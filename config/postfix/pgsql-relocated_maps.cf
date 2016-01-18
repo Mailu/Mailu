@@ -1,0 +1,14 @@
+# All parameters are described in pgsql_table(5) / PGSQL PARAMETERS
+#
+# The hosts that Postfix will try to connect to and query from.
+hosts = localhost
+
+# The user name and password to log into the pgsql server.
+user = postfix
+password = some_password
+
+# The database name on the servers.
+dbname = mailsys
+
+# The SQL query template used to search the database
+query = SELECT destination FROM postfix_relocated_map('%u', '%d')

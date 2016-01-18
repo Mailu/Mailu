@@ -1,0 +1,33 @@
+# aliases
+sql      = pgsql:${config_directory}/
+proxysql = proxy:${sql}
+
+# relocated users from the database
+relocated_maps = ${proxysql}pgsql-relocated_maps.cf
+
+# transport settings from our database
+transport_maps = ${proxysql}pgsql-transport_maps.cf
+
+# virtual domains, mailboxes and aliases
+virtual_mailbox_domains = ${proxysql}pgsql-virtual_mailbox_domains.cf
+virtual_alias_maps = ${proxysql}pgsql-virtual_alias_maps.cf
+virtual_minimum_uid = 70000
+virtual_uid_maps = ${sql}pgsql-virtual_uid_maps.cf
+virtual_gid_maps = ${sql}pgsql-virtual_gid_maps.cf
+virtual_mailbox_base = /
+virtual_mailbox_maps = ${proxysql}pgsql-virtual_mailbox_maps.cf
+
+# delivery transport
+virtual_transport = lmtp:unix:private/dovecot-lmtp
+
+# dovecot SASL
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/dovecot-auth
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_security_options = noplaintext, noanonymous
+
+# submission restrictions
+smtpd_recipient_restrictions =
+ permit_mynetworks
+ permit_sasl_authenticated
+ reject_unauth_destination

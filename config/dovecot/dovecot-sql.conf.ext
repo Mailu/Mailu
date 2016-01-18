@@ -1,0 +1,18 @@
+driver = pgsql
+connect = host=localhost dbname=mailsys user=dovecot password=$Dovecot_PASS
+
+password_query = \
+ SELECT userid AS "user", password FROM dovecotpassword('%Ln', '%Ld') WHERE %Ls
+
+# uncomment this user_query if you want to use the quota plugin
+#user_query = \
+# SELECT home, uid, gid, mail, quota_rule FROM dovecotquotauser('%Ln', '%Ld')
+
+# otherwise uncomment the following user_query
+#user_query = SELECT home, uid, gid, mail FROM dovecotuser('%Ln', '%Ld')
+
+iterate_query = \
+ SELECT local_part AS username, domain_name.domainname AS domain \
+   FROM users \
+        LEFT JOIN domain_data USING (gid) \
+        LEFT JOIN domain_name USING (gid)

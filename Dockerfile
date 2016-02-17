@@ -5,7 +5,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
  && apt-get install -y --no-install-recommends \
       postfix dovecot-imapd dovecot-sqlite dovecot-lmtpd \
       dovecot-sieve dovecot-managesieved \
-      dovecot-antispam spamassassin clamav \
+      dovecot-antispam spamassassin spamc clamav \
       supervisor rsyslog \
  && apt-get clean
 

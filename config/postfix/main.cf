@@ -1,33 +1,43 @@
-# aliases
-sql      = pgsql:${config_directory}/
-proxysql = proxy:${sql}
+###############
+# General
+###############
 
-# relocated users from the database
-relocated_maps = ${proxysql}pgsql-relocated_maps.cf
+# The list of relayed networks is still loaded from a configuration file
+mynetworks = /data/relaynets
+# Empty alias list to override the configuration variable and disable NIS
+alias_maps = hash:/etc/aliases
+# SQLite configuration
+sql = sqlite:${config_directory}/
 
-# transport settings from our database
-transport_maps = ${proxysql}pgsql-transport_maps.cf
+###############
+# TLS
+###############
+smtpd_use_tls = yes
+smtpd_tls_cert_file=/data/ssl/cert.pem
+smtpd_tls_key_file=/data/ssl/key.pem
+smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
-# virtual domains, mailboxes and aliases
-virtual_mailbox_domains = ${proxysql}pgsql-virtual_mailbox_domains.cf
-virtual_alias_maps = ${proxysql}pgsql-virtual_alias_maps.cf
-virtual_minimum_uid = 70000
-virtual_uid_maps = ${sql}pgsql-virtual_uid_maps.cf
-virtual_gid_maps = ${sql}pgsql-virtual_gid_maps.cf
-virtual_mailbox_base = /
-virtual_mailbox_maps = ${proxysql}pgsql-virtual_mailbox_maps.cf
-
-# delivery transport
-virtual_transport = lmtp:unix:private/dovecot-lmtp
-
-# dovecot SASL
+###############
+# SASL
+###############
+smtpd_sasl_local_domain = $myhostname
 smtpd_sasl_type = dovecot
 smtpd_sasl_path = private/dovecot-auth
 smtpd_sasl_auth_enable = yes
-smtpd_sasl_security_options = noplaintext, noanonymous
+smtpd_sasl_security_options = noanonymous
 
-# submission restrictions
-smtpd_recipient_restrictions =
- permit_mynetworks
- permit_sasl_authenticated
- reject_unauth_destination
+###############
+# Virtual
+###############
+virtual_mailbox_domains = ${sql}sqlite-virtual_mailbox_domains.cf
+virtual_alias_maps = ${sql}sqlite-virtual_alias_maps.cf
+virtual_transport = lmtp:unix:private/dovecot-lmtp
+
+###############
+# Milter
+###############
+milter_default_action = tempfail
+milter_protocol = 6
+smtpd_milters =
+non_smtpd_milters =

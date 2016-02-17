@@ -1,0 +1,2 @@
+dbpath = /data/freeposte.db
+query = SELECT destination FROM aliases WHERE localpart = '%u' AND domain = '%d'

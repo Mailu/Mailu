@@ -9,12 +9,7 @@ admin = admin.Admin(app, name='Freeposte.io', template_mode='bootstrap3')
 
 
 class BaseModelView(sqla.ModelView):
-
-    def after_model_change(self, form, model, is_created):
-        db.session.commit()
-
-    def after_model_delete(self, model):
-        db.session.commit()
+    pass
 
 
 class DomainModelView(BaseModelView):

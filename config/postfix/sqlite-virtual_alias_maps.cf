@@ -1,6 +1,6 @@
 dbpath = /data/freeposte.db
-query = \
- SELECT destination  \
-   FROM aliases INNER JOIN domains ON aliases.domain_id = domains.id \
-  WHERE domains.name = '%d' \
-    AND aliases.localpart = '%n'
+query =
+ SELECT destination
+   FROM alias INNER JOIN domain ON alias.domain_id = domain.id
+  WHERE domain.name = '%d'
+    AND alias.localpart = '%u'

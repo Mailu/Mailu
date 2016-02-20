@@ -8,15 +8,24 @@ from freeposte import app, db, models
 admin = admin.Admin(app, name='Freeposte.io', template_mode='bootstrap3')
 
 
-class DomainModelView(sqla.ModelView):
+class BaseModelView(sqla.ModelView):
+
+    def after_model_change(self, form, model, is_created):
+        db.session.commit()
+
+    def after_model_delete(self, model):
+        db.session.commit()
+
+
+class DomainModelView(BaseModelView):
     pass
 
 
-class UserModelView(sqla.ModelView):
+class UserModelView(BaseModelView):
     pass
 
 
-class AliasModelView(sqla.ModelView):
+class AliasModelView(BaseModelView):
     pass
 
 

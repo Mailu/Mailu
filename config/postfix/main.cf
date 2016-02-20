@@ -8,6 +8,8 @@ mynetworks = /data/relaynets
 alias_maps = hash:/etc/aliases
 # SQLite configuration
 sql = sqlite:${config_directory}/
+# Only accept virtual emails
+mydestination =
 
 ###############
 # TLS

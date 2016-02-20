@@ -1,2 +1,4 @@
 Flask
+Flask-Admin
 Flask-SQLAlchemy
+uwsgi

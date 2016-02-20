@@ -3,7 +3,7 @@
 ###############
 
 # The list of relayed networks is still loaded from a configuration file
-mynetworks = /data/relaynets
+mynetworks = 127.0.0.1/32 [::1]/128
 # Empty alias list to override the configuration variable and disable NIS
 alias_maps = hash:/etc/aliases
 # SQLite configuration

@@ -4,7 +4,7 @@ connect = /data/freeposte.db
 # Return the user hashed password
 password_query = \
  SELECT password \
-   FROM user INNER JOIN domain ON user.domain_id = domains.id \
+   FROM user INNER JOIN domain ON user.domain_id = domain.id \
   WHERE domain.name = '%d' \
     AND user.username = '%n'
 

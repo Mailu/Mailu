@@ -1,2 +1,2 @@
 dbpath = /data/freeposte.db
-query = SELECT domain FROM domains WHERE domain='%s'
+query = SELECT name FROM domains WHERE domain='%s'

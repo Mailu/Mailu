@@ -16,6 +16,28 @@ same level of functionality and still be able to host a complete mail server
 at little cost while running only FOSS, applying the KISS principle and being
 able to fine-tune some details if needed.
 
+How-to run your mail server
+===========================
+
+*Please note that this image is still in a very early stage. Do not use for
+production!*
+
+The mail server runs as a single Docker container. A volume should be mounted to ``/data`` for persistent storage. Simply setup Docker on your
+server then run a container with the ``kaiyou/freeposte.io`` image:
+
+```
+docker run --name=freeposte -d \
+ -e POSTMASTER_ADDRESS=admin@your.tld \
+ -e MAIL_HOSTNAME=mail.your.tld \
+ -e SECRET_KEY=yourflasksecretkey \
+ -p 25:25 \
+ -p 143:143 \
+ -p 587:587 \
+ -p 80:80 \
+ -v /path/to/your/data:/data \
+ kaiyou/freeposte.io
+```
+
 General architecture
 ====================
 
@@ -32,34 +54,3 @@ Additional Web UI :
  * Administration UI based on Flask.
 
 All components are monitored by supervisord.
-
-Incoming e-mail
-===============
-
-Incoming e-mail is received by postfix, according to the workflow:
-- ``smtpd`` receives the message;
-- the domain is checked against the ``domains`` table;
-- if the domain matches an active domain or the source address is allowed relay, continue;
-- the mail is forwarded to Spamassassin, which appends some headers;
-- the mail is fowarded to Dovecot using ``lmtp``;
-- the local part and domain are checked against the ``users`` table;
-- the user quota is checked;
-- the mail is delivered to the local maildir.
-
-
-
-TODO
-====
-
-The project is still at a very (very !) early stage.
-This is more of a roadmap than a proper TODO list. Please poke me or pull
-request if you would like to join the effort.
-
- - [x] Import vmm configuration files and get a simple postfix/dovecot running with SQLite.
- - [x] Add support for spamassassin.
- - [ ] Add support for clamav.
- - [ ] Learn from user-defined spam or ham.
- - [ ] Draft a Web administration UI.
- - [ ] Implement basic features from the free (as in beer) poste.io.
- - [ ] Start using on a couple production mail servers.
- - [ ] Implement some fancy features.

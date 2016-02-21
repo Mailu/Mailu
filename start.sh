@@ -1,12 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
-cat <<< EOF
-   __                               _         _
-  / _|                             | |       (_)
+cat << EOF
+   __                                _         _
+  / _|                              | |       (_)
   | |_ _ __ ___  ___ _ __   ___  ___| |_ ___   _  ___
-  |  _| '__/ _ \/ _ \ '_ \ / _ \/ __| __/ _ \ | |/ _ \
-  | | | | |  __/  __/ |_) | (_) \__ \ ||  __/_| | (_) |
-  |_| |_|  \___|\___| .__/ \___/|___/\__\___(_)_|\___/
+  |  _| '__/ _ \\/ _ \\ '_ \\ / _ \\/ __| __/ _ \\ | |/ _ \\
+  | | | | |  __/  __/ |_) | (_) \\__ \\ ||  __/_| | (_)|
+  |_| |_|  \\___|\\___| .__/ \\___/|___/\\__\\___(_)_|\\___/
                   | |
                   |_|
 
@@ -23,15 +23,14 @@ mkdir -p \
  /data/mail \
  /data/webmail/tmp \
  /data/logs \
+ /data/logs/webmail \
  /data/ssl
 
 # Create the main database if necessary
-if [ ! -f /data/freeposte.db ]
-  sqlite3 /data/freeposte.db .databases > /dev/null
-fi
+[ -f /data/freeposte.db ] || sqlite3 /data/freeposte.db .databases > /dev/null
 
 # Fixing permissions
-chown mail:mail /data/freeposte.db
+chown mail:www-data /data/freeposte.db
 chown -R mail:mail /data/mail
 chown -R www-data:www-data /data/webmail /data/logs/webmail
 

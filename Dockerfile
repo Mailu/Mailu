@@ -7,7 +7,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
       postfix dovecot-imapd dovecot-sqlite dovecot-lmtpd \
       dovecot-sieve dovecot-managesieved \
       dovecot-antispam spamassassin spamc clamav \
-      php5-fpm php5-mysql php5-imap php5-sqlite \
+      php5-fpm php5-mysql php5-imap php5-sqlite php5-mcrypt \
       supervisor rsyslog nginx \
  && apt-get clean
 

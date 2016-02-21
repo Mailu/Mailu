@@ -8,7 +8,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
       dovecot-sieve dovecot-managesieved \
       dovecot-antispam spamassassin spamc clamav \
       php5-fpm php5-mysql php5-imap php5-sqlite php5-mcrypt \
-      supervisor rsyslog nginx \
+      supervisor rsyslog nginx sqlite3 \
  && apt-get clean
 
 # Install the Webmail from source

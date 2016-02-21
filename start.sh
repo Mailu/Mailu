@@ -52,4 +52,5 @@ EOF
 fi
 
 # Finally run the server
-/usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+echo "Supervisor will now take over..."
+exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf

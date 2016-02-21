@@ -5,9 +5,6 @@ uwsgi:
   master: true
   workers: 2
 
-  uid: www-data
-  gid: www-data
-
   vacuum: true
   plugins: python
   wsgi-file: /admin/run.py

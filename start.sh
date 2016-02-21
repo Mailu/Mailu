@@ -27,22 +27,26 @@ mkdir -p \
  /data/ssl
 
 # Create the main database if necessary
-[ -f /data/freeposte.db ] || sqlite3 /data/freeposte.db .databases > /dev/null
+if [ ! -f /data/freeposte.db ]; then
+  echo 'Initializing the database...'
+  cd /admin && python initdb.py
+fi
 
 # Fixing permissions
-chown mail:www-data /data/freeposte.db
+chown www-data:mail /data/freeposte.db
+chmod 664 /data/freeposte.db
 chown -R mail:mail /data/mail
 chown -R www-data:www-data /data/webmail /data/logs/webmail
 
 # Copy the system snakeoil certificate if none is provided
 if [ ! -f /data/ssl/cert.pem ]; then
-  cat <<< EOF
+  cat << EOF
     No TLS certificate is installed, a snakeoil ceritifcate is thus
     being configured. You MUST NOT run a production server with this
     certificate, as the private key is known publicly.
 
     You have been warned.
-  EOF
+EOF
   cp /etc/ssl/private/ssl-cert-snakeoil.key /data/ssl/key.pem
   cp /etc/ssl/certs/ssl-cert-snakeoil.pem /data/ssl/cert.pem
 fi

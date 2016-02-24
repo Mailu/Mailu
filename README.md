@@ -1,11 +1,10 @@
 Freeposte.io
 ============
 
-Simple yet functional and full-featured mail server as a single Docker image.
+Simple yet functional and full-featured mail server as a set of Docker images.
 The idea behing Freeposte.io is identical to motivations that led to poste.io:
-even though it looks like a Docker anti-pattern, single upgradable image
-running a full-featured mail server is a truly amazing advantage for hosting
-mails on modern cloud services or home-brewed Docker servers.
+providing a simple and maintainable mail server that is painless to manage and
+does not require more resources than necessary.
 
 People from poste.io did an amazing job at accomplishing this ; any company
 looking for a serious yet simple mail server with professional support should
@@ -19,23 +18,32 @@ able to fine-tune some details if needed.
 How-to run your mail server
 ===========================
 
-*Please note that this image is still in a very early stage. Do not use for
+*Please note that this project is still in a very early stage. Do not use for
 production!*
 
-The mail server runs as a single Docker container. A volume should be mounted to ``/data`` for persistent storage. Simply setup Docker on your
-server then run a container with the ``kaiyou/freeposte.io`` image:
+The mail server runs as a set of Docker containers. These containers are managed
+through a ``docker-compose.yml`` configuration file that requires Docker Compose
+to run.
+
+First, follow instructions at https://docs.docker.com to setup Docker and Docker
+Compose properly for your system. Then download the main configuration file:
 
 ```
-docker run --name=freeposte -d \
- -e POSTMASTER_ADDRESS=admin@your.tld \
- -e MAIL_HOSTNAME=mail.your.tld \
- -e SECRET_KEY=yourflasksecretkey \
- -p 25:25 \
- -p 143:143 \
- -p 587:587 \
- -p 80:80 \
- -v /path/to/your/data:/data \
- kaiyou/freeposte.io
+wget https://freeposte.io/docker-compose.yml
+```
+
+This file contains instructions about which containers to run and how they will
+interact. You should also create a data directory. Freeposte will use ``/data``
+as a sane default:
+
+```
+mkdir -p /data
+```
+
+Finally, you can run your mail server:
+
+```
+docker-compose up -d
 ```
 
 General architecture
@@ -52,5 +60,3 @@ Additional Web UI :
 
  * Roundcube Webmail (can easily be replaced) ;
  * Administration UI based on Flask.
-
-All components are monitored by supervisord.

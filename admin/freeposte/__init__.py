@@ -10,7 +10,8 @@ app = Flask(__name__)
 default_config = {
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/freeposte.db',
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
-    'SECRET_KEY': None
+    'SECRET_KEY': None,
+    'DEBUG': False
 }
 
 # Load configuration from the environment if available
@@ -21,4 +22,9 @@ for key, value in default_config.items():
 # Create the database
 db = SQLAlchemy(app)
 
-from freeposte import views
+# Import views and models
+from freeposte import models, views
+
+# Manage database upgrades if necessary
+db.create_all()
+db.session.commit()

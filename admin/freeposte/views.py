@@ -3,9 +3,11 @@ from flask_admin.contrib import sqla
 
 from freeposte import app, db, models
 
+import os
 
 # Flask admin
-admin = admin.Admin(app, name='Freeposte.io', template_mode='bootstrap3')
+app_name = os.environ.get('APP_NAME', 'Freeposte.io')
+admin = admin.Admin(app, name=app_name, template_mode='bootstrap3')
 
 
 class BaseModelView(sqla.ModelView):

@@ -1,4 +1,4 @@
 Flask
 Flask-Admin
 Flask-SQLAlchemy
-uwsgi
+gunicorn

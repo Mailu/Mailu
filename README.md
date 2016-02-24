@@ -26,6 +26,8 @@ The mail infrastructure is based on a standard MTA-LDA pattern :
  * Roundcube (or any Webmail) as a user-friendly Web client ;
  * Freeposte (Flask application) as an administration interface.
 
+![Architecture](doc/archi.png)
+
 How-to run your mail server
 ===========================
 
@@ -56,5 +58,3 @@ Finally, you can run your mail server:
 ```
 docker-compose up -d
 ```
-
-

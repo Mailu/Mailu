@@ -1,16 +1,18 @@
 http:
   build: nginx
+  env_file: freeposte.env
   ports:
     - "80:80"
     - "443:443"
   links:
-    - admin
-    - webmail
+    - admin:admin
+    - webmail:webmail
   volumes:
     - /tmp/data/certs:/certs
 
 imap:
   build: dovecot
+  env_file: freeposte.env
   ports:
     - "143:143"
     - "993:993"
@@ -21,28 +23,44 @@ imap:
 
 smtp:
   build: postfix
+  env_file: freeposte.env
   ports:
     - "25:25"
     - "465:465"
     - "587:587"
   links:
-    - imap
+    - filter:lmtp
+    - imap:sasl
   volumes:
     - /tmp/data/freeposte:/data
     - /tmp/data/logs:/logs
     - /tmp/data/certs:/certs
 
+filter:
+  build: amavis
+  env_file: freeposte.env
+  links:
+    - imap:lmtp
+    - clamav:clamav
+
+clamav:
+  build: clamav
+  env_file: freeposte.env
+  volumes:
+    - /tmp/data/clamav:/data
+    - /tmp/data/logs:/logs
+
 admin:
   build: admin
+  env_file: freeposte.env
   volumes:
     - /tmp/data/freeposte:/data
-  environment:
-    - DEBUG=True
-    - SECRET_KEY=mysecretkey
 
 webmail:
   build: roundcube
+  env_file: freeposte.env
   links:
-    - imap
+    - imap:imap
+    - smtp:smtp
   volumes:
     - /tmp/data/webmail:/data

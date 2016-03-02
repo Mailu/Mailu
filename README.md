@@ -15,6 +15,19 @@ same level of functionality and still be able to host a complete mail server
 at little cost while running only FOSS, applying the KISS principle and being
 able to fine-tune some details if needed.
 
+General architecture
+====================
+
+The mail infrastructure is based on a standard MTA-LDA pattern :
+
+ * Postfix for incoming and outgoing emails ;
+ * Amavis as a filtering interface before delivery (with SpamaAssassin and ClamAV) ;
+ * Dovecot as a delivery agent and reading (IMAP) server ;
+ * Roundcube (or any Webmail) as a user-friendly Web client ;
+ * Freeposte (Flask application) as an administration interface.
+
+![Architecture](doc/archi.png)
+
 How-to run your mail server
 ===========================
 
@@ -45,18 +58,3 @@ Finally, you can run your mail server:
 ```
 docker-compose up -d
 ```
-
-General architecture
-====================
-
-The mail infrastructure is based on a standard MTA-LDA :
-
- * Postfix with an SQLite database for transport ;
- * Dovecot with an SQLite database for delivery and access ;
- * Spamassassin for spam filtering ;
- * ClamAV for malware filtering.
-
-Additional Web UI :
-
- * Roundcube Webmail (can easily be replaced) ;
- * Administration UI based on Flask.

@@ -41,14 +41,9 @@ filter:
   env_file: freeposte.env
   links:
     - imap:lmtp
-    - clamav:clamav
-
-clamav:
-  build: clamav
-  env_file: freeposte.env
   volumes:
-    - /tmp/data/clamav:/data
-    - /tmp/data/logs:/logs
+    - /tmp/data/filter:/data
+
 
 admin:
   build: admin

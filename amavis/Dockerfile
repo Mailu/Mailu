@@ -6,6 +6,7 @@ RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/re
       perl-io-socket-inet6@testing \
       amavisd-new \
       spamassassin \
+      clamav \
       rsyslog \
       wget \
  && rm -rf /var/cache/apk/*

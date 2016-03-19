@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}
+New user
+{% endblock %}
+
+{% block subtitle %}
+{{ domain.name }}
+{% endblock %}
+
+{% block box_content %}
+{{ wtf.quick_form(form) }}
+{% endblock %}

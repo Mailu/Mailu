@@ -1,0 +1,53 @@
+from flask_wtf import Form
+from wtforms import validators, fields, widgets
+from wtforms_components import fields as fields_
+
+
+class LoginForm(Form):
+    email = fields.StringField('E-mail', [validators.Email()])
+    pw = fields.PasswordField('Password', [validators.DataRequired()])
+    submit = fields.SubmitField('Sign in')
+
+
+class DomainCreateForm(Form):
+    name = fields.StringField('Domain name', [validators.DataRequired()])
+    submit = fields.SubmitField('Create')
+
+
+class DomainEditForm(Form):
+    max_users = fields.IntegerField('Maximum mailbox count')
+    max_aliases = fields.IntegerField('Maximum aliases count')
+    submit = fields.SubmitField('Save')
+
+
+class UserCreateForm(Form):
+    localpart = fields.StringField('E-mail', [validators.DataRequired()])
+    pw = fields.PasswordField('Password', [validators.DataRequired()])
+    submit = fields.SubmitField('Create')
+
+
+class UserEditForm(Form):
+    quota = fields.IntegerField('Quota')
+    submit = fields.SubmitField('Create')
+
+
+class UserPasswordForm(Form):
+    pw = fields.PasswordField('Password', [validators.DataRequired()])
+    pw2 = fields.PasswordField('Password check', [validators.DataRequired()])
+    submit = fields.SubmitField('Update password')
+
+
+class UserForwardForm(Form):
+    forward = fields.StringField('Destination', [validators.Email()])
+    submit = fields.SubmitField('Update')
+
+
+class AliasCreateForm(Form):
+    localpart = fields.StringField('Alias', [validators.DataRequired()])
+    destination = fields.StringField('Destination', widget=widgets.TextArea())
+    submit = fields.SubmitField('Create')
+
+
+class AliasEditForm(Form):
+    destination = fields.StringField('Destination', widget=widgets.TextArea())
+    submit = fields.SubmitField('Create')

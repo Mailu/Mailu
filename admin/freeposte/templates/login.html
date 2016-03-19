@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block sidebar %}
+<section class="sidebar">
+  <ul class="sidebar-menu">
+    <li class="header">Your account</li>
+    <li>
+      <a href="#">
+        <i class="fa fa-sign-in"></i> <span>Sign in</span>
+      </a>
+    </li>
+  </ul>
+</section>
+{% endblock %}
+
+{% block title %}
+Sign in
+{% endblock %}
+
+{% block subtitle %}
+to access the administration tools
+{% endblock %}
+
+{% block box_content %}
+{{ wtf.quick_form(form) }}
+{% endblock %}

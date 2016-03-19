@@ -1,0 +1,74 @@
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/utils.html" as utils %}
+{% extends "bootstrap/base.html" %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/static/adminlte/css/AdminLTE.min.css">
+<link rel="stylesheet" href="/static/adminlte/css/skin-blue.min.css">
+{% endblock %}
+
+{% block body_attribs %}
+class="hold-transition skin-blue sidebar-mini"
+{% endblock %}
+
+{% block body %}
+  <div class="wrapper">
+    {% block navbar %}
+    <header class="main-header">
+      <a href="index2.html" class="logo">
+        <span class="logo-lg">FreePoste.io</span>
+      </a>
+    </header>
+    <aside class="main-sidebar">
+      {% block sidebar %}
+      {% include "sidebar.html" %}
+      {% endblock %}
+    </aside>
+    {% endblock %}
+
+    <div class="content-wrapper">
+      <section class="content-header">
+        <div class="pull-right">
+          {% block main_action %}
+          {% endblock %}
+        </div>
+        <h1>
+          {% block title %}{% endblock %}
+          <small>{% block subtitle %}{% endblock %}</small>
+        </h1>
+      </section>
+
+      <section class="content">
+        {{ utils.flashed_messages(container=False) }}
+        {% block content %}
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="box">
+              {% block box %}
+              <div class="box-header">
+                {% block box_title %}{% endblock %}
+              </div>
+              <div class="box-body">
+                {% block box_content %}{% endblock %}
+              </div>
+              {% endblock %}
+            </div>
+          </div>
+        </div>
+        {% endblock %}
+      </section>
+    </div>
+    <footer class="main-footer">
+      Built with <i class="fa fa-heart"></i> using <a class="white-text" href="http://flask.pocoo.org/">Flask</a> and
+      <a class="white-text" href="https://almsaeedstudio.com/preview">AdminLTE</a>
+      <span class="pull-right"><i class="fa fa-code-fork"></i> on <a class="white-text" href="https://github.com/kaiyou/freeposte.io">Github</a></a>
+    </footer>
+
+    {% block scripts %}
+    {{super()}}
+    <script src="/static/adminlte/js/app.min.js"></script>
+    {% endblock %}
+  </div>
+{% endblock %}

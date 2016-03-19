@@ -1,0 +1,63 @@
+<section class="sidebar">
+  <h4 class="text-center text-primary">{{ current_user }}</h4>
+
+  <ul class="sidebar-menu">
+    <li class="header">My account</li>
+    <li>
+      <a href="{{ url_for('user_settings') }}">
+        <i class="fa fa-wrench"></i> <span>Settings</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('user_password') }}">
+        <i class="fa fa-lock"></i> <span>Update password</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('user_forward') }}">
+        <i class="fa fa-share"></i> <span>Auto-forward</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('user_vacation') }}">
+        <i class="fa fa-plane"></i> <span>Vacation</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('user_fetchmail') }}">
+        <i class="fa fa-download"></i> <span>Fetched accounts</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('logout') }}">
+        <i class="fa fa-sign-out"></i> <span>Sign out</span>
+      </a>
+    </li>
+    <li class="header">Administration</li>
+    {% if current_user.global_admin %}
+    <li>
+      <a href="{{ url_for('status') }}">
+        <i class="fa fa-dashboard"></i> <span>Services status</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('admins') }}">
+        <i class="fa fa-user"></i> <span>Adminitrators</span>
+      </a>
+    </li>
+    {% endif %}
+    {% if current_user.admin_of %}
+    <li>
+      <a href="{{ url_for('domain_list') }}">
+        <i class="fa fa-envelope"></i> <span>Mail domains</span>
+      </a>
+    </li>
+    {% endif %}
+
+    <li>
+      <a href="https://github.com/kaiyou/freeposte.io">
+        <i class="fa fa-life-ring"></i> <span>Help</span>
+      </a>
+    </li>
+  </ul>
+</section>

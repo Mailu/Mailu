@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}
+User list
+{% endblock %}
+
+{% block subtitle %}
+{{ domain.name }}
+{% endblock %}
+
+{% block main_action %}
+<a class="btn btn-primary" href="{{ url_for('user_create', domain_name=domain.name) }}">Add user</a>
+{% endblock %}
+
+{% block box %}
+<table class="table table-bordered">
+  <tbody>
+    <tr>
+      <th>Actions</th>
+      <th>Address</th>
+      <th>Forward</th>
+      <th>Quota</th>
+    </tr>
+    {% for user in domain.users %}
+    <tr>
+      <td>
+        <a href="{{ url_for('user_settings', user_email=user.get_id()) }}" title="Settings"><i class="fa fa-wrench"></i></a>&nbsp;
+        <a href="{{ url_for('user_password', user_email=user.get_id()) }}" title="Update password"><i class="fa fa-lock"></i></a>&nbsp;
+        <a href="{{ url_for('user_forward', user_email=user.get_id()) }}" title="Auto-forward"><i class="fa fa-share"></i></a>&nbsp;
+        <a href="{{ url_for('user_vacation', user_email=user.get_id()) }}" title="Vacation"><i class="fa fa-plane"></i></a>&nbsp;
+        <a href="{{ url_for('user_fetchmail', user_email=user.get_id()) }}" title="Fetched accounts"><i class="fa fa-download"></i></a>&nbsp;
+        <a href="{{ url_for('user_edit', user_email=user.get_id()) }}" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;
+        <a href="{{ url_for('user_delete', user_email=user.get_id()) }}" title="Delete"><i class="fa fa-trash"></i></a>
+      </td>
+      <td>{{ user }}</td>
+      <td>{{ user.forward or '-' }}</td>
+      <td>{{ user.quota_bytes | filesizeformat }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

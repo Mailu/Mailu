@@ -1,4 +1,8 @@
 Flask
-Flask-Admin
+Flask-Login
 Flask-SQLAlchemy
 gunicorn
+flask_wtf
+WTForms-Components
+Flask-bootstrap
+passlib

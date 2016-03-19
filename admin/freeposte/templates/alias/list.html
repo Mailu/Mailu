@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+Alias list
+{% endblock %}
+
+{% block subtitle %}
+{{ domain.name }}
+{% endblock %}
+
+{% block main_action %}
+<a class="btn btn-primary" href="{{ url_for('alias_create', domain_name=domain.name) }}">Add alias</a>
+{% endblock %}
+
+{% block box %}
+<table class="table table-bordered">
+  <tbody>
+    <tr>
+      <th>Actions</th>
+      <th>Address</th>
+      <th>Destination</th>
+    </tr>
+    {% for alias in domain.aliases %}
+    <tr>
+      <td>
+        <a href="{{ url_for('alias_edit', alias=alias.get_id()) }}" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;
+        <a href="{{ url_for('alias_delete', alias=alias.get_id()) }}" title="Delete"><i class="fa fa-trash"></i></a>
+      </td>
+      <td>{{ alias }}</td>
+      <td>{{ alias.destination or '-' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

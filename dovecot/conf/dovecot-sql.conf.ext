@@ -4,13 +4,13 @@ connect = /data/freeposte.db
 # Return the user hashed password
 password_query = \
  SELECT password \
-   FROM user INNER JOIN domain ON user.domain_id = domain.id \
-  WHERE domain.name = '%d' \
+   FROM user \
+  WHERE user.domain_name = '%d' \
     AND user.username = '%n'
 
 # Mostly get the user quota
 user_query = \
  SELECT '*:bytes=' || user.quota_bytes AS quota_rule \
-   FROM user INNER JOIN domain ON user.domain_id = domain.id \
-  WHERE domain.name = '%d' \
+   FROM user \
+  WHERE user.domain_name = '%d' \
     AND user.username = '%n'

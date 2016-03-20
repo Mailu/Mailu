@@ -33,7 +33,7 @@ def domain_create():
 def domain_edit(domain_name):
     utils.require_global_admin()
     domain = utils.get_domain_admin(domain_name)
-    form = forms.DomainEditForm()
+    form = forms.DomainEditForm(obj=domain)
     if form.validate_on_submit():
         domain.max_users = form.max_users.data
         domain.max_aliases = form.max_aliases.data

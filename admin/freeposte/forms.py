@@ -42,6 +42,12 @@ class UserForwardForm(Form):
     submit = fields.SubmitField('Update')
 
 
+class UserReplyForm(Form):
+    reply_subject = fields.StringField('Reply subject')
+    reply_body = fields.StringField('Reply body', widget=widgets.TextArea())
+    submit = fields.SubmitField('Update')
+
+
 class AliasCreateForm(Form):
     localpart = fields.StringField('Alias', [validators.DataRequired()])
     destination = fields.StringField('Destination', widget=widgets.TextArea())

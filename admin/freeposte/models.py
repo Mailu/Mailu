@@ -60,8 +60,12 @@ class User(Address):
     domain = db.relationship(Domain, backref='users')
     password = db.Column(db.String(255), nullable=False)
     quota_bytes = db.Column(db.Integer(), nullable=False, default=10**9)
-    forward = db.Column(db.String(160), nullable=True, default=None)
     global_admin = db.Column(db.Boolean(), nullable=False, default=False)
+
+    # Filters
+    forward = db.Column(db.String(160), nullable=True, default=None)
+    reply_topic = db.Column(db.String(255), nullable=True, default=None)
+    reply_body = db.Column(db.Text(), nullable=True, default=None)
 
     is_authenticated = True
     is_active = True

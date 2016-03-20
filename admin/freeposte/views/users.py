@@ -103,14 +103,25 @@ def user_forward(user_email):
         if user_email:
             return flask.redirect(
                 flask.url_for('user_list', domain_name=user.domain.name))
-    return flask.render_template('user/forward.html', form=form, user=useré)
+    return flask.render_template('user/forward.html', form=form, user=user)
 
 
-@app.route('/user/vacation', methods=['GET', 'POST'], defaults={'user_email': None})
-@app.route('/user/vacation<user_email>', methods=['GET', 'POST'])
+@app.route('/user/reply', methods=['GET', 'POST'], defaults={'user_email': None})
+@app.route('/user/reply/<user_email>', methods=['GET', 'POST'])
 @flask_login.login_required
-def user_vacation(user_email):
-    return flask.render_template('user/vacation.html')
+def user_reply(user_email):
+    user = utils.get_user(user_email)
+    form = forms.UserReplyForm()
+    if form.validate_on_submit():
+        user.reply_subject = form.reply_subject.data
+        user.reply_body = form.reply_body.data
+        db.session.add(user)
+        db.session.commit()
+        flask.flash('Auto-reply message updated for %s' % user)
+        if user_email:
+            return flask.redirect(
+                flask.url_for('user_list', domain_name=user.domain.name))
+    return flask.render_template('user/reply.html', form=form, user=user)
 
 
 @app.route('/user/fetchmail', methods=['GET', 'POST'], defaults={'user_email': None})

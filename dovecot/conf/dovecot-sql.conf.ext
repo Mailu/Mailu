@@ -6,11 +6,11 @@ password_query = \
  SELECT password \
    FROM user \
   WHERE user.domain_name = '%d' \
-    AND user.username = '%n'
+    AND user.localpart = '%n'
 
 # Mostly get the user quota
 user_query = \
  SELECT '*:bytes=' || user.quota_bytes AS quota_rule \
    FROM user \
   WHERE user.domain_name = '%d' \
-    AND user.username = '%n'
+    AND user.localpart = '%n'

@@ -26,10 +26,9 @@ def alias_create(domain_name):
                 flask.flash('Address %s is already used' % address, 'error')
                 break
         else:
-            alias = models.Alias(
-                localpart=form.localpart.data, domain=domain,
-                destination=form.destination.data
-            )
+            alias = models.Alias(localpart=form.localpart.data, domain=domain)
+            alias.destination = form.destination.data
+            alias.comment = form.comment.data
             db.session.add(alias)
             db.session.commit()
             flask.flash('Alias %s created' % alias)
@@ -46,6 +45,7 @@ def alias_edit(alias):
     form = forms.AliasEditForm()
     if form.validate_on_submit():
         alias.destination = form.destination.data
+        alias.comment = form.comment.data
         db.session.add(alias)
         db.session.commit()
         flask.flash('Alias %s updated' % alias)

@@ -11,23 +11,27 @@ class LoginForm(Form):
 
 class DomainCreateForm(Form):
     name = fields.StringField('Domain name', [validators.DataRequired()])
+    comment = fields.StringField('Comment')
     submit = fields.SubmitField('Create')
 
 
 class DomainEditForm(Form):
     max_users = fields.IntegerField('Maximum mailbox count')
     max_aliases = fields.IntegerField('Maximum aliases count')
+    comment = fields.StringField('Comment')
     submit = fields.SubmitField('Save')
 
 
 class UserCreateForm(Form):
     localpart = fields.StringField('E-mail', [validators.DataRequired()])
     pw = fields.PasswordField('Password', [validators.DataRequired()])
+    comment = fields.StringField('Comment')
     submit = fields.SubmitField('Create')
 
 
 class UserEditForm(Form):
     quota_bytes = fields.IntegerField('Quota')
+    comment = fields.StringField('Comment')
     submit = fields.SubmitField('Create')
 
 
@@ -58,9 +62,11 @@ class UserReplyForm(Form):
 class AliasCreateForm(Form):
     localpart = fields.StringField('Alias', [validators.DataRequired()])
     destination = fields.StringField('Destination', widget=widgets.TextArea())
+    comment = fields.StringField('Comment')
     submit = fields.SubmitField('Create')
 
 
 class AliasEditForm(Form):
     destination = fields.StringField('Destination', widget=widgets.TextArea())
+    comment = fields.StringField('Comment')
     submit = fields.SubmitField('Create')

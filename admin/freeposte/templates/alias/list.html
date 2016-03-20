@@ -19,6 +19,7 @@ Alias list
       <th>Actions</th>
       <th>Address</th>
       <th>Destination</th>
+      <th>Comment</th>
       <th>Created</th>
       <th>Last edit</th>
     </tr>
@@ -30,6 +31,7 @@ Alias list
       </td>
       <td>{{ alias }}</td>
       <td>{{ alias.destination or '-' }}</td>
+      <td>{{ alias.comment or '' }}</td>
       <td>{{ alias.created_at }}</td>
       <td>{{ alias.updated_at or '' }}</td>
     </tr>

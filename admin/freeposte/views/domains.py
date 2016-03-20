@@ -21,6 +21,7 @@ def domain_create():
             flask.flash('Domain %s is already used' % form.name.data, 'error')
         else:
             domain = models.Domain(name=form.name.data)
+            domain.comment = form.comment.data
             db.session.add(domain)
             db.session.commit()
             flask.flash('Domain %s created' % domain)
@@ -37,6 +38,7 @@ def domain_edit(domain_name):
     if form.validate_on_submit():
         domain.max_users = form.max_users.data
         domain.max_aliases = form.max_aliases.data
+        domain.comment = form.comment.data
         db.session.add(domain)
         db.session.commit()
         flask.flash('Domain %s saved' % domain)

@@ -25,6 +25,7 @@ class Base(db.Model):
 
     created_at = db.Column(db.Date, nullable=False, default=datetime.now)
     updated_at = db.Column(db.Date, nullable=True, onupdate=datetime.now)
+    comment = db.Column(db.String(255), nullable=True)
 
 
 class Domain(Base):

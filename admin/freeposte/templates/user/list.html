@@ -22,6 +22,7 @@ User list
       <th>Forward</th>
       <th>Reply</th>
       <th>Quota</th>
+      <th>Comment</th>
       <th>Created</th>
       <th>Last edit</th>
     </tr>
@@ -41,6 +42,7 @@ User list
       <td>{% if user.forward %}<span class="label label-info">enabled</span>{% endif %}</td>
       <td>{% if user.reply_subject %}<span class="label label-info">enabled</span>{% endif %}</td>
       <td>{{ user.quota_bytes | filesizeformat }}</td>
+      <td>{{ user.comment or '' }}</td>
       <td>{{ user.created_at }}</td>
       <td>{{ user.updated_at or '' }}</td>
     </tr>

@@ -27,6 +27,7 @@ def user_create(domain_name):
                 break
         else:
             user = models.User(localpart=form.localpart.data, domain=domain)
+            user.comment = form.comment.data
             user.set_password(form.pw.data)
             db.session.add(user)
             db.session.commit()
@@ -44,6 +45,7 @@ def user_edit(user_email):
     form = forms.UserEditForm(obj=user)
     if form.validate_on_submit():
         user.quota_bytes = form.quota_bytes.data
+        user.comment = form.comment.data
         db.session.add(user)
         db.session.commit()
         flask.flash('User %s updated' % user)

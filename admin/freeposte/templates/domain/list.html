@@ -18,6 +18,7 @@ Domain list
       <th>Domain name</th>
       <th>Mailbox count</th>
       <th>Alias count</th>
+      <th>Comemnt</th>
       <th>Created</th>
       <th>Last edit</th>
     </tr>
@@ -33,6 +34,7 @@ Domain list
       <td>{{ domain.name }}</td>
       <td>{{ domain.users | count }} / {{ domain.max_users or '∞' }}</td>
       <td>{{ domain.aliases | count }} / {{ domain.max_aliases or '∞' }}</td>
+      <td>{{ domain.comment or '' }}</td>
       <td>{{ domain.created_at }}</td>
       <td>{{ domain.updated_at or '' }}</td>
     </tr>

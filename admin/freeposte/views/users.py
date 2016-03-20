@@ -66,7 +66,19 @@ def user_delete(user_email):
 @app.route('/user/usersettings/<user_email>', methods=['GET', 'POST'])
 @flask_login.login_required
 def user_settings(user_email):
-    return flask.render_template('user/settings.html')
+    user = utils.get_user(user_email)
+    form = forms.UserSettingsForm()
+    if form.validate_on_submit():
+        user.displayed_name = form.displayed_name.data
+        user.spam_enabled = form.spam_enabled.data
+        user.spam_threshold = form.spam_threshold.data
+        db.session.add(user)
+        db.session.commit()
+        flask.flash('Settings updated for %s' % user)
+        if user_email:
+            return flask.redirect(
+                flask.url_for('user_list', domain_name=user.domain.name))
+    return flask.render_template('user/settings.html', form=form, user=user)
 
 
 @app.route('/user/password', methods=['GET', 'POST'], defaults={'user_email': None})

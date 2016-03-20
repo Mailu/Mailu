@@ -31,6 +31,13 @@ class UserEditForm(Form):
     submit = fields.SubmitField('Create')
 
 
+class UserSettingsForm(Form):
+    displayed_name = fields.StringField('Displayed name')
+    spam_enabled = fields.BooleanField('Enable spam filter')
+    spam_threshold = fields.DecimalField('Spam filter sensitivity')
+    submit = fields.SubmitField('Save settings')
+
+
 class UserPasswordForm(Form):
     pw = fields.PasswordField('Password', [validators.DataRequired()])
     pw2 = fields.PasswordField('Password check', [validators.DataRequired()])

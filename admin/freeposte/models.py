@@ -67,6 +67,12 @@ class User(Address):
     reply_topic = db.Column(db.String(255), nullable=True, default=None)
     reply_body = db.Column(db.Text(), nullable=True, default=None)
 
+    # Settings
+    displayed_name = db.Column(db.String(160), nullable=False, default="")
+    spam_enabled = db.Column(db.Boolean(), nullable=False, default=True)
+    spam_threshold = db.Column(db.Numeric(), nullable=False, default=5.0)
+
+    # Flask-login attributes
     is_authenticated = True
     is_active = True
     is_anonymous = False

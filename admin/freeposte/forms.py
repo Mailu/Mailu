@@ -27,7 +27,7 @@ class UserCreateForm(Form):
 
 
 class UserEditForm(Form):
-    quota = fields.IntegerField('Quota')
+    quota_bytes = fields.IntegerField('Quota')
     submit = fields.SubmitField('Create')
 
 

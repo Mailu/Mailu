@@ -41,9 +41,9 @@ def user_create(domain_name):
 @flask_login.login_required
 def user_edit(user_email):
     user = utils.get_user(user_email, True)
-    form = forms.UserEditForm()
+    form = forms.UserEditForm(obj=user)
     if form.validate_on_submit():
-        user.quota_bytes = form.quota.data
+        user.quota_bytes = form.quota_bytes.data
         db.session.add(user)
         db.session.commit()
         flask.flash('User %s updated' % user)
@@ -67,7 +67,7 @@ def user_delete(user_email):
 @flask_login.login_required
 def user_settings(user_email):
     user = utils.get_user(user_email)
-    form = forms.UserSettingsForm()
+    form = forms.UserSettingsForm(obj=user)
     if form.validate_on_submit():
         user.displayed_name = form.displayed_name.data
         user.spam_enabled = form.spam_enabled.data
@@ -106,7 +106,7 @@ def user_password(user_email):
 @flask_login.login_required
 def user_forward(user_email):
     user = utils.get_user(user_email)
-    form = forms.UserForwardForm()
+    form = forms.UserForwardForm(obj=user)
     if form.validate_on_submit():
         user.forward = form.forward.data
         db.session.add(user)
@@ -123,7 +123,7 @@ def user_forward(user_email):
 @flask_login.login_required
 def user_reply(user_email):
     user = utils.get_user(user_email)
-    form = forms.UserReplyForm()
+    form = forms.UserReplyForm(obj=user)
     if form.validate_on_submit():
         user.reply_subject = form.reply_subject.data
         user.reply_body = form.reply_body.data

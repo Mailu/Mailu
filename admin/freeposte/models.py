@@ -64,7 +64,7 @@ class User(Address):
 
     # Filters
     forward = db.Column(db.String(160), nullable=True, default=None)
-    reply_topic = db.Column(db.String(255), nullable=True, default=None)
+    reply_subject = db.Column(db.String(255), nullable=True, default=None)
     reply_body = db.Column(db.Text(), nullable=True, default=None)
 
     # Settings

@@ -1,8 +1,10 @@
-from freeposte import db
+from freeposte.admin import db
 
 from sqlalchemy.ext import declarative
 from passlib import context
 from datetime import datetime
+
+import re
 
 
 # Many-to-many association table for domain administrators
@@ -89,13 +91,16 @@ class User(Address):
     is_active = True
     is_anonymous = False
 
-    pw_context = context.CryptContext(["sha512_crypt", "sha256_crypt"])
+    pw_context = context.CryptContext(
+        ["sha512_crypt", "sha256_crypt", "md5_crypt"]
+    )
 
     def check_password(self, password):
-        return User.pw_context.verify(password, self.password)
+        reference = re.match('({[^}]+})?(.*)', self.password).group(2)
+        return User.pw_context.verify(password, reference)
 
     def set_password(self, password):
-        self.password = User.pw_context.encrypt(password)
+        self.password = '{SHA512-CRYPT}' + User.pw_context.encrypt(password)
 
     def get_managed_domains(self):
         if self.global_admin:

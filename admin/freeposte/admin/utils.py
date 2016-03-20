@@ -1,4 +1,4 @@
-from freeposte import models
+from freeposte.admin import models
 from flask.ext import login as flask_login
 
 import flask

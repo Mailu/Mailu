@@ -1,4 +1,4 @@
-from freeposte import app, db, models, forms, utils
+from freeposte.admin import app, db, models, forms, utils
 from flask.ext import login as flask_login
 
 import os
@@ -25,7 +25,7 @@ def domain_create():
             db.session.add(domain)
             db.session.commit()
             flask.flash('Domain %s created' % domain)
-            return flask.redirect(flask.url_for('domain_list'))
+            return flask.redirect(flask.url_for('.domain_list'))
     return flask.render_template('domain/create.html', form=form)
 
 
@@ -42,7 +42,7 @@ def domain_edit(domain_name):
         db.session.add(domain)
         db.session.commit()
         flask.flash('Domain %s saved' % domain)
-        return flask.redirect(flask.url_for('domain_list'))
+        return flask.redirect(flask.url_for('.domain_list'))
     return flask.render_template('domain/edit.html', form=form,
         domain=domain)
 
@@ -55,7 +55,7 @@ def domain_delete(domain_name):
     db.session.delete(domain)
     db.session.commit()
     flask.flash('Domain %s deleted' % domain)
-    return flask.redirect(flask.url_for('domain_list'))
+    return flask.redirect(flask.url_for('.domain_list'))
 
 
 @app.route('/domain/admins/<domain_name>', methods=['GET'])

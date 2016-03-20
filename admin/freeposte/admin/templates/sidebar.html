@@ -4,51 +4,51 @@
   <ul class="sidebar-menu">
     <li class="header">My account</li>
     <li>
-      <a href="{{ url_for('user_settings') }}">
+      <a href="{{ url_for('.user_settings') }}">
         <i class="fa fa-wrench"></i> <span>Settings</span>
       </a>
     </li>
     <li>
-      <a href="{{ url_for('user_password') }}">
+      <a href="{{ url_for('.user_password') }}">
         <i class="fa fa-lock"></i> <span>Update password</span>
       </a>
     </li>
     <li>
-      <a href="{{ url_for('user_forward') }}">
+      <a href="{{ url_for('.user_forward') }}">
         <i class="fa fa-share"></i> <span>Auto-forward</span>
       </a>
     </li>
     <li>
-      <a href="{{ url_for('user_reply') }}">
+      <a href="{{ url_for('.user_reply') }}">
         <i class="fa fa-plane"></i> <span>Auto-reply</span>
       </a>
     </li>
     <li>
-      <a href="{{ url_for('user_fetchmail') }}">
+      <a href="{{ url_for('.user_fetchmail') }}">
         <i class="fa fa-download"></i> <span>Fetched accounts</span>
       </a>
     </li>
     <li>
-      <a href="{{ url_for('logout') }}">
+      <a href="{{ url_for('.logout') }}">
         <i class="fa fa-sign-out"></i> <span>Sign out</span>
       </a>
     </li>
     <li class="header">Administration</li>
     {% if current_user.global_admin %}
     <li>
-      <a href="{{ url_for('status') }}">
+      <a href="{{ url_for('.status') }}">
         <i class="fa fa-dashboard"></i> <span>Services status</span>
       </a>
     </li>
     <li>
-      <a href="{{ url_for('admins') }}">
+      <a href="{{ url_for('.admins') }}">
         <i class="fa fa-user"></i> <span>Adminitrators</span>
       </a>
     </li>
     {% endif %}
-    {% if current_user.admin_of %}
+    {% if current_user.admin_of or current_user.global_admin %}
     <li>
-      <a href="{{ url_for('domain_list') }}">
+      <a href="{{ url_for('.domain_list') }}">
         <i class="fa fa-envelope"></i> <span>Mail domains</span>
       </a>
     </li>

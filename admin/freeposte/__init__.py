@@ -10,7 +10,7 @@ import os
 app = Flask(__name__)
 
 default_config = {
-    'SQLALCHEMY_DATABASE_URI': 'sqlite:////tmp/freeposte.db',
+    'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/freeposte.db',
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     'SECRET_KEY': "changeMe",
     'DEBUG': False
@@ -20,24 +20,12 @@ default_config = {
 for key, value in default_config.items():
     app.config[key] = os.environ.get(key, value)
 
-# Setup Bootstrap
+# Setup components
 Bootstrap(app)
-
-# Create the database
 db = SQLAlchemy(app)
-
-# Import models once the database is ready
-from freeposte import models
-
-# Setup Flask-login
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "login"
-login_manager.user_loader(models.User.get_by_email)
 
-@app.context_processor
-def inject_user():
-    return dict(current_user=flask_login.current_user)
-
-# Finally import view
-from freeposte import views
+# Finally setup the blueprint
+from freeposte import admin
+app.register_blueprint(admin.app, url_prefix='/admin')

@@ -5,8 +5,8 @@
 {% block styles %}
 {{super()}}
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="/static/adminlte/css/AdminLTE.min.css">
-<link rel="stylesheet" href="/static/adminlte/css/skin-blue.min.css">
+<link rel="stylesheet" href="{{ url_for('.static', filename='adminlte/css/AdminLTE.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('.static', filename='adminlte/css/skin-blue.min.css') }}">
 {% endblock %}
 
 {% block body_attribs %}
@@ -68,7 +68,7 @@ class="hold-transition skin-blue sidebar-mini"
 
     {% block scripts %}
     {{super()}}
-    <script src="/static/adminlte/js/app.min.js"></script>
+    <script src="{{ url_for('.static', filename='adminlte/js/app.min.js') }}"></script>
     {% endblock %}
   </div>
 {% endblock %}

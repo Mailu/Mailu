@@ -1,4 +1,4 @@
-from freeposte import app, db, models, forms, utils
+from freeposte.admin import app, db, models, forms, utils
 from flask.ext import login as flask_login
 
 import os

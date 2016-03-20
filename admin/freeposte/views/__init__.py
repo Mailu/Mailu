@@ -1,1 +1,1 @@
-from freeposte.views import base, account, admin, domains, users, aliases
+from freeposte.views import base, admin, domains, users, aliases

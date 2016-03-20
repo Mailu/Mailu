@@ -16,7 +16,7 @@ def alias_list(domain_name):
 @flask_login.login_required
 def alias_create(domain_name):
     domain = utils.get_domain_admin(domain_name)
-    if len(domain.aliases) >= domain.max_aliases:
+    if domain.max_aliases and len(domain.aliases) >= domain.max_aliases:
         flask.flash('Too many aliases for domain %s' % domain, 'error')
         return flask.redirect(flask.url_for('alias_list', domain_name=domain.name))
     form = forms.AliasCreateForm()

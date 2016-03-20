@@ -16,7 +16,7 @@ def user_list(domain_name):
 @flask_login.login_required
 def user_create(domain_name):
     domain = utils.get_domain_admin(domain_name)
-    if len(domain.users) >= domain.max_users:
+    if domain.mex_users and len(domain.users) >= domain.max_users:
         flask.flash('Too many users for domain %s' % domain, 'error')
         return flask.redirect(flask.url_for('user_list', domain_name=domain.name))
     form = forms.UserCreateForm()

@@ -7,6 +7,7 @@ sa-update
 freshclam
 
 # Actually run Amavis
+rm -f /var/run/rsyslogd.pid
 /usr/sbin/clamd
 /usr/sbin/amavisd
 rsyslogd -n

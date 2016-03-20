@@ -6,5 +6,6 @@ for VARIABLE in `env | cut -f1 -d=`; do
 done
 
 # Actually run Postfix
+rm -f /var/run/rsyslogd.pid
 /usr/lib/postfix/master &
 rsyslogd -n

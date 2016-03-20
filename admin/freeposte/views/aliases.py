@@ -42,7 +42,7 @@ def alias_create(domain_name):
 @flask_login.login_required
 def alias_edit(alias):
     alias = utils.get_alias(alias)
-    form = forms.AliasEditForm()
+    form = forms.AliasEditForm(obj=alias)
     if form.validate_on_submit():
         alias.destination = form.destination.data
         alias.comment = form.comment.data

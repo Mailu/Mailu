@@ -1,4 +1,4 @@
-from freeposte import db, models
+from freeposte.admin import db, models
 from passlib import hash
 
 
@@ -10,7 +10,7 @@ user = models.User(
     localpart="admin",
     domain=domain,
     global_admin=True,
-    password=hash.sha512_crypt.encrypt("admin").
+    password=hash.sha512_crypt.encrypt("admin")
 )
 
 db.session.add(domain)

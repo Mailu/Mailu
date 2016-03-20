@@ -18,6 +18,8 @@ Domain list
       <th>Domain name</th>
       <th>Mailbox count</th>
       <th>Alias count</th>
+      <th>Created</th>
+      <th>Last edit</th>
     </tr>
     {% for domain in current_user.get_managed_domains() %}
     <tr>
@@ -31,6 +33,8 @@ Domain list
       <td>{{ domain.name }}</td>
       <td>{{ domain.users | count }} / {{ domain.max_users or '∞' }}</td>
       <td>{{ domain.aliases | count }} / {{ domain.max_aliases or '∞' }}</td>
+      <td>{{ domain.created_at }}</td>
+      <td>{{ domain.updated_at or '' }}</td>
     </tr>
     {% endfor %}
   </tbody>

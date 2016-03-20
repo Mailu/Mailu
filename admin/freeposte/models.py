@@ -2,6 +2,7 @@ from freeposte import db
 
 from sqlalchemy.ext import declarative
 from passlib import context
+from datetime import datetime
 
 
 # Many-to-many association table for domain administrators
@@ -16,7 +17,17 @@ admins = db.Table('admin',
 )
 
 
-class Domain(db.Model):
+class Base(db.Model):
+    """ Base class for all models
+    """
+
+    __abstract__ = True
+
+    created_at = db.Column(db.Date, nullable=False, default=datetime.now)
+    updated_at = db.Column(db.Date, nullable=True, onupdate=datetime.now)
+
+
+class Domain(Base):
     """ A DNS domain that has mail addresses associated to it.
     """
     name = db.Column(db.String(80), primary_key=True, nullable=False)
@@ -29,7 +40,7 @@ class Domain(db.Model):
         return self.name
 
 
-class Address(db.Model):
+class Address(Base):
     """ Abstraction for a mail address (localpart and domain).
     """
     __abstract__ = True

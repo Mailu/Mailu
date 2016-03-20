@@ -18,8 +18,12 @@ User list
     <tr>
       <th>Actions</th>
       <th>Address</th>
+      <th>Name</th>
       <th>Forward</th>
+      <th>Reply</th>
       <th>Quota</th>
+      <th>Created</th>
+      <th>Last edit</th>
     </tr>
     {% for user in domain.users %}
     <tr>
@@ -33,8 +37,12 @@ User list
         <a href="{{ url_for('user_delete', user_email=user.get_id()) }}" title="Delete"><i class="fa fa-trash"></i></a>
       </td>
       <td>{{ user }}</td>
-      <td>{{ user.forward or '-' }}</td>
+      <td>{{ user.displayed_name }}</td>
+      <td>{% if user.forward %}<span class="label label-info">enabled</span>{% endif %}</td>
+      <td>{% if user.reply_subject %}<span class="label label-info">enabled</span>{% endif %}</td>
       <td>{{ user.quota_bytes | filesizeformat }}</td>
+      <td>{{ user.created_at }}</td>
+      <td>{{ user.updated_at or '' }}</td>
     </tr>
     {% endfor %}
   </tbody>

@@ -33,7 +33,7 @@ User list
         <a href="{{ url_for('.user_reply', user_email=user.get_id()) }}" title="Auto-reply"><i class="fa fa-plane"></i></a>&nbsp;
         <a href="{{ url_for('.user_fetchmail', user_email=user.get_id()) }}" title="Fetched accounts"><i class="fa fa-download"></i></a>&nbsp;
         <a href="{{ url_for('.user_edit', user_email=user.get_id()) }}" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;
-        <a href="{{ url_for('.user_delete', user_email=user.get_id()) }}" title="Delete"><i class="fa fa-trash"></i></a>
+        <a href="{{ url_for('.user_delete', user_email=user.get_id()) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>
       </td>
       <td>{{ user }}</td>
       <td>

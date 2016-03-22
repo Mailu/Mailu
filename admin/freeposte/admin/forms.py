@@ -9,17 +9,12 @@ class LoginForm(Form):
     submit = fields.SubmitField('Sign in')
 
 
-class DomainCreateForm(Form):
+class DomainForm(Form):
     name = fields.StringField('Domain name', [validators.DataRequired()])
+    max_users = fields_.DecimalField('Maximum user count', default=10)
+    max_aliases = fields_.DecimalField('Maximum alias count', default=10)
     comment = fields.StringField('Comment')
     submit = fields.SubmitField('Create')
-
-
-class DomainEditForm(Form):
-    max_users = fields.IntegerField('Maximum mailbox count')
-    max_aliases = fields.IntegerField('Maximum aliases count')
-    comment = fields.StringField('Comment')
-    submit = fields.SubmitField('Save')
 
 
 class UserForm(Form):

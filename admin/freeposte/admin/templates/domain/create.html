@@ -1,5 +1,15 @@
-{% extends "form.html" %}
+{% extends "base.html" %}
 
 {% block title %}
 New domain
+{% endblock %}
+
+{% block box_content %}
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {{ macros.form_field(form.name) }}
+  {{ macros.form_fields((form.max_users, form.max_aliases)) }}
+  {{ macros.form_field(form.comment) }}
+  {{ macros.form_field(form.submit) }}
+</form>
 {% endblock %}

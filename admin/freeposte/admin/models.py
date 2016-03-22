@@ -36,8 +36,8 @@ class Domain(Base):
     name = db.Column(db.String(80), primary_key=True, nullable=False)
     admins = db.relationship('User', secondary=admins,
         backref=db.backref('admin_of'), lazy='dynamic')
-    max_users = db.Column(db.Integer, nullable=True)
-    max_aliases = db.Column(db.Integer, nullable=True)
+    max_users = db.Column(db.Integer, nullable=False, default=0)
+    max_aliases = db.Column(db.Integer, nullable=False, default=0)
 
     def has_address(self, localpart):
         for address in self.users + self.aliases:

@@ -3,6 +3,7 @@ from flask.ext import login as flask_login
 
 import os
 import flask
+import wtforms_components
 
 
 @app.route('/domain', methods=['GET'])
@@ -15,12 +16,14 @@ def domain_list():
 @flask_login.login_required
 def domain_create():
     utils.require_global_admin()
-    form = forms.DomainCreateForm()
+    form = forms.DomainForm()
     if form.validate_on_submit():
         if models.Domain.query.filter_by(name=form.name.data).first():
             flask.flash('Domain %s is already used' % form.name.data, 'error')
         else:
             domain = models.Domain(name=form.name.data)
+            domain.max_users = int(form.max_users.data)
+            domain.max_aliases = int(form.max_aliases.data)
             domain.comment = form.comment.data
             db.session.add(domain)
             db.session.commit()
@@ -34,10 +37,11 @@ def domain_create():
 def domain_edit(domain_name):
     utils.require_global_admin()
     domain = utils.get_domain_admin(domain_name)
-    form = forms.DomainEditForm(obj=domain)
+    form = forms.DomainForm(obj=domain)
+    wtforms_components.read_only(form.name)
     if form.validate_on_submit():
-        domain.max_users = form.max_users.data
-        domain.max_aliases = form.max_aliases.data
+        domain.max_users = int(form.max_users.data)
+        domain.max_aliases = int(form.max_aliases.data)
         domain.comment = form.comment.data
         db.session.add(domain)
         db.session.commit()

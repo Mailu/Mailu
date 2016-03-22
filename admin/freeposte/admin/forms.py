@@ -55,14 +55,8 @@ class UserReplyForm(Form):
     submit = fields.SubmitField('Update')
 
 
-class AliasCreateForm(Form):
+class AliasForm(Form):
     localpart = fields.StringField('Alias', [validators.DataRequired()])
     destination = fields.StringField('Destination')
-    comment = fields.StringField('Comment')
-    submit = fields.SubmitField('Create')
-
-
-class AliasEditForm(Form):
-    destination = fields.StringField('Destination', widget=widgets.TextArea())
     comment = fields.StringField('Comment')
     submit = fields.SubmitField('Create')

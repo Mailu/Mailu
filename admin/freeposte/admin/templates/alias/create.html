@@ -17,8 +17,10 @@ Create alias
   {{ macros.form_field(form.submit) }}
   <script>
     $("#destination").tagsinput({
-      confirmKeys: [13, 32],
+      confirmKeys: [9, 13, 32],
+      tagClass: 'label label-primary large',
       typeahead: {
+        afterSelect: function(val) { this.$element.val(""); },
         source: {{ current_user.get_managed_addresses()|map('string')|list|tojson }}
       }
     });

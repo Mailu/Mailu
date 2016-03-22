@@ -3,6 +3,7 @@ from flask.ext import login as flask_login
 
 import os
 import flask
+import wtforms_components
 
 
 @app.route('/alias/list/<domain_name>', methods=['GET'])
@@ -20,12 +21,10 @@ def alias_create(domain_name):
         flask.flash('Too many aliases for domain %s' % domain, 'error')
         return flask.redirect(
             flask.url_for('.alias_list', domain_name=domain.name))
-    form = forms.AliasCreateForm()
+    form = forms.AliasForm()
     if form.validate_on_submit():
-        for address in domain.users + domain.aliases:
-            if address.localpart == form.localpart.data:
-                flask.flash('Address %s is already used' % address, 'error')
-                break
+        if domain.has_address(form.localpart.data):
+            flask.flash('Address %s is already used' % address, 'error')
         else:
             alias = models.Alias(localpart=form.localpart.data, domain=domain)
             alias.destination = form.destination.data
@@ -43,7 +42,8 @@ def alias_create(domain_name):
 @flask_login.login_required
 def alias_edit(alias):
     alias = utils.get_alias(alias)
-    form = forms.AliasEditForm(obj=alias)
+    form = forms.AliasForm(obj=alias)
+    wtforms_components.read_only(form.localpart)
     if form.validate_on_submit():
         alias.destination = form.destination.data
         alias.comment = form.comment.data
@@ -52,7 +52,8 @@ def alias_edit(alias):
         flask.flash('Alias %s updated' % alias)
         return flask.redirect(
             flask.url_for('.alias_list', domain_name=alias.domain.name))
-    return flask.render_template('alias/edit.html', form=form, alias=alias)
+    return flask.render_template('alias/edit.html',
+        form=form, alias=alias, domain=alias.domain)
 
 
 @app.route('/alias/delete/<alias>', methods=['GET'])

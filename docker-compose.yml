@@ -44,7 +44,6 @@ filter:
   volumes:
     - /tmp/data/filter:/data
 
-
 admin:
   build: admin
   env_file: freeposte.env

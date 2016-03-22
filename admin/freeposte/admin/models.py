@@ -115,6 +115,13 @@ class User(Address):
         else:
             return self.admin_of
 
+    def get_managed_addresses(self):
+        addresses = []
+        for domain in self.get_managed_domains():
+            addresses.extend(domain.users)
+            addresses.extend(domain.aliases)
+        return addresses
+
     @classmethod
     def login(cls, email, password):
         user = cls.get_by_email(email)

@@ -57,7 +57,7 @@ class UserReplyForm(Form):
 
 class AliasCreateForm(Form):
     localpart = fields.StringField('Alias', [validators.DataRequired()])
-    destination = fields.StringField('Destination', widget=widgets.TextArea())
+    destination = fields.StringField('Destination')
     comment = fields.StringField('Comment')
     submit = fields.SubmitField('Create')
 

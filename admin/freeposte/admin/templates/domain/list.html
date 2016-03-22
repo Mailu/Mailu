@@ -15,6 +15,7 @@ Domain list
   <tbody>
     <tr>
       <th>Actions</th>
+      <th>Manage</th>
       <th>Domain name</th>
       <th>Mailbox count</th>
       <th>Alias count</th>
@@ -25,11 +26,13 @@ Domain list
     {% for domain in current_user.get_managed_domains() %}
     <tr>
       <td>
+        <a href="{{ url_for('.domain_edit', domain_name=domain.name) }}" title="Edit"><i class="fa fa-pencil"></i></a>
+        <a href="{{ url_for('.domain_delete', domain_name=domain.name) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>&nbsp;
+      </td>
+      <td>
         <a href="{{ url_for('.user_list', domain_name=domain.name) }}" title="Users"><i class="fa fa-envelope-o"></i></a>&nbsp;
         <a href="{{ url_for('.alias_list', domain_name=domain.name) }}" title="Aliases"><i class="fa fa-at"></i></a>&nbsp;
         <a href="{{ url_for('.domain_admins', domain_name=domain.name) }}" title="Administrators"><i class="fa fa-user"></i></a>&nbsp;
-        <a href="{{ url_for('.domain_edit', domain_name=domain.name) }}" title="Edit"><i class="fa fa-pencil"></i></a>
-        <a href="{{ url_for('.domain_delete', domain_name=domain.name) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>&nbsp;
       </td>
       <td>{{ domain.name }}</td>
       <td>{{ domain.users | count }} / {{ domain.max_users or '∞' }}</td>

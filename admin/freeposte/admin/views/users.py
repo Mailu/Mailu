@@ -29,6 +29,8 @@ def user_create(domain_name):
             user = models.User(localpart=form.localpart.data, domain=domain)
             user.comment = form.comment.data
             user.quota_bytes = int(form.quota_bytes.data)
+            user.enable_imap = form.enable_imap.data
+            user.enable_pop = form.enable_pop.data
             user.set_password(form.pw.data)
             db.session.add(user)
             db.session.commit()
@@ -47,8 +49,12 @@ def user_edit(user_email):
     wtforms_components.read_only(form.localpart)
     form.pw.validators = []
     if form.validate_on_submit():
-        user.quota_bytes = int(form.quota_bytes.data)
         user.comment = form.comment.data
+        user.quota_bytes = int(form.quota_bytes.data)
+        user.enable_imap = form.enable_imap.data
+        user.enable_pop = form.enable_pop.data
+        if form.pw.data:
+            user.set_password(form.pw.data)
         db.session.add(user)
         db.session.commit()
         flask.flash('User %s updated' % user)

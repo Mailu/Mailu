@@ -9,5 +9,14 @@ New user
 {% endblock %}
 
 {% block box_content %}
-{{ wtf.quick_form(form) }}
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {{ macros.form_field(form.localpart, append='<span class="input-group-addon">@'+domain.name+'</span>') }}
+  {{ macros.form_fields((form.pw, form.pw2)) }}
+  {{ macros.form_field(form.quota_bytes, step=1000000000, max=50000000000,
+      prepend='<span class="input-group-addon"><span id="quota">'+(form.quota_bytes.data//1000000000).__str__()+'</span> GiB</span>',
+      oninput='$("#quota").text(this.value/1000000000);') }}
+  {{ macros.form_field(form.comment) }}
+  {{ macros.form_field(form.submit) }}
+</form>
 {% endblock %}

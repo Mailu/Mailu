@@ -39,6 +39,13 @@ class Domain(Base):
     max_users = db.Column(db.Integer, nullable=True)
     max_aliases = db.Column(db.Integer, nullable=True)
 
+    def has_address(self, localpart):
+        for address in self.users + self.aliases:
+            if address.localpart == localpart:
+                return True
+        else:
+            return False
+
     def __str__(self):
         return self.name
 

@@ -22,17 +22,13 @@ class DomainEditForm(Form):
     submit = fields.SubmitField('Save')
 
 
-class UserCreateForm(Form):
+class UserForm(Form):
     localpart = fields.StringField('E-mail', [validators.DataRequired()])
     pw = fields.PasswordField('Password', [validators.DataRequired()])
+    pw2 = fields.PasswordField('Confirm password', [validators.EqualTo('pw')])
+    quota_bytes = fields_.DecimalSliderField('Quota', default=1000000000)
     comment = fields.StringField('Comment')
-    submit = fields.SubmitField('Create')
-
-
-class UserEditForm(Form):
-    quota_bytes = fields.IntegerField('Quota')
-    comment = fields.StringField('Comment')
-    submit = fields.SubmitField('Create')
+    submit = fields.SubmitField('Save')
 
 
 class UserSettingsForm(Form):

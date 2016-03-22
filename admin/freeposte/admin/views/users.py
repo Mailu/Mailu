@@ -3,6 +3,7 @@ from flask.ext import login as flask_login
 
 import os
 import flask
+import wtforms_components
 
 
 @app.route('/user/list/<domain_name>', methods=['GET'])
@@ -20,15 +21,14 @@ def user_create(domain_name):
         flask.flash('Too many users for domain %s' % domain, 'error')
         return flask.redirect(
             flask.url_for('.user_list', domain_name=domain.name))
-    form = forms.UserCreateForm()
+    form = forms.UserForm()
     if form.validate_on_submit():
-        for address in domain.users + domain.aliases:
-            if address.localpart == form.localpart.data:
-                flask.flash('Address %s is already used' % address, 'error')
-                break
+        if domain.has_address(form.localpart.data):
+            flask.flash('Address %s is already used' % address, 'error')
         else:
             user = models.User(localpart=form.localpart.data, domain=domain)
             user.comment = form.comment.data
+            user.quota_bytes = int(form.quota_bytes.data)
             user.set_password(form.pw.data)
             db.session.add(user)
             db.session.commit()
@@ -43,16 +43,18 @@ def user_create(domain_name):
 @flask_login.login_required
 def user_edit(user_email):
     user = utils.get_user(user_email, True)
-    form = forms.UserEditForm(obj=user)
+    form = forms.UserForm(obj=user)
+    wtforms_components.read_only(form.localpart)
+    form.pw.validators = []
     if form.validate_on_submit():
-        user.quota_bytes = form.quota_bytes.data
+        user.quota_bytes = int(form.quota_bytes.data)
         user.comment = form.comment.data
         db.session.add(user)
         db.session.commit()
         flask.flash('User %s updated' % user)
         return flask.redirect(
             flask.url_for('.user_list', domain_name=user.domain.name))
-    return flask.render_template('user/edit.html', form=form, user=user)
+    return flask.render_template('user/edit.html', form=form, user=user, domain=user.domain)
 
 
 @app.route('/user/delete/<user_email>', methods=['GET'])

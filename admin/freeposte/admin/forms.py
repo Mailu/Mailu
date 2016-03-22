@@ -27,6 +27,8 @@ class UserForm(Form):
     pw = fields.PasswordField('Password', [validators.DataRequired()])
     pw2 = fields.PasswordField('Confirm password', [validators.EqualTo('pw')])
     quota_bytes = fields_.DecimalSliderField('Quota', default=1000000000)
+    enable_imap = fields.BooleanField('Allow IMAP access', default=True)
+    enable_pop = fields.BooleanField('Allow POP3 access', default=True)
     comment = fields.StringField('Comment')
     submit = fields.SubmitField('Save')
 

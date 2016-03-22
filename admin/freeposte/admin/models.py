@@ -83,6 +83,10 @@ class User(Address):
     quota_bytes = db.Column(db.Integer(), nullable=False, default=10**9)
     global_admin = db.Column(db.Boolean(), nullable=False, default=False)
 
+    # Features
+    enable_imap = db.Column(db.Boolean(), nullable=False, default=True)
+    enable_pop = db.Column(db.Boolean(), nullable=False, default=True)
+
     # Filters
     forward = db.Column(db.String(160), nullable=True, default=None)
     reply_subject = db.Column(db.String(255), nullable=True, default=None)

@@ -10,34 +10,42 @@
   {% endif %}
 {% endmacro %}
 
+{% macro form_field_errors(field) %}
+  {% if field.errors %}
+    {% for error in field.errors %}
+      <p class="help-block inline">{{ error }}</p>
+    {% endfor %}
+  {% endif %}
+{% endmacro %}
+
 {% macro form_fields(fields, prepend='', append='', label=True) %}
   {% set width = (12 / fields|length)|int %}
   <div class="form-group">
     <div class="row">
       {% for field in fields %}
       <div class="col-lg-{{ width }} col-xs-12 {{ 'has-error' if field.errors else '' }}">
-        {{ field.label if label else '' }}
-        {% if field.errors %}
-          {% for error in field.errors %}
-            <p class="help-block inline">{{ error }}</p>
-          {% endfor %}
-        {% endif %}
-        {% if prepend or append %}<div class="input-group">{% endif %}
-          {{ prepend|safe }}
-          {{ field(class_="form-control", **kwargs) }}
-          {{ append|safe }}
-        {% if prepend or append %}</div>{% endif %}
+        {{ form_individual_field(field, prepend=prepend, append=append, label=label, **kwargs) }}
       </div>
       {% endfor %}
     </div>
   </div>
 {% endmacro %}
 
+{% macro form_individual_field(field, prepend='', append='', label=True) %}
+  {% if field.type == "BooleanField" %}
+    {{ field(**kwargs) }}<span>&nbsp;&nbsp;</span>
+    {{ field.label if label else '' }}
+  {% else %}
+    {{ field.label if label else '' }}{{ form_field_errors(field) }}
+    {% if prepend or append %}<div class="input-group">{% endif %}
+      {{ prepend|safe }}{{ field(class_="form-control", **kwargs) }}{{ append|safe }}
+    {% if prepend or append %}</div>{% endif %}
+  {% endif %}
+{% endmacro %}
+
 {% macro form_field(field) %}
   {% if field.type == 'SubmitField' %}
   {{ form_fields((field,), label=False, class="btn btn-default", **kwargs) }}
-  {% elif field.type == 'HiddenField' %}
-  {{ form_fields((field,), label=False, **kwargs) }}
   {% else %}
   {{ form_fields((field,), **kwargs) }}
   {% endif %}

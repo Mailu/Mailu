@@ -1,60 +1,70 @@
-http:
-  build: nginx
-  env_file: freeposte.env
-  ports:
-    - "80:80"
-    - "443:443"
-  links:
-    - admin:admin
-    - webmail:webmail
-  volumes:
-    - /tmp/data/certs:/certs
+version: '2'
 
-imap:
-  build: dovecot
-  env_file: freeposte.env
-  ports:
-    - "143:143"
-    - "993:993"
-  volumes:
-    - /tmp/data/freeposte:/data
-    - /tmp/data/mail:/mail
-    - /tmp/data/certs:/certs
+services:
 
-smtp:
-  build: postfix
-  env_file: freeposte.env
-  ports:
-    - "25:25"
-    - "465:465"
-    - "587:587"
-  links:
-    - filter:lmtp
-    - imap:sasl
-  volumes:
-    - /tmp/data/freeposte:/data
-    - /tmp/data/logs:/logs
-    - /tmp/data/certs:/certs
+  http:
+    build: nginx
+    image: freeposte/reverse-proxy
+    env_file: freeposte.env
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - admin:admin
+      - webmail:webmail
+    volumes:
+      - /data/certs:/certs
 
-filter:
-  build: amavis
-  env_file: freeposte.env
-  links:
-    - imap:lmtp
-  volumes:
-    - /tmp/data/filter:/data
+  imap:
+    build: dovecot
+    image: freeposte/dovecot
+    env_file: freeposte.env
+    ports:
+      - "143:143"
+      - "993:993"
+    volumes:
+      - /data/freeposte:/data
+      - /data/mail:/mail
+      - /data/certs:/certs
 
-admin:
-  build: admin
-  env_file: freeposte.env
-  volumes:
-    - /tmp/data/freeposte:/data
+  smtp:
+    build: postfix
+    image: freeposte/postfix
+    env_file: freeposte.env
+    ports:
+      - "25:25"
+      - "465:465"
+      - "587:587"
+    links:
+      - filter:lmtp
+      - imap:sasl
+    volumes:
+      - /data/freeposte:/data
+      - /data/logs:/logs
+      - /data/certs:/certs
 
-webmail:
-  build: roundcube
-  env_file: freeposte.env
-  links:
-    - imap:imap
-    - smtp:smtp
-  volumes:
-    - /tmp/data/webmail:/data
+  filter:
+    build: amavis
+    image: freeposte/amavis
+    env_file: freeposte.env
+    links:
+      - imap:lmtp
+    volumes:
+      - /data/filter:/data
+
+  admin:
+    build: admin
+    image: freeposte/admin
+    env_file: freeposte.env
+    volumes:
+      - /data/freeposte:/data
+
+  webmail:
+    build: roundcube
+    image: freeposte/roundcube
+    env_file: freeposte.env
+    links:
+      - imap:imap
+      - smtp:smtp
+    volumes:
+      - /data/webmail:/data

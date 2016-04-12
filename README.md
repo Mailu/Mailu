@@ -42,7 +42,7 @@ First, follow instructions at https://docs.docker.com to setup Docker and Docker
 Compose properly for your system. Then download the main configuration file:
 
 ```
-wget https://freeposte.io/docker-compose.yml
+wget https://raw.githubusercontent.com/kaiyou/freeposte.io/master/docker-compose.yml
 ```
 
 This file contains instructions about which containers to run and how they will
@@ -53,8 +53,58 @@ as a sane default:
 mkdir -p /data
 ```
 
-Finally, you can run your mail server:
+Otherwise, simply edit the ``docker-compose.yml`` to match your requirements. Finally, you can run your mail server:
 
 ```
 docker-compose up -d
+```
+
+Monitoring the mail server
+==========================
+
+Logs are managed by Docker directly. You can easily read your logs using :
+
+```
+docker-compose logs
+```
+
+Docker is able to forward logs to multiple log engines. Read the following documentation or details: https://docs.docker.com/engine/admin/logging/overview/.
+
+Building from source
+====================
+
+You can simply build all the containers from source using the ``docker-compose.yml``. First clone the Git repository:
+
+```
+git clone https://github.com/kaiyou/freeposte.io.git
+```
+
+Then build all the images :
+
+```
+docker-compose build
+```
+
+Development environment
+=======================
+
+The administration Web interface requires a proper dev environment that can easily be setup using ``virtualenv`` (make sure you are using Python 3) :
+
+```
+cd admin
+virtualenv .
+source bin/activate
+pip install -r requirements.txt
+```
+
+You can then export the path to the development database:
+
+```
+export SQLALCHEMY_DATABASE_URI=sqlite:///path/to/dev.db
+```
+
+And finally run the server with debug enabled:
+
+```
+python run.py
 ```

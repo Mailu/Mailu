@@ -28,8 +28,8 @@ The mail infrastructure is based on a standard MTA-LDA pattern :
 
 ![Architecture](doc/archi.png)
 
-How-to run your mail server
-===========================
+Running a mail server
+=====================
 
 *Please note that this project is still in a very early stage. Do not use for
 production!*
@@ -39,14 +39,17 @@ through a ``docker-compose.yml`` configuration file that requires Docker Compose
 to run.
 
 First, follow instructions at https://docs.docker.com to setup Docker and Docker
-Compose properly for your system. Then download the main configuration file:
+Compose properly for your system. Then download the main configuration files:
 
 ```
 wget https://raw.githubusercontent.com/kaiyou/freeposte.io/master/docker-compose.yml
+wget https://raw.githubusercontent.com/kaiyou/freeposte.io/master/freeposte.env
 ```
 
-This file contains instructions about which containers to run and how they will
-interact. You should also create a data directory. Freeposte will use ``/data``
+The ``docker-compose.yml`` file contains instructions about which containers to run and how they will
+interact. ``freeposte.env`` is the main configuration file. You must read it and provide proper configuration before running the server.
+
+You will also need to create a data directory. Freeposte will use ``/data``
 as a sane default:
 
 ```

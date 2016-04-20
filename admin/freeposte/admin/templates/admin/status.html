@@ -1,1 +1,30 @@
-{% extends "working.html" %}
+{% extends "base.html" %}
+
+{% block title %}
+Services status
+{% endblock %}
+
+{% block box %}
+<table class="table table-bordered">
+  <tbody>
+    <tr>
+      <th>Service</th>
+      <th>Status</th>
+      <th>PID</th>
+      <th>Image</th>
+      <th>Started</th>
+      <th>Last update</th>
+    </tr>
+    {% for name, container in containers.items() %}
+    <tr>
+      <td>{{ name }}</td>
+      <td><span class="label label-{{ "success" if container['State']['Running'] else "danger" }}">{{ container['State']['Status'] }}</span></td>
+      <td>{{ container['State']['Pid'] }}</td>
+      <td>{{ container['Config']['Image'] }}</td>
+      <td>{{ container['State']['StartedAt'] }}</td>
+      <td>{{ container['Image']['Created'] }}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

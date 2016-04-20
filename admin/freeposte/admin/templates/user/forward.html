@@ -1,4 +1,4 @@
-{% extends "form.html" %}
+{% extends "base.html" %}
 
 {% block title %}
 Forward emails
@@ -6,4 +6,17 @@ Forward emails
 
 {% block subtitle %}
 {{ user }}
+{% endblock %}
+
+{% block box_content %}
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {{ macros.form_field(form.forward_enabled,
+      onchange="if(this.checked){$('#forward').removeAttr('disabled')}
+                else{$('#forward').attr('disabled', '').val('')}",
+      **{("checked" if user.forward else "unchecked"): ""}) }}
+  {{ macros.form_field(form.forward,
+      **{("enabled" if user.forward else "disabled"): ""}) }}
+  {{ macros.form_field(form.submit) }}
+</form>
 {% endblock %}

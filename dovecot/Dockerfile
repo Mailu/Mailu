@@ -9,6 +9,9 @@ RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/re
      dovecot-antispam-plugin@testing \
  && rm -rf /var/cache/apk/*
 
+COPY dovecot-pigeonhole-plugin-extdata-1-r0.apk /
+RUN apk add --allow-untrusted --force dovecot-pigeonhole-plugin-extdata-1-r0.apk
+
 COPY conf /etc/dovecot
 COPY sieve /var/lib/dovecot
 

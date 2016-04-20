@@ -120,7 +120,10 @@ def user_forward(user_email):
     user = utils.get_user(user_email)
     form = forms.UserForwardForm(obj=user)
     if form.validate_on_submit():
-        user.forward = form.forward.data
+        if form.forward_enabled:
+            user.forward = form.forward.data
+        else:
+            user.forward = None
         db.session.add(user)
         db.session.commit()
         flask.flash('Forward destination updated for %s' % user)

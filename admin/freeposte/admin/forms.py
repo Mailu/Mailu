@@ -42,11 +42,15 @@ class UserPasswordForm(Form):
 
 
 class UserForwardForm(Form):
-    forward = fields.StringField('Destination', [validators.Email()])
+    forward_enabled = fields.BooleanField('Enable forwarding', default=False)
+    forward = fields.StringField(
+        'Destination', [validators.Optional(), validators.Email()]
+    )
     submit = fields.SubmitField('Update')
 
 
 class UserReplyForm(Form):
+    reply_enabled = fields.BooleanField('Enable reply', default=False)
     reply_subject = fields.StringField('Reply subject')
     reply_body = fields.StringField('Reply body', widget=widgets.TextArea())
     submit = fields.SubmitField('Update')

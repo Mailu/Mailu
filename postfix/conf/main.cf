@@ -30,7 +30,7 @@ smtp_tls_security_level = may
 ###############
 smtpd_sasl_local_domain = $myhostname
 smtpd_sasl_type = dovecot
-smtpd_sasl_path = inet:sasl:2102
+smtpd_sasl_path = inet:imap:2102
 smtpd_sasl_auth_enable = yes
 smtpd_sasl_security_options = noanonymous
 
@@ -39,5 +39,5 @@ smtpd_sasl_security_options = noanonymous
 ###############
 virtual_mailbox_domains = ${sql}sqlite-virtual_mailbox_domains.cf
 virtual_alias_maps = ${sql}sqlite-virtual_alias_maps.cf
-virtual_transport = lmtp:inet:lmtp:2525
+virtual_transport = lmtp:inet:filter:2525
 lmtp_host_lookup = native

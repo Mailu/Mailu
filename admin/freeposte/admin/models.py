@@ -55,24 +55,32 @@ class Address(Base):
     """
     __abstract__ = True
 
-    localpart = db.Column(db.String(80), primary_key=True, nullable=False)
+    localpart = db.Column(db.String(80), nullable=False)
 
     @declarative.declared_attr
     def domain_name(cls):
         return db.Column(db.String(80), db.ForeignKey(Domain.name),
-            primary_key=True, nullable=False)
+            nullable=False)
 
-    def __str__(self):
-        return '{0}@{1}'.format(self.localpart, self.domain_name)
-
-    def get_id(self):
-        return str(self)
+    # This field is redundant with both localpart and domain name.
+    # It is however very useful for quick lookups without joining tables,
+    # especially when the mail server il reading the database.
+    @declarative.declared_attr
+    def address(cls):
+        updater = lambda context: "{0}@{1}".format(
+            context.current_parameters["localpart"],
+            context.current_parameters["domain_name"],
+        )
+        return db.Column(db.String(255),
+            primary_key=True, nullable=False,
+            default=updater)
 
     @classmethod
     def get_by_email(cls, email):
-        localpart, domain = email.split('@', maxsplit=1)
-        # Get the user object
-        return cls.query.filter_by(domain_name=domain, localpart=localpart).first()
+        return cls.query.filter_by(address=email).first()
+
+    def __str__(self):
+        return self.address
 
 
 class User(Address):
@@ -101,6 +109,9 @@ class User(Address):
     is_authenticated = True
     is_active = True
     is_anonymous = False
+
+    def get_id(self):
+        return self.address
 
     pw_context = context.CryptContext(
         ["sha512_crypt", "sha256_crypt", "md5_crypt"]

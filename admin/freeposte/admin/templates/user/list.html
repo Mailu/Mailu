@@ -28,14 +28,14 @@ User list
     {% for user in domain.users %}
     <tr>
       <td>
-        <a href="{{ url_for('.user_edit', user_email=user.get_id()) }}" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;
-        <a href="{{ url_for('.user_delete', user_email=user.get_id()) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>
+        <a href="{{ url_for('.user_edit', user_email=user.address) }}" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;
+        <a href="{{ url_for('.user_delete', user_email=user.address) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>
       </td>
       <td>
-        <a href="{{ url_for('.user_settings', user_email=user.get_id()) }}" title="Settings"><i class="fa fa-wrench"></i></a>&nbsp;
-        <a href="{{ url_for('.user_forward', user_email=user.get_id()) }}" title="Auto-forward"><i class="fa fa-share"></i></a>&nbsp;
-        <a href="{{ url_for('.user_reply', user_email=user.get_id()) }}" title="Auto-reply"><i class="fa fa-plane"></i></a>&nbsp;
-        <a href="{{ url_for('.user_fetchmail', user_email=user.get_id()) }}" title="Fetched accounts"><i class="fa fa-download"></i></a>&nbsp;
+        <a href="{{ url_for('.user_settings', user_email=user.address) }}" title="Settings"><i class="fa fa-wrench"></i></a>&nbsp;
+        <a href="{{ url_for('.user_forward', user_email=user.address) }}" title="Auto-forward"><i class="fa fa-share"></i></a>&nbsp;
+        <a href="{{ url_for('.user_reply', user_email=user.address) }}" title="Auto-reply"><i class="fa fa-plane"></i></a>&nbsp;
+        <a href="{{ url_for('.user_fetchmail', user_email=user.address) }}" title="Fetched accounts"><i class="fa fa-download"></i></a>&nbsp;
       </td>
       <td>{{ user }}</td>
       <td>

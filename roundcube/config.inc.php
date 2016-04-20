@@ -12,7 +12,6 @@ $config['reply_all_mode'] = 1;
 $config['plugins'] = array(
     'archive',
     'zipdownload',
-    'managesieve',
     'markasjunk'
 );
 

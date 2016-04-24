@@ -9,6 +9,9 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    links:
+      - webmail
+      - admin
     volumes:
       - /data/certs:/certs
 

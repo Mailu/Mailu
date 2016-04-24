@@ -52,7 +52,7 @@ services:
     env_file: freeposte.env
     volumes:
       - /data/freeposte:/data
-      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
   webmail:
     build: roundcube

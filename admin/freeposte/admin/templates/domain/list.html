@@ -32,7 +32,7 @@ Domain list
       <td>
         <a href="{{ url_for('.user_list', domain_name=domain.name) }}" title="Users"><i class="fa fa-envelope-o"></i></a>&nbsp;
         <a href="{{ url_for('.alias_list', domain_name=domain.name) }}" title="Aliases"><i class="fa fa-at"></i></a>&nbsp;
-        <a href="{{ url_for('.domain_admins', domain_name=domain.name) }}" title="Administrators"><i class="fa fa-user"></i></a>&nbsp;
+        <a href="{{ url_for('.manager_list', domain_name=domain.name) }}" title="Managers"><i class="fa fa-user"></i></a>&nbsp;
       </td>
       <td>{{ domain.name }}</td>
       <td>{{ domain.users | count }} / {{ domain.max_users or '∞' }}</td>

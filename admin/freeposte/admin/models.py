@@ -7,15 +7,10 @@ from datetime import datetime
 import re
 
 
-# Many-to-many association table for domain administrators
-admins = db.Table('admin',
+# Many-to-many association table for domain managers
+managers = db.Table('manager',
     db.Column('domain_name', db.String(80), db.ForeignKey('domain.name')),
-    db.Column('user_domain_name', db.String(80)),
-    db.Column('user_localpart', db.String(80)),
-    db.ForeignKeyConstraint(
-        ('user_domain_name', 'user_localpart'),
-        ('user.domain_name', 'user.localpart')
-    )
+    db.Column('user_address', db.String(80), db.ForeignKey('user.address'))
 )
 
 
@@ -34,8 +29,8 @@ class Domain(Base):
     """ A DNS domain that has mail addresses associated to it.
     """
     name = db.Column(db.String(80), primary_key=True, nullable=False)
-    admins = db.relationship('User', secondary=admins,
-        backref=db.backref('admin_of'), lazy='dynamic')
+    managers = db.relationship('User', secondary=managers,
+        backref=db.backref('manager_of'), lazy='dynamic')
     max_users = db.Column(db.Integer, nullable=False, default=0)
     max_aliases = db.Column(db.Integer, nullable=False, default=0)
 

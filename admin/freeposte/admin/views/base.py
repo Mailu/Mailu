@@ -1,4 +1,5 @@
-from freeposte.admin import app, db, models, forms
+from freeposte import dockercli
+from freeposte.admin import app, db, models, forms, utils
 from flask.ext import login as flask_login
 
 import os
@@ -29,3 +30,17 @@ def login():
 def logout():
     flask_login.logout_user()
     return flask.redirect(flask.url_for('.index'))
+
+
+@app.route('/services', methods=['GET'])
+@flask_login.login_required
+def services():
+    utils.require_global_admin()
+    containers = {}
+    for brief in dockercli.containers(all=True):
+        if brief['Image'].startswith('freeposte/'):
+            container = dockercli.inspect_container(brief['Id'])
+            container['Image'] = dockercli.inspect_image(container['Image'])
+            name = container['Config']['Labels']['com.docker.compose.service']
+            containers[name] = container
+    return flask.render_template('services.html', containers=containers)

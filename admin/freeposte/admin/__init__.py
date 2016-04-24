@@ -21,7 +21,8 @@ def inject_user():
 
 # Import views
 from freeposte.admin.views import \
-    administrators, \
+    admins, \
+    managers, \
     base, \
     aliases, \
     users, \

@@ -61,3 +61,13 @@ class AliasForm(Form):
     destination = fields.StringField('Destination')
     comment = fields.StringField('Comment')
     submit = fields.SubmitField('Create')
+
+
+class AdminForm(Form):
+    admin = fields.StringField('Admin address', [validators.Email()])
+    submit = fields.SubmitField('Submit')
+
+
+class ManagerForm(Form):
+    manager = fields.StringField('Manager address', [validators.Email()])
+    submit = fields.SubmitField('Submit')

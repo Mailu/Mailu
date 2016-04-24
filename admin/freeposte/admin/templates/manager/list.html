@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}
+Manager list
+{% endblock %}
+
+{% block subtitle %}
+{{ domain.name }}
+{% endblock %}
+
+{% block main_action %}
+<a class="btn btn-primary" href="{{ url_for('.manager_create', domain_name=domain.name) }}">Add manager</a>
+{% endblock %}
+
+{% block box %}
+<table class="table table-bordered">
+  <tbody>
+    <tr>
+      <th>Actions</th>
+      <th>Address</th>
+      <th>Created</th>
+      <th>Last edit</th>
+    </tr>
+    {% for manager in domain.managers %}
+    <tr>
+      <td>
+        <a href="{{ url_for('.manager_delete', manager=manager.address) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>
+      </td>
+      <td>{{ manager }}</td>
+      <td>{{ manager.created_at }}</td>
+      <td>{{ manager.updated_at or '' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

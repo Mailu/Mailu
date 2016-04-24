@@ -8,9 +8,9 @@ import flask
 import json
 
 
-@app.route('/status', methods=['GET'])
+@app.route('/services', methods=['GET'])
 @flask_login.login_required
-def status():
+def services():
     utils.require_global_admin()
     containers = {}
     for brief in dockercli.containers(all=True):
@@ -20,7 +20,7 @@ def status():
             name = container['Config']['Labels']['com.docker.compose.service']
             containers[name] = container
             pprint.pprint(container)
-    return flask.render_template('admin/status.html', containers=containers)
+    return flask.render_template('admin/services.html', containers=containers)
 
 
 @app.route('/admins', methods=['GET'])

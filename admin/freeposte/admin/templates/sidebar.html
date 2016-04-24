@@ -46,7 +46,7 @@
       </a>
     </li>
     {% endif %}
-    {% if current_user.admin_of or current_user.global_admin %}
+    {% if current_user.manager_of or current_user.global_admin %}
     <li>
       <a href="{{ url_for('.domain_list') }}">
         <i class="fa fa-envelope"></i> <span>Mail domains</span>

@@ -123,7 +123,7 @@ class User(Address):
         if self.global_admin:
             return Domain.query.all()
         else:
-            return self.admin_of
+            return self.manager_of
 
     def get_managed_addresses(self):
         addresses = []

@@ -1,11 +1,10 @@
-FROM alpine
+FROM alpine:edge
 
 RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
- && echo "@community http://dl-3.alpinelinux.org/alpine/edge/community/" >> /etc/apk/repositories \
  && apk add --update \
      dovecot \
      dovecot-sqlite \
-     dovecot-pigeonhole-plugin@community \
+     dovecot-pigeonhole-plugin \
      dovecot-antispam-plugin@testing \
  && rm -rf /var/cache/apk/*
 

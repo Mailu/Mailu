@@ -37,7 +37,6 @@ services:
       - "587:587"
     volumes:
       - /data/freeposte:/data
-      - /data/logs:/logs
       - /data/certs:/certs
 
   filter:
@@ -53,6 +52,7 @@ services:
     env_file: freeposte.env
     volumes:
       - /data/freeposte:/data
+      - /var/run/docker.sock:/tmp/docker.sock
 
   webmail:
     build: roundcube

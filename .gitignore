@@ -1,2 +1,7 @@
 *.pyc
 __pycache__
+/admin/lib
+/admin/bin
+/admin/include
+pip-selfcheck.json
+/data

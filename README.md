@@ -62,6 +62,18 @@ Otherwise, simply edit the ``docker-compose.yml`` to match your requirements. Fi
 docker-compose up -d
 ```
 
+Upgrading the mail server
+=========================
+
+First check upstream for changes in the ``docker-compose.yml`` or in the
+``freeposte.env`` files. Update these files, then simply pull the latest
+images and recreate the containers :
+
+```
+docker-compose pull
+docker-compose up -d
+```
+
 Monitoring the mail server
 ==========================
 

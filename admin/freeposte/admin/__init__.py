@@ -26,4 +26,5 @@ from freeposte.admin.views import \
     base, \
     aliases, \
     users, \
-    domains
+    domains, \
+    fetches

@@ -40,3 +40,13 @@ def get_alias(alias):
     if not alias.domain in flask_login.current_user.get_managed_domains():
         return 403
     return alias
+
+
+def get_fetch(fetch_id):
+    fetch = models.Fetch.query.filter_by(id=fetch_id).first()
+    if not fetch:
+        flask.abort(404)
+    if not fetch.user.domain in flask_login.current_user.get_managed_domains():
+        if not fetch.user == flask_login.current_user:
+            flask.abort(403)
+    return fetch

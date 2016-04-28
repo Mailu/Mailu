@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}
+Fetched accounts
+{% endblock %}
+
+{% block subtitle %}
+{{ user }}
+{% endblock %}
+
+{% block main_action %}
+<a class="btn btn-primary" href="{{ url_for('.fetch_create', user_address=user.address) }}">Add an account</a>
+{% endblock %}
+
+{% block box %}
+<table class="table table-bordered">
+  <tbody>
+    <tr>
+      <th>Actions</th>
+      <th>Protocol</th>
+      <th>Hostname</th>
+      <th>Port</th>
+      <th>TLS</th>
+      <th>Username</th>
+      <th>Created</th>
+      <th>Last edit</th>
+    </tr>
+    {% for fetch in user.fetches %}
+    <tr>
+      <td>
+        <a href="{{ url_for('.fetch_edit', fetch_id=fetch.id) }}" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;
+        <a href="{{ url_for('.fetch_delete', fetch_id=fetch.id) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>
+      </td>
+      <td>{{ fetch.protocol }}</td>
+      <td>{{ fetch.host }}</td>
+      <td>{{ fetch.port }}</td>
+      <td>{{ fetch.tls }}</td>
+      <td>{{ fetch.created_at }}</td>
+      <td>{{ fetch.updated_at or '' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

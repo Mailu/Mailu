@@ -60,3 +60,10 @@ services:
     env_file: freeposte.env
     volumes:
       - /data/webmail:/data
+
+  fetchmail:
+    build: fetchmail
+    image: freeposte/fetchmail
+    env_file: freeposte.env
+    volumes:
+      - /data/freeposte:/data

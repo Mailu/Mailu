@@ -149,10 +149,3 @@ def user_reply(user_email):
             return flask.redirect(
                 flask.url_for('.user_list', domain_name=user.domain.name))
     return flask.render_template('user/reply.html', form=form, user=user)
-
-
-@app.route('/user/fetchmail', methods=['GET', 'POST'], defaults={'user_email': None})
-@app.route('/user/fetchmail/<user_email>', methods=['GET', 'POST'])
-@flask_login.login_required
-def user_fetchmail(user_email):
-    return flask.render_template('user/fetchmail.html')

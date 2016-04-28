@@ -71,3 +71,15 @@ class AdminForm(Form):
 class ManagerForm(Form):
     manager = fields.StringField('Manager address', [validators.Email()])
     submit = fields.SubmitField('Submit')
+
+
+class FetchForm(Form):
+    protocol = fields.SelectField('Protocol', choices=[
+        ('imap', 'IMAP'), ('pop3', 'POP3')
+    ])
+    host = fields.StringField('Hostname or IP')
+    port = fields.IntegerField('TCP port')
+    tls = fields.BooleanField('Enable TLS')
+    username = fields.StringField('Username')
+    password = fields.StringField('Password')
+    submit = fields.SubmitField('Submit')

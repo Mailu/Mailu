@@ -10,7 +10,7 @@ import re
 # Many-to-many association table for domain managers
 managers = db.Table('manager',
     db.Column('domain_name', db.String(80), db.ForeignKey('domain.name')),
-    db.Column('user_address', db.String(80), db.ForeignKey('user.address'))
+    db.Column('user_address', db.String(255), db.ForeignKey('user.address'))
 )
 
 
@@ -143,3 +143,19 @@ class Alias(Address):
     """
     domain = db.relationship(Domain, backref='aliases')
     destination = db.Column(db.String(), nullable=False)
+
+
+class Fetch(Base):
+    """ A fetched account is a repote POP/IMAP account fetched into a local
+    account.
+    """
+    id = db.Column(db.Integer(), primary_key=True)
+    user_address = db.Column(db.String(255), db.ForeignKey(User.address),
+        nullable=False)
+    user = db.relationship(User, backref='fetches')
+    protocol = db.Column(db.Enum('imap', 'pop3'), nullable=False)
+    host = db.Column(db.String(255), nullable=False)
+    port = db.Column(db.Integer(), nullable=False)
+    tls = db.Column(db.Boolean(), nullable=False)
+    username = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(255), nullable=False)

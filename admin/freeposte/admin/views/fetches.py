@@ -32,7 +32,7 @@ def fetch_create(user_address):
         db.session.commit()
         flask.flash('Fetch configuration created')
         return flask.redirect(
-            flask.url_for('.fetch_create', user_address=user.address))
+            flask.url_for('.fetch_list', user_address=user.address))
     return flask.render_template('fetch/create.html', form=form)
 
 

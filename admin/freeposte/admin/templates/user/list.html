@@ -35,7 +35,7 @@ User list
         <a href="{{ url_for('.user_settings', user_email=user.address) }}" title="Settings"><i class="fa fa-wrench"></i></a>&nbsp;
         <a href="{{ url_for('.user_forward', user_email=user.address) }}" title="Auto-forward"><i class="fa fa-share"></i></a>&nbsp;
         <a href="{{ url_for('.user_reply', user_email=user.address) }}" title="Auto-reply"><i class="fa fa-plane"></i></a>&nbsp;
-        <a href="{{ url_for('.user_fetchmail', user_email=user.address) }}" title="Fetched accounts"><i class="fa fa-download"></i></a>&nbsp;
+        <a href="{{ url_for('.fetch_list', user_address=user.address) }}" title="Fetched accounts"><i class="fa fa-download"></i></a>&nbsp;
       </td>
       <td>{{ user }}</td>
       <td>

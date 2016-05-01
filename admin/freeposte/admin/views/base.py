@@ -21,7 +21,7 @@ def login():
             flask_login.login_user(user)
             return flask.redirect(flask.url_for('.index'))
         else:
-            flask.flash('Wrong e-mail address or password', 'error')
+            flask.flash('Wrong e-mail or password', 'error')
     return flask.render_template('login.html', form=form)
 
 

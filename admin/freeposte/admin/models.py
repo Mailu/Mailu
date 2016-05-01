@@ -10,7 +10,7 @@ import re
 # Many-to-many association table for domain managers
 managers = db.Table('manager',
     db.Column('domain_name', db.String(80), db.ForeignKey('domain.name')),
-    db.Column('user_address', db.String(255), db.ForeignKey('user.address'))
+    db.Column('user_email', db.String(255), db.ForeignKey('user.email'))
 )
 
 
@@ -34,9 +34,9 @@ class Domain(Base):
     max_users = db.Column(db.Integer, nullable=False, default=0)
     max_aliases = db.Column(db.Integer, nullable=False, default=0)
 
-    def has_address(self, localpart):
-        for address in self.users + self.aliases:
-            if address.localpart == localpart:
+    def has_email(self, localpart):
+        for email in self.users + self.aliases:
+            if email.localpart == localpart:
                 return True
         else:
             return False
@@ -45,8 +45,8 @@ class Domain(Base):
         return self.name
 
 
-class Address(Base):
-    """ Abstraction for a mail address (localpart and domain).
+class Email(Base):
+    """ Abstraction for an email address (localpart and domain).
     """
     __abstract__ = True
 
@@ -61,7 +61,7 @@ class Address(Base):
     # It is however very useful for quick lookups without joining tables,
     # especially when the mail server il reading the database.
     @declarative.declared_attr
-    def address(cls):
+    def email(cls):
         updater = lambda context: "{0}@{1}".format(
             context.current_parameters["localpart"],
             context.current_parameters["domain_name"],
@@ -72,14 +72,14 @@ class Address(Base):
 
     @classmethod
     def get_by_email(cls, email):
-        return cls.query.filter_by(address=email).first()
+        return cls.query.filter_by(email=email).first()
 
     def __str__(self):
-        return self.address
+        return self.email
 
 
-class User(Address):
-    """ A user is a mail address that has a password to access a mailbox.
+class User(Email):
+    """ A user is an email address that has a password to access a mailbox.
     """
     domain = db.relationship(Domain, backref='users')
     password = db.Column(db.String(255), nullable=False)
@@ -106,7 +106,7 @@ class User(Address):
     is_anonymous = False
 
     def get_id(self):
-        return self.address
+        return self.email
 
     pw_context = context.CryptContext(
         ["sha512_crypt", "sha256_crypt", "md5_crypt"]
@@ -125,12 +125,12 @@ class User(Address):
         else:
             return self.manager_of
 
-    def get_managed_addresses(self):
-        addresses = []
+    def get_managed_emails(self):
+        emails = []
         for domain in self.get_managed_domains():
-            addresses.extend(domain.users)
-            addresses.extend(domain.aliases)
-        return addresses
+            emails.extend(domain.users)
+            emails.extend(domain.aliases)
+        return emails
 
     @classmethod
     def login(cls, email, password):
@@ -138,8 +138,8 @@ class User(Address):
         return user if (user and user.check_password(password)) else None
 
 
-class Alias(Address):
-    """ An alias is a mail address that redirects to some other addresses.
+class Alias(Email):
+    """ An alias is an email address that redirects to some destination.
     """
     domain = db.relationship(Domain, backref='aliases')
     destination = db.Column(db.String(), nullable=False)
@@ -150,7 +150,7 @@ class Fetch(Base):
     account.
     """
     id = db.Column(db.Integer(), primary_key=True)
-    user_address = db.Column(db.String(255), db.ForeignKey(User.address),
+    user_email = db.Column(db.String(255), db.ForeignKey(User.email),
         nullable=False)
     user = db.relationship(User, backref='fetches')
     protocol = db.Column(db.Enum('imap', 'pop3'), nullable=False)

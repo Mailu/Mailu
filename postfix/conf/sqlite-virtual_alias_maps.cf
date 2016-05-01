@@ -2,4 +2,4 @@ dbpath = /data/freeposte.db
 query =
  SELECT destination
    FROM alias
-  WHERE alias.address = '%s'
+  WHERE alias.email = '%s'

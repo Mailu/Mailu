@@ -6,19 +6,19 @@ import flask
 import wtforms_components
 
 
-@app.route('/fetch/list', methods=['GET', 'POST'], defaults={'user_address': None})
-@app.route('/fetch/list/<user_address>', methods=['GET'])
+@app.route('/fetch/list', methods=['GET', 'POST'], defaults={'user_email': None})
+@app.route('/fetch/list/<user_email>', methods=['GET'])
 @flask_login.login_required
-def fetch_list(user_address):
-    user = utils.get_user(user_address, True)
+def fetch_list(user_email):
+    user = utils.get_user(user_email, True)
     return flask.render_template('fetch/list.html', user=user)
 
 
-@app.route('/fetch/list', methods=['GET', 'POST'], defaults={'user_address': None})
-@app.route('/fetch/create/<user_address>', methods=['GET', 'POST'])
+@app.route('/fetch/list', methods=['GET', 'POST'], defaults={'user_email': None})
+@app.route('/fetch/create/<user_email>', methods=['GET', 'POST'])
 @flask_login.login_required
-def fetch_create(user_address):
-    user = utils.get_user(user_address)
+def fetch_create(user_email):
+    user = utils.get_user(user_email)
     form = forms.FetchForm()
     if form.validate_on_submit():
         fetch = models.Fetch(user=user)
@@ -32,7 +32,7 @@ def fetch_create(user_address):
         db.session.commit()
         flask.flash('Fetch configuration created')
         return flask.redirect(
-            flask.url_for('.fetch_list', user_address=user.address))
+            flask.url_for('.fetch_list', user_email=user.email))
     return flask.render_template('fetch/create.html', form=form)
 
 
@@ -52,7 +52,7 @@ def fetch_edit(fetch_id):
         db.session.commit()
         flask.flash('Fetch configuration updated')
         return flask.redirect(
-            flask.url_for('.fetch_list', user_address=fetch.user.address))
+            flask.url_for('.fetch_list', user_email=fetch.user.email))
     return flask.render_template('fetch/edit.html',
         form=form, fetch=fetch)
 
@@ -65,4 +65,4 @@ def fetch_delete(fetch_id):
     db.session.commit()
     flask.flash('Fetch configuration delete')
     return flask.redirect(
-        flask.url_for('.fetch_list', user_address=fetch.user.address))
+        flask.url_for('.fetch_list', user_email=fetch.user.email))

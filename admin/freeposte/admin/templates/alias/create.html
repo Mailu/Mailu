@@ -21,7 +21,7 @@ Create alias
       tagClass: 'label label-primary large',
       typeahead: {
         afterSelect: function(val) { this.$element.val(""); },
-        source: {{ current_user.get_managed_addresses()|map('string')|list|tojson }}
+        source: {{ current_user.get_managed_emails()|map('string')|list|tojson }}
       }
     });
   </script>

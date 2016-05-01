@@ -9,7 +9,7 @@ Fetched accounts
 {% endblock %}
 
 {% block main_action %}
-<a class="btn btn-primary" href="{{ url_for('.fetch_create', user_address=user.address) }}">Add an account</a>
+<a class="btn btn-primary" href="{{ url_for('.fetch_create', user_email=user.email) }}">Add an account</a>
 {% endblock %}
 
 {% block box %}

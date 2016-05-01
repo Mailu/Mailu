@@ -19,7 +19,7 @@ def admin_list():
 def admin_create():
     form = forms.AdminForm()
     if form.validate_on_submit():
-        user = models.User.query.filter_by(address=form.admin.data).first()
+        user = models.User.query.filter_by(email=form.admin.data).first()
         if user:
             user.global_admin = True
             db.session.add(user)
@@ -34,7 +34,7 @@ def admin_create():
 @app.route('/admin/delete/<admin>', methods=['GET'])
 @flask_login.login_required
 def admin_delete(admin):
-    user = models.User.query.filter_by(address=admin).first()
+    user = models.User.query.filter_by(email=admin).first()
     if user:
         user.global_admin  = False
         db.session.add(user)

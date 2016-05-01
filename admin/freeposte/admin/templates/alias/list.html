@@ -17,7 +17,7 @@ Alias list
   <tbody>
     <tr>
       <th>Actions</th>
-      <th>Address</th>
+      <th>Email</th>
       <th>Destination</th>
       <th>Comment</th>
       <th>Created</th>
@@ -26,8 +26,8 @@ Alias list
     {% for alias in domain.aliases %}
     <tr>
       <td>
-        <a href="{{ url_for('.alias_edit', alias=alias.address) }}" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;
-        <a href="{{ url_for('.alias_delete', alias=alias.address) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>
+        <a href="{{ url_for('.alias_edit', alias=alias.email) }}" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;
+        <a href="{{ url_for('.alias_delete', alias=alias.email) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>
       </td>
       <td>{{ alias }}</td>
       <td>{{ alias.destination or '-' }}</td>

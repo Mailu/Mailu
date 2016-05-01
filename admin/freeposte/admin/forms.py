@@ -64,12 +64,12 @@ class AliasForm(Form):
 
 
 class AdminForm(Form):
-    admin = fields.StringField('Admin address', [validators.Email()])
+    admin = fields.StringField('Admin email', [validators.Email()])
     submit = fields.SubmitField('Submit')
 
 
 class ManagerForm(Form):
-    manager = fields.StringField('Manager address', [validators.Email()])
+    manager = fields.StringField('Manager email', [validators.Email()])
     submit = fields.SubmitField('Submit')
 
 

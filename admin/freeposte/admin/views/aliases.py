@@ -23,8 +23,9 @@ def alias_create(domain_name):
             flask.url_for('.alias_list', domain_name=domain.name))
     form = forms.AliasForm()
     if form.validate_on_submit():
-        if domain.has_address(form.localpart.data):
-            flask.flash('Address %s is already used' % address, 'error')
+        if domain.has_email(form.localpart.data):
+            # TODO email is not declared
+            flask.flash('Email %s is already used' % email, 'error')
         else:
             alias = models.Alias(localpart=form.localpart.data, domain=domain)
             alias.destination = form.destination.data

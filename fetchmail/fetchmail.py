@@ -10,7 +10,7 @@ RC_LINE = """
 poll {host} proto {protocol} port {port}
     user "{username}" password "{password}"
     smtphost "smtp"
-    smtpname {user_address}
+    smtpname {user_email}
     {options}
 """
 
@@ -25,15 +25,15 @@ def fetchmail(fetchmailrc):
 
 def run(cursor):
     cursor.execute("""
-        SELECT user_address, protocol, host, port, tls, username, password
+        SELECT user_email, protocol, host, port, tls, username, password
         FROM fetch
     """)
     fetchmailrc = ""
     for line in cursor.fetchall():
-        user_address, protocol, host, port, tls, username, password = line
+        user_email, protocol, host, port, tls, username, password = line
         options = "options ssl" if tls else ""
         fetchmailrc += RC_LINE.format(
-            user_address=user_address,
+            user_email=user_email,
             protocol=protocol,
             host=host,
             port=port,

@@ -23,8 +23,9 @@ def user_create(domain_name):
             flask.url_for('.user_list', domain_name=domain.name))
     form = forms.UserForm()
     if form.validate_on_submit():
-        if domain.has_address(form.localpart.data):
-            flask.flash('Address %s is already used' % address, 'error')
+        if domain.has_email(form.localpart.data):
+            # TODO: email is not declared
+            flask.flash('Email %s is already used' % email, 'error')
         else:
             user = models.User(localpart=form.localpart.data, domain=domain)
             user.comment = form.comment.data

@@ -17,14 +17,14 @@ Manager list
   <tbody>
     <tr>
       <th>Actions</th>
-      <th>Address</th>
+      <th>Email</th>
       <th>Created</th>
       <th>Last edit</th>
     </tr>
     {% for manager in domain.managers %}
     <tr>
       <td>
-        <a href="{{ url_for('.manager_delete', manager=manager.address) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>
+        <a href="{{ url_for('.manager_delete', manager=manager.email) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>
       </td>
       <td>{{ manager }}</td>
       <td>{{ manager.created_at }}</td>

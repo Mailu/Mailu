@@ -3,20 +3,20 @@ connect = /data/freeposte.db
 map {
   pattern = priv/reply_subject
   table = user
-  username_field = address
+  username_field = email
   value_field = reply_subject
 }
 
 map {
   pattern = priv/reply_body
   table = user
-  username_field = address
+  username_field = email
   value_field = reply_body
 }
 
 map {
   pattern = priv/forward
   table = user
-  username_field = address
+  username_field = email
   value_field = forward
 }

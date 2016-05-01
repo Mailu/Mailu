@@ -24,14 +24,10 @@ def user_create(domain_name):
     form = forms.UserForm()
     if form.validate_on_submit():
         if domain.has_email(form.localpart.data):
-            # TODO: email is not declared
-            flask.flash('Email %s is already used' % email, 'error')
+            flask.flash('Email is already used', 'error')
         else:
-            user = models.User(localpart=form.localpart.data, domain=domain)
-            user.comment = form.comment.data
-            user.quota_bytes = int(form.quota_bytes.data)
-            user.enable_imap = form.enable_imap.data
-            user.enable_pop = form.enable_pop.data
+            user = models.User(domain=domain)
+            form.populate_obj(user)
             user.set_password(form.pw.data)
             db.session.add(user)
             db.session.commit()
@@ -50,10 +46,7 @@ def user_edit(user_email):
     wtforms_components.read_only(form.localpart)
     form.pw.validators = []
     if form.validate_on_submit():
-        user.comment = form.comment.data
-        user.quota_bytes = int(form.quota_bytes.data)
-        user.enable_imap = form.enable_imap.data
-        user.enable_pop = form.enable_pop.data
+        form.populate_obj(user)
         if form.pw.data:
             user.set_password(form.pw.data)
         db.session.add(user)
@@ -82,9 +75,7 @@ def user_settings(user_email):
     user = utils.get_user(user_email)
     form = forms.UserSettingsForm(obj=user)
     if form.validate_on_submit():
-        user.displayed_name = form.displayed_name.data
-        user.spam_enabled = form.spam_enabled.data
-        user.spam_threshold = form.spam_threshold.data
+        form.populate_obj(user)
         db.session.add(user)
         db.session.commit()
         flask.flash('Settings updated for %s' % user)
@@ -141,8 +132,7 @@ def user_reply(user_email):
     user = utils.get_user(user_email)
     form = forms.UserReplyForm(obj=user)
     if form.validate_on_submit():
-        user.reply_subject = form.reply_subject.data
-        user.reply_body = form.reply_body.data
+        form.populate_obj(user)
         db.session.add(user)
         db.session.commit()
         flask.flash('Auto-reply message updated for %s' % user)

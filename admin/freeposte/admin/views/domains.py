@@ -21,10 +21,8 @@ def domain_create():
         if models.Domain.query.get(form.name.data):
             flask.flash('Domain %s is already used' % form.name.data, 'error')
         else:
-            domain = models.Domain(name=form.name.data)
-            domain.max_users = int(form.max_users.data)
-            domain.max_aliases = int(form.max_aliases.data)
-            domain.comment = form.comment.data
+            domain = models.Domain()
+            form.populate_obj(domain)
             db.session.add(domain)
             db.session.commit()
             flask.flash('Domain %s created' % domain)
@@ -40,9 +38,7 @@ def domain_edit(domain_name):
     form = forms.DomainForm(obj=domain)
     wtforms_components.read_only(form.name)
     if form.validate_on_submit():
-        domain.max_users = int(form.max_users.data)
-        domain.max_aliases = int(form.max_aliases.data)
-        domain.comment = form.comment.data
+        form.populate_obj(domain)
         db.session.add(domain)
         db.session.commit()
         flask.flash('Domain %s saved' % domain)
@@ -60,9 +56,3 @@ def domain_delete(domain_name):
     db.session.commit()
     flask.flash('Domain %s deleted' % domain)
     return flask.redirect(flask.url_for('.domain_list'))
-
-
-@app.route('/domain/admins/<domain_name>', methods=['GET'])
-@flask_login.login_required
-def domain_admins(domain_name):
-    domain = utils.get_domain_admin(domain_name)

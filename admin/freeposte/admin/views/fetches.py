@@ -22,12 +22,7 @@ def fetch_create(user_email):
     form = forms.FetchForm()
     if form.validate_on_submit():
         fetch = models.Fetch(user=user)
-        fetch.protocol = form.protocol.data
-        fetch.host = form.host.data
-        fetch.port = form.port.data
-        fetch.tls = form.tls.data
-        fetch.username = form.username.data
-        fetch.password = form.password.data
+        form.populate_obj(fetch)
         db.session.add(fetch)
         db.session.commit()
         flask.flash('Fetch configuration created')
@@ -42,12 +37,7 @@ def fetch_edit(fetch_id):
     fetch = utils.get_fetch(fetch_id)
     form = forms.FetchForm(obj=fetch)
     if form.validate_on_submit():
-        fetch.protocol = form.protocol.data
-        fetch.host = form.host.data
-        fetch.port = form.port.data
-        fetch.tls = form.tls.data
-        fetch.username = form.username.data
-        fetch.password = form.password.data
+        form.populate_obj(fetch)
         db.session.add(fetch)
         db.session.commit()
         flask.flash('Fetch configuration updated')

@@ -24,12 +24,10 @@ def alias_create(domain_name):
     form = forms.AliasForm()
     if form.validate_on_submit():
         if domain.has_email(form.localpart.data):
-            # TODO email is not declared
-            flask.flash('Email %s is already used' % email, 'error')
+            flask.flash('Email is already used', 'error')
         else:
-            alias = models.Alias(localpart=form.localpart.data, domain=domain)
-            alias.destination = form.destination.data
-            alias.comment = form.comment.data
+            alias = models.Alias(domain=domain)
+            form.populate_obj(alias)
             db.session.add(alias)
             db.session.commit()
             flask.flash('Alias %s created' % alias)
@@ -46,8 +44,7 @@ def alias_edit(alias):
     form = forms.AliasForm(obj=alias)
     wtforms_components.read_only(form.localpart)
     if form.validate_on_submit():
-        alias.destination = form.destination.data
-        alias.comment = form.comment.data
+        form.populate_obj(alias)
         db.session.add(alias)
         db.session.commit()
         flask.flash('Alias %s updated' % alias)

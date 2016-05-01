@@ -5,7 +5,7 @@ import flask
 
 
 def get_domain_admin(domain_name):
-    domain = models.Domain.query.filter_by(name=domain_name).first()
+    domain = models.Domain.query.get(domain_name)
     if not domain:
         flask.abort(404)
     if not domain in flask_login.current_user.get_managed_domains():
@@ -22,7 +22,7 @@ def get_user(user_email, admin=False):
     if user_email is None:
         user = flask_login.current_user
     else:
-        user = models.User.get_by_email(user_email)
+        user = models.User.query.get(user_email)
     if not user:
         flask.abort(404)
     if not user.domain in flask_login.current_user.get_managed_domains():
@@ -34,7 +34,7 @@ def get_user(user_email, admin=False):
 
 
 def get_alias(alias):
-    alias = models.Alias.get_by_email(alias)
+    alias = models.Alias.query.get(alias)
     if not alias:
         flask.abort(404)
     if not alias.domain in flask_login.current_user.get_managed_domains():
@@ -43,7 +43,7 @@ def get_alias(alias):
 
 
 def get_fetch(fetch_id):
-    fetch = models.Fetch.query.filter_by(id=fetch_id).first()
+    fetch = models.Fetch.query.get(fetch_id)
     if not fetch:
         flask.abort(404)
     if not fetch.user.domain in flask_login.current_user.get_managed_domains():

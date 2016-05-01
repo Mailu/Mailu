@@ -70,10 +70,6 @@ class Email(Base):
             primary_key=True, nullable=False,
             default=updater)
 
-    @classmethod
-    def get_by_email(cls, email):
-        return cls.query.filter_by(email=email).first()
-
     def __str__(self):
         return self.email
 
@@ -134,7 +130,7 @@ class User(Email):
 
     @classmethod
     def login(cls, email, password):
-        user = cls.get_by_email(email)
+        user = cls.query.get(email)
         return user if (user and user.check_password(password)) else None
 
 

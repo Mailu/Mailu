@@ -18,7 +18,7 @@ def domain_create():
     utils.require_global_admin()
     form = forms.DomainForm()
     if form.validate_on_submit():
-        if models.Domain.query.filter_by(name=form.name.data).first():
+        if models.Domain.query.get(form.name.data):
             flask.flash('Domain %s is already used' % form.name.data, 'error')
         else:
             domain = models.Domain(name=form.name.data)

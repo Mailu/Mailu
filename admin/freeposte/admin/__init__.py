@@ -13,7 +13,7 @@ from freeposte.admin import models
 
 # Register the login components
 login_manager.login_view = "admin.login"
-login_manager.user_loader(models.User.get_by_email)
+login_manager.user_loader(models.User.query.get)
 
 @app.context_processor
 def inject_user():

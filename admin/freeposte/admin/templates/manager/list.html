@@ -18,8 +18,6 @@ Manager list
     <tr>
       <th>Actions</th>
       <th>Email</th>
-      <th>Created</th>
-      <th>Last edit</th>
     </tr>
     {% for manager in domain.managers %}
     <tr>
@@ -27,8 +25,6 @@ Manager list
         <a href="{{ url_for('.manager_delete', manager=manager.email) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>
       </td>
       <td>{{ manager }}</td>
-      <td>{{ manager.created_at }}</td>
-      <td>{{ manager.updated_at or '' }}</td>
     </tr>
     {% endfor %}
   </tbody>

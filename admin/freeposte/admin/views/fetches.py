@@ -10,11 +10,11 @@ import wtforms_components
 @app.route('/fetch/list/<user_email>', methods=['GET'])
 @flask_login.login_required
 def fetch_list(user_email):
-    user = utils.get_user(user_email, True)
+    user = utils.get_user(user_email)
     return flask.render_template('fetch/list.html', user=user)
 
 
-@app.route('/fetch/list', methods=['GET', 'POST'], defaults={'user_email': None})
+@app.route('/fetch/create', methods=['GET', 'POST'], defaults={'user_email': None})
 @app.route('/fetch/create/<user_email>', methods=['GET', 'POST'])
 @flask_login.login_required
 def fetch_create(user_email):

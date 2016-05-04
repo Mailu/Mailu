@@ -13,8 +13,7 @@ Automatic reply
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.reply_enabled,
       onchange="if(this.checked){$('#reply_subject,#reply_body').removeAttr('disabled')}
-                else{$('#reply_subject,#reply_body').attr('disabled', '').val('')}",
-      **{("checked" if user.reply_subject else "unchecked"): ""}) }}
+                else{$('#reply_subject,#reply_body').attr('disabled', '')}") }}
   {{ macros.form_field(form.reply_subject,
       **{("enabled" if user.reply_subject else "disabled"): ""}) }}
     {{ macros.form_field(form.reply_body, rows=10,

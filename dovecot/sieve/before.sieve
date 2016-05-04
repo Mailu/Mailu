@@ -1,14 +1,10 @@
 require ["variables", "vacation", "vnd.dovecot.extdata"];
 
-if string :is "${extdata.reply_subject}" "" {
-
-} else {
+if ${extdata.reply_enabled} {
   vacation :days 1 :subject "${extdata.reply_subject}" "${extdata.reply_body}";
 }
 
-if string :is "${extdata.forward}" "" {
-
-} else {
-  redirect "${extdata.forward}";
+if ${extdata.forward_enabled} {
+  redirect "${extdata.forward_destination}";
   keep;
 }

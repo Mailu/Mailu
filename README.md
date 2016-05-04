@@ -1,10 +1,10 @@
 Freeposte.io
 ============
 
-**The database a data structures are still unstable, please wait until we
+**The database and data structures are still unstable, please wait until we
 release 1.0.0 to use this for production.**
 
-Simple yet functional and full-featured mail server as a set of Docker images.
+Simple yet full-featured mail server as a set of Docker images.
 The idea behing Freeposte.io is identical to motivations that led to poste.io:
 providing a simple and maintainable mail server that is painless to manage and
 does not require more resources than necessary.

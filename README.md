@@ -1,6 +1,9 @@
 Freeposte.io
 ============
 
+**The database a data structures are still unstable, please wait until we
+release 1.0.0 to use this for production.**
+
 Simple yet functional and full-featured mail server as a set of Docker images.
 The idea behing Freeposte.io is identical to motivations that led to poste.io:
 providing a simple and maintainable mail server that is painless to manage and
@@ -24,6 +27,7 @@ The mail infrastructure is based on a standard MTA-LDA pattern :
  * Amavis as a filtering interface before delivery (with SpamaAssassin and ClamAV) ;
  * Dovecot as a delivery agent and reading (IMAP) server ;
  * Roundcube (or any Webmail) as a user-friendly Web client ;
+ * Fetchmail as a client to fetch remote accounts (POP/IMAP) ;
  * Freeposte (Flask application) as an administration interface.
 
 ![Architecture](doc/archi.png)

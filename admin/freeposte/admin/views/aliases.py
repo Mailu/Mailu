@@ -45,7 +45,6 @@ def alias_edit(alias):
     wtforms_components.read_only(form.localpart)
     if form.validate_on_submit():
         form.populate_obj(alias)
-        db.session.add(alias)
         db.session.commit()
         flask.flash('Alias %s updated' % alias)
         return flask.redirect(

@@ -38,7 +38,6 @@ def fetch_edit(fetch_id):
     form = forms.FetchForm(obj=fetch)
     if form.validate_on_submit():
         form.populate_obj(fetch)
-        db.session.add(fetch)
         db.session.commit()
         flask.flash('Fetch configuration updated')
         return flask.redirect(

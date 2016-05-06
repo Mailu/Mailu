@@ -24,7 +24,6 @@ def manager_create(domain_name):
             flask.flash('User %s is already manager' % user, 'error')
         else:
             domain.managers.append(user)
-            db.session.add(domain)
             db.session.commit()
             flask.flash('User %s can now manage %s' % (user, domain.name))
             return flask.redirect(
@@ -40,7 +39,6 @@ def manager_delete(manager):
     domain = utils.get_domain_admin(user.domain_name)
     if user in domain.managers:
         domain.managers.remove(user)
-        db.session.add(domain)
         db.session.commit()
         flask.flash('User %s can no longer manager %s' % (user, domain))
     else:

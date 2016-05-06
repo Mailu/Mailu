@@ -39,7 +39,6 @@ def domain_edit(domain_name):
     wtforms_components.read_only(form.name)
     if form.validate_on_submit():
         form.populate_obj(domain)
-        db.session.add(domain)
         db.session.commit()
         flask.flash('Domain %s saved' % domain)
         return flask.redirect(flask.url_for('.domain_list'))

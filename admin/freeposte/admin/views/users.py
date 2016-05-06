@@ -49,7 +49,6 @@ def user_edit(user_email):
         form.populate_obj(user)
         if form.pw.data:
             user.set_password(form.pw.data)
-        db.session.add(user)
         db.session.commit()
         flask.flash('User %s updated' % user)
         return flask.redirect(
@@ -76,7 +75,6 @@ def user_settings(user_email):
     form = forms.UserSettingsForm(obj=user)
     if form.validate_on_submit():
         form.populate_obj(user)
-        db.session.add(user)
         db.session.commit()
         flask.flash('Settings updated for %s' % user)
         if user_email:
@@ -96,7 +94,6 @@ def user_password(user_email):
             flask.flash('Passwords do not match', 'error')
         else:
             user.set_password(form.pw.data)
-            db.session.add(user)
             db.session.commit()
             flask.flash('Password updated for %s' % user)
             if user_email:
@@ -116,7 +113,6 @@ def user_forward(user_email):
             user.forward = form.forward.data
         else:
             user.forward = None
-        db.session.add(user)
         db.session.commit()
         flask.flash('Forward destination updated for %s' % user)
         if user_email:
@@ -133,7 +129,6 @@ def user_reply(user_email):
     form = forms.UserReplyForm(obj=user)
     if form.validate_on_submit():
         form.populate_obj(user)
-        db.session.add(user)
         db.session.commit()
         flask.flash('Auto-reply message updated for %s' % user)
         if user_email:

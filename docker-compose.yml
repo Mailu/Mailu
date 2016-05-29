@@ -14,6 +14,11 @@ services:
       - admin
     volumes:
       - /data/certs:/certs
+      
+  redis:
+    image: redis
+    volumes:
+      - /data/redis:/data
 
   imap:
     build: dovecot
@@ -39,9 +44,23 @@ services:
       - /data/freeposte:/data
       - /data/certs:/certs
 
-  filter:
-    build: amavis
-    image: freeposte/amavis
+  milter:
+    build: rmilter
+    image: freeposte/rmilter
+    env_file: freeposte.env
+    volumes:
+      - /data/filter:/data
+      
+  antispam:
+    build: rspamd
+    image: freeposte/rspamd
+    env_file: freeposte.env
+    volumes:
+      - /data/filter:/var/lib/rspamd
+      
+  antivirus:
+    build: clamav
+    image: freeposte/clamav
     env_file: freeposte.env
     volumes:
       - /data/filter:/data

@@ -39,5 +39,13 @@ smtpd_sasl_security_options = noanonymous
 ###############
 virtual_mailbox_domains = ${sql}sqlite-virtual_mailbox_domains.cf
 virtual_alias_maps = ${sql}sqlite-virtual_alias_maps.cf
-virtual_transport = lmtp:inet:filter:2525
+virtual_transport = lmtp:inet:imap:2525
 lmtp_host_lookup = native
+
+###############
+# Milter
+###############
+smtpd_milters = inet:milter:9900
+milter_protocol = 6
+milter_mail_macros = i {mail_addr} {client_addr} {client_name} {auth_authen}
+milter_default_action = tempfail

@@ -4,7 +4,7 @@ $config = array();
 
 // Generals
 $config['db_dsnw'] = 'sqlite:////data/roundcube.db';
-$config['des_key'] = 'rcmail-!24ByteDESkey*Str';
+$config['des_key'] = getenv('SECRET_KEY');
 $config['identities_level'] = 3;
 $config['reply_all_mode'] = 1;
 

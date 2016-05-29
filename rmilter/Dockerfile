@@ -1,17 +1,11 @@
-FROM alpine
+FROM alpine:edge
 
 RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
  && apk add --update \
-      perl-socket6 \
-      perl-io-socket-inet6@testing \
-      amavisd-new \
-      spamassassin \
-      clamav \
-      rsyslog \
-      wget \
+     rmilter@testing rsyslog \
  && rm -rf /var/cache/apk/*
-
-COPY conf /etc/
+ 
+COPY rmilter.conf /etc/rmilter.conf
 COPY rsyslog.conf /etc/rsyslog.conf
 
 COPY start.sh /start.sh

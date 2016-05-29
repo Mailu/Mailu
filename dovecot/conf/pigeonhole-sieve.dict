@@ -1,6 +1,13 @@
 connect = /data/freeposte.db
 
 map {
+  pattern = priv/reply_enabled
+  table = user
+  username_field = email
+  value_field = reply_enabled
+}
+
+map {
   pattern = priv/reply_subject
   table = user
   username_field = email
@@ -15,8 +22,15 @@ map {
 }
 
 map {
-  pattern = priv/forward
+  pattern = priv/forward_enabled
   table = user
   username_field = email
-  value_field = forward
+  value_field = forward_enabled
+}
+
+map {
+  pattern = priv/forward_destination
+  table = user
+  username_field = email
+  value_field = forward_destination
 }

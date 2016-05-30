@@ -20,9 +20,8 @@ def require_global_admin():
 
 def get_user(user_email, admin=False):
     if user_email is None:
-        user = flask_login.current_user
-    else:
-        user = models.User.query.get(user_email)
+        user_email = flask_login.current_user.email
+    user = models.User.query.get(user_email)
     if not user:
         flask.abort(404)
     if not user.domain in flask_login.current_user.get_managed_domains():

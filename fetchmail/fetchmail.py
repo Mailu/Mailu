@@ -16,7 +16,6 @@ poll {host} proto {protocol} port {port}
 
 
 def fetchmail(fetchmailrc):
-    print(fetchmailrc)
     with tempfile.NamedTemporaryFile() as handler:
         handler.write(fetchmailrc.encode("utf8"))
         handler.flush()

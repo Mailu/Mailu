@@ -92,7 +92,7 @@ You can simply build all the containers from source using the ``docker-compose.y
 git clone https://github.com/kaiyou/freeposte.io.git
 ```
 
-Then build all the images :
+Then build all the images:
 
 ```
 docker-compose build

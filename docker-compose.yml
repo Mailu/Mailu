@@ -14,13 +14,13 @@ services:
       - webmail
       - admin
     volumes:
-      - /data/certs:/certs
+      - /freeposte/certs:/certs
       
   redis:
     image: redis
     restart: always
     volumes:
-      - /data/redis:/data
+      - /freeposte/redis:/data
 
   imap:
     build: dovecot
@@ -31,9 +31,9 @@ services:
       - "143:143"
       - "993:993"
     volumes:
-      - /data/freeposte:/data
-      - /data/mail:/mail
-      - /data/certs:/certs
+      - /freeposte/freeposte:/data
+      - /freeposte/mail:/mail
+      - /freeposte/certs:/certs
 
   smtp:
     build: postfix
@@ -45,8 +45,8 @@ services:
       - "465:465"
       - "587:587"
     volumes:
-      - /data/freeposte:/data
-      - /data/certs:/certs
+      - /freeposte/freeposte:/data
+      - /freeposte/certs:/certs
 
   milter:
     build: rmilter
@@ -54,7 +54,7 @@ services:
     restart: always
     env_file: freeposte.env
     volumes:
-      - /data/filter:/data
+      - /freeposte/filter:/data
       
   antispam:
     build: rspamd
@@ -62,7 +62,7 @@ services:
     restart: always
     env_file: freeposte.env
     volumes:
-      - /data/filter:/var/lib/rspamd
+      - /freeposte/filter:/var/lib/rspamd
       
   antivirus:
     build: clamav
@@ -70,7 +70,7 @@ services:
     restart: always
     env_file: freeposte.env
     volumes:
-      - /data/filter:/data
+      - /freeposte/filter:/data
 
   admin:
     build: admin
@@ -78,7 +78,7 @@ services:
     restart: always
     env_file: freeposte.env
     volumes:
-      - /data/freeposte:/data
+      - /dfreeposteata/freeposte:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   webmail:
@@ -87,7 +87,7 @@ services:
     restart: always
     env_file: freeposte.env
     volumes:
-      - /data/webmail:/data
+      - /freeposte/webmail:/data
 
   fetchmail:
     build: fetchmail
@@ -95,4 +95,4 @@ services:
     restart: always
     env_file: freeposte.env
     volumes:
-      - /data/freeposte:/data
+      - /freeposte/freeposte:/data

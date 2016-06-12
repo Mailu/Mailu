@@ -46,10 +46,11 @@ Docker supports *AUFS* over *ext4* and *btrfs* as stable storage drivers.
 Other filesystems are supported such as *OverlayFS*. If you know what you are
 doing, you should go for it.
  
-Freeposte uses Docker port forwarding from the host to make services available
-to external users. First, your host should have a public IP address configured
-(see ``/etc/network/interfaces``) or your router should forward connections
-to its internal IP address. Due to spam problems and reputation services, it
+Freeposte.io uses Docker port forwarding from the host to make services
+available to external users. First, your host should have a public IP address
+configured (see ``/etc/network/interfaces``) or your router should 
+forward connections to its internal IP address. Due to spam problems and
+reputation services, it
 is highly recommended that you use a dedicated IP address for your mail server
 and that you have a dedicated hostname with forward and reverse DNS entries
 for this IP address.
@@ -73,18 +74,18 @@ by Docker or setup your own rulesets.
 Setting up Docker
 =================
  
-Freeposte relies on some of the latest Docker features. Therefore, you should
+Freeposte.io relies on some of the latest Docker features. Therefore, you should
 install Docker from the official repositories instead of your distribution
 ones.
 
 The Docker website is full of [detailed instructions](https://docs.docker.com/engine/installation/)
 about setting up a proper Docker install. Default configuration should be
-suited for Freeposte.
+suited for Freeposte.io.
 
 Additionally, you must install ``docker-compose`` by following the instructions
 from the [Docker website](https://docs.docker.com/compose/). Compose is a
-management tool for Docker, especially suited for multipl containers systems
-like Freeposte.
+management tool for Docker, especially suited for multiple containers systems
+like Freeposte.io.
  
 Once everything is setup, you should be able to run the following commands
 (exact version numbers do not matter):
@@ -117,7 +118,7 @@ OpenSSL version: OpenSSL 1.0.2h  3 May 2016
 Preparing the mail server environment
 =====================================
 
-Freeposte will store all of its persistent data in ``/freeposte`` by default,
+Freeposte.io will store all of its persistent data in ``/freeposte`` by default,
 simply create the directory and move there:
 
 ```
@@ -126,7 +127,7 @@ cd /freeposte
 ```
 
 Docker Compose configuration is stored in a file named ``docker-compose.yml``.
-Additionally, Freeposte relies on an environment file for various settings.
+Additionally, Freeposte.io relies on an environment file for various settings.
 
 Download the templates files from the git repository:
 
@@ -136,11 +137,26 @@ wget https://raw.githubusercontent.com/kaiyou/freeposte.io/master/freeposte.env
 ```
 
 These templates are used for development environment. So, if you do not plan
-on biulding Freeposte from source, simply remove the ``build:`` references:
+on biulding Freeposte.io from source, simply remove the ``build:`` references:
 
 ```
 sed -i '/build:/d' docker-compose.yml
 ```
+
+The default configuration will pull the latest image built from the Docker
+Hub, which is based on the latest commit on Github. This behaviour is ok for
+evaluating Freeposte.io, but you should at least specify a branch. You will
+still get bugfixes and security updates, but breaking changed will not be
+pulled unless you explicitely change the branch number. To specify you want
+to pull the ``1.0`` branch, simply add the version number to the ``image``
+field:
+
+```
+VERSION=1.0
+sed -i "/image:/s/\(:[0-9.]*\)\?$/:$VERSION/" docker-compose.yml
+```
+
+You should always have all containers using the same branch.
 
 Finally, edit the ``freeposte.env`` file and update the following settings:
 
@@ -153,7 +169,7 @@ Finally, edit the ``freeposte.env`` file and update the following settings:
 Setting up certificates
 =======================
 
-Freeposte relies heavily on TLS and must have a key pair and a certificate
+Freeposte.io relies heavily on TLS and must have a key pair and a certificate
 available, at least for the hostname configured in ``freeposte.env``.
 
 Create the certificate directory:
@@ -170,7 +186,7 @@ Then create two files in this directory:
 Bootstrapping the database
 ==========================
 
-Freeposte does not yet have a database initialization or migration system.
+Freeposte.io does not yet have a database initialization or migration system.
 This will be added in version ``1.1``. For now, you will have to manually
 bootstrap the database. First, start the mail server stack:
 

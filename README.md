@@ -32,71 +32,17 @@ The mail infrastructure is based on a standard MTA-LDA pattern :
 Running a mail server
 =====================
 
-The mail server runs as a set of Docker containers. These containers are managed
-through a ``docker-compose.yml`` configuration file that requires Docker Compose
-to run.
-
-First, follow instructions at https://docs.docker.com to setup Docker and Docker
-Compose properly for your system. Then download the main configuration files:
-
-```
-wget https://raw.githubusercontent.com/kaiyou/freeposte.io/master/docker-compose.yml
-wget https://raw.githubusercontent.com/kaiyou/freeposte.io/master/freeposte.env
-```
-
-The ``docker-compose.yml`` file contains instructions about which containers to run and how they will
-interact. ``freeposte.env`` is the main configuration file. You must read it and provide proper configuration before running the server.
-
-You will also need to create a data directory. Freeposte will use ``/data``
-as a sane default:
-
-```
-mkdir -p /data
-```
-
-Otherwise, simply edit the ``docker-compose.yml`` to match your requirements. Finally, you can run your mail server:
+Freeposte runs on top of Docker for easy packaging and upgrades. All you need
+is a proper system with Docker and Compose installed, then simply download
+the ``docker-compose.yml`` and sample ``freeposte.env``, tune them to your
+needs and fire up the mail server:
 
 ```
 docker-compose up -d
 ```
 
-Upgrading the mail server
-=========================
-
-First check upstream for changes in the ``docker-compose.yml`` or in the
-``freeposte.env`` files. Update these files, then simply pull the latest
-images and recreate the containers :
-
-```
-docker-compose pull
-docker-compose up -d
-```
-
-Monitoring the mail server
-==========================
-
-Logs are managed by Docker directly. You can easily read your logs using :
-
-```
-docker-compose logs
-```
-
-Docker is able to forward logs to multiple log engines. Read the following documentation or details: https://docs.docker.com/engine/admin/logging/overview/.
-
-Building from source
-====================
-
-You can simply build all the containers from source using the ``docker-compose.yml``. First clone the Git repository:
-
-```
-git clone https://github.com/kaiyou/freeposte.io.git
-```
-
-Then build all the images:
-
-```
-docker-compose build
-```
+For a detailed walktrough, see ``INSTALL.md``. Also, see ``MANAGE.md`` for
+details about daily maintenance of your mail server.
 
 Development environment
 =======================
@@ -121,3 +67,17 @@ And finally run the server with debug enabled:
 ```
 python run.py
 ```
+
+Philosophy
+==========
+
+The mailserver is designed as a whole, some images are therefore not best
+suited for reuse outside this project. All images should however follow
+Docker best practices and be as generic as possible :
+
+ - even if not suited for reuse, they should be simple enough to
+   fit as base images for other projects,
+ - interesting settings should be available as environment variables
+ - base images should be well-trusted (officiel Alpine or Debian for instance).
+ 
+

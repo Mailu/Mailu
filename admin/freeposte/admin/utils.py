@@ -27,7 +27,7 @@ def get_user(user_email, admin=False):
     if not user.domain in flask_login.current_user.get_managed_domains():
         if admin:
             flask.abort(403)
-        elif not user == flask_login.current_user:
+        elif not user.email == flask_login.current_user.email:
             flask.abort(403)
     return user
 

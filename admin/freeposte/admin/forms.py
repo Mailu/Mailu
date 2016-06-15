@@ -21,7 +21,7 @@ class UserForm(Form):
     localpart = fields.StringField('E-mail', [validators.DataRequired()])
     pw = fields.PasswordField('Password', [validators.DataRequired()])
     pw2 = fields.PasswordField('Confirm password', [validators.EqualTo('pw')])
-    quota_bytes = fields_.DecimalSliderField('Quota', default=1000000000)
+    quota_bytes = fields_.IntegerSliderField('Quota', default=1000000000)
     enable_imap = fields.BooleanField('Allow IMAP access', default=True)
     enable_pop = fields.BooleanField('Allow POP3 access', default=True)
     comment = fields.StringField('Comment')

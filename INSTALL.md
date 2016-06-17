@@ -197,7 +197,7 @@ docker-compose up -d
 Then bootstrap the database:
 
 ```
-docker exec -i -t freeposte_amin_1 python initdb.py
+docker exec -i -t freeposte_admin_1 python initdb.py
 docker-compose restart
 ```
 

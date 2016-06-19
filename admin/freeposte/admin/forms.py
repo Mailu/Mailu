@@ -58,18 +58,18 @@ class UserReplyForm(Form):
 
 class AliasForm(Form):
     localpart = fields.StringField('Alias', [validators.DataRequired()])
-    destination = fields.StringField('Destination')
+    destination = fields.SelectField('Destination')
     comment = fields.StringField('Comment')
     submit = fields.SubmitField('Create')
 
 
 class AdminForm(Form):
-    admin = fields.StringField('Admin email', [validators.Email()])
+    admin = fields.SelectField('Admin email', choices=[])
     submit = fields.SubmitField('Submit')
 
 
 class ManagerForm(Form):
-    manager = fields.StringField('Manager email', [validators.Email()])
+    manager = fields.SelectField('Manager email')
     submit = fields.SubmitField('Submit')
 
 

@@ -22,6 +22,10 @@ def alias_create(domain_name):
         return flask.redirect(
             flask.url_for('.alias_list', domain_name=domain.name))
     form = forms.AliasForm()
+    form.destination.choices = [
+        (email.email, email.email) for email in
+        flask_login.current_user.get_managed_emails()
+    ]
     if form.validate_on_submit():
         if domain.has_email(form.localpart.data):
             flask.flash('Email is already used', 'error')
@@ -42,6 +46,10 @@ def alias_create(domain_name):
 def alias_edit(alias):
     alias = utils.get_alias(alias)
     form = forms.AliasForm(obj=alias)
+    form.destination.choices = [
+        (email.email, email.email) for email in
+        flask_login.current_user.get_managed_emails()
+    ]
     wtforms_components.read_only(form.localpart)
     if form.validate_on_submit():
         form.populate_obj(alias)

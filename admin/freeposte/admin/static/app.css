@@ -1,4 +1,3 @@
-.bootstrap-tagsinput {
-  display: block;
-  border-radius: 0px;
+.select2-search--inline .select2-search__field:focus {
+  border: none;
 }

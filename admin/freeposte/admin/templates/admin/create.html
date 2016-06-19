@@ -10,14 +10,7 @@ Add a global administrator
   {{ macros.form_field(form.admin, id='admin') }}
   {{ macros.form_field(form.submit) }}
   <script>
-    $("#admin").tagsinput({
-      confirmKeys: [9, 13, 32],
-      tagClass: 'label label-primary large',
-      typeahead: {
-        afterSelect: function(val) { this.$element.val(""); },
-        source: {{ current_user.get_managed_emails()|map('string')|list|tojson }}
-      }
-    });
+    $("#admin").select2();
   </script>
 </form>
 {% endblock %}

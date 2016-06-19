@@ -18,6 +18,10 @@ def manager_list(domain_name):
 def manager_create(domain_name):
     domain = utils.get_domain_admin(domain_name)
     form = forms.ManagerForm()
+    form.manager.choices = [
+        (user.email, user.email) for user in
+        flask_login.current_user.get_managed_emails(include_aliases=False)
+    ]
     if form.validate_on_submit():
         user = utils.get_user(form.manager.data, admin=True)
         if user in domain.managers:

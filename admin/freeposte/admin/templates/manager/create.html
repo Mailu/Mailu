@@ -14,14 +14,7 @@ Add a manager
   {{ macros.form_field(form.manager, id='manager') }}
   {{ macros.form_field(form.submit) }}
   <script>
-    $("#manager").tagsinput({
-      confirmKeys: [9, 13, 32],
-      tagClass: 'label label-primary large',
-      typeahead: {
-        afterSelect: function(val) { this.$element.val(""); },
-        source: {{ current_user.get_managed_emails()|map('string')|list|tojson }}
-      }
-    });
+    $("#manager").select2();
   </script>
 </form>
 {% endblock %}

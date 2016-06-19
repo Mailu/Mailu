@@ -18,6 +18,11 @@ def admin_list():
 @flask_login.login_required
 def admin_create():
     form = forms.AdminForm()
+    form.admin.choices = [
+        (user.email, user.email)
+        for user in
+        flask_login.current_user.get_managed_emails(include_aliases=False)
+    ]
     if form.validate_on_submit():
         user = models.User.query.get(form.admin.data)
         if user:

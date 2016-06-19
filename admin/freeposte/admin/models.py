@@ -123,11 +123,12 @@ class User(Email):
         else:
             return self.manager_of
 
-    def get_managed_emails(self):
+    def get_managed_emails(self, include_aliases=True):
         emails = []
         for domain in self.get_managed_domains():
             emails.extend(domain.users)
-            emails.extend(domain.aliases)
+            if include_aliases:
+                emails.extend(domain.aliases)
         return emails
 
     @classmethod

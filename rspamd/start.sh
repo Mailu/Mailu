@@ -1,4 +1,4 @@
 #!/bin/sh
 
 rspamd -i
-rsyslogd -n
+tail -f /var/log/rspamd/rspamd.log

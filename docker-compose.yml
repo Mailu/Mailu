@@ -55,6 +55,7 @@ services:
     env_file: freeposte.env
     volumes:
       - /freeposte/filter:/data
+      - /freeposte/dkim:/dkim
 
   antispam:
     build: rspamd
@@ -79,6 +80,7 @@ services:
     env_file: freeposte.env
     volumes:
       - /freeposte/freeposte:/data
+      - /freeposte/dkim:/dkim
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   webmail:

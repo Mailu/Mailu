@@ -63,3 +63,11 @@ def domain_details(domain_name):
     domain = utils.get_domain_admin(domain_name)
     return flask.render_template('domain/details.html', domain=domain,
         config=flask_app.config)
+
+
+@app.route('/domain/genkeys/<domain_name>', methods=['GET'])
+def domain_genkeys(domain_name):
+    domain = utils.get_domain_admin(domain_name)
+    domain.generate_dkim_key()
+    return flask.redirect(
+        flask.url_for(".domain_details", domain_name=domain_name))

@@ -10,7 +10,7 @@ Domain details
 
 {% block main_action %}
 {% if current_user.global_admin %}
-<a class="btn btn-primary" href="#">Regenerate keys</a>
+<a class="btn btn-primary" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}">Regenerate keys</a>
 {% endif %}
 {% endblock %}
 
@@ -26,8 +26,18 @@ Domain details
       <td><pre>{{ domain.name }}. 600 IN MX 10 {{ config["HOSTNAME"] }}.</pre></td>
     </tr>
     <tr>
-      <th>DNS SPF entry</th>
-      <td><pre>{{ domain.name }}. 600 IN TXT "v=spf1 mx a:{{ config["HOSTNAME"] }} -all"</pre></td>
+      <th>DNS SPF entries</th>
+      <td><pre>
+{{ domain.name }}. 600 IN TXT "v=spf1 mx a:{{ config["HOSTNAME"] }} -all"
+{{ domain.name }}. 600 IN SPF "v=spf1 mx a:{{ config["HOSTNAME"] }} -all"</pre></td>
+    </tr>
+    <tr>
+      <th>DKIM public key</th>
+      <td><pre style="white-space: pre-wrap; word-wrap: break-word;">{{ domain.dkim_publickey }}</pre></td>
+    </tr>
+    <tr>
+      <th>DNS DKIM entry</th>
+      <td><pre style="white-space: pre-wrap; word-wrap: break-word;">{{ config["DKIM_SELECTOR"] }}._domainkey IN 600 TXT "v=DKIM1; k=rsa; p={{ domain.dkim_publickey }}"</pre></td>
     </tr>
     <tr>
       <th>DNS DMARC entry</th>

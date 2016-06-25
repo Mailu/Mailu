@@ -6,6 +6,7 @@ Flask-migrate
 Flask-script
 flask_wtf
 WTForms-Components
+PyOpenSSL
 passlib
 gunicorn
 docker-py

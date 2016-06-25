@@ -1,10 +1,14 @@
-from freeposte.admin import db
+from freeposte.admin import db, dkim
+from freeposte import app
 
 from sqlalchemy.ext import declarative
 from passlib import context
 from datetime import datetime
 
 import re
+import time
+import os
+import glob
 
 
 # Many-to-many association table for domain managers
@@ -33,6 +37,28 @@ class Domain(Base):
         backref=db.backref('manager_of'), lazy='dynamic')
     max_users = db.Column(db.Integer, nullable=False, default=0)
     max_aliases = db.Column(db.Integer, nullable=False, default=0)
+
+    @property
+    def dkim_key(self):
+        file_path = app.config["DKIM_PATH"].format(
+            domain=self.name, selector=app.config["DKIM_SELECTOR"])
+        if os.path.exists(file_path):
+            with open(file_path, "rb") as handle:
+                return handle.read()
+
+    @dkim_key.setter
+    def dkim_key(self, value):
+        file_path = app.config["DKIM_PATH"].format(
+            domain=self.name, selector=app.config["DKIM_SELECTOR"])
+        with open(file_path, "wb") as handle:
+            handle.write(value)
+
+    @property
+    def dkim_publickey(self):
+        return dkim.strip_key(self.dkim_key).decode("utf8")
+
+    def generate_dkim_key(self):
+        self.dkim_key = dkim.gen_key()
 
     def has_email(self, localpart):
         for email in self.users + self.aliases:

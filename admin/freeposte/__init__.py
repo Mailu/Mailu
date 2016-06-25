@@ -20,7 +20,9 @@ default_config = {
     'HOSTNAME': 'mail.freeposte.io',
     'DOMAIN': 'freeposte.io',
     'POSTMASTER': 'postmaster',
-    'DEBUG': False
+    'DEBUG': False,
+    'DKIM_PATH': '/dkim/{domain}.{selector}.key',
+    'DKIM_SELECTOR': 'dkim'
 }
 
 # Load configuration from the environment if available

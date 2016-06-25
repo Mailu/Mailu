@@ -15,7 +15,7 @@ services:
       - admin
     volumes:
       - /freeposte/certs:/certs
-      
+
   redis:
     image: redis
     restart: always
@@ -55,7 +55,7 @@ services:
     env_file: freeposte.env
     volumes:
       - /freeposte/filter:/data
-      
+
   antispam:
     build: rspamd
     image: freeposte/rspamd
@@ -63,7 +63,7 @@ services:
     env_file: freeposte.env
     volumes:
       - /freeposte/filter:/var/lib/rspamd
-      
+
   antivirus:
     build: clamav
     image: freeposte/clamav
@@ -78,7 +78,7 @@ services:
     restart: always
     env_file: freeposte.env
     volumes:
-      - /dfreeposteata/freeposte:/data
+      - /freeposte/freeposte:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   webmail:

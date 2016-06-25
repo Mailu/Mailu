@@ -46,6 +46,6 @@ def get_fetch(fetch_id):
     if not fetch:
         flask.abort(404)
     if not fetch.user.domain in flask_login.current_user.get_managed_domains():
-        if not fetch.user == flask_login.current_user:
+        if not fetch.user.email == flask_login.current_user.email:
             flask.abort(403)
     return fetch

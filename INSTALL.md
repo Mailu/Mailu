@@ -37,43 +37,43 @@ make sure that you either:
  - or setup a root *btrfs* partition,
  - or leave enough unpartitionned space for a dedicated *ext4* or *btrfs*
    partition.
-  
-If you chose to create a dedicated partition, simply mount it to 
+
+If you chose to create a dedicated partition, simply mount it to
 ``/var/lib/docker``. You could also create a separate partition (*ext4* is a
 sane default)  ans mount it to ``/freeposte`` for storing e-mail data.
 
 Docker supports *AUFS* over *ext4* and *btrfs* as stable storage drivers.
 Other filesystems are supported such as *OverlayFS*. If you know what you are
 doing, you should go for it.
- 
+
 Freeposte.io uses Docker port forwarding from the host to make services
 available to external users. First, your host should have a public IP address
-configured (see ``/etc/network/interfaces``) or your router should 
+configured (see ``/etc/network/interfaces``) or your router should
 forward connections to its internal IP address. Due to spam problems and
 reputation services, it
 is highly recommended that you use a dedicated IP address for your mail server
 and that you have a dedicated hostname with forward and reverse DNS entries
 for this IP address.
- 
+
 Also, your host must not listen on ports ``25``, ``80``, ``110``, ``143``,
 ``443``, ``465``, ``587``, ``993`` or ``995`` as these are used by Freeposte
 services. Therefore, you should disable or uninstall any program that is
 listening on these ports (or have them listen on a different port). For
 instance, on a default Debian install:
- 
+
 ```
 apt-get autoremove --purge exim4 exim4-base
 ```
- 
+
 Finally, Docker relies heavily on ``iptables`` for port forwardings. You
 should use ``iptables-persistent`` (or any equivalent tool on other
 systems) for managing persistent rules. If you were brave enough to switch to
 ``nftables``, you will have to rollback until official support is released
 by Docker or setup your own rulesets.
- 
+
 Setting up Docker
 =================
- 
+
 Freeposte.io relies on some of the latest Docker features. Therefore, you should
 install Docker from the official repositories instead of your distribution
 ones.
@@ -86,7 +86,7 @@ Additionally, you must install ``docker-compose`` by following the instructions
 from the [Docker website](https://docs.docker.com/compose/). Compose is a
 management tool for Docker, especially suited for multiple containers systems
 like Freeposte.io.
- 
+
 Once everything is setup, you should be able to run the following commands
 (exact version numbers do not matter):
 
@@ -165,7 +165,7 @@ Finally, edit the ``freeposte.env`` file and update the following settings:
  - set ``DOMAIN`` to your main mail domain,
  - set ``ADMIN`` to the local part of the admin address on the main domain,
  - set ``HOSTNAME`` to your mailserver hostname.
- 
+
 Setting up certificates
 =======================
 
@@ -183,30 +183,24 @@ Then create two files in this directory:
  - ``cert.pem`` contains the certificate,
  - ``key.pem`` contains the key pair.
 
-Bootstrapping the database
-==========================
+Creating the first admin user
+=============================
 
-Freeposte.io does not yet have a database initialization or migration system.
-This will be added in version ``1.1``. For now, you will have to manually
-bootstrap the database. First, start the mail server stack:
+Freeposte.io does not come with any default user. You have to create the
+first admin user manually. First, start the mail server stack:
 
 ```
 docker-compose up -d
 ```
 
-Then bootstrap the database:
+Then create the admin user:
 
 ```
-docker exec -i -t freeposte_admin_1 python initdb.py
-docker-compose restart
+docker exec -i -t freeposte_admin_1 python manage.py admin admin exmaple.net admin
 ```
 
-Be very careful and run this command only once, as it will remove any existing
-data before creating a fresh database.
-
-The default user is ``admin@example.com`` with password ``admin``. Connect to
-the Web admin interface and setup a proper domain with your own admin user
-before removing the default one:
+This will create ``admin@example.net`` with password ``admin``. Connect to
+the Web admin interface change the password to a strong one:
 
 ```
 https://your-host-name.tld/admin/

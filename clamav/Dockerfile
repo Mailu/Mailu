@@ -8,6 +8,6 @@ RUN apk add --update \
 
 
 COPY conf /etc/clamav
+COPY start.sh /start.sh
 
-
-CMD ["/usr/sbin/clamd"]
+CMD ["/start.sh"]

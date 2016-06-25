@@ -4,6 +4,7 @@ RUN mkdir -p /app
 WORKDIR /app
 
 COPY freeposte ./freeposte
+COPY migrations ./migrations
 COPY manage.py .
 COPY requirements.txt .
 COPY start.sh /start.sh

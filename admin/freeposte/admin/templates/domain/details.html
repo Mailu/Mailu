@@ -38,7 +38,7 @@ Domain details
     </tr>
     <tr>
       <th>DNS DKIM entry</th>
-      <td><pre style="white-space: pre-wrap; word-wrap: break-word;">{{ config["DKIM_SELECTOR"] }}._domainkey IN 600 TXT "v=DKIM1; k=rsa; p={{ domain.dkim_publickey }}"</pre></td>
+      <td><pre style="white-space: pre-wrap; word-wrap: break-word;">{{ config["DKIM_SELECTOR"] }}._domainkey.{{ domain.name }}. IN 600 TXT "v=DKIM1; k=rsa; p={{ domain.dkim_publickey }}"</pre></td>
     </tr>
     <tr>
       <th>DNS DMARC entry</th>

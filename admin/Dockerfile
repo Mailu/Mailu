@@ -4,9 +4,10 @@ RUN mkdir -p /app
 WORKDIR /app
 
 COPY freeposte ./freeposte
-COPY initdb.py .
+COPY manage.py .
 COPY requirements.txt .
+COPY start.sh /start.sh
 
 RUN pip install -r requirements.txt
 
-CMD gunicorn -w 4 -b 0.0.0.0:80 --access-logfile - --error-logfile - freeposte:app
+CMD ["/start.sh"]

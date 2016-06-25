@@ -1,4 +1,35 @@
-from freeposte import manager
+from freeposte import manager, db
+from freeposte.admin import models
+
+
+@manager.command
+def flushdb():
+    """ Flush the database
+    """
+    db.drop_all()
+
+
+@manager.command
+def initdb():
+    """ Initialize the database
+    """
+    db.create_all()
+
+
+@manager.command
+def admin(localpart, domain_name, password):
+    """ Create an admin user
+    """
+    domain = models.Domain(name=domain)
+    user = models.User(
+        localpart=localpart,
+        domain=domain,
+        global_admin=True,
+        password=hash.sha512_crypt.encrypt(password)
+    )
+    db.session.add(domain)
+    db.session.add(user)
+    db.session.commit()
 
 
 if __name__ == "__main__":

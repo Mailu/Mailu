@@ -1,5 +1,6 @@
 from freeposte import manager, db
 from freeposte.admin import models
+from passlib import hash
 
 
 @manager.command
@@ -20,7 +21,7 @@ def initdb():
 def admin(localpart, domain_name, password):
     """ Create an admin user
     """
-    domain = models.Domain(name=domain)
+    domain = models.Domain(name=domain_name)
     user = models.User(
         localpart=localpart,
         domain=domain,

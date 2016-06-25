@@ -1,14 +1,16 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_bootstrap import Bootstrap
-from flask.ext import login as flask_login
+import flask
+import flask_sqlalchemy
+import flask_bootstrap
+import flask_login
+import flask_script
+import flask_migrate
 
 import os
 import docker
 
 
 # Create application
-app = Flask(__name__)
+app = flask.Flask(__name__)
 
 default_config = {
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/freeposte.db',
@@ -23,10 +25,15 @@ for key, value in default_config.items():
     app.config[key] = os.environ.get(key, value)
 
 # Setup components
-Bootstrap(app)
-db = SQLAlchemy(app)
+flask_bootstrap.Bootstrap(app)
+db = flask_sqlalchemy.SQLAlchemy(app)
+migrate = flask_migrate.Migrate(app, db)
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
+
+# Manager commnad
+manager = flask_script.Manager(app)
+manager.add_command('db', flask_migrate.MigrateCommand)
 
 # Connect to the Docker socket
 dockercli = docker.Client(base_url=app.config['DOCKER_SOCKET'])

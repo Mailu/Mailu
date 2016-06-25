@@ -1,9 +1,11 @@
 Flask
 Flask-Login
 Flask-SQLAlchemy
-gunicorn
+Flask-bootstrap
+Flask-migrate
+Flask-script
 flask_wtf
 WTForms-Components
-Flask-bootstrap
 passlib
+gunicorn
 docker-py

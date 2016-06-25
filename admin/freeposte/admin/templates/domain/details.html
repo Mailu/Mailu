@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}
+Domain details
+{% endblock %}
+
+{% block subtitle %}
+{{ domain.name }}
+{% endblock %}
+
+{% block main_action %}
+{% if current_user.global_admin %}
+<a class="btn btn-primary" href="#">Regenerate keys</a>
+{% endif %}
+{% endblock %}
+
+{% block box %}
+<table class="table table-bordered">
+  <tbody>
+    <tr>
+      <th>Domain name</th>
+      <td>{{ domain.name }}</td>
+    </tr>
+    <tr>
+      <th>DNS MX entry</th>
+      <td><pre>{{ domain.name }}. 600 IN MX 10 {{ config["HOSTNAME"] }}.</pre></td>
+    </tr>
+    <tr>
+      <th>DNS SPF entry</th>
+      <td><pre>{{ domain.name }}. 600 IN TXT "v=spf1 mx a:{{ config["HOSTNAME"] }} -all"</pre></td>
+    </tr>
+    <tr>
+      <th>DNS DMARC entry</th>
+      <td><pre>_dmarc.{{ domain.name }}. 600 IN TXT "v=DMARC1; p=reject; rua=mailto:{{ config["POSTMASTER"] }}@{{ config["DOMAIN"] }}; adkim=s; aspf=s"</pre></td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}

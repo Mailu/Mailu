@@ -17,6 +17,9 @@ default_config = {
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     'SECRET_KEY': 'changeMe',
     'DOCKER_SOCKET': 'unix:///var/run/docker.sock',
+    'HOSTNAME': 'mail.freeposte.io',
+    'DOMAIN': 'freeposte.io',
+    'POSTMASTER': 'postmaster',
     'DEBUG': False
 }
 

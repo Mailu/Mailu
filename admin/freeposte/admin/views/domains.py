@@ -1,4 +1,5 @@
 from freeposte.admin import app, db, models, forms, utils
+from freeposte import app as flask_app
 from flask.ext import login as flask_login
 
 import os
@@ -55,3 +56,10 @@ def domain_delete(domain_name):
     db.session.commit()
     flask.flash('Domain %s deleted' % domain)
     return flask.redirect(flask.url_for('.domain_list'))
+
+
+@app.route('/domain/details/<domain_name>', methods=['GET'])
+def domain_details(domain_name):
+    domain = utils.get_domain_admin(domain_name)
+    return flask.render_template('domain/details.html', domain=domain,
+        config=flask_app.config)

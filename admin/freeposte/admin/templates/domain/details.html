@@ -10,7 +10,7 @@ Domain details
 
 {% block main_action %}
 {% if current_user.global_admin %}
-<a class="btn btn-primary" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}">Regenerate keys</a>
+<a class="btn btn-primary" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}" onclick="return confirm('Are you sure?')">Regenerate keys</a>
 {% endif %}
 {% endblock %}
 

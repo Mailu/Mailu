@@ -31,6 +31,7 @@ Domain details
 {{ domain.name }}. 600 IN TXT "v=spf1 mx a:{{ config["HOSTNAME"] }} -all"
 {{ domain.name }}. 600 IN SPF "v=spf1 mx a:{{ config["HOSTNAME"] }} -all"</pre></td>
     </tr>
+    {% if domain.dkim_publickey %}
     <tr>
       <th>DKIM public key</th>
       <td><pre style="white-space: pre-wrap; word-wrap: break-word;">{{ domain.dkim_publickey }}</pre></td>
@@ -43,6 +44,7 @@ Domain details
       <th>DNS DMARC entry</th>
       <td><pre>_dmarc.{{ domain.name }}. 600 IN TXT "v=DMARC1; p=reject; rua=mailto:{{ config["POSTMASTER"] }}@{{ config["DOMAIN"] }}; adkim=s; aspf=s"</pre></td>
     </tr>
+    {% endif %}
   </tbody>
 </table>
 {% endblock %}

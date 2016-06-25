@@ -55,7 +55,9 @@ class Domain(Base):
 
     @property
     def dkim_publickey(self):
-        return dkim.strip_key(self.dkim_key).decode("utf8")
+        dkim_key = self.dkim_key
+        if dkim_key:
+            return dkim.strip_key(self.dkim_key).decode("utf8")
 
     def generate_dkim_key(self):
         self.dkim_key = dkim.gen_key()

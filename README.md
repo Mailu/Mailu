@@ -65,7 +65,7 @@ export SQLALCHEMY_DATABASE_URI=sqlite:///path/to/dev.db
 And finally run the server with debug enabled:
 
 ```
-python run.py
+python manage.py runserver
 ```
 
 Philosophy
@@ -79,5 +79,3 @@ Docker best practices and be as generic as possible :
    fit as base images for other projects,
  - interesting settings should be available as environment variables
  - base images should be well-trusted (officiel Alpine or Debian for instance).
- 
-

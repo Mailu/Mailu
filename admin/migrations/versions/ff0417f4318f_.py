@@ -73,7 +73,7 @@ def upgrade():
         sa.ForeignKeyConstraint(['user_email'], ['user.email'], ),
         sa.PrimaryKeyConstraint('id')
         )
-        op.create_table('manager',
+    op.create_table('manager',
         sa.Column('domain_name', sa.String(length=80), nullable=True),
         sa.Column('user_email', sa.String(length=255), nullable=True),
         sa.ForeignKeyConstraint(['domain_name'], ['domain.name'], ),

@@ -6,6 +6,13 @@ import os
 import tempfile
 
 
+FETCHMAIL = """
+fetchmail -N \
+    --sslcertck --sslcertpath /etc/ssl/certs \
+    -f {}
+"""
+
+
 RC_LINE = """
 poll {host} proto {protocol} port {port}
     user "{username}" password "{password}"
@@ -19,7 +26,7 @@ def fetchmail(fetchmailrc):
     with tempfile.NamedTemporaryFile() as handler:
         handler.write(fetchmailrc.encode("utf8"))
         handler.flush()
-        os.system("fetchmail --sslcertck -N -f '{}'".format(handler.name))
+        os.system(FETCHMAIL.format(handler.name))
 
 
 def run(cursor):

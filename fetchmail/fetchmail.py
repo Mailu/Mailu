@@ -19,7 +19,7 @@ def fetchmail(fetchmailrc):
     with tempfile.NamedTemporaryFile() as handler:
         handler.write(fetchmailrc.encode("utf8"))
         handler.flush()
-        os.system("fetchmail -N -f '{}'".format(handler.name))
+        os.system("fetchmail --sslcertck -N -f '{}'".format(handler.name))
 
 
 def run(cursor):

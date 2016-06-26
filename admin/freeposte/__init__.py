@@ -21,7 +21,7 @@ default_config = {
     'DOMAIN': 'freeposte.io',
     'POSTMASTER': 'postmaster',
     'DEBUG': False,
-    'BOOTSTRAP_SERVE_LOCAL': True,
+    'BOOTSTRAP_SERVE_LOCAL': False,
     'DKIM_PATH': '/dkim/{domain}.{selector}.key',
     'DKIM_SELECTOR': 'dkim'
 }

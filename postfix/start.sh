@@ -16,12 +16,15 @@ else
 fi
 
 # Include table-map files
-if [ "$(ls -A /config/*.map)" ]; then
+if ls -A /config/*.map 1> /dev/null 2>&1; then
   cp /config/*.map /etc/postfix/
   postmap /etc/postfix/*.map
   rm /etc/postfix/*.map
   chown root:root /etc/postfix/*.db
   chmod 0600 /etc/postfix/*.db
+  echo "Loaded 'map files'"
+else
+  echo "No extra map files loaded because optional '/config/*.map' not provided."
 fi
 
 # Actually run Postfix

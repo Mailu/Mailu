@@ -47,7 +47,7 @@ services:
     volumes:
       - /freeposte/freeposte:/data
       - /freeposte/certs:/certs
-      - /freeposte/config/postfix:/config
+      - /freeposte/overrides:/overrides
 
   milter:
     build: rmilter

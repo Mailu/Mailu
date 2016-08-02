@@ -5,3 +5,4 @@ __pycache__
 /admin/include
 pip-selfcheck.json
 /data
+/docker-compose.mac.yml

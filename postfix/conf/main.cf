@@ -49,3 +49,7 @@ smtpd_milters = inet:milter:9900
 milter_protocol = 6
 milter_mail_macros = i {mail_addr} {client_addr} {client_name} {auth_authen}
 milter_default_action = tempfail
+
+###############
+# Extra Settings
+###############

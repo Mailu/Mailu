@@ -21,7 +21,7 @@ class DestinationField(fields.SelectMultipleField):
         for email in managed:
             selected = self.data is not None and self.coerce(email) in self.data
             yield (email, email, selected)
-        for email in self.data:
+        for email in self.data or ():
             if email not in managed:
                 yield (email, email, True)
 

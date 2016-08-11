@@ -12,12 +12,12 @@ Automatic reply
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.reply_enabled,
-      onchange="if(this.checked){$('#reply_subject,#reply_body').removeAttr('disabled')}
-                else{$('#reply_subject,#reply_body').attr('disabled', '')}") }}
+      onchange="if(this.checked){$('#reply_subject,#reply_body').removeAttr('readonly')}
+                else{$('#reply_subject,#reply_body').attr('readonly', '')}") }}
   {{ macros.form_field(form.reply_subject,
-      **{("enabled" if user.reply_subject else "disabled"): ""}) }}
+      **{("rw" if user.reply_enabled else "readonly"): ""}) }}
     {{ macros.form_field(form.reply_body, rows=10,
-        **{("enabled" if user.reply_subject else "disabled"): ""}) }}
+        **{("rw" if user.reply_enabled else "readonly"): ""}) }}
   {{ macros.form_field(form.submit) }}
 </form>
 {% endblock %}

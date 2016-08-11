@@ -123,7 +123,8 @@ class Email(Base):
 class User(Email):
     """ A user is an email address that has a password to access a mailbox.
     """
-    domain = db.relationship(Domain, backref='users')
+    domain = db.relationship(Domain,
+        backref=db.backref('users', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
     quota_bytes = db.Column(db.Integer(), nullable=False, default=10**9)
     global_admin = db.Column(db.Boolean(), nullable=False, default=False)
@@ -186,7 +187,8 @@ class User(Email):
 class Alias(Email):
     """ An alias is an email address that redirects to some destination.
     """
-    domain = db.relationship(Domain, backref='aliases')
+    domain = db.relationship(Domain,
+        backref=db.backref('aliases', cascade='all, delete-orphan'))
     destination = db.Column(CommaSeparatedList, nullable=False)
 
 
@@ -197,7 +199,8 @@ class Fetch(Base):
     id = db.Column(db.Integer(), primary_key=True)
     user_email = db.Column(db.String(255), db.ForeignKey(User.email),
         nullable=False)
-    user = db.relationship(User, backref='fetches')
+    user = db.relationship(User,
+        backref=db.backref('fetches', cascade='all, delete-orphan'))
     protocol = db.Column(db.Enum('imap', 'pop3'), nullable=False)
     host = db.Column(db.String(255), nullable=False)
     port = db.Column(db.Integer(), nullable=False)

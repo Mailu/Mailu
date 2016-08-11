@@ -1,6 +1,34 @@
 from flask_wtf import Form
 from wtforms import validators, fields, widgets
 from wtforms_components import fields as fields_
+from flask.ext import login as flask_login
+
+import re
+
+
+class DestinationField(fields.SelectMultipleField):
+    """ Allow for multiple emails selection from current user choices and
+    additional email addresses.
+    """
+
+    validator = re.compile(r'^.+@([^.@][^@]+)$', re.IGNORECASE)
+
+    def iter_choices(self):
+        managed = [
+            str(email)
+            for email in flask_login.current_user.get_managed_emails()
+        ]
+        for email in managed:
+            selected = self.data is not None and self.coerce(email) in self.data
+            yield (email, email, selected)
+        for email in self.data:
+            if email not in managed:
+                yield (email, email, True)
+
+    def pre_validate(self, form):
+        for item in self.data:
+            if not self.validator.match(item):
+                raise validators.ValidationError("Invalid email address.")
 
 
 class LoginForm(Form):
@@ -58,7 +86,7 @@ class UserReplyForm(Form):
 
 class AliasForm(Form):
     localpart = fields.StringField('Alias', [validators.DataRequired()])
-    destination = fields.SelectField('Destination')
+    destination = DestinationField('Destination')
     comment = fields.StringField('Comment')
     submit = fields.SubmitField('Create')
 

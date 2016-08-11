@@ -18,6 +18,24 @@ managers = db.Table('manager',
 )
 
 
+class CommaSeparatedList(db.TypeDecorator):
+    """ Stores a list as a comma-separated string, compatible with Postfix.
+    """
+
+    impl = db.String
+
+    def process_bind_param(self, value, dialect):
+        if type(value) is not list:
+            raise TypeError("Shoud be a list")
+        for item in value:
+            if "," in item:
+                raise ValueError("No item should contain a comma")
+        return ",".join(value)
+
+    def process_result_value(self, value, dialect):
+        return value.split(",")
+
+
 class Base(db.Model):
     """ Base class for all models
     """
@@ -169,7 +187,7 @@ class Alias(Email):
     """ An alias is an email address that redirects to some destination.
     """
     domain = db.relationship(Domain, backref='aliases')
-    destination = db.Column(db.String(), nullable=False)
+    destination = db.Column(CommaSeparatedList, nullable=False)
 
 
 class Fetch(Base):

@@ -1,9 +1,9 @@
 from freeposte.admin import app, db, models, forms, utils
 from freeposte import app as flask_app
-from flask.ext import login as flask_login
 
 import os
 import flask
+import flask_login
 import wtforms_components
 
 

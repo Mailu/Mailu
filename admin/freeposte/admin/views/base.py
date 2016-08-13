@@ -1,9 +1,9 @@
 from freeposte import dockercli
 from freeposte.admin import app, db, models, forms, utils
-from flask.ext import login as flask_login
 
 import os
 import flask
+import flask_login
 
 
 @app.route('/', methods=["GET"])

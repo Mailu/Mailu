@@ -1,6 +1,7 @@
 from flask import Blueprint
-from flask.ext import login as flask_login
 from freeposte import login_manager, db
+
+import flask_login
 
 
 app = Blueprint(

@@ -1,9 +1,9 @@
 from freeposte.admin import app, db, models, forms
-from flask.ext import login as flask_login
 
 import os
 import pprint
 import flask
+import flask_login
 import json
 
 

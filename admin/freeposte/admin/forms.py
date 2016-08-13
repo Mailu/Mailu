@@ -1,8 +1,8 @@
 from flask_wtf import Form
 from wtforms import validators, fields, widgets
 from wtforms_components import fields as fields_
-from flask.ext import login as flask_login
 
+import flask_login
 import re
 
 

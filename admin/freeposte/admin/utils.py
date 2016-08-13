@@ -1,7 +1,7 @@
 from freeposte.admin import models
-from flask.ext import login as flask_login
 
 import flask
+import flask_login
 
 
 def get_domain_admin(domain_name):

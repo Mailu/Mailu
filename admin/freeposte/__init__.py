@@ -10,7 +10,7 @@ import docker
 
 
 # Create application
-app = flask.Flask(__name__)
+app = flask.Flask(__name__, static_url_path='/admin/app_static')
 
 default_config = {
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/freeposte.db',
@@ -21,7 +21,7 @@ default_config = {
     'DOMAIN': 'freeposte.io',
     'POSTMASTER': 'postmaster',
     'DEBUG': False,
-    'BOOTSTRAP_SERVE_LOCAL': False,
+    'BOOTSTRAP_SERVE_LOCAL': True,
     'DKIM_PATH': '/dkim/{domain}.{selector}.key',
     'DKIM_SELECTOR': 'dkim'
 }

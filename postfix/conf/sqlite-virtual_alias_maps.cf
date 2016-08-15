@@ -1,5 +1,11 @@
 dbpath = /data/freeposte.db
 query =
- SELECT destination
-   FROM alias
-  WHERE alias.email = '%s'
+ SELECT destination 
+	FROM alias 
+	WHERE alias.email = '%s' 
+	      AND alias.wildcard = 0 
+ UNION SELECT destination 
+	FROM alias 
+	WHERE '%s' LIKE alias.email 
+	      AND alias.wildcard = 1 
+ LIMIT 1

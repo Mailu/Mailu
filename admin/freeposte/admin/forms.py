@@ -86,6 +86,8 @@ class UserReplyForm(Form):
 
 class AliasForm(Form):
     localpart = fields.StringField('Alias', [validators.DataRequired()])
+    wildcard = fields.BooleanField(
+        'Use SQL Like Syntax (e.g. for catch-all aliases, admin-%@domain.com)')
     destination = DestinationField('Destination')
     comment = fields.StringField('Comment')
     submit = fields.SubmitField('Create')

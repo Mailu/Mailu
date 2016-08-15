@@ -13,5 +13,6 @@ query =
      '%s' LIKE alias.email
     )
   ORDER BY
-    alias.wildcard ASC
+    alias.wildcard ASC,
+    length(alias.localpart) DESC
   LIMIT 1

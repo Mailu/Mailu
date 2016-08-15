@@ -189,6 +189,7 @@ class Alias(Email):
     """
     domain = db.relationship(Domain,
         backref=db.backref('aliases', cascade='all, delete-orphan'))
+    wildcard = db.Column(db.Boolean(), default=False)
     destination = db.Column(CommaSeparatedList, nullable=False, default=[])
 
 

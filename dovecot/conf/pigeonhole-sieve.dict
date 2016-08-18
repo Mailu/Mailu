@@ -1,6 +1,20 @@
 connect = /data/freeposte.db
 
 map {
+  pattern = priv/spam_enabled
+  table = user
+  username_field = email
+  value_field = spam_enabled
+}
+
+map {
+  pattern = priv/spam_threshold
+  table = user
+  username_field = email
+  value_field = spam_threshold
+}
+
+map {
   pattern = priv/reply_enabled
   table = user
   username_field = email

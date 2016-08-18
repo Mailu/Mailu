@@ -59,7 +59,7 @@ class UserForm(Form):
 class UserSettingsForm(Form):
     displayed_name = fields.StringField('Displayed name')
     spam_enabled = fields.BooleanField('Enable spam filter')
-    spam_threshold = fields.DecimalField('Spam filter sensitivity')
+    spam_threshold = fields_.IntegerSliderField('Spam filter threshold')
     submit = fields.SubmitField('Save settings')
 
 

@@ -1,4 +1,13 @@
-require ["variables", "vacation", "fileinto", "envelope", "mailbox", "imap4flags", "regex", "relational", "comparator-i;ascii-numeric", "vnd.dovecot.extdata"];
+require "variables";
+require "vacation";
+require "fileinto";
+require "envelope";
+require "mailbox";
+require "imap4flags";
+require "regex";
+require "relational";
+require "comparator-i;ascii-numeric";
+require "vnd.dovecot.extdata";
 
 if string :is "${extdata.spam_enabled}" "1" {
   if header :matches "X-Spam-Status" "* score=*" {

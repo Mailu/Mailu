@@ -1,18 +1,21 @@
 dbpath = /data/freeposte.db
 query =
- SELECT destination
-	FROM alias
-	WHERE
-    (
-     alias.wildcard = 0
-     AND
-     alias.email = '%s'
-    ) OR (
-     alias.wildcard = 1
-     AND
-     '%s' LIKE alias.email
-    )
-  ORDER BY
-    alias.wildcard ASC,
-    length(alias.localpart) DESC
-  LIMIT 1
+  SELECT destination
+   FROM
+     (SELECT destination, email, wildcard, localpart FROM alias
+      UNION
+      SELECT email AS destination, email, 0 as wildcard, localpart FROM user)
+   WHERE
+     (
+      wildcard = 0
+      AND
+      email = '%s'
+     ) OR (
+      wildcard = 1
+      AND
+      '%s' LIKE email
+     )
+   ORDER BY
+     wildcard ASC,
+     length(localpart) DESC
+   LIMIT 1

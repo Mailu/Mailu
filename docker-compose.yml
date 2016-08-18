@@ -58,6 +58,7 @@ services:
     volumes:
       - /freeposte/filter:/data
       - /freeposte/dkim:/dkim
+      - /freeposte/overrides:/overrides
 
   antispam:
     build: rspamd

@@ -34,6 +34,7 @@ services:
       - /freeposte/freeposte:/data
       - /freeposte/mail:/mail
       - /freeposte/certs:/certs
+      - /freeposte/overrides:/overrides
 
   smtp:
     build: postfix

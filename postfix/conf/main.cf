@@ -14,6 +14,8 @@ alias_maps = hash:/etc/aliases
 sql = sqlite:${config_directory}/
 # Only accept virtual emails
 mydestination =
+# Relayhost if any is configured
+relayhost = {{ RELAYHOST }}
 
 ###############
 # TLS

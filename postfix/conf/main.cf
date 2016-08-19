@@ -26,6 +26,10 @@ smtpd_tls_key_file=/certs/key.pem
 smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 smtp_tls_security_level = may
+smtpd_tls_protocols=!SSLv2,!SSLv3
+smtpd_tls_ciphers=medium
+smtpd_tls_exclude_ciphers=aNULL,RC4
+
 
 ###############
 # SASL

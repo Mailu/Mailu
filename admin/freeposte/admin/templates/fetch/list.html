@@ -29,7 +29,7 @@ Fetched accounts
     <tr>
       <td>
         <a href="{{ url_for('.fetch_edit', fetch_id=fetch.id) }}" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;
-        <a href="{{ url_for('.fetch_delete', fetch_id=fetch.id) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>
+        <a href="{{ url_for('.fetch_delete', fetch_id=fetch.id) }}" title="Delete"><i class="fa fa-trash"></i></a>
       </td>
       <td>{{ fetch.protocol }}</td>
       <td>{{ fetch.host }}</td>

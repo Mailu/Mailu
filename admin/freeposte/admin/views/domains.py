@@ -47,7 +47,8 @@ def domain_edit(domain_name):
         domain=domain)
 
 
-@app.route('/domain/delete/<domain_name>', methods=['GET'])
+@app.route('/domain/delete/<domain_name>', methods=['GET', 'POST'])
+@utils.confirmation_required("delete {domain_name}")
 @flask_login.login_required
 def domain_delete(domain_name):
     utils.require_global_admin()
@@ -59,13 +60,16 @@ def domain_delete(domain_name):
 
 
 @app.route('/domain/details/<domain_name>', methods=['GET'])
+@flask_login.login_required
 def domain_details(domain_name):
     domain = utils.get_domain_admin(domain_name)
     return flask.render_template('domain/details.html', domain=domain,
         config=flask_app.config)
 
 
-@app.route('/domain/genkeys/<domain_name>', methods=['GET'])
+@app.route('/domain/genkeys/<domain_name>', methods=['GET', 'POST'])
+@utils.confirmation_required("regenerate keys for {domain_name}")
+@flask_login.login_required
 def domain_genkeys(domain_name):
     domain = utils.get_domain_admin(domain_name)
     domain.generate_dkim_key()

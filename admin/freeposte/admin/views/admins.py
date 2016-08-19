@@ -1,4 +1,4 @@
-from freeposte.admin import app, db, models, forms
+from freeposte.admin import app, db, models, forms, utils
 
 import os
 import pprint
@@ -35,7 +35,8 @@ def admin_create():
     return flask.render_template('admin/create.html', form=form)
 
 
-@app.route('/admin/delete/<admin>', methods=['GET'])
+@app.route('/admin/delete/<admin>', methods=['GET', 'POST'])
+@utils.confirmation_required("delete admin {admin }")
 @flask_login.login_required
 def admin_delete(admin):
     user = models.User.query.get(admin)

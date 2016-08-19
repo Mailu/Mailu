@@ -27,7 +27,7 @@ Alias list
     <tr>
       <td>
         <a href="{{ url_for('.alias_edit', alias=alias.email) }}" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;
-        <a href="{{ url_for('.alias_delete', alias=alias.email) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>
+        <a href="{{ url_for('.alias_delete', alias=alias.email) }}" title="Delete"><i class="fa fa-trash"></i></a>
       </td>
       <td>{{ alias }}</td>
       <td>{{ alias.destination|join(', ') or '-' }}</td>

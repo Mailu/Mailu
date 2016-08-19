@@ -46,7 +46,8 @@ def fetch_edit(fetch_id):
         form=form, fetch=fetch)
 
 
-@app.route('/fetch/delete/<fetch_id>', methods=['GET'])
+@app.route('/fetch/delete/<fetch_id>', methods=['GET', 'POST'])
+@utils.confirmation_required("delete a fetched account")
 @flask_login.login_required
 def fetch_delete(fetch_id):
     fetch = utils.get_fetch(fetch_id)

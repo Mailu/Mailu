@@ -18,7 +18,7 @@ Global administrators
     {% for admin in admins %}
     <tr>
       <td>
-        <a href="{{ url_for('.admin_delete', admin=admin.email) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>
+        <a href="{{ url_for('.admin_delete', admin=admin.email) }}" title="Delete"><i class="fa fa-trash"></i></a>
       </td>
       <td>{{ admin }}</td>
     </tr>

@@ -53,7 +53,8 @@ def alias_edit(alias):
         form=form, alias=alias, domain=alias.domain)
 
 
-@app.route('/alias/delete/<alias>', methods=['GET'])
+@app.route('/alias/delete/<alias>', methods=['GET', 'POST'])
+@utils.confirmation_required("delete {alias}")
 @flask_login.login_required
 def alias_delete(alias):
     alias = utils.get_alias(alias)

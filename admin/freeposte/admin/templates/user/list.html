@@ -29,7 +29,7 @@ User list
     <tr>
       <td>
         <a href="{{ url_for('.user_edit', user_email=user.email) }}" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;
-        <a href="{{ url_for('.user_delete', user_email=user.email) }}" onclick="return confirm('Are you sure?')" title="Delete"><i class="fa fa-trash"></i></a>
+        <a href="{{ url_for('.user_delete', user_email=user.email) }}" title="Delete"><i class="fa fa-trash"></i></a>
       </td>
       <td>
         <a href="{{ url_for('.user_settings', user_email=user.email) }}" title="Settings"><i class="fa fa-wrench"></i></a>&nbsp;

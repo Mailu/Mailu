@@ -36,7 +36,8 @@ def manager_create(domain_name):
         domain=domain, form=form)
 
 
-@app.route('/manager/delete/<manager>', methods=['GET'])
+@app.route('/manager/delete/<manager>', methods=['GET', 'POST'])
+@utils.confirmation_required("remove manager {manager}")
 @flask_login.login_required
 def manager_delete(manager):
     user = utils.get_user(manager, admin=True)

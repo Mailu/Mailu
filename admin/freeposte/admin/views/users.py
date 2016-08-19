@@ -56,7 +56,8 @@ def user_edit(user_email):
     return flask.render_template('user/edit.html', form=form, user=user, domain=user.domain)
 
 
-@app.route('/user/delete/<user_email>', methods=['GET'])
+@app.route('/user/delete/<user_email>', methods=['GET', 'POST'])
+@utils.confirmation_required("delete {user_email}")
 @flask_login.login_required
 def user_delete(user_email):
     user = utils.get_user(user_email, True)

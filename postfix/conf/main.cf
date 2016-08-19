@@ -21,20 +21,27 @@ relayhost = {{ RELAYHOST }}
 # TLS
 ###############
 smtpd_use_tls = yes
+# Only one key/certificate pair is used, SNI not being supported by all
+# services and not a strong requirement.
 smtpd_tls_cert_file=/certs/cert.pem
 smtpd_tls_key_file=/certs/key.pem
 smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
-smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
-smtp_tls_security_level = may
+# Server-side TLS is hardened, it should be up to the client to update his or
+# her TLS stack in order to connect to the mail server.
 smtpd_tls_protocols=!SSLv2,!SSLv3
 smtpd_tls_ciphers=medium
 smtpd_tls_exclude_ciphers=aNULL,RC4
-
+# Outgoing TLS is more flexible because 1. not all receiving servers will
+# support TLS, 2. not all will have and up-to-date TLS stack.
+smtp_tls_security_level = may
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
 ###############
 # SASL
 ###############
 smtpd_sasl_local_domain = $myhostname
+# Authentication is done against dovecot, which acts as the main authention
+# source
 smtpd_sasl_type = dovecot
 smtpd_sasl_path = inet:imap:2102
 smtpd_sasl_auth_enable = yes
@@ -45,7 +52,10 @@ smtpd_sasl_security_options = noanonymous
 ###############
 virtual_mailbox_domains = ${sql}sqlite-virtual_mailbox_domains.cf
 virtual_alias_maps = ${sql}sqlite-virtual_alias_maps.cf
+# Mails are forwarded to Dovecot for delivery
 virtual_transport = lmtp:inet:imap:2525
+# In order to prevent Postfix from running DNS query, enforce the use of the
+# native DNS stack, that will check /etc/hosts properly.
 lmtp_host_lookup = native
 
 ###############

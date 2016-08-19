@@ -6,40 +6,56 @@
 mydomain = {{ DOMAIN }}
 myhostname = {{ HOSTNAME }}
 myorigin = $mydomain
+
 # Relayed networks
 mynetworks = 127.0.0.1/32 [::1]/128 {{ RELAYNETS }}
+
 # Empty alias list to override the configuration variable and disable NIS
 alias_maps = hash:/etc/aliases
+
 # SQLite configuration
 sql = sqlite:${config_directory}/
+
 # Only accept virtual emails
 mydestination =
+
 # Relayhost if any is configured
 relayhost = {{ RELAYHOST }}
 
 ###############
 # TLS
 ###############
-smtpd_use_tls = yes
+
 # Only one key/certificate pair is used, SNI not being supported by all
 # services and not a strong requirement.
+smtpd_use_tls = yes
 smtpd_tls_cert_file=/certs/cert.pem
 smtpd_tls_key_file=/certs/key.pem
 smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+
 # Server-side TLS is hardened, it should be up to the client to update his or
-# her TLS stack in order to connect to the mail server.
-smtpd_tls_protocols=!SSLv2,!SSLv3
-smtpd_tls_ciphers=medium
-smtpd_tls_exclude_ciphers=aNULL,RC4
+# her TLS stack in order to connect to the mail server. Hardening is based on
+# https://bettercrypto.org/static/applied-crypto-hardening.pdf
+smtpd_tls_protocols = !SSLv2, !SSLv3
+smtpd_tls_mandatory_ciphers = high
+tls_high_cipherlist = EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA256:EECDH:+CAMELLIA128:+AES128:+SSLv3:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!IDEA:!ECDSA:kEDH:CAMELLIA128-SHA:AES128-SHA
+
 # Outgoing TLS is more flexible because 1. not all receiving servers will
 # support TLS, 2. not all will have and up-to-date TLS stack.
 smtp_tls_security_level = may
+smtp_tls_mandatory_protocols = !SSLv2, !SSLv3
+smtp_tls_protocols =!SSLv2,!SSLv3
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+
+# General TLS hardening
+tls_ssl_options = NO_COMPRESSION
 
 ###############
 # SASL
 ###############
+
 smtpd_sasl_local_domain = $myhostname
+
 # Authentication is done against dovecot, which acts as the main authention
 # source
 smtpd_sasl_type = dovecot
@@ -50,10 +66,13 @@ smtpd_sasl_security_options = noanonymous
 ###############
 # Virtual
 ###############
+
 virtual_mailbox_domains = ${sql}sqlite-virtual_mailbox_domains.cf
 virtual_alias_maps = ${sql}sqlite-virtual_alias_maps.cf
+
 # Mails are forwarded to Dovecot for delivery
 virtual_transport = lmtp:inet:imap:2525
+
 # In order to prevent Postfix from running DNS query, enforce the use of the
 # native DNS stack, that will check /etc/hosts properly.
 lmtp_host_lookup = native
@@ -61,6 +80,7 @@ lmtp_host_lookup = native
 ###############
 # Milter
 ###############
+
 smtpd_milters = inet:milter:9900
 milter_protocol = 6
 milter_mail_macros = i {mail_addr} {client_addr} {client_name} {auth_authen}

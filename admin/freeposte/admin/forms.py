@@ -31,6 +31,10 @@ class DestinationField(fields.SelectMultipleField):
                 raise validators.ValidationError("Invalid email address.")
 
 
+class ConfirmationForm(Form):
+    submit = fields.SubmitField('Confirm')
+
+
 class LoginForm(Form):
     email = fields.StringField('E-mail', [validators.Email()])
     pw = fields.PasswordField('Password', [validators.DataRequired()])

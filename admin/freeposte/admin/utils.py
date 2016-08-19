@@ -1,7 +1,25 @@
-from freeposte.admin import models
+from freeposte.admin import models, forms
 
 import flask
 import flask_login
+import functools
+
+
+def confirmation_required(action):
+    """ View decorator that asks for a confirmation first.
+    """
+    def inner(function):
+        @functools.wraps(function)
+        def wrapper(*args, **kwargs):
+            form = forms.ConfirmationForm()
+            if form.validate_on_submit():
+                return function(*args, **kwargs)
+            return flask.render_template(
+                "confirm.html", action=action.format(*args, **kwargs),
+                form=form
+            )
+        return wrapper
+    return inner
 
 
 def get_domain_admin(domain_name):

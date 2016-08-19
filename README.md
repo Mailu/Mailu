@@ -26,6 +26,7 @@ Main features include:
 - **Admin features**, global admins, per-domain delegation, quotas
 - **Security**, enforced TLS, outgoing DKIM, anti-virus scanner
 - **Antispam**, auto-learn, greylisting, DMARC and SPF
+- **Freedom**, all FOSS components, no tracker included
 
 ![Creating a new user](http://freeposte.io/screenshots/create.png)
 

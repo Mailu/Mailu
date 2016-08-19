@@ -29,6 +29,7 @@ relayhost = {{ RELAYHOST }}
 # Only one key/certificate pair is used, SNI not being supported by all
 # services and not a strong requirement.
 smtpd_use_tls = yes
+smtpd_tls_security_level = encrypt
 smtpd_tls_cert_file=/certs/cert.pem
 smtpd_tls_key_file=/certs/key.pem
 smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
@@ -49,6 +50,7 @@ smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
 # General TLS hardening
 tls_ssl_options = NO_COMPRESSION
+tls_preempt_cipherlist = yes
 
 ###############
 # SASL

@@ -27,9 +27,9 @@ relayhost = {{ RELAYHOST }}
 ###############
 
 # Only one key/certificate pair is used, SNI not being supported by all
-# services and not a strong requirement.
-smtpd_use_tls = yes
-smtpd_tls_security_level = encrypt
+# services and not a strong requirement. Also, TLS is enforced for submission
+# and smtps in master.cf.
+smtpd_tls_security_level = may
 smtpd_tls_cert_file=/certs/cert.pem
 smtpd_tls_key_file=/certs/key.pem
 smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache

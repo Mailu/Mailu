@@ -36,7 +36,7 @@ def admin_create():
 
 
 @app.route('/admin/delete/<admin>', methods=['GET', 'POST'])
-@utils.confirmation_required("delete admin {admin }")
+@utils.confirmation_required("delete admin {admin}")
 @flask_login.login_required
 def admin_delete(admin):
     user = models.User.query.get(admin)

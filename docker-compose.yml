@@ -8,8 +8,8 @@ services:
     restart: always
     env_file: .env
     ports:
-      - "80:80"
-      - "443:443"
+      - "$BIND_ADDRESS:80:80"
+      - "$BIND_ADDRESS:443:443"
     volumes:
       - "$ROOT/certs:/certs"
 
@@ -25,8 +25,8 @@ services:
     restart: always
     env_file: .env
     ports:
-      - "143:143"
-      - "993:993"
+      - "$BIND_ADDRESS:143:143"
+      - "$BIND_ADDRESS:993:993"
     volumes:
       - "$ROOT/freeposte:/data"
       - "$ROOT/mail:/mail"
@@ -39,9 +39,9 @@ services:
     restart: always
     env_file: .env
     ports:
-      - "25:25"
-      - "465:465"
-      - "587:587"
+      - "$BIND_ADDRESS:25:25"
+      - "$BIND_ADDRESS:465:465"
+      - "$BIND_ADDRESS:587:587"
     volumes:
       - "$ROOT/freeposte:/data"
       - "$ROOT/certs:/certs"
@@ -84,7 +84,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   webmail:
-    # build: "$WEBMAIL"
+    build: "$WEBMAIL"
     image: "freeposte/$WEBMAIL:$VERSION"
     restart: always
     env_file: .env

@@ -15,7 +15,7 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.add_column('alias', sa.Column('wildcard', sa.Boolean(), nullable=True))
+    op.add_column('alias', sa.Column('wildcard', sa.Boolean(), nullable=False, default=False))
 
 
 def downgrade():

@@ -4,7 +4,7 @@ services:
 
   http:
     # build: nginx
-    image: freeposte/reverse-proxy
+    image: freeposte/reverse-proxy:$VERSION
     restart: always
     env_file: .env
     ports:
@@ -14,14 +14,14 @@ services:
       - "$ROOT/certs:/certs"
 
   redis:
-    image: redis
+    image: redis:latest
     restart: always
     volumes:
       - "$ROOT/redis:/data"
 
   imap:
     # build: dovecot
-    image: freeposte/dovecot
+    image: freeposte/dovecot:$VERSION
     restart: always
     env_file: .env
     ports:
@@ -35,7 +35,7 @@ services:
 
   smtp:
     # build: postfix
-    image: freeposte/postfix
+    image: freeposte/postfix:$VERSION
     restart: always
     env_file: .env
     ports:
@@ -49,7 +49,7 @@ services:
 
   milter:
     # build: rmilter
-    image: freeposte/rmilter
+    image: freeposte/rmilter:$VERSION
     restart: always
     env_file: .env
     volumes:
@@ -59,7 +59,7 @@ services:
 
   antispam:
     # build: rspamd
-    image: freeposte/rspamd
+    image: freeposte/rspamd:$VERSION
     restart: always
     env_file: .env
     volumes:
@@ -67,7 +67,7 @@ services:
 
   antivirus:
     # build: clamav
-    image: freeposte/clamav
+    image: freeposte/clamav:$VERSION
     restart: always
     env_file: .env
     volumes:
@@ -75,7 +75,7 @@ services:
 
   admin:
     # build: admin
-    image: freeposte/admin
+    image: freeposte/admin:$VERSION
     restart: always
     env_file: .env
     volumes:
@@ -85,7 +85,7 @@ services:
 
   webmail:
     # build: "$WEBMAIL"
-    image: "freeposte/$WEBMAIL"
+    image: "freeposte/$WEBMAIL:$VERSION"
     restart: always
     env_file: .env
     volumes:
@@ -93,7 +93,7 @@ services:
 
   fetchmail:
     # build: fetchmail
-    image: freeposte/fetchmail
+    image: freeposte/fetchmail:$VERSION
     restart: always
     env_file: .env
     volumes:

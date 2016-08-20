@@ -6,98 +6,95 @@ services:
     # build: nginx
     image: freeposte/reverse-proxy
     restart: always
-    env_file: freeposte.env
+    env_file: .env
     ports:
       - "80:80"
       - "443:443"
-    links:
-      - webmail
-      - admin
     volumes:
-      - /freeposte/certs:/certs
+      - "$ROOT/certs:/certs"
 
   redis:
     image: redis
     restart: always
     volumes:
-      - /freeposte/redis:/data
+      - "$ROOT/redis:/data"
 
   imap:
     # build: dovecot
     image: freeposte/dovecot
     restart: always
-    env_file: freeposte.env
+    env_file: .env
     ports:
       - "143:143"
       - "993:993"
     volumes:
-      - /freeposte/freeposte:/data
-      - /freeposte/mail:/mail
-      - /freeposte/certs:/certs
-      - /freeposte/overrides:/overrides
+      - "$ROOT/freeposte:/data"
+      - "$ROOT/mail:/mail"
+      - "$ROOT/certs:/certs"
+      - "$ROOT/overrides:/overrides"
 
   smtp:
     # build: postfix
     image: freeposte/postfix
     restart: always
-    env_file: freeposte.env
+    env_file: .env
     ports:
       - "25:25"
       - "465:465"
       - "587:587"
     volumes:
-      - /freeposte/freeposte:/data
-      - /freeposte/certs:/certs
-      - /freeposte/overrides:/overrides
+      - "$ROOT/freeposte:/data"
+      - "$ROOT/certs:/certs"
+      - "$ROOT/overrides:/overrides"
 
   milter:
     # build: rmilter
     image: freeposte/rmilter
     restart: always
-    env_file: freeposte.env
+    env_file: .env
     volumes:
-      - /freeposte/filter:/data
-      - /freeposte/dkim:/dkim
-      - /freeposte/overrides:/overrides
+      - "$ROOT/filter:/data"
+      - "$ROOT/dkim:/dkim"
+      - "$ROOT/overrides:/overrides"
 
   antispam:
     # build: rspamd
     image: freeposte/rspamd
     restart: always
-    env_file: freeposte.env
+    env_file: .env
     volumes:
-      - /freeposte/filter:/var/lib/rspamd
+      - "$ROOT/filter:/var/lib/rspamd"
 
   antivirus:
     # build: clamav
     image: freeposte/clamav
     restart: always
-    env_file: freeposte.env
+    env_file: .env
     volumes:
-      - /freeposte/filter:/data
+      - "$ROOT/filter:/data"
 
   admin:
     # build: admin
     image: freeposte/admin
     restart: always
-    env_file: freeposte.env
+    env_file: .env
     volumes:
-      - /freeposte/freeposte:/data
-      - /freeposte/dkim:/dkim
+      - "$ROOT/freeposte:/data"
+      - "$ROOT/dkim:/dkim"
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   webmail:
     # build: roundcube
     image: freeposte/roundcube
     restart: always
-    env_file: freeposte.env
+    env_file: .env
     volumes:
-      - /freeposte/webmail:/data
+      - "$ROOT/webmail:/data"
 
   fetchmail:
     # build: fetchmail
     image: freeposte/fetchmail
     restart: always
-    env_file: freeposte.env
+    env_file: .env
     volumes:
-      - /freeposte/freeposte:/data
+      - "$ROOT/freeposte:/data"

@@ -87,7 +87,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   webmail:
-    build: roundcube
+    # build: roundcube
     image: freeposte/roundcube
     restart: always
     env_file: freeposte.env
@@ -95,7 +95,7 @@ services:
       - /freeposte/webmail:/data
 
   fetchmail:
-    build: fetchmail
+    # build: fetchmail
     image: freeposte/fetchmail
     restart: always
     env_file: freeposte.env

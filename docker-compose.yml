@@ -84,8 +84,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   webmail:
-    # build: roundcube
-    image: freeposte/roundcube
+    # build: "$WEBMAIL"
+    image: "freeposte/$WEBMAIL"
     restart: always
     env_file: .env
     volumes:

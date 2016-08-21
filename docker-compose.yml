@@ -4,7 +4,7 @@ services:
 
   http:
     # build: nginx
-    image: freeposte/reverse-proxy:$VERSION
+    image: freeposte/$FRONTEND:$VERSION
     restart: always
     env_file: .env
     ports:

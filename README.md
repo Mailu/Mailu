@@ -35,8 +35,8 @@ Running a mail server
 
 Freeposte.io runs on top of Docker for easy packaging and upgrades. All you need
 is a proper system with Docker and Compose installed, then simply download
-the ``docker-compose.yml`` and sample ``freeposte.env``, tune them to your
-needs and fire up the mail server:
+the ``docker-compose.yml`` and sample ``.env``, tune them to your needs and
+fire up the mail server:
 
 ```
 docker-compose up -d

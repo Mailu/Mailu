@@ -74,17 +74,19 @@ services:
       - "$ROOT/filter:/data"
 
   admin:
-    # build: admin
+    build: admin
     image: freeposte/admin:$VERSION
     restart: always
     env_file: .env
+    ports:
+      - "127.0.0.1:8000:80"
     volumes:
       - "$ROOT/freeposte:/data"
       - "$ROOT/dkim:/dkim"
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   webmail:
-    build: "$WEBMAIL"
+    # build: "$WEBMAIL"
     image: "freeposte/$WEBMAIL:$VERSION"
     restart: always
     env_file: .env

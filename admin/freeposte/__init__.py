@@ -44,6 +44,10 @@ manager.add_command('db', flask_migrate.MigrateCommand)
 # Connect to the Docker socket
 dockercli = docker.Client(base_url=app.config['DOCKER_SOCKET'])
 
-# Finally setup the blueprint
+# Finally setup the blueprint and redirect /
 from freeposte import admin
 app.register_blueprint(admin.app, url_prefix='/admin')
+
+@app.route("/")
+def index():
+    return flask.redirect(flask.url_for("admin.index"))

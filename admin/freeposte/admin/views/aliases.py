@@ -1,4 +1,4 @@
-from freeposte.admin import app, db, models, forms, utils
+from freeposte.admin import app, db, models, forms, access
 
 import os
 import flask
@@ -7,16 +7,16 @@ import wtforms_components
 
 
 @app.route('/alias/list/<domain_name>', methods=['GET'])
-@flask_login.login_required
+@access.domain_admin(models.Domain, 'domain_name')
 def alias_list(domain_name):
-    domain = utils.get_domain_admin(domain_name)
+    domain = models.Domain.query.get(domain_name) or flask.abort(404)
     return flask.render_template('alias/list.html', domain=domain)
 
 
 @app.route('/alias/create/<domain_name>', methods=['GET', 'POST'])
-@flask_login.login_required
+@access.domain_admin(models.Domain, 'domain_name')
 def alias_create(domain_name):
-    domain = utils.get_domain_admin(domain_name)
+    domain = models.Domain.query.get(domain_name) or flask.abort(404)
     if domain.max_aliases and len(domain.aliases) >= domain.max_aliases:
         flask.flash('Too many aliases for domain %s' % domain, 'error')
         return flask.redirect(
@@ -38,9 +38,9 @@ def alias_create(domain_name):
 
 
 @app.route('/alias/edit/<alias>', methods=['GET', 'POST'])
-@flask_login.login_required
+@access.domain_admin(models.Alias, 'alias')
 def alias_edit(alias):
-    alias = utils.get_alias(alias)
+    alias = models.Alias.query.get(alias) or flask.abort(404)
     form = forms.AliasForm(obj=alias)
     wtforms_components.read_only(form.localpart)
     if form.validate_on_submit():
@@ -54,10 +54,10 @@ def alias_edit(alias):
 
 
 @app.route('/alias/delete/<alias>', methods=['GET', 'POST'])
-@utils.confirmation_required("delete {alias}")
-@flask_login.login_required
+@access.domain_admin(models.Alias, 'alias')
+@access.confirmation_required("delete {alias}")
 def alias_delete(alias):
-    alias = utils.get_alias(alias)
+    alias = models.Alias.query.get(alias) or flask.abort(404)
     db.session.delete(alias)
     db.session.commit()
     flask.flash('Alias %s deleted' % alias)

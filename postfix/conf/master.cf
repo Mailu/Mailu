@@ -7,11 +7,17 @@ submission inet n       -       n       -       -       smtpd
   -o smtpd_tls_security_level=encrypt
   -o smtpd_sasl_auth_enable=yes
   -o smtpd_client_restrictions=permit_sasl_authenticated,reject
+  -o cleanup_service_name=outclean
 smtps     inet  n       -       n       -       -       smtpd
   -o smtpd_tls_security_level=encrypt
   -o smtpd_sasl_auth_enable=yes
   -o smtpd_tls_wrappermode=yes
   -o smtpd_client_restrictions=permit_sasl_authenticated,reject
+  -o cleanup_service_name=outclean
+
+# Additional services
+outclean   unix n       -       n       -       0       cleanup
+  -o header_checks=pcre:/etc/postfix/outclean_header_filter
 
 # Internal postfix services
 pickup    unix  n       -       n       60      1       pickup

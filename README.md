@@ -1,3 +1,5 @@
+![Logo](logo.svg)
+
 Freeposte.io
 ============
 

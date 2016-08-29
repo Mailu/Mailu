@@ -37,18 +37,17 @@ def manager_create(domain_name):
         domain=domain, form=form)
 
 
-# TODO For now the deletion behaviour is broken and reserved to
-# global admins.
-@app.route('/manager/delete/<manager>', methods=['GET', 'POST'])
-@access.confirmation_required("remove manager {manager}")
-@access.global_admin
-def manager_delete(manager):
-    user = models.User.query.get(manager)
-    if user in user.domain.managers:
-        user.domain.managers.remove(user)
+@app.route('/manager/delete/<domain_name>/<user_email>', methods=['GET', 'POST'])
+@access.confirmation_required("remove manager {user_email}")
+@access.domain_admin(models.Domain, 'domain_name')
+def manager_delete(domain_name, user_email):
+    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    user = models.User.query.get(user_email) or flask.abort(404)
+    if user in domain.managers:
+        domain.managers.remove(user)
         db.session.commit()
-        flask.flash('User %s can no longer manager %s' % (user, user.domain))
+        flask.flash('User %s can no longer manager %s' % (user, domain))
     else:
         flask.flash('User %s is not manager' % user, 'error')
     return flask.redirect(
-        flask.url_for('.manager_list', domain_name=user.domain.name))
+        flask.url_for('.manager_list', domain_name=domain_name))

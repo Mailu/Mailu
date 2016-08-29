@@ -25,6 +25,7 @@ def permissions_wrapper(handler):
                 @functools.wraps(function)
                 def wrapper(*args, **kwargs):
                     return callback(function, args, kwargs, dargs, dkwargs)
+                wrapper._audit_permissions = handler, dargs
                 return flask_login.login_required(wrapper)
             return inner
     else:
@@ -32,6 +33,7 @@ def permissions_wrapper(handler):
             @functools.wraps(function)
             def wrapper(*args, **kwargs):
                 return callback(function, args, kwargs, (), {})
+            wrapper._audit_permissions = handler, []
             return flask_login.login_required(wrapper)
     return decorator
 

@@ -1,8 +1,6 @@
 from freeposte.admin import app, db, models, forms, access
 
-import os
 import flask
-import flask_login
 import wtforms_components
 
 

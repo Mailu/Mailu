@@ -1,6 +1,5 @@
-from freeposte.admin import app, db, models, forms, utils, access
+from freeposte.admin import app, db, models, forms, access
 
-import os
 import flask
 import flask_login
 import wtforms_components
@@ -58,7 +57,7 @@ def user_edit(user_email):
 
 @app.route('/user/delete/<user_email>', methods=['GET', 'POST'])
 @access.domain_admin(models.User, 'user_email')
-@utils.confirmation_required("delete {user_email}")
+@access.confirmation_required("delete {user_email}")
 def user_delete(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     db.session.delete(user)

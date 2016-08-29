@@ -1,7 +1,6 @@
 from freeposte import dockercli
-from freeposte.admin import app, db, models, forms, utils, access
+from freeposte.admin import app, db, models, forms, access
 
-import os
 import flask
 import flask_login
 
@@ -35,7 +34,6 @@ def logout():
 @app.route('/services', methods=['GET'])
 @access.global_admin
 def services():
-    utils.require_global_admin()
     containers = {}
     for brief in dockercli.containers(all=True):
         if brief['Image'].startswith('freeposte/'):

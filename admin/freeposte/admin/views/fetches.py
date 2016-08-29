@@ -1,9 +1,7 @@
-from freeposte.admin import app, db, models, forms, utils, access
+from freeposte.admin import app, db, models, forms, access
 
-import os
 import flask
 import flask_login
-import wtforms_components
 
 
 @app.route('/fetch/list', methods=['GET', 'POST'], defaults={'user_email': None})
@@ -49,7 +47,7 @@ def fetch_edit(fetch_id):
 
 
 @app.route('/fetch/delete/<fetch_id>', methods=['GET', 'POST'])
-@utils.confirmation_required("delete a fetched account")
+@access.confirmation_required("delete a fetched account")
 @access.owner(models.Fetch, 'fetch_id')
 def fetch_delete(fetch_id):
     fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)

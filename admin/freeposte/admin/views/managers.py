@@ -1,9 +1,7 @@
-from freeposte.admin import app, db, models, forms, utils, access
+from freeposte.admin import app, db, models, forms, access
 
-import os
 import flask
 import flask_login
-import wtforms_components
 
 
 @app.route('/manager/list/<domain_name>', methods=['GET'])
@@ -18,13 +16,16 @@ def manager_list(domain_name):
 def manager_create(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     form = forms.ManagerForm()
+    available_users = flask_login.current_user.get_managed_emails(
+        include_aliases=False)
     form.manager.choices = [
-        (user.email, user.email) for user in
-        flask_login.current_user.get_managed_emails(include_aliases=False)
+        (user.email, user.email) for user in available_users
     ]
     if form.validate_on_submit():
-        user = utils.get_user(form.manager.data, admin=True)
-        if user in domain.managers:
+        user = models.User.query.get(form.manager.data)
+        if user not in available_users:
+            flask.abort(403)
+        elif user in domain.managers:
             flask.flash('User %s is already manager' % user, 'error')
         else:
             domain.managers.append(user)
@@ -36,18 +37,18 @@ def manager_create(domain_name):
         domain=domain, form=form)
 
 
+# TODO For now the deletion behaviour is broken and reserved to
+# global admins.
 @app.route('/manager/delete/<manager>', methods=['GET', 'POST'])
-@utils.confirmation_required("remove manager {manager}")
-@flask_login.login_required
+@access.confirmation_required("remove manager {manager}")
+@access.global_admin
 def manager_delete(manager):
-    # TODO fix this behaviour
-    user = utils.get_user(manager, admin=True)
-    domain = utils.get_domain_admin(user.domain_name)
-    if user in domain.managers:
-        domain.managers.remove(user)
+    user = models.User.query.get(manager)
+    if user in user.domain.managers:
+        user.domain.managers.remove(user)
         db.session.commit()
-        flask.flash('User %s can no longer manager %s' % (user, domain))
+        flask.flash('User %s can no longer manager %s' % (user, user.domain))
     else:
         flask.flash('User %s is not manager' % user, 'error')
     return flask.redirect(
-        flask.url_for('.manager_list', domain_name=domain.name))
+        flask.url_for('.manager_list', domain_name=user.domain.name))

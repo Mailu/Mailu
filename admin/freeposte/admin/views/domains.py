@@ -1,9 +1,7 @@
-from freeposte.admin import app, db, models, forms, utils, access
+from freeposte.admin import app, db, models, forms, access
 from freeposte import app as flask_app
 
-import os
 import flask
-import flask_login
 import wtforms_components
 
 
@@ -47,7 +45,7 @@ def domain_edit(domain_name):
 
 @app.route('/domain/delete/<domain_name>', methods=['GET', 'POST'])
 @access.global_admin
-@utils.confirmation_required("delete {domain_name}")
+@access.confirmation_required("delete {domain_name}")
 def domain_delete(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     db.session.delete(domain)
@@ -66,7 +64,7 @@ def domain_details(domain_name):
 
 @app.route('/domain/genkeys/<domain_name>', methods=['GET', 'POST'])
 @access.domain_admin(models.Domain, 'domain_name')
-@utils.confirmation_required("regenerate keys for {domain_name}")
+@access.confirmation_required("regenerate keys for {domain_name}")
 def domain_genkeys(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     domain.generate_dkim_key()

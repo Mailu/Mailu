@@ -40,11 +40,21 @@ def permissions_wrapper(handler):
 
 @permissions_wrapper
 def global_admin(args, kwargs):
+    """ The view is only available to global administrators.
+    """
     return flask_login.current_user.global_admin
 
 
 @permissions_wrapper
 def domain_admin(args, kwargs, model, key):
+    """ The view is only available to specific domain admins.
+    Global admins will still be able to access the resource.
+
+    A model and key must be provided. The model will be queries
+    based on the query parameter named after the key. The model may
+    either be Domain or an Email subclass (or any class with a
+    ``domain`` attribute which stores a related Domain instance).
+    """
     obj = model.query.get(kwargs[key])
     if not obj:
         flask.abort(404)
@@ -55,12 +65,20 @@ def domain_admin(args, kwargs, model, key):
 
 @permissions_wrapper
 def owner(args, kwargs, model, key):
-    # if no key is provided but the model is User, then return the current
-    # user
+    """ The view is only available to the resource owner or manager.
+
+    A model and key must be provided. The model will be queries
+    based on the query parameter named after the key. The model may
+    either be User or any model with a ``user`` attribute storing
+    a user instance (like Fetch).
+
+    If the query parameter is empty and the model is User, then
+    the resource being accessed is supposed to be the current
+    logged in user and access is obviously authorized.
+    """
     if kwargs[key] is None and model == models.User:
-        obj = model.query.get(flask_login.current_user.email)
-    else:
-        obj = model.query.get(kwargs[key])
+        return True
+    obj = model.query.get(kwargs[key])
     if not obj:
         flask.abort(404)
     else:
@@ -73,6 +91,8 @@ def owner(args, kwargs, model, key):
 
 @permissions_wrapper
 def authenticated(args, kwargs):
+    """ The view is only available to logged in users.
+    """
     return True
 
 

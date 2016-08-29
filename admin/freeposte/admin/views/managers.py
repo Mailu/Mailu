@@ -1,4 +1,4 @@
-from freeposte.admin import app, db, models, forms, utils
+from freeposte.admin import app, db, models, forms, utils, access
 
 import os
 import flask
@@ -7,16 +7,16 @@ import wtforms_components
 
 
 @app.route('/manager/list/<domain_name>', methods=['GET'])
-@flask_login.login_required
+@access.domain_admin(models.Domain, 'domain_name')
 def manager_list(domain_name):
-    domain = utils.get_domain_admin(domain_name)
+    domain = models.Domain.query.get(domain_name) or flask.abort(404)
     return flask.render_template('manager/list.html', domain=domain)
 
 
 @app.route('/manager/create/<domain_name>', methods=['GET', 'POST'])
-@flask_login.login_required
+@access.domain_admin(models.Domain, 'domain_name')
 def manager_create(domain_name):
-    domain = utils.get_domain_admin(domain_name)
+    domain = models.Domain.query.get(domain_name) or flask.abort(404)
     form = forms.ManagerForm()
     form.manager.choices = [
         (user.email, user.email) for user in
@@ -40,6 +40,7 @@ def manager_create(domain_name):
 @utils.confirmation_required("remove manager {manager}")
 @flask_login.login_required
 def manager_delete(manager):
+    # TODO fix this behaviour
     user = utils.get_user(manager, admin=True)
     domain = utils.get_domain_admin(user.domain_name)
     if user in domain.managers:

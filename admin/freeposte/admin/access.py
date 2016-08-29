@@ -53,7 +53,12 @@ def domain_admin(args, kwargs, model, key):
 
 @permissions_wrapper
 def owner(args, kwargs, model, key):
-    obj = model.query.get(kwargs[key])
+    # if no key is provided but the model is User, then return the current
+    # user
+    if kwargs[key] is None and model == models.User:
+        obj = model.query.get(flask_login.current_user.email)
+    else:
+        obj = model.query.get(kwargs[key])
     if not obj:
         flask.abort(404)
     else:

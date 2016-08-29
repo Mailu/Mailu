@@ -29,7 +29,7 @@ def domain_create():
 
 
 @app.route('/domain/edit/<domain_name>', methods=['GET', 'POST'])
-@access.domain_admin(models.Domain, 'domain_name')
+@access.global_admin
 def domain_edit(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     form = forms.DomainForm(obj=domain)

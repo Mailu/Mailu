@@ -10,3 +10,4 @@ PyOpenSSL
 passlib
 gunicorn
 docker-py
+tabulate

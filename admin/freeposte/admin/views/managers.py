@@ -1,30 +1,31 @@
-from freeposte.admin import app, db, models, forms, utils
+from freeposte.admin import app, db, models, forms, access
 
-import os
 import flask
 import flask_login
-import wtforms_components
 
 
 @app.route('/manager/list/<domain_name>', methods=['GET'])
-@flask_login.login_required
+@access.domain_admin(models.Domain, 'domain_name')
 def manager_list(domain_name):
-    domain = utils.get_domain_admin(domain_name)
+    domain = models.Domain.query.get(domain_name) or flask.abort(404)
     return flask.render_template('manager/list.html', domain=domain)
 
 
 @app.route('/manager/create/<domain_name>', methods=['GET', 'POST'])
-@flask_login.login_required
+@access.domain_admin(models.Domain, 'domain_name')
 def manager_create(domain_name):
-    domain = utils.get_domain_admin(domain_name)
+    domain = models.Domain.query.get(domain_name) or flask.abort(404)
     form = forms.ManagerForm()
+    available_users = flask_login.current_user.get_managed_emails(
+        include_aliases=False)
     form.manager.choices = [
-        (user.email, user.email) for user in
-        flask_login.current_user.get_managed_emails(include_aliases=False)
+        (user.email, user.email) for user in available_users
     ]
     if form.validate_on_submit():
-        user = utils.get_user(form.manager.data, admin=True)
-        if user in domain.managers:
+        user = models.User.query.get(form.manager.data)
+        if user not in available_users:
+            flask.abort(403)
+        elif user in domain.managers:
             flask.flash('User %s is already manager' % user, 'error')
         else:
             domain.managers.append(user)
@@ -36,12 +37,12 @@ def manager_create(domain_name):
         domain=domain, form=form)
 
 
-@app.route('/manager/delete/<manager>', methods=['GET', 'POST'])
-@utils.confirmation_required("remove manager {manager}")
-@flask_login.login_required
-def manager_delete(manager):
-    user = utils.get_user(manager, admin=True)
-    domain = utils.get_domain_admin(user.domain_name)
+@app.route('/manager/delete/<domain_name>/<user_email>', methods=['GET', 'POST'])
+@access.confirmation_required("remove manager {user_email}")
+@access.domain_admin(models.Domain, 'domain_name')
+def manager_delete(domain_name, user_email):
+    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    user = models.User.query.get(user_email) or flask.abort(404)
     if user in domain.managers:
         domain.managers.remove(user)
         db.session.commit()
@@ -49,4 +50,4 @@ def manager_delete(manager):
     else:
         flask.flash('User %s is not manager' % user, 'error')
     return flask.redirect(
-        flask.url_for('.manager_list', domain_name=domain.name))
+        flask.url_for('.manager_list', domain_name=domain_name))

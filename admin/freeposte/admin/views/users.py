@@ -1,22 +1,21 @@
-from freeposte.admin import app, db, models, forms, utils
+from freeposte.admin import app, db, models, forms, access
 
-import os
 import flask
 import flask_login
 import wtforms_components
 
 
 @app.route('/user/list/<domain_name>', methods=['GET'])
-@flask_login.login_required
+@access.domain_admin(models.Domain, 'domain_name')
 def user_list(domain_name):
-    domain = utils.get_domain_admin(domain_name)
+    domain = models.Domain.query.get(domain_name) or flask.abort(404)
     return flask.render_template('user/list.html', domain=domain)
 
 
 @app.route('/user/create/<domain_name>', methods=['GET', 'POST'])
-@flask_login.login_required
+@access.domain_admin(models.Domain, 'domain_name')
 def user_create(domain_name):
-    domain = utils.get_domain_admin(domain_name)
+    domain = models.Domain.query.get(domain_name) or flask.abort(404)
     if domain.max_users and len(domain.users) >= domain.max_users:
         flask.flash('Too many users for domain %s' % domain, 'error')
         return flask.redirect(
@@ -39,9 +38,9 @@ def user_create(domain_name):
 
 
 @app.route('/user/edit/<user_email>', methods=['GET', 'POST'])
-@flask_login.login_required
+@access.domain_admin(models.User, 'user_email')
 def user_edit(user_email):
-    user = utils.get_user(user_email, True)
+    user = models.User.query.get(user_email) or flask.abort(404)
     form = forms.UserForm(obj=user)
     wtforms_components.read_only(form.localpart)
     form.pw.validators = []
@@ -57,10 +56,10 @@ def user_edit(user_email):
 
 
 @app.route('/user/delete/<user_email>', methods=['GET', 'POST'])
-@utils.confirmation_required("delete {user_email}")
-@flask_login.login_required
+@access.domain_admin(models.User, 'user_email')
+@access.confirmation_required("delete {user_email}")
 def user_delete(user_email):
-    user = utils.get_user(user_email, True)
+    user = models.User.query.get(user_email) or flask.abort(404)
     db.session.delete(user)
     db.session.commit()
     flask.flash('User %s deleted' % user)
@@ -70,9 +69,10 @@ def user_delete(user_email):
 
 @app.route('/user/settings', methods=['GET', 'POST'], defaults={'user_email': None})
 @app.route('/user/usersettings/<user_email>', methods=['GET', 'POST'])
-@flask_login.login_required
+@access.owner(models.User, 'user_email')
 def user_settings(user_email):
-    user = utils.get_user(user_email)
+    user_email = user_email or flask_login.current_user.email
+    user = models.User.query.get(user_email) or flask.abort(404)
     form = forms.UserSettingsForm(obj=user)
     if form.validate_on_submit():
         form.populate_obj(user)
@@ -86,9 +86,10 @@ def user_settings(user_email):
 
 @app.route('/user/password', methods=['GET', 'POST'], defaults={'user_email': None})
 @app.route('/user/password/<user_email>', methods=['GET', 'POST'])
-@flask_login.login_required
+@access.owner(models.User, 'user_email')
 def user_password(user_email):
-    user = utils.get_user(user_email)
+    user_email = user_email or flask_login.current_user.email
+    user = models.User.query.get(user_email) or flask.abort(404)
     form = forms.UserPasswordForm()
     if form.validate_on_submit():
         if form.pw.data != form.pw2.data:
@@ -105,9 +106,10 @@ def user_password(user_email):
 
 @app.route('/user/forward', methods=['GET', 'POST'], defaults={'user_email': None})
 @app.route('/user/forward/<user_email>', methods=['GET', 'POST'])
-@flask_login.login_required
+@access.owner(models.User, 'user_email')
 def user_forward(user_email):
-    user = utils.get_user(user_email)
+    user_email = user_email or flask_login.current_user.email
+    user = models.User.query.get(user_email) or flask.abort(404)
     form = forms.UserForwardForm(obj=user)
     if form.validate_on_submit():
         form.populate_obj(user)
@@ -121,9 +123,10 @@ def user_forward(user_email):
 
 @app.route('/user/reply', methods=['GET', 'POST'], defaults={'user_email': None})
 @app.route('/user/reply/<user_email>', methods=['GET', 'POST'])
-@flask_login.login_required
+@access.owner(models.User, 'user_email')
 def user_reply(user_email):
-    user = utils.get_user(user_email)
+    user_email = user_email or flask_login.current_user.email
+    user = models.User.query.get(user_email) or flask.abort(404)
     form = forms.UserReplyForm(obj=user)
     if form.validate_on_submit():
         form.populate_obj(user)

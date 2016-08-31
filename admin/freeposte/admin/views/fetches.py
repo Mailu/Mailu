@@ -1,24 +1,24 @@
-from freeposte.admin import app, db, models, forms, utils
+from freeposte.admin import app, db, models, forms, access
 
-import os
 import flask
 import flask_login
-import wtforms_components
 
 
 @app.route('/fetch/list', methods=['GET', 'POST'], defaults={'user_email': None})
 @app.route('/fetch/list/<user_email>', methods=['GET'])
-@flask_login.login_required
+@access.owner(models.User, 'user_email')
 def fetch_list(user_email):
-    user = utils.get_user(user_email)
+    user_email = user_email or flask_login.current_user.email
+    user = models.User.query.get(user_email) or flask.abort(404)
     return flask.render_template('fetch/list.html', user=user)
 
 
 @app.route('/fetch/create', methods=['GET', 'POST'], defaults={'user_email': None})
 @app.route('/fetch/create/<user_email>', methods=['GET', 'POST'])
-@flask_login.login_required
+@access.owner(models.User, 'user_email')
 def fetch_create(user_email):
-    user = utils.get_user(user_email)
+    user_email = user_email or flask_login.current_user.email
+    user = models.User.query.get(user_email) or flask.abort(404)
     form = forms.FetchForm()
     if form.validate_on_submit():
         fetch = models.Fetch(user=user)
@@ -32,9 +32,9 @@ def fetch_create(user_email):
 
 
 @app.route('/fetch/edit/<fetch_id>', methods=['GET', 'POST'])
-@flask_login.login_required
+@access.owner(models.Fetch, 'fetch_id')
 def fetch_edit(fetch_id):
-    fetch = utils.get_fetch(fetch_id)
+    fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
     form = forms.FetchForm(obj=fetch)
     if form.validate_on_submit():
         form.populate_obj(fetch)
@@ -47,10 +47,10 @@ def fetch_edit(fetch_id):
 
 
 @app.route('/fetch/delete/<fetch_id>', methods=['GET', 'POST'])
-@utils.confirmation_required("delete a fetched account")
-@flask_login.login_required
+@access.confirmation_required("delete a fetched account")
+@access.owner(models.Fetch, 'fetch_id')
 def fetch_delete(fetch_id):
-    fetch = utils.get_fetch(fetch_id)
+    fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
     db.session.delete(fetch)
     db.session.commit()
     flask.flash('Fetch configuration delete')

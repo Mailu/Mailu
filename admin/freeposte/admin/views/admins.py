@@ -1,24 +1,19 @@
-from freeposte.admin import app, db, models, forms, utils
+from freeposte.admin import app, db, models, forms, access
 
-import os
-import pprint
 import flask
 import flask_login
-import json
 
 
 @app.route('/admin/list', methods=['GET'])
-@flask_login.login_required
+@access.global_admin
 def admin_list():
-    utils.require_global_admin()
     admins = models.User.query.filter_by(global_admin=True)
     return flask.render_template('admin/list.html', admins=admins)
 
 
 @app.route('/admin/create', methods=['GET', 'POST'])
-@flask_login.login_required
+@access.global_admin
 def admin_create():
-    utils.require_global_admin()
     form = forms.AdminForm()
     form.admin.choices = [
         (user.email, user.email)
@@ -38,10 +33,9 @@ def admin_create():
 
 
 @app.route('/admin/delete/<admin>', methods=['GET', 'POST'])
-@utils.confirmation_required("delete admin {admin}")
-@flask_login.login_required
+@access.global_admin
+@access.confirmation_required("delete admin {admin}")
 def admin_delete(admin):
-    utils.require_global_admin()
     user = models.User.query.get(admin)
     if user:
         user.global_admin  = False

@@ -22,7 +22,7 @@ Manager list
     {% for manager in domain.managers %}
     <tr>
       <td>
-        <a href="{{ url_for('.manager_delete', manager=manager.email) }}" title="Delete"><i class="fa fa-trash"></i></a>
+        <a href="{{ url_for('.manager_delete', domain_name=domain.name, user_email=manager.email) }}" title="Delete"><i class="fa fa-trash"></i></a>
       </td>
       <td>{{ manager }}</td>
     </tr>

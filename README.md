@@ -17,7 +17,7 @@ same level of functionality and still be able to host a complete mail server
 at little cost while running only FOSS, applying the KISS principle and being
 able to fine-tune some details if needed.
 
-Join us on Freenode (IRC) : ``#freeposte.io``.
+[Try it out on our demo server](https://github.com/kaiyou/freeposte.io/wiki/Demo-server).
 
 Features
 ========

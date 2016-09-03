@@ -25,7 +25,7 @@ Features
 Main features include:
 
 - **Standard email server**, IMAP and IMAP+, SMTP and Submission
-- **Web access**, Roundcube-based Webmail and adminitration interface
+- **Web access**, multiple Webmails and adminitration interface
 - **User features**, aliases, auto-reply, auto-forward, fetched accounts
 - **Admin features**, global admins, per-domain delegation, quotas
 - **Security**, enforced TLS, outgoing DKIM, anti-virus scanner

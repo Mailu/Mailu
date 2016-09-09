@@ -21,14 +21,16 @@ def initdb():
 def admin(localpart, domain_name, password):
     """ Create an admin user
     """
-    domain = models.Domain(name=domain_name)
+    domain = models.Domain.query.get(domain_name)
+    if not domain:
+        domain = models.Domain(name=domain_name)
+        db.session.add(domain)
     user = models.User(
         localpart=localpart,
         domain=domain,
         global_admin=True,
         password=hash.sha512_crypt.encrypt(password)
     )
-    db.session.add(domain)
     db.session.add(user)
     db.session.commit()
 

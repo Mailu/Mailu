@@ -3,7 +3,7 @@ version: '2'
 services:
 
   http:
-    # build: nginx
+    # build: $FRONTEND
     image: freeposte/$FRONTEND:$VERSION
     restart: always
     env_file: .env

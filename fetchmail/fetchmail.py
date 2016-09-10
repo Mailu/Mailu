@@ -4,6 +4,7 @@ import sqlite3
 import time
 import os
 import tempfile
+import shlex
 
 
 FETCHMAIL = """
@@ -14,19 +15,24 @@ fetchmail -N \
 
 
 RC_LINE = """
-poll {host} proto {protocol} port {port}
+poll "{host}" proto {protocol} port {port}
     user "{username}" password "{password}"
     smtphost "smtp"
-    smtpname {user_email}
+    smtpname "{user_email}"
     {options}
 """
 
 
+def escape_rc_string(arg):
+    return arg.replace("\\", "\\\\").replace('"', '\\"')
+
+
 def fetchmail(fetchmailrc):
+    print(fetchmailrc)
     with tempfile.NamedTemporaryFile() as handler:
         handler.write(fetchmailrc.encode("utf8"))
         handler.flush()
-        os.system(FETCHMAIL.format(handler.name))
+        os.system(FETCHMAIL.format(shlex.quote(handler.name)))
 
 
 def run(cursor):
@@ -39,12 +45,12 @@ def run(cursor):
         user_email, protocol, host, port, tls, username, password = line
         options = "options ssl" if tls else ""
         fetchmailrc += RC_LINE.format(
-            user_email=user_email,
+            user_email=escape_rc_string(user_email),
             protocol=protocol,
-            host=host,
+            host=escape_rc_string(host),
             port=port,
-            username=username,
-            password=password,
+            username=escape_rc_string(username),
+            password=escape_rc_string(password),
             options=options
         )
     fetchmail(fetchmailrc)

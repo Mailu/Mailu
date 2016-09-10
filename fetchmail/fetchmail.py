@@ -5,6 +5,7 @@ import time
 import os
 import tempfile
 import shlex
+import subprocess
 
 
 FETCHMAIL = """
@@ -28,20 +29,21 @@ def escape_rc_string(arg):
 
 
 def fetchmail(fetchmailrc):
-    print(fetchmailrc)
     with tempfile.NamedTemporaryFile() as handler:
         handler.write(fetchmailrc.encode("utf8"))
         handler.flush()
-        os.system(FETCHMAIL.format(shlex.quote(handler.name)))
+        command = FETCHMAIL.format(shlex.quote(handler.name))
+        output = subprocess.check_output(command, shell=True)
+        return output
 
 
-def run(cursor):
+def run(connection, cursor):
     cursor.execute("""
         SELECT user_email, protocol, host, port, tls, username, password
         FROM fetch
     """)
-    fetchmailrc = ""
     for line in cursor.fetchall():
+        fetchmailrc = ""
         user_email, protocol, host, port, tls, username, password = line
         options = "options ssl" if tls else ""
         fetchmailrc += RC_LINE.format(
@@ -53,7 +55,19 @@ def run(cursor):
             password=escape_rc_string(password),
             options=options
         )
-    fetchmail(fetchmailrc)
+        try:
+            print(fetchmail(fetchmailrc))
+            error_message = ""
+        except subprocess.CalledProcessError as error:
+            error_message = error.output.decode("utf8")
+            print(error.output)
+        finally:
+            cursor.execute("""
+                UPDATE fetch SET error=?, last_check=datetime('now')
+                WHERE user_email=?
+            """, (error_message.split("\n")[0], user_email))
+            connection.commit()
+
 
 
 if __name__ == "__main__":
@@ -62,5 +76,5 @@ if __name__ == "__main__":
     while True:
         time.sleep(int(os.environ.get("FETCHMAIL_DELAY", 10)))
         cursor = connection.cursor()
-        run(cursor)
+        run(connection, cursor)
         cursor.close()

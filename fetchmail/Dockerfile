@@ -7,8 +7,4 @@ RUN apk add --update \
 
 COPY fetchmail.py /fetchmail.py
 
-RUN mkdir /var/spool/mail \
- && chown mail: /var/spool/mail
-USER mail
-
 CMD ["/fetchmail.py"]

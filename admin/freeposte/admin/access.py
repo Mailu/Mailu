@@ -56,9 +56,7 @@ def domain_admin(args, kwargs, model, key):
     ``domain`` attribute which stores a related Domain instance).
     """
     obj = model.query.get(kwargs[key])
-    if not obj:
-        flask.abort(404)
-    else:
+    if obj:
         domain = obj if type(obj) is models.Domain else obj.domain
         return domain in flask_login.current_user.get_managed_domains()
 
@@ -79,9 +77,7 @@ def owner(args, kwargs, model, key):
     if kwargs[key] is None and model == models.User:
         return True
     obj = model.query.get(kwargs[key])
-    if not obj:
-        flask.abort(404)
-    else:
+    if obj:
         user = obj if type(obj) is models.User else obj.user
         return (
             user.email == flask_login.current_user.email

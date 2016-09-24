@@ -7,6 +7,9 @@ mydomain = {{ DOMAIN }}
 myhostname = {{ HOSTNAME }}
 myorigin = $mydomain
 
+# Message size limit
+message_size_limit = {{ MESSAGE_SIZE_LIMIT }}
+
 # Relayed networks
 mynetworks = 127.0.0.1/32 [::1]/128 {{ RELAYNETS }}
 

@@ -8,16 +8,14 @@ require "regex";
 require "relational";
 require "comparator-i;ascii-numeric";
 require "vnd.dovecot.extdata";
+require "spamtestplus";
 
 if allof (string :is "${extdata.spam_enabled}" "1",
-          not header :matches "X-Spam-Status" "* score=-*",
-          header :matches "X-Spam-Status" "* score=*")
+          spamtest :percent :value "gt" :comparator "i;ascii-numeric"  "${extdata.spam_threshold}")
 {
-  if string :value "ge" :comparator "i;ascii-numeric" "${2}" "${extdata.spam_threshold}" {
-    setflag "\\seen";
-    fileinto :create "Junk";
-    stop;
-  }
+  setflag "\\seen";
+  fileinto :create "Junk";
+  stop;
 }
 
 if string :is "${extdata.reply_enabled}" "1" {

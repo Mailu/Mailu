@@ -90,6 +90,12 @@ class Domain(Base):
     def __str__(self):
         return self.name
 
+    def __eq__(self, other):
+        try:
+            return self.name == other.name
+        except AttributeError:
+            return False
+
 
 class Email(Base):
     """ Abstraction for an email address (localpart and domain).

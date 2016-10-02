@@ -32,7 +32,7 @@ class DestinationField(fields.SelectMultipleField):
                 raise validators.ValidationError(_('Invalid email address.'))
 
 
-class Confirmation(flask_wtf.FlaskForm):
+class ConfirmationForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Confirm'))
 
 

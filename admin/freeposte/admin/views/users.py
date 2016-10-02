@@ -71,8 +71,8 @@ def user_delete(user_email):
 @app.route('/user/usersettings/<user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def user_settings(user_email):
-    user_email = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email) or flask.abort(404)
+    user_email_or_current = user_email or flask_login.current_user.email
+    user = models.User.query.get(user_email_or_current) or flask.abort(404)
     form = forms.UserSettingsForm(obj=user)
     if form.validate_on_submit():
         form.populate_obj(user)
@@ -88,8 +88,8 @@ def user_settings(user_email):
 @app.route('/user/password/<user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def user_password(user_email):
-    user_email = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email) or flask.abort(404)
+    user_email_or_current = user_email or flask_login.current_user.email
+    user = models.User.query.get(user_email_or_current) or flask.abort(404)
     form = forms.UserPasswordForm()
     if form.validate_on_submit():
         if form.pw.data != form.pw2.data:
@@ -108,8 +108,8 @@ def user_password(user_email):
 @app.route('/user/forward/<user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def user_forward(user_email):
-    user_email = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email) or flask.abort(404)
+    user_email_or_current = user_email or flask_login.current_user.email
+    user = models.User.query.get(user_email_or_current) or flask.abort(404)
     form = forms.UserForwardForm(obj=user)
     if form.validate_on_submit():
         form.populate_obj(user)
@@ -125,8 +125,8 @@ def user_forward(user_email):
 @app.route('/user/reply/<user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def user_reply(user_email):
-    user_email = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email) or flask.abort(404)
+    user_email_or_current = user_email or flask_login.current_user.email
+    user = models.User.query.get(user_email_or_current) or flask.abort(404)
     form = forms.UserReplyForm(obj=user)
     if form.validate_on_submit():
         form.populate_obj(user)

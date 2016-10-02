@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-Domain details
+{% trans %}Domain details{% endtrans %}
 {% endblock %}
 
 {% block subtitle %}
@@ -10,7 +10,7 @@ Domain details
 
 {% block main_action %}
 {% if current_user.global_admin %}
-<a class="btn btn-primary" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}">Regenerate keys</a>
+<a class="btn btn-primary" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}">{% trans %}Regenerate keys{% endtrans %}</a>
 {% endif %}
 {% endblock %}
 
@@ -18,30 +18,30 @@ Domain details
 <table class="table table-bordered">
   <tbody>
     <tr>
-      <th>Domain name</th>
+      <th>{% trans %}Domain name{% endtrans %}</th>
       <td>{{ domain.name }}</td>
     </tr>
     <tr>
-      <th>DNS MX entry</th>
+      <th>{% trans %}DNS MX entry{% endtrans %}</th>
       <td><pre>{{ domain.name }}. 600 IN MX 10 {{ config["HOSTNAME"] }}.</pre></td>
     </tr>
     <tr>
-      <th>DNS SPF entries</th>
+      <th>{% trans %}DNS SPF entries{% endtrans %}</th>
       <td><pre>
 {{ domain.name }}. 600 IN TXT "v=spf1 mx a:{{ config["HOSTNAME"] }} -all"
 {{ domain.name }}. 600 IN SPF "v=spf1 mx a:{{ config["HOSTNAME"] }} -all"</pre></td>
     </tr>
     {% if domain.dkim_publickey %}
     <tr>
-      <th>DKIM public key</th>
+      <th>{% trans %}DKIM public key{% endtrans %}</th>
       <td><pre style="white-space: pre-wrap; word-wrap: break-word;">{{ domain.dkim_publickey }}</pre></td>
     </tr>
     <tr>
-      <th>DNS DKIM entry</th>
+      <th>{% trans %}DNS DKIM entry{% endtrans %}</th>
       <td><pre style="white-space: pre-wrap; word-wrap: break-word;">{{ config["DKIM_SELECTOR"] }}._domainkey.{{ domain.name }}. IN 600 TXT "v=DKIM1; k=rsa; p={{ domain.dkim_publickey }}"</pre></td>
     </tr>
     <tr>
-      <th>DNS DMARC entry</th>
+      <th>{% trans %}DNS DMARC entry{% endtrans %}</th>
       <td><pre>_dmarc.{{ domain.name }}. 600 IN TXT "v=DMARC1; p=reject; rua=mailto:{{ config["POSTMASTER"] }}@{{ config["DOMAIN"] }}; adkim=s; aspf=s"</pre></td>
     </tr>
     {% endif %}

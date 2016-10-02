@@ -4,6 +4,7 @@ import flask_bootstrap
 import flask_login
 import flask_script
 import flask_migrate
+import flask_babel
 
 import os
 import docker
@@ -23,7 +24,9 @@ default_config = {
     'DEBUG': False,
     'BOOTSTRAP_SERVE_LOCAL': True,
     'DKIM_PATH': '/dkim/{domain}.{selector}.key',
-    'DKIM_SELECTOR': 'dkim'
+    'DKIM_SELECTOR': 'dkim',
+    'BABEL_DEFAULT_LOCALE': 'en',
+    'BABEL_DEFAULT_TIMEZONE': 'UTC'
 }
 
 # Load configuration from the environment if available
@@ -36,6 +39,7 @@ db = flask_sqlalchemy.SQLAlchemy(app)
 migrate = flask_migrate.Migrate(app, db)
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
+babel = flask_babel.Babel(app)
 
 # Manager commnad
 manager = flask_script.Manager(app)

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-Alias list
+{% trans %}Alias list{% endtrans %}
 {% endblock %}
 
 {% block subtitle %}
@@ -9,25 +9,25 @@ Alias list
 {% endblock %}
 
 {% block main_action %}
-<a class="btn btn-primary" href="{{ url_for('.alias_create', domain_name=domain.name) }}">Add alias</a>
+<a class="btn btn-primary" href="{{ url_for('.alias_create', domain_name=domain.name) }}">{% trans %}Add alias{% endtrans %}</a>
 {% endblock %}
 
 {% block box %}
 <table class="table table-bordered">
   <tbody>
     <tr>
-      <th>Actions</th>
-      <th>Email</th>
-      <th>Destination</th>
-      <th>Comment</th>
-      <th>Created</th>
-      <th>Last edit</th>
+      <th>{% trans %}Actions{% endtrans %}</th>
+      <th>{% trans %}Email{% endtrans %}</th>
+      <th>{% trans %}Destination{% endtrans %}</th>
+      <th>{% trans %}Comment{% endtrans %}</th>
+      <th>{% trans %}Created{% endtrans %}</th>
+      <th>{% trans %}Last edit{% endtrans %}</th>
     </tr>
     {% for alias in domain.aliases %}
     <tr>
       <td>
-        <a href="{{ url_for('.alias_edit', alias=alias.email) }}" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;
-        <a href="{{ url_for('.alias_delete', alias=alias.email) }}" title="Delete"><i class="fa fa-trash"></i></a>
+        <a href="{{ url_for('.alias_edit', alias=alias.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
+        <a href="{{ url_for('.alias_delete', alias=alias.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
       </td>
       <td>{{ alias }}</td>
       <td>{{ alias.destination|join(', ') or '-' }}</td>

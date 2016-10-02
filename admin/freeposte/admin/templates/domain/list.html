@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
 {% block title %}
-Domain list
+{% trans %}Domain list{% endtrans %}
 {% endblock %}
 
 {% block main_action %}
 {% if current_user.global_admin %}
-<a class="btn btn-primary" href="{{ url_for('.domain_create') }}">New domain</a>
+<a class="btn btn-primary" href="{{ url_for('.domain_create') }}">{% trans %}New domain{% endtrans %}</a>
 {% endif %}
 {% endblock %}
 
@@ -14,28 +14,28 @@ Domain list
 <table class="table table-bordered">
   <tbody>
     <tr>
-      <th>Actions</th>
-      <th>Manage</th>
-      <th>Domain name</th>
-      <th>Mailbox count</th>
-      <th>Alias count</th>
-      <th>Comment</th>
-      <th>Created</th>
-      <th>Last edit</th>
+      <th>{% trans %}Actions{% endtrans %}</th>
+      <th>{% trans %}Manage{% endtrans %}</th>
+      <th>{% trans %}Domain name{% endtrans %}</th>
+      <th>{% trans %}Mailbox count{% endtrans %}</th>
+      <th>{% trans %}Alias count{% endtrans %}</th>
+      <th>{% trans %}Comment{% endtrans %}</th>
+      <th>{% trans %}Created{% endtrans %}</th>
+      <th>{% trans %}Last edit{% endtrans %}</th>
     </tr>
     {% for domain in current_user.get_managed_domains() %}
     <tr>
       <td>
-        <a href="{{ url_for('.domain_details', domain_name=domain.name) }}" title="Details"><i class="fa fa-list"></i></a>&nbsp;
+        <a href="{{ url_for('.domain_details', domain_name=domain.name) }}" title="{% trans %}Details{% endtrans %}"><i class="fa fa-list"></i></a>&nbsp;
         {% if current_user.global_admin %}
-        <a href="{{ url_for('.domain_edit', domain_name=domain.name) }}" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;
-        <a href="{{ url_for('.domain_delete', domain_name=domain.name) }}" title="Delete"><i class="fa fa-trash"></i></a>&nbsp;
+        <a href="{{ url_for('.domain_edit', domain_name=domain.name) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
+        <a href="{{ url_for('.domain_delete', domain_name=domain.name) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>&nbsp;
         {% endif %}
       </td>
       <td>
-        <a href="{{ url_for('.user_list', domain_name=domain.name) }}" title="Users"><i class="fa fa-envelope-o"></i></a>&nbsp;
-        <a href="{{ url_for('.alias_list', domain_name=domain.name) }}" title="Aliases"><i class="fa fa-at"></i></a>&nbsp;
-        <a href="{{ url_for('.manager_list', domain_name=domain.name) }}" title="Managers"><i class="fa fa-user"></i></a>&nbsp;
+        <a href="{{ url_for('.user_list', domain_name=domain.name) }}" title="{% trans %}Users{% endtrans %}"><i class="fa fa-envelope-o"></i></a>&nbsp;
+        <a href="{{ url_for('.alias_list', domain_name=domain.name) }}" title="{% trans %}Aliases{% endtrans %}"><i class="fa fa-at"></i></a>&nbsp;
+        <a href="{{ url_for('.manager_list', domain_name=domain.name) }}" title="{% trans %}Managers{% endtrans %}"><i class="fa fa-user"></i></a>&nbsp;
       </td>
       <td>{{ domain.name }}</td>
       <td>{{ domain.users | count }} / {{ domain.max_users or '∞' }}</td>

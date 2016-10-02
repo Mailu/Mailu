@@ -1,24 +1,26 @@
 {% extends "base.html" %}
 
 {% block title %}
-Global administrators
+{% trans %}Global administrators{% endtrans %}
 {% endblock %}
 
 {% block main_action %}
-<a class="btn btn-primary" href="{{ url_for('.admin_create') }}">Add administrator</a>
+<a class="btn btn-primary" href="{{ url_for('.admin_create') }}">
+  {% trans %}Add administrator{% endtrans %}
+</a>
 {% endblock %}
 
 {% block box %}
 <table class="table table-bordered">
   <tbody>
     <tr>
-      <th>Actions</th>
-      <th>Email</th>
+      <th>{% trans %}Actions{% endtrans %}</th>
+      <th>{% trans %}Email{% endtrans %}</th>
     </tr>
     {% for admin in admins %}
     <tr>
       <td>
-        <a href="{{ url_for('.admin_delete', admin=admin.email) }}" title="Delete"><i class="fa fa-trash"></i></a>
+        <a href="{{ url_for('.admin_delete', admin=admin.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
       </td>
       <td>{{ admin }}</td>
     </tr>

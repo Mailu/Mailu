@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 
 {% block title %}
-Services status
+{% trans %}Services status{% endtrans %}
 {% endblock %}
 
 {% block box %}
 <table class="table table-bordered">
   <tbody>
     <tr>
-      <th>Service</th>
-      <th>Status</th>
-      <th>PID</th>
-      <th>Image</th>
-      <th>Started</th>
-      <th>Last update</th>
+      <th>{% trans %}Service{% endtrans %}</th>
+      <th>{% trans %}Status{% endtrans %}</th>
+      <th>{% trans %}PID{% endtrans %}</th>
+      <th>{% trans %}Image{% endtrans %}</th>
+      <th>{% trans %}Started{% endtrans %}</th>
+      <th>{% trans %}Last update{% endtrans %}</th>
     </tr>
     {% for name, container in containers.items() %}
     <tr>

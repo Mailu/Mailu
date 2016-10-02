@@ -2,9 +2,10 @@ Flask
 Flask-Login
 Flask-SQLAlchemy
 Flask-bootstrap
+Flask-Babel
 Flask-migrate
 Flask-script
-flask_wtf
+Flask-wtf
 WTForms-Components
 PyOpenSSL
 passlib

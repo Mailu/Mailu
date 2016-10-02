@@ -3,10 +3,10 @@
 {% block sidebar %}
 <section class="sidebar">
   <ul class="sidebar-menu">
-    <li class="header">Your account</li>
+    <li class="header">{% trans %}Your account{% endtrans %}</li>
     <li>
       <a href="#">
-        <i class="fa fa-sign-in"></i> <span>Sign in</span>
+        <i class="fa fa-sign-in"></i> <span>{% trans %}Sign in{% endtrans %}</span>
       </a>
     </li>
   </ul>
@@ -14,11 +14,11 @@
 {% endblock %}
 
 {% block title %}
-Sign in
+{% trans %}Sign in{% endtrans %}
 {% endblock %}
 
 {% block subtitle %}
-to access the administration tools
+{% trans %}to access the administration tools{% endtrans %}
 {% endblock %}
 
 {% block box_content %}

@@ -1,5 +1,6 @@
 from wtforms import validators, fields, widgets
 from wtforms_components import fields as fields_
+from flask_babel import lazy_gettext as _
 
 import flask_login
 import flask_wtf
@@ -28,92 +29,93 @@ class DestinationField(fields.SelectMultipleField):
     def pre_validate(self, form):
         for item in self.data:
             if not self.validator.match(item):
-                raise validators.ValidationError("Invalid email address.")
+                raise validators.ValidationError(_('Invalid email address.'))
 
 
-class Confirmation(flask_wtf.FlaskForm):
-    submit = fields.SubmitField('Confirm')
+class ConfirmationForm(flask_wtf.FlaskForm):
+    submit = fields.SubmitField(_('Confirm'))
 
 
 class LoginForm(flask_wtf.FlaskForm):
-    email = fields.StringField('E-mail', [validators.Email()])
-    pw = fields.PasswordField('Password', [validators.DataRequired()])
-    submit = fields.SubmitField('Sign in')
+    email = fields.StringField(_('E-mail'), [validators.Email()])
+    pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
+    submit = fields.SubmitField(_('Sign in'))
 
 
 class DomainForm(flask_wtf.FlaskForm):
-    name = fields.StringField('Domain name', [validators.DataRequired()])
-    max_users = fields_.IntegerField('Maximum user count', default=10)
-    max_aliases = fields_.IntegerField('Maximum alias count', default=10)
-    comment = fields.StringField('Comment')
-    submit = fields.SubmitField('Create')
+    name = fields.StringField(_('Domain name'), [validators.DataRequired()])
+    max_users = fields_.IntegerField(_('Maximum user count'), default=10)
+    max_aliases = fields_.IntegerField(_('Maximum alias count'), default=10)
+    comment = fields.StringField(_('Comment'))
+    submit = fields.SubmitField(_('Create'))
 
 
 class UserForm(flask_wtf.FlaskForm):
-    localpart = fields.StringField('E-mail', [validators.DataRequired()])
-    pw = fields.PasswordField('Password', [validators.DataRequired()])
-    pw2 = fields.PasswordField('Confirm password', [validators.EqualTo('pw')])
-    quota_bytes = fields_.IntegerSliderField('Quota', default=1000000000)
-    enable_imap = fields.BooleanField('Allow IMAP access', default=True)
-    enable_pop = fields.BooleanField('Allow POP3 access', default=True)
-    comment = fields.StringField('Comment')
-    submit = fields.SubmitField('Save')
+    localpart = fields.StringField(_('E-mail'), [validators.DataRequired()])
+    pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
+    pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
+    quota_bytes = fields_.IntegerSliderField(_('Quota'), default=1000000000)
+    enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)
+    enable_pop = fields.BooleanField(_('Allow POP3 access'), default=True)
+    comment = fields.StringField(_('Comment'))
+    submit = fields.SubmitField(_('Save'))
 
 
 class UserSettingsForm(flask_wtf.FlaskForm):
-    displayed_name = fields.StringField('Displayed name')
-    spam_enabled = fields.BooleanField('Enable spam filter')
-    spam_threshold = fields_.IntegerSliderField('Spam filter threshold')
-    submit = fields.SubmitField('Save settings')
+    displayed_name = fields.StringField(_('Displayed name'))
+    spam_enabled = fields.BooleanField(_('Enable spam filter'))
+    spam_threshold = fields_.IntegerSliderField(_('Spam filter threshold'))
+    submit = fields.SubmitField(_('Save settings'))
 
 
 class UserPasswordForm(flask_wtf.FlaskForm):
-    pw = fields.PasswordField('Password', [validators.DataRequired()])
-    pw2 = fields.PasswordField('Password check', [validators.DataRequired()])
-    submit = fields.SubmitField('Update password')
+    pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
+    pw2 = fields.PasswordField(_('Password check'), [validators.DataRequired()])
+    submit = fields.SubmitField(_('Update password'))
 
 
 class UserForwardForm(flask_wtf.FlaskForm):
-    forward_enabled = fields.BooleanField('Enable forwarding')
+    forward_enabled = fields.BooleanField(_('Enable forwarding'))
     forward_destination = fields.StringField(
-        'Destination', [validators.Optional(), validators.Email()]
+        _('Destination'), [validators.Optional(), validators.Email()]
     )
-    submit = fields.SubmitField('Update')
+    submit = fields.SubmitField(_('Update'))
 
 
 class UserReplyForm(flask_wtf.FlaskForm):
-    reply_enabled = fields.BooleanField('Enable automatic reply')
-    reply_subject = fields.StringField('Reply subject')
-    reply_body = fields.StringField('Reply body', widget=widgets.TextArea())
-    submit = fields.SubmitField('Update')
+    reply_enabled = fields.BooleanField(_('Enable automatic reply'))
+    reply_subject = fields.StringField(_('Reply subject'))
+    reply_body = fields.StringField(_('Reply body'),
+        widget=widgets.TextArea())
+    submit = fields.SubmitField(_('Update'))
 
 
 class AliasForm(flask_wtf.FlaskForm):
-    localpart = fields.StringField('Alias', [validators.DataRequired()])
+    localpart = fields.StringField(_('Alias'), [validators.DataRequired()])
     wildcard = fields.BooleanField(
-        'Use SQL Like Syntax (e.g. for catch-all aliases, admin-%@domain.com)')
-    destination = DestinationField('Destination')
-    comment = fields.StringField('Comment')
-    submit = fields.SubmitField('Create')
+        _('Use SQL LIKE Syntax (e.g. for catch-all aliases)'))
+    destination = DestinationField(_('Destination'))
+    comment = fields.StringField(_('Comment'))
+    submit = fields.SubmitField(_('Create'))
 
 
 class AdminForm(flask_wtf.FlaskForm):
-    admin = fields.SelectField('Admin email', choices=[])
-    submit = fields.SubmitField('Submit')
+    admin = fields.SelectField(_('Admin email'), choices=[])
+    submit = fields.SubmitField(_('Submit'))
 
 
 class ManagerForm(flask_wtf.FlaskForm):
-    manager = fields.SelectField('Manager email')
-    submit = fields.SubmitField('Submit')
+    manager = fields.SelectField(_('Manager email'))
+    submit = fields.SubmitField(_('Submit'))
 
 
 class FetchForm(flask_wtf.FlaskForm):
-    protocol = fields.SelectField('Protocol', choices=[
+    protocol = fields.SelectField(_('Protocol'), choices=[
         ('imap', 'IMAP'), ('pop3', 'POP3')
     ])
-    host = fields.StringField('Hostname or IP')
-    port = fields.IntegerField('TCP port')
-    tls = fields.BooleanField('Enable TLS')
-    username = fields.StringField('Username')
-    password = fields.StringField('Password')
-    submit = fields.SubmitField('Submit')
+    host = fields.StringField(_('Hostname or IP'))
+    port = fields.IntegerField(_('TCP port'))
+    tls = fields.BooleanField(_('Enable TLS'))
+    username = fields.StringField(_('Username'))
+    password = fields.StringField(_('Password'))
+    submit = fields.SubmitField(_('Submit'))

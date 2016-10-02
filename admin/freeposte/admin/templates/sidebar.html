@@ -2,61 +2,61 @@
   <h4 class="text-center text-primary">{{ current_user }}</h4>
 
   <ul class="sidebar-menu">
-    <li class="header">My account</li>
+    <li class="header">{% trans %}My account{% endtrans %}</li>
     <li>
       <a href="{{ url_for('.user_settings') }}">
-        <i class="fa fa-wrench"></i> <span>Settings</span>
+        <i class="fa fa-wrench"></i> <span>{% trans %}Settings{% endtrans %}</span>
       </a>
     </li>
     <li>
       <a href="{{ url_for('.user_password') }}">
-        <i class="fa fa-lock"></i> <span>Update password</span>
+        <i class="fa fa-lock"></i> <span>{% trans %}Update password{% endtrans %}</span>
       </a>
     </li>
     <li>
       <a href="{{ url_for('.user_forward') }}">
-        <i class="fa fa-share"></i> <span>Auto-forward</span>
+        <i class="fa fa-share"></i> <span>{% trans %}Auto-forward{% endtrans %}</span>
       </a>
     </li>
     <li>
       <a href="{{ url_for('.user_reply') }}">
-        <i class="fa fa-plane"></i> <span>Auto-reply</span>
+        <i class="fa fa-plane"></i> <span>{% trans %}Auto-reply{% endtrans %}</span>
       </a>
     </li>
     <li>
       <a href="{{ url_for('.fetch_list') }}">
-        <i class="fa fa-download"></i> <span>Fetched accounts</span>
+        <i class="fa fa-download"></i> <span>{% trans %}Fetched accounts{% endtrans %}</span>
       </a>
     </li>
     <li>
       <a href="{{ url_for('.logout') }}">
-        <i class="fa fa-sign-out"></i> <span>Sign out</span>
+        <i class="fa fa-sign-out"></i> <span>{% trans %}Sign out{% endtrans %}</span>
       </a>
     </li>
-    <li class="header">Administration</li>
+    <li class="header">{% trans %}Administration{% endtrans %}</li>
     {% if current_user.global_admin %}
     <li>
       <a href="{{ url_for('.services') }}">
-        <i class="fa fa-dashboard"></i> <span>Services status</span>
+        <i class="fa fa-dashboard"></i> <span>{% trans %}Services status{% endtrans %}</span>
       </a>
     </li>
     <li>
       <a href="{{ url_for('.admin_list') }}">
-        <i class="fa fa-user"></i> <span>Administrators</span>
+        <i class="fa fa-user"></i> <span>{% trans %}Administrators{% endtrans %}</span>
       </a>
     </li>
     {% endif %}
     {% if current_user.manager_of or current_user.global_admin %}
     <li>
       <a href="{{ url_for('.domain_list') }}">
-        <i class="fa fa-envelope"></i> <span>Mail domains</span>
+        <i class="fa fa-envelope"></i> <span>{% trans %}Mail domains{% endtrans %}</span>
       </a>
     </li>
     {% endif %}
 
     <li>
       <a href="https://github.com/kaiyou/freeposte.io">
-        <i class="fa fa-life-ring"></i> <span>Help</span>
+        <i class="fa fa-life-ring"></i> <span>{% trans %}Help{% endtrans %}</span>
       </a>
     </li>
   </ul>

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-Confirm action
+{% trans %}Confirm action{% endtrans %}
 {% endblock %}
 
 {% block subtitle %}
@@ -9,6 +9,6 @@ Confirm action
 {% endblock %}
 
 {% block box_content %}
-<p>You are about to {{ action }}. Please confirm your action.</p>
+<p>{% trans action %}You are about to {{ action }}. Please confirm your action.{% endtrans %}</p>
 {{ macros.form(form) }}
 {% endblock %}

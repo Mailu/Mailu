@@ -143,7 +143,7 @@ class User(Email):
     # Settings
     displayed_name = db.Column(db.String(160), nullable=False, default="")
     spam_enabled = db.Column(db.Boolean(), nullable=False, default=True)
-    spam_threshold = db.Column(db.Numeric(), nullable=False, default=10.0)
+    spam_threshold = db.Column(db.Numeric(), nullable=False, default=80.0)
 
     # Flask-login attributes
     is_authenticated = True

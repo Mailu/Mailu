@@ -1,8 +1,8 @@
-from flask_wtf import Form
 from wtforms import validators, fields, widgets
 from wtforms_components import fields as fields_
 
 import flask_login
+import flask_wtf
 import re
 
 
@@ -31,17 +31,17 @@ class DestinationField(fields.SelectMultipleField):
                 raise validators.ValidationError("Invalid email address.")
 
 
-class ConfirmationForm(Form):
+class Confirmation(flask_wtf.FlaskForm):
     submit = fields.SubmitField('Confirm')
 
 
-class LoginForm(Form):
+class LoginForm(flask_wtf.FlaskForm):
     email = fields.StringField('E-mail', [validators.Email()])
     pw = fields.PasswordField('Password', [validators.DataRequired()])
     submit = fields.SubmitField('Sign in')
 
 
-class DomainForm(Form):
+class DomainForm(flask_wtf.FlaskForm):
     name = fields.StringField('Domain name', [validators.DataRequired()])
     max_users = fields_.IntegerField('Maximum user count', default=10)
     max_aliases = fields_.IntegerField('Maximum alias count', default=10)
@@ -49,7 +49,7 @@ class DomainForm(Form):
     submit = fields.SubmitField('Create')
 
 
-class UserForm(Form):
+class UserForm(flask_wtf.FlaskForm):
     localpart = fields.StringField('E-mail', [validators.DataRequired()])
     pw = fields.PasswordField('Password', [validators.DataRequired()])
     pw2 = fields.PasswordField('Confirm password', [validators.EqualTo('pw')])
@@ -60,20 +60,20 @@ class UserForm(Form):
     submit = fields.SubmitField('Save')
 
 
-class UserSettingsForm(Form):
+class UserSettingsForm(flask_wtf.FlaskForm):
     displayed_name = fields.StringField('Displayed name')
     spam_enabled = fields.BooleanField('Enable spam filter')
     spam_threshold = fields_.IntegerSliderField('Spam filter threshold')
     submit = fields.SubmitField('Save settings')
 
 
-class UserPasswordForm(Form):
+class UserPasswordForm(flask_wtf.FlaskForm):
     pw = fields.PasswordField('Password', [validators.DataRequired()])
     pw2 = fields.PasswordField('Password check', [validators.DataRequired()])
     submit = fields.SubmitField('Update password')
 
 
-class UserForwardForm(Form):
+class UserForwardForm(flask_wtf.FlaskForm):
     forward_enabled = fields.BooleanField('Enable forwarding')
     forward_destination = fields.StringField(
         'Destination', [validators.Optional(), validators.Email()]
@@ -81,14 +81,14 @@ class UserForwardForm(Form):
     submit = fields.SubmitField('Update')
 
 
-class UserReplyForm(Form):
+class UserReplyForm(flask_wtf.FlaskForm):
     reply_enabled = fields.BooleanField('Enable automatic reply')
     reply_subject = fields.StringField('Reply subject')
     reply_body = fields.StringField('Reply body', widget=widgets.TextArea())
     submit = fields.SubmitField('Update')
 
 
-class AliasForm(Form):
+class AliasForm(flask_wtf.FlaskForm):
     localpart = fields.StringField('Alias', [validators.DataRequired()])
     wildcard = fields.BooleanField(
         'Use SQL Like Syntax (e.g. for catch-all aliases, admin-%@domain.com)')
@@ -97,17 +97,17 @@ class AliasForm(Form):
     submit = fields.SubmitField('Create')
 
 
-class AdminForm(Form):
+class AdminForm(flask_wtf.FlaskForm):
     admin = fields.SelectField('Admin email', choices=[])
     submit = fields.SubmitField('Submit')
 
 
-class ManagerForm(Form):
+class ManagerForm(flask_wtf.FlaskForm):
     manager = fields.SelectField('Manager email')
     submit = fields.SubmitField('Submit')
 
 
-class FetchForm(Form):
+class FetchForm(flask_wtf.FlaskForm):
     protocol = fields.SelectField('Protocol', choices=[
         ('imap', 'IMAP'), ('pop3', 'POP3')
     ])

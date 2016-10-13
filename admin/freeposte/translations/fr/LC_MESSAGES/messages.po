@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-10-02 17:33+0200\n"
+"POT-Creation-Date: 2016-10-13 09:28+0200\n"
 "PO-Revision-Date: 2016-10-02 16:32+0200\n"
 "Last-Translator: \n"
 "Language: fr\n"
@@ -181,6 +181,14 @@ msgstr "Confirmer"
 #, python-format
 msgid "You are about to %(action)s. Please confirm your action."
 msgstr "Vous allez %(action)s. Merci de confirmer votre action."
+
+#: freeposte/admin/templates/docker-error.html:4
+msgid "Docker error"
+msgstr ""
+
+#: freeposte/admin/templates/docker-error.html:12
+msgid "An error occurred while talking to the Docker server."
+msgstr ""
 
 #: freeposte/admin/templates/login.html:6
 msgid "Your account"

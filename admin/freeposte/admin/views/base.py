@@ -35,7 +35,11 @@ def logout():
 @access.global_admin
 def services():
     containers = {}
-    for brief in dockercli.containers(all=True):
+    try:
+        all_containers = dockercli.containers(all=True)
+    except Exception as error:
+        return flask.render_template('docker-error.html', error=error)
+    for brief in all_containers:
         if brief['Image'].startswith('freeposte/'):
             container = dockercli.inspect_container(brief['Id'])
             container['Image'] = dockercli.inspect_image(container['Image'])

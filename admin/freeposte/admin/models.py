@@ -50,6 +50,8 @@ class Base(db.Model):
 class Domain(Base):
     """ A DNS domain that has mail addresses associated to it.
     """
+    __tablename__ = "domain"
+
     name = db.Column(db.String(80), primary_key=True, nullable=False)
     managers = db.relationship('User', secondary=managers,
         backref=db.backref('manager_of'), lazy='dynamic')
@@ -97,10 +99,9 @@ class Domain(Base):
             return False
 
 
-class Email(Base):
+class Email(object):
     """ Abstraction for an email address (localpart and domain).
     """
-    __abstract__ = True
 
     localpart = db.Column(db.String(80), nullable=False)
 
@@ -126,9 +127,11 @@ class Email(Base):
         return self.email
 
 
-class User(Email):
+class User(Base, Email):
     """ A user is an email address that has a password to access a mailbox.
     """
+    __tablename__ = "user"
+
     domain = db.relationship(Domain,
         backref=db.backref('users', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
@@ -190,9 +193,11 @@ class User(Email):
         return user if (user and user.check_password(password)) else None
 
 
-class Alias(Email):
+class Alias(Base, Email):
     """ An alias is an email address that redirects to some destination.
     """
+    __tablename__ = "alias"
+
     domain = db.relationship(Domain,
         backref=db.backref('aliases', cascade='all, delete-orphan'))
     wildcard = db.Column(db.Boolean(), nullable=False, default=False)
@@ -203,6 +208,8 @@ class Fetch(Base):
     """ A fetched account is a repote POP/IMAP account fetched into a local
     account.
     """
+    __tablename__ = "fetch"
+
     id = db.Column(db.Integer(), primary_key=True)
     user_email = db.Column(db.String(255), db.ForeignKey(User.email),
         nullable=False)

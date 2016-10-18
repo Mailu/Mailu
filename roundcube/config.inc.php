@@ -12,7 +12,8 @@ $config['reply_all_mode'] = 1;
 $config['plugins'] = array(
     'archive',
     'zipdownload',
-    'markasjunk'
+    'markasjunk',
+    'managesieve'
 );
 
 // Mail servers
@@ -22,6 +23,10 @@ $config['smtp_server'] = 'tls://smtp';
 $config['smtp_port'] = 587;
 $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
+
+// Sieve script management
+$config['managesieve_host'] = 'imap';
+$config['managesieve_usetls'] = true;
 
 // We access the IMAP and SMTP servers locally with internal names, SSL
 // will obviously fail but this sounds better than allowing insecure login
@@ -34,6 +39,7 @@ $ssl_no_check = array(
 );
 $config['imap_conn_options'] = $ssl_no_check;
 $config['smtp_conn_options'] = $ssl_no_check;
+$config['managesieve_conn_options'] = $ssl_no_check;
 
 // skin name: folder from skins/
 $config['skin'] = 'larry';

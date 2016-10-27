@@ -62,8 +62,11 @@ def run(connection, cursor):
             error_message = error.output.decode("utf8")
             # No mail is not an error
             if not (error_message.startswith("fetchmail: No mail")): 
+                # activate the next statement to log the poll command
+                # Warning: the poll command contains the mailbox password
+                #          in clear text
+                #print(fetchmailrc)
                 print(fetchmailrc)
-                print(error_message)
         finally:
             cursor.execute("""
                 UPDATE fetch SET error=?, last_check=datetime('now')

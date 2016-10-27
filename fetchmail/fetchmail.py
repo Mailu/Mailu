@@ -14,15 +14,14 @@ fetchmail -N \
     -f {}
 """
 
-
 RC_LINE = """
-poll "{host}" proto {protocol} port {port}
+poll "{host}" proto {protocol}  port {port}
     user "{username}" password "{password}"
+    is "{user_email}"
     smtphost "smtp"
-    smtpname "{user_email}"
     {options}
+    sslproto 'AUTO'
 """
-
 
 def escape_rc_string(arg):
     return arg.replace("\\", "\\\\").replace('"', '\\"')
@@ -45,7 +44,8 @@ def run(connection, cursor):
     for line in cursor.fetchall():
         fetchmailrc = ""
         user_email, protocol, host, port, tls, username, password = line
-        options = "options ssl" if tls else ""
+        options = "options fetchall antispam 501, 504, 550, 553, 554"
+        options += " ssl" if tls else ""
         fetchmailrc += RC_LINE.format(
             user_email=escape_rc_string(user_email),
             protocol=protocol,
@@ -60,7 +60,13 @@ def run(connection, cursor):
             error_message = ""
         except subprocess.CalledProcessError as error:
             error_message = error.output.decode("utf8")
-            print(error.output)
+            # No mail is not an error
+            if not (error_message.startswith("fetchmail: No mail")): 
+                # activate the next statement to log the poll command
+                # Warning: the poll command contains the mailbox password
+                #          in clear text
+                #print(fetchmailrc)
+                print(fetchmailrc)
         finally:
             cursor.execute("""
                 UPDATE fetch SET error=?, last_check=datetime('now')
@@ -74,7 +80,7 @@ if __name__ == "__main__":
     db_path = os.environ.get("DB_PATH", "/data/freeposte.db")
     connection = sqlite3.connect(db_path)
     while True:
-        time.sleep(int(os.environ.get("FETCHMAIL_DELAY", 10)))
         cursor = connection.cursor()
         run(connection, cursor)
         cursor.close()
+        time.sleep(int(os.environ.get("FETCHMAIL_DELAY", 60)))

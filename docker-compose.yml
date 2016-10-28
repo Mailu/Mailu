@@ -4,7 +4,7 @@ services:
 
   http:
     # build: $FRONTEND
-    image: freeposte/$FRONTEND:$VERSION
+    image: mailu/$FRONTEND:$VERSION
     restart: always
     env_file: .env
     ports:
@@ -21,21 +21,21 @@ services:
 
   imap:
     # build: dovecot
-    image: freeposte/dovecot:$VERSION
+    image: mailu/dovecot:$VERSION
     restart: always
     env_file: .env
     ports:
       - "$BIND_ADDRESS:143:143"
       - "$BIND_ADDRESS:993:993"
     volumes:
-      - "$ROOT/freeposte:/data"
+      - "$ROOT/mailu:/data"
       - "$ROOT/mail:/mail"
       - "$ROOT/certs:/certs"
       - "$ROOT/overrides:/overrides"
 
   smtp:
     # build: postfix
-    image: freeposte/postfix:$VERSION
+    image: mailu/postfix:$VERSION
     restart: always
     env_file: .env
     ports:
@@ -43,13 +43,13 @@ services:
       - "$BIND_ADDRESS:465:465"
       - "$BIND_ADDRESS:587:587"
     volumes:
-      - "$ROOT/freeposte:/data"
+      - "$ROOT/mailu:/data"
       - "$ROOT/certs:/certs"
       - "$ROOT/overrides:/overrides"
 
   milter:
     # build: rmilter
-    image: freeposte/rmilter:$VERSION
+    image: mailu/rmilter:$VERSION
     restart: always
     env_file: .env
     volumes:
@@ -59,7 +59,7 @@ services:
 
   antispam:
     # build: rspamd
-    image: freeposte/rspamd:$VERSION
+    image: mailu/rspamd:$VERSION
     restart: always
     env_file: .env
     volumes:
@@ -67,7 +67,7 @@ services:
 
   antivirus:
     # build: clamav
-    image: freeposte/clamav:$VERSION
+    image: mailu/clamav:$VERSION
     restart: always
     env_file: .env
     volumes:
@@ -75,19 +75,19 @@ services:
 
   admin:
     # build: admin
-    image: freeposte/admin:$VERSION
+    image: mailu/admin:$VERSION
     restart: always
     env_file: .env
     ports:
       - "127.0.0.1:8000:80"
     volumes:
-      - "$ROOT/freeposte:/data"
+      - "$ROOT/mailu:/data"
       - "$ROOT/dkim:/dkim"
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   webmail:
     # build: "$WEBMAIL"
-    image: "freeposte/$WEBMAIL:$VERSION"
+    image: "mailu/$WEBMAIL:$VERSION"
     restart: always
     env_file: .env
     volumes:
@@ -95,8 +95,8 @@ services:
 
   fetchmail:
     # build: fetchmail
-    image: freeposte/fetchmail:$VERSION
+    image: mailu/fetchmail:$VERSION
     restart: always
     env_file: .env
     volumes:
-      - "$ROOT/freeposte:/data"
+      - "$ROOT/mailu:/data"

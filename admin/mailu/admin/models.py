@@ -1,5 +1,5 @@
-from freeposte.admin import db, dkim
-from freeposte import app
+from mailu.admin import db, dkim
+from mailu import app
 
 from sqlalchemy.ext import declarative
 from passlib import context

@@ -1,5 +1,5 @@
-from freeposte import manager, db
-from freeposte.admin import models
+from mailu import manager, db
+from mailu.admin import models
 from passlib import hash
 
 

@@ -1,5 +1,5 @@
-from freeposte.admin import app, db, models, forms, access
-from freeposte import app as flask_app
+from mailu.admin import app, db, models, forms, access
+from mailu import app as flask_app
 
 import flask
 import wtforms_components

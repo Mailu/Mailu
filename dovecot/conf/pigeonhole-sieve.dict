@@ -1,4 +1,4 @@
-connect = /data/freeposte.db
+connect = /data/main.db
 
 map {
   pattern = priv/spam_enabled

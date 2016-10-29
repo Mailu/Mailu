@@ -1,5 +1,5 @@
 from flask import Blueprint
-from freeposte import login_manager, db
+from mailu import login_manager, db
 
 import flask_login
 
@@ -10,7 +10,7 @@ app = Blueprint(
     static_folder='static')
 
 # Import models
-from freeposte.admin import models
+from mailu.admin import models
 
 # Register the login components
 login_manager.login_view = "admin.login"
@@ -21,7 +21,7 @@ def inject_user():
     return dict(current_user=flask_login.current_user)
 
 # Import views
-from freeposte.admin.views import \
+from mailu.admin.views import \
     admins, \
     managers, \
     base, \

@@ -1,4 +1,4 @@
-from freeposte.admin import app, db, models, forms, access
+from mailu.admin import app, db, models, forms, access
 
 import flask
 import flask_login

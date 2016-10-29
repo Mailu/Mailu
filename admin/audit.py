@@ -1,4 +1,4 @@
-from freeposte import app
+from mailu import app
 
 import sys
 import tabulate

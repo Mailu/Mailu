@@ -1,4 +1,4 @@
-dbpath = /data/freeposte.db
+dbpath = /data/main.db
 query =
   SELECT destination
    FROM

@@ -61,7 +61,7 @@ def run(connection, cursor):
         except subprocess.CalledProcessError as error:
             error_message = error.output.decode("utf8")
             # No mail is not an error
-            if not (error_message.startswith("fetchmail: No mail")): 
+            if not (error_message.startswith("fetchmail: No mail")):
                 # activate the next statement to log the poll command
                 # Warning: the poll command contains the mailbox password
                 #          in clear text
@@ -77,7 +77,7 @@ def run(connection, cursor):
 
 
 if __name__ == "__main__":
-    db_path = os.environ.get("DB_PATH", "/data/freeposte.db")
+    db_path = os.environ.get("DB_PATH", "/data/main.db")
     connection = sqlite3.connect(db_path)
     while True:
         cursor = connection.cursor()

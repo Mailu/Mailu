@@ -13,8 +13,8 @@ down_revision = 'dc8c25cf5b98'
 from alembic import op
 import sqlalchemy as sa
 
-from freeposte.admin.models import User
-from freeposte import db
+from mailu.admin.models import User
+from mailu import db
 
 def upgrade():
     # spam_threshold is a X/15 based value, we're converting it to percent.

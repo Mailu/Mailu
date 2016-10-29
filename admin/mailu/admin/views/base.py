@@ -1,5 +1,5 @@
-from freeposte import dockercli
-from freeposte.admin import app, db, models, forms, access
+from mailu import dockercli
+from mailu.admin import app, db, models, forms, access
 
 import flask
 import flask_login
@@ -40,7 +40,7 @@ def services():
     except Exception as error:
         return flask.render_template('docker-error.html', error=error)
     for brief in all_containers:
-        if brief['Image'].startswith('freeposte/'):
+        if brief['Image'].startswith('mailu/'):
             container = dockercli.inspect_container(brief['Id'])
             container['Image'] = dockercli.inspect_image(container['Image'])
             name = container['Config']['Labels']['com.docker.compose.service']

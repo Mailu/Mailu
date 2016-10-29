@@ -1,5 +1,5 @@
 driver = sqlite
-connect = /data/freeposte.db
+connect = /data/main.db
 
 # Return the user hashed password
 password_query = \

@@ -1,17 +1,18 @@
-# Translations template for PROJECT.
+# French translations for PROJECT.
 # Copyright (C) 2016 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2016-10-29 13:37+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2016-10-02 16:32+0200\n"
+"Last-Translator: \n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -23,7 +24,7 @@ msgstr ""
 
 #: mailu/admin/forms.py:36
 msgid "Confirm"
-msgstr ""
+msgstr "Confirmer"
 
 #: mailu/admin/forms.py:40 mailu/admin/forms.py:54
 msgid "E-mail"
@@ -141,7 +142,7 @@ msgstr ""
 
 #: mailu/admin/forms.py:103
 msgid "Admin email"
-msgstr ""
+msgstr "Email de l'administrateur"
 
 #: mailu/admin/forms.py:104 mailu/admin/forms.py:109 mailu/admin/forms.py:121
 msgid "Submit"
@@ -173,12 +174,12 @@ msgstr ""
 
 #: mailu/admin/templates/confirm.html:4
 msgid "Confirm action"
-msgstr ""
+msgstr "Confirmer"
 
 #: mailu/admin/templates/confirm.html:12
 #, python-format
 msgid "You are about to %(action)s. Please confirm your action."
-msgstr ""
+msgstr "Vous allez %(action)s. Merci de confirmer votre action."
 
 #: mailu/admin/templates/docker-error.html:4
 msgid "Docker error"

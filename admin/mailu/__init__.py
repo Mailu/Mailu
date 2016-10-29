@@ -14,12 +14,12 @@ import docker
 app = flask.Flask(__name__, static_url_path='/admin/app_static')
 
 default_config = {
-    'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/freeposte.db',
+    'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     'SECRET_KEY': 'changeMe',
     'DOCKER_SOCKET': 'unix:///var/run/docker.sock',
-    'HOSTNAME': 'mail.freeposte.io',
-    'DOMAIN': 'freeposte.io',
+    'HOSTNAME': 'mail.mailu.io',
+    'DOMAIN': 'mailu.io',
     'POSTMASTER': 'postmaster',
     'DEBUG': False,
     'BOOTSTRAP_SERVE_LOCAL': True,
@@ -49,7 +49,7 @@ manager.add_command('db', flask_migrate.MigrateCommand)
 dockercli = docker.Client(base_url=app.config['DOCKER_SOCKET'])
 
 # Finally setup the blueprint and redirect /
-from freeposte import admin
+from mailu import admin
 app.register_blueprint(admin.app, url_prefix='/admin')
 
 @app.route("/")

@@ -7,8 +7,9 @@ ENV RAINLOOP_URL https://github.com/RainLoop/rainloop-webmail/releases/download/
 
 RUN echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini
 
-RUN cd /var/www/html \
- && rm -rf ./* \
+RUN rm -rf /var/www/html/ \
+ && mkdir -p /var/www/html/webmail \
+ && cd /var/www/html/webmail \
  && curl -L -O ${RAINLOOP_URL} \
  && unzip *.zip \
  && rm -f *.zip \
@@ -17,7 +18,7 @@ RUN cd /var/www/html \
  && find . -type f -exec chmod 644 {} \; \
  && chown -R www-data: *
 
-COPY include.php /var/www/html/include.php
+COPY include.php /var/www/html/webmail/include.php
 
 COPY config.ini /config.ini
 COPY default.ini /default.ini

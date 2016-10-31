@@ -4,7 +4,7 @@ Mailu
 =====
 
 *This project used to be named Freeposte.io, the name was change back in
-octobre 2016.*
+October 2016.*
 
 Simple yet full-featured mail server as a set of Docker images.
 The idea behing Mailu is identical to motivations that led to poste.io:

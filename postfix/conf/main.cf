@@ -72,8 +72,11 @@ smtpd_sasl_security_options = noanonymous
 # Virtual
 ###############
 
-virtual_mailbox_domains = ${sql}sqlite-virtual_mailbox_domains.cf
+# The alias map actually returns both aliases and local mailboxes, which is
+# required for reject_unlisted_sender to work properly
 virtual_alias_maps = ${sql}sqlite-virtual_alias_maps.cf
+virtual_mailbox_domains = ${sql}sqlite-virtual_mailbox_domains.cf
+virtual_mailbox_maps = $virtual_alias_maps
 
 # Mails are forwarded to Dovecot for delivery
 virtual_transport = lmtp:inet:imap:2525

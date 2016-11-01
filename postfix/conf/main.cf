@@ -83,6 +83,41 @@ virtual_transport = lmtp:inet:imap:2525
 lmtp_host_lookup = native
 
 ###############
+# Restrictions
+###############
+
+# Delay all rejects until all information can be logged
+smtpd_delay_reject = yes
+
+# Allowed senders are: the user or one of the alias destinations
+smtpd_sender_login_maps = $virtual_alias_maps
+
+# Helo restrictions
+smtpd_helo_required = yes
+smtpd_helo_restrictions =
+   permit_mynetworks,
+   reject_non_fqdn_helo_hostname,
+   reject_invalid_helo_hostname,
+   permit
+
+# Sender restrictions
+smtpd_sender_restrictions =
+   permit_mynetworks,
+   reject_non_fqdn_sender,
+   reject_unknown_sender_domain,
+   reject_sender_login_mismatch,
+   permit
+
+# Recipient restrictions:
+smtpd_recipient_restrictions =
+   reject_unauth_pipelining,
+   reject_non_fqdn_recipient,
+   reject_unknown_recipient_domain,
+   permit_mynetworks,
+   reject_unauth_destination,
+   permit
+
+###############
 # Milter
 ###############
 

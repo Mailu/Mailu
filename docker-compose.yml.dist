@@ -28,7 +28,7 @@ services:
       - "$BIND_ADDRESS:143:143"
       - "$BIND_ADDRESS:993:993"
     volumes:
-      - "$ROOT/mailu:/data"
+      - "$ROOT/data:/data"
       - "$ROOT/mail:/mail"
       - "$ROOT/certs:/certs"
       - "$ROOT/overrides:/overrides"
@@ -43,7 +43,7 @@ services:
       - "$BIND_ADDRESS:465:465"
       - "$BIND_ADDRESS:587:587"
     volumes:
-      - "$ROOT/mailu:/data"
+      - "$ROOT/data:/data"
       - "$ROOT/certs:/certs"
       - "$ROOT/overrides:/overrides"
 
@@ -81,7 +81,7 @@ services:
     ports:
       - "127.0.0.1:8000:80"
     volumes:
-      - "$ROOT/mailu:/data"
+      - "$ROOT/data:/data"
       - "$ROOT/dkim:/dkim"
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
@@ -99,4 +99,4 @@ services:
     restart: always
     env_file: .env
     volumes:
-      - "$ROOT/mailu:/data"
+      - "$ROOT/data:/data"

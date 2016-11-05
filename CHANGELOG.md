@@ -5,7 +5,24 @@ Notable changes to this project are documented in the current file. For more
 details about individual changes, see the Git log. You should read this before
 upgrading Freposte.io as some changes will include useful notes.
 
-v1.2.1 - Unreleased
+v1.3.0 - 2016-11-05
+-------------------
+
+- Global: renamed the project to Mailu
+- Global: renamed ``freeposte.env`` as ``.env`` and distribute dist files
+
+  Have a look at https://github.com/Mailu/Mailu/wiki/Migrate-from-Freeposte-to-Mailu
+  for migrating to the new project
+
+- Security: disabled access to extdata from user-written sieve scripts
+- Security: increased Postfix delivery restrictions, will help against spam as
+  well
+- Feature: setup I18N for the admin interface
+- Enhancement: improved database models
+- Upstream: upgrade to Roundcube 1.2.2
+- Upstream: upgrade to Dovecot 2.2.6
+
+v1.2.1 - 2016-09-28
 -------------------
 
 - Bug: fix the migration script regarding wildcard aliases.

@@ -9,6 +9,8 @@ import flask_babel
 import os
 import docker
 
+from apscheduler.schedulers import background
+
 
 # Create application
 app = flask.Flask(__name__, static_url_path='/admin/app_static')
@@ -41,6 +43,7 @@ login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 babel = flask_babel.Babel(app)
 translations = list(map(str, babel.list_translations()))
+scheduler = background.BackgroundScheduler()
 
 # Manager commnad
 manager = flask_script.Manager(app)
@@ -48,6 +51,10 @@ manager.add_command('db', flask_migrate.MigrateCommand)
 
 # Connect to the Docker socket
 dockercli = docker.Client(base_url=app.config['DOCKER_SOCKET'])
+
+# Task scheduling
+if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+    scheduler.start()
 
 # Babel configuration
 @babel.localeselector
@@ -60,4 +67,5 @@ app.register_blueprint(admin.app, url_prefix='/admin')
 
 @app.route("/")
 def index():
+    return 1/0
     return flask.redirect(flask.url_for("admin.index"))

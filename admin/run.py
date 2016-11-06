@@ -1,5 +1,7 @@
-from mailu import app
+import os
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    os.environ["DEBUG"] = "true"
+    from mailu import app
+    app.run()

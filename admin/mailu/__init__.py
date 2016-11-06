@@ -40,6 +40,7 @@ migrate = flask_migrate.Migrate(app, db)
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 babel = flask_babel.Babel(app)
+translations = list(map(str, babel.list_translations()))
 
 # Manager commnad
 manager = flask_script.Manager(app)
@@ -47,6 +48,11 @@ manager.add_command('db', flask_migrate.MigrateCommand)
 
 # Connect to the Docker socket
 dockercli = docker.Client(base_url=app.config['DOCKER_SOCKET'])
+
+# Babel configuration
+@babel.localeselector
+def get_locale():
+    return flask.request.accept_languages.best_match(translations)
 
 # Finally setup the blueprint and redirect /
 from mailu import admin

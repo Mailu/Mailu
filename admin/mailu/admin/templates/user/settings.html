@@ -14,7 +14,7 @@ User settings
   {{ macros.form_field(form.displayed_name) }}
   {{ macros.form_field(form.spam_enabled) }}
   {{ macros.form_field(form.spam_threshold, step=1, max=100,
-      prepend='<span class="input-group-addon"><span id="threshold">'+(form.spam_threshold.data).__int__().__str__()+'</span>&nbsp;/&nbsp;100</span>',
+      prepend='<span class="input-group-addon"><span id="threshold">'+form.spam_threshold.data.__str__()+'</span>&nbsp;/&nbsp;100</span>',
       oninput='$("#threshold").text(this.value);') }}
   {{ macros.form_field(form.submit) }}
 </form>

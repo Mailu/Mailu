@@ -65,8 +65,7 @@ def run(connection, cursor):
                 # activate the next statement to log the poll command
                 # Warning: the poll command contains the mailbox password
                 #          in clear text
-                #print(fetchmailrc)
-                print(fetchmailrc)
+                # print(fetchmailrc)
         finally:
             cursor.execute("""
                 UPDATE fetch SET error=?, last_check=datetime('now')

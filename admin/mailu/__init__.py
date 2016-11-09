@@ -28,7 +28,9 @@ default_config = {
     'DKIM_PATH': '/dkim/{domain}.{selector}.key',
     'DKIM_SELECTOR': 'dkim',
     'BABEL_DEFAULT_LOCALE': 'en',
-    'BABEL_DEFAULT_TIMEZONE': 'UTC'
+    'BABEL_DEFAULT_TIMEZONE': 'UTC',
+    'ENABLE_CERTBOT': False,
+    'CERTS_PATH': '/certs'
 }
 
 # Load configuration from the environment if available
@@ -60,6 +62,10 @@ if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
 @babel.localeselector
 def get_locale():
     return flask.request.accept_languages.best_match(translations)
+
+# Certbot configuration
+if app.config['ENABLE_CERTBOT']:
+    from mailu import certbot
 
 # Finally setup the blueprint and redirect /
 from mailu import admin

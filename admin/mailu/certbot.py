@@ -1,4 +1,4 @@
-from mailu import app, scheduler
+from mailu import app, scheduler, dockercli
 
 import subprocess
 import os
@@ -64,5 +64,6 @@ def generate_cert():
             result.stdout.decode("utf8") + result.stdout.decode("utf8")))
     else:
         print("Successfully generated or renewed TLS certificates")
-        must_reload = certbot_install(domain)
-        
+        if certbot_install(domain):
+            print("Reloading TLS-dependant services")
+            dockercli.reload("http", "smtp", "imap")

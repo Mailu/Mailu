@@ -36,7 +36,7 @@ def fetchmail(fetchmailrc):
         return output
 
 
-def run(connection, cursor):
+def run(connection, cursor, debug):
     cursor.execute("""
         SELECT user_email, protocol, host, port, tls, username, password
         FROM fetch
@@ -55,17 +55,16 @@ def run(connection, cursor):
             password=escape_rc_string(password),
             options=options
         )
+        if debug:
+            print(fetchmailrc)
         try:
             print(fetchmail(fetchmailrc))
             error_message = ""
         except subprocess.CalledProcessError as error:
             error_message = error.output.decode("utf8")
             # No mail is not an error
-            if not (error_message.startswith("fetchmail: No mail")):
-                # activate the next statement to log the poll command
-                # Warning: the poll command contains the mailbox password
-                #          in clear text
-                # print(fetchmailrc)
+            if not error_message.startswith("fetchmail: No mail"):
+                print(error_message)
         finally:
             cursor.execute("""
                 UPDATE fetch SET error=?, last_check=datetime('now')
@@ -76,10 +75,11 @@ def run(connection, cursor):
 
 
 if __name__ == "__main__":
+    debug = os.environ.get("DEBUG", None) == "True"
     db_path = os.environ.get("DB_PATH", "/data/main.db")
     connection = sqlite3.connect(db_path)
     while True:
         cursor = connection.cursor()
-        run(connection, cursor)
+        run(connection, cursor, debug)
         cursor.close()
         time.sleep(int(os.environ.get("FETCHMAIL_DELAY", 60)))

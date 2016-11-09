@@ -34,15 +34,8 @@ def logout():
 @app.route('/services', methods=['GET'])
 @access.global_admin
 def services():
-    containers = {}
     try:
-        all_containers = dockercli.containers(all=True)
+        containers = dockercli.get()
     except Exception as error:
         return flask.render_template('docker-error.html', error=error)
-    for brief in all_containers:
-        if brief['Image'].startswith('mailu/'):
-            container = dockercli.inspect_container(brief['Id'])
-            container['Image'] = dockercli.inspect_image(container['Image'])
-            name = container['Config']['Labels']['com.docker.compose.service']
-            containers[name] = container
     return flask.render_template('services.html', containers=containers)

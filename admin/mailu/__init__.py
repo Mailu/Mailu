@@ -51,9 +51,6 @@ scheduler = background.BackgroundScheduler()
 manager = flask_script.Manager(app)
 manager.add_command('db', flask_migrate.MigrateCommand)
 
-# Connect to the Docker socket
-dockercli = docker.Client(base_url=app.config['DOCKER_SOCKET'])
-
 # Task scheduling
 if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
     scheduler.start()

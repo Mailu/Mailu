@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-10-29 13:37+0200\n"
+"POT-Creation-Date: 2016-11-10 10:52+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,6 +55,7 @@ msgstr ""
 #: mailu/admin/forms.py:49 mailu/admin/forms.py:60 mailu/admin/forms.py:98
 #: mailu/admin/templates/alias/list.html:22
 #: mailu/admin/templates/domain/list.html:22
+#: mailu/admin/templates/user/list.html:24
 msgid "Comment"
 msgstr ""
 
@@ -66,7 +67,7 @@ msgstr ""
 msgid "Confirm password"
 msgstr ""
 
-#: mailu/admin/forms.py:57
+#: mailu/admin/forms.py:57 mailu/admin/templates/user/list.html:23
 msgid "Quota"
 msgstr ""
 
@@ -171,6 +172,26 @@ msgstr ""
 msgid "Username"
 msgstr ""
 
+#: mailu/admin/forms.py:125
+msgid "Announcement subject"
+msgstr ""
+
+#: mailu/admin/forms.py:127
+msgid "Announcement body"
+msgstr ""
+
+#: mailu/admin/forms.py:129
+msgid "Send"
+msgstr ""
+
+#: mailu/admin/templates/announcement.html:4
+msgid "Public announcement"
+msgstr ""
+
+#: mailu/admin/templates/announcement.html:8
+msgid "from"
+msgstr ""
+
 #: mailu/admin/templates/confirm.html:4
 msgid "Confirm action"
 msgstr ""
@@ -229,20 +250,23 @@ msgstr ""
 msgid "My account"
 msgstr ""
 
-#: mailu/admin/templates/sidebar.html:8
+#: mailu/admin/templates/sidebar.html:8 mailu/admin/templates/user/list.html:35
 msgid "Settings"
 msgstr ""
 
 #: mailu/admin/templates/sidebar.html:18
+#: mailu/admin/templates/user/list.html:36
 msgid "Auto-forward"
 msgstr ""
 
 #: mailu/admin/templates/sidebar.html:23
+#: mailu/admin/templates/user/list.html:37
 msgid "Auto-reply"
 msgstr ""
 
 #: mailu/admin/templates/fetch/list.html:4
 #: mailu/admin/templates/sidebar.html:28
+#: mailu/admin/templates/user/list.html:38
 msgid "Fetched accounts"
 msgstr ""
 
@@ -255,14 +279,18 @@ msgid "Administration"
 msgstr ""
 
 #: mailu/admin/templates/sidebar.html:45
+msgid "Announcement"
+msgstr ""
+
+#: mailu/admin/templates/sidebar.html:50
 msgid "Administrators"
 msgstr ""
 
-#: mailu/admin/templates/sidebar.html:52
+#: mailu/admin/templates/sidebar.html:57
 msgid "Mail domains"
 msgstr ""
 
-#: mailu/admin/templates/sidebar.html:59
+#: mailu/admin/templates/sidebar.html:64
 msgid "Help"
 msgstr ""
 
@@ -287,12 +315,14 @@ msgstr ""
 #: mailu/admin/templates/domain/list.html:17
 #: mailu/admin/templates/fetch/list.html:19
 #: mailu/admin/templates/manager/list.html:19
+#: mailu/admin/templates/user/list.html:19
 msgid "Actions"
 msgstr ""
 
 #: mailu/admin/templates/admin/list.html:18
 #: mailu/admin/templates/alias/list.html:20
 #: mailu/admin/templates/manager/list.html:20
+#: mailu/admin/templates/user/list.html:21
 msgid "Email"
 msgstr ""
 
@@ -301,6 +331,7 @@ msgstr ""
 #: mailu/admin/templates/domain/list.html:32
 #: mailu/admin/templates/fetch/list.html:31
 #: mailu/admin/templates/manager/list.html:25
+#: mailu/admin/templates/user/list.html:32
 msgid "Delete"
 msgstr ""
 
@@ -323,18 +354,21 @@ msgstr ""
 #: mailu/admin/templates/alias/list.html:23
 #: mailu/admin/templates/domain/list.html:23
 #: mailu/admin/templates/fetch/list.html:24
+#: mailu/admin/templates/user/list.html:25
 msgid "Created"
 msgstr ""
 
 #: mailu/admin/templates/alias/list.html:24
 #: mailu/admin/templates/domain/list.html:24
 #: mailu/admin/templates/fetch/list.html:25
+#: mailu/admin/templates/user/list.html:26
 msgid "Last edit"
 msgstr ""
 
 #: mailu/admin/templates/alias/list.html:29
 #: mailu/admin/templates/domain/list.html:31
 #: mailu/admin/templates/fetch/list.html:30
+#: mailu/admin/templates/user/list.html:31
 msgid "Edit"
 msgstr ""
 
@@ -437,5 +471,42 @@ msgstr ""
 
 #: mailu/admin/templates/manager/list.html:12
 msgid "Add manager"
+msgstr ""
+
+#: mailu/admin/templates/user/create.html:4
+msgid "New user"
+msgstr ""
+
+#: mailu/admin/templates/user/edit.html:4
+msgid "Edit user"
+msgstr ""
+
+#: mailu/admin/templates/user/forward.html:4
+msgid "Forward emails"
+msgstr ""
+
+#: mailu/admin/templates/user/list.html:4
+msgid "User list"
+msgstr ""
+
+#: mailu/admin/templates/user/list.html:12
+msgid "Add user"
+msgstr ""
+
+#: mailu/admin/templates/user/list.html:20
+#: mailu/admin/templates/user/settings.html:4
+msgid "User settings"
+msgstr ""
+
+#: mailu/admin/templates/user/list.html:22
+msgid "Features"
+msgstr ""
+
+#: mailu/admin/templates/user/password.html:4
+msgid "Password update"
+msgstr ""
+
+#: mailu/admin/templates/user/reply.html:4
+msgid "Automatic reply"
 msgstr ""
 

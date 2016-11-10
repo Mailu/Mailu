@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  Mailu\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-11-10 10:47+0100\n"
+"POT-Creation-Date: 2016-11-10 10:52+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -52,6 +52,7 @@ msgstr "Nombre maximum d'alias"
 #: mailu/admin/forms.py:49 mailu/admin/forms.py:60 mailu/admin/forms.py:98
 #: mailu/admin/templates/alias/list.html:22
 #: mailu/admin/templates/domain/list.html:22
+#: mailu/admin/templates/user/list.html:24
 msgid "Comment"
 msgstr "Commentaire"
 
@@ -63,7 +64,7 @@ msgstr "Créer"
 msgid "Confirm password"
 msgstr "Confirmer le mot de passe"
 
-#: mailu/admin/forms.py:57
+#: mailu/admin/forms.py:57 mailu/admin/templates/user/list.html:23
 msgid "Quota"
 msgstr "Quota"
 
@@ -246,20 +247,23 @@ msgstr "Dernière mise à jour"
 msgid "My account"
 msgstr "Mon compte"
 
-#: mailu/admin/templates/sidebar.html:8
+#: mailu/admin/templates/sidebar.html:8 mailu/admin/templates/user/list.html:35
 msgid "Settings"
 msgstr "Préférences"
 
 #: mailu/admin/templates/sidebar.html:18
+#: mailu/admin/templates/user/list.html:36
 msgid "Auto-forward"
 msgstr "Redirection"
 
 #: mailu/admin/templates/sidebar.html:23
+#: mailu/admin/templates/user/list.html:37
 msgid "Auto-reply"
 msgstr "Réponse automatique"
 
 #: mailu/admin/templates/fetch/list.html:4
 #: mailu/admin/templates/sidebar.html:28
+#: mailu/admin/templates/user/list.html:38
 msgid "Fetched accounts"
 msgstr "Comptes externes"
 
@@ -308,12 +312,14 @@ msgstr "Ajouter un administrateur"
 #: mailu/admin/templates/domain/list.html:17
 #: mailu/admin/templates/fetch/list.html:19
 #: mailu/admin/templates/manager/list.html:19
+#: mailu/admin/templates/user/list.html:19
 msgid "Actions"
 msgstr "Actions"
 
 #: mailu/admin/templates/admin/list.html:18
 #: mailu/admin/templates/alias/list.html:20
 #: mailu/admin/templates/manager/list.html:20
+#: mailu/admin/templates/user/list.html:21
 msgid "Email"
 msgstr "E-mail"
 
@@ -322,6 +328,7 @@ msgstr "E-mail"
 #: mailu/admin/templates/domain/list.html:32
 #: mailu/admin/templates/fetch/list.html:31
 #: mailu/admin/templates/manager/list.html:25
+#: mailu/admin/templates/user/list.html:32
 msgid "Delete"
 msgstr "Supprimer"
 
@@ -344,18 +351,21 @@ msgstr "Ajouter un alias"
 #: mailu/admin/templates/alias/list.html:23
 #: mailu/admin/templates/domain/list.html:23
 #: mailu/admin/templates/fetch/list.html:24
+#: mailu/admin/templates/user/list.html:25
 msgid "Created"
 msgstr "Création"
 
 #: mailu/admin/templates/alias/list.html:24
 #: mailu/admin/templates/domain/list.html:24
 #: mailu/admin/templates/fetch/list.html:25
+#: mailu/admin/templates/user/list.html:26
 msgid "Last edit"
 msgstr "Dernière modification"
 
 #: mailu/admin/templates/alias/list.html:29
 #: mailu/admin/templates/domain/list.html:31
 #: mailu/admin/templates/fetch/list.html:30
+#: mailu/admin/templates/user/list.html:31
 msgid "Edit"
 msgstr "Modifier"
 
@@ -459,4 +469,41 @@ msgstr "Liste des gérants"
 #: mailu/admin/templates/manager/list.html:12
 msgid "Add manager"
 msgstr "Ajouter le gérant"
+
+#: mailu/admin/templates/user/create.html:4
+msgid "New user"
+msgstr ""
+
+#: mailu/admin/templates/user/edit.html:4
+msgid "Edit user"
+msgstr ""
+
+#: mailu/admin/templates/user/forward.html:4
+msgid "Forward emails"
+msgstr ""
+
+#: mailu/admin/templates/user/list.html:4
+msgid "User list"
+msgstr ""
+
+#: mailu/admin/templates/user/list.html:12
+msgid "Add user"
+msgstr ""
+
+#: mailu/admin/templates/user/list.html:20
+#: mailu/admin/templates/user/settings.html:4
+msgid "User settings"
+msgstr ""
+
+#: mailu/admin/templates/user/list.html:22
+msgid "Features"
+msgstr ""
+
+#: mailu/admin/templates/user/password.html:4
+msgid "Password update"
+msgstr ""
+
+#: mailu/admin/templates/user/reply.html:4
+msgid "Automatic reply"
+msgstr ""
 

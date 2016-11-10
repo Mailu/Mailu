@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-New user
+{% trans %}New user{% endtrans %}
 {% endblock %}
 
 {% block subtitle %}
@@ -17,7 +17,7 @@ New user
       prepend='<span class="input-group-addon"><span id="quota">'+(form.quota_bytes.data//1000000000).__str__()+'</span> GiB</span>',
       oninput='$("#quota").text(this.value/1000000000);') }}
   {{ macros.form_field(form.enable_imap) }}
-  {{ macros.form_field(form.enable_pop) }}  
+  {{ macros.form_field(form.enable_pop) }}
   {{ macros.form_field(form.comment) }}
   {{ macros.form_field(form.submit) }}
 </form>

@@ -1,18 +1,11 @@
-
 msgid ""
 msgstr ""
-"Project-Id-Version:  Mailu\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-11-10 10:52+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: fr\n"
-"Language-Team: fr <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.3.4\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: Mailu\n"
+"Language: fr\n"
 
 #: mailu/admin/forms.py:32
 msgid "Invalid email address."
@@ -169,32 +162,11 @@ msgstr "Activer TLS"
 msgid "Username"
 msgstr "Nom d'utilisateur"
 
-#: mailu/admin/forms.py:125
-msgid "Announcement subject"
-msgstr ""
-
-#: mailu/admin/forms.py:127
-msgid "Announcement body"
-msgstr ""
-
-#: mailu/admin/forms.py:129
-msgid "Send"
-msgstr ""
-
-#: mailu/admin/templates/announcement.html:4
-msgid "Public announcement"
-msgstr ""
-
-#: mailu/admin/templates/announcement.html:8
-msgid "from"
-msgstr ""
-
 #: mailu/admin/templates/confirm.html:4
 msgid "Confirm action"
 msgstr "Confirmer"
 
 #: mailu/admin/templates/confirm.html:12
-#, python-format
 msgid "You are about to %(action)s. Please confirm your action."
 msgstr "Vous allez %(action)s. Merci de confirmer votre action."
 
@@ -274,10 +246,6 @@ msgstr "Déconnexion"
 #: mailu/admin/templates/sidebar.html:36
 msgid "Administration"
 msgstr "Administration"
-
-#: mailu/admin/templates/sidebar.html:45
-msgid "Announcement"
-msgstr ""
 
 #: mailu/admin/templates/sidebar.html:50
 msgid "Administrators"
@@ -470,40 +438,64 @@ msgstr "Liste des gérants"
 msgid "Add manager"
 msgstr "Ajouter le gérant"
 
+#: mailu/admin/forms.py:125
+msgid "Announcement subject"
+msgstr "Sujet de l'annonce"
+
+#: mailu/admin/forms.py:127
+msgid "Announcement body"
+msgstr "Corps de l'annonce"
+
+#: mailu/admin/forms.py:129
+msgid "Send"
+msgstr "Envoyer"
+
+#: mailu/admin/templates/announcement.html:4
+msgid "Public announcement"
+msgstr "Annonce globale"
+
+#: mailu/admin/templates/announcement.html:8
+msgid "from"
+msgstr "de"
+
+#: mailu/admin/templates/sidebar.html:45
+msgid "Announcement"
+msgstr "Annonce"
+
 #: mailu/admin/templates/user/create.html:4
 msgid "New user"
-msgstr ""
+msgstr "Nouvel utilisateur"
 
 #: mailu/admin/templates/user/edit.html:4
 msgid "Edit user"
-msgstr ""
+msgstr "Modifier l'utilisateur"
 
 #: mailu/admin/templates/user/forward.html:4
 msgid "Forward emails"
-msgstr ""
+msgstr "Faire suivre les emails"
 
 #: mailu/admin/templates/user/list.html:4
 msgid "User list"
-msgstr ""
+msgstr "Utilisateurs"
 
 #: mailu/admin/templates/user/list.html:12
 msgid "Add user"
-msgstr ""
+msgstr "Ajouter un utilisateur"
 
 #: mailu/admin/templates/user/list.html:20
 #: mailu/admin/templates/user/settings.html:4
 msgid "User settings"
-msgstr ""
+msgstr "Options de l'utilisateur"
 
 #: mailu/admin/templates/user/list.html:22
 msgid "Features"
-msgstr ""
+msgstr "Fonctionnalités"
 
 #: mailu/admin/templates/user/password.html:4
 msgid "Password update"
-msgstr ""
+msgstr "Modifier le mot de passe"
 
 #: mailu/admin/templates/user/reply.html:4
 msgid "Automatic reply"
-msgstr ""
+msgstr "Réponse automatique"
 

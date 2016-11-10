@@ -5,6 +5,16 @@ Notable changes to this project are documented in the current file. For more
 details about individual changes, see the Git log. You should read this before
 upgrading Freposte.io as some changes will include useful notes.
 
+v1.4.0 - unreleased
+-------------------
+
+- Global: make sure that ``DEBUG`` is commented in your ``.env`` if you
+  disabled it and update your ``docker-compose.yml``
+- Security: disable verbose logging of passwords by the fetchmail script
+- Feature: certbot certificate generation is available, uncomment
+  ``ENABLE_CERTBOT`` in your ``.env`` to enable it
+- L10N: french loca is now available
+
 v1.3.0 - 2016-11-05
 -------------------
 

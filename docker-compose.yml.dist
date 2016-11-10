@@ -83,6 +83,7 @@ services:
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/dkim:/dkim"
+      - "$ROOT/certs:/certs"
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   webmail:

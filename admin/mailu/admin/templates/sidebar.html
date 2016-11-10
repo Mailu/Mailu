@@ -41,6 +41,11 @@
       </a>
     </li>
     <li>
+      <a href="{{ url_for('.announcement') }}">
+        <i class="fa fa-bullhorn"></i> <span>{% trans %}Announcement{% endtrans %}</span>
+      </a>
+    </li>
+    <li>
       <a href="{{ url_for('.admin_list') }}">
         <i class="fa fa-user"></i> <span>{% trans %}Administrators{% endtrans %}</span>
       </a>

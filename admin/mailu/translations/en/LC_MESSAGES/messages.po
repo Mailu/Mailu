@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-10-29 13:37+0200\n"
+"POT-Creation-Date: 2016-11-10 10:47+0100\n"
 "PO-Revision-Date: 2016-10-02 15:02+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -172,6 +172,26 @@ msgstr ""
 msgid "Username"
 msgstr ""
 
+#: mailu/admin/forms.py:125
+msgid "Announcement subject"
+msgstr ""
+
+#: mailu/admin/forms.py:127
+msgid "Announcement body"
+msgstr ""
+
+#: mailu/admin/forms.py:129
+msgid "Send"
+msgstr ""
+
+#: mailu/admin/templates/announcement.html:4
+msgid "Public announcement"
+msgstr ""
+
+#: mailu/admin/templates/announcement.html:8
+msgid "from"
+msgstr ""
+
 #: mailu/admin/templates/confirm.html:4
 msgid "Confirm action"
 msgstr ""
@@ -256,14 +276,18 @@ msgid "Administration"
 msgstr ""
 
 #: mailu/admin/templates/sidebar.html:45
+msgid "Announcement"
+msgstr ""
+
+#: mailu/admin/templates/sidebar.html:50
 msgid "Administrators"
 msgstr ""
 
-#: mailu/admin/templates/sidebar.html:52
+#: mailu/admin/templates/sidebar.html:57
 msgid "Mail domains"
 msgstr ""
 
-#: mailu/admin/templates/sidebar.html:59
+#: mailu/admin/templates/sidebar.html:64
 msgid "Help"
 msgstr ""
 

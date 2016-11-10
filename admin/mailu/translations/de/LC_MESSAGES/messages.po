@@ -7,17 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: stefan.auditor@erdfisch.de\n"
-"POT-Creation-Date: 2016-11-09 19:59+0100\n"
+"POT-Creation-Date: 2016-11-10 10:47+0100\n"
 "PO-Revision-Date: 2016-11-09 21:43+0100\n"
+"Last-Translator: Stefan Auditor <stefan.auditor@erdfisch.de>\n"
+"Language: de\n"
 "Language-Team: Mailu German Team <stefan.auditor@erdfisch.de>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
-"X-Generator: Poedit 1.8.11\n"
-"Last-Translator: Stefan Auditor <stefan.auditor@erdfisch.de>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"Language: de\n"
 
 #: mailu/admin/forms.py:32
 msgid "Invalid email address."
@@ -173,6 +172,26 @@ msgstr "TLS aktivieren"
 msgid "Username"
 msgstr "Benutzername"
 
+#: mailu/admin/forms.py:125
+msgid "Announcement subject"
+msgstr ""
+
+#: mailu/admin/forms.py:127
+msgid "Announcement body"
+msgstr ""
+
+#: mailu/admin/forms.py:129
+msgid "Send"
+msgstr ""
+
+#: mailu/admin/templates/announcement.html:4
+msgid "Public announcement"
+msgstr ""
+
+#: mailu/admin/templates/announcement.html:8
+msgid "from"
+msgstr ""
+
 #: mailu/admin/templates/confirm.html:4
 msgid "Confirm action"
 msgstr "Aktion bestätigen"
@@ -188,7 +207,9 @@ msgstr "Docker Fehler"
 
 #: mailu/admin/templates/docker-error.html:12
 msgid "An error occurred while talking to the Docker server."
-msgstr "Während der Kommunikation mit dem Docker Server ist ein Fehler ist aufgetreten."
+msgstr ""
+"Während der Kommunikation mit dem Docker Server ist ein Fehler ist "
+"aufgetreten."
 
 #: mailu/admin/templates/login.html:6
 msgid "Your account"
@@ -257,14 +278,18 @@ msgid "Administration"
 msgstr "Administration"
 
 #: mailu/admin/templates/sidebar.html:45
+msgid "Announcement"
+msgstr ""
+
+#: mailu/admin/templates/sidebar.html:50
 msgid "Administrators"
 msgstr "Administratoren"
 
-#: mailu/admin/templates/sidebar.html:52
+#: mailu/admin/templates/sidebar.html:57
 msgid "Mail domains"
 msgstr "E-Mail-Domains"
 
-#: mailu/admin/templates/sidebar.html:59
+#: mailu/admin/templates/sidebar.html:64
 msgid "Help"
 msgstr "Hilfe"
 
@@ -440,3 +465,4 @@ msgstr "Manager Liste"
 #: mailu/admin/templates/manager/list.html:12
 msgid "Add manager"
 msgstr "Manager hinzufügen"
+

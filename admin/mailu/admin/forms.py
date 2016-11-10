@@ -119,3 +119,11 @@ class FetchForm(flask_wtf.FlaskForm):
     username = fields.StringField(_('Username'))
     password = fields.StringField(_('Password'))
     submit = fields.SubmitField(_('Submit'))
+
+
+class AnnouncementForm(flask_wtf.FlaskForm):
+    announcement_subject = fields.StringField(_('Announcement subject'),
+        [validators.DataRequired()])
+    announcement_body = fields.StringField(_('Announcement body'),
+        [validators.DataRequired()], widget=widgets.TextArea())
+    submit = fields.SubmitField(_('Send'))

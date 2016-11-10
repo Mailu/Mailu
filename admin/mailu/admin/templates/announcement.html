@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% trans %}Public announcement{% endtrans %}
+{% endblock %}
+
+{% block subtitle %}
+{% trans %}from{% endtrans %} {{ from_address }}
+{% endblock %}
+
+{% block box_content %}
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {{ macros.form_field(form.announcement_subject) }}
+  {{ macros.form_field(form.announcement_body, rows=10) }}
+  {{ macros.form_field(form.submit) }}
+</form>
+{% endblock %}

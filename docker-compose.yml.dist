@@ -27,6 +27,7 @@ services:
     ports:
       - "$BIND_ADDRESS:143:143"
       - "$BIND_ADDRESS:993:993"
+      - "$BIND_ADDRESS:4190:4190"
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/mail:/mail"

@@ -7,6 +7,4 @@ RUN apk add --update \
 
 COPY fetchmail.py /fetchmail.py
 
-USER fetchmail
-
 CMD ["/fetchmail.py"]

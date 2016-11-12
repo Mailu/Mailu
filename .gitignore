@@ -1,8 +1,11 @@
 *.pyc
+*.mo
 __pycache__
 /admin/lib
 /admin/bin
 /admin/include
 pip-selfcheck.json
+/.env
 /data
 /docker-compose.mac.yml
+/docker-compose.yml

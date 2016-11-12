@@ -56,8 +56,9 @@ def alias_edit(alias):
 @access.confirmation_required("delete {alias}")
 def alias_delete(alias):
     alias = models.Alias.query.get(alias) or flask.abort(404)
+    domain = alias.domain
     db.session.delete(alias)
     db.session.commit()
     flask.flash('Alias %s deleted' % alias)
     return flask.redirect(
-        flask.url_for('.alias_list', domain_name=alias.domain.name))
+        flask.url_for('.alias_list', domain_name=domain.name))

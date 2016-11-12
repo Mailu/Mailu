@@ -60,11 +60,12 @@ def user_edit(user_email):
 @access.confirmation_required("delete {user_email}")
 def user_delete(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
+    domain = user.domain
     db.session.delete(user)
     db.session.commit()
     flask.flash('User %s deleted' % user)
     return flask.redirect(
-        flask.url_for('.user_list', domain_name=user.domain.name))
+        flask.url_for('.user_list', domain_name=domain.name))
 
 
 @app.route('/user/settings', methods=['GET', 'POST'], defaults={'user_email': None})

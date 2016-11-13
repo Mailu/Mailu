@@ -45,15 +45,14 @@ def certbot_install(domain):
 @scheduler.scheduled_job('cron', hour=2, minute=0)
 def generate_cert():
     print("Generating TLS certificates using Certbot")
-    domain = app.config["DOMAIN"]
-    email = "{}@{}".format(app.config["POSTMASTER"], domain)
+    email = "{}@{}".format(app.config["POSTMASTER"], app.config["DOMAIN"])
     result = certbot_command(
         "certonly",
         "--standalone",
         "--agree-tos",
         "--preferred-challenges", "http",
         "--email", email,
-        "-d", domain,
+        "-d", app.config["HOSTNAME"],
         # The port is hardcoded in the nginx image as well, we should find
         # a more suitable way to go but this will do until we have a proper
         # daemon handling certbot stuff

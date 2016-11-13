@@ -45,6 +45,7 @@ def certbot_install(domain):
 @scheduler.scheduled_job('cron', hour=2, minute=0)
 def generate_cert():
     print("Generating TLS certificates using Certbot")
+    hostname = app.config["HOSTNAME"]
     email = "{}@{}".format(app.config["POSTMASTER"], app.config["DOMAIN"])
     result = certbot_command(
         "certonly",
@@ -52,7 +53,7 @@ def generate_cert():
         "--agree-tos",
         "--preferred-challenges", "http",
         "--email", email,
-        "-d", app.config["HOSTNAME"],
+        "-d", hostname,
         # The port is hardcoded in the nginx image as well, we should find
         # a more suitable way to go but this will do until we have a proper
         # daemon handling certbot stuff
@@ -63,6 +64,6 @@ def generate_cert():
             result.stdout.decode("utf8") + result.stdout.decode("utf8")))
     else:
         print("Successfully generated or renewed TLS certificates")
-        if certbot_install(domain):
+        if certbot_install(hostname):
             print("Reloading TLS-dependant services")
             dockercli.reload("http", "smtp", "imap")

@@ -95,13 +95,8 @@ smtpd_delay_reject = yes
 # Allowed senders are: the user or one of the alias destinations
 smtpd_sender_login_maps = $virtual_alias_maps
 
-# Helo restrictions
+# Helo restrictions are specified for smtp only in master.cf
 smtpd_helo_required = yes
-smtpd_helo_restrictions =
-   permit_mynetworks,
-   reject_non_fqdn_helo_hostname,
-   reject_invalid_helo_hostname,
-   permit
 
 # Sender restrictions
 smtpd_sender_restrictions =

@@ -9,3 +9,4 @@ this file.
 Other contributors:
 
  - Angedestenebres - Tests on development version & Current version
+ - Stefan Auditor - German translation on POEditor.com

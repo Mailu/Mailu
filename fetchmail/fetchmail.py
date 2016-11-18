@@ -44,8 +44,9 @@ def run(connection, cursor, debug):
     for line in cursor.fetchall():
         fetchmailrc = ""
         user_email, protocol, host, port, tls, username, password = line
-        options = "options fetchall antispam 501, 504, 550, 553, 554"
+        options = "options antispam 501, 504, 550, 553, 554"
         options += " ssl" if tls else ""
+        options += " keep" if keep else " fetchall"
         fetchmailrc += RC_LINE.format(
             user_email=escape_rc_string(user_email),
             protocol=protocol,
@@ -56,15 +57,21 @@ def run(connection, cursor, debug):
             options=options
         )
         if debug:
-            print(fetchmailrc)
+            print( fetchmailrc )
         try:
-            print(fetchmail(fetchmailrc))
+            print( fetchmail( fetchmailrc ) )
             error_message = ""
         except subprocess.CalledProcessError as error:
-            error_message = error.output.decode("utf8")
+            error_message = error.output.decode( "utf8" )
             # No mail is not an error
             if not error_message.startswith("fetchmail: No mail"):
-                print(error_message)
+                print( error_message )
+
+            user_info = "for %s at %s" % ( user_email, host )
+            # Number of messages seen is not a error as well
+            if "messages" in error_message and "(seen " in error_message and \
+                                            user_info in error_message:
+                print( error_message )
         finally:
             cursor.execute("""
                 UPDATE fetch SET error=?, last_check=datetime('now')
@@ -76,6 +83,7 @@ def run(connection, cursor, debug):
 
 if __name__ == "__main__":
     debug = os.environ.get("DEBUG", None) == "True"
+    keep = os.environ.get("FETCHMAIL_KEEP", None) == "True"
     db_path = os.environ.get("DB_PATH", "/data/main.db")
     connection = sqlite3.connect(db_path)
     while True:
@@ -83,3 +91,4 @@ if __name__ == "__main__":
         run(connection, cursor, debug)
         cursor.close()
         time.sleep(int(os.environ.get("FETCHMAIL_DELAY", 60)))
+

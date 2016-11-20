@@ -36,7 +36,7 @@ def fetchmail(fetchmailrc):
         return output
 
 
-def run(connection, cursor, debug):
+def run(connection, cursor, keep, debug):
     cursor.execute("""
         SELECT user_email, protocol, host, port, tls, username, password
         FROM fetch
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     connection = sqlite3.connect(db_path)
     while True:
         cursor = connection.cursor()
-        run(connection, cursor, debug)
+        run(connection, cursor, keep, debug)
         cursor.close()
         time.sleep(int(os.environ.get("FETCHMAIL_DELAY", 60)))
 

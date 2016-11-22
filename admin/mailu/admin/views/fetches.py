@@ -51,8 +51,9 @@ def fetch_edit(fetch_id):
 @access.owner(models.Fetch, 'fetch_id')
 def fetch_delete(fetch_id):
     fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
+    user = fetch.user
     db.session.delete(fetch)
     db.session.commit()
     flask.flash('Fetch configuration delete')
     return flask.redirect(
-        flask.url_for('.fetch_list', user_email=fetch.user.email))
+        flask.url_for('.fetch_list', user_email=user.email))

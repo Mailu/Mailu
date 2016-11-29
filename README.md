@@ -1,5 +1,7 @@
 ![Logo](logo.png)
 
+[![Gitter chat](https://badges.gitter.im/Mailu/Lobby.png)](https://gitter.im/mailu/Lobby)
+
 Mailu
 =====
 

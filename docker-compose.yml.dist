@@ -76,6 +76,14 @@ services:
     volumes:
       - "$ROOT/filter:/data"
 
+  webdav:
+    # build: $WEBDAV
+    image: mailu/$WEBDAV:$VERSION
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/dav:/data"
+
   admin:
     # build: admin
     image: mailu/admin:$VERSION

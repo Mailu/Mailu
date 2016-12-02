@@ -23,6 +23,7 @@ poll "{host}" proto {protocol}  port {port}
     sslproto 'AUTO'
 """
 
+
 def escape_rc_string(arg):
     return arg.replace("\\", "\\\\").replace('"', '\\"')
 
@@ -57,28 +58,27 @@ def run(connection, cursor, keep, debug):
             options=options
         )
         if debug:
-            print( fetchmailrc )
+            print(fetchmailrc)
         try:
-            print( fetchmail( fetchmailrc ) )
+            print(fetchmail(fetchmailrc))
             error_message = ""
         except subprocess.CalledProcessError as error:
-            error_message = error.output.decode( "utf8" )
+            error_message = error.output.decode("utf8")
             # No mail is not an error
             if not error_message.startswith("fetchmail: No mail"):
-                print( error_message )
-
-            user_info = "for %s at %s" % ( user_email, host )
+                print(error_message)
+            user_info = "for %s at %s" % (user_email, host)
             # Number of messages seen is not a error as well
-            if "messages" in error_message and "(seen " in error_message and \
-                                            user_info in error_message:
-                print( error_message )
+            if ("messages" in error_message and
+                    "(seen " in error_message and
+                    user_info in error_message):
+                print(error_message)
         finally:
             cursor.execute("""
                 UPDATE fetch SET error=?, last_check=datetime('now')
                 WHERE user_email=?
             """, (error_message.split("\n")[0], user_email))
             connection.commit()
-
 
 
 if __name__ == "__main__":
@@ -91,4 +91,3 @@ if __name__ == "__main__":
         run(connection, cursor, keep, debug)
         cursor.close()
         time.sleep(int(os.environ.get("FETCHMAIL_DELAY", 60)))
-

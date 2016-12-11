@@ -8,6 +8,7 @@ require "regex";
 require "relational";
 require "comparator-i;ascii-numeric";
 require "vnd.dovecot.extdata";
+require "vnd.dovecot.execute";
 require "spamtestplus";
 
 if allof (string :is "${extdata.spam_enabled}" "1",
@@ -23,6 +24,6 @@ if string :is "${extdata.reply_enabled}" "1" {
 }
 
 if string :is "${extdata.forward_enabled}" "1" {
-  redirect "${extdata.forward_destination}";
+  execute :pipe "forward" "${extdata.forward_destination}";
   keep;
 }

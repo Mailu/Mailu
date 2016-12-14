@@ -51,5 +51,22 @@ def user(localpart, domain_name, password):
     db.session.add(user)
     db.session.commit()
 
+@manager.command
+def alias(localpart, domain_name, destination):
+    """ Create an alias
+    """
+    domain = models.Domain.query.get(domain_name)
+    if not domain:
+        domain = models.Domain(name=domain_name)
+        db.session.add(domain)
+    alias = models.Alias(   
+        localpart=localpart,
+        domain=domain,
+        destination=destination.split(','),
+        email="%s@%s" % (localpart, domain_name)
+    )
+    db.session.add(alias)
+    db.session.commit()
+
 if __name__ == "__main__":
     manager.run()

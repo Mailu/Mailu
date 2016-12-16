@@ -34,6 +34,39 @@ def admin(localpart, domain_name, password):
     db.session.add(user)
     db.session.commit()
 
+@manager.command
+def user(localpart, domain_name, password):
+    """ Create an user
+    """
+    domain = models.Domain.query.get(domain_name)
+    if not domain:
+        domain = models.Domain(name=domain_name)
+        db.session.add(domain)
+    user = models.User(
+        localpart=localpart,
+        domain=domain,
+        global_admin=False,
+        password=hash.sha512_crypt.encrypt(password)
+    )
+    db.session.add(user)
+    db.session.commit()
+
+@manager.command
+def alias(localpart, domain_name, destination):
+    """ Create an alias
+    """
+    domain = models.Domain.query.get(domain_name)
+    if not domain:
+        domain = models.Domain(name=domain_name)
+        db.session.add(domain)
+    alias = models.Alias(   
+        localpart=localpart,
+        domain=domain,
+        destination=destination.split(','),
+        email="%s@%s" % (localpart, domain_name)
+    )
+    db.session.add(alias)
+    db.session.commit()
 
 if __name__ == "__main__":
     manager.run()

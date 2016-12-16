@@ -110,7 +110,7 @@ msgstr "Passwort aktualisieren"
 
 #: mailu/admin/forms.py:78
 msgid "Enable forwarding"
-msgstr "Weiterleiten aktivieren"
+msgstr "Weiterleitung aktivieren"
 
 #: mailu/admin/forms.py:80 mailu/admin/forms.py:97
 #: mailu/admin/templates/alias/list.html:21
@@ -163,42 +163,21 @@ msgstr "Hostname oder IP"
 
 #: mailu/admin/forms.py:117
 msgid "TCP port"
-msgstr "TCP Port"
+msgstr "Port"
 
 #: mailu/admin/forms.py:118
 msgid "Enable TLS"
-msgstr "TLS aktivieren"
+msgstr "Verschlüsselung aktivieren"
 
 #: mailu/admin/forms.py:119 mailu/admin/templates/fetch/list.html:21
 msgid "Username"
 msgstr "Benutzername"
-
-#: mailu/admin/forms.py:125
-msgid "Announcement subject"
-msgstr ""
-
-#: mailu/admin/forms.py:127
-msgid "Announcement body"
-msgstr ""
-
-#: mailu/admin/forms.py:129
-msgid "Send"
-msgstr ""
-
-#: mailu/admin/templates/announcement.html:4
-msgid "Public announcement"
-msgstr ""
-
-#: mailu/admin/templates/announcement.html:8
-msgid "from"
-msgstr ""
 
 #: mailu/admin/templates/confirm.html:4
 msgid "Confirm action"
 msgstr "Aktion bestätigen"
 
 #: mailu/admin/templates/confirm.html:12
-#, python-format
 msgid "You are about to %(action)s. Please confirm your action."
 msgstr "Bitte bestätigen: %(action)s."
 
@@ -208,9 +187,7 @@ msgstr "Docker Fehler"
 
 #: mailu/admin/templates/docker-error.html:12
 msgid "An error occurred while talking to the Docker server."
-msgstr ""
-"Während der Kommunikation mit dem Docker Server ist ein Fehler ist "
-"aufgetreten."
+msgstr "Während der Kommunikation mit dem Docker Server ist ein Fehler aufgetreten."
 
 #: mailu/admin/templates/login.html:6
 msgid "Your account"
@@ -222,7 +199,7 @@ msgstr "für administrativen Zugriff"
 
 #: mailu/admin/templates/services.html:4 mailu/admin/templates/sidebar.html:40
 msgid "Services status"
-msgstr "Dienste-Status"
+msgstr "Dienst-Status"
 
 #: mailu/admin/templates/services.html:11
 msgid "Service"
@@ -239,7 +216,7 @@ msgstr "PID"
 
 #: mailu/admin/templates/services.html:14
 msgid "Image"
-msgstr "Bild"
+msgstr "Image"
 
 #: mailu/admin/templates/services.html:15
 msgid "Started"
@@ -260,7 +237,7 @@ msgstr "Einstellungen"
 #: mailu/admin/templates/sidebar.html:18
 #: mailu/admin/templates/user/list.html:36
 msgid "Auto-forward"
-msgstr "Auot-Weiterleitung"
+msgstr "Auto-Weiterleitung"
 
 #: mailu/admin/templates/sidebar.html:23
 #: mailu/admin/templates/user/list.html:37
@@ -280,10 +257,6 @@ msgstr "Abmelden"
 #: mailu/admin/templates/sidebar.html:36
 msgid "Administration"
 msgstr "Administration"
-
-#: mailu/admin/templates/sidebar.html:45
-msgid "Announcement"
-msgstr ""
 
 #: mailu/admin/templates/sidebar.html:50
 msgid "Administrators"
@@ -398,7 +371,7 @@ msgstr "DNS SPF Einträge"
 
 #: mailu/admin/templates/domain/details.html:36
 msgid "DKIM public key"
-msgstr "DKIM public key"
+msgstr "DKIM öffentlicher Schlüssel"
 
 #: mailu/admin/templates/domain/details.html:40
 msgid "DNS DKIM entry"
@@ -476,40 +449,64 @@ msgstr "Manager Liste"
 msgid "Add manager"
 msgstr "Manager hinzufügen"
 
+#: mailu/admin/forms.py:125
+msgid "Announcement subject"
+msgstr "Bekanntmachung Betreff"
+
+#: mailu/admin/forms.py:127
+msgid "Announcement body"
+msgstr "Bekanntmachung Text"
+
+#: mailu/admin/forms.py:129
+msgid "Send"
+msgstr "Absenden"
+
+#: mailu/admin/templates/announcement.html:4
+msgid "Public announcement"
+msgstr "Öffentliche Bekanntmachung"
+
+#: mailu/admin/templates/announcement.html:8
+msgid "from"
+msgstr "von"
+
+#: mailu/admin/templates/sidebar.html:45
+msgid "Announcement"
+msgstr "Bekanntmachung"
+
 #: mailu/admin/templates/user/create.html:4
 msgid "New user"
-msgstr ""
+msgstr "Neuer Benutzer"
 
 #: mailu/admin/templates/user/edit.html:4
 msgid "Edit user"
-msgstr ""
+msgstr "Benutzer bearbeiten"
 
 #: mailu/admin/templates/user/forward.html:4
 msgid "Forward emails"
-msgstr ""
+msgstr "E-Mails weiterleiten"
 
 #: mailu/admin/templates/user/list.html:4
 msgid "User list"
-msgstr ""
+msgstr "Benutzerliste"
 
 #: mailu/admin/templates/user/list.html:12
 msgid "Add user"
-msgstr ""
+msgstr "Benutzer hinzufügen"
 
 #: mailu/admin/templates/user/list.html:20
 #: mailu/admin/templates/user/settings.html:4
 msgid "User settings"
-msgstr ""
+msgstr "Benutzer Einstellungen"
 
 #: mailu/admin/templates/user/list.html:22
 msgid "Features"
-msgstr ""
+msgstr "Funktionen"
 
 #: mailu/admin/templates/user/password.html:4
 msgid "Password update"
-msgstr ""
+msgstr "Passwort aktualisieren"
 
 #: mailu/admin/templates/user/reply.html:4
 msgid "Automatic reply"
-msgstr ""
+msgstr "Automatische Antwort"
 

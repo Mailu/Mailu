@@ -1,9 +1,9 @@
 FROM alpine:edge
 
-RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
- && apk add --update \
-     rspamd@testing \
- && rm -rf /var/cache/apk/*
+# We have to upgrade musl, or rspamd will not work.
+RUN echo 'http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories && \
+  apk add --no-cache --upgrade musl musl-utils && \
+  apk add --no-cache rspamd rsyslog
 
 RUN mkdir /run/rspamd
 

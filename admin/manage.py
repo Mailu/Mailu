@@ -1,6 +1,5 @@
 from mailu import manager, db
 from mailu.admin import models
-from passlib import hash
 
 
 @manager.command
@@ -28,11 +27,12 @@ def admin(localpart, domain_name, password):
     user = models.User(
         localpart=localpart,
         domain=domain,
-        global_admin=True,
-        password=hash.sha512_crypt.encrypt(password)
+        global_admin=True
     )
+    user.set_password(password)
     db.session.add(user)
     db.session.commit()
+
 
 @manager.command
 def user(localpart, domain_name, password):
@@ -45,11 +45,12 @@ def user(localpart, domain_name, password):
     user = models.User(
         localpart=localpart,
         domain=domain,
-        global_admin=False,
-        password=hash.sha512_crypt.encrypt(password)
+        global_admin=False
     )
+    user.set_password(password)
     db.session.add(user)
     db.session.commit()
+
 
 @manager.command
 def alias(localpart, domain_name, destination):
@@ -59,7 +60,7 @@ def alias(localpart, domain_name, destination):
     if not domain:
         domain = models.Domain(name=domain_name)
         db.session.add(domain)
-    alias = models.Alias(   
+    alias = models.Alias(
         localpart=localpart,
         domain=domain,
         destination=destination.split(','),
@@ -67,6 +68,7 @@ def alias(localpart, domain_name, destination):
     )
     db.session.add(alias)
     db.session.commit()
+
 
 if __name__ == "__main__":
     manager.run()

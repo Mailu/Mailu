@@ -44,6 +44,7 @@ def user_edit(user_email):
     form = forms.UserForm(obj=user)
     wtforms_components.read_only(form.localpart)
     form.pw.validators = []
+    form.localpart.validators = []
     if form.validate_on_submit():
         form.populate_obj(user)
         if form.pw.data:

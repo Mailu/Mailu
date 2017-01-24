@@ -41,6 +41,7 @@ def alias_edit(alias):
     alias = models.Alias.query.get(alias) or flask.abort(404)
     form = forms.AliasForm(obj=alias)
     wtforms_components.read_only(form.localpart)
+    form.localpart.validators = []
     if form.validate_on_submit():
         form.populate_obj(alias)
         db.session.commit()

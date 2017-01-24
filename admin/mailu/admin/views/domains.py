@@ -34,6 +34,7 @@ def domain_edit(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     form = forms.DomainForm(obj=domain)
     wtforms_components.read_only(form.name)
+    form.name.validators = []
     if form.validate_on_submit():
         form.populate_obj(domain)
         db.session.commit()

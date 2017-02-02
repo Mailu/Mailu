@@ -57,6 +57,7 @@ class Domain(Base):
         backref=db.backref('manager_of'), lazy='dynamic')
     max_users = db.Column(db.Integer, nullable=False, default=0)
     max_aliases = db.Column(db.Integer, nullable=False, default=0)
+    max_quota_bytes = db.Column(db.Integer(), nullable=False, default=0)
 
     @property
     def dkim_key(self):

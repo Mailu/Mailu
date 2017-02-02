@@ -46,6 +46,7 @@ class DomainForm(flask_wtf.FlaskForm):
     name = fields.StringField(_('Domain name'), [validators.DataRequired()])
     max_users = fields_.IntegerField(_('Maximum user count'), default=10)
     max_aliases = fields_.IntegerField(_('Maximum alias count'), default=10)
+    max_quota_bytes = fields_.IntegerSliderField(_('Maximum user quota'), default=0)
     comment = fields.StringField(_('Comment'))
     submit = fields.SubmitField(_('Create'))
 

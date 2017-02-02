@@ -2,6 +2,7 @@ from mailu.admin import app, db, models, forms, access
 
 import flask
 import flask_login
+import wtforms
 import wtforms_components
 
 
@@ -21,6 +22,8 @@ def user_create(domain_name):
         return flask.redirect(
             flask.url_for('.user_list', domain_name=domain.name))
     form = forms.UserForm()
+    form.quota_bytes.validators = [
+        wtforms.validators.NumberRange(max=domain.max_quota_bytes)]
     if form.validate_on_submit():
         if domain.has_email(form.localpart.data):
             flask.flash('Email is already used', 'error')
@@ -41,10 +44,17 @@ def user_create(domain_name):
 @access.domain_admin(models.User, 'user_email')
 def user_edit(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
+    # Handle the case where user quota is more than allowed
+    max_quota_bytes = user.domain.max_quota_bytes
+    if max_quota_bytes and user.quota_bytes > max_quota_bytes:
+        max_quota_bytes = user.quota_bytes
+    # Create the form
     form = forms.UserForm(obj=user)
     wtforms_components.read_only(form.localpart)
     form.pw.validators = []
     form.localpart.validators = []
+    form.quota_bytes.validators = [
+        wtforms.validators.NumberRange(max=max_quota_bytes)]
     if form.validate_on_submit():
         form.populate_obj(user)
         if form.pw.data:
@@ -53,7 +63,8 @@ def user_edit(user_email):
         flask.flash('User %s updated' % user)
         return flask.redirect(
             flask.url_for('.user_list', domain_name=user.domain.name))
-    return flask.render_template('user/edit.html', form=form, user=user, domain=user.domain)
+    return flask.render_template('user/edit.html', form=form, user=user,
+        domain=user.domain, max_quota_bytes=max_quota_bytes)
 
 
 @app.route('/user/delete/<user_email>', methods=['GET', 'POST'])

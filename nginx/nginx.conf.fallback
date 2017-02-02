@@ -1,0 +1,27 @@
+#  Basic configuration
+user nginx;
+worker_processes  1;
+error_log /dev/stderr info;
+pid /var/run/nginx.pid;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    # Standard HTTP configuration with slight hardening
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    access_log /dev/stdout;
+    sendfile on;
+    keepalive_timeout  65;
+    server_tokens off;
+
+    server {
+      listen 80;
+
+      location /.well-known/acme-challenge {
+        proxy_pass http://admin:8081;
+      }
+    }
+}

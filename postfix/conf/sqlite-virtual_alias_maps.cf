@@ -4,7 +4,7 @@ query =
    FROM
      (SELECT destination, email, wildcard, localpart FROM alias
       UNION
-      SELECT email AS destination, email, 0 as wildcard, localpart FROM user)
+      SELECT email||(CASE WHEN forward_enabled=1 THEN ','||forward_destination ELSE '' END) AS destination, email, 0 as wildcard, localpart FROM user)
    WHERE
      (
       wildcard = 0

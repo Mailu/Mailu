@@ -22,8 +22,3 @@ if allof (string :is "${extdata.spam_enabled}" "1",
 if string :is "${extdata.reply_enabled}" "1" {
   vacation :days 1 :subject "${extdata.reply_subject}" "${extdata.reply_body}";
 }
-
-if string :is "${extdata.forward_enabled}" "1" {
-  execute :pipe "forward" "${extdata.forward_destination}";
-  keep;
-}

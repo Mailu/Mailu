@@ -34,17 +34,3 @@ map {
   username_field = email
   value_field = reply_body
 }
-
-map {
-  pattern = priv/forward_enabled
-  table = user
-  username_field = email
-  value_field = forward_enabled
-}
-
-map {
-  pattern = priv/forward_destination
-  table = user
-  username_field = email
-  value_field = forward_destination
-}

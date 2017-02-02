@@ -222,5 +222,6 @@ class Fetch(Base):
     tls = db.Column(db.Boolean(), nullable=False)
     username = db.Column(db.String(255), nullable=False)
     password = db.Column(db.String(255), nullable=False)
+    keep = db.Column(db.Boolean(), nullable=False)
     last_check = db.Column(db.DateTime, nullable=True)
     error = db.Column(db.String(1023), nullable=True)

@@ -37,14 +37,14 @@ def fetchmail(fetchmailrc):
         return output
 
 
-def run(connection, cursor, keep, debug):
+def run(connection, cursor, debug):
     cursor.execute("""
-        SELECT user_email, protocol, host, port, tls, username, password
+        SELECT user_email, protocol, host, port, tls, username, password, keep
         FROM fetch
     """)
     for line in cursor.fetchall():
         fetchmailrc = ""
-        user_email, protocol, host, port, tls, username, password = line
+        user_email, protocol, host, port, tls, username, password, keep = line
         options = "options antispam 501, 504, 550, 553, 554"
         options += " ssl" if tls else ""
         options += " keep" if keep else " fetchall"
@@ -83,11 +83,10 @@ def run(connection, cursor, keep, debug):
 
 if __name__ == "__main__":
     debug = os.environ.get("DEBUG", None) == "True"
-    keep = os.environ.get("FETCHMAIL_KEEP", None) == "True"
     db_path = os.environ.get("DB_PATH", "/data/main.db")
     connection = sqlite3.connect(db_path)
     while True:
         cursor = connection.cursor()
-        run(connection, cursor, keep, debug)
+        run(connection, cursor, debug)
         cursor.close()
         time.sleep(int(os.environ.get("FETCHMAIL_DELAY", 60)))

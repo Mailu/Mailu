@@ -19,6 +19,7 @@
       <th>{% trans %}Actions{% endtrans %}</th>
       <th>{% trans %}Endpoint{% endtrans %}</th>
       <th>{% trans %}Username{% endtrans %}</th>
+      <th>{% trans %}Keep emails{% endtrans %}</th>
       <th>{% trans %}Last check{% endtrans %}</th>
       <th>{% trans %}Status{% endtrans %}</th>
       <th>{% trans %}Created{% endtrans %}</th>
@@ -32,6 +33,7 @@
       </td>
       <td>{{ fetch.protocol }}{{ 's' if fetch.tls else '' }}://{{ fetch.host }}:{{ fetch.port }}</td>
       <td>{{ fetch.username }}</td>
+      <td>{% if fetch.keep %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
       <td>{{ fetch.last_check or '-' }}</td>
       <td>{{ fetch.error or '-' }}</td>
       <td>{{ fetch.created_at }}</td>

@@ -119,6 +119,7 @@ class FetchForm(flask_wtf.FlaskForm):
     tls = fields.BooleanField(_('Enable TLS'))
     username = fields.StringField(_('Username'))
     password = fields.StringField(_('Password'))
+    keep = fields.BooleanField(_('Keep emails on the server'))
     submit = fields.SubmitField(_('Submit'))
 
 

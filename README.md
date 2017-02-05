@@ -37,7 +37,7 @@ Main features include:
 - **Antispam**, auto-learn, greylisting, DMARC and SPF
 - **Freedom**, all FOSS components, no tracker included
 
-![Creating a new user](http://mailu.io/screenshots/create.png)
+![Creating a new user](https://mailu.io/screenshots/create.png)
 
 Running a mail server
 =====================

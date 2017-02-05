@@ -1,6 +1,6 @@
 ![Logo](logo.png)
 
-[![Gitter chat](https://badges.gitter.im/Mailu/Lobby.png)](https://gitter.im/mailu/Lobby)
+[Join us and chat about the project.](https://riot.im/app/#/room/#mailu:tedomum.net)
 
 Mailu
 =====

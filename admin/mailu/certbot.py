@@ -28,15 +28,17 @@ def certbot_install(domain):
     path = app.config["CERTS_PATH"]
     cert = os.path.join(path, "cert.pem")
     key = os.path.join(path, "key.pem")
-    live_cert = os.path.join(path, "live", domain, "fullchain.pem")
-    live_key = os.path.join(path, "live", domain, "privkey.pem")
+    live_cert = os.path.join("live", domain, "fullchain.pem")
+    live_key = os.path.join("live", domain, "privkey.pem")
     if not os.path.islink(cert) or os.readlink(cert) != live_cert:
         must_reload = True
-        os.unlink(cert)
+        if os.path.exists(cert):
+            os.unlink(cert)
         os.symlink(live_cert, cert)
     if not os.path.islink(key) or os.readlink(key) != live_key:
         must_reload = True
-        os.unlink(key)
+        if os.path.exists(key):
+            os.unlink(key)
         os.symlink(live_key, key)
     return must_reload
 

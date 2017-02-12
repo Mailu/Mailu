@@ -1,6 +1,6 @@
 FROM alpine
 
-RUN apk add --update bash postfix postfix-sqlite postfix-pcre rsyslog && rm -rf /var/cache/apk/*
+RUN apk add --no-cache bash postfix postfix-sqlite postfix-pcre rsyslog
 
 COPY conf /etc/postfix
 COPY rsyslog.conf /etc/rsyslog.conf

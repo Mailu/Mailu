@@ -1,9 +1,6 @@
 FROM python:alpine
 
-RUN apk add --update \
-    fetchmail \
-    ca-certificates \
- && rm -rf /var/cache/apk/*
+RUN apk add --no-cache fetchmail ca-certificates
 
 COPY fetchmail.py /fetchmail.py
 

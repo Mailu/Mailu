@@ -1,11 +1,6 @@
 FROM alpine
 
-RUN apk add --update \
-      clamav \
-      rsyslog \
-      wget \
- && rm -rf /var/cache/apk/*
-
+RUN apk add --no-cache clamav rsyslog wget
 
 COPY conf /etc/clamav
 COPY start.sh /start.sh

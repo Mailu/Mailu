@@ -1,11 +1,10 @@
 FROM alpine:edge
 
 RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
- && apk add --update \
+ && apk add --no-cache \
      dovecot dovecot-sqlite dovecot-pigeonhole-plugin dovecot-pigeonhole-plugin-extdata \
      rspamd-client@testing \
-     bash \
- && rm -rf /var/cache/apk/*
+     bash
 
 COPY conf /etc/dovecot
 COPY sieve /var/lib/dovecot

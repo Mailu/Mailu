@@ -5,15 +5,30 @@ Notable changes to this project are documented in the current file. For more
 details about individual changes, see the Git log. You should read this before
 upgrading Freposte.io as some changes will include useful notes.
 
-v1.4.0 - unreleased
+v1.4.0 - 2017-02-12
 -------------------
 
 - Global: make sure that ``DEBUG`` is commented in your ``.env`` if you
   disabled it and update your ``docker-compose.yml``
+- Global: now only using proper upstream packages
 - Security: disable verbose logging of passwords by the fetchmail script
+- Security: the SMTP TLS configuration was improved
 - Feature: certbot certificate generation is available, uncomment
   ``ENABLE_CERTBOT`` in your ``.env`` to enable it
+- Feature: fetched emails can now be kept on the remote server
+- Feature: a maximum quota can now be configured per domain
+- Feature: admins can now send public announcements
+- Feature: managesieve is enabled and configured in Webmails automatically
+- Feature: a DAV server is available
+- L10N: language is selected automatically based on HTTP headers
 - L10N: french loca is now available
+- L10N: german loca is now available
+- L10N: dutch loca is now available
+- Upstream: upgrade to Roundcube 1.2.3
+- Upstream: upgrade to Dovecot 2.2.27
+- Bug: mail forwards are now handled by Postfix directly to avoid many bugs
+  with sieve forwards
+- Bug: fixed multiple bugs in the admin UI
 
 v1.3.0 - 2016-11-05
 -------------------

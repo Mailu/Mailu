@@ -1,3 +1,3 @@
 require "vnd.dovecot.execute";
 
-execute :pipe mailtrain ham;
+execute :pipe "mailtrain" "ham";

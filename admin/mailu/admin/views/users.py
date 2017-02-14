@@ -22,8 +22,9 @@ def user_create(domain_name):
         return flask.redirect(
             flask.url_for('.user_list', domain_name=domain.name))
     form = forms.UserForm()
-    form.quota_bytes.validators = [
-        wtforms.validators.NumberRange(max=domain.max_quota_bytes)]
+    if domain.max_quota_bytes:
+        form.quota_bytes.validators = [
+            wtforms.validators.NumberRange(max=domain.max_quota_bytes)]
     if form.validate_on_submit():
         if domain.has_email(form.localpart.data):
             flask.flash('Email is already used', 'error')
@@ -53,8 +54,9 @@ def user_edit(user_email):
     wtforms_components.read_only(form.localpart)
     form.pw.validators = []
     form.localpart.validators = []
-    form.quota_bytes.validators = [
-        wtforms.validators.NumberRange(max=max_quota_bytes)]
+    if max_quota_bytes:
+        form.quota_bytes.validators = [
+            wtforms.validators.NumberRange(max=max_quota_bytes)]
     if form.validate_on_submit():
         form.populate_obj(user)
         if form.pw.data:

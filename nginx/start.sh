@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [[ -z ENABLE_CERTBOT || -f /certs/cert.pem ]]
+if [[ -z $ENABLE_CERTBOT || -f /certs/cert.pem ]]
 then
   cp /etc/nginx/nginx.conf.default /etc/nginx/nginx.conf
 else

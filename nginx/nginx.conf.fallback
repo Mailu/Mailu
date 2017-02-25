@@ -30,6 +30,7 @@ http {
       ssl_session_cache shared:SSL:50m;
       ssl_certificate /tmp/snakeoil.pem;
       ssl_certificate_key /tmp/snakeoil.pem;
+      ssl_dhparam /etc/nginx/dhparam.pem;
 
       add_header Strict-Transport-Security max-age=15768000;
 

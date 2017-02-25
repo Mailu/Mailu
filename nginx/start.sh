@@ -9,4 +9,8 @@ L=None/O=None/CN=$DOMAIN"
   cp /etc/nginx/nginx.conf.fallback /etc/nginx/nginx.conf
 fi
 
+if [ ! -r /etc/nginx/dhparam.pem ]; then
+  openssl dhparam -out /etc/nginx/dhparam.pem $NGINX_SSL_DHPARAM_BITS
+fi
+
 nginx -g 'daemon off;'

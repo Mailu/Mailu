@@ -35,6 +35,7 @@ http {
       ssl_session_cache shared:SSL:50m;
       ssl_certificate /certs/cert.pem;
       ssl_certificate_key /certs/key.pem;
+      ssl_dhparam /etc/nginx/dhparam.pem;
 
       add_header Strict-Transport-Security max-age=15768000;
 

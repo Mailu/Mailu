@@ -10,3 +10,4 @@ Other contributors:
 
  - Angedestenebres - Tests on development version & Current version
  - Stefan Auditor - German translation on POEditor.com
+ - [Carlos Bernárdez](https://github.com/jkarlosb) - [[Contributions in Mailu]](https://github.com/Mailu/Mailu/commits?author=jkarlosb)

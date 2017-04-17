@@ -69,6 +69,26 @@ def alias(localpart, domain_name, destination):
     db.session.add(alias)
     db.session.commit()
 
+# Set limits to a domain
+@manager.command
+def setlimits(domain_name, max_users, max_aliases, max_quota_bytes):
+  domain = models.Domain.query.get(domain_name)
+  domain.max_users = max_users
+  domain.max_aliases = max_aliases
+  domain.max_quota_bytes = max_quota_bytes
+
+  db.session.add(domain)
+  db.session.commit()
+
+# Make the user manager of a domain
+@manager.command
+def setmanager(domain_name, user_name='manager'):
+  domain = models.Domain.query.get(domain_name)
+  manageruser = models.User.query.get(user_name + '@' + domain_name)
+  domain.managers.append(manageruser)
+  db.session.add(domain)
+  db.session.commit()
+
 
 if __name__ == "__main__":
     manager.run()

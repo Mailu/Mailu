@@ -27,4 +27,4 @@ splits:
 origins:
   - ^master$
   - ^stable$
-  - ^\d+\.\d+$
+  - ^v\d+\.\d+\.\d+$

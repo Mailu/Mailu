@@ -3,6 +3,8 @@ user nginx;
 worker_processes  1;
 error_log /dev/stderr info;
 pid /var/run/nginx.pid;
+include /etc/nginx/modules/devel_kit.conf;
+include /etc/nginx/modules/http_lua.conf;
 
 events {
     worker_connections  1024;

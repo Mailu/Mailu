@@ -1,6 +1,6 @@
 FROM nginx:alpine
 
-RUN apk add --no-cache nginx-lua openssl
+RUN apk add --no-cache nginx-mod-http-lua
 
 COPY nginx.conf.default /etc/nginx/nginx.conf.default
 

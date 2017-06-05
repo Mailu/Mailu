@@ -25,6 +25,8 @@ http {
     server {
       listen 80;
       listen 443 ssl;
+      listen [::]:80;
+      listen [::]:443 ssl;
 
       # TLS configuration hardened according to:
       # https://bettercrypto.org/static/applied-crypto-hardening.pdf

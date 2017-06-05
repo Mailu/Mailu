@@ -24,6 +24,7 @@ http {
 
     server {
       listen 80;
+      listen [::]:80;
 
       # Load Lua variables
       set_by_lua $webmail 'return os.getenv("WEBMAIL")';

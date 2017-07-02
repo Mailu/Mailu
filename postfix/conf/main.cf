@@ -7,6 +7,9 @@ mydomain = {{ DOMAIN }}
 myhostname = {{ HOSTNAME }}
 myorigin = $mydomain
 
+# Queue location
+queue_directory = /queue
+
 # Message size limit
 message_size_limit = {{ MESSAGE_SIZE_LIMIT }}
 

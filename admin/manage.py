@@ -36,7 +36,7 @@ def admin(localpart, domain_name, password):
 
 @manager.command
 def user(localpart, domain_name, password, hash_scheme='SHA512-CRYPT'):
-    """ Create an user
+    """ Create a user
     """
     domain = models.Domain.query.get(domain_name)
     if not domain:
@@ -52,8 +52,12 @@ def user(localpart, domain_name, password, hash_scheme='SHA512-CRYPT'):
     db.session.commit()
 
 @manager.command
-def user_raw(localpart, domain_name, password, hash_scheme='SHA512-CRYPT'):
-    """ Create an user
+def user_import(localpart, domain_name, password_hash, hash_scheme='SHA512-CRYPT'):
+    """ Import a user along with password hash. Available hashes:
+                   'SHA512-CRYPT'
+                   'SHA256-CRYPT'
+                   'MD5-CRYPT'
+                   'CRYPT'
     """
     domain = models.Domain.query.get(domain_name)
     if not domain:
@@ -64,7 +68,7 @@ def user_raw(localpart, domain_name, password, hash_scheme='SHA512-CRYPT'):
         domain=domain,
         global_admin=False
     )
-    user.set_password(password, hash_scheme=hash_scheme)
+    user.set_password(password_hash, hash_scheme=hash_scheme, raw=True)
     db.session.add(user)
     db.session.commit()
 

@@ -63,7 +63,7 @@ def generate_cert():
     )
     if result.returncode:
         print("Error while generating certificates:\n{}".format(
-            result.stdout.decode("utf8") + result.stdout.decode("utf8")))
+            result.stdout.decode("utf8") + result.stderr.decode("utf8")))
     else:
         print("Successfully generated or renewed TLS certificates")
         if certbot_install(hostname):

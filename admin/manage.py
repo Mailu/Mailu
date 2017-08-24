@@ -35,7 +35,7 @@ def admin(localpart, domain_name, password):
 
 
 @manager.command
-def user(localpart, domain_name, password):
+def user(localpart, domain_name, password, hash_scheme='SHA512-CRYPT'):
     """ Create an user
     """
     domain = models.Domain.query.get(domain_name)
@@ -47,7 +47,24 @@ def user(localpart, domain_name, password):
         domain=domain,
         global_admin=False
     )
-    user.set_password(password)
+    user.set_password(password, hash_scheme=hash_scheme)
+    db.session.add(user)
+    db.session.commit()
+
+@manager.command
+def user_raw(localpart, domain_name, password, hash_scheme='SHA512-CRYPT'):
+    """ Create an user
+    """
+    domain = models.Domain.query.get(domain_name)
+    if not domain:
+        domain = models.Domain(name=domain_name)
+        db.session.add(domain)
+    user = models.User(
+        localpart=localpart,
+        domain=domain,
+        global_admin=False
+    )
+    user.set_password(password, hash_scheme=hash_scheme)
     db.session.add(user)
     db.session.commit()
 

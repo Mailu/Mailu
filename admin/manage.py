@@ -135,6 +135,22 @@ def config_update(delete_objects=False):
     db.session.commit()
 
 @manager.command
+def user_delete(email):
+    """delete user"""
+    user = models.User.query.get(email)
+    if user:
+        db.session.delete(user)
+    db.session.commit()
+
+@manager.command
+def alias_delete(email):
+    """delete alias"""
+    alias = models.Alias.query.get(email)
+    if alias:
+        db.session.delete(alias)
+    db.session.commit()
+
+@manager.command
 def alias(localpart, domain_name, destination):
     """ Create an alias
     """

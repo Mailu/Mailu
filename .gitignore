@@ -10,3 +10,4 @@ pip-selfcheck.json
 /docker-compose.mac.yml
 /docker-compose.yml
 /.idea
+/.vscode

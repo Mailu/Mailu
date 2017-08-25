@@ -73,22 +73,25 @@ def user_import(localpart, domain_name, password_hash, hash_scheme='SHA512-CRYPT
     db.session.commit()
 
 @manager.command
-def config_update():
-    """sync configuration with data from stdin"""
+def config_update(delete_objects=False):
+    """sync configuration with data from YAML-formatted stdin"""
     import yaml, sys
     new_config=yaml.load(sys.stdin)
     # print new_config
     users=new_config['users']
+    tracked_users=set()
     for user_config in users:
         localpart=user_config['localpart']
         domain_name=user_config['domain']
         password_hash=user_config['password_hash']
         hash_scheme=user_config['hash_scheme']
         domain = models.Domain.query.get(domain_name)
+        email='{0}@{1}'.format(localpart,domain_name)
         if not domain:
             domain = models.Domain(name=domain_name)
             db.session.add(domain)
-        user = models.User.query.get('{0}@{1}'.format(localpart,domain_name))
+        user = models.User.query.get(email)
+        tracked_users.add(email)
         if not user:
             user = models.User(
                 localpart=localpart,
@@ -99,26 +102,36 @@ def config_update():
         db.session.add(user)
 
     aliases=new_config['aliases']
+    tracked_aliases=set()
     for alias_config in aliases:
         localpart=alias_config['localpart']
         domain_name=alias_config['domain']
         destination=alias_config['destination']
         domain = models.Domain.query.get(domain_name)
+        email='{0}@{1}'.format(localpart,domain_name)
         if not domain:
             domain = models.Domain(name=domain_name)
             db.session.add(domain)
-        alias = models.Alias.query.get('{0}@{1}'.format(localpart, domain_name))
+        alias = models.Alias.query.get(email)
+        tracked_aliases.add(email)
         if not alias:
             alias = models.Alias(
                 localpart=localpart,
                 domain=domain,
                 destination=destination.split(','),
-                email="%s@%s" % (localpart, domain_name)
+                email=email
             )
         else:
             alias.destination = destination.split(',')
         db.session.add(alias)
     
+    if delete_objects:
+        for user in db.session.query(models.User).all():
+            if not ( user.email in tracked_users ):
+                db.session.delete(user)
+        for alias in db.session.query(models.Alias).all():
+            if not ( alias.email in tracked_aliases ):
+                db.session.delete(alias)
     db.session.commit()
 
 @manager.command

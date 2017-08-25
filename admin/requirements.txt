@@ -14,3 +14,4 @@ docker-py
 tabulate
 apscheduler
 certbot
+PyYAML

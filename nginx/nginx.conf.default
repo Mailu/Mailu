@@ -26,8 +26,19 @@ http {
 
     server {
       listen 80;
-      listen 443 ssl;
       listen [::]:80;
+
+      location /.well-known/acme-challenge {
+        proxy_pass http://admin:8081;
+      }
+
+      location / {
+        return 301 https://$host$request_uri;
+      }
+    }
+
+    server {
+      listen 443 ssl;
       listen [::]:443 ssl;
 
       # TLS configuration hardened according to:
@@ -42,10 +53,6 @@ http {
       ssl_dhparam /etc/nginx/dhparam.pem;
 
       add_header Strict-Transport-Security max-age=15768000;
-
-      if ($scheme = http) {
-    		return 301 https://$host$request_uri;
-    	}
 
       # Load Lua variables
       set_by_lua $webmail 'return os.getenv("WEBMAIL")';
@@ -92,10 +99,6 @@ http {
         if ($webdav = none) {
           return 403;
         }
-      }
-
-      location /.well-known/acme-challenge {
-        proxy_pass http://admin:8081;
       }
     }
 }

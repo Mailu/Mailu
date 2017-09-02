@@ -30,7 +30,8 @@ default_config = {
     'BABEL_DEFAULT_LOCALE': 'en',
     'BABEL_DEFAULT_TIMEZONE': 'UTC',
     'ENABLE_CERTBOT': False,
-    'CERTS_PATH': '/certs'
+    'CERTS_PATH': '/certs',
+    'PASSWORD_SCHEME': 'SHA512-CRYPT'
 }
 
 # Load configuration from the environment if available

@@ -1,4 +1,4 @@
-from mailu import manager, db
+from mailu import app, manager, db
 from mailu.admin import models
 
 
@@ -35,7 +35,7 @@ def admin(localpart, domain_name, password):
 
 
 @manager.command
-def user(localpart, domain_name, password, hash_scheme='SHA512-CRYPT'):
+def user(localpart, domain_name, password, hash_scheme=app.config['PASSWORD_SCHEME']):
     """ Create a user
     """
     domain = models.Domain.query.get(domain_name)
@@ -52,7 +52,7 @@ def user(localpart, domain_name, password, hash_scheme='SHA512-CRYPT'):
     db.session.commit()
 
 @manager.command
-def user_import(localpart, domain_name, password_hash, hash_scheme='SHA512-CRYPT'):
+def user_import(localpart, domain_name, password_hash, hash_scheme=app.config['PASSWORD_SCHEME']):
     """ Import a user along with password hash. Available hashes:
                    'SHA512-CRYPT'
                    'SHA256-CRYPT'

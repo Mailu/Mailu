@@ -3,7 +3,7 @@
 
 # Exposed SMTP services
 smtp      inet  n       -       n       -       -       smtpd
-  -o smtpd_sender_restrictions=permit_mynetworks,permit
+  -o smtpd_helo_restrictions=permit_mynetworks,permit
 submission inet n       -       n       -       -       smtpd
   -o smtpd_tls_security_level=encrypt
   -o smtpd_sasl_auth_enable=yes

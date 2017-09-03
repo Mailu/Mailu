@@ -146,6 +146,7 @@ class User(Base, Email):
     # Filters
     forward_enabled = db.Column(db.Boolean(), nullable=False, default=False)
     forward_destination = db.Column(db.String(255), nullable=True, default=None)
+    forward_keep = db.Column(db.Boolean(), nullable=False, default=True)
     reply_enabled = db.Column(db.Boolean(), nullable=False, default=False)
     reply_subject = db.Column(db.String(255), nullable=True, default=None)
     reply_body = db.Column(db.Text(), nullable=True, default=None)

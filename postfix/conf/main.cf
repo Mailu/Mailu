@@ -28,6 +28,9 @@ mydestination =
 # Relayhost if any is configured
 relayhost = {{ RELAYHOST }}
 
+# Recipient delimiter for extended addresses
+recipient_delimiter = +
+
 ###############
 # TLS
 ###############

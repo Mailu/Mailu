@@ -100,6 +100,22 @@ class Domain(Base):
             return False
 
 
+class Alternative(Base):
+    """ Alternative name for a served domain.
+    The name "domain alias" was avoided to prevent some confusion.
+    """
+
+    __tablename__ = "alternative"
+
+    name = db.Column(db.String(80), primary_key=True, nullable=False)
+    domain_name = db.Column(db.String(80), db.ForeignKey(Domain.name))
+    domain = db.relationship(Domain,
+        backref=db.backref('alternatives', cascade='all, delete-orphan'))
+
+    def __str__(self):
+        return self.name
+
+
 class Email(object):
     """ Abstraction for an email address (localpart and domain).
     """

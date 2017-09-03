@@ -169,14 +169,14 @@ class User(Base, Email):
                    'CRYPT': "des_crypt"}
     pw_context = context.CryptContext(
         schemes = scheme_dict.values(),
-        default='sha512_crypt',
+        default=scheme_dict[app.config['PASSWORD_SCHEME']],
     )
 
     def check_password(self, password):
         reference = re.match('({[^}]+})?(.*)', self.password).group(2)
         return User.pw_context.verify(password, reference)
 
-    def set_password(self, password, hash_scheme='SHA512-CRYPT', raw=False):
+    def set_password(self, password, hash_scheme=app.config['PASSWORD_SCHEME'], raw=False):
         """Set password for user with specified encryption scheme
            @password: plain text password to encrypt (if raw == True the hash itself)
         """

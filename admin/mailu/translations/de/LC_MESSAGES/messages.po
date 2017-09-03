@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: stefan.auditor@erdfisch.de\n"
-"POT-Creation-Date: 2016-11-10 10:52+0100\n"
+"POT-Creation-Date: 2017-09-03 15:30+0200\n"
 "PO-Revision-Date: 2016-11-09 21:43+0100\n"
 "Last-Translator: Stefan Auditor <stefan.auditor@erdfisch.de>\n"
 "Language: de\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.3.4\n"
+"Generated-By: Babel 2.5.0\n"
 
 #: mailu/admin/forms.py:32
 msgid "Invalid email address."
@@ -26,12 +26,12 @@ msgstr "Ungültige E-Mail-Adresse."
 msgid "Confirm"
 msgstr "Bestätigen"
 
-#: mailu/admin/forms.py:40 mailu/admin/forms.py:54
+#: mailu/admin/forms.py:40 mailu/admin/forms.py:55
 msgid "E-mail"
 msgstr "E-Mail"
 
-#: mailu/admin/forms.py:41 mailu/admin/forms.py:55 mailu/admin/forms.py:72
-#: mailu/admin/forms.py:120
+#: mailu/admin/forms.py:41 mailu/admin/forms.py:56 mailu/admin/forms.py:73
+#: mailu/admin/forms.py:122
 msgid "Password"
 msgstr "Passwort"
 
@@ -53,131 +53,164 @@ msgstr "Maximale Anzahl Benutzer"
 msgid "Maximum alias count"
 msgstr "Maximale Anzahl Aliase"
 
-#: mailu/admin/forms.py:49 mailu/admin/forms.py:60 mailu/admin/forms.py:98
+#: mailu/admin/forms.py:49
+msgid "Maximum user quota"
+msgstr ""
+
+#: mailu/admin/forms.py:50 mailu/admin/forms.py:61 mailu/admin/forms.py:100
 #: mailu/admin/templates/alias/list.html:22
 #: mailu/admin/templates/domain/list.html:22
 #: mailu/admin/templates/user/list.html:24
 msgid "Comment"
 msgstr "Kommentar"
 
-#: mailu/admin/forms.py:50 mailu/admin/forms.py:99
+#: mailu/admin/forms.py:51 mailu/admin/forms.py:101
 msgid "Create"
 msgstr "Erstellen"
 
-#: mailu/admin/forms.py:56
+#: mailu/admin/forms.py:57
 msgid "Confirm password"
 msgstr "Passwort bestätigen"
 
-#: mailu/admin/forms.py:57 mailu/admin/templates/user/list.html:23
+#: mailu/admin/forms.py:58 mailu/admin/templates/user/list.html:23
 msgid "Quota"
 msgstr "Quota"
 
-#: mailu/admin/forms.py:58
+#: mailu/admin/forms.py:59
 msgid "Allow IMAP access"
 msgstr "Zugriff via IMAP erlauben"
 
-#: mailu/admin/forms.py:59
+#: mailu/admin/forms.py:60
 msgid "Allow POP3 access"
 msgstr "Zugriff via POP3 erlauben"
 
-#: mailu/admin/forms.py:61
+#: mailu/admin/forms.py:62
 msgid "Save"
 msgstr "Speichern"
 
-#: mailu/admin/forms.py:65
+#: mailu/admin/forms.py:66
 msgid "Displayed name"
 msgstr "Angezeigter Name"
 
-#: mailu/admin/forms.py:66
+#: mailu/admin/forms.py:67
 msgid "Enable spam filter"
 msgstr "Spam-Filter aktivieren"
 
-#: mailu/admin/forms.py:67
+#: mailu/admin/forms.py:68
 msgid "Spam filter threshold"
 msgstr "Spam-Filter Schwellenwert"
 
-#: mailu/admin/forms.py:68
+#: mailu/admin/forms.py:69
 msgid "Save settings"
 msgstr "Einstellungen speichern"
 
-#: mailu/admin/forms.py:73
+#: mailu/admin/forms.py:74
 msgid "Password check"
 msgstr "Passwort prüfen"
 
-#: mailu/admin/forms.py:74 mailu/admin/templates/sidebar.html:13
+#: mailu/admin/forms.py:75 mailu/admin/templates/sidebar.html:13
 msgid "Update password"
 msgstr "Passwort aktualisieren"
 
-#: mailu/admin/forms.py:78
+#: mailu/admin/forms.py:79
 msgid "Enable forwarding"
 msgstr "Weiterleitung aktivieren"
 
-#: mailu/admin/forms.py:80 mailu/admin/forms.py:97
+#: mailu/admin/forms.py:80
+msgid "Keep a copy of the emails"
+msgstr ""
+
+#: mailu/admin/forms.py:82 mailu/admin/forms.py:99
 #: mailu/admin/templates/alias/list.html:21
 msgid "Destination"
 msgstr "Ziel"
 
-#: mailu/admin/forms.py:82 mailu/admin/forms.py:90
+#: mailu/admin/forms.py:84 mailu/admin/forms.py:92
 msgid "Update"
 msgstr "Aktualisieren"
 
-#: mailu/admin/forms.py:86
+#: mailu/admin/forms.py:88
 msgid "Enable automatic reply"
 msgstr "Automatische Antwort aktivieren"
 
-#: mailu/admin/forms.py:87
+#: mailu/admin/forms.py:89
 msgid "Reply subject"
 msgstr "Antwort Betreff"
 
-#: mailu/admin/forms.py:88
+#: mailu/admin/forms.py:90
 msgid "Reply body"
 msgstr "Antwort Text"
 
-#: mailu/admin/forms.py:94
+#: mailu/admin/forms.py:96
 msgid "Alias"
 msgstr "Alias"
 
-#: mailu/admin/forms.py:96
+#: mailu/admin/forms.py:98
 msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"
 msgstr "SQL LIKE Syntax nutzen (z.B. für Catch-All Aliase)"
 
-#: mailu/admin/forms.py:103
+#: mailu/admin/forms.py:105
 msgid "Admin email"
 msgstr "Administrator E-Mail"
 
-#: mailu/admin/forms.py:104 mailu/admin/forms.py:109 mailu/admin/forms.py:121
+#: mailu/admin/forms.py:106 mailu/admin/forms.py:111 mailu/admin/forms.py:124
 msgid "Submit"
 msgstr "Absenden"
 
-#: mailu/admin/forms.py:108
+#: mailu/admin/forms.py:110
 msgid "Manager email"
 msgstr "Manager E-Mail"
 
-#: mailu/admin/forms.py:113
+#: mailu/admin/forms.py:115
 msgid "Protocol"
 msgstr "Protokoll"
 
-#: mailu/admin/forms.py:116
+#: mailu/admin/forms.py:118
 msgid "Hostname or IP"
 msgstr "Hostname oder IP"
 
-#: mailu/admin/forms.py:117
+#: mailu/admin/forms.py:119
 msgid "TCP port"
 msgstr "Port"
 
-#: mailu/admin/forms.py:118
+#: mailu/admin/forms.py:120
 msgid "Enable TLS"
 msgstr "Verschlüsselung aktivieren"
 
-#: mailu/admin/forms.py:119 mailu/admin/templates/fetch/list.html:21
+#: mailu/admin/forms.py:121 mailu/admin/templates/fetch/list.html:21
 msgid "Username"
 msgstr "Benutzername"
+
+#: mailu/admin/forms.py:123
+msgid "Keep emails on the server"
+msgstr ""
+
+#: mailu/admin/forms.py:128
+msgid "Announcement subject"
+msgstr "Bekanntmachung Betreff"
+
+#: mailu/admin/forms.py:130
+msgid "Announcement body"
+msgstr "Bekanntmachung Text"
+
+#: mailu/admin/forms.py:132
+msgid "Send"
+msgstr "Absenden"
+
+#: mailu/admin/templates/announcement.html:4
+msgid "Public announcement"
+msgstr "Öffentliche Bekanntmachung"
+
+#: mailu/admin/templates/announcement.html:8
+msgid "from"
+msgstr "von"
 
 #: mailu/admin/templates/confirm.html:4
 msgid "Confirm action"
 msgstr "Aktion bestätigen"
 
 #: mailu/admin/templates/confirm.html:12
+#, python-format
 msgid "You are about to %(action)s. Please confirm your action."
 msgstr "Bitte bestätigen: %(action)s."
 
@@ -187,7 +220,9 @@ msgstr "Docker Fehler"
 
 #: mailu/admin/templates/docker-error.html:12
 msgid "An error occurred while talking to the Docker server."
-msgstr "Während der Kommunikation mit dem Docker Server ist ein Fehler aufgetreten."
+msgstr ""
+"Während der Kommunikation mit dem Docker Server ist ein Fehler "
+"aufgetreten."
 
 #: mailu/admin/templates/login.html:6
 msgid "Your account"
@@ -205,7 +240,7 @@ msgstr "Dienst-Status"
 msgid "Service"
 msgstr "Dienst"
 
-#: mailu/admin/templates/fetch/list.html:23
+#: mailu/admin/templates/fetch/list.html:24
 #: mailu/admin/templates/services.html:12
 msgid "Status"
 msgstr "Status"
@@ -258,6 +293,10 @@ msgstr "Abmelden"
 msgid "Administration"
 msgstr "Administration"
 
+#: mailu/admin/templates/sidebar.html:45
+msgid "Announcement"
+msgstr "Bekanntmachung"
+
 #: mailu/admin/templates/sidebar.html:50
 msgid "Administrators"
 msgstr "Administratoren"
@@ -305,7 +344,7 @@ msgstr "E-Mail"
 #: mailu/admin/templates/admin/list.html:23
 #: mailu/admin/templates/alias/list.html:30
 #: mailu/admin/templates/domain/list.html:32
-#: mailu/admin/templates/fetch/list.html:31
+#: mailu/admin/templates/fetch/list.html:32
 #: mailu/admin/templates/manager/list.html:25
 #: mailu/admin/templates/user/list.html:32
 msgid "Delete"
@@ -329,21 +368,21 @@ msgstr "Alias hinzufügen"
 
 #: mailu/admin/templates/alias/list.html:23
 #: mailu/admin/templates/domain/list.html:23
-#: mailu/admin/templates/fetch/list.html:24
+#: mailu/admin/templates/fetch/list.html:25
 #: mailu/admin/templates/user/list.html:25
 msgid "Created"
 msgstr "Erstellt"
 
 #: mailu/admin/templates/alias/list.html:24
 #: mailu/admin/templates/domain/list.html:24
-#: mailu/admin/templates/fetch/list.html:25
+#: mailu/admin/templates/fetch/list.html:26
 #: mailu/admin/templates/user/list.html:26
 msgid "Last edit"
 msgstr "Zuletzt bearbeitet"
 
 #: mailu/admin/templates/alias/list.html:29
 #: mailu/admin/templates/domain/list.html:31
-#: mailu/admin/templates/fetch/list.html:30
+#: mailu/admin/templates/fetch/list.html:31
 #: mailu/admin/templates/user/list.html:31
 msgid "Edit"
 msgstr "Bearbeiten"
@@ -434,8 +473,20 @@ msgid "Endpoint"
 msgstr "Endpunkt"
 
 #: mailu/admin/templates/fetch/list.html:22
+msgid "Keep emails"
+msgstr ""
+
+#: mailu/admin/templates/fetch/list.html:23
 msgid "Last check"
 msgstr "Letzte Prüfung"
+
+#: mailu/admin/templates/fetch/list.html:36
+msgid "yes"
+msgstr ""
+
+#: mailu/admin/templates/fetch/list.html:36
+msgid "no"
+msgstr ""
 
 #: mailu/admin/templates/manager/create.html:4
 msgid "Add a manager"
@@ -448,30 +499,6 @@ msgstr "Manager Liste"
 #: mailu/admin/templates/manager/list.html:12
 msgid "Add manager"
 msgstr "Manager hinzufügen"
-
-#: mailu/admin/forms.py:125
-msgid "Announcement subject"
-msgstr "Bekanntmachung Betreff"
-
-#: mailu/admin/forms.py:127
-msgid "Announcement body"
-msgstr "Bekanntmachung Text"
-
-#: mailu/admin/forms.py:129
-msgid "Send"
-msgstr "Absenden"
-
-#: mailu/admin/templates/announcement.html:4
-msgid "Public announcement"
-msgstr "Öffentliche Bekanntmachung"
-
-#: mailu/admin/templates/announcement.html:8
-msgid "from"
-msgstr "von"
-
-#: mailu/admin/templates/sidebar.html:45
-msgid "Announcement"
-msgstr "Bekanntmachung"
 
 #: mailu/admin/templates/user/create.html:4
 msgid "New user"

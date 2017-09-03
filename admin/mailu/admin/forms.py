@@ -77,6 +77,7 @@ class UserPasswordForm(flask_wtf.FlaskForm):
 
 class UserForwardForm(flask_wtf.FlaskForm):
     forward_enabled = fields.BooleanField(_('Enable forwarding'))
+    forward_keep = fields.BooleanField(_('Keep a copy of the emails'))
     forward_destination = fields.StringField(
         _('Destination'), [validators.Optional(), validators.Email()]
     )

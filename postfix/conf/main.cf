@@ -29,7 +29,7 @@ mydestination =
 relayhost = {{ RELAYHOST }}
 
 # Recipient delimiter for extended addresses
-recipient_delimiter = +
+recipient_delimiter = {{ RECIPIENT_DELIMITER }}
 
 ###############
 # TLS

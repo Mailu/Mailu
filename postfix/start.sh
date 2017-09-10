@@ -5,7 +5,7 @@ for VARIABLE in `env | cut -f1 -d=`; do
   sed -i "s={{ $VARIABLE }}=${!VARIABLE}=g" /etc/postfix/*.cf
 done
 
-# Override Postfix configuration
+# Override Postfix main configuration
 if [ -f /overrides/postfix.cf ]; then
   while read line; do
     postconf -e "$line"
@@ -13,6 +13,16 @@ if [ -f /overrides/postfix.cf ]; then
   echo "Loaded '/overrides/postfix.cf'"
 else
   echo "No extra postfix settings loaded because optional '/overrides/postfix.cf' not provided."
+fi
+
+# Override Postfix master configuration
+if [ -f /overrides/postfix.master ]; then
+  while read line; do
+    postconf -Me "$line"
+  done < /overrides/postfix.master
+  echo "Loaded '/overrides/postfix.master'"
+else
+  echo "No extra postfix settings loaded because optional '/overrides/postfix.master' not provided."
 fi
 
 # Include table-map files

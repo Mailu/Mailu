@@ -45,6 +45,7 @@ tls_preempt_cipherlist = yes
 smtpd_tls_security_level = may
 smtpd_tls_cert_file=/certs/cert.pem
 smtpd_tls_key_file=/certs/key.pem
+smtpd_tls_dh1024_param_file=/certs/dhparam.pem
 smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
 
 # Server-side TLS is hardened, it should be up to the client to update his or

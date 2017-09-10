@@ -42,15 +42,7 @@
     </tr>
     <tr>
       <th>{% trans %}DNS DMARC entry{% endtrans %}</th>
-      {% if config["DMARC_RUA"] != "" and config["DMARC_RUF"] != "" %}
-      <td><pre>_dmarc.{{ domain.name }}. 600 IN TXT "v=DMARC1; p=reject; rua=mailto:{{ config["DMARC_RUA"] }}@{{ config["DOMAIN"] }}; ruf=mailto:{{ config["DMARC_RUF"] }}@{{ config["DOMAIN"] }}; adkim=s; aspf=s"</pre></td>
-      {% elif config["DMARC_RUA"] != "" %}
-      <td><pre>_dmarc.{{ domain.name }}. 600 IN TXT "v=DMARC1; p=reject; rua=mailto:{{ config["DMARC_RUA"] }}@{{ config["DOMAIN"] }}; adkim=s; aspf=s"</pre></td>
-      {% elif config["DMARC_RUF"] != "" %}
-      <td><pre>_dmarc.{{ domain.name }}. 600 IN TXT "v=DMARC1; p=reject; ruf=mailto:{{ config["DMARC_RUF"] }}@{{ config["DOMAIN"] }}; adkim=s; aspf=s"</pre></td>
-      {% else %}
-      <td><pre>_dmarc.{{ domain.name }}. 600 IN TXT "v=DMARC1; p=reject; rua=mailto:{{ config["POSTMASTER"] }}@{{ config["DOMAIN"] }}; adkim=s; aspf=s"</pre></td>
-      {% endif %}
+      <td><pre>_dmarc.{{ domain.name }}. 600 IN TXT "v=DMARC1; p=reject;{% if config["DMARC_RUA"] %} rua=mailto:{{ config["DMARC_RUA"] }}@{{ config["DOMAIN"] }};{% endif %}{% if config["DMARC_RUF"] %} ruf=mailto:{{ config["DMARC_RUF"] }}@{{ config["DOMAIN"] }};{% endif %} adkim=s; aspf=s"</pre></td>
     </tr>
     {% endif %}
   </tbody>

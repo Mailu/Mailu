@@ -44,7 +44,7 @@ def certbot_install(domain):
 
 
 @scheduler.scheduled_job('date')
-@scheduler.scheduled_job('cron', hour=96, minute=0)
+@scheduler.scheduled_job('cron', day='*/4', hour=0, minute=0)
 def generate_cert():
     print("Generating TLS certificates using Certbot")
     hostname = app.config["HOSTNAME"]

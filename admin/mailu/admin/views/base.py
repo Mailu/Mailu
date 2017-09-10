@@ -6,6 +6,7 @@ import flask_login
 import smtplib
 
 from email.mime import text
+from urllib import parse
 
 
 @app.route('/', methods=["GET"])
@@ -21,7 +22,11 @@ def login():
         user = models.User.login(form.email.data, form.pw.data)
         if user:
             flask_login.login_user(user)
-            return flask.redirect(flask.url_for('.index'))
+            redirect = flask.request.args.get('next')
+            parsed_redirect = parse.urlparse(redirect)
+            if parsed_redirect.scheme or parsed_redirect.netloc:
+                return flask.abort(400)
+            return flask.redirect(redirect or flask.url_for('.index'))
         else:
             flask.flash('Wrong e-mail or password', 'error')
     return flask.render_template('login.html', form=form)

@@ -116,6 +116,20 @@ class Alternative(Base):
         return self.name
 
 
+class Relay(Base):
+    """ Relayed mail domain.
+    The domain is either relayed publicly or through a specified SMTP host.
+    """
+
+    __tablename__ = "relay"
+
+    name = db.Column(db.String(80), primary_key=True, nullable=False)
+    smtp = db.Column(db.String(80), nullable=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Email(object):
     """ Abstraction for an email address (localpart and domain).
     """

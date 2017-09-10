@@ -28,7 +28,7 @@ def install_certs(domain):
     else:
         print("Could not find the proper certificate from traefik")
         return
-    if os.path.join(cert_path):
+    if os.path.exists(cert_path):
         with open(cert_path, "rb") as handler:
             if handler.read() == cert:
                 return

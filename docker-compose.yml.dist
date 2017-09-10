@@ -70,7 +70,7 @@ services:
 
   antivirus:
     # build: clamav
-    image: mailu/clamav:$VERSION
+    image: mailu/$ANTIVIRUS:$VERSION
     restart: always
     env_file: .env
     volumes:

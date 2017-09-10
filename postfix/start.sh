@@ -16,13 +16,13 @@ else
 fi
 
 # Override Postfix master configuration
-if [ -f /overrides/master.cf ]; then
+if [ -f /overrides/postfix.master ]; then
   while read line; do
-    postconf -M "$line"
-  done < /overrides/master.cf
-  echo "Loaded '/overrides/master.cf'"
+    postconf -Me "$line"
+  done < /overrides/postfix.master
+  echo "Loaded '/overrides/postfix.master'"
 else
-  echo "No extra postfix settings loaded because optional '/overrides/master.cf' not provided."
+  echo "No extra postfix settings loaded because optional '/overrides/postfix.master' not provided."
 fi
 
 # Include table-map files

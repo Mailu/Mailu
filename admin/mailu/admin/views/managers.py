@@ -23,7 +23,7 @@ def manager_create(domain_name):
     ]
     if form.validate_on_submit():
         user = models.User.query.get(form.manager.data)
-        if user not in available_users:
+        if user.email not in [user.email for user in available_users]:
             flask.abort(403)
         elif user in domain.managers:
             flask.flash('User %s is already manager' % user, 'error')

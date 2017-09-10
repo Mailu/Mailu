@@ -18,6 +18,7 @@ http {
     sendfile on;
     keepalive_timeout  65;
     server_tokens off;
+    client_max_body_size 25m;
 
     server {
       listen 80;

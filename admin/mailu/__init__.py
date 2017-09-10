@@ -46,7 +46,9 @@ login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 babel = flask_babel.Babel(app)
 translations = list(map(str, babel.list_translations()))
-scheduler = background.BackgroundScheduler()
+scheduler = background.BackgroundScheduler({
+    'apscheduler.timezone': 'UTC'
+})
 
 # Manager commnad
 manager = flask_script.Manager(app)

@@ -118,7 +118,7 @@ def config_update(delete_objects=False):
             alias = models.Alias(
                 localpart=localpart,
                 domain=domain,
-                destination=destination.split(','),
+                # destination=destination.split(','),
                 email=email
             )
         else:

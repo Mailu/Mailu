@@ -73,7 +73,7 @@ def user_import(localpart, domain_name, password_hash, hash_scheme='SHA512-CRYPT
     db.session.commit()
 
 @manager.command
-def config_update(delete_objects=False):
+def config_update(verbose=False, delete_objects=False):
     """sync configuration with data from YAML-formatted stdin"""
     import yaml, sys
     new_config=yaml.load(sys.stdin)
@@ -81,6 +81,8 @@ def config_update(delete_objects=False):
     users=new_config['users']
     tracked_users=set()
     for user_config in users:
+        if verbose:
+            print user_config
         localpart=user_config['localpart']
         domain_name=user_config['domain']
         password_hash=user_config['password_hash']
@@ -104,6 +106,8 @@ def config_update(delete_objects=False):
     aliases=new_config['aliases']
     tracked_aliases=set()
     for alias_config in aliases:
+        if verbose:
+            print alias_config
         localpart=alias_config['localpart']
         domain_name=alias_config['domain']
         destination=alias_config['destination']

@@ -82,7 +82,7 @@ def config_update(verbose=False, delete_objects=False):
     tracked_users=set()
     for user_config in users:
         if verbose:
-            print user_config
+            print(str(user_config))
         localpart=user_config['localpart']
         domain_name=user_config['domain']
         password_hash=user_config['password_hash']
@@ -107,7 +107,7 @@ def config_update(verbose=False, delete_objects=False):
     tracked_aliases=set()
     for alias_config in aliases:
         if verbose:
-            print alias_config
+            print(str(alias_config))
         localpart=alias_config['localpart']
         domain_name=alias_config['domain']
         destination=alias_config['destination']

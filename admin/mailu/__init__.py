@@ -31,7 +31,8 @@ default_config = {
     'DMARC_RUF': None,
     'BABEL_DEFAULT_LOCALE': 'en',
     'BABEL_DEFAULT_TIMEZONE': 'UTC',
-    'ENABLE_CERTBOT': False,
+    'FRONTEND': 'none',
+    'TLS_FLAVOR': 'cert',
     'CERTS_PATH': '/certs',
     'PASSWORD_SCHEME': 'SHA512-CRYPT'
 }
@@ -59,15 +60,12 @@ manager.add_command('db', flask_migrate.MigrateCommand)
 # Task scheduling
 if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
     scheduler.start()
+    from mailu import tlstasks
 
 # Babel configuration
 @babel.localeselector
 def get_locale():
     return flask.request.accept_languages.best_match(translations)
-
-# Certbot configuration
-if app.config['ENABLE_CERTBOT']:
-    from mailu import certbot
 
 # Finally setup the blueprint and redirect /
 from mailu import admin
@@ -75,4 +73,4 @@ app.register_blueprint(admin.app, url_prefix='/admin')
 
 @app.route("/")
 def index():
-    return flask.redirect(flask.url_for("admin.index"))
+    return flask.redirect("/webmail/")

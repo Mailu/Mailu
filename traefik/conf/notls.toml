@@ -1,0 +1,14 @@
+defaultEntryPoints = ["http"]
+logLevel = "ERROR"
+accessLogsFile = "/dev/stdout"
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+
+[docker]
+endpoint = "unix:///docker.sock"
+domain = "{{ DOMAIN }}"
+watch = true
+exposedbydefault = false
+

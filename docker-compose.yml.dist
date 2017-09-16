@@ -12,6 +12,7 @@ services:
       - "$BIND_ADDRESS:443:443"
     volumes:
       - "$ROOT/certs:/certs"
+      - /var/run/docker.sock:/docker.sock:ro
 
   redis:
     image: redis:latest
@@ -87,6 +88,12 @@ services:
   admin:
     # build: admin
     image: mailu/admin:$VERSION
+    labels:
+      - traefik.enable=true
+      - traefik.admin.frontend.rule=Host:$HOSTNAME;PathPrefix:/admin/
+      - traefik.admin.port=80
+      - traefik.home.frontend.rule=Host:$HOSTNAME;Path:/
+      - traefik.home.port=80
     restart: always
     env_file: .env
     ports:
@@ -100,6 +107,10 @@ services:
   webmail:
     # build: "$WEBMAIL"
     image: "mailu/$WEBMAIL:$VERSION"
+    labels:
+      - traefik.enable=true
+      - traefik.frontend.rule=Host:$HOSTNAME;PathPrefix:/webmail/
+      - traefik.port=80
     restart: always
     env_file: .env
     volumes:

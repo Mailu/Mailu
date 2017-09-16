@@ -28,4 +28,5 @@ from mailu.admin.views import \
     aliases, \
     users, \
     domains, \
+    alternatives, \
     fetches

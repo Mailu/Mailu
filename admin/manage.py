@@ -1,6 +1,8 @@
 from mailu import app, manager, db
 from mailu.admin import models
 
+import flask_migrate
+
 
 @manager.command
 def flushdb():
@@ -14,6 +16,7 @@ def initdb():
     """ Initialize the database
     """
     db.create_all()
+    flask_migrate.stamp(revision="head")    
 
 
 @manager.command

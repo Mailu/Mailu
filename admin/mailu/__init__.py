@@ -73,4 +73,4 @@ app.register_blueprint(admin.app, url_prefix='/admin')
 
 @app.route("/")
 def index():
-    return flask.redirect("/webmail")
+    return flask.redirect("/webmail/")

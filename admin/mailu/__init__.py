@@ -27,6 +27,8 @@ default_config = {
     'BOOTSTRAP_SERVE_LOCAL': True,
     'DKIM_PATH': '/dkim/{domain}.{selector}.key',
     'DKIM_SELECTOR': 'dkim',
+    'DMARC_RUA': None,
+    'DMARC_RUF': None,
     'BABEL_DEFAULT_LOCALE': 'en',
     'BABEL_DEFAULT_TIMEZONE': 'UTC',
     'FRONTEND': 'none',

@@ -91,7 +91,8 @@ virtual_alias_maps = ${sql}sqlite-virtual_alias_maps.cf
 virtual_mailbox_domains = ${sql}sqlite-virtual_mailbox_domains.cf
 virtual_mailbox_maps = $virtual_alias_maps
 
-# Mails are forwarded to Dovecot for delivery
+# Mails are transported if required, then forwarded to Dovecot for delivery
+transport_maps = ${sql}sqlite-transport.cf
 virtual_transport = lmtp:inet:imap:2525
 
 # In order to prevent Postfix from running DNS query, enforce the use of the

@@ -16,7 +16,10 @@ def domain_list():
 def domain_create():
     form = forms.DomainForm()
     if form.validate_on_submit():
-        if models.Domain.query.get(form.name.data):
+        conflicting_domain = models.Domain.query.get(form.name.data)
+        conflicting_alternative = models.Alternative.query.get(form.name.data)
+        conflicting_relay = models.Relay.query.get(form.name.data)
+        if conflicting_domain or conflicting_alternative or conflicting_relay:
             flask.flash('Domain %s is already used' % form.name.data, 'error')
         else:
             domain = models.Domain()

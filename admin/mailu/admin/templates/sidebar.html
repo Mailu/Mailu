@@ -50,6 +50,11 @@
         <i class="fa fa-user"></i> <span>{% trans %}Administrators{% endtrans %}</span>
       </a>
     </li>
+    <li>
+      <a href="{{ url_for('.relay_list') }}">
+        <i class="fa fa-reply-all"></i> <span>{% trans %}Relayed domains{% endtrans %}</span>
+      </a>
+    </li>
     {% endif %}
     {% if current_user.manager_of or current_user.global_admin %}
     <li>

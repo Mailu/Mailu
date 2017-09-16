@@ -36,6 +36,9 @@
         <a href="{{ url_for('.user_list', domain_name=domain.name) }}" title="{% trans %}Users{% endtrans %}"><i class="fa fa-envelope-o"></i></a>&nbsp;
         <a href="{{ url_for('.alias_list', domain_name=domain.name) }}" title="{% trans %}Aliases{% endtrans %}"><i class="fa fa-at"></i></a>&nbsp;
         <a href="{{ url_for('.manager_list', domain_name=domain.name) }}" title="{% trans %}Managers{% endtrans %}"><i class="fa fa-user"></i></a>&nbsp;
+        {% if current_user.global_admin %}
+        <a href="{{ url_for('.alternative_list', domain_name=domain.name) }}" title="{% trans %}Alternatives{% endtrans %}"><i class="fa fa-asterisk"></i></a>&nbsp;
+        {% endif %}
       </td>
       <td>{{ domain.name }}</td>
       <td>{{ domain.users | count }} / {{ domain.max_users or '∞' }}</td>

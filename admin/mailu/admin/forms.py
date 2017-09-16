@@ -56,6 +56,13 @@ class AlternativeForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Create'))
 
 
+class RelayForm(flask_wtf.FlaskForm):
+    name = fields.StringField(_('Relayed domain name'), [validators.DataRequired()])
+    smtp = fields.StringField(_('Remote host'))
+    comment = fields.StringField(_('Comment'))
+    submit = fields.SubmitField(_('Create'))
+
+
 class UserForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('E-mail'), [validators.DataRequired()])
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])

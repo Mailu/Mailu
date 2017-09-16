@@ -90,9 +90,10 @@ services:
     image: mailu/admin:$VERSION
     labels:
       - traefik.enable=true
-      - traefik.frontend.rule=Host:$HOSTNAME;PathPrefix:/admin/
-      - traefik.root.frontend.rule=Host:$HOSTNAME;Path:/
-      - traefik.port=80
+      - traefik.admin.frontend.rule=Host:$HOSTNAME;PathPrefix:/admin/
+      - traefik.admin.port=80
+      - traefik.home.frontend.rule=Host:$HOSTNAME;Path:/
+      - traefik.home.port=80
     restart: always
     env_file: .env
     ports:

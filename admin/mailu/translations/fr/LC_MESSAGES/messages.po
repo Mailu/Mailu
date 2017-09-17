@@ -1,18 +1,11 @@
-
 msgid ""
 msgstr ""
-"Project-Id-Version:  Mailu\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-09-03 15:30+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: fr\n"
-"Language-Team: fr <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.0\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: Mailu\n"
+"Language: fr\n"
 
 #: mailu/admin/forms.py:32
 msgid "Invalid email address."
@@ -48,10 +41,6 @@ msgstr "Nombre maximum d'utilisateurs"
 #: mailu/admin/forms.py:48
 msgid "Maximum alias count"
 msgstr "Nombre maximum d'alias"
-
-#: mailu/admin/forms.py:49
-msgid "Maximum user quota"
-msgstr ""
 
 #: mailu/admin/forms.py:50 mailu/admin/forms.py:61 mailu/admin/forms.py:100
 #: mailu/admin/templates/alias/list.html:22
@@ -111,10 +100,6 @@ msgstr "Changer de mot de passe"
 #: mailu/admin/forms.py:79
 msgid "Enable forwarding"
 msgstr "Activer la redirection"
-
-#: mailu/admin/forms.py:80
-msgid "Keep a copy of the emails"
-msgstr ""
 
 #: mailu/admin/forms.py:82 mailu/admin/forms.py:99
 #: mailu/admin/templates/alias/list.html:21
@@ -177,36 +162,11 @@ msgstr "Activer TLS"
 msgid "Username"
 msgstr "Nom d'utilisateur"
 
-#: mailu/admin/forms.py:123
-msgid "Keep emails on the server"
-msgstr ""
-
-#: mailu/admin/forms.py:128
-msgid "Announcement subject"
-msgstr "Sujet de l'annonce"
-
-#: mailu/admin/forms.py:130
-msgid "Announcement body"
-msgstr "Corps de l'annonce"
-
-#: mailu/admin/forms.py:132
-msgid "Send"
-msgstr "Envoyer"
-
-#: mailu/admin/templates/announcement.html:4
-msgid "Public announcement"
-msgstr "Annonce globale"
-
-#: mailu/admin/templates/announcement.html:8
-msgid "from"
-msgstr "de"
-
 #: mailu/admin/templates/confirm.html:4
 msgid "Confirm action"
 msgstr "Confirmer"
 
 #: mailu/admin/templates/confirm.html:12
-#, python-format
 msgid "You are about to %(action)s. Please confirm your action."
 msgstr "Vous allez %(action)s. Merci de confirmer votre action."
 
@@ -286,10 +246,6 @@ msgstr "Déconnexion"
 #: mailu/admin/templates/sidebar.html:36
 msgid "Administration"
 msgstr "Administration"
-
-#: mailu/admin/templates/sidebar.html:45
-msgid "Announcement"
-msgstr "Annonce"
 
 #: mailu/admin/templates/sidebar.html:50
 msgid "Administrators"
@@ -466,21 +422,9 @@ msgstr "Ajouter un compte"
 msgid "Endpoint"
 msgstr "Source"
 
-#: mailu/admin/templates/fetch/list.html:22
-msgid "Keep emails"
-msgstr ""
-
 #: mailu/admin/templates/fetch/list.html:23
 msgid "Last check"
 msgstr "Dernier relevé"
-
-#: mailu/admin/templates/fetch/list.html:36
-msgid "yes"
-msgstr ""
-
-#: mailu/admin/templates/fetch/list.html:36
-msgid "no"
-msgstr ""
 
 #: mailu/admin/templates/manager/create.html:4
 msgid "Add a manager"
@@ -493,6 +437,30 @@ msgstr "Liste des gérants"
 #: mailu/admin/templates/manager/list.html:12
 msgid "Add manager"
 msgstr "Ajouter le gérant"
+
+#: mailu/admin/forms.py:128
+msgid "Announcement subject"
+msgstr "Sujet de l'annonce"
+
+#: mailu/admin/forms.py:130
+msgid "Announcement body"
+msgstr "Corps de l'annonce"
+
+#: mailu/admin/forms.py:132
+msgid "Send"
+msgstr "Envoyer"
+
+#: mailu/admin/templates/announcement.html:4
+msgid "Public announcement"
+msgstr "Annonce globale"
+
+#: mailu/admin/templates/announcement.html:8
+msgid "from"
+msgstr "de"
+
+#: mailu/admin/templates/sidebar.html:45
+msgid "Announcement"
+msgstr "Annonce"
 
 #: mailu/admin/templates/user/create.html:4
 msgid "New user"
@@ -530,4 +498,28 @@ msgstr "Modifier le mot de passe"
 #: mailu/admin/templates/user/reply.html:4
 msgid "Automatic reply"
 msgstr "Réponse automatique"
+
+#: mailu/admin/forms.py:49
+msgid "Maximum user quota"
+msgstr "Quota maximum par utilisateur"
+
+#: mailu/admin/forms.py:80
+msgid "Keep a copy of the emails"
+msgstr "Conserver une copie des messages"
+
+#: mailu/admin/forms.py:123
+msgid "Keep emails on the server"
+msgstr "Conserver les messages sur le serveur"
+
+#: mailu/admin/templates/fetch/list.html:22
+msgid "Keep emails"
+msgstr "Conserver les messages"
+
+#: mailu/admin/templates/fetch/list.html:36
+msgid "yes"
+msgstr "oui"
+
+#: mailu/admin/templates/fetch/list.html:36
+msgid "no"
+msgstr "non"
 

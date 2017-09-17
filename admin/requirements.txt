@@ -7,11 +7,9 @@ Flask-migrate
 Flask-script
 Flask-wtf
 WTForms-Components
-PyOpenSSL
 passlib
 gunicorn
 docker-py
 tabulate
 apscheduler
-certbot
 PyYAML

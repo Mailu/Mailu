@@ -1,16 +1,9 @@
-acme==0.18.1
 alembic==0.9.5
 APScheduler==3.3.1
-asn1crypto==0.22.0
-Babel==2.5.0
-certbot==0.18.1
+Babel==2.5.1
 certifi==2017.7.27.1
-cffi==1.10.0
 chardet==3.0.4
 click==6.7
-ConfigArgParse==0.12.0
-configobj==5.0.6
-cryptography==2.0.3
 decorator==4.1.2
 docker-py==1.10.6
 docker-pycreds==0.2.1
@@ -23,7 +16,6 @@ Flask-Migrate==2.1.1
 Flask-Script==2.0.6
 Flask-SQLAlchemy==2.2
 Flask-WTF==0.14.2
-future==0.16.0
 gunicorn==19.7.1
 idna==2.6
 infinity==1.4
@@ -32,13 +24,7 @@ itsdangerous==0.24
 Jinja2==2.9.6
 Mako==1.0.7
 MarkupSafe==1.0
-mock==2.0.0
-parsedatetime==2.4
 passlib==1.7.1
-pbr==3.1.1
-pycparser==2.18
-pyOpenSSL==17.2.0
-pyRFC3339==1.0
 python-dateutil==2.6.1
 python-editor==1.0.3
 pytz==2017.2
@@ -55,6 +41,3 @@ websocket-client==0.44.0
 Werkzeug==0.12.2
 WTForms==2.1
 WTForms-Components==0.10.3
-zope.component==4.4.0
-zope.event==4.3.0
-zope.interface==4.4.2

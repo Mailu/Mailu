@@ -22,7 +22,7 @@ same level of functionality and still be able to host a complete mail server
 at little cost while running only FOSS, applying the KISS principle and being
 able to fine-tune some details if needed.
 
-[Try it out on our demo server](https://github.com/mail-u/mailu/wiki/Demo-server).
+[Try it out on our demo server](https://github.com/mailu/mailu/wiki/Demo-server).
 
 Features
 ========
@@ -30,10 +30,11 @@ Features
 Main features include:
 
 - **Standard email server**, IMAP and IMAP+, SMTP and Submission
+- **Advanced email features**, aliases, domain aliases, custom routing
 - **Web access**, multiple Webmails and adminitration interface
 - **User features**, aliases, auto-reply, auto-forward, fetched accounts
-- **Admin features**, global admins, per-domain delegation, quotas
-- **Security**, enforced TLS, outgoing DKIM, anti-virus scanner
+- **Admin features**, global admins, announcements, per-domain delegation, quotas
+- **Security**, enforced TLS, Letsencrypt!, outgoing DKIM, anti-virus scanner
 - **Antispam**, auto-learn, greylisting, DMARC and SPF
 - **Freedom**, all FOSS components, no tracker included
 
@@ -51,7 +52,7 @@ fire up the mail server:
 docker-compose up -d
 ```
 
-For a detailed walktrough, see the [Setup Guide](https://github.com/mail-u/mailu/wiki/Setup-Guide).
+For a detailed walktrough, see the [Setup Guide](https://github.com/mailu/mailu/wiki/Setup-Guide).
 
 Contributing
 ============
@@ -61,4 +62,4 @@ components are free software and compatible with the MIT license. All
 specific configuration files, Dockerfiles and code are placed under the
 MIT license.
 
-For details, see the [Contributor Guide](https://github.com/mail-u/mailu/wiki/Contributors-Guide).
+For details, see the [Contributor Guide](https://github.com/mailu/mailu/wiki/Contributors-Guide).

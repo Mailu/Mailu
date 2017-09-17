@@ -8,6 +8,11 @@ from email.mime import text
 from urllib import parse
 
 
+@app.route('/home', methods=["GET"])
+def home():
+    return flask.redirect('/webmail/')
+
+
 @app.route('/', methods=["GET"])
 @access.authenticated
 def index():

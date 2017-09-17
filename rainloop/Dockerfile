@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y \
 ENV RAINLOOP_URL https://github.com/RainLoop/rainloop-webmail/releases/download/v1.10.3.151/rainloop-community-1.10.3.151-aa8d0c41baec166a35bb9855ee3d07b9.zip
 
 RUN rm -rf /var/www/html/ \
- && mkdir -p /var/www/html/webmail \
- && cd /var/www/html/webmail \
+ && mkdir /var/www/html \
+ && cd /var/www/html \
  && curl -L -O ${RAINLOOP_URL} \
  && unzip *.zip \
  && rm -f *.zip \
@@ -16,7 +16,7 @@ RUN rm -rf /var/www/html/ \
  && find . -type f -exec chmod 644 {} \; \
  && chown -R www-data: *
 
-COPY include.php /var/www/html/webmail/include.php
+COPY include.php /var/www/html/include.php
 COPY php.ini /usr/local/etc/php/conf.d/rainloop.ini
 
 COPY config.ini /config.ini

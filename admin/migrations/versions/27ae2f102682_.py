@@ -13,25 +13,41 @@ down_revision = 'dc8c25cf5b98'
 from alembic import op
 import sqlalchemy as sa
 
-from mailu.admin.models import User
-from mailu import db
+
+user_table = sa.Table(
+    'user',
+    sa.MetaData(),
+    sa.Column('email', sa.String(255), primary_key=True),
+    sa.Column('spam_threshold', sa.Numeric())
+)
+
 
 def upgrade():
+    connection = op.get_bind()
     # spam_threshold is a X/15 based value, we're converting it to percent.
-    for user in User.query.all():
-         user.spam_threshold = int(100. * float(user.spam_threshold or 0.) / 15.)
-    db.session.commit()
-
+    for user in connection.execute(user_table.select()):
+         connection.execute(
+            user_table.update().where(
+                user_table.c.email == user.email
+            ).values(
+                spam_threshold=int(100. * float(user.spam_threshold or 0.) / 15.)
+            )
+         )
     # set default to 80%
     with op.batch_alter_table('user') as batch:
         batch.alter_column('spam_threshold', default=80.)
 
 def downgrade():
+    connection = op.get_bind()
     # spam_threshold is a X/15 based value, we're converting it from percent.
-    for user in User.query.all():
-         user.spam_threshold = int(15. * float(user.spam_threshold or 0.) / 100.)
-    db.session.commit()
-
+    for user in connection.execute(user_table.select()):
+         connection.execute(
+            user_table.update().where(
+                user_table.c.email == user.email
+            ).values(
+                spam_threshold=int(15. * float(user.spam_threshold or 0.) / 100.)
+            )
+         )
     # set default to 10/15
     with op.batch_alter_table('user') as batch:
         batch.alter_column('spam_threshold', default=10.)

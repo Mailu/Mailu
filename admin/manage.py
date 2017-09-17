@@ -1,23 +1,6 @@
 from mailu import app, manager, db
 from mailu.admin import models
 
-import flask_migrate
-
-
-@manager.command
-def flushdb():
-    """ Flush the database
-    """
-    db.drop_all()
-
-
-@manager.command
-def initdb():
-    """ Initialize the database
-    """
-    db.create_all()
-    flask_migrate.stamp(revision="head")    
-
 
 @manager.command
 def admin(localpart, domain_name, password):

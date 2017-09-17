@@ -3,7 +3,7 @@ FROM php:5-apache
 RUN apt-get update && apt-get install -y \
       unzip
 
-ENV RAINLOOP_URL https://github.com/RainLoop/rainloop-webmail/releases/download/v1.10.3.151/rainloop-community-1.10.3.151-aa8d0c41baec166a35bb9855ee3d07b9.zip
+ENV RAINLOOP_URL https://github.com/RainLoop/rainloop-webmail/releases/download/v1.11.1/rainloop-community-1.11.1.zip
 
 RUN rm -rf /var/www/html/ \
  && mkdir -p /var/www/html/webmail \

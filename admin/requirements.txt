@@ -13,3 +13,4 @@ docker-py
 tabulate
 apscheduler
 PyYAML
+PyOpenSSL

@@ -21,11 +21,9 @@ def login():
         user = models.User.login(form.email.data, form.pw.data)
         if user:
             flask_login.login_user(user)
-            redirect = flask.request.args.get('next')
-            parsed_redirect = parse.urlparse(redirect)
-            if parsed_redirect.scheme or parsed_redirect.netloc:
-                return flask.abort(400)
-            return flask.redirect(redirect or flask.url_for('.index'))
+            endpoint = flask.request.args.get('next')
+            return flask.redirect(flask.url_for(endpoint)
+                or flask.url_for('.index'))
         else:
             flask.flash('Wrong e-mail or password', 'error')
     return flask.render_template('login.html', form=form)

@@ -90,7 +90,7 @@ services:
     image: mailu/admin:$VERSION
     labels:
       - traefik.enable=true
-      - traefik.admin.frontend.rule=Host:$HOSTNAME;PathPrefix:/admin/
+      - traefik.admin.frontend.rule=Host:$HOSTNAME;PathPrefixStrip:/admin/
       - traefik.admin.port=80
       - traefik.home.frontend.rule=Host:$HOSTNAME;Path:/
       - traefik.home.port=80

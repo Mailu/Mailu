@@ -11,6 +11,8 @@ import docker
 
 from apscheduler.schedulers import background
 
+from mailu import models
+
 
 # Create application
 app = flask.Flask(__name__, static_url_path='/admin/app_static')
@@ -41,36 +43,45 @@ default_config = {
 for key, value in default_config.items():
     app.config[key] = os.environ.get(key, value)
 
-# Setup components
+# Base application
 flask_bootstrap.Bootstrap(app)
 db = flask_sqlalchemy.SQLAlchemy(app)
 migrate = flask_migrate.Migrate(app, db)
-login_manager = flask_login.LoginManager()
-login_manager.init_app(app)
-babel = flask_babel.Babel(app)
-translations = list(map(str, babel.list_translations()))
-scheduler = background.BackgroundScheduler({
-    'apscheduler.timezone': 'UTC'
-})
 
 # Manager commnad
 manager = flask_script.Manager(app)
 manager.add_command('db', flask_migrate.MigrateCommand)
 
 # Task scheduling
+scheduler = background.BackgroundScheduler({
+    'apscheduler.timezone': 'UTC'
+})
 if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
     scheduler.start()
     from mailu import tlstasks
 
 # Babel configuration
+babel = flask_babel.Babel(app)
+translations = list(map(str, babel.list_translations()))
+
 @babel.localeselector
 def get_locale():
     return flask.request.accept_languages.best_match(translations)
 
-# Finally setup the blueprint and redirect /
-from mailu import admin
-app.register_blueprint(admin.app, url_prefix='/admin')
+# Login configuration
+login_manager = flask_login.LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "admin.login"
+login_manager.user_loader(models.User.query.get)
+
+@app.context_processor
+def inject_user():
+    return dict(current_user=flask_login.current_user)
 
 @app.route("/")
 def index():
     return flask.redirect("/webmail/")
+
+
+# Import views
+from mailu.views import *

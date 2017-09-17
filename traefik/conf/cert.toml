@@ -22,10 +22,3 @@ domain = "{{ DOMAIN }}"
 watch = true
 exposedbydefault = false
 
-[acme]
-email = "{{ POSTMASTER }}@{{ DOMAIN }}"
-storageFile = "/certs/acme.json"
-onDemand = true
-entryPoint = "https"
-
-

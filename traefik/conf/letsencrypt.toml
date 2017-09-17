@@ -22,7 +22,8 @@ exposedbydefault = false
 [acme]
 email = "{{ POSTMASTER }}@{{ DOMAIN }}"
 storageFile = "/certs/acme.json"
-onDemand = true
+onDemand = false
+OnHostRule = true
 entryPoint = "https"
 
 

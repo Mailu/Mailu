@@ -1,5 +1,4 @@
-from mailu import dockercli, app as flask_app
-from mailu.admin import app, db, models, forms, access
+from mailu import dockercli, app, db, models, forms, access
 
 import flask
 import flask_login
@@ -53,7 +52,7 @@ def services():
 @access.global_admin
 def announcement():
     from_address = '{}@{}'.format(
-        flask_app.config['POSTMASTER'], flask_app.config['DOMAIN'])
+        app.config['POSTMASTER'], app.config['DOMAIN'])
     form = forms.AnnouncementForm()
     if form.validate_on_submit():
         with smtplib.SMTP('smtp') as smtp:

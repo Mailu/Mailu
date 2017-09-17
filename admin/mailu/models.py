@@ -1,5 +1,4 @@
-from mailu.admin import db, dkim
-from mailu import app
+from mailu import app, db, dkim, login_manager
 
 from sqlalchemy.ext import declarative
 from passlib import context
@@ -235,6 +234,8 @@ class User(Base, Email):
     def login(cls, email, password):
         user = cls.query.get(email)
         return user if (user and user.check_password(password)) else None
+
+login_manager.user_loader(User.query.get)
 
 
 class Alias(Base, Email):

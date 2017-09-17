@@ -1,5 +1,4 @@
-from mailu.admin import app, db, models, forms, access
-from mailu import app as flask_app
+from mailu import app, db, models, forms, access
 
 import flask
 import wtforms_components

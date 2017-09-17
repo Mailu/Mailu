@@ -1,5 +1,4 @@
-from mailu import app, manager, db
-from mailu.admin import models
+from mailu import app, manager, db, models
 
 
 @manager.command

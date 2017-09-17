@@ -11,8 +11,6 @@ import docker
 
 from apscheduler.schedulers import background
 
-from mailu import models
-
 
 # Create application
 app = flask.Flask(__name__, static_url_path='/admin/app_static')
@@ -71,17 +69,11 @@ def get_locale():
 # Login configuration
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "admin.login"
-login_manager.user_loader(models.User.query.get)
+login_manager.login_view = ".login"
 
 @app.context_processor
 def inject_user():
     return dict(current_user=flask_login.current_user)
-
-@app.route("/")
-def index():
-    return flask.redirect("/webmail/")
-
 
 # Import views
 from mailu.views import *

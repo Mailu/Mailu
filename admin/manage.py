@@ -126,7 +126,10 @@ def config_update(verbose=False, delete_objects=False):
                 email=email
             )
         else:
-            alias.destination = destination.split(',')
+            if type(destination) == type(""):
+                alias.destination = destination.split(',')
+            else:
+                alias.destination = destination
         db.session.add(alias)
     
     if delete_objects:

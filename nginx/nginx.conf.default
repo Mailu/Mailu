@@ -31,7 +31,8 @@ http {
       # TLS configuration hardened according to:
       # https://bettercrypto.org/static/applied-crypto-hardening.pdf
       ssl_protocols TLSv1.1 TLSv1.2;
-      ssl_ciphers 'EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA256:EECDH:+CAMELLIA128:+AES128:+SSLv3:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!IDEA:!ECDSA:kEDH:CAMELLIA128-SHA:AES128-SHA';
+      # ssl_ciphers 'EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA256:EECDH:+CAMELLIA128:+AES128:+SSLv3:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!IDEA:!ECDSA:kEDH:CAMELLIA128-SHA:AES128-SHA';
+      ssl_ciphers 'EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH:EDH+aRSA:!RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS';
       ssl_prefer_server_ciphers on;
       ssl_session_timeout 5m;
       ssl_session_cache shared:SSL:50m;
@@ -41,8 +42,8 @@ http {
       add_header Strict-Transport-Security max-age=15768000;
 
       if ($scheme = http) {
-    		return 301 https://$host$request_uri;
-    	}
+        return 301 https://$host$request_uri;
+      }
 
       # Load Lua variables
       set_by_lua $webmail 'return os.getenv("WEBMAIL")';

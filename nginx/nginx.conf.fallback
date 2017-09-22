@@ -36,6 +36,8 @@ http {
 
       add_header Strict-Transport-Security max-age=15768000;
 
+      include http.d/*.conf;
+
       if ($scheme = http) {
         return 301 https://$host$request_uri;
       }
@@ -45,3 +47,5 @@ http {
       }
     }
 }
+
+include extra.d/*.conf;

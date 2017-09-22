@@ -50,6 +50,7 @@ http {
       set_by_lua $webdav 'return os.getenv("WEBDAV")';
       set_by_lua $expose_admin 'return os.getenv("EXPOSE_ADMIN")';
 
+      include http.d/*.conf;
       # Actual logic
 
       location / {
@@ -97,3 +98,5 @@ http {
       }
     }
 }
+
+include extra.d/*.conf;

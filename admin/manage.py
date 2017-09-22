@@ -37,6 +37,7 @@ def user(localpart, domain_name, password, hash_scheme=app.config['PASSWORD_SCHE
     db.session.add(user)
     db.session.commit()
 
+
 @manager.command
 def user_import(localpart, domain_name, password_hash, hash_scheme=app.config['PASSWORD_SCHEME']):
     """ Import a user along with password hash. Available hashes:
@@ -59,7 +60,7 @@ def user_import(localpart, domain_name, password_hash, hash_scheme=app.config['P
     db.session.commit()
 
 @manager.command
-def config_update(delete_objects=False):
+def config_update(verbose=False, delete_objects=False):
     """sync configuration with data from YAML-formatted stdin"""
     import yaml, sys
     new_config=yaml.load(sys.stdin)
@@ -67,6 +68,8 @@ def config_update(delete_objects=False):
     users=new_config['users']
     tracked_users=set()
     for user_config in users:
+        if verbose:
+            print(str(user_config))
         localpart=user_config['localpart']
         domain_name=user_config['domain']
         password_hash=user_config['password_hash']
@@ -90,9 +93,15 @@ def config_update(delete_objects=False):
     aliases=new_config['aliases']
     tracked_aliases=set()
     for alias_config in aliases:
+        if verbose:
+            print(str(alias_config))
         localpart=alias_config['localpart']
         domain_name=alias_config['domain']
-        destination=alias_config['destination']
+        pre_destination=alias_config['destination']
+        if type(pre_destination) == type(""):
+            destination = pre_destination.split(',')
+        else:
+            destination = pre_destination
         domain = models.Domain.query.get(domain_name)
         email='{0}@{1}'.format(localpart,domain_name)
         if not domain:
@@ -104,11 +113,11 @@ def config_update(delete_objects=False):
             alias = models.Alias(
                 localpart=localpart,
                 domain=domain,
-                destination=destination.split(','),
+                destination=destination,
                 email=email
             )
         else:
-            alias.destination = destination.split(',')
+            alias.destination = destination
         db.session.add(alias)
     
     if delete_objects:

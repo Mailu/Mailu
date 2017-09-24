@@ -74,8 +74,9 @@ def inject_user():
     return dict(current_user=flask_login.current_user)
 
 # Import views
-from mailu import ui
+from mailu import ui, internal
 app.register_blueprint(ui.ui, url_prefix='/ui')
+app.register_blueprint(internal.internal, url_prefix='/internal')
 
 # Create the prefix middleware
 class PrefixMiddleware(object):

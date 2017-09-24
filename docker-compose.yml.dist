@@ -2,17 +2,23 @@ version: '2'
 
 services:
 
-  http:
-    # build: $FRONTEND
-    image: mailu/$FRONTEND:$VERSION
+  front:
+    # build: nginx
+    image: mailu/nginx:$VERSION
     restart: always
     env_file: .env
     ports:
       - "$BIND_ADDRESS:80:80"
       - "$BIND_ADDRESS:443:443"
+      - "$BIND_ADDRESS:110:110"
+      - "$BIND_ADDRESS:143:143"
+      - "$BIND_ADDRESS:993:993"
+      - "$BIND_ADDRESS:995:995"
+      - "$BIND_ADDRESS:25:25"
+      - "$BIND_ADDRESS:465:465"
+      - "$BIND_ADDRESS:587:587"
     volumes:
       - "$ROOT/certs:/certs"
-      - /var/run/docker.sock:/docker.sock:ro
 
   redis:
     image: redis:latest
@@ -25,16 +31,9 @@ services:
     image: mailu/dovecot:$VERSION
     restart: always
     env_file: .env
-    ports:
-      - "$BIND_ADDRESS:110:110"
-      - "$BIND_ADDRESS:143:143"
-      - "$BIND_ADDRESS:993:993"
-      - "$BIND_ADDRESS:995:995"
-      - "$BIND_ADDRESS:4190:4190"
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/mail:/mail"
-      - "$ROOT/certs:/certs"
       - "$ROOT/overrides:/overrides"
 
   smtp:
@@ -42,13 +41,8 @@ services:
     image: mailu/postfix:$VERSION
     restart: always
     env_file: .env
-    ports:
-      - "$BIND_ADDRESS:25:25"
-      - "$BIND_ADDRESS:465:465"
-      - "$BIND_ADDRESS:587:587"
     volumes:
       - "$ROOT/data:/data"
-      - "$ROOT/certs:/certs"
       - "$ROOT/overrides:/overrides"
 
   milter:
@@ -88,29 +82,16 @@ services:
   admin:
     # build: admin
     image: mailu/admin:$VERSION
-    labels:
-      - traefik.enable=true
-      - traefik.admin.frontend.rule=Host:$HOSTNAME;PathPrefixStrip:/admin/
-      - traefik.admin.port=80
-      - traefik.home.frontend.rule=Host:$HOSTNAME;Path:/
-      - traefik.home.port=80
     restart: always
     env_file: .env
-    ports:
-      - "127.0.0.1:8000:80"
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/dkim:/dkim"
-      - "$ROOT/certs:/certs"
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   webmail:
     # build: "$WEBMAIL"
     image: "mailu/$WEBMAIL:$VERSION"
-    labels:
-      - traefik.enable=true
-      - traefik.frontend.rule=Host:$HOSTNAME;PathPrefixStrip:/webmail/
-      - traefik.port=80
     restart: always
     env_file: .env
     volumes:

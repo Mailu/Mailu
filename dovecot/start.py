@@ -10,11 +10,9 @@ convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()
 # Actual startup script
 os.environ["FRONT_ADDRESS"] = socket.gethostbyname("front")
 
-for postfix_file in glob.glob("/conf/*.cf"):
-    convert(postfix_file, os.path.join("/etc/postfix", os.path.basename(postfix_file)))
-
-convert("/conf/rsyslog.conf", "/etc/rsyslog.conf")
+for dovecot_file in glob.glob("/conf/*"):
+    convert(dovecot_file, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))
 
 # Run postfix
 os.system("chown -R mail:mail /mail /var/lib/dovecot")
-os.execv("/usr/sbin/dovecot" ["dovecot", "-c", "/etc/dovecot/dovecot.conf", "-F"])
+os.execv("/usr/sbin/dovecot", ["dovecot", "-c", "/etc/dovecot/dovecot.conf", "-F"])

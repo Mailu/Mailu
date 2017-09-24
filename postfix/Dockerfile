@@ -1,10 +1,8 @@
 FROM alpine
 
-RUN apk add --no-cache bash postfix postfix-sqlite postfix-pcre rsyslog
+RUN apk add --no-cache postfix postfix-sqlite postfix-pcre rsyslog python py-jinja2
 
-COPY conf /etc/postfix
-COPY rsyslog.conf /etc/rsyslog.conf
+COPY conf /conf
+COPY start.py /start.py
 
-COPY start.sh /start.sh
-
-CMD ["/start.sh"]
+CMD /start.py

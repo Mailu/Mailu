@@ -38,24 +38,7 @@ recipient_delimiter = {{ RECIPIENT_DELIMITER }}
 # General TLS configuration
 tls_high_cipherlist = EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA256:EECDH:+CAMELLIA128:+AES128:+SSLv3:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!IDEA:!ECDSA:kEDH:CAMELLIA128-SHA:AES128-SHA
 tls_preempt_cipherlist = yes
-
-# Only one key/certificate pair is used, SNI not being supported by all
-# services and not a strong requirement. Also, TLS is enforced for submission
-# and smtps in master.cf.
-smtpd_tls_security_level = may
-smtpd_tls_cert_file=/certs/cert.pem
-smtpd_tls_key_file=/certs/key.pem
-smtpd_tls_dh1024_param_file=/certs/dhparam.pem
-smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
-
-# Server-side TLS is hardened, it should be up to the client to update his or
-# her TLS stack in order to connect to the mail server. Hardening is based on
-# https://bettercrypto.org/static/applied-crypto-hardening.pdf
-smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3
-smtpd_tls_protocols = !SSLv2, !SSLv3
-smtpd_tls_ciphers = high
-smtpd_tls_mandatory_ciphers = high
-
+tls_ssl_options = NO_COMPRESSION
 
 # Outgoing TLS is more flexible because 1. not all receiving servers will
 # support TLS, 2. not all will have and up-to-date TLS stack.
@@ -63,23 +46,6 @@ smtp_tls_security_level = may
 smtp_tls_mandatory_protocols = !SSLv2, !SSLv3
 smtp_tls_protocols =!SSLv2,!SSLv3
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
-
-# General TLS hardening
-tls_ssl_options = NO_COMPRESSION
-tls_preempt_cipherlist = yes
-
-###############
-# SASL
-###############
-
-smtpd_sasl_local_domain = $myhostname
-
-# Authentication is done against dovecot, which acts as the main authention
-# source
-smtpd_sasl_type = dovecot
-smtpd_sasl_path = inet:imap:2102
-smtpd_sasl_auth_enable = yes
-smtpd_sasl_security_options = noanonymous
 
 ###############
 # Virtual
@@ -118,15 +84,14 @@ smtpd_sender_restrictions =
    reject_non_fqdn_sender,
    reject_unknown_sender_domain,
    reject_unlisted_sender,
-   reject_sender_login_mismatch,
    permit
 
 # Recipient restrictions:
 smtpd_recipient_restrictions =
+   permit_mynetworks,
    reject_unauth_pipelining,
    reject_non_fqdn_recipient,
    reject_unknown_recipient_domain,
-   permit_mynetworks,
    permit
 
 ###############

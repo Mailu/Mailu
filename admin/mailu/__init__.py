@@ -9,9 +9,6 @@ import flask_babel
 import os
 import docker
 
-from apscheduler.schedulers import background
-
-
 # Create application
 app = flask.Flask(__name__)
 
@@ -20,7 +17,7 @@ default_config = {
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     'SECRET_KEY': 'changeMe',
     'DOCKER_SOCKET': 'unix:///var/run/docker.sock',
-    'HOSTNAME': 'mail.mailu.io',
+    'HOSTNAMES': 'mail.mailu.io',
     'DOMAIN': 'mailu.io',
     'POSTMASTER': 'postmaster',
     'DEBUG': False,

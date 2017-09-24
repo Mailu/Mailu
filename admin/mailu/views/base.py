@@ -1,5 +1,4 @@
-from mailu import dockercli, app as flask_app
-from mailu.admin import app, db, models, forms, access
+from mailu import dockercli, app, db, models, forms, access
 
 import flask
 import flask_login
@@ -7,6 +6,11 @@ import smtplib
 
 from email.mime import text
 from urllib import parse
+
+
+@app.route('/home', methods=["GET"])
+def home():
+    return flask.redirect('/webmail/')
 
 
 @app.route('/', methods=["GET"])
@@ -22,11 +26,9 @@ def login():
         user = models.User.login(form.email.data, form.pw.data)
         if user:
             flask_login.login_user(user)
-            redirect = flask.request.args.get('next')
-            parsed_redirect = parse.urlparse(redirect)
-            if parsed_redirect.scheme or parsed_redirect.netloc:
-                return flask.abort(400)
-            return flask.redirect(redirect or flask.url_for('.index'))
+            endpoint = flask.request.args.get('next')
+            return flask.redirect(flask.url_for(endpoint)
+                or flask.url_for('.index'))
         else:
             flask.flash('Wrong e-mail or password', 'error')
     return flask.render_template('login.html', form=form)
@@ -53,7 +55,7 @@ def services():
 @access.global_admin
 def announcement():
     from_address = '{}@{}'.format(
-        flask_app.config['POSTMASTER'], flask_app.config['DOMAIN'])
+        app.config['POSTMASTER'], app.config['DOMAIN'])
     form = forms.AnnouncementForm()
     if form.validate_on_submit():
         with smtplib.SMTP('smtp') as smtp:

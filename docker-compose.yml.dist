@@ -90,7 +90,7 @@ services:
     image: mailu/admin:$VERSION
     labels:
       - traefik.enable=true
-      - traefik.admin.frontend.rule=Host:$HOSTNAME;PathPrefix:/admin/
+      - traefik.admin.frontend.rule=Host:$HOSTNAME;PathPrefixStrip:/admin/
       - traefik.admin.port=80
       - traefik.home.frontend.rule=Host:$HOSTNAME;Path:/
       - traefik.home.port=80
@@ -109,7 +109,7 @@ services:
     image: "mailu/$WEBMAIL:$VERSION"
     labels:
       - traefik.enable=true
-      - traefik.frontend.rule=Host:$HOSTNAME;PathPrefix:/webmail/
+      - traefik.frontend.rule=Host:$HOSTNAME;PathPrefixStrip:/webmail/
       - traefik.port=80
     restart: always
     env_file: .env

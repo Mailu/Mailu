@@ -12,17 +12,16 @@ ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1
 RUN echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini
 
 RUN rm -rf /var/www/html/ \
- && mkdir /var/www/html \
- && cd /var/www/html \
+ && cd /var/www \
  && curl -L -O ${ROUNDCUBE_URL} \
  && tar -xf *.tar.gz \
  && rm -f *.tar.gz \
- && mv roundcubemail-* webmail \
- && cd webmail \
+ && mv roundcubemail-* html \
+ && cd html \
  && rm -rf CHANGELOG INSTALL LICENSE README.md UPGRADING composer.json-dist installer \
  && chown -R www-data: logs
 
-COPY config.inc.php /var/www/html/webmail/config/
+COPY config.inc.php /var/www/html/config/
 
 COPY start.sh /start.sh
 

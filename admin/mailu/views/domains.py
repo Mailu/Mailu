@@ -1,5 +1,4 @@
-from mailu.admin import app, db, models, forms, access
-from mailu import app as flask_app
+from mailu import app, db, models, forms, access
 
 import flask
 import wtforms_components
@@ -63,7 +62,7 @@ def domain_delete(domain_name):
 def domain_details(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     return flask.render_template('domain/details.html', domain=domain,
-        config=flask_app.config)
+        config=app.config)
 
 
 @app.route('/domain/genkeys/<domain_name>', methods=['GET', 'POST'])

@@ -84,6 +84,7 @@ smtpd_sender_restrictions =
    reject_non_fqdn_sender,
    reject_unknown_sender_domain,
    reject_unlisted_sender,
+   reject_sender_login_mismatch,
    permit
 
 # Recipient restrictions:

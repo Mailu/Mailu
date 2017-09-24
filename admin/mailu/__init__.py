@@ -50,14 +50,6 @@ migrate = flask_migrate.Migrate(app, db)
 manager = flask_script.Manager(app)
 manager.add_command('db', flask_migrate.MigrateCommand)
 
-# Task scheduling
-scheduler = background.BackgroundScheduler({
-    'apscheduler.timezone': 'UTC'
-})
-if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-    scheduler.start()
-    from mailu import tlstasks
-
 # Babel configuration
 babel = flask_babel.Babel(app)
 translations = list(map(str, babel.list_translations()))

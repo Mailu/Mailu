@@ -11,6 +11,5 @@ passlib
 gunicorn
 docker-py
 tabulate
-apscheduler
 PyYAML
 PyOpenSSL

@@ -1,5 +1,4 @@
 alembic==0.9.5
-APScheduler==3.3.1
 asn1crypto==0.22.0
 Babel==2.5.1
 certifi==2017.7.27.1

@@ -31,6 +31,9 @@ relayhost = {{ RELAYHOST }}
 # Recipient delimiter for extended addresses
 recipient_delimiter = {{ RECIPIENT_DELIMITER }}
 
+# XClient for connection from the frontend
+smtpd_authorized_xclient_hosts = {{ FRONT_ADDRESS }}
+
 ###############
 # TLS
 ###############

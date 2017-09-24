@@ -4,9 +4,10 @@ RUN mkdir -p /app
 WORKDIR /app
 
 COPY requirements-prod.txt requirements.txt
-RUN apk --update add --virtual build-dep openssl-dev libffi-dev python-dev build-base openssl \
-	&& pip install -r requirements.txt \
-	&& apk del build-dep
+RUN apk --update add --virtual build-dep openssl-dev libffi-dev python-dev build-base \
+ && apk add openssl \
+ && pip install -r requirements.txt \
+ && apk del build-dep
 
 COPY mailu ./mailu
 COPY migrations ./migrations

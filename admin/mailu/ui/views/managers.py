@@ -1,17 +1,18 @@
-from mailu import app, db, models, forms, access
+from mailu import db, models
+from mailu.ui import ui, forms, access
 
 import flask
 import flask_login
 
 
-@app.route('/manager/list/<domain_name>', methods=['GET'])
+@ui.route('/manager/list/<domain_name>', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
 def manager_list(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     return flask.render_template('manager/list.html', domain=domain)
 
 
-@app.route('/manager/create/<domain_name>', methods=['GET', 'POST'])
+@ui.route('/manager/create/<domain_name>', methods=['GET', 'POST'])
 @access.domain_admin(models.Domain, 'domain_name')
 def manager_create(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
@@ -37,7 +38,7 @@ def manager_create(domain_name):
         domain=domain, form=form)
 
 
-@app.route('/manager/delete/<domain_name>/<user_email>', methods=['GET', 'POST'])
+@ui.route('/manager/delete/<domain_name>/<user_email>', methods=['GET', 'POST'])
 @access.confirmation_required("remove manager {user_email}")
 @access.domain_admin(models.Domain, 'domain_name')
 def manager_delete(domain_name, user_email):

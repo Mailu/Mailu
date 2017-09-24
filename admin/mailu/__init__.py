@@ -13,7 +13,7 @@ from apscheduler.schedulers import background
 
 
 # Create application
-app = flask.Flask(__name__, static_url_path='/admin/app_static')
+app = flask.Flask(__name__)
 
 default_config = {
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
@@ -82,7 +82,8 @@ def inject_user():
     return dict(current_user=flask_login.current_user)
 
 # Import views
-from mailu.views import *
+from mailu import ui
+app.register_blueprint(ui.ui, url_prefix='/ui')
 
 # Create the prefix middleware
 class PrefixMiddleware(object):

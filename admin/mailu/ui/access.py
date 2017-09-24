@@ -1,4 +1,5 @@
-from mailu import db, models, forms
+from mailu import db, models
+from mailu.ui import forms
 
 import flask
 import flask_login

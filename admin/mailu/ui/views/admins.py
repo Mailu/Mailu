@@ -1,17 +1,18 @@
-from mailu import app, db, models, forms, access
+from mailu import db, models
+from mailu.ui import ui, forms, access
 
 import flask
 import flask_login
 
 
-@app.route('/admin/list', methods=['GET'])
+@ui.route('/admin/list', methods=['GET'])
 @access.global_admin
 def admin_list():
     admins = models.User.query.filter_by(global_admin=True)
     return flask.render_template('admin/list.html', admins=admins)
 
 
-@app.route('/admin/create', methods=['GET', 'POST'])
+@ui.route('/admin/create', methods=['GET', 'POST'])
 @access.global_admin
 def admin_create():
     form = forms.AdminForm()
@@ -32,7 +33,7 @@ def admin_create():
     return flask.render_template('admin/create.html', form=form)
 
 
-@app.route('/admin/delete/<admin>', methods=['GET', 'POST'])
+@ui.route('/admin/delete/<admin>', methods=['GET', 'POST'])
 @access.global_admin
 @access.confirmation_required("delete admin {admin}")
 def admin_delete(admin):

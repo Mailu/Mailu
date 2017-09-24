@@ -1,4 +1,5 @@
-from mailu import dockercli, app, db, models, forms, access
+from mailu import dockercli, app, db, models
+from mailu.ui import ui, forms, access
 
 import flask
 import flask_login
@@ -8,18 +9,13 @@ from email.mime import text
 from urllib import parse
 
 
-@app.route('/home', methods=["GET"])
-def home():
-    return flask.redirect('/webmail/')
-
-
-@app.route('/', methods=["GET"])
+@ui.route('/', methods=["GET"])
 @access.authenticated
 def index():
     return flask.redirect(flask.url_for('.user_settings'))
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@ui.route('/login', methods=['GET', 'POST'])
 def login():
     form = forms.LoginForm()
     if form.validate_on_submit():
@@ -34,14 +30,14 @@ def login():
     return flask.render_template('login.html', form=form)
 
 
-@app.route('/logout', methods=['GET'])
+@ui.route('/logout', methods=['GET'])
 @access.authenticated
 def logout():
     flask_login.logout_user()
     return flask.redirect(flask.url_for('.index'))
 
 
-@app.route('/services', methods=['GET'])
+@ui.route('/services', methods=['GET'])
 @access.global_admin
 def services():
     try:
@@ -51,7 +47,7 @@ def services():
     return flask.render_template('services.html', containers=containers)
 
 
-@app.route('/announcement', methods=['GET', 'POST'])
+@ui.route('/announcement', methods=['GET', 'POST'])
 @access.global_admin
 def announcement():
     from_address = '{}@{}'.format(

@@ -1,17 +1,18 @@
-from mailu import app, db, models, forms, access
+from mailu import db, models
+from mailu.ui import ui, forms, access
 
 import flask
 import wtforms_components
 
 
-@app.route('/alternative/list/<domain_name>', methods=['GET'])
+@ui.route('/alternative/list/<domain_name>', methods=['GET'])
 @access.global_admin
 def alternative_list(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     return flask.render_template('alternative/list.html', domain=domain)
 
 
-@app.route('/alternative/create/<domain_name>', methods=['GET', 'POST'])
+@ui.route('/alternative/create/<domain_name>', methods=['GET', 'POST'])
 @access.global_admin
 def alternative_create(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
@@ -34,7 +35,7 @@ def alternative_create(domain_name):
         domain=domain, form=form)
 
 
-@app.route('/alternative/delete/<alternative>', methods=['GET', 'POST'])
+@ui.route('/alternative/delete/<alternative>', methods=['GET', 'POST'])
 @access.global_admin
 @access.confirmation_required("delete {alternative}")
 def alternative_delete(alternative):

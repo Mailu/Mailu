@@ -1,17 +1,18 @@
-from mailu import app, db, models, forms, access
+from mailu import db, models
+from mailu.ui import ui, forms, access
 
 import flask
 import wtforms_components
 
 
-@app.route('/alias/list/<domain_name>', methods=['GET'])
+@ui.route('/alias/list/<domain_name>', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
 def alias_list(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     return flask.render_template('alias/list.html', domain=domain)
 
 
-@app.route('/alias/create/<domain_name>', methods=['GET', 'POST'])
+@ui.route('/alias/create/<domain_name>', methods=['GET', 'POST'])
 @access.domain_admin(models.Domain, 'domain_name')
 def alias_create(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
@@ -35,7 +36,7 @@ def alias_create(domain_name):
         domain=domain, form=form)
 
 
-@app.route('/alias/edit/<alias>', methods=['GET', 'POST'])
+@ui.route('/alias/edit/<alias>', methods=['GET', 'POST'])
 @access.domain_admin(models.Alias, 'alias')
 def alias_edit(alias):
     alias = models.Alias.query.get(alias) or flask.abort(404)
@@ -52,7 +53,7 @@ def alias_edit(alias):
         form=form, alias=alias, domain=alias.domain)
 
 
-@app.route('/alias/delete/<alias>', methods=['GET', 'POST'])
+@ui.route('/alias/delete/<alias>', methods=['GET', 'POST'])
 @access.domain_admin(models.Alias, 'alias')
 @access.confirmation_required("delete {alias}")
 def alias_delete(alias):

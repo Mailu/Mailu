@@ -1,16 +1,17 @@
-from mailu import app, db, models, forms, access
+from mailu import app, db, models
+from mailu.ui import ui, forms, access
 
 import flask
 import wtforms_components
 
 
-@app.route('/domain', methods=['GET'])
+@ui.route('/domain', methods=['GET'])
 @access.authenticated
 def domain_list():
     return flask.render_template('domain/list.html')
 
 
-@app.route('/domain/create', methods=['GET', 'POST'])
+@ui.route('/domain/create', methods=['GET', 'POST'])
 @access.global_admin
 def domain_create():
     form = forms.DomainForm()
@@ -30,7 +31,7 @@ def domain_create():
     return flask.render_template('domain/create.html', form=form)
 
 
-@app.route('/domain/edit/<domain_name>', methods=['GET', 'POST'])
+@ui.route('/domain/edit/<domain_name>', methods=['GET', 'POST'])
 @access.global_admin
 def domain_edit(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
@@ -46,7 +47,7 @@ def domain_edit(domain_name):
         domain=domain)
 
 
-@app.route('/domain/delete/<domain_name>', methods=['GET', 'POST'])
+@ui.route('/domain/delete/<domain_name>', methods=['GET', 'POST'])
 @access.global_admin
 @access.confirmation_required("delete {domain_name}")
 def domain_delete(domain_name):
@@ -57,7 +58,7 @@ def domain_delete(domain_name):
     return flask.redirect(flask.url_for('.domain_list'))
 
 
-@app.route('/domain/details/<domain_name>', methods=['GET'])
+@ui.route('/domain/details/<domain_name>', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
 def domain_details(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
@@ -65,7 +66,7 @@ def domain_details(domain_name):
         config=app.config)
 
 
-@app.route('/domain/genkeys/<domain_name>', methods=['GET', 'POST'])
+@ui.route('/domain/genkeys/<domain_name>', methods=['GET', 'POST'])
 @access.domain_admin(models.Domain, 'domain_name')
 @access.confirmation_required("regenerate keys for {domain_name}")
 def domain_genkeys(domain_name):

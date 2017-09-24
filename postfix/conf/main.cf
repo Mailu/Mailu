@@ -4,7 +4,7 @@
 
 # Main domain and hostname
 mydomain = {{ DOMAIN }}
-myhostname = {{ HOSTNAME }}
+myhostname = {{ HOSTNAMES.split(",")[0] }}
 myorigin = $mydomain
 
 # Queue location

@@ -1,13 +1,15 @@
 #!/usr/bin/python
 
-import jinja2
 import os
-import socket
-	
-convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
+import subprocess
+
 
 # Actual startup script
-if "ADMIN_ADDRESS" not in os.environ:
-    os.environ["ADMIN_ADDRESS"] = socket.gethostbyname("admin")
-convert("/conf/nginx.conf", "/etc/nginx/nginx.conf")
+if not os.path.exists("/certs/dhparam.pem") and os.environ["TLS_FLAVOR"] != "notls":
+    os.system("openssl dhparam -out /certs/dhparam.pem 4096")
+
+if os.environ["TLS_FLAVOR"] == "letsencrypt":
+    subprocess.Popen(["/letsencrypt.py"])
+
+subprocess.call(["/config.py"])
 os.execv("/usr/sbin/nginx", ["nginx", "-g", "daemon off;"])

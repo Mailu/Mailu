@@ -1,8 +1,8 @@
 FROM alpine:edge
 
-RUN apk add --no-cache nginx nginx-mod-mail python py-jinja2
+RUN apk add --no-cache nginx nginx-mod-mail python py-jinja2 certbot openssl
 
 COPY conf /conf
-COPY start.py /start.py
+COPY *.py /
 
 CMD /start.py

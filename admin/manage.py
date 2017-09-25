@@ -98,7 +98,7 @@ def config_update(verbose=False, delete_objects=False):
         localpart=alias_config['localpart']
         domain_name=alias_config['domain']
         pre_destination=alias_config['destination']
-        if type(pre_destination) == type(""):
+        if type(pre_destination) is str:
             destination = pre_destination.split(',')
         else:
             destination = pre_destination

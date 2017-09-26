@@ -50,7 +50,10 @@ def user(localpart, domain_name, password, hash_scheme='SHA512-CRYPT'):
     db.session.add(user)
     db.session.commit()
 
-@manager.command
+@manager.option('-n','--domain_name',dest='domain_name')
+@manager.option('-u','--max_users',dest='max_users')
+@manager.option('-a','--max_aliases',dest='max_aliases')
+@manager.option('-q','--max_quota_bytes',dest='max_quota_bytes')
 def domain(domain_name, max_users=0, max_aliases=0, max_quota_bytes=0):
     domain = models.Domain.query.get(domain_name)
     if not domain:

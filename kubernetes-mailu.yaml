@@ -1,0 +1,491 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: mailu-admin-ing
+  labels:
+    app: mailu
+    role: mail
+    tier: backend
+spec:
+  tls:
+  - hosts:
+    - "mail.example.com"
+    secretName: letsencrypt-certs-all # If unsure how to generate these, check out https://github.com/ployst/docker-letsencrypt
+  rules:
+  - host: "mail.example.com"
+    http:
+      paths:
+      - path: "/admin"
+        backend:
+          serviceName: mailu-admin
+          servicePort: 80
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mailu-redis
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mailu-redis
+        role: mail
+        tier: backend
+    spec:
+      containers:
+      - name: redis
+        image: redis:4.0-alpine
+        imagePullPolicy: Always
+        volumeMounts:
+          - mountPath: /data
+            name: redisdata
+        ports:
+          - containerPort: 6379
+            name: redis
+            protocol: TCP
+      volumes:
+        - name: redisdata
+          hostPath:
+            path: /var/data/mailu/redisdata
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    app: mailu-redis
+    role: mail
+    tier: backend
+spec:
+  selector:
+    app: mailu
+    role: mail
+    tier: backend
+  ports:
+  - name: redis
+    port: 6379
+    protocol: TCP
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mailu-imap
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mailu-imap
+        role: mail
+        tier: backend
+    spec:
+      containers:
+      - name: imap
+        image: mailu/dovecot:stable
+        imagePullPolicy: Always
+        env:
+          - name  : DOMAIN
+            value : example.com
+          - name  : HOSTNAME
+            value : mail.example.com
+          - name  : POSTMASTER
+            value : admin
+        volumeMounts:
+          - mountPath: /data
+            name: maildata
+          - mountPath: /mail
+            name: mailstate
+          - mountPath: /overrides
+            name: overrides
+          - mountPath: /certs
+            name: certs
+            readOnly: true
+        ports:
+          - containerPort: 2102
+          - containerPort: 2525
+          - containerPort: 143
+          - containerPort: 993
+          - containerPort: 4190
+      volumes:
+        - name: maildata
+          hostPath:
+            path: /var/data/mailu/maildata
+        - name: mailstate
+          hostPath:
+            path: /var/data/mailu/mailstate
+        - name: overrides
+          hostPath:
+            path: /var/data/mailu/overrides
+        - name: certs
+          secret:
+            items:
+              - key: tls.crt
+                path: cert.pem
+              - key: tls.key
+                path: key.pem
+            secretName: letsencrypt-certs-all
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: imap
+  labels:
+    app: mailu
+    role: mail
+    tier: backend
+spec:
+  selector:
+    app: mailu-imap
+    role: mail
+    tier: backend
+  ports:
+  ports:
+  - name: imap-auth
+    port: 2102
+    protocol: TCP
+  - name: imap-transport
+    port: 2525
+    protocol: TCP
+  - name: imap-default
+    port: 143
+    protocol: TCP
+  - name: imap-ssl
+    port: 993
+    protocol: TCP
+  - name: sieve
+    port: 4190
+    protocol: TCP
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mailu-smtp
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mailu-smtp
+        role: mail
+        tier: backend
+    spec:
+      containers:
+      - name: smtp
+        image: mailu/postfix:stable
+        imagePullPolicy: Always
+        env:
+          - name  : DOMAIN
+            value : example.com
+          - name  : HOSTNAME
+            value : mail.example.com
+          - name  : MESSAGE_SIZE_LIMIT
+            value : "50000000"
+          - name  : RELAYHOST
+            value : ""
+        volumeMounts:
+          - mountPath: /data
+            name: maildata
+          - mountPath: /overrides
+            name: overrides
+          - mountPath: /certs
+            name: certs
+            readOnly: true
+        ports:
+          - name: smtp
+            containerPort: 25
+            protocol: TCP
+          - name: smtp-ssl
+            containerPort: 465
+            protocol: TCP
+          - name: smtp-starttls
+            containerPort: 587
+            protocol: TCP
+      volumes:
+        - name: maildata
+          hostPath:
+            path: /var/data/mailu/maildata
+        - name: overrides
+          hostPath:
+            path: /var/data/mailu/overrides
+        - name: certs
+          secret:
+            items:
+              - key: tls.crt
+                path: cert.pem
+              - key: tls.key
+                path: key.pem
+            secretName: letsencrypt-certs-all
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: smtp
+  labels:
+    app: mailu
+    role: mail
+    tier: backend
+spec:
+  selector:
+    app: mailu-smtp
+    role: mail
+    tier: backend
+  ports:
+  - name: smtp
+    port: 25
+    protocol: TCP
+  - name: smtp-ssl
+    port: 465
+    protocol: TCP
+  - name: smtp-starttls
+    port: 587
+    protocol: TCP
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mailu-milter
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mailu-milter
+        role: mail
+        tier: backend
+    spec:
+      containers:
+      - name: milter
+        image: mailu/rmilter:stable
+        imagePullPolicy: Always
+        ports:
+          - name: milter
+            containerPort: 9900
+            protocol: TCP
+        volumeMounts:
+          - name: maildata
+            mountPath: /data
+          - name: dkim
+            mountPath: /dkim
+          - name: overrides
+            mountPath: /overrides
+          - name: certs
+            mountPath: /certs
+            readOnly: true
+      volumes:
+        - name: maildata
+          hostPath:
+            path: /var/data/mailu/maildata
+        - name: overrides
+          hostPath:
+            path: /var/data/mailu/overrides
+        - name: dkim
+          hostPath:
+            path: /var/data/mailu/dkim
+        - name: certs
+          secret:
+            items:
+              - key: tls.crt
+                path: cert.pem
+              - key: tls.key
+                path: key.pem
+            secretName: letsencrypt-certs-all
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: milter
+  labels:
+    app: mailu-milter
+    role: mail
+    tier: backend
+spec:
+  selector:
+    app: mailu-milter
+    role: mail
+    tier: backend
+  ports:
+  - name: milter
+    port: 9900
+    protocol: TCP
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mailu-security
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mailu-security
+        role: mail
+        tier: backend
+    spec:
+      containers:
+      - name: antispam
+        image: mailu/rspamd:stable
+        imagePullPolicy: Always
+        ports:
+          - name: antispam
+            containerPort: 11333
+            protocol: TCP
+        volumeMounts:
+          - name: filter
+            mountPath: /var/lib/rspamd
+      - name: antivirus
+        image: mailu/clamav:stable
+        imagePullPolicy: Always
+        ports:
+          - name: antivirus
+            containerPort: 3310
+            protocol: TCP
+        volumeMounts:
+          - name: filter
+            mountPath: /data
+      volumes:
+        - name: filter
+          hostPath:
+            path: /var/data/mailu/filter
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: antispam
+  labels:
+    app: mailu-antispam
+    role: mail
+    tier: backend
+spec:
+  selector:
+    app: mailu-security
+    role: mail
+    tier: backend
+  ports:
+  - name: antispam
+    port: 11333
+    protocol: TCP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: antivirus
+  labels:
+    app: mailu-antivirus
+    role: mail
+    tier: backend
+spec:
+  selector:
+    app: mailu-security
+    role: mail
+    tier: backend
+  ports:
+  - name: antivirus
+    port: 3310
+    protocol: TCP
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mailu-admin
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mailu-admin
+        role: mail
+        tier: backend
+    spec:
+      containers:
+      - name: admin
+        image: mailu/admin:stable
+        imagePullPolicy: Always
+        env:
+          - name  : DOMAIN
+            value : example.com
+          - name  : HOSTNAME
+            value : mail.example.com
+          - name  : POSTMASTER
+            value : core
+          - name  : SECRET_KEY
+            value : pleasereplacethiswithabetterkey
+          - name  : DEBUG
+            value : "True"
+        volumeMounts:
+          - name: maildata
+            mountPath: /data
+          - name: dkim
+            mountPath: /dkim
+          - name: certs
+            mountPath: /certs
+            readOnly: true
+          # - name: docker
+          #   mountPath: /var/run/docker.sock
+          #   readOnly: true
+        ports:
+          - name: http
+            containerPort: 80
+            protocol: TCP
+      volumes:
+        - name: maildata
+          hostPath:
+            path: /var/data/mailu/maildata
+        - name: dkim
+          hostPath:
+            path: /var/data/mailu/dkim
+        - name: certs
+          secret:
+            items:
+              - key: tls.crt
+                path: cert.pem
+              - key: tls.key
+                path: key.pem
+            secretName: letsencrypt-certs-all
+        # - name: docker
+        #   hostPath:
+        #     path: /var/run/docker.sock
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailu-admin
+  labels:
+    app: mailu-admin
+    role: mail
+    tier: backend
+spec:
+  selector:
+    app: mailu-admin
+    role: mail
+    tier: backend
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP

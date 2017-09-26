@@ -19,7 +19,6 @@ def admin(localpart, domain_name, password):
     db.session.add(user)
     db.session.commit()
 
-
 @manager.command
 def user(localpart, domain_name, password, hash_scheme=app.config['PASSWORD_SCHEME']):
     """ Create a user
@@ -37,6 +36,13 @@ def user(localpart, domain_name, password, hash_scheme=app.config['PASSWORD_SCHE
     db.session.add(user)
     db.session.commit()
 
+@manager.command
+def domain(domain_name, max_users=0, max_aliases=0, max_quota_bytes=0):
+    domain = models.Domain.query.get(domain_name)
+    if not domain:
+        domain = models.Domain(name=domain_name)
+        db.session.add(domain)
+        db.session.commit()
 
 @manager.command
 def user_import(localpart, domain_name, password_hash, hash_scheme=app.config['PASSWORD_SCHEME']):
@@ -65,7 +71,31 @@ def config_update(verbose=False, delete_objects=False):
     import yaml, sys
     new_config=yaml.load(sys.stdin)
     # print new_config
-    users=new_config['users']
+    domains=new_config.get('domains',[])
+    tracked_domains=set()
+    for domain_config in domains:
+        if verbose:
+            print(str(domain_config))
+            domain_name = domain_config['name']
+            max_users=domain_config.get('max_users',0)
+            max_aliases=domain_config.get('max_aliases',0)
+            max_quota_bytes=domain_config.get('max_quota_bytes',0)
+            tracked_domains.add(domain_name)
+            domain = models.Domain.query.get(domain_name)
+            if not domain:
+                domain = models.Domain(name=domain_name,
+                        max_users=max_users,
+                        max_aliases=max_aliases,
+                        max_quota_bytes=max_quota_bytes)
+                db.session.add(domain)
+            else:
+                domain.max_users = max_users
+                domain.max_aliases = max_aliases
+                domain.max_quota_bytes = max_quota_bytes
+                db.session.add(domain)
+
+
+    users=new_config.get('users',[])
     tracked_users=set()
     for user_config in users:
         if verbose:
@@ -81,6 +111,7 @@ def config_update(verbose=False, delete_objects=False):
             db.session.add(domain)
         user = models.User.query.get(email)
         tracked_users.add(email)
+        tracked_domains.add(domain_name)
         if not user:
             user = models.User(
                 localpart=localpart,
@@ -90,7 +121,7 @@ def config_update(verbose=False, delete_objects=False):
         user.set_password(password_hash, hash_scheme=hash_scheme, raw=True)
         db.session.add(user)
 
-    aliases=new_config['aliases']
+    aliases=new_config.get('aliases',[])
     tracked_aliases=set()
     for alias_config in aliases:
         if verbose:
@@ -109,6 +140,7 @@ def config_update(verbose=False, delete_objects=False):
             db.session.add(domain)
         alias = models.Alias.query.get(email)
         tracked_aliases.add(email)
+        tracked_domains.add(domain_name)
         if not alias:
             alias = models.Alias(
                 localpart=localpart,
@@ -119,6 +151,18 @@ def config_update(verbose=False, delete_objects=False):
         else:
             alias.destination = destination
         db.session.add(alias)
+
+    managers=new_config.get('managers',[])
+    # tracked_managers=set()
+    for manager_config in managers:
+        if verbose:
+            print(str(manager_config))
+        domain_name = manager_config['domain']
+        user_name = manage_config['user']
+        domain = models.Domain.query.get(domain_name)
+        manageruser = models.User.query.get(user_name + '@' + domain_name)
+        domain.managers.append(manageruser)
+        db.session.add(domain)
     
     if delete_objects:
         for user in db.session.query(models.User).all():
@@ -127,6 +171,9 @@ def config_update(verbose=False, delete_objects=False):
         for alias in db.session.query(models.Alias).all():
             if not ( alias.email in tracked_aliases ):
                 db.session.delete(alias)
+        for domain in db.session.query(models.Domain).all():
+            if not ( domain.name in tracked_domains ):
+                db.session.delete(domain)
     db.session.commit()
 
 @manager.command

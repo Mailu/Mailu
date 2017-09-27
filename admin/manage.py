@@ -118,8 +118,8 @@ def config_update(verbose=False, delete_objects=False):
             print(str(user_config))
         localpart=user_config['localpart']
         domain_name=user_config['domain']
-        password_hash=user_config['password_hash']
-        hash_scheme=user_config['hash_scheme']
+        password_hash=user_config.get('password_hash',None)
+        hash_scheme=user_config.get('hash_scheme',None)
         domain = models.Domain.query.get(domain_name)
         email='{0}@{1}'.format(localpart,domain_name)
         if not domain:

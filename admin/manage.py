@@ -173,7 +173,7 @@ def config_update(verbose=False, delete_objects=False):
         if verbose:
             print(str(manager_config))
         domain_name = manager_config['domain']
-        user_name = manage_config['user']
+        user_name = manager_config['user']
         domain = models.Domain.query.get(domain_name)
         manageruser = models.User.query.get(user_name + '@' + domain_name)
         domain.managers.append(manageruser)

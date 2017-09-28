@@ -168,6 +168,8 @@ def config_update(verbose=False, delete_objects=False):
                 alias.destination = destination
         db.session.add(alias)
 
+    db.session.commit()
+
     managers=new_config.get('managers',[])
     # tracked_managers=set()
     for manager_config in managers:
@@ -180,6 +182,8 @@ def config_update(verbose=False, delete_objects=False):
         domain.managers.append(manageruser)
         db.session.add(domain)
     
+    db.session.commit()
+
     if delete_objects:
         for user in db.session.query(models.User).all():
             if not ( user.email in tracked_users ):

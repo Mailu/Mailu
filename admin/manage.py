@@ -114,15 +114,24 @@ def config_update(verbose=False, delete_objects=False):
 
     users=new_config.get('users',[])
     tracked_users=set()
+    user_optional_params=('comment','quota_bytes','global_admin',
+            'enable_imap','enable_pop','forward_enabled','forward_destination',
+            'reply_enabled','reply_subject','reply_body','displayed_name','spam_enabled',
+            'email','spam_threshold')
     for user_config in users:
         if verbose:
             print(str(user_config))
         localpart=user_config['localpart']
         domain_name=user_config['domain']
+        global_admin=user_config.get('global_admin',False)
         password_hash=user_config.get('password_hash',None)
         hash_scheme=user_config.get('hash_scheme',None)
         domain = models.Domain.query.get(domain_name)
         email='{0}@{1}'.format(localpart,domain_name)
+        optional_params={}
+        for k in user_optional_params:
+            if user_config.has_key(k):
+                optional_params[k]=user_config[k]
         if not domain:
             domain = models.Domain(name=domain_name)
             db.session.add(domain)
@@ -133,7 +142,7 @@ def config_update(verbose=False, delete_objects=False):
             user = models.User(
                 localpart=localpart,
                 domain=domain,
-                global_admin=False
+                **optional_params
             )
         user.set_password(password_hash, hash_scheme=hash_scheme, raw=True)
         db.session.add(user)
@@ -146,6 +155,11 @@ def config_update(verbose=False, delete_objects=False):
         localpart=alias_config['localpart']
         domain_name=alias_config['domain']
         destination=alias_config['destination']
+        if type(alias_config['destination']) == str:
+            destination = alias_config['destination'].split(',')
+        else:
+            destination = alias_config['destination']
+        wildcard=alias_config.get('wildcard',False)
         domain = models.Domain.query.get(domain_name)
         email='{0}@{1}'.format(localpart,domain_name)
         if not domain:
@@ -158,14 +172,13 @@ def config_update(verbose=False, delete_objects=False):
             alias = models.Alias(
                 localpart=localpart,
                 domain=domain,
-                # destination=destination.split(','),
+                wildcard=wildcard,
+                destination=destination,
                 email=email
             )
         else:
-            if type(destination) == str:
-                alias.destination = destination.split(',')
-            else:
-                alias.destination = destination
+            alias.destination = destination
+            alias.wildcard=wildcard
         db.session.add(alias)
 
     db.session.commit()

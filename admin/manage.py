@@ -78,36 +78,46 @@ def config_update(verbose=False, delete_objects=False):
     for domain_config in domains:
         if verbose:
             print(str(domain_config))
-            domain_name = domain_config['name']
-            max_users=domain_config.get('max_users',0)
-            max_aliases=domain_config.get('max_aliases',0)
-            max_quota_bytes=domain_config.get('max_quota_bytes',0)
-            tracked_domains.add(domain_name)
-            domain = models.Domain.query.get(domain_name)
-            if not domain:
-                domain = models.Domain(name=domain_name,
-                        max_users=max_users,
-                        max_aliases=max_aliases,
-                        max_quota_bytes=max_quota_bytes)
-                db.session.add(domain)
-            else:
-                domain.max_users = max_users
-                domain.max_aliases = max_aliases
-                domain.max_quota_bytes = max_quota_bytes
-                db.session.add(domain)
-
+        domain_name = domain_config['name']
+        max_users=domain_config.get('max_users',0)
+        max_aliases=domain_config.get('max_aliases',0)
+        max_quota_bytes=domain_config.get('max_quota_bytes',0)
+        tracked_domains.add(domain_name)
+        domain = models.Domain.query.get(domain_name)
+        if not domain:
+            domain = models.Domain(name=domain_name,
+                    max_users=max_users,
+                    max_aliases=max_aliases,
+                    max_quota_bytes=max_quota_bytes)
+            db.session.add(domain)
+            print("Added "+str(domain_config))
+        else:
+            domain.max_users = max_users
+            domain.max_aliases = max_aliases
+            domain.max_quota_bytes = max_quota_bytes
+            db.session.add(domain)
+            print("Updated "+str(domain_config))
 
     users=new_config.get('users',[])
     tracked_users=set()
+    user_optional_params=('comment','quota_bytes','global_admin',
+            'enable_imap','enable_pop','forward_enabled','forward_destination',
+            'reply_enabled','reply_subject','reply_body','displayed_name','spam_enabled',
+            'email','spam_threshold')
     for user_config in users:
         if verbose:
             print(str(user_config))
         localpart=user_config['localpart']
         domain_name=user_config['domain']
+        global_admin=user_config.get('global_admin',False)
         password_hash=user_config.get('password_hash',None)
         hash_scheme=user_config.get('hash_scheme',None)
         domain = models.Domain.query.get(domain_name)
         email='{0}@{1}'.format(localpart,domain_name)
+        optional_params={}
+        for k in user_optional_params:
+            if k in user_config:
+                optional_params[k]=user_config[k]
         if not domain:
             domain = models.Domain(name=domain_name)
             db.session.add(domain)
@@ -118,8 +128,11 @@ def config_update(verbose=False, delete_objects=False):
             user = models.User(
                 localpart=localpart,
                 domain=domain,
-                global_admin=False
+                **optional_params
             )
+        else:
+            for k in optional_params:
+                setattr(user, k, optional_params[k])
         user.set_password(password_hash, hash_scheme=hash_scheme, raw=True)
         db.session.add(user)
 
@@ -130,11 +143,11 @@ def config_update(verbose=False, delete_objects=False):
             print(str(alias_config))
         localpart=alias_config['localpart']
         domain_name=alias_config['domain']
-        pre_destination=alias_config['destination']
-        if type(pre_destination) is str:
-            destination = pre_destination.split(',')
+        if type(alias_config['destination']) is str:
+            destination = alias_config['destination'].split(',')
         else:
-            destination = pre_destination
+            destination = alias_config['destination']
+        wildcard=alias_config.get('wildcard',False)
         domain = models.Domain.query.get(domain_name)
         email='{0}@{1}'.format(localpart,domain_name)
         if not domain:
@@ -147,12 +160,16 @@ def config_update(verbose=False, delete_objects=False):
             alias = models.Alias(
                 localpart=localpart,
                 domain=domain,
+                wildcard=wildcard,
                 destination=destination,
                 email=email
             )
         else:
             alias.destination = destination
+            alias.wildcard=wildcard
         db.session.add(alias)
+
+    db.session.commit()
 
     managers=new_config.get('managers',[])
     # tracked_managers=set()
@@ -160,21 +177,30 @@ def config_update(verbose=False, delete_objects=False):
         if verbose:
             print(str(manager_config))
         domain_name = manager_config['domain']
-        user_name = manage_config['user']
+        user_name = manager_config['user']
         domain = models.Domain.query.get(domain_name)
         manageruser = models.User.query.get(user_name + '@' + domain_name)
-        domain.managers.append(manageruser)
+        if not manageruser in domain.managers:
+            domain.managers.append(manageruser)
         db.session.add(domain)
     
+    db.session.commit()
+
     if delete_objects:
         for user in db.session.query(models.User).all():
             if not ( user.email in tracked_users ):
+                if verbose:
+                    print("Deleting user: "+str(user.email))
                 db.session.delete(user)
         for alias in db.session.query(models.Alias).all():
             if not ( alias.email in tracked_aliases ):
+                if verbose:
+                    print("Deleting alias: "+str(alias.email))
                 db.session.delete(alias)
         for domain in db.session.query(models.Domain).all():
             if not ( domain.name in tracked_domains ):
+                if verbose:
+                    print("Deleting domain: "+str(domain.name))
                 db.session.delete(domain)
     db.session.commit()
 

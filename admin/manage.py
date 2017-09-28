@@ -144,6 +144,9 @@ def config_update(verbose=False, delete_objects=False):
                 domain=domain,
                 **optional_params
             )
+        else:
+            for k in optional_params:
+                setattr(user, k, optional_params[k])
         user.set_password(password_hash, hash_scheme=hash_scheme, raw=True)
         db.session.add(user)
 

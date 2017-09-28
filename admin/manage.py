@@ -20,7 +20,8 @@ def admin(localpart, domain_name, password):
 
 
 @manager.command
-def user(localpart, domain_name, password, hash_scheme=app.config['PASSWORD_SCHEME']):
+def user(localpart, domain_name, password,
+         hash_scheme=app.config['PASSWORD_SCHEME']):
     """ Create a user
     """
     domain = models.Domain.query.get(domain_name)
@@ -50,7 +51,8 @@ def domain(domain_name, max_users=0, max_aliases=0, max_quota_bytes=0):
 
 
 @manager.command
-def user_import(localpart, domain_name, password_hash, hash_scheme=app.config['PASSWORD_SCHEME']):
+def user_import(localpart, domain_name, password_hash, 
+                hash_scheme=app.config['PASSWORD_SCHEME']):
     """ Import a user along with password hash. Available hashes:
                    'SHA512-CRYPT'
                    'SHA256-CRYPT'
@@ -106,15 +108,15 @@ def config_update(verbose=False, delete_objects=False):
     users = new_config.get('users', [])
     tracked_users = set()
     user_optional_params = ('comment', 'quota_bytes', 'global_admin',
-                            'enable_imap', 'enable_pop', 'forward_enabled', 'forward_destination',
-                            'reply_enabled', 'reply_subject', 'reply_body', 'displayed_name', 'spam_enabled',
-                            'email', 'spam_threshold')
+                            'enable_imap', 'enable_pop', 'forward_enabled',
+                            'forward_destination', 'reply_enabled',
+                            'reply_subject', 'reply_body', 'displayed_name',
+                            'spam_enabled', 'email', 'spam_threshold')
     for user_config in users:
         if verbose:
             print(str(user_config))
         localpart = user_config['localpart']
         domain_name = user_config['domain']
-        global_admin = user_config.get('global_admin', False)
         password_hash = user_config.get('password_hash', None)
         hash_scheme = user_config.get('hash_scheme', None)
         domain = models.Domain.query.get(domain_name)
@@ -185,7 +187,7 @@ def config_update(verbose=False, delete_objects=False):
         user_name = manager_config['user']
         domain = models.Domain.query.get(domain_name)
         manageruser = models.User.query.get(user_name + '@' + domain_name)
-        if not manageruser in domain.managers:
+        if manageruser not in domain.managers:
             domain.managers.append(manageruser)
         db.session.add(domain)
 

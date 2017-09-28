@@ -179,7 +179,8 @@ def config_update(verbose=False, delete_objects=False):
         user_name = manager_config['user']
         domain = models.Domain.query.get(domain_name)
         manageruser = models.User.query.get(user_name + '@' + domain_name)
-        domain.managers.append(manageruser)
+        if not manageruser in domain.managers:
+            domain.managers.append(manageruser)
         db.session.add(domain)
     
     db.session.commit()

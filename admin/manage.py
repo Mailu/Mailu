@@ -92,7 +92,6 @@ def config_update(verbose=False, delete_objects=False):
     tracked_domains=set()
     for domain_config in domains:
         if verbose:
-            print(str(domain_config))
             domain_name = domain_config['name']
             max_users=domain_config.get('max_users',0)
             max_aliases=domain_config.get('max_aliases',0)
@@ -105,11 +104,13 @@ def config_update(verbose=False, delete_objects=False):
                         max_aliases=max_aliases,
                         max_quota_bytes=max_quota_bytes)
                 db.session.add(domain)
+                print("Added "+str(domain_config))
             else:
                 domain.max_users = max_users
                 domain.max_aliases = max_aliases
                 domain.max_quota_bytes = max_quota_bytes
                 db.session.add(domain)
+                print("Updated "+str(domain_config))
 
     users=new_config.get('users',[])
     tracked_users=set()
@@ -182,12 +183,18 @@ def config_update(verbose=False, delete_objects=False):
     if delete_objects:
         for user in db.session.query(models.User).all():
             if not ( user.email in tracked_users ):
+                if verbose:
+                    print("Deleting user: "+str(user.email))
                 db.session.delete(user)
         for alias in db.session.query(models.Alias).all():
             if not ( alias.email in tracked_aliases ):
+                if verbose:
+                    print("Deleting alias: "+str(alias.email))
                 db.session.delete(alias)
         for domain in db.session.query(models.Domain).all():
             if not ( domain.name in tracked_domains ):
+                if verbose:
+                    print("Deleting domain: "+str(domain.name))
                 db.session.delete(domain)
     db.session.commit()
 

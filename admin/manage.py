@@ -130,7 +130,7 @@ def config_update(verbose=False, delete_objects=False):
         email='{0}@{1}'.format(localpart,domain_name)
         optional_params={}
         for k in user_optional_params:
-            if user_config.has_key(k):
+            if k in user_config:
                 optional_params[k]=user_config[k]
         if not domain:
             domain = models.Domain(name=domain_name)

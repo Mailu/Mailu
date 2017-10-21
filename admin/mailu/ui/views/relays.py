@@ -1,17 +1,18 @@
-from mailu import app, db, models, forms, access
+from mailu import db, models
+from mailu.ui import ui, forms, access
 
 import flask
 import wtforms_components
 
 
-@app.route('/relay', methods=['GET'])
+@ui.route('/relay', methods=['GET'])
 @access.global_admin
 def relay_list():
     relays = models.Relay.query.all()
     return flask.render_template('relay/list.html', relays=relays)
 
 
-@app.route('/relay/create', methods=['GET', 'POST'])
+@ui.route('/relay/create', methods=['GET', 'POST'])
 @access.global_admin
 def relay_create():
     form = forms.RelayForm()
@@ -31,7 +32,7 @@ def relay_create():
     return flask.render_template('relay/create.html', form=form)
 
 
-@app.route('/relay/edit/<relay_name>', methods=['GET', 'POST'])
+@ui.route('/relay/edit/<relay_name>', methods=['GET', 'POST'])
 @access.global_admin
 def relay_edit(relay_name):
     relay = models.Relay.query.get(relay_name) or flask.abort(404)
@@ -47,7 +48,7 @@ def relay_edit(relay_name):
         relay=relay)
 
 
-@app.route('/relay/delete/<relay_name>', methods=['GET', 'POST'])
+@ui.route('/relay/delete/<relay_name>', methods=['GET', 'POST'])
 @access.global_admin
 @access.confirmation_required("delete {relay_name}")
 def relay_delete(relay_name):

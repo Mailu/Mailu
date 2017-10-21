@@ -17,10 +17,10 @@ $config['plugins'] = array(
 );
 
 // Mail servers
-$config['default_host'] = 'tls://imap';
+$config['default_host'] = 'front';
 $config['default_port'] = 143;
-$config['smtp_server'] = 'tls://smtp';
-$config['smtp_port'] = 587;
+$config['smtp_server'] = 'front';
+$config['smtp_port'] = 25;
 $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 

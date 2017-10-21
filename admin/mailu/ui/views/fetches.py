@@ -1,11 +1,12 @@
-from mailu import app, db, models, forms, access
+from mailu import db, models
+from mailu.ui import ui, forms, access
 
 import flask
 import flask_login
 
 
-@app.route('/fetch/list', methods=['GET', 'POST'], defaults={'user_email': None})
-@app.route('/fetch/list/<user_email>', methods=['GET'])
+@ui.route('/fetch/list', methods=['GET', 'POST'], defaults={'user_email': None})
+@ui.route('/fetch/list/<user_email>', methods=['GET'])
 @access.owner(models.User, 'user_email')
 def fetch_list(user_email):
     user_email = user_email or flask_login.current_user.email
@@ -13,8 +14,8 @@ def fetch_list(user_email):
     return flask.render_template('fetch/list.html', user=user)
 
 
-@app.route('/fetch/create', methods=['GET', 'POST'], defaults={'user_email': None})
-@app.route('/fetch/create/<user_email>', methods=['GET', 'POST'])
+@ui.route('/fetch/create', methods=['GET', 'POST'], defaults={'user_email': None})
+@ui.route('/fetch/create/<user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def fetch_create(user_email):
     user_email = user_email or flask_login.current_user.email
@@ -31,7 +32,7 @@ def fetch_create(user_email):
     return flask.render_template('fetch/create.html', form=form)
 
 
-@app.route('/fetch/edit/<fetch_id>', methods=['GET', 'POST'])
+@ui.route('/fetch/edit/<fetch_id>', methods=['GET', 'POST'])
 @access.owner(models.Fetch, 'fetch_id')
 def fetch_edit(fetch_id):
     fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
@@ -46,7 +47,7 @@ def fetch_edit(fetch_id):
         form=form, fetch=fetch)
 
 
-@app.route('/fetch/delete/<fetch_id>', methods=['GET', 'POST'])
+@ui.route('/fetch/delete/<fetch_id>', methods=['GET', 'POST'])
 @access.confirmation_required("delete a fetched account")
 @access.owner(models.Fetch, 'fetch_id')
 def fetch_delete(fetch_id):

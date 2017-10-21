@@ -1,4 +1,5 @@
-from mailu import app, db, models, forms, access
+from mailu import db, models
+from mailu.ui import ui, access, forms
 
 import flask
 import flask_login
@@ -6,14 +7,14 @@ import wtforms
 import wtforms_components
 
 
-@app.route('/user/list/<domain_name>', methods=['GET'])
+@ui.route('/user/list/<domain_name>', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
 def user_list(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     return flask.render_template('user/list.html', domain=domain)
 
 
-@app.route('/user/create/<domain_name>', methods=['GET', 'POST'])
+@ui.route('/user/create/<domain_name>', methods=['GET', 'POST'])
 @access.domain_admin(models.Domain, 'domain_name')
 def user_create(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
@@ -41,7 +42,7 @@ def user_create(domain_name):
         domain=domain, form=form)
 
 
-@app.route('/user/edit/<user_email>', methods=['GET', 'POST'])
+@ui.route('/user/edit/<user_email>', methods=['GET', 'POST'])
 @access.domain_admin(models.User, 'user_email')
 def user_edit(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
@@ -69,7 +70,7 @@ def user_edit(user_email):
         domain=user.domain, max_quota_bytes=max_quota_bytes)
 
 
-@app.route('/user/delete/<user_email>', methods=['GET', 'POST'])
+@ui.route('/user/delete/<user_email>', methods=['GET', 'POST'])
 @access.domain_admin(models.User, 'user_email')
 @access.confirmation_required("delete {user_email}")
 def user_delete(user_email):
@@ -82,8 +83,8 @@ def user_delete(user_email):
         flask.url_for('.user_list', domain_name=domain.name))
 
 
-@app.route('/user/settings', methods=['GET', 'POST'], defaults={'user_email': None})
-@app.route('/user/usersettings/<user_email>', methods=['GET', 'POST'])
+@ui.route('/user/settings', methods=['GET', 'POST'], defaults={'user_email': None})
+@ui.route('/user/usersettings/<user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def user_settings(user_email):
     user_email_or_current = user_email or flask_login.current_user.email
@@ -99,8 +100,8 @@ def user_settings(user_email):
     return flask.render_template('user/settings.html', form=form, user=user)
 
 
-@app.route('/user/password', methods=['GET', 'POST'], defaults={'user_email': None})
-@app.route('/user/password/<user_email>', methods=['GET', 'POST'])
+@ui.route('/user/password', methods=['GET', 'POST'], defaults={'user_email': None})
+@ui.route('/user/password/<user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def user_password(user_email):
     user_email_or_current = user_email or flask_login.current_user.email
@@ -119,8 +120,8 @@ def user_password(user_email):
     return flask.render_template('user/password.html', form=form, user=user)
 
 
-@app.route('/user/forward', methods=['GET', 'POST'], defaults={'user_email': None})
-@app.route('/user/forward/<user_email>', methods=['GET', 'POST'])
+@ui.route('/user/forward', methods=['GET', 'POST'], defaults={'user_email': None})
+@ui.route('/user/forward/<user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def user_forward(user_email):
     user_email_or_current = user_email or flask_login.current_user.email
@@ -136,8 +137,8 @@ def user_forward(user_email):
     return flask.render_template('user/forward.html', form=form, user=user)
 
 
-@app.route('/user/reply', methods=['GET', 'POST'], defaults={'user_email': None})
-@app.route('/user/reply/<user_email>', methods=['GET', 'POST'])
+@ui.route('/user/reply', methods=['GET', 'POST'], defaults={'user_email': None})
+@ui.route('/user/reply/<user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def user_reply(user_email):
     user_email_or_current = user_email or flask_login.current_user.email

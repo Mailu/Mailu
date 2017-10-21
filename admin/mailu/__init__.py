@@ -9,18 +9,15 @@ import flask_babel
 import os
 import docker
 
-from apscheduler.schedulers import background
-
-
 # Create application
-app = flask.Flask(__name__, static_url_path='/admin/app_static')
+app = flask.Flask(__name__)
 
 default_config = {
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     'SECRET_KEY': 'changeMe',
     'DOCKER_SOCKET': 'unix:///var/run/docker.sock',
-    'HOSTNAME': 'mail.mailu.io',
+    'HOSTNAMES': 'mail.mailu.io',
     'DOMAIN': 'mailu.io',
     'POSTMASTER': 'postmaster',
     'DEBUG': False,
@@ -50,14 +47,6 @@ migrate = flask_migrate.Migrate(app, db)
 manager = flask_script.Manager(app)
 manager.add_command('db', flask_migrate.MigrateCommand)
 
-# Task scheduling
-scheduler = background.BackgroundScheduler({
-    'apscheduler.timezone': 'UTC'
-})
-if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-    scheduler.start()
-    from mailu import tlstasks
-
 # Babel configuration
 babel = flask_babel.Babel(app)
 translations = list(map(str, babel.list_translations()))
@@ -82,7 +71,9 @@ def inject_user():
     return dict(current_user=flask_login.current_user)
 
 # Import views
-from mailu.views import *
+from mailu import ui, internal
+app.register_blueprint(ui.ui, url_prefix='/ui')
+app.register_blueprint(internal.internal, url_prefix='/internal')
 
 # Create the prefix middleware
 class PrefixMiddleware(object):

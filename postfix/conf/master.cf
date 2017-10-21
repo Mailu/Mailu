@@ -3,17 +3,6 @@
 
 # Exposed SMTP services
 smtp      inet  n       -       n       -       -       smtpd
-  -o smtpd_helo_restrictions=permit_mynetworks,permit
-submission inet n       -       n       -       -       smtpd
-  -o smtpd_tls_security_level=encrypt
-  -o smtpd_sasl_auth_enable=yes
-  -o smtpd_client_restrictions=permit_sasl_authenticated,reject
-  -o cleanup_service_name=outclean
-smtps     inet  n       -       n       -       -       smtpd
-  -o smtpd_tls_security_level=encrypt
-  -o smtpd_sasl_auth_enable=yes
-  -o smtpd_tls_wrappermode=yes
-  -o smtpd_client_restrictions=permit_sasl_authenticated,reject
   -o cleanup_service_name=outclean
 
 # Additional services

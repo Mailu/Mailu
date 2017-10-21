@@ -1,5 +1,7 @@
 from mailu import db, models
 
+import socket
+
 
 SUPPORTED_AUTH_METHODS = ["none", "plain"]
 
@@ -9,6 +11,12 @@ STATUSES = {
         "smtp": "535 5.7.8",
         "pop3": ""
     }),
+}
+
+
+SERVER_MAP = {
+    "imap": ("imap", 143),
+    "smtp": ("smtp", 25)
 }
 
 
@@ -57,8 +65,6 @@ def get_status(protocol, status):
 
 
 def get_server(protocol):
-    servers = {
-        "imap": ("172.18.0.12", 143),
-        "smtp": ("172.18.0.9", 25)
-    }
-    return servers[protocol]
+    hostname, port = SERVER_MAP[protocol]
+    address = socket.gethostbyname(hostname)
+    return address, port

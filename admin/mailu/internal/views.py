@@ -11,4 +11,3 @@ def nginx_authentication():
     for key, value in headers.items():
         response.headers[key] = str(value)
     return response
-

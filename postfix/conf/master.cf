@@ -6,7 +6,6 @@ smtp      inet  n       -       n       -       -       smtpd
 
 # Internal SMTP service
 10025     inet  n       -       n       -       -       smtpd
-  -o smtpd_authorized_xclient_hosts={{ FRONT_ADDRESS }}
   -o smtpd_recipient_restrictions=reject_unlisted_sender,reject_sender_login_mismatch,permit
   -o cleanup_service_name=outclean
 outclean  unix n       -       n       -       0       cleanup

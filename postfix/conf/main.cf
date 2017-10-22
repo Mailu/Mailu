@@ -31,6 +31,9 @@ relayhost = {{ RELAYHOST }}
 # Recipient delimiter for extended addresses
 recipient_delimiter = {{ RECIPIENT_DELIMITER }}
 
+# Only the front server is allowed to perform xclient
+smtpd_authorized_xclient_hosts={{ FRONT_ADDRESS }}
+
 ###############
 # TLS
 ###############
@@ -75,7 +78,6 @@ smtpd_delay_reject = yes
 # Allowed senders are: the user or one of the alias destinations
 smtpd_sender_login_maps = $virtual_alias_maps
 
-# Helo restrictions are specified for smtp only in master.cf
 # Restrictions for incoming SMTP, other restrictions are applied in master.cf
 smtpd_helo_required = yes
 

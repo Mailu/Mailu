@@ -1,16 +1,3 @@
- :warning: Warning
-==================
-
-**Be very careful when using `master`**, especially if you are currently running
-`1.4`, development of version `1.5` includes refactoring the frontend and
-authentication mechanisms. At best your server will stop working, at worst you
-could expose your data to malicious attackers!
-
-**Do not start using `traefik`** as a frontend server. Traefik was first tested
-to replace nginx because certificate generation was a nightmare. As we are in the
-process of completely rewriting the frontend and authentication interface, it will
-probably be deprecated before `1.5` is out.
-
 ![Logo](logo.png)
 
 [Join us and chat about the project.](https://riot.im/app/#/room/#mailu:tedomum.net)

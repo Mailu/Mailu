@@ -1,12 +1,15 @@
 # service type  private unpriv  chroot  wakeup  maxproc command + args
 #               (yes)   (yes)   (yes)   (never) (100)
 
-# Exposed SMTP services
+# Exposed SMTP service
 smtp      inet  n       -       n       -       -       smtpd
-  -o cleanup_service_name=outclean
 
-# Additional services
-outclean   unix n       -       n       -       0       cleanup
+# Internal SMTP service
+10025     inet  n       -       n       -       -       smtpd
+  -o smtpd_authorized_xclient_hosts={{ FRONT_ADDRESS }}
+  -o smtpd_recipient_restrictions=reject_unlisted_sender,reject_sender_login_mismatch,permit
+  -o cleanup_service_name=outclean
+outclean  unix n       -       n       -       0       cleanup
   -o header_checks=pcre:/etc/postfix/outclean_header_filter.cf
 
 # Internal postfix services

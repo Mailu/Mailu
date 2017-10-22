@@ -16,8 +16,8 @@ STATUSES = {
 
 
 SERVER_MAP = {
-    "imap": ("imap", 143),
-    "smtp": ("smtp", 25)
+    "imap": ("imap", 143),  # Connect to the generic IMAP port
+    "smtp": ("smtp", 10025)  # Connect to the specific SMTP port
 }
 
 

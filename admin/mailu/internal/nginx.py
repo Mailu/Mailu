@@ -1,6 +1,7 @@
 from mailu import db, models
 
 import socket
+import urllib
 
 
 SUPPORTED_AUTH_METHODS = ["none", "plain"]
@@ -36,8 +37,8 @@ def handle_authentication(headers):
         }
     # Authenticated user
     elif method == "plain":
-        user_email = headers["Auth-User"]
-        password = headers["Auth-Pass"]
+        user_email = urllib.parse.unquote(headers["Auth-User"])
+        password = urllib.parse.unquote(headers["Auth-Pass"])
         user = models.User.query.get(user_email)
         if user and user.check_password(password):
             return {

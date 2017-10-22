@@ -6,6 +6,7 @@ import urllib
 
 SUPPORTED_AUTH_METHODS = ["none", "plain"]
 
+
 STATUSES = {
     "authentication": ("Authentication credentials invalid", {
         "imap": "AUTHENTICATIONFAILED",

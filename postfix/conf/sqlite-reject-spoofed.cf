@@ -1,0 +1,5 @@
+dbpath = /data/main.db
+query =
+  SELECT 'REJECT' FROM domain WHERE name='%s'
+  UNION
+  SELECT 'REJECT' FROM alternative WHERE name='%s'

@@ -31,8 +31,8 @@ relayhost = {{ RELAYHOST }}
 # Recipient delimiter for extended addresses
 recipient_delimiter = {{ RECIPIENT_DELIMITER }}
 
-# XClient for connection from the frontend
-smtpd_authorized_xclient_hosts = {{ FRONT_ADDRESS }}
+# Only the front server is allowed to perform xclient
+smtpd_authorized_xclient_hosts={{ FRONT_ADDRESS }}
 
 ###############
 # TLS
@@ -78,25 +78,16 @@ smtpd_delay_reject = yes
 # Allowed senders are: the user or one of the alias destinations
 smtpd_sender_login_maps = $virtual_alias_maps
 
-# Helo restrictions are specified for smtp only in master.cf
+# Restrictions for incoming SMTP, other restrictions are applied in master.cf
 smtpd_helo_required = yes
 
-# Sender restrictions
-smtpd_sender_restrictions =
-   permit_mynetworks,
-   reject_non_fqdn_sender,
-   reject_unknown_sender_domain,
-   reject_unlisted_sender,
-   reject_sender_login_mismatch,
-   permit
-
-# Recipient restrictions:
 smtpd_recipient_restrictions =
-   permit_mynetworks,
-   reject_unauth_pipelining,
-   reject_non_fqdn_recipient,
-   reject_unknown_recipient_domain,
-   permit
+  permit_mynetworks,
+  check_sender_access ${sql}sqlite-reject-spoofed.cf,
+  reject_non_fqdn_sender,
+  reject_unknown_sender_domain,
+  reject_unknown_recipient_domain,
+  permit
 
 ###############
 # Milter

@@ -1,9 +1,11 @@
 from mailu import db, models
 
 import socket
+import urllib
 
 
 SUPPORTED_AUTH_METHODS = ["none", "plain"]
+
 
 STATUSES = {
     "authentication": ("Authentication credentials invalid", {
@@ -14,21 +16,15 @@ STATUSES = {
 }
 
 
-SERVER_MAP = {
-    "imap": ("imap", 143),
-    "smtp": ("smtp", 25)
-}
-
-
 def handle_authentication(headers):
     """ Handle an HTTP nginx authentication request
     See: http://nginx.org/en/docs/mail/ngx_mail_auth_http_module.html#protocol
     """
     method = headers["Auth-Method"]
     protocol = headers["Auth-Protocol"]
-    server, port = get_server(headers["Auth-Protocol"])
     # Incoming mail, no authentication
     if method == "none" and protocol == "smtp":
+        server, port = get_server(headers["Auth-Protocol"], False)
         return {
             "Auth-Status": "OK",
             "Auth-Server": server,
@@ -36,8 +32,9 @@ def handle_authentication(headers):
         }
     # Authenticated user
     elif method == "plain":
-        user_email = headers["Auth-User"]
-        password = headers["Auth-Pass"]
+        server, port = get_server(headers["Auth-Protocol"], True)
+        user_email = urllib.parse.unquote(headers["Auth-User"])
+        password = urllib.parse.unquote(headers["Auth-Pass"])
         user = models.User.query.get(user_email)
         if user and user.check_password(password):
             return {
@@ -64,7 +61,13 @@ def get_status(protocol, status):
     return status, codes[protocol]
 
 
-def get_server(protocol):
-    hostname, port = SERVER_MAP[protocol]
+def get_server(protocol, authenticated=False):
+    if protocol == "imap":
+        hostname, port = "imap", 143
+    elif protocol == "pop3":
+        hostname, port = "imap", 110
+    elif protocol == "smtp":
+        hostname = "smtp"
+        port = 10025 if authenticated else 25
     address = socket.gethostbyname(hostname)
     return address, port

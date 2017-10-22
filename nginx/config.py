@@ -2,14 +2,10 @@
 
 import jinja2
 import os
-import socket
 	
 convert = lambda src, dst, args: open(dst, "w").write(jinja2.Template(open(src).read()).render(**args))
 
 args = os.environ.copy()
-
-if "ADMIN_ADDRESS" not in os.environ:
-    args["ADMIN_ADDRESS"] = socket.gethostbyname("admin")
 
 args["TLS"] = {
     "cert": ("/certs/cert.pem", "/certs/key.pem"),

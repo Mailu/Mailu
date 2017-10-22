@@ -18,9 +18,9 @@ $config['plugins'] = array(
 
 // Mail servers
 $config['default_host'] = 'front';
-$config['default_port'] = 143;
+$config['default_port'] = 10143;
 $config['smtp_server'] = 'front';
-$config['smtp_port'] = 25;
+$config['smtp_port'] = 10025;
 $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 

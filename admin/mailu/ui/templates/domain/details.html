@@ -15,7 +15,7 @@
 {% endblock %}
 
 {% block box %}
-{% let hostname = config["HOSTNAMES"].split(",")[0] %}
+{% set hostname = config["HOSTNAMES"].split(",")[0] %}
 <table class="table table-bordered">
   <tbody>
     <tr>
@@ -24,7 +24,7 @@
     </tr>
     <tr>
       <th>{% trans %}DNS MX entry{% endtrans %}</th>
-      <td><pre>{{ domain.name }}. 600 IN MX 10 {{ config["HOSTNAME"] }}.</pre></td>
+      <td><pre>{{ domain.name }}. 600 IN MX 10 {{ hostname }}.</pre></td>
     </tr>
     <tr>
       <th>{% trans %}DNS SPF entries{% endtrans %}</th>

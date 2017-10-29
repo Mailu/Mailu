@@ -12,23 +12,21 @@
 <a class="btn btn-primary" href="{{ url_for('.alternative_create', domain_name=domain.name) }}">{% trans %}Add alternative{% endtrans %}</a>
 {% endblock %}
 
-{% block box %}
-<table class="table table-bordered">
-  <tbody>
-    <tr>
-      <th>{% trans %}Actions{% endtrans %}</th>
-      <th>{% trans %}Name{% endtrans %}</th>
-      <th>{% trans %}Created{% endtrans %}</th>
-    </tr>
-    {% for alternative in domain.alternatives %}
-    <tr>
-      <td>
-        <a href="{{ url_for('.alternative_delete', alternative=alternative.name) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
-      </td>
-      <td>{{ alternative }}</td>
-      <td>{{ alternative.created_at }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% block content %}
+{% call macros.table() %}
+<tr>
+  <th>{% trans %}Actions{% endtrans %}</th>
+  <th>{% trans %}Name{% endtrans %}</th>
+  <th>{% trans %}Created{% endtrans %}</th>
+</tr>
+{% for alternative in domain.alternatives %}
+<tr>
+  <td>
+    <a href="{{ url_for('.alternative_delete', alternative=alternative.name) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+  </td>
+  <td>{{ alternative }}</td>
+  <td>{{ alternative.created_at }}</td>
+</tr>
+{% endfor %}
+{% endcall %}
 {% endblock %}

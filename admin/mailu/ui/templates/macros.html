@@ -63,3 +63,36 @@
   {% endfor %}
 </form>
 {% endmacro %}
+
+{% macro box(title=None, theme="primary", header=True) %}
+<div class="row">
+  <div class="col-lg-12">
+    <div class="box box-{{ theme }}">
+      {% if header %}
+      <div class="box-header">
+        {% if title %}
+        <h3 class="box-title">{{ title }}</h3>
+        {% endif %}
+      </div>
+      {% endif %}
+      <div class="box-body">
+       {{ caller() }}
+      </div>
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro table(theme="primary") %}
+<div class="row">
+  <div class="col-lg-12">
+    <div class="box box-{{ theme }}">
+      <table class="table table-bordered">
+        <tbody>
+          {{ caller() }}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endmacro %}

@@ -8,7 +8,9 @@
 {{ action }}
 {% endblock %}
 
-{% block box_content %}
+{% block content %}
+{% call macros.box(theme="warning") %}
 <p>{% trans action %}You are about to {{ action }}. Please confirm your action.{% endtrans %}</p>
 {{ macros.form(form) }}
+{% endcall %}
 {% endblock %}

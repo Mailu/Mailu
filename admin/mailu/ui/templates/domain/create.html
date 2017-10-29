@@ -4,7 +4,8 @@
 {% trans %}New domain{% endtrans %}
 {% endblock %}
 
-{% block box_content %}
+{% block content %}
+{% call macros.box() %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.name) }}
@@ -15,4 +16,5 @@
   {{ macros.form_field(form.comment) }}
   {{ macros.form_field(form.submit) }}
 </form>
+{% endcall %}
 {% endblock %}

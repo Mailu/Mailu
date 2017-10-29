@@ -21,6 +21,8 @@
 {% trans %}to access the administration tools{% endtrans %}
 {% endblock %}
 
-{% block box_content %}
+{% block content %}
+{% call macros.box() %}
 {{ macros.form(form) }}
+{% endcall %}
 {% endblock %}

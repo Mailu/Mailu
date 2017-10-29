@@ -266,7 +266,7 @@ class Token(Base):
         return hash.sha256_crypt.verify(password, self.password)
 
     def set_password(self, password):
-        self.password = hash.sha256_crypt.hash(password)
+        self.password = hash.sha256_crypt.using(rounds=1000).hash(password)
 
     def __str__(self):
         return self.comment

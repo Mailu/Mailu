@@ -24,12 +24,14 @@ def token_create(user_email):
     user_email = user_email or flask_login.current_user.email
     user = models.User.query.get(user_email) or flask.abort(404)
     form = forms.TokenForm()
-    form.raw_password.data = pwd.genword(entropy=128, charset="hex")
-    wtforms_components.read_only(form.raw_password)
+    wtforms_components.read_only(form.displayed_password)
+    if not form.raw_password.data:
+        form.raw_password.data = pwd.genword(entropy=128, charset="hex")
+        form.displayed_password.data = form.raw_password.data
     if form.validate_on_submit():
         token = models.Token(user=user)
-        form.populate_obj(token)
         token.set_password(form.raw_password.data)
+        form.populate_obj(token)
         db.session.add(token)
         db.session.commit()
         flask.flash('Authentication token created')

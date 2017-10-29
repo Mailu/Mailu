@@ -35,7 +35,16 @@ def handle_authentication(headers):
         server, port = get_server(headers["Auth-Protocol"], True)
         user_email = urllib.parse.unquote(headers["Auth-User"])
         password = urllib.parse.unquote(headers["Auth-Pass"])
+        ip = urllib.parse.unquote(headers["Client-Ip"])
         user = models.User.query.get(user_email)
+        for token in user.tokens:
+            if (token.check_password(password) and
+                (not token.ip or token.ip == ip)):
+                    return {
+                        "Auth-Status": "OK",
+                        "Auth-Server": server,
+                        "Auth-Port": port
+                    }
         if user and user.check_password(password):
             return {
                 "Auth-Status": "OK",

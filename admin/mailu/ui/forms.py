@@ -104,6 +104,18 @@ class UserReplyForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Update'))
 
 
+class TokenForm(flask_wtf.FlaskForm):
+    displayed_password = fields.StringField(
+        _('Your token (write it down, as it will never be displayed again)')
+    )
+    raw_password = fields.HiddenField([validators.DataRequired()])
+    comment = fields.StringField(_('Comment'))
+    ip = fields.StringField(
+        _('Authorized IP'), [validators.Optional(), validators.IPAddress()]
+    )
+    submit = fields.SubmitField(_('Create'))
+
+
 class AliasForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('Alias'), [validators.DataRequired()])
     wildcard = fields.BooleanField(

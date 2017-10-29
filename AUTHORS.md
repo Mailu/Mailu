@@ -6,6 +6,10 @@ If you contribute time, code or resources to the project, feel free to add
 your name, pseudonym, and any contact information you feel is relevant to
 this file.
 
+As it is almost impossible to distinguish code contributions from various
+authors, all are considered equal contributors and all must agree with
+any change in the software license.
+
 Other contributors:
 
  - "Angedestenebres" - Tests on development version & Current version

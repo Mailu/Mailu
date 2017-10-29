@@ -8,11 +8,13 @@
 {% trans %}from{% endtrans %} {{ from_address }}
 {% endblock %}
 
-{% block box_content %}
+{% block content %}
+{% call macros.box() %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.announcement_subject) }}
   {{ macros.form_field(form.announcement_body, rows=10) }}
   {{ macros.form_field(form.submit) }}
 </form>
+{% endcall %}
 {% endblock %}

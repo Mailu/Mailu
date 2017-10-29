@@ -1,7 +1,10 @@
 <section class="sidebar">
+  {% if current_user.is_authenticated %}
   <h4 class="text-center text-primary">{{ current_user }}</h4>
+  {% endif %}
 
   <ul class="sidebar-menu">
+    {% if current_user.is_authenticated %}
     <li class="header">{% trans %}My account{% endtrans %}</li>
     <li>
       <a href="{{ url_for('.user_settings') }}">
@@ -33,11 +36,7 @@
         <i class="fa fa-ticket"></i> <span>{% trans %}Authentication tokens{% endtrans %}</span>
       </a>
     </li>
-    <li>
-      <a href="{{ url_for('.logout') }}">
-        <i class="fa fa-sign-out"></i> <span>{% trans %}Sign out{% endtrans %}</span>
-      </a>
-    </li>
+    
     <li class="header">{% trans %}Administration{% endtrans %}</li>
     {% if current_user.global_admin %}
     <li>
@@ -68,11 +67,38 @@
       </a>
     </li>
     {% endif %}
+    {% endif %}
 
+    <li class="header">{% trans %}Go to{% endtrans %}</li>
+    {% if config["WEBMAIL"] != "none" %}
+    <li>
+      <a href="/webmail/">
+        <i class="fa fa-envelope-o"></i> <span>{% trans %}Webmail{% endtrans %}</span>
+      </a>
+    </li>
+    {% endif %}
+    <li>
+      <a href="https://mailu.io">
+        <i class="fa fa-globe"></i> <span>{% trans %}Website{% endtrans %}</span>
+      </a>
+    </li>
     <li>
       <a href="https://github.com/Mailu/Mailu">
         <i class="fa fa-life-ring"></i> <span>{% trans %}Help{% endtrans %}</span>
       </a>
     </li>
+    {% if current_user.is_authenticated %}
+    <li>
+      <a href="{{ url_for('.logout') }}">
+        <i class="fa fa-sign-out"></i> <span>{% trans %}Sign out{% endtrans %}</span>
+      </a>
+    </li>
+    {% else %}
+    <li>
+      <a href="#">
+        <i class="fa fa-sign-in"></i> <span>{% trans %}Sign in{% endtrans %}</span>
+      </a>
+    </li>
+    {% endif %}
   </ul>
 </section>

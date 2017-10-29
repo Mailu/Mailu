@@ -8,7 +8,8 @@
 {{ user }}
 {% endblock %}
 
-{% block box_content %}
+{% block content %}
+{% call macros.box() %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.reply_enabled,
@@ -20,4 +21,5 @@
         **{("rw" if user.reply_enabled else "readonly"): ""}) }}
   {{ macros.form_field(form.submit) }}
 </form>
+{% endcall %}
 {% endblock %}

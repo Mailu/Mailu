@@ -1,10 +1,14 @@
-from mailu import db, models
+from mailu import db, models, app, limiter
 from mailu.internal import internal, nginx
 
 import flask
 
 
 @internal.route("/auth/email")
+@limiter.limit(
+    app.config["AUTH_RATELIMIT"],
+    lambda: flask.request.headers["Client-Ip"]
+)
 def nginx_authentication():
     """ Main authentication endpoint for Nginx email server
     """

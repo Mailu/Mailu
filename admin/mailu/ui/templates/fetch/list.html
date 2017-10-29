@@ -12,34 +12,32 @@
 <a class="btn btn-primary" href="{{ url_for('.fetch_create', user_email=user.email) }}">{% trans %}Add an account{% endtrans %}</a>
 {% endblock %}
 
-{% block box %}
-<table class="table table-bordered">
-  <tbody>
-    <tr>
-      <th>{% trans %}Actions{% endtrans %}</th>
-      <th>{% trans %}Endpoint{% endtrans %}</th>
-      <th>{% trans %}Username{% endtrans %}</th>
-      <th>{% trans %}Keep emails{% endtrans %}</th>
-      <th>{% trans %}Last check{% endtrans %}</th>
-      <th>{% trans %}Status{% endtrans %}</th>
-      <th>{% trans %}Created{% endtrans %}</th>
-      <th>{% trans %}Last edit{% endtrans %}</th>
-    </tr>
-    {% for fetch in user.fetches %}
-    <tr>
-      <td>
-        <a href="{{ url_for('.fetch_edit', fetch_id=fetch.id) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
-        <a href="{{ url_for('.fetch_delete', fetch_id=fetch.id) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
-      </td>
-      <td>{{ fetch.protocol }}{{ 's' if fetch.tls else '' }}://{{ fetch.host }}:{{ fetch.port }}</td>
-      <td>{{ fetch.username }}</td>
-      <td>{% if fetch.keep %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
-      <td>{{ fetch.last_check or '-' }}</td>
-      <td>{{ fetch.error or '-' }}</td>
-      <td>{{ fetch.created_at }}</td>
-      <td>{{ fetch.updated_at or '' }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% block content %}
+{% call macros.table() %}
+<tr>
+  <th>{% trans %}Actions{% endtrans %}</th>
+  <th>{% trans %}Endpoint{% endtrans %}</th>
+  <th>{% trans %}Username{% endtrans %}</th>
+  <th>{% trans %}Keep emails{% endtrans %}</th>
+  <th>{% trans %}Last check{% endtrans %}</th>
+  <th>{% trans %}Status{% endtrans %}</th>
+  <th>{% trans %}Created{% endtrans %}</th>
+  <th>{% trans %}Last edit{% endtrans %}</th>
+</tr>
+{% for fetch in user.fetches %}
+<tr>
+  <td>
+    <a href="{{ url_for('.fetch_edit', fetch_id=fetch.id) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
+    <a href="{{ url_for('.fetch_delete', fetch_id=fetch.id) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+  </td>
+  <td>{{ fetch.protocol }}{{ 's' if fetch.tls else '' }}://{{ fetch.host }}:{{ fetch.port }}</td>
+  <td>{{ fetch.username }}</td>
+  <td>{% if fetch.keep %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
+  <td>{{ fetch.last_check or '-' }}</td>
+  <td>{{ fetch.error or '-' }}</td>
+  <td>{{ fetch.created_at }}</td>
+  <td>{{ fetch.updated_at or '' }}</td>
+</tr>
+{% endfor %}
+{% endcall %}
 {% endblock %}

@@ -62,8 +62,7 @@ def domain_delete(domain_name):
 @access.domain_admin(models.Domain, 'domain_name')
 def domain_details(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
-    return flask.render_template('domain/details.html', domain=domain,
-        config=app.config)
+    return flask.render_template('domain/details.html', domain=domain)
 
 
 @ui.route('/domain/genkeys/<domain_name>', methods=['GET', 'POST'])

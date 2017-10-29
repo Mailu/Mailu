@@ -53,22 +53,7 @@ class="hold-transition skin-blue sidebar-mini"
 
       <section class="content">
         {{ utils.flashed_messages(container=False) }}
-        {% block content %}
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="box">
-              {% block box %}
-              <div class="box-header">
-                {% block box_title %}{% endblock %}
-              </div>
-              <div class="box-body">
-                {% block box_content %}{% endblock %}
-              </div>
-              {% endblock %}
-            </div>
-          </div>
-        </div>
-        {% endblock %}
+        {% block content %}{% endblock %}
       </section>
     </div>
     <footer class="main-footer">

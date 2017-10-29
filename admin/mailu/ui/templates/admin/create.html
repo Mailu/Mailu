@@ -4,7 +4,8 @@
 {% trans %}Add a global administrator{% endtrans %}
 {% endblock %}
 
-{% block box_content %}
+{% block content %}
+{% call macros.box() %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.admin, id='admin') }}
@@ -13,4 +14,5 @@
     $("#admin").select2();
   </script>
 </form>
+{% endcall %}
 {% endblock %}

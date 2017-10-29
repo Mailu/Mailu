@@ -8,7 +8,8 @@
 {{ domain }}
 {% endblock %}
 
-{% block box_content %}
+{% block content %}
+{% call macros.box() %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.localpart, append='<span class="input-group-addon">@'+domain.name+'</span>') }}
@@ -23,4 +24,5 @@
     })
   </script>
 </form>
+{% endcall %}
 {% endblock %}

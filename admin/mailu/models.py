@@ -149,7 +149,7 @@ class Email(object):
             context.current_parameters["localpart"],
             context.current_parameters["domain_name"],
         )
-        return db.Column(db.String(255),
+        return db.Column(db.String(255, collation="NOCASE"),
             primary_key=True, nullable=False,
             default=updater)
 
@@ -193,9 +193,9 @@ class User(Base, Email):
     def get_id(self):
         return self.email
 
-    scheme_dict = {'SHA512-CRYPT': "sha512_crypt", 
-                   'SHA256-CRYPT': "sha256_crypt", 
-                   'MD5-CRYPT': "md5_crypt", 
+    scheme_dict = {'SHA512-CRYPT': "sha512_crypt",
+                   'SHA256-CRYPT': "sha256_crypt",
+                   'MD5-CRYPT': "md5_crypt",
                    'CRYPT': "des_crypt"}
     pw_context = context.CryptContext(
         schemes = scheme_dict.values(),

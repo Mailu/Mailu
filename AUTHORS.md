@@ -8,6 +8,12 @@ this file.
 
 Other contributors:
 
- - Angedestenebres - Tests on development version & Current version
+ - "Angedestenebres" - Tests on development version & Current version
  - Stefan Auditor - German translation on POEditor.com
  - [Carlos Bernárdez](https://github.com/jkarlosb) - [[Contributions in Mailu]](https://github.com/Mailu/Mailu/commits?author=jkarlosb)
+ - Felipe Lubra - Portugese translation
+ - Mélanie Henry - German translation
+ - Maxime Saddok - French translation
+ - "ofthesun9" - French translation
+ - "SunMar" - Dutch translation
+

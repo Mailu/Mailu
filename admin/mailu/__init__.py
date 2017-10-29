@@ -43,6 +43,11 @@ flask_bootstrap.Bootstrap(app)
 db = flask_sqlalchemy.SQLAlchemy(app)
 migrate = flask_migrate.Migrate(app, db)
 
+# Debugging toolbar
+if app.config.get("DEBUG"):
+    import flask_debugtoolbar
+    toolbar = flask_debugtoolbar.DebugToolbarExtension(app)
+
 # Manager commnad
 manager = flask_script.Manager(app)
 manager.add_command('db', flask_migrate.MigrateCommand)

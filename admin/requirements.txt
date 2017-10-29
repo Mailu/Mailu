@@ -6,6 +6,7 @@ Flask-Babel
 Flask-migrate
 Flask-script
 Flask-wtf
+Flask-debugtoolbar
 WTForms-Components
 passlib
 gunicorn

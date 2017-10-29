@@ -1,17 +1,4 @@
-{% extends "base.html" %}
-
-{% block sidebar %}
-<section class="sidebar">
-  <ul class="sidebar-menu">
-    <li class="header">{% trans %}Your account{% endtrans %}</li>
-    <li>
-      <a href="#">
-        <i class="fa fa-sign-in"></i> <span>{% trans %}Sign in{% endtrans %}</span>
-      </a>
-    </li>
-  </ul>
-</section>
-{% endblock %}
+{% extends "form.html" %}
 
 {% block title %}
 {% trans %}Sign in{% endtrans %}
@@ -19,10 +6,4 @@
 
 {% block subtitle %}
 {% trans %}to access the administration tools{% endtrans %}
-{% endblock %}
-
-{% block content %}
-{% call macros.box() %}
-{{ macros.form(form) }}
-{% endcall %}
 {% endblock %}

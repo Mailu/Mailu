@@ -20,6 +20,8 @@ default_config = {
     'HOSTNAMES': 'mail.mailu.io',
     'DOMAIN': 'mailu.io',
     'POSTMASTER': 'postmaster',
+    'SITENAME': 'Mailu',
+    'WEBSITE': 'https://mailu.io',
     'DEBUG': False,
     'BOOTSTRAP_SERVE_LOCAL': True,
     'DKIM_PATH': '/dkim/{domain}.{selector}.key',
@@ -32,6 +34,7 @@ default_config = {
     'TLS_FLAVOR': 'cert',
     'CERTS_PATH': '/certs',
     'PASSWORD_SCHEME': 'SHA512-CRYPT',
+    'WEBMAIL': 'none',
 }
 
 # Load configuration from the environment if available
@@ -72,8 +75,11 @@ def handle_needs_login():
     )
 
 @app.context_processor
-def inject_user():
-    return dict(current_user=flask_login.current_user)
+def inject_defaults():
+    return dict(
+        current_user=flask_login.current_user,
+        config=app.config
+    )
 
 # Import views
 from mailu import ui, internal

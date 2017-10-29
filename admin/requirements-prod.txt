@@ -15,6 +15,7 @@ Flask==0.12.2
 Flask-Babel==0.11.2
 Flask-Bootstrap==3.3.7.1
 Flask-DebugToolbar==0.10.1
+Flask-Limiter==0.9.5.1
 Flask-Login==0.4.0
 Flask-Migrate==2.1.1
 Flask-Script==2.0.6
@@ -26,6 +27,7 @@ infinity==1.4
 intervals==0.8.0
 itsdangerous==0.24
 Jinja2==2.9.6
+limits==1.2.1
 Mako==1.0.7
 MarkupSafe==1.0
 passlib==1.7.1
@@ -35,6 +37,7 @@ python-dateutil==2.6.1
 python-editor==1.0.3
 pytz==2017.2
 PyYAML==3.12
+redis==2.10.6
 requests==2.18.4
 six==1.11.0
 SQLAlchemy==1.1.14

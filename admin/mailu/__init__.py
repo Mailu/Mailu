@@ -5,6 +5,7 @@ import flask_login
 import flask_script
 import flask_migrate
 import flask_babel
+import flask_limiter
 
 import os
 import docker
@@ -35,6 +36,8 @@ default_config = {
     'CERTS_PATH': '/certs',
     'PASSWORD_SCHEME': 'SHA512-CRYPT',
     'WEBMAIL': 'none',
+    'AUTH_RATELIMIT': '10/minute;1000/hour',
+    'RATELIMIT_STORAGE_URL': 'redis://redis'
 }
 
 # Load configuration from the environment if available
@@ -45,6 +48,7 @@ for key, value in default_config.items():
 flask_bootstrap.Bootstrap(app)
 db = flask_sqlalchemy.SQLAlchemy(app)
 migrate = flask_migrate.Migrate(app, db)
+limiter = flask_limiter.Limiter(app, key_func=lambda: current_user.username)
 
 # Debugging toolbar
 if app.config.get("DEBUG"):

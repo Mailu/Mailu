@@ -1,7 +1,7 @@
 from mailu import app, db, dkim, login_manager
 
 from sqlalchemy.ext import declarative
-from passlib import context
+from passlib import context, hash
 from datetime import datetime
 
 import re
@@ -247,6 +247,29 @@ class Alias(Base, Email):
         backref=db.backref('aliases', cascade='all, delete-orphan'))
     wildcard = db.Column(db.Boolean(), nullable=False, default=False)
     destination = db.Column(CommaSeparatedList, nullable=False, default=[])
+
+
+class Token(Base):
+    """ A token is an application password for a given user.
+    """
+    __tablename__ = "token"
+
+    id = db.Column(db.Integer(), primary_key=True)
+    user_email = db.Column(db.String(255), db.ForeignKey(User.email),
+        nullable=False)
+    user = db.relationship(User,
+        backref=db.backref('tokens', cascade='all, delete-orphan'))
+    password = db.Column(db.String(255), nullable=False)
+    ip = db.Column(db.String(255))
+
+    def check_password(self, password):
+        return hash.sha256_crypt.verify(password, self.password)
+
+    def set_password(self, password):
+        self.password = hash.sha256_crypt.hash(password)
+
+    def __str__(self):
+        return self.comment
 
 
 class Fetch(Base):

@@ -29,6 +29,11 @@
       </a>
     </li>
     <li>
+      <a href="{{ url_for('.token_list') }}">
+        <i class="fa fa-ticket"></i> <span>{% trans %}Authentication tokens{% endtrans %}</span>
+      </a>
+    </li>
+    <li>
       <a href="{{ url_for('.logout') }}">
         <i class="fa fa-sign-out"></i> <span>{% trans %}Sign out{% endtrans %}</span>
       </a>

@@ -12,25 +12,23 @@
 <a class="btn btn-primary" href="{{ url_for('.token_create', user_email=user.email) }}">{% trans %}New token{% endtrans %}</a>
 {% endblock %}
 
-{% block box %}
-<table class="table table-bordered">
-  <tbody>
-    <tr>
-      <th>{% trans %}Actions{% endtrans %}</th>
-      <th>{% trans %}Comment{% endtrans %}</th>
-      <th>{% trans %}Authorized IP{% endtrans %}</th>
-      <th>{% trans %}Created{% endtrans %}</th>
-    </tr>
-    {% for token in user.tokens %}
-    <tr>
-      <td>
-        <a href="{{ url_for('.token_delete', token_id=token.id) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
-      </td>
-      <td>{{ token.comment }}</td>
-      <td>{{ token.ip or "any" }}</td>
-      <td>{{ token.created_at }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% block content %}
+{% call macros.table() %}
+<tr>
+  <th>{% trans %}Actions{% endtrans %}</th>
+  <th>{% trans %}Comment{% endtrans %}</th>
+  <th>{% trans %}Authorized IP{% endtrans %}</th>
+  <th>{% trans %}Created{% endtrans %}</th>
+</tr>
+{% for token in user.tokens %}
+<tr>
+  <td>
+    <a href="{{ url_for('.token_delete', token_id=token.id) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+  </td>
+  <td>{{ token.comment }}</td>
+  <td>{{ token.ip or "any" }}</td>
+  <td>{{ token.created_at }}</td>
+</tr>
+{% endfor %}
+{% endcall %}
 {% endblock %}

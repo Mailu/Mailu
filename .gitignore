@@ -1,9 +1,9 @@
 *.pyc
 *.mo
 __pycache__
-/admin/lib
-/admin/bin
-/admin/include
+/core/admin/lib
+/core/admin/bin
+/core/admin/include
 pip-selfcheck.json
 /.env
 /data

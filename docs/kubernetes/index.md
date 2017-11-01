@@ -1,10 +1,13 @@
-# Installing Mailu with Kubernetes #
+Kubernetes setup
+================
 
-# Prerequisites #
+Prepare the environment
+-----------------------
 
 The resource configurations in this folder assume that you have [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) set up for your cluster. If you are not using the [NGINX Ingress Controller for Kubernetes](https://github.com/kubernetes/ingress/tree/master/controllers/nginx), please ensure that the configuration specified in the file matches your set up.
 
-# How to use #
+Setup the Kubernetes service
+----------------------------
 
 Using the resource configurations is simple:
 

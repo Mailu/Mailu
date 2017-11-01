@@ -1,4 +1,4 @@
-![Logo](logo.png)
+![Logo](docs/assets/logo.png)
 
 [Join us and chat about the project.](https://riot.im/app/#/room/#mailu:tedomum.net)
 

@@ -5,6 +5,38 @@ Notable changes to this project are documented in the current file. For more
 details about individual changes, see the Git log. You should read this before
 upgrading Freposte.io as some changes will include useful notes.
 
+v1.5.0 - 2017-11-05
+-------------------
+
+- Global: clean the ``.env`` file and change many options, *make sure
+  that you downloade the latest ``.env`` and apply your settings when migrating.
+- Global: nginx is now a reverse proxy for HTTP, SMTP, IMAP and POP.
+- Global: the new Rainloop webmail is available.
+- Global: the mail stack now supports IPv6.
+- Global: most images moved to Alpine.
+- Global: the documentation moved to a Sphinx directory.
+- Feature: multiple TLS flavors are available, see the ``TLS_FLAVOR`` setting.
+- Feature: alternative domains now act as a copy of a given domain.
+- Feature: relay domains now act as a mail relay (e.g. for backup servers).
+- Feature: the server now supports multiple public names, with letsencrypt.
+- Feature: authentication tokens can be generated per client.
+- Feature: the manage.py CLI has many options to import and manage a setup.
+- Feature: add overrides for the Postfix configuration.
+- Feature: allow to keep or discard forwarded messages.
+- Feature: make password encryption scheme configurable.
+- Feature: make DMARC rua configurable.
+- Feature: Clamav may now be disabled completely.
+- Feature: support a configurable recipient delimiter for address extension.
+- Feature: the admin interface points to the webmail and a configurable site.
+- L10N: portugese loca is now available
+- Upstream: upgrade to Roundcube 1
+- Upstream: upgrade to Rainloop 1.11.1
+- Bug: the Postfix queue is now persisted.
+- Bug: certbot now handle renewal properly.
+- Bug: fix sender and recipient restrictions for antispam features.
+- Bug: webmails now handle large attachments.
+- Bug: dhparam are now generated properly on the frontend.
+
 v1.4.0 - 2017-02-12
 -------------------
 

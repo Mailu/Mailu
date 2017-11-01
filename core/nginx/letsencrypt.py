@@ -12,7 +12,7 @@ command = [
     "-m", "{}@{}".format(os.environ["POSTMASTER"], os.environ["DOMAIN"]),
     "certonly", "--standalone",
     "--cert-name", "mailu",
-    "--preferred-challenges", "http", "--http-01-port", "8000",
+    "--preferred-challenges", "http", "--http-01-port", "8008",
     "--keep-until-expiring",
     "--rsa-key-size", "4096",
     "--config-dir", "/certs/letsencrypt",

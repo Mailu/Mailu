@@ -21,14 +21,14 @@ Download the proper template files from the git repository. For `stable`:
 
 .. code-block:: bash
 
-  wget -O docker-compose.yml https://raw.githubusercontent.com/Mailu/Mailu/stable/docker-compose.yml.dist
-  wget -O .env https://raw.githubusercontent.com/Mailu/Mailu/stable/.env.dist
+  wget -O docker-compose.yml https://raw.githubusercontent.com/Mailu/Mailu/stable/docs/compose/docker-compose.yml.dist
+  wget -O .env https://raw.githubusercontent.com/Mailu/Mailu/stable/docs/compose/.env.dist
 
 For the latest version (replace with version number otherwise):
 
 .. code-block:: bash
-  wget -O docker-compose.yml https://raw.githubusercontent.com/Mailu/Mailu/master/docker-compose.yml.dist
-  wget -O .env https://raw.githubusercontent.com/Mailu/Mailu/master/.env.dist
+  wget -O docker-compose.yml https://raw.githubusercontent.com/Mailu/Mailu/master/docs/compose/docker-compose.yml.dist
+  wget -O .env https://raw.githubusercontent.com/Mailu/Mailu/master/docs/compose/.env.dist
 
 Then open the ``.env`` file to setup the mail server. Modify the ``ROOT`` setting
 to match your setup directory if different from ``/mailu``.

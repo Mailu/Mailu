@@ -17,10 +17,12 @@ running and the Docker API (>= 1.11) is available.
 
 Because most of our tests run on Debian Jessie and Debian Stretch, we recommend
 one of these for the base system. Mailu should however be able to run on
-any of the [officially supported distributions](https://docs.docker.com/engine/installation/).
+any of the `officially supported distributions`_.
 
 For the purpose of this guide, all examples are based on Debian Stretch. The
 differences with other system will hardly be noticeable however.
+
+.. _`officially supported distributions`: https://docs.docker.com/engine/installation/
 
 Install the distribution
 ------------------------
@@ -56,9 +58,10 @@ services. Therefore, you should disable or uninstall any program that is
 listening on these ports (or have them listen on a different port). For
 instance, on a default Debian install:
 
-```
-apt-get autoremove --purge exim4 exim4-base
-```
+.. code-block:: bash
+
+  apt-get autoremove --purge exim4 exim4-base
+
 
 Finally, Docker relies heavily on ``iptables`` for port forwardings. You
 should use ``iptables-persistent`` (or any equivalent tool on other
@@ -73,40 +76,42 @@ Mailu relies on some of the latest Docker features. Therefore, you should
 install Docker from the official repositories instead of your distribution
 ones.
 
-The Docker website is full of [detailed instructions](https://docs.docker.com/engine/installation/)
+The Docker website is full of `detailed instructions`_
 about setting up a proper Docker install. Default configuration should be
 suited for Mailu.
 
 Additionally, you must install ``docker-compose`` by following the instructions
-from the [Docker website](https://docs.docker.com/compose/). Compose is a
+from the `Docker website`_ if you plan on using the CompComposesoe flavor. Compose is a
 management tool for Docker, especially suited for multiple containers systems
 like Mailu.
+
+.. _`detailed instructions`: https://docs.docker.com/engine/installation/
+.. _`Docker website`: https://docs.docker.com/compose/
 
 Once everything is setup, you should be able to run the following commands
 (exact version numbers do not matter):
 
-```
-$ docker version
-Client:
- Version:      1.11.2
- API version:  1.23
- Go version:   go1.6.2
- Git commit:   b9f10c9
- Built:        Sun Jun  5 23:17:55 2016
- OS/Arch:      linux/amd64
+.. code-block:: bash
 
-Server:
- Version:      1.11.1
- API version:  1.23
- Go version:   go1.6.2
- Git commit:   5604cbe
- Built:        Mon May  2 00:06:51 2016
- OS/Arch:      linux/amd64
+  $ docker version
+  Client:
+   Version:      1.11.2
+   API version:  1.23
+   Go version:   go1.6.2
+   Git commit:   b9f10c9
+   Built:        Sun Jun  5 23:17:55 2016
+   OS/Arch:      linux/amd64
 
-$ docker-compose version
-docker-compose version 1.7.1, build 6c29830
-docker-py version: 1.8.1
-CPython version: 3.5.1
-OpenSSL version: OpenSSL 1.0.2h  3 May 2016
-```
+  Server:
+   Version:      1.11.1
+   API version:  1.23
+   Go version:   go1.6.2
+   Git commit:   5604cbe
+   Built:        Mon May  2 00:06:51 2016
+   OS/Arch:      linux/amd64
 
+  $ docker-compose version
+  docker-compose version 1.7.1, build 6c29830
+  docker-py version: 1.8.1
+  CPython version: 3.5.1
+  OpenSSL version: OpenSSL 1.0.2h  3 May 2016

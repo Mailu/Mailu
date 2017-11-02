@@ -16,9 +16,9 @@ You should pick a meaningful hostname that you can give your users to access the
 
 Set that name in the ``HOSTNAME`` configuration entry. Then depending on your domain provider, make sure that you have an address record (``A``) serving the public IP address of your server:
 
-```
-mail.mydomain.com.  IN  A  a.b.c.d
-```
+.. code-block:: bash
+
+  mail.mydomain.com.  IN  A  a.b.c.d
 
 Also, ``a.b.c.d`` should be set in your ``BIND_INTERFACE`` configuration unless your server is in a DMZ and you are using port forwards to expose the services.
 
@@ -33,16 +33,16 @@ For every domain that your mail server is responsible for, you must have a corre
 
 To setup an ``MX`` record, exact actions will depend on your DNS provider and hoster, but assuming you are using a zone file, you should add for ``mydomain.com``:
 
-```
-mydomain.com.  IN  MX  10 mail.mydomain.com.
-```
+.. code-block:: bash
+
+  mydomain.com.  IN  MX  10 mail.mydomain.com.
 
 The number is the ``MX`` priority, which has little importance if you are running a single mail server but should be adjusted if you run a separate backup server.
 
 And for another domain, ``myotherdomain.com`` for example:
 
-```
-myotherdomain.com.  IN  MX  10 mail.mydomain.com.
-```
+.. code-block:: bash
+
+  myotherdomain.com.  IN  MX  10 mail.mydomain.com.
 
 Note that both point to the same mail server hostname, which is unique to your server.

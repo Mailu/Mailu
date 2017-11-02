@@ -59,10 +59,12 @@ Make sure that you test properly before going live!
 - Try to send an email to an external service
 - On the external service, verify that DKIM and SPF are listed as passing
 - Try to receive an email from an external service
-- Check the logs (`docker-compose logs -f servicenamehere`) to look for
+- Check the logs (``docker-compose logs -f servicenamehere``) to look for
   warnings or errors
-- Use an open relay checker like [MailRadar](http://www.mailradar.com/openrelay/)
+- Use an open relay checker like `mailradar`_
   to ensure you're not contributing to the spam problem on the internet.
   All tests there should result in "Relay denied".
 - If using DMARC, be sure to check the reports you get to verify that legitimate
   email is getting through and forgeries are being properly blocked.
+
+  .. _mailradar: http://www.mailradar.com/openrelay/

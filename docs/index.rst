@@ -12,7 +12,6 @@ The documentation is written as part of the repository and evolves with it.
 Make sure that you access the proper version of the documentation, based on
 the version of Mailu that you are running.
 
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:

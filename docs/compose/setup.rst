@@ -7,10 +7,10 @@ Prepare the environment
 Mailu will store all of its persistent data in a path of your choice
 (``/mailu`` by default) simply create the directory and move there:
 
-```
-mkdir /mailu
-cd /mailu
-```
+.. code-block:: bash
+
+  mkdir /mailu
+  cd /mailu
 
 Download the initial configuration file
 ---------------------------------------
@@ -19,17 +19,16 @@ Docker Compose configuration is stored in a file named ``docker-compose.yml``.
 Additionally, Mailu relies on an environment file for various settings.
 Download the proper template files from the git repository. For `stable`:
 
-```
-wget -O docker-compose.yml https://raw.githubusercontent.com/Mailu/Mailu/stable/docker-compose.yml.dist
-wget -O .env https://raw.githubusercontent.com/Mailu/Mailu/stable/.env.dist
-```
+.. code-block:: bash
+
+  wget -O docker-compose.yml https://raw.githubusercontent.com/Mailu/Mailu/stable/docker-compose.yml.dist
+  wget -O .env https://raw.githubusercontent.com/Mailu/Mailu/stable/.env.dist
 
 For the latest version (replace with version number otherwise):
 
-```
-wget -O docker-compose.yml https://raw.githubusercontent.com/Mailu/Mailu/master/docker-compose.yml.dist
-wget -O .env https://raw.githubusercontent.com/Mailu/Mailu/master/.env.dist
-```
+.. code-block:: bash
+  wget -O docker-compose.yml https://raw.githubusercontent.com/Mailu/Mailu/master/docker-compose.yml.dist
+  wget -O .env https://raw.githubusercontent.com/Mailu/Mailu/master/.env.dist
 
 Then open the ``.env`` file to setup the mail server. Modify the ``ROOT`` setting
 to match your setup directory if different from ``/mailu``.
@@ -101,7 +100,7 @@ Finish setting up TLS
 Mailu relies heavily on TLS and must have a key pair and a certificate
 available, at least for the hostname configured in the ``.env`` file.
 
-If you set `TLS_FLAVOR` to `cert` or if then you must create a `certs` directory
+If you set ``TLS_FLAVOR`` to ``cert`` or if then you must create a ``certs`` directory
 in your root path and setup a key-certificate pair there:
  - ``cert.pem`` contains the certificate,
  - ``key.pem`` contains the key pair.
@@ -111,14 +110,14 @@ Start Mailu
 
 You may now start Mailu. Move the to the Mailu directory and run:
 
-```
-docker-compose up -d
-```
+.. code-block:: bash
+
+  docker-compose up -d
 
 Finally, you must create the initial admin user account:
 
-```
-docker-compose run --rm admin python manage.py admin root example.net password
-```
+.. code-block:: bash
+
+  docker-compose run --rm admin python manage.py admin root example.net password
 
 This will create a user named ``root@example.net`` with password ``password`` and administration privileges. Connect to the Web admin interface and change the password to a strong one.

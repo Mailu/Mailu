@@ -115,7 +115,7 @@ This will stop redirects (301 and 302) sent by the Webmail, nginx front and admi
 
 
 Override Mailu configuration
-============================
+----------------------------
 
 If you do not have the resources for running a separate reverse proxy, you could override Mailu reverse proxy configuration by using a Docker volume. Simply store your configuration file (Nginx format), in ``/mailu/nginx.conf`` for instance.
 
@@ -137,7 +137,7 @@ Then modify your ``docker-compose.yml`` file and change the ``front`` section to
 You can use our default configuration file as a sane base for your configuration.
 
 Disable completely Mailu reverse proxy
-======================================
+--------------------------------------
 
 You can simply disable Mailu reverse proxy by removing the ``front`` section from the ``docker-compose.yml`` and use your own means to reverse proxy requests to the proper containers.
 

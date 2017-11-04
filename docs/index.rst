@@ -21,6 +21,19 @@ with an easily setup, easily maintained and full-featured mail server while
 not shipping proprietary software nor unrelated features often found in
 popular groupware.
 
+Main features include:
+
+- **Standard email server**, IMAP and IMAP+, SMTP and Submission
+- **Advanced email features**, aliases, domain aliases, custom routing
+- **Web access**, multiple Webmails and adminitration interface
+- **User features**, aliases, auto-reply, auto-forward, fetched accounts
+- **Admin features**, global admins, announcements, per-domain delegation, quotas
+- **Security**, enforced TLS, Letsencrypt!, outgoing DKIM, anti-virus scanner
+- **Antispam**, auto-learn, greylisting, DMARC and SPF
+- **Freedom**, all FOSS components, no tracker included
+
+.. image:: assets/screenshots/create.png
+
 The documentation is written as part of the repository and evolves with it.
 Make sure that you access the proper version of the documentation, based on
 the version of Mailu that you are running.
@@ -30,6 +43,7 @@ the version of Mailu that you are running.
    :caption: General
 
    general
+   features
 
 .. toctree::
     :maxdepth: 2

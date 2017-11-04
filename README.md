@@ -25,7 +25,7 @@ Main features include:
 - **Antispam**, auto-learn, greylisting, DMARC and SPF
 - **Freedom**, all FOSS components, no tracker included
 
-![Domains](docs/screenshots/domains.png)
+![Domains](docs/assets/screenshots/domains.png)
 
 Contributing
 ============

@@ -27,6 +27,7 @@ Download the proper template files from the git repository. For `stable`:
 For the latest version (replace with version number otherwise):
 
 .. code-block:: bash
+
   wget -O docker-compose.yml https://raw.githubusercontent.com/Mailu/Mailu/master/docs/compose/docker-compose.yml.dist
   wget -O .env https://raw.githubusercontent.com/Mailu/Mailu/master/docs/compose/.env.dist
 

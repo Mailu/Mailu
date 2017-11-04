@@ -44,6 +44,8 @@ the version of Mailu that you are running.
 
    general
    features
+   releases
+   demo
 
 .. toctree::
     :maxdepth: 2
@@ -62,3 +64,13 @@ the version of Mailu that you are running.
 
     maintain
     cli
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Contributors
+
+    contributors/guide
+    contributors/environment
+    contributors/database
+    contributors/memo
+    contributors/localization

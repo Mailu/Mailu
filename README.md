@@ -8,7 +8,7 @@ not shipping proprietary software nor unrelated features often found in
 popular groupware.
 
 Most of the documentation is available on our [Website](https://mailu.io),
-you can also [try our demo server](https://github.com/mailu/mailu/wiki/Demo-server)
+you can also [try our demo server](https://mailu.io/master/demo.html)
 before setting up your own, and come [talk to us on Matrix](https://matrix.to/#/#mailu:tedomum.net).
 
 Features
@@ -25,7 +25,7 @@ Main features include:
 - **Antispam**, auto-learn, greylisting, DMARC and SPF
 - **Freedom**, all FOSS components, no tracker included
 
-![Creating a new user](https://mailu.io/screenshots/create.png)
+![Domains](docs/screenshots/domains.png)
 
 Contributing
 ============
@@ -34,5 +34,3 @@ Mailu is free software, open to suggestions and contributions. All
 components are free software and compatible with the MIT license. All
 specific configuration files, Dockerfiles and code are placed under the
 MIT license.
-
-For details, see the [contributor guide](https://github.com/mailu/mailu/wiki/Contributors-Guide).

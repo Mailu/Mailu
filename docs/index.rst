@@ -3,6 +3,17 @@ Mailu
 
 .. image:: assets/logo.png
 
+|
+
+.. image:: https://img.shields.io/github/stars/mailu/mailu.svg?label=github&logo=github&maxAge=2592000
+   :target: https://github.com/mailu/mailu
+
+.. image:: https://img.shields.io/docker/pulls/mailu/admin.svg?label=docker&maxAge=2592000
+   :target: https://hub.docker.com/u/mailu/
+
+.. image:: https://img.shields.io/badge/matrix-%23mailu%3Atedomum.net-7bc9a4.svg
+   :target: https://matrix.to/#/#mailu:tedomum.net
+
 Mailu is a simple yet full-featured mail server as a set of Docker images.
 It is free software (both as in free beer and as in free speech), open to
 suggestions and external contributions. The project aims at providing people

@@ -4,7 +4,7 @@
 
 extensions = ['sphinx.ext.imgmath',
     'sphinx.ext.viewcode']
-templates_path = []
+templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'Mailu'
@@ -26,4 +26,13 @@ html_sidebars = {
         'relations.html',  # needs 'show_related': True theme option to display
         'searchbox.html',
     ]
+}
+
+# Theme options
+html_context = {
+    'display_github': True,
+    'github_user': 'mailu',
+    'github_repo': 'mailu',
+    'github_version': 'master',
+    'conf_py_path': '/docs/'
 }

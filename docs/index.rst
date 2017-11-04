@@ -16,14 +16,24 @@ the version of Mailu that you are running.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: General
 
    general
-   setup
-   configuration
-   compose/requirements
-   compose/setup
-   kubernetes/index
-   maintain
-   cli
-   dns
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Setup
+
+    setup
+    configuration
+    compose/requirements
+    compose/setup
+    kubernetes/index
+    dns
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Administration
+
+    maintain
+    cli

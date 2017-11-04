@@ -103,8 +103,8 @@ available, at least for the hostname configured in the ``.env`` file.
 
 If you set ``TLS_FLAVOR`` to ``cert`` or if then you must create a ``certs`` directory
 in your root path and setup a key-certificate pair there:
- - ``cert.pem`` contains the certificate,
- - ``key.pem`` contains the key pair.
+- ``cert.pem`` contains the certificate,
+- ``key.pem`` contains the key pair.
 
 Start Mailu
 -----------

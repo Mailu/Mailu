@@ -77,7 +77,7 @@ class UserForm(flask_wtf.FlaskForm):
 class UserSettingsForm(flask_wtf.FlaskForm):
     displayed_name = fields.StringField(_('Displayed name'))
     spam_enabled = fields.BooleanField(_('Enable spam filter'))
-    spam_threshold = fields_.IntegerSliderField(_('Spam filter threshold'))
+    spam_threshold = fields_.IntegerSliderField(_('Spam filter tolerance'))
     submit = fields.SubmitField(_('Save settings'))
 
 

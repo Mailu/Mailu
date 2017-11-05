@@ -10,6 +10,8 @@ v1.5.0 - 2017-11-05
 
 - Global: clean the ``.env`` file and change many options, *make sure
   that you download the latest ``.env`` and apply your settings when migrating.*
+- Global: clean the Compose configuration, *make sure that you download the
+  latest ``docker-compose.yml`` when migrating.*
 - Global: nginx is now a reverse proxy for HTTP, SMTP, IMAP and POP.
 - Global: the new Rainloop webmail is available.
 - Global: the mail stack now supports IPv6.

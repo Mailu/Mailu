@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-10-29 19:12+0100\n"
+"POT-Creation-Date: 2017-11-05 17:17+0100\n"
 "PO-Revision-Date: 2017-03-27 11:43-0300\n"
 "Last-Translator: \n"
 "Language: pt_BR\n"
@@ -60,7 +60,7 @@ msgstr ""
 #: mailu/ui/forms.py:50 mailu/ui/forms.py:62 mailu/ui/forms.py:73
 #: mailu/ui/forms.py:112 mailu/ui/forms.py:124
 #: mailu/ui/templates/alias/list.html:21 mailu/ui/templates/domain/list.html:21
-#: mailu/ui/templates/relay/list.html:19 mailu/ui/templates/token/list.html:20
+#: mailu/ui/templates/relay/list.html:19 mailu/ui/templates/token/list.html:19
 #: mailu/ui/templates/user/list.html:23
 msgid "Comment"
 msgstr "Comentário"
@@ -111,8 +111,8 @@ msgid "Enable spam filter"
 msgstr "Habilitar filtro de spam"
 
 #: mailu/ui/forms.py:80
-msgid "Spam filter threshold"
-msgstr "Limite de filtro de spam"
+msgid "Spam filter tolerance"
+msgstr ""
 
 #: mailu/ui/forms.py:81
 msgid "Save settings"
@@ -159,7 +159,7 @@ msgstr "Corpo da resposta"
 msgid "Your token (write it down, as it will never be displayed again)"
 msgstr ""
 
-#: mailu/ui/forms.py:114 mailu/ui/templates/token/list.html:21
+#: mailu/ui/forms.py:114 mailu/ui/templates/token/list.html:20
 msgid "Authorized IP"
 msgstr ""
 
@@ -361,7 +361,7 @@ msgstr "Adicionar administrador"
 #: mailu/ui/templates/alternative/list.html:18
 #: mailu/ui/templates/domain/list.html:16 mailu/ui/templates/fetch/list.html:18
 #: mailu/ui/templates/manager/list.html:18
-#: mailu/ui/templates/relay/list.html:16 mailu/ui/templates/token/list.html:19
+#: mailu/ui/templates/relay/list.html:16 mailu/ui/templates/token/list.html:18
 #: mailu/ui/templates/user/list.html:18
 msgid "Actions"
 msgstr "Ações"
@@ -375,7 +375,7 @@ msgstr "Email"
 #: mailu/ui/templates/alternative/list.html:25
 #: mailu/ui/templates/domain/list.html:31 mailu/ui/templates/fetch/list.html:31
 #: mailu/ui/templates/manager/list.html:24
-#: mailu/ui/templates/relay/list.html:27 mailu/ui/templates/token/list.html:27
+#: mailu/ui/templates/relay/list.html:27 mailu/ui/templates/token/list.html:26
 #: mailu/ui/templates/user/list.html:31
 msgid "Delete"
 msgstr "Deletar"
@@ -399,7 +399,7 @@ msgstr "Adicionar alias"
 #: mailu/ui/templates/alias/list.html:22
 #: mailu/ui/templates/alternative/list.html:20
 #: mailu/ui/templates/domain/list.html:22 mailu/ui/templates/fetch/list.html:24
-#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:22
+#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:21
 #: mailu/ui/templates/user/list.html:24
 msgid "Created"
 msgstr "Criado"
@@ -627,4 +627,7 @@ msgstr ""
 
 #~ msgid "Your account"
 #~ msgstr "Sua conta"
+
+#~ msgid "Spam filter threshold"
+#~ msgstr "Limite de filtro de spam"
 

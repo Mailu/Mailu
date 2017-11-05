@@ -16,6 +16,7 @@ people.
 
 Version 1.5 is about bringing the features that were intended for the late
 version 2.0. It includes many new concepts like:
+
 - alternative domains, a way to configure a domain that is semantically
   equivalent to another;
 - domain relays, a way to relay emails to a separate server;
@@ -43,16 +44,21 @@ were simply removed (e.g. rmilter):
   docker-compose pull
   docker-compose up -d --remove-oprhans
 
+If you experience issues when upgrading, feel free to post issues and contact
+us on our chat channel for emergency support.
+
 The branch should be considered stable, but the ``stable`` reference will not
-be moved to ``1.5`` until as many users as possible have migrated. Regarding
-statistics, Mailu has gone from "no tracker at all" to a tracker that we
-find is designed to preserve privacy and security as much as possible. Your
+be moved to ``1.5`` until as many users as possible have migrated.
+
+Regarding statistics, Mailu has gone from "no tracker at all" to a tracker that
+we find is designed to preserve privacy and security as much as possible. Your
 admin container will now perform DNS requests for a domain that we hold,
 including information about your "instance id" (a unique and random string)
 and Mailu version. If your mail server performs direct DNS queries instead
 of going through a DNS recursor, you might want to opt-out of statistics if
-you would prefer the server IP address not be included in our logs. This can
-be accomplished in the ``.env`` file directly.
+you would prefer the server IP address not be included anywhere (we do not log
+it, but our hosting provider might). This can be accomplished in the ``.env``
+file directly.
 
 Mailu 1.3 - 2016-11-06
 ----------------------

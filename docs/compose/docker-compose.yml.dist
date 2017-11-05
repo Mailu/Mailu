@@ -25,7 +25,7 @@ services:
     - "$BIND_ADDRESS6:995:995"
     - "$BIND_ADDRESS6:25:25"
     - "$BIND_ADDRESS6:465:465"
-    - "$BIND_ADDRESS6:587:587"  
+    - "$BIND_ADDRESS6:587:587"
     volumes:
       - "$ROOT/certs:/certs"
 
@@ -52,16 +52,6 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/data:/data"
-      - "$ROOT/overrides:/overrides"
-
-  milter:
-    # build: rmilter
-    image: mailu/rmilter:$VERSION
-    restart: always
-    env_file: .env
-    volumes:
-      - "$ROOT/filter:/data"
-      - "$ROOT/dkim:/dkim"
       - "$ROOT/overrides:/overrides"
 
   antispam:

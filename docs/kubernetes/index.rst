@@ -1,6 +1,10 @@
 Kubernetes setup
 ================
 
+Please note that Kubernetes setup is not yet well supported or documented, all
+tests currently run on Docker Compose. The configuration has not yet been updated
+to work properly with ngin authentication proxy.
+
 Prepare the environment
 -----------------------
 

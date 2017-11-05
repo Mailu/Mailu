@@ -93,7 +93,7 @@ smtpd_recipient_restrictions =
 # Milter
 ###############
 
-smtpd_milters = inet:antispam:9900
+smtpd_milters = inet:antispam:11332
 milter_protocol = 6
 milter_mail_macros = i {mail_addr} {client_addr} {client_name} {auth_authen}
 milter_default_action = tempfail

@@ -61,6 +61,7 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/filter:/var/lib/rspamd"
+      - "$ROOT/overrides/rspamd:/etc/rspamd/override.d"
 
   antivirus:
     # build: clamav

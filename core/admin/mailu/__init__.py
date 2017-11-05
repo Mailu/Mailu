@@ -41,7 +41,8 @@ default_config = {
     'PASSWORD_SCHEME': 'SHA512-CRYPT',
     'WEBMAIL': 'none',
     'AUTH_RATELIMIT': '10/minute;1000/hour',
-    'RATELIMIT_STORAGE_URL': 'redis://redis'
+    'RATELIMIT_STORAGE_URL': 'redis://redis',
+    'DISABLE_STATISTICS': 'False'
 }
 
 # Load configuration from the environment if available
@@ -62,10 +63,11 @@ else:
     instance_id = str(uuid.uuid4())
     with open(app.config["INSTANCE_ID_PATH"], "w") as handle:
         handle.write(instance_id)
-try:
-    socket.gethostbyname(app.config["STATS_ENDPOINT"].format(instance_id))
-except:
-    pass
+if app.config["DISABLE_STATISTICS"].lower() != "true":
+    try:
+        socket.gethostbyname(app.config["STATS_ENDPOINT"].format(instance_id))
+    except:
+        pass
 
 # Debugging toolbar
 if app.config.get("DEBUG"):

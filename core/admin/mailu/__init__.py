@@ -19,7 +19,7 @@ default_config = {
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     'INSTANCE_ID_PATH': '/data/instance',
-    'STATS_ENDPOINT': '0.{}.stats.mailu.io',
+    'STATS_ENDPOINT': '15.{}.stats.mailu.io',
     'SECRET_KEY': 'changeMe',
     'DOCKER_SOCKET': 'unix:///var/run/docker.sock',
     'HOSTNAMES': 'mail.mailu.io',

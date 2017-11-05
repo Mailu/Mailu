@@ -9,12 +9,13 @@ v1.5.0 - 2017-11-05
 -------------------
 
 - Global: clean the ``.env`` file and change many options, *make sure
-  that you downloade the latest ``.env`` and apply your settings when migrating.
+  that you download the latest ``.env`` and apply your settings when migrating.*
 - Global: nginx is now a reverse proxy for HTTP, SMTP, IMAP and POP.
 - Global: the new Rainloop webmail is available.
 - Global: the mail stack now supports IPv6.
 - Global: most images moved to Alpine.
 - Global: the documentation moved to a Sphinx directory.
+- Global: deprecate rmilter and use rspamd proxy instead.
 - Feature: multiple TLS flavors are available, see the ``TLS_FLAVOR`` setting.
 - Feature: alternative domains now act as a copy of a given domain.
 - Feature: relay domains now act as a mail relay (e.g. for backup servers).
@@ -29,8 +30,10 @@ v1.5.0 - 2017-11-05
 - Feature: support a configurable recipient delimiter for address extension.
 - Feature: the admin interface points to the webmail and a configurable site.
 - L10N: portugese loca is now available
-- Upstream: upgrade to Roundcube 1
-- Upstream: upgrade to Rainloop 1.11.1
+- Upstream: upgrade to Roundcube 1.3.2
+- Upstream: upgrade to Rainloop 1.11.3
+- Upstream: upgrade to Dovecot 2.2.33
+- Upstream: upgrade to Postfix 3.2.4
 - Bug: the Postfix queue is now persisted.
 - Bug: certbot now handle renewal properly.
 - Bug: fix sender and recipient restrictions for antispam features.

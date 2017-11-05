@@ -28,7 +28,7 @@ the main frontend container and terminates all connections, performing
 TLS and authentication directly. Letsencrypt support is now more complete,
 with various TLS "flavors" for all kinds of setup.
 
-More details about the changes are available in the changelog, and this
+More details about the changes are available in the `changelog`_, and this
 release will be followed by a short-term upgrade including some more features
 and bug fixes.
 
@@ -59,6 +59,8 @@ of going through a DNS recursor, you might want to opt-out of statistics if
 you would prefer the server IP address not be included anywhere (we do not log
 it, but our hosting provider might). This can be accomplished in the ``.env``
 file directly.
+
+.. _`changelog`: https://github.com/Mailu/Mailu/blob/master/CHANGELOG.md
 
 Mailu 1.3 - 2016-11-06
 ----------------------

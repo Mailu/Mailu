@@ -19,6 +19,11 @@ if allof (string :is "${extdata.spam_enabled}" "1",
   stop;
 }
 
+if exists "X-Virus" {
+  discard;
+  stop;
+}
+
 if string :is "${extdata.reply_enabled}" "1" {
   vacation :days 1 :subject "${extdata.reply_subject}" "${extdata.reply_body}";
 }

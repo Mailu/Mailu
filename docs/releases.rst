@@ -1,6 +1,59 @@
 Release notes
 =============
 
+Mailu 1.5 - 2017-11-05
+----------------------
+
+It has been two years since this project started, one year since it was renamed
+to Mailu and took a more serious path toward building a proper email server
+distribution. The experience has been extremely interesting and we as
+contributors should be quite proud of what was accomplished in that time.
+
+Mailu started as a random project of administration interface for Postfix, it
+is now running thousands of mail servers, has reached over half a million pulls
+on Docker hub and contributions from very different and frankly interesting
+people.
+
+Version 1.5 is about bringing the features that were intended for the late
+version 2.0. It includes many new concepts like:
+- alternative domains, a way to configure a domain that is semantically
+  equivalent to another;
+- domain relays, a way to relay emails to a separate server;
+- authentication tokens, a way to let users generate passwords for their various
+  clients and restrict authentication per IP address.
+
+The release also includes some structural changes to the project. Nginx is now
+the main frontend container and terminates all connections, performing
+TLS and authentication directly. Letsencrypt support is now more complete,
+with various TLS "flavors" for all kinds of setup.
+
+More details about the changes are available in the changelog, and this
+release will be followed by a short-term upgrade including some more features
+and bug fixes.
+
+**If you are upgrading**, please go through the setup guide and download the
+latest ``docker-compose.yml`` and ``.env``, then update them with your
+sepcific settings, because more than 50% of these templates was rewritten.
+You should then be able to simply pull and start your new e-mail stack with
+no issue, simply remove orphaned container, since some were renamed and others
+were simply removed (e.g. rmilter):
+
+.. code-block:: bash
+
+  docker-compose pull
+  docker-compose up -d --remove-oprhans
+
+The branch should be considered stable, but the ``stable`` reference will not
+be moved to ``1.5`` until as many users as possible have migrated. Regarding
+statistics, Mailu has gone from "no tracker at all" to a tracker that we
+find is designed to preserve privacy and security as much as possible. Your
+admin container will now perform DNS requests for a domain that we hold,
+including information about your "instance id" (a unique and random string)
+and Mailu version. If your mail server performs direct DNS queries instead
+of going through a DNS recursor, you might want to opt-out of statistics if
+you would prefer the server IP address not be included in our logs. This can
+be accomplished in the ``.env`` file directly.
+
 Mailu 1.3 - 2016-11-06
 ----------------------
 

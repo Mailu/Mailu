@@ -2,10 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 
-import os, sys, docutils
-
-sys.path.append(os.path.dirname(__file__))
-extensions = ['sphinx.ext.imgmath', 'sphinx.ext.viewcode', 'conf']
+extensions = ['sphinx.ext.imgmath', 'sphinx.ext.viewcode']
 templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
@@ -38,20 +35,6 @@ html_context = {
     'github_version': 'master',
     'conf_py_path': '/docs/'
 }
-
-
-def setup(app):
-    """ The conf itself is an extension for parsing rst.
-    """
-    def rstjinja(app, docname, source):
-        """ Render our pages as a jinja template for fancy templating.
-        """
-        if app.builder.format != 'html':
-            return
-        source[0] = app.builder.templates.render_string(
-            source[0], app.config.html_context)
-
-    app.connect("source-read", rstjinja)
 
 
 # Upload function when the script is called directly

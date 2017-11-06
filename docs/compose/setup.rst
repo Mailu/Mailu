@@ -19,12 +19,12 @@ Docker Compose configuration is stored in a file named
 :download:`docker-compose.yml`. Additionally, Mailu
 relies on a :download:`.env` file for various settings. Download
 the proper template files from the git repository. To download the configuration
-for the ``{{ github_version }}`` branch, use:
+for the ``VERSION_TAG`` branch, use:
 
 .. code-block:: bash
 
-  wget https://mailu.io/{{ github_version }}/_downloads/docker-compose.yml
-  wget https://mailu.io/{{ github_version }}/_downloads/.env
+  wget https://mailu.io/VERSION_TAG/_downloads/docker-compose.yml
+  wget https://mailu.io/VERSION_TAG/_downloads/.env
 
 Then open the ``.env`` file to setup the mail server. Modify the ``ROOT`` setting
 to match your setup directory if different from ``/mailu``.

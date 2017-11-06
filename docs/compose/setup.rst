@@ -15,21 +15,16 @@ Mailu will store all of its persistent data in a path of your choice
 Download the initial configuration file
 ---------------------------------------
 
-Docker Compose configuration is stored in a file named ``docker-compose.yml``.
-Additionally, Mailu relies on an environment file for various settings.
-Download the proper template files from the git repository. For `stable`:
+Docker Compose configuration is stored in a file named
+:download:`docker-compose.yml`. Additionally, Mailu
+relies on a :download:`.env` file for various settings. Download
+the proper template files from the git repository. To download the configuration
+for the "|version|" branch, use:
 
-.. code-block:: bash
+.. parsed-literal::
 
-  wget -O docker-compose.yml https://raw.githubusercontent.com/Mailu/Mailu/stable/docs/compose/docker-compose.yml.dist
-  wget -O .env https://raw.githubusercontent.com/Mailu/Mailu/stable/docs/compose/.env.dist
-
-For the latest version (replace with version number otherwise):
-
-.. code-block:: bash
-
-  wget -O docker-compose.yml https://raw.githubusercontent.com/Mailu/Mailu/master/docs/compose/docker-compose.yml.dist
-  wget -O .env https://raw.githubusercontent.com/Mailu/Mailu/master/docs/compose/.env.dist
+  wget https://mailu.io/|version|/_downloads/docker-compose.yml
+  wget https://mailu.io/|version|/_downloads/.env
 
 Then open the ``.env`` file to setup the mail server. Modify the ``ROOT`` setting
 to match your setup directory if different from ``/mailu``.
@@ -50,11 +45,11 @@ you would simply like the server to listen on all interfaces, use ``0.0.0.0``.
 Modify ``BIND_ADDRESS6`` to match the public IPv6 address assigned to your server.
 The behavior is identical to ``BIND_ADDRESS4``.
 
-Set the `TLS_FLAVOR` to one of the following
+Set the ``TLS_FLAVOR`` to one of the following
 values:
-- `cert` is the default and requires certificates to be setup manually;
-- `letsencrypt` will use the Letsencrypt! CA to generate automatic ceriticates;
-- `notls` will disable TLS, this is not recommended except for testing.
+- ``cert`` is the default and requires certificates to be setup manually;
+- ``letsencrypt`` will use the Letsencrypt! CA to generate automatic ceriticates;
+- ``notls`` will disable TLS, this is not recommended except for testing.
 
 Enable optional features
 ------------------------

@@ -3,7 +3,6 @@ version: '2'
 services:
 
   front:
-    # build: nginx
     image: mailu/nginx:$VERSION
     restart: always
     env_file: .env
@@ -36,7 +35,6 @@ services:
       - "$ROOT/redis:/data"
 
   imap:
-    # build: dovecot
     image: mailu/dovecot:$VERSION
     restart: always
     env_file: .env
@@ -46,7 +44,6 @@ services:
       - "$ROOT/overrides:/overrides"
 
   smtp:
-    # build: postfix
     image: mailu/postfix:$VERSION
     restart: always
     env_file: .env
@@ -55,7 +52,6 @@ services:
       - "$ROOT/overrides:/overrides"
 
   antispam:
-    # build: rspamd
     image: mailu/rspamd:$VERSION
     restart: always
     env_file: .env
@@ -64,7 +60,6 @@ services:
       - "$ROOT/overrides/rspamd:/etc/rspamd/override.d"
 
   antivirus:
-    # build: clamav
     image: mailu/$ANTIVIRUS:$VERSION
     restart: always
     env_file: .env
@@ -72,7 +67,6 @@ services:
       - "$ROOT/filter:/data"
 
   webdav:
-    # build: $WEBDAV
     image: mailu/$WEBDAV:$VERSION
     restart: always
     env_file: .env
@@ -80,7 +74,6 @@ services:
       - "$ROOT/dav:/data"
 
   admin:
-    # build: admin
     image: mailu/admin:$VERSION
     restart: always
     env_file: .env
@@ -90,7 +83,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   webmail:
-    # build: "$WEBMAIL"
     image: "mailu/$WEBMAIL:$VERSION"
     restart: always
     env_file: .env
@@ -98,7 +90,6 @@ services:
       - "$ROOT/webmail:/data"
 
   fetchmail:
-    # build: fetchmail
     image: mailu/fetchmail:$VERSION
     restart: always
     env_file: .env

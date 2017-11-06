@@ -68,10 +68,10 @@ configuration option must be one of the following:
 - ``rainloop`` will run the popular Rainloop Webmail.
 
 The administration interface is not exposed on the public address by default,
-you will need to set the ``EXPOSE_ADMIN`` variable accordingly:
+you will need to set the ``ADMIN`` variable accordingly:
 
-- ``yes`` will expose the admin interface in ``/admin``;
-- ``no`` (or any other value) will disable this behaviour.
+- ``true`` will expose the admin interface in ``/admin``;
+- ``false`` (or any other value) will disable this behaviour.
 
 A Webdav server exposes a Dav interface over HTTP so that clients can store
 contacts or calendars using the mail account. This can be enabled using the `WEBDAV`

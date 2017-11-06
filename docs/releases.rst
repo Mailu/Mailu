@@ -35,20 +35,17 @@ and bug fixes.
 **If you are upgrading**, please go through the setup guide and download the
 latest ``docker-compose.yml`` and ``.env``, then update them with your
 sepcific settings, because more than 50% of these templates was rewritten.
-You should then be able to simply pull and start your new e-mail stack with
+You should then be able to pull and start your new e-mail stack with
 no issue, simply remove orphaned container, since some were renamed and others
-were simply removed (e.g. rmilter):
+were removed (e.g. rmilter):
 
 .. code-block:: bash
 
   docker-compose pull
-  docker-compose up -d --remove-oprhans
+  docker-compose up -d --remove-orphans
 
-If you experience issues when upgrading, feel free to post issues and contact
+If you experience problems when upgrading, feel free to post issues and contact
 us on our chat channel for emergency support.
-
-The branch should be considered stable, but the ``stable`` reference will not
-be moved to ``1.5`` until as many users as possible have migrated.
 
 Regarding statistics, Mailu has gone from "no tracker at all" to a tracker that
 we find is designed to preserve privacy and security as much as possible. Your

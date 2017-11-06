@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 #
 
-extensions = ['sphinx.ext.imgmath',
-    'sphinx.ext.viewcode']
+import os, sys, docutils
+
+sys.path.append(os.path.dirname(__file__))
+extensions = ['sphinx.ext.imgmath', 'sphinx.ext.viewcode', 'conf']
 templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
@@ -36,6 +38,16 @@ html_context = {
     'github_version': 'master',
     'conf_py_path': '/docs/'
 }
+
+
+def setup(app):
+    """ The configuration acts as an extension itself.
+    """
+    def var_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+        return [docutils.nodes.Text(html_context.get(text, ""))], []
+
+    app.add_role("var", var_role)
+
 
 # Upload function when the script is called directly
 if __name__ == "__main__":

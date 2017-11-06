@@ -8,7 +8,7 @@ Mailu uses Babel for internationalization and localization. Before any
 of your work is merged, you must make sure that your strings are internationalized
 using Babel.
 
-If you used ``_``, ``{% trans %}`` and other Babel syntaxes in your code, run the
+If you used ``_``, ``trans`` blocks and other Babel syntaxes in your code, run the
 following command to update the POT file:
 
 .. code-block:: bash

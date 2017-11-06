@@ -41,12 +41,17 @@ html_context = {
 
 
 def setup(app):
-    """ The configuration acts as an extension itself.
+    """ The conf itself is an extension for parsing rst.
     """
-    def var_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
-        return [docutils.nodes.Text(html_context.get(text, ""))], []
+    def rstjinja(app, docname, source):
+        """ Render our pages as a jinja template for fancy templating.
+        """
+        if app.builder.format != 'html':
+            return
+        source[0] = app.builder.templates.render_string(
+            source[0], app.config.html_context)
 
-    app.add_role("var", var_role)
+    app.connect("source-read", rstjinja)
 
 
 # Upload function when the script is called directly

@@ -26,7 +26,7 @@ for trust in a specific branch of the project, we can switch to a shared
 repository and add a couple of trusted committers.
 
 Commits
-``````
+```````
 
 This is a community project, thus commits should be readable enough for any of
 the contributors to guess the content by simply reading the comment or find a

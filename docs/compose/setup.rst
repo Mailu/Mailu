@@ -47,8 +47,11 @@ The behavior is identical to ``BIND_ADDRESS4``.
 
 Set the ``TLS_FLAVOR`` to one of the following
 values:
+
 - ``cert`` is the default and requires certificates to be setup manually;
 - ``letsencrypt`` will use the Letsencrypt! CA to generate automatic ceriticates;
+- ``mail`` is similar to ``cert`` except that TLS will only be served for
+  emails (IMAP and SMTP), not HTTP (use it behind reverse proxies);
 - ``notls`` will disable TLS, this is not recommended except for testing.
 
 Enable optional features

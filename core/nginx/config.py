@@ -2,13 +2,14 @@
 
 import jinja2
 import os
-	
+
 convert = lambda src, dst, args: open(dst, "w").write(jinja2.Template(open(src).read()).render(**args))
 
 args = os.environ.copy()
 
 args["TLS"] = {
     "cert": ("/certs/cert.pem", "/certs/key.pem"),
+    "mail": ("/certs/cert.pem", "/certs/key.pem"),
     "letsencrypt": ("/certs/letsencrypt/live/mailu/fullchain.pem",
         "/certs/letsencrypt/live/mailu/privkey.pem"),
     "notls": None

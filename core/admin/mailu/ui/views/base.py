@@ -54,7 +54,7 @@ def announcement():
         app.config['POSTMASTER'], app.config['DOMAIN'])
     form = forms.AnnouncementForm()
     if form.validate_on_submit():
-        with smtplib.SMTP('smtp') as smtp:
+        with smtplib.SMTP('smtp', port=10025) as smtp:
             for recipient in [user.email for user in models.User.query.all()]:
                 msg = text.MIMEText(form.announcement_body.data)
                 msg['Subject'] = form.announcement_subject.data

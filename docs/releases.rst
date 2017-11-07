@@ -28,6 +28,16 @@ the main frontend container and terminates all connections, performing
 TLS and authentication directly. Letsencrypt support is now more complete,
 with various TLS "flavors" for all kinds of setup.
 
+Finally, a big change about how versions are managed: the ``stable`` branch
+will be deprecated with the end of branch ``1.4``. Mailu will now only publish
+branches per version, as any version jump requires manual updates anyway. This
+will avoid confusion about which branch is currently considered *the* stable
+one. End of support for branches will happen after 2 version changes (e.g.
+end of support for branch ``1.4`` will happen when branch ``1.6`` is released).
+Finally, intermediary versions backporting some important features will be
+branched as subversions first (branch ``1.5.1`` for instance), then merge in
+the branch version once enough testing has happened.
+
 More details about the changes are available in the `changelog`_, and this
 release will be followed by a short-term upgrade including some more features
 and bug fixes.

@@ -1,5 +1,27 @@
 from mailu import app, manager, db, models
 
+import os
+import socket
+import uuid
+
+
+@manager.command
+def advertise():
+    """ Advertise this server against statistic services.
+    """
+    if os.path.isfile(app.config["INSTANCE_ID_PATH"]):
+        with open(app.config["INSTANCE_ID_PATH"], "r") as handle:
+            instance_id = handle.read()
+    else:
+        instance_id = str(uuid.uuid4())
+        with open(app.config["INSTANCE_ID_PATH"], "w") as handle:
+            handle.write(instance_id)
+    if app.config["DISABLE_STATISTICS"].lower() != "true":
+        try:
+            socket.gethostbyname(app.config["STATS_ENDPOINT"].format(instance_id))
+        except:
+            pass
+
 
 @manager.command
 def admin(localpart, domain_name, password):
@@ -51,7 +73,7 @@ def domain(domain_name, max_users=0, max_aliases=0, max_quota_bytes=0):
 
 
 @manager.command
-def user_import(localpart, domain_name, password_hash, 
+def user_import(localpart, domain_name, password_hash,
                 hash_scheme=app.config['PASSWORD_SCHEME']):
     """ Import a user along with password hash. Available hashes:
                    'SHA512-CRYPT'

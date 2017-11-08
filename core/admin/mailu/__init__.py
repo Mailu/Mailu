@@ -55,20 +55,6 @@ db = flask_sqlalchemy.SQLAlchemy(app)
 migrate = flask_migrate.Migrate(app, db)
 limiter = flask_limiter.Limiter(app, key_func=lambda: current_user.username)
 
-# Run statistics
-if os.path.isfile(app.config["INSTANCE_ID_PATH"]):
-    with open(app.config["INSTANCE_ID_PATH"], "r") as handle:
-        instance_id = handle.read()
-else:
-    instance_id = str(uuid.uuid4())
-    with open(app.config["INSTANCE_ID_PATH"], "w") as handle:
-        handle.write(instance_id)
-if app.config["DISABLE_STATISTICS"].lower() != "true":
-    try:
-        socket.gethostbyname(app.config["STATS_ENDPOINT"].format(instance_id))
-    except:
-        pass
-
 # Debugging toolbar
 if app.config.get("DEBUG"):
     import flask_debugtoolbar

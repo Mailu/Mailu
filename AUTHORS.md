@@ -20,4 +20,4 @@ Other contributors:
  - Maxime Saddok - French translation
  - "ofthesun9" - French translation
  - "SunMar" - Dutch translation
-
+ - "Marty Hou" - Chinese Simple translation

@@ -34,3 +34,10 @@ map {
   username_field = email
   value_field = reply_body
 }
+
+map {
+  pattern = priv/reply_enddate
+  table = user
+  username_field = email
+  value_field = reply_enddate
+}

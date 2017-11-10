@@ -26,7 +26,7 @@ $config['smtp_pass'] = '%p';
 
 // Sieve script management
 $config['managesieve_host'] = 'imap';
-$config['managesieve_usetls'] = true;
+$config['managesieve_usetls'] = false;
 
 // We access the IMAP and SMTP servers locally with internal names, SSL
 // will obviously fail but this sounds better than allowing insecure login

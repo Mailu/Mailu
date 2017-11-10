@@ -3,7 +3,7 @@ connect = /data/main.db
 
 # Return the user hashed password
 password_query = \
- SELECT NULL as password, 'Y' as nopassword, '{{ FRONT_ADDRESS }}' as allow_nets \
+ SELECT NULL as password, 'Y' as nopassword, '{{ FRONT_ADDRESS }}{% if WEBMAIL_ADDRESS %},{{ WEBMAIL_ADDRESS }}{% endif %}' as allow_nets \
    FROM user \
   WHERE user.email = '%u'
 

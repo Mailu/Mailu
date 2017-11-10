@@ -11,7 +11,7 @@ STATUSES = {
     "authentication": ("Authentication credentials invalid", {
         "imap": "AUTHENTICATIONFAILED",
         "smtp": "535 5.7.8",
-        "pop3": ""
+        "pop3": "-ERR Authentication failed"
     }),
 }
 
@@ -52,16 +52,14 @@ def handle_authentication(headers):
                     "Auth-Server": server,
                     "Auth-Port": port
                 }
-        else:
-            status, code = get_status(protocol, "authentication")
-            return {
-                "Auth-Status": status,
-                "Auth-Error-Code": code,
-                "Auth-Wait": 0
-            }
+        status, code = get_status(protocol, "authentication")
+        return {
+            "Auth-Status": status,
+            "Auth-Error-Code": code,
+            "Auth-Wait": 0
+        }
     # Unexpected
-    else:
-        return {}
+    return {}
 
 
 def get_status(protocol, status):

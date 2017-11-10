@@ -36,7 +36,7 @@
         <i class="fa fa-ticket"></i> <span>{% trans %}Authentication tokens{% endtrans %}</span>
       </a>
     </li>
-    
+
     <li class="header">{% trans %}Administration{% endtrans %}</li>
     {% if current_user.global_admin %}
     <li>
@@ -57,6 +57,11 @@
     <li>
       <a href="{{ url_for('.relay_list') }}">
         <i class="fa fa-reply-all"></i> <span>{% trans %}Relayed domains{% endtrans %}</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ config["WEB_ADMIN"] }}/antispam/">
+        <i class="fa fa-trash-o"></i> <span>{% trans %}Antispam{% endtrans %}</span>
       </a>
     </li>
     {% endif %}

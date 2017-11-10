@@ -45,7 +45,8 @@ default_config = {
     'DISABLE_STATISTICS': 'False',
     'WELCOME': 'False',
     'WELCOME_SUBJECT': 'Dummy welcome topic',
-    'WELCOME_BODY': 'Dummy welcome body'
+    'WELCOME_BODY': 'Dummy welcome body',
+    'WEB_ADMIN': '/admin'
 }
 
 # Load configuration from the environment if available
@@ -78,12 +79,12 @@ def get_locale():
 # Login configuration
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = ".login"
+login_manager.login_view = "ui.login"
 
 @login_manager.unauthorized_handler
 def handle_needs_login():
     return flask.redirect(
-        flask.url_for('.login', next=flask.request.endpoint)
+        flask.url_for('ui.login', next=flask.request.endpoint)
     )
 
 @app.context_processor

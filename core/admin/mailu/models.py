@@ -3,11 +3,14 @@ from mailu import app, db, dkim, login_manager
 from sqlalchemy.ext import declarative
 from passlib import context, hash
 from datetime import datetime
+from email.mime import text
+
 
 import re
 import time
 import os
 import glob
+import smtplib
 
 
 # Many-to-many association table for domain managers
@@ -153,6 +156,18 @@ class Email(object):
             primary_key=True, nullable=False,
             default=updater)
 
+    def sendmail(self, subject, body):
+        """ Send an email to the address.
+        """
+        from_address = '{}@{}'.format(
+            app.config['POSTMASTER'], app.config['DOMAIN'])
+        with smtplib.SMTP('smtp', port=10025) as smtp:
+            msg = text.MIMEText(body)
+            msg['Subject'] = subject
+            msg['From'] = from_address
+            msg['To'] = self.email
+            smtp.sendmail(from_address, [self.email], msg.as_string())
+
     def __str__(self):
         return self.email
 
@@ -229,6 +244,11 @@ class User(Base, Email):
             if include_aliases:
                 emails.extend(domain.aliases)
         return emails
+
+    def send_welcome(self):
+        if app.config["WELCOME"].lower() == "true":
+            self.sendmail(app.config["WELCOME_SUBJECT"],
+                app.config["WELCOME_BODY"])
 
     @classmethod
     def login(cls, email, password):

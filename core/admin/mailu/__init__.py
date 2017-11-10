@@ -48,6 +48,7 @@ default_config = {
     'SITENAME': 'Mailu',
     'WEBSITE': 'https://mailu.io',
     'WEB_ADMIN': '/admin',
+    'WEB_WEBMAIL': '/webmail',
     # Advanced settings
     'PASSWORD_SCHEME': 'SHA512-CRYPT',
 }

@@ -77,18 +77,18 @@
     <li class="header">{% trans %}Go to{% endtrans %}</li>
     {% if config["WEBMAIL"] != "none" %}
     <li>
-      <a href="/webmail/">
+      <a href="{{ config["WEB_WEBMAIL"] }}/">
         <i class="fa fa-envelope-o"></i> <span>{% trans %}Webmail{% endtrans %}</span>
       </a>
     </li>
     {% endif %}
     <li>
-      <a href="https://mailu.io">
+      <a href="{{ config["WEBSITE"] }}">
         <i class="fa fa-globe"></i> <span>{% trans %}Website{% endtrans %}</span>
       </a>
     </li>
     <li>
-      <a href="https://github.com/Mailu/Mailu">
+      <a href="https://mailu.io">
         <i class="fa fa-life-ring"></i> <span>{% trans %}Help{% endtrans %}</span>
       </a>
     </li>

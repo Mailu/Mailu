@@ -1,6 +1,29 @@
 from mailu import manager, db
 from mailu.admin import models
 
+import os
+import socket
+import uuid
+
+
+@manager.command
+def advertise():
+    """ Advertise this server against statistic services.
+    """
+    filepath = "/data/instance"
+    endpoint = "14.{}.stats.mailu.io"
+    if os.path.isfile(filepath):
+        with open(filepath, "r") as handle:
+            instance_id = handle.read()
+    else:
+        instance_id = str(uuid.uuid4())
+        with open(filepath, "w") as handle:
+            handle.write(instance_id)
+    try:
+        socket.gethostbyname(endpoint.format(instance_id))
+    except:
+        pass
+
 
 @manager.command
 def flushdb():

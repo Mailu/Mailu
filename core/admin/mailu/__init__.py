@@ -42,7 +42,10 @@ default_config = {
     'WEBMAIL': 'none',
     'AUTH_RATELIMIT': '10/minute;1000/hour',
     'RATELIMIT_STORAGE_URL': 'redis://redis',
-    'DISABLE_STATISTICS': 'False'
+    'DISABLE_STATISTICS': 'False',
+    'WELCOME': 'False',
+    'WELCOME_SUBJECT': 'Dummy welcome topic',
+    'WELCOME_BODY': 'Dummy welcome body'
 }
 
 # Load configuration from the environment if available

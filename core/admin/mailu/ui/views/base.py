@@ -3,9 +3,7 @@ from mailu.ui import ui, forms, access
 
 import flask
 import flask_login
-import smtplib
 
-from email.mime import text
 from urllib import parse
 
 
@@ -50,20 +48,13 @@ def services():
 @ui.route('/announcement', methods=['GET', 'POST'])
 @access.global_admin
 def announcement():
-    from_address = '{}@{}'.format(
-        app.config['POSTMASTER'], app.config['DOMAIN'])
     form = forms.AnnouncementForm()
     if form.validate_on_submit():
-        with smtplib.SMTP('smtp', port=10025) as smtp:
-            for recipient in [user.email for user in models.User.query.all()]:
-                msg = text.MIMEText(form.announcement_body.data)
-                msg['Subject'] = form.announcement_subject.data
-                msg['From'] = from_address
-                msg['To'] = recipient
-                smtp.sendmail(from_address, [recipient], msg.as_string())
+        for user in models.User.query.all():
+            user.sendmail(form.announcement_subject.data,
+                form.announcement_body.data)
         # Force-empty the form
         form.announcement_subject.data = ''
         form.announcement_body.data = ''
         flask.flash('Your announcement was sent', 'success')
-    return flask.render_template('announcement.html', form=form,
-        from_address=from_address)
+    return flask.render_template('announcement.html', form=form)

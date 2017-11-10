@@ -35,6 +35,7 @@ def user_create(domain_name):
             user.set_password(form.pw.data)
             db.session.add(user)
             db.session.commit()
+            user.send_welcome()
             flask.flash('User %s created' % user)
             return flask.redirect(
                 flask.url_for('.user_list', domain_name=domain.name))

@@ -101,6 +101,7 @@ class UserReplyForm(flask_wtf.FlaskForm):
     reply_subject = fields.StringField(_('Reply subject'))
     reply_body = fields.StringField(_('Reply body'),
         widget=widgets.TextArea())
+    reply_enddate = fields.html5.DateField(_('End of vacation'))
     submit = fields.SubmitField(_('Update'))
 
 

@@ -13,12 +13,14 @@
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.reply_enabled,
-      onchange="if(this.checked){$('#reply_subject,#reply_body').removeAttr('readonly')}
-                else{$('#reply_subject,#reply_body').attr('readonly', '')}") }}
+      onchange="if(this.checked){$('#reply_subject,#reply_body,#reply_enddate').removeAttr('readonly')}
+                else{$('#reply_subject,#reply_body,#reply_enddate').attr('readonly', '')}") }}
   {{ macros.form_field(form.reply_subject,
       **{("rw" if user.reply_enabled else "readonly"): ""}) }}
     {{ macros.form_field(form.reply_body, rows=10,
         **{("rw" if user.reply_enabled else "readonly"): ""}) }}
+  {{ macros.form_field(form.reply_enddate,
+      **{("rw" if user.reply_enabled else "readonly"): ""}) }}
   {{ macros.form_field(form.submit) }}
 </form>
 {% endcall %}

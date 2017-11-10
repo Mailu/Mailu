@@ -1,9 +1,10 @@
 FROM alpine:edge
 
-RUN apk add --no-cache rspamd ca-certificates
+RUN apk add --no-cache python py-jinja2 rspamd rspamd-controller rspamd-proxy ca-certificates
 
 RUN mkdir /run/rspamd
 
-COPY conf/ /etc/rspamd
+COPY conf/ /conf
+COPY start.py /start.py
 
-CMD ["rspamd", "-i", "-f"]
+CMD /start.py

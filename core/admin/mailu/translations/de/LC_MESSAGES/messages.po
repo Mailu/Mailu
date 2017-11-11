@@ -1,22 +1,11 @@
-# German translations for Mailu.
-# Copyright (C) 2016 Mailu
-# This file is distributed under the same license as the PROJECT project.
-# Stefan Auditor <stefan.auditor@erdfisch.de>, 2016.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: stefan.auditor@erdfisch.de\n"
-"POT-Creation-Date: 2017-11-05 17:17+0100\n"
-"PO-Revision-Date: 2016-11-09 21:43+0100\n"
-"Last-Translator: Stefan Auditor <stefan.auditor@erdfisch.de>\n"
-"Language: de\n"
-"Language-Team: Mailu German Team <stefan.auditor@erdfisch.de>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: Mailu\n"
+"Language: de\n"
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."
@@ -53,10 +42,6 @@ msgstr "Maximale Anzahl Benutzer"
 msgid "Maximum alias count"
 msgstr "Maximale Anzahl Aliase"
 
-#: mailu/ui/forms.py:49
-msgid "Maximum user quota"
-msgstr ""
-
 #: mailu/ui/forms.py:50 mailu/ui/forms.py:62 mailu/ui/forms.py:73
 #: mailu/ui/forms.py:112 mailu/ui/forms.py:124
 #: mailu/ui/templates/alias/list.html:21 mailu/ui/templates/domain/list.html:21
@@ -69,18 +54,6 @@ msgstr "Kommentar"
 #: mailu/ui/forms.py:116 mailu/ui/forms.py:125
 msgid "Create"
 msgstr "Erstellen"
-
-#: mailu/ui/forms.py:55
-msgid "Alternative name"
-msgstr ""
-
-#: mailu/ui/forms.py:60
-msgid "Relayed domain name"
-msgstr ""
-
-#: mailu/ui/forms.py:61 mailu/ui/templates/relay/list.html:18
-msgid "Remote host"
-msgstr ""
 
 #: mailu/ui/forms.py:69
 msgid "Confirm password"
@@ -111,8 +84,8 @@ msgid "Enable spam filter"
 msgstr "Spam-Filter aktivieren"
 
 #: mailu/ui/forms.py:80
-msgid "Spam filter tolerance"
-msgstr ""
+msgid "Spam filter threshold"
+msgstr "Schwellenwert für Spam-Filter"
 
 #: mailu/ui/forms.py:81
 msgid "Save settings"
@@ -120,7 +93,7 @@ msgstr "Einstellungen speichern"
 
 #: mailu/ui/forms.py:86
 msgid "Password check"
-msgstr "Passwort prüfen"
+msgstr "Passwort wiederholen"
 
 #: mailu/ui/forms.py:87 mailu/ui/templates/sidebar.html:16
 msgid "Update password"
@@ -129,10 +102,6 @@ msgstr "Passwort aktualisieren"
 #: mailu/ui/forms.py:91
 msgid "Enable forwarding"
 msgstr "Weiterleitung aktivieren"
-
-#: mailu/ui/forms.py:92
-msgid "Keep a copy of the emails"
-msgstr ""
 
 #: mailu/ui/forms.py:94 mailu/ui/forms.py:123
 #: mailu/ui/templates/alias/list.html:20
@@ -149,19 +118,11 @@ msgstr "Automatische Antwort aktivieren"
 
 #: mailu/ui/forms.py:101
 msgid "Reply subject"
-msgstr "Antwort Betreff"
+msgstr "Betreff"
 
 #: mailu/ui/forms.py:102
 msgid "Reply body"
-msgstr "Antwort Text"
-
-#: mailu/ui/forms.py:109
-msgid "Your token (write it down, as it will never be displayed again)"
-msgstr ""
-
-#: mailu/ui/forms.py:114 mailu/ui/templates/token/list.html:20
-msgid "Authorized IP"
-msgstr ""
+msgstr "Text"
 
 #: mailu/ui/forms.py:120
 msgid "Alias"
@@ -169,7 +130,7 @@ msgstr "Alias"
 
 #: mailu/ui/forms.py:122
 msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"
-msgstr "SQL LIKE Syntax nutzen (z.B. für Catch-All Aliase)"
+msgstr "SQL LIKE Syntax nutzen (z.B. für Catch-All-Aliase)"
 
 #: mailu/ui/forms.py:129
 msgid "Admin email"
@@ -203,36 +164,11 @@ msgstr "Verschlüsselung aktivieren"
 msgid "Username"
 msgstr "Benutzername"
 
-#: mailu/ui/forms.py:147
-msgid "Keep emails on the server"
-msgstr ""
-
-#: mailu/ui/forms.py:152
-msgid "Announcement subject"
-msgstr "Bekanntmachung Betreff"
-
-#: mailu/ui/forms.py:154
-msgid "Announcement body"
-msgstr "Bekanntmachung Text"
-
-#: mailu/ui/forms.py:156
-msgid "Send"
-msgstr "Absenden"
-
-#: mailu/ui/templates/announcement.html:4
-msgid "Public announcement"
-msgstr "Öffentliche Bekanntmachung"
-
-#: mailu/ui/templates/announcement.html:8
-msgid "from"
-msgstr "von"
-
 #: mailu/ui/templates/confirm.html:4
 msgid "Confirm action"
 msgstr "Aktion bestätigen"
 
 #: mailu/ui/templates/confirm.html:13
-#, python-format
 msgid "You are about to %(action)s. Please confirm your action."
 msgstr "Bitte bestätigen: %(action)s."
 
@@ -242,9 +178,11 @@ msgstr "Docker Fehler"
 
 #: mailu/ui/templates/docker-error.html:12
 msgid "An error occurred while talking to the Docker server."
-msgstr ""
-"Während der Kommunikation mit dem Docker Server ist ein Fehler "
-"aufgetreten."
+msgstr "Während der Kommunikation mit dem Docker Server ist ein Fehler aufgetreten."
+
+#: mailu/admin/templates/login.html:6
+msgid "Your account"
+msgstr "Konto"
 
 #: mailu/ui/templates/login.html:8
 msgid "to access the administration tools"
@@ -299,49 +237,25 @@ msgstr "Auto-Antwort"
 msgid "Fetched accounts"
 msgstr "Abgerufene Konten"
 
-#: mailu/ui/templates/sidebar.html:36 mailu/ui/templates/token/list.html:4
-msgid "Authentication tokens"
-msgstr ""
+#: mailu/ui/templates/sidebar.html:93
+msgid "Sign out"
+msgstr "Abmelden"
 
 #: mailu/ui/templates/sidebar.html:40
 msgid "Administration"
 msgstr "Administration"
 
-#: mailu/ui/templates/sidebar.html:49
-msgid "Announcement"
-msgstr "Bekanntmachung"
-
 #: mailu/ui/templates/sidebar.html:54
 msgid "Administrators"
 msgstr "Administratoren"
-
-#: mailu/ui/templates/sidebar.html:59
-msgid "Relayed domains"
-msgstr ""
 
 #: mailu/ui/templates/sidebar.html:66
 msgid "Mail domains"
 msgstr "E-Mail-Domains"
 
-#: mailu/ui/templates/sidebar.html:72
-msgid "Go to"
-msgstr ""
-
-#: mailu/ui/templates/sidebar.html:76
-msgid "Webmail"
-msgstr ""
-
-#: mailu/ui/templates/sidebar.html:82
-msgid "Website"
-msgstr ""
-
 #: mailu/ui/templates/sidebar.html:87
 msgid "Help"
 msgstr "Hilfe"
-
-#: mailu/ui/templates/sidebar.html:93
-msgid "Sign out"
-msgstr "Abmelden"
 
 #: mailu/ui/templates/working.html:4
 msgid "We are still working on this feature!"
@@ -392,7 +306,7 @@ msgstr "Alias bearbeiten"
 
 #: mailu/ui/templates/alias/list.html:4
 msgid "Alias list"
-msgstr "Alias Liste"
+msgstr "Aliase"
 
 #: mailu/ui/templates/alias/list.html:12
 msgid "Add alias"
@@ -418,22 +332,6 @@ msgstr "Zuletzt bearbeitet"
 msgid "Edit"
 msgstr "Bearbeiten"
 
-#: mailu/ui/templates/alternative/create.html:4
-msgid "Create alternative domain"
-msgstr ""
-
-#: mailu/ui/templates/alternative/list.html:4
-msgid "Alternative domain list"
-msgstr ""
-
-#: mailu/ui/templates/alternative/list.html:12
-msgid "Add alternative"
-msgstr ""
-
-#: mailu/ui/templates/alternative/list.html:19
-msgid "Name"
-msgstr ""
-
 #: mailu/ui/templates/domain/create.html:4
 #: mailu/ui/templates/domain/list.html:9
 msgid "New domain"
@@ -441,7 +339,7 @@ msgstr "Neue Domain"
 
 #: mailu/ui/templates/domain/details.html:4
 msgid "Domain details"
-msgstr "Domain Details"
+msgstr "Domain-Details"
 
 #: mailu/ui/templates/domain/details.html:13
 msgid "Regenerate keys"
@@ -473,7 +371,7 @@ msgstr "Domain bearbeiten"
 
 #: mailu/ui/templates/domain/list.html:4
 msgid "Domain list"
-msgstr "Domain Liste"
+msgstr "Domains"
 
 #: mailu/ui/templates/domain/list.html:17
 msgid "Manage"
@@ -481,11 +379,11 @@ msgstr "Verwalten"
 
 #: mailu/ui/templates/domain/list.html:19
 msgid "Mailbox count"
-msgstr "Mailboxen"
+msgstr "Anzahl Mailboxen"
 
 #: mailu/ui/templates/domain/list.html:20
 msgid "Alias count"
-msgstr "Aliase"
+msgstr "Anzahl Aliase"
 
 #: mailu/ui/templates/domain/list.html:28
 msgid "Details"
@@ -503,10 +401,6 @@ msgstr "Aliase"
 msgid "Managers"
 msgstr "Manager"
 
-#: mailu/ui/templates/domain/list.html:39
-msgid "Alternatives"
-msgstr ""
-
 #: mailu/ui/templates/fetch/create.html:4
 msgid "Add a fetched account"
 msgstr "Externes Konto hinzufügen"
@@ -523,21 +417,9 @@ msgstr "Konto hinzufügen"
 msgid "Endpoint"
 msgstr "Endpunkt"
 
-#: mailu/ui/templates/fetch/list.html:21
-msgid "Keep emails"
-msgstr ""
-
 #: mailu/ui/templates/fetch/list.html:22
 msgid "Last check"
 msgstr "Letzte Prüfung"
-
-#: mailu/ui/templates/fetch/list.html:35
-msgid "yes"
-msgstr ""
-
-#: mailu/ui/templates/fetch/list.html:35
-msgid "no"
-msgstr ""
 
 #: mailu/ui/templates/manager/create.html:4
 msgid "Add a manager"
@@ -545,47 +427,39 @@ msgstr "Einen Manager hinzufügen"
 
 #: mailu/ui/templates/manager/list.html:4
 msgid "Manager list"
-msgstr "Manager Liste"
+msgstr "Manager"
 
 #: mailu/ui/templates/manager/list.html:12
 msgid "Add manager"
 msgstr "Manager hinzufügen"
 
-#: mailu/ui/templates/relay/create.html:4
-msgid "New relay domain"
-msgstr ""
+#: mailu/ui/forms.py:152
+msgid "Announcement subject"
+msgstr "Betreff"
 
-#: mailu/ui/templates/relay/edit.html:4
-msgid "Edit relayd domain"
-msgstr ""
+#: mailu/ui/forms.py:154
+msgid "Announcement body"
+msgstr "Text"
 
-#: mailu/ui/templates/relay/list.html:4
-msgid "Relayed domain list"
-msgstr ""
+#: mailu/ui/forms.py:156
+msgid "Send"
+msgstr "Absenden"
 
-#: mailu/ui/templates/relay/list.html:9
-msgid "New relayed domain"
-msgstr ""
+#: mailu/ui/templates/announcement.html:4
+msgid "Public announcement"
+msgstr "Öffentliche Bekanntmachung"
 
-#: mailu/ui/templates/token/create.html:4
-msgid "Create an authentication token"
-msgstr ""
+#: mailu/ui/templates/announcement.html:8
+msgid "from"
+msgstr "von"
 
-#: mailu/ui/templates/token/list.html:12
-msgid "New token"
-msgstr ""
+#: mailu/ui/templates/sidebar.html:49
+msgid "Announcement"
+msgstr "Bekanntmachung"
 
 #: mailu/ui/templates/user/create.html:4
 msgid "New user"
 msgstr "Neuer Benutzer"
-
-#: mailu/ui/templates/user/create.html:15
-msgid "General"
-msgstr ""
-
-#: mailu/ui/templates/user/create.html:21
-msgid "Features and quotas"
-msgstr ""
 
 #: mailu/ui/templates/user/edit.html:4
 msgid "Edit user"
@@ -597,7 +471,7 @@ msgstr "E-Mails weiterleiten"
 
 #: mailu/ui/templates/user/list.html:4
 msgid "User list"
-msgstr "Benutzerliste"
+msgstr "Benutzer"
 
 #: mailu/ui/templates/user/list.html:12
 msgid "Add user"
@@ -605,7 +479,7 @@ msgstr "Benutzer hinzufügen"
 
 #: mailu/ui/templates/user/list.html:19 mailu/ui/templates/user/settings.html:4
 msgid "User settings"
-msgstr "Benutzer Einstellungen"
+msgstr "Einstellungen"
 
 #: mailu/ui/templates/user/list.html:21
 msgid "Features"
@@ -619,17 +493,131 @@ msgstr "Passwort aktualisieren"
 msgid "Automatic reply"
 msgstr "Automatische Antwort"
 
+#: mailu/ui/forms.py:49
+msgid "Maximum user quota"
+msgstr "Maximale Quota pro Benutzer"
+
+#: mailu/ui/forms.py:92
+msgid "Keep a copy of the emails"
+msgstr "Kopie der E-Mails behalten"
+
+#: mailu/ui/forms.py:147
+msgid "Keep emails on the server"
+msgstr "E-Mails auf dem Server belassen"
+
+#: mailu/ui/templates/fetch/list.html:21
+msgid "Keep emails"
+msgstr "E-Mails behalten"
+
+#: mailu/ui/templates/fetch/list.html:35
+msgid "yes"
+msgstr "ja"
+
+#: mailu/ui/templates/fetch/list.html:35
+msgid "no"
+msgstr "nein"
+
+#: mailu/ui/forms.py:55
+msgid "Alternative name"
+msgstr "Alternativer Name"
+
+#: mailu/ui/forms.py:60
+msgid "Relayed domain name"
+msgstr "Relay-Domain-Name"
+
+#: mailu/ui/forms.py:61 mailu/ui/templates/relay/list.html:18
+msgid "Remote host"
+msgstr "Entfernter Host"
+
+#: mailu/ui/templates/sidebar.html:59
+msgid "Relayed domains"
+msgstr "Relay-Domains"
+
+#: mailu/ui/templates/alternative/create.html:4
+msgid "Create alternative domain"
+msgstr "Alternative Domain erstellen"
+
+#: mailu/ui/templates/alternative/list.html:4
+msgid "Alternative domain list"
+msgstr "Alternative Domains"
+
+#: mailu/ui/templates/alternative/list.html:12
+msgid "Add alternative"
+msgstr "Alternative hinzufügen"
+
+#: mailu/ui/templates/alternative/list.html:19
+msgid "Name"
+msgstr "Name"
+
+#: mailu/ui/templates/domain/list.html:39
+msgid "Alternatives"
+msgstr "Alternativen"
+
+#: mailu/ui/templates/relay/create.html:4
+msgid "New relay domain"
+msgstr "Neue Relay-Domain"
+
+#: mailu/ui/templates/relay/edit.html:4
+msgid "Edit relayd domain"
+msgstr "Relay-Domain bearbeiten"
+
+#: mailu/ui/templates/relay/list.html:4
+msgid "Relayed domain list"
+msgstr "Relay-Domains"
+
+#: mailu/ui/templates/relay/list.html:9
+msgid "New relayed domain"
+msgstr "Neue Relay-Domain"
+
+#: mailu/ui/forms.py:109
+msgid "Your token (write it down, as it will never be displayed again)"
+msgstr "Token (bitte speichern, da er hier nach nicht mehr angezeigt wird)"
+
+#: mailu/ui/forms.py:114 mailu/ui/templates/token/list.html:20
+msgid "Authorized IP"
+msgstr "Authorisierte IP-Adresse"
+
+#: mailu/ui/templates/sidebar.html:36 mailu/ui/templates/token/list.html:4
+msgid "Authentication tokens"
+msgstr "Authentifizierungs-Tokens"
+
+#: mailu/ui/templates/sidebar.html:72
+msgid "Go to"
+msgstr "Wechseln zu"
+
+#: mailu/ui/templates/sidebar.html:76
+msgid "Webmail"
+msgstr "Webmail"
+
+#: mailu/ui/templates/sidebar.html:82
+msgid "Website"
+msgstr "Website"
+
+#: mailu/ui/templates/token/create.html:4
+msgid "Create an authentication token"
+msgstr "Authentifizierungs-Token erstellen"
+
+#: mailu/ui/templates/token/list.html:12
+msgid "New token"
+msgstr "Neuer Token"
+
+#: mailu/ui/templates/user/create.html:15
+msgid "General"
+msgstr "Allgemein"
+
+#: mailu/ui/templates/user/create.html:21
+msgid "Features and quotas"
+msgstr "Funktionen und Quotas"
+
 #: mailu/ui/templates/user/settings.html:14
 msgid "General settings"
-msgstr ""
+msgstr "Allgemeine Einstellungen"
 
 #: mailu/ui/templates/user/settings.html:18
 msgid "Antispam"
+msgstr "Antispam"
+
+#: mailu/ui/forms.py:80
+msgid "Spam filter tolerance"
 msgstr ""
-
-#~ msgid "Your account"
-#~ msgstr "Konto"
-
-#~ msgid "Spam filter threshold"
-#~ msgstr "Spam-Filter Schwellenwert"
 

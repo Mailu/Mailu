@@ -27,6 +27,8 @@ services:
     - "$BIND_ADDRESS6:587:587"
     volumes:
       - "$ROOT/certs:/certs"
+    depends_on:
+      - admin
 
   redis:
     image: redis:latest
@@ -42,6 +44,8 @@ services:
       - "$ROOT/data:/data"
       - "$ROOT/mail:/mail"
       - "$ROOT/overrides:/overrides"
+    depends_on:
+      - front
 
   smtp:
     image: mailu/postfix:$VERSION
@@ -50,6 +54,8 @@ services:
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/overrides:/overrides"
+    depends_on:
+      - front
 
   antispam:
     image: mailu/rspamd:$VERSION
@@ -59,6 +65,8 @@ services:
       - "$ROOT/filter:/var/lib/rspamd"
       - "$ROOT/dkim:/dkim"
       - "$ROOT/overrides/rspamd:/etc/rspamd/override.d"
+    depends_on:
+      - front
 
   antivirus:
     image: mailu/$ANTIVIRUS:$VERSION

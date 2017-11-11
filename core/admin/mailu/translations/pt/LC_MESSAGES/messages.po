@@ -1,22 +1,11 @@
-# Portuguese (Brazil) translations for PROJECT.
-# Copyright (C) 2016 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-11-05 17:17+0100\n"
-"PO-Revision-Date: 2017-03-27 11:43-0300\n"
-"Last-Translator: \n"
-"Language: pt_BR\n"
-"Language-Team: \n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: Mailu\n"
+"Language: pt\n"
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."
@@ -53,10 +42,6 @@ msgstr "Quantidade máxima de usuários"
 msgid "Maximum alias count"
 msgstr "Quantidade máxima de alias"
 
-#: mailu/ui/forms.py:49
-msgid "Maximum user quota"
-msgstr ""
-
 #: mailu/ui/forms.py:50 mailu/ui/forms.py:62 mailu/ui/forms.py:73
 #: mailu/ui/forms.py:112 mailu/ui/forms.py:124
 #: mailu/ui/templates/alias/list.html:21 mailu/ui/templates/domain/list.html:21
@@ -69,18 +54,6 @@ msgstr "Comentário"
 #: mailu/ui/forms.py:116 mailu/ui/forms.py:125
 msgid "Create"
 msgstr "Criar"
-
-#: mailu/ui/forms.py:55
-msgid "Alternative name"
-msgstr ""
-
-#: mailu/ui/forms.py:60
-msgid "Relayed domain name"
-msgstr ""
-
-#: mailu/ui/forms.py:61 mailu/ui/templates/relay/list.html:18
-msgid "Remote host"
-msgstr ""
 
 #: mailu/ui/forms.py:69
 msgid "Confirm password"
@@ -111,8 +84,8 @@ msgid "Enable spam filter"
 msgstr "Habilitar filtro de spam"
 
 #: mailu/ui/forms.py:80
-msgid "Spam filter tolerance"
-msgstr ""
+msgid "Spam filter threshold"
+msgstr "Limite de filtro de spam"
 
 #: mailu/ui/forms.py:81
 msgid "Save settings"
@@ -129,10 +102,6 @@ msgstr "Alterar senha"
 #: mailu/ui/forms.py:91
 msgid "Enable forwarding"
 msgstr "Habilitar encaminhamento"
-
-#: mailu/ui/forms.py:92
-msgid "Keep a copy of the emails"
-msgstr ""
 
 #: mailu/ui/forms.py:94 mailu/ui/forms.py:123
 #: mailu/ui/templates/alias/list.html:20
@@ -154,14 +123,6 @@ msgstr "Assunto da resposta"
 #: mailu/ui/forms.py:102
 msgid "Reply body"
 msgstr "Corpo da resposta"
-
-#: mailu/ui/forms.py:109
-msgid "Your token (write it down, as it will never be displayed again)"
-msgstr ""
-
-#: mailu/ui/forms.py:114 mailu/ui/templates/token/list.html:20
-msgid "Authorized IP"
-msgstr ""
 
 #: mailu/ui/forms.py:120
 msgid "Alias"
@@ -203,36 +164,11 @@ msgstr "Habilitar TLS"
 msgid "Username"
 msgstr "Usuário"
 
-#: mailu/ui/forms.py:147
-msgid "Keep emails on the server"
-msgstr "Manter os e-mails no servidor"
-
-#: mailu/ui/forms.py:152
-msgid "Announcement subject"
-msgstr "Título do comunicado"
-
-#: mailu/ui/forms.py:154
-msgid "Announcement body"
-msgstr "Corpo do comunicado"
-
-#: mailu/ui/forms.py:156
-msgid "Send"
-msgstr "Enviar"
-
-#: mailu/ui/templates/announcement.html:4
-msgid "Public announcement"
-msgstr "Comunicado geral"
-
-#: mailu/ui/templates/announcement.html:8
-msgid "from"
-msgstr "de"
-
 #: mailu/ui/templates/confirm.html:4
 msgid "Confirm action"
 msgstr "Confirmar ação"
 
 #: mailu/ui/templates/confirm.html:13
-#, python-format
 msgid "You are about to %(action)s. Please confirm your action."
 msgstr "Por favor, confirme a(s) %(action)s"
 
@@ -243,6 +179,10 @@ msgstr "Erro no docker"
 #: mailu/ui/templates/docker-error.html:12
 msgid "An error occurred while talking to the Docker server."
 msgstr "Um erro foi encontrado na conexão com o servidor Docker"
+
+#: mailu/admin/templates/login.html:6
+msgid "Your account"
+msgstr "Sua conta"
 
 #: mailu/ui/templates/login.html:8
 msgid "to access the administration tools"
@@ -297,49 +237,25 @@ msgstr "Resposta automática"
 msgid "Fetched accounts"
 msgstr "Contas importadas"
 
-#: mailu/ui/templates/sidebar.html:36 mailu/ui/templates/token/list.html:4
-msgid "Authentication tokens"
-msgstr ""
+#: mailu/ui/templates/sidebar.html:93
+msgid "Sign out"
+msgstr "Sair"
 
 #: mailu/ui/templates/sidebar.html:40
 msgid "Administration"
 msgstr "Administração"
 
-#: mailu/ui/templates/sidebar.html:49
-msgid "Announcement"
-msgstr "Comunicado"
-
 #: mailu/ui/templates/sidebar.html:54
 msgid "Administrators"
 msgstr "Administradores"
-
-#: mailu/ui/templates/sidebar.html:59
-msgid "Relayed domains"
-msgstr ""
 
 #: mailu/ui/templates/sidebar.html:66
 msgid "Mail domains"
 msgstr "Domínios de e-mail"
 
-#: mailu/ui/templates/sidebar.html:72
-msgid "Go to"
-msgstr ""
-
-#: mailu/ui/templates/sidebar.html:76
-msgid "Webmail"
-msgstr ""
-
-#: mailu/ui/templates/sidebar.html:82
-msgid "Website"
-msgstr ""
-
 #: mailu/ui/templates/sidebar.html:87
 msgid "Help"
 msgstr "Ajuda"
-
-#: mailu/ui/templates/sidebar.html:93
-msgid "Sign out"
-msgstr "Sair"
 
 #: mailu/ui/templates/working.html:4
 msgid "We are still working on this feature!"
@@ -416,22 +332,6 @@ msgstr "Última edição"
 msgid "Edit"
 msgstr "Editar"
 
-#: mailu/ui/templates/alternative/create.html:4
-msgid "Create alternative domain"
-msgstr ""
-
-#: mailu/ui/templates/alternative/list.html:4
-msgid "Alternative domain list"
-msgstr ""
-
-#: mailu/ui/templates/alternative/list.html:12
-msgid "Add alternative"
-msgstr ""
-
-#: mailu/ui/templates/alternative/list.html:19
-msgid "Name"
-msgstr ""
-
 #: mailu/ui/templates/domain/create.html:4
 #: mailu/ui/templates/domain/list.html:9
 msgid "New domain"
@@ -501,10 +401,6 @@ msgstr "Aliases"
 msgid "Managers"
 msgstr "Gerentes"
 
-#: mailu/ui/templates/domain/list.html:39
-msgid "Alternatives"
-msgstr ""
-
 #: mailu/ui/templates/fetch/create.html:4
 msgid "Add a fetched account"
 msgstr "Adicionar conta a importar"
@@ -521,21 +417,9 @@ msgstr "Adicionar uma conta"
 msgid "Endpoint"
 msgstr "Endpoint"
 
-#: mailu/ui/templates/fetch/list.html:21
-msgid "Keep emails"
-msgstr ""
-
 #: mailu/ui/templates/fetch/list.html:22
 msgid "Last check"
 msgstr "Última verificação"
-
-#: mailu/ui/templates/fetch/list.html:35
-msgid "yes"
-msgstr ""
-
-#: mailu/ui/templates/fetch/list.html:35
-msgid "no"
-msgstr ""
 
 #: mailu/ui/templates/manager/create.html:4
 msgid "Add a manager"
@@ -549,41 +433,33 @@ msgstr "Lista de gerentes"
 msgid "Add manager"
 msgstr "Adicionar gerente"
 
-#: mailu/ui/templates/relay/create.html:4
-msgid "New relay domain"
-msgstr ""
+#: mailu/ui/forms.py:152
+msgid "Announcement subject"
+msgstr "Título do comunicado"
 
-#: mailu/ui/templates/relay/edit.html:4
-msgid "Edit relayd domain"
-msgstr ""
+#: mailu/ui/forms.py:154
+msgid "Announcement body"
+msgstr "Corpo do comunicado"
 
-#: mailu/ui/templates/relay/list.html:4
-msgid "Relayed domain list"
-msgstr ""
+#: mailu/ui/forms.py:156
+msgid "Send"
+msgstr "Enviar"
 
-#: mailu/ui/templates/relay/list.html:9
-msgid "New relayed domain"
-msgstr ""
+#: mailu/ui/templates/announcement.html:4
+msgid "Public announcement"
+msgstr "Comunicado geral"
 
-#: mailu/ui/templates/token/create.html:4
-msgid "Create an authentication token"
-msgstr ""
+#: mailu/ui/templates/announcement.html:8
+msgid "from"
+msgstr "de"
 
-#: mailu/ui/templates/token/list.html:12
-msgid "New token"
-msgstr ""
+#: mailu/ui/templates/sidebar.html:49
+msgid "Announcement"
+msgstr "Comunicado"
 
 #: mailu/ui/templates/user/create.html:4
 msgid "New user"
 msgstr "Novo usuário"
-
-#: mailu/ui/templates/user/create.html:15
-msgid "General"
-msgstr ""
-
-#: mailu/ui/templates/user/create.html:21
-msgid "Features and quotas"
-msgstr ""
 
 #: mailu/ui/templates/user/edit.html:4
 msgid "Edit user"
@@ -617,6 +493,122 @@ msgstr "Atualizar senha"
 msgid "Automatic reply"
 msgstr "Resposta automática"
 
+#: mailu/ui/forms.py:49
+msgid "Maximum user quota"
+msgstr "Cota máxima por usuário"
+
+#: mailu/ui/forms.py:92
+msgid "Keep a copy of the emails"
+msgstr "Manter uma cópia dos emails"
+
+#: mailu/ui/forms.py:147
+msgid "Keep emails on the server"
+msgstr "Manter os e-mails no servidor"
+
+#: mailu/ui/templates/fetch/list.html:21
+msgid "Keep emails"
+msgstr "Manter emails"
+
+#: mailu/ui/templates/fetch/list.html:35
+msgid "yes"
+msgstr "sim"
+
+#: mailu/ui/templates/fetch/list.html:35
+msgid "no"
+msgstr "não"
+
+#: mailu/ui/forms.py:55
+msgid "Alternative name"
+msgstr "Nome alternativo"
+
+#: mailu/ui/forms.py:60
+msgid "Relayed domain name"
+msgstr "Nome de domínio para encaminhar"
+
+#: mailu/ui/forms.py:61 mailu/ui/templates/relay/list.html:18
+msgid "Remote host"
+msgstr "Host remoto"
+
+#: mailu/ui/templates/sidebar.html:59
+msgid "Relayed domains"
+msgstr "Domínios para encaminhamento"
+
+#: mailu/ui/templates/alternative/create.html:4
+msgid "Create alternative domain"
+msgstr "Criar domínio alternativo"
+
+#: mailu/ui/templates/alternative/list.html:4
+msgid "Alternative domain list"
+msgstr "Lista de domínios alternativos"
+
+#: mailu/ui/templates/alternative/list.html:12
+msgid "Add alternative"
+msgstr "Adicionar alternativo"
+
+#: mailu/ui/templates/alternative/list.html:19
+msgid "Name"
+msgstr "Nome"
+
+#: mailu/ui/templates/domain/list.html:39
+msgid "Alternatives"
+msgstr "Alternativos"
+
+#: mailu/ui/templates/relay/create.html:4
+msgid "New relay domain"
+msgstr "Novo domínio para encaminhamento"
+
+#: mailu/ui/templates/relay/edit.html:4
+msgid "Edit relayd domain"
+msgstr "Editar domínio de encaminhamento"
+
+#: mailu/ui/templates/relay/list.html:4
+msgid "Relayed domain list"
+msgstr "Lista de domínios para encaminhamento"
+
+#: mailu/ui/templates/relay/list.html:9
+msgid "New relayed domain"
+msgstr "Novo domínio de encaminhamento"
+
+#: mailu/ui/forms.py:109
+msgid "Your token (write it down, as it will never be displayed again)"
+msgstr ""
+
+#: mailu/ui/forms.py:114 mailu/ui/templates/token/list.html:20
+msgid "Authorized IP"
+msgstr ""
+
+#: mailu/ui/templates/sidebar.html:36 mailu/ui/templates/token/list.html:4
+msgid "Authentication tokens"
+msgstr ""
+
+#: mailu/ui/templates/sidebar.html:72
+msgid "Go to"
+msgstr ""
+
+#: mailu/ui/templates/sidebar.html:76
+msgid "Webmail"
+msgstr ""
+
+#: mailu/ui/templates/sidebar.html:82
+msgid "Website"
+msgstr ""
+
+#: mailu/ui/templates/token/create.html:4
+msgid "Create an authentication token"
+msgstr ""
+
+#: mailu/ui/templates/token/list.html:12
+msgid "New token"
+msgstr ""
+
+#: mailu/ui/templates/user/create.html:15
+msgid "General"
+msgstr ""
+
+#: mailu/ui/templates/user/create.html:21
+msgid "Features and quotas"
+msgstr ""
+
 #: mailu/ui/templates/user/settings.html:14
 msgid "General settings"
 msgstr ""
@@ -625,9 +617,7 @@ msgstr ""
 msgid "Antispam"
 msgstr ""
 
-#~ msgid "Your account"
-#~ msgstr "Sua conta"
-
-#~ msgid "Spam filter threshold"
-#~ msgstr "Limite de filtro de spam"
+#: mailu/ui/forms.py:80
+msgid "Spam filter tolerance"
+msgstr ""
 

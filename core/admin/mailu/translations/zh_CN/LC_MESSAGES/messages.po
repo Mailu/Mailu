@@ -45,7 +45,7 @@ msgstr "最大别名数"
 #: mailu/ui/forms.py:50 mailu/ui/forms.py:62 mailu/ui/forms.py:73
 #: mailu/ui/forms.py:112 mailu/ui/forms.py:124
 #: mailu/ui/templates/alias/list.html:21 mailu/ui/templates/domain/list.html:21
-#: mailu/ui/templates/relay/list.html:19 mailu/ui/templates/token/list.html:20
+#: mailu/ui/templates/relay/list.html:19 mailu/ui/templates/token/list.html:19
 #: mailu/ui/templates/user/list.html:23
 msgid "Comment"
 msgstr "说明"
@@ -277,7 +277,7 @@ msgstr "添加管理员"
 #: mailu/ui/templates/alternative/list.html:18
 #: mailu/ui/templates/domain/list.html:16 mailu/ui/templates/fetch/list.html:18
 #: mailu/ui/templates/manager/list.html:18
-#: mailu/ui/templates/relay/list.html:16 mailu/ui/templates/token/list.html:19
+#: mailu/ui/templates/relay/list.html:16 mailu/ui/templates/token/list.html:18
 #: mailu/ui/templates/user/list.html:18
 msgid "Actions"
 msgstr "操作"
@@ -291,7 +291,7 @@ msgstr "电子邮件"
 #: mailu/ui/templates/alternative/list.html:25
 #: mailu/ui/templates/domain/list.html:31 mailu/ui/templates/fetch/list.html:31
 #: mailu/ui/templates/manager/list.html:24
-#: mailu/ui/templates/relay/list.html:27 mailu/ui/templates/token/list.html:27
+#: mailu/ui/templates/relay/list.html:27 mailu/ui/templates/token/list.html:26
 #: mailu/ui/templates/user/list.html:31
 msgid "Delete"
 msgstr "删除"
@@ -315,7 +315,7 @@ msgstr "添加别名"
 #: mailu/ui/templates/alias/list.html:22
 #: mailu/ui/templates/alternative/list.html:20
 #: mailu/ui/templates/domain/list.html:22 mailu/ui/templates/fetch/list.html:24
-#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:22
+#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:21
 #: mailu/ui/templates/user/list.html:24
 msgid "Created"
 msgstr "创建"
@@ -573,7 +573,7 @@ msgstr "新的中继域"
 msgid "Your token (write it down, as it will never be displayed again)"
 msgstr "您的令牌（请保存下来，它只显示这一次）"
 
-#: mailu/ui/forms.py:114 mailu/ui/templates/token/list.html:21
+#: mailu/ui/forms.py:114 mailu/ui/templates/token/list.html:20
 msgid "Authorized IP"
 msgstr "授权IP"
 
@@ -616,4 +616,8 @@ msgstr "常规设置"
 #: mailu/ui/templates/user/settings.html:18
 msgid "Antispam"
 msgstr "反垃圾邮件"
+
+#: mailu/ui/forms.py:80
+msgid "Spam filter tolerance"
+msgstr ""
 

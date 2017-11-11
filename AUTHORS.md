@@ -21,3 +21,4 @@ Other contributors:
  - "ofthesun9" - French translation
  - "SunMar" - Dutch translation
  - "Marty Hou" - Chinese Simple translation
+ - [Thomas Sänger](https://github.com/HorayNarea) - German translation

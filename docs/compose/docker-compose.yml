@@ -31,7 +31,7 @@ services:
       - admin
 
   redis:
-    image: redis:latest
+    image: redis:alpine
     restart: always
     volumes:
       - "$ROOT/redis:/data"

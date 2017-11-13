@@ -27,8 +27,6 @@ services:
     - "$BIND_ADDRESS6:587:587"
     volumes:
       - "$ROOT/certs:/certs"
-    depends_on:
-      - admin
 
   redis:
     image: redis:alpine
@@ -90,6 +88,8 @@ services:
       - "$ROOT/data:/data"
       - "$ROOT/dkim:/dkim"
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - redis
 
   webmail:
     image: "mailu/$WEBMAIL:$VERSION"

@@ -81,11 +81,11 @@ msgstr "Angezeigter Name"
 
 #: mailu/ui/forms.py:79
 msgid "Enable spam filter"
-msgstr "Spam-Filter aktivieren"
+msgstr "Spamfilter aktivieren"
 
 #: mailu/ui/forms.py:80
 msgid "Spam filter threshold"
-msgstr "Schwellenwert für Spam-Filter"
+msgstr "Schwellenwert für Spamfilter"
 
 #: mailu/ui/forms.py:81
 msgid "Save settings"
@@ -619,5 +619,5 @@ msgstr "Antispam"
 
 #: mailu/ui/forms.py:80
 msgid "Spam filter tolerance"
-msgstr ""
+msgstr "Spamfilter-Grenzwert"
 

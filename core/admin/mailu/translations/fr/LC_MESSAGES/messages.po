@@ -619,5 +619,5 @@ msgstr "Antispam"
 
 #: mailu/ui/forms.py:80
 msgid "Spam filter tolerance"
-msgstr ""
+msgstr "Tolérance du filtre antispam"
 

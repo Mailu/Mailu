@@ -5,15 +5,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 "Project-Id-Version: Mailu\n"
-"Language: fr\n"
+"Language: pl\n"
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."
-msgstr "Adresse e-mail invalide"
+msgstr "Nieprawidłowy adres e-mail."
 
 #: mailu/ui/forms.py:36
 msgid "Confirm"
-msgstr "Confirmer"
+msgstr "Zatwierdź"
 
 #: mailu/ui/forms.py:40 mailu/ui/forms.py:67
 msgid "E-mail"
@@ -22,107 +22,108 @@ msgstr "E-mail"
 #: mailu/ui/forms.py:41 mailu/ui/forms.py:68 mailu/ui/forms.py:85
 #: mailu/ui/forms.py:146
 msgid "Password"
-msgstr "Mot de passe"
+msgstr "Hasło"
 
 #: mailu/ui/forms.py:42 mailu/ui/templates/login.html:4
 #: mailu/ui/templates/sidebar.html:99
 msgid "Sign in"
-msgstr "Se connecter"
+msgstr "Zaloguj"
 
 #: mailu/ui/forms.py:46 mailu/ui/templates/domain/details.html:21
 #: mailu/ui/templates/domain/list.html:18 mailu/ui/templates/relay/list.html:17
 msgid "Domain name"
-msgstr "Nom de domaine"
+msgstr "Nazwa domeny"
 
 #: mailu/ui/forms.py:47
 msgid "Maximum user count"
-msgstr "Nombre maximum d'utilisateurs"
+msgstr "Maksymalna liczba użytkowników"
 
 #: mailu/ui/forms.py:48
 msgid "Maximum alias count"
-msgstr "Nombre maximum d'alias"
+msgstr "Maksymalna liczba aliasów"
 
+#. Needs more context - is that a verb or a noun?
 #: mailu/ui/forms.py:50 mailu/ui/forms.py:62 mailu/ui/forms.py:73
 #: mailu/ui/forms.py:112 mailu/ui/forms.py:124
 #: mailu/ui/templates/alias/list.html:21 mailu/ui/templates/domain/list.html:21
 #: mailu/ui/templates/relay/list.html:19 mailu/ui/templates/token/list.html:19
 #: mailu/ui/templates/user/list.html:23
 msgid "Comment"
-msgstr "Commentaire"
+msgstr "Komentarz"
 
 #: mailu/ui/forms.py:51 mailu/ui/forms.py:56 mailu/ui/forms.py:63
 #: mailu/ui/forms.py:116 mailu/ui/forms.py:125
 msgid "Create"
-msgstr "Créer"
+msgstr "Utwórz"
 
 #: mailu/ui/forms.py:69
 msgid "Confirm password"
-msgstr "Confirmer le mot de passe"
+msgstr "Potwierdź hasło"
 
 #: mailu/ui/forms.py:70 mailu/ui/templates/user/list.html:22
 msgid "Quota"
-msgstr "Quota"
+msgstr ""
 
 #: mailu/ui/forms.py:71
 msgid "Allow IMAP access"
-msgstr "Autoriser l'accès IMAP"
+msgstr "Zezwalaj na dostęp przez protokół IMAP"
 
 #: mailu/ui/forms.py:72
 msgid "Allow POP3 access"
-msgstr "Autoriser l'accès POP3"
+msgstr "Zezwalaj na dostęp przez protokół POP3"
 
 #: mailu/ui/forms.py:74
 msgid "Save"
-msgstr "Enregistrer"
+msgstr "Zapisz"
 
 #: mailu/ui/forms.py:78
 msgid "Displayed name"
-msgstr "Nom affiché"
+msgstr "Nazwa wyświetlana"
 
 #: mailu/ui/forms.py:79
 msgid "Enable spam filter"
-msgstr "Activer le filtre anti-spam"
+msgstr "Włącz filtr antyspamowy"
 
 #: mailu/ui/forms.py:80
 msgid "Spam filter threshold"
-msgstr "Seuil du filtre anti-spam"
+msgstr "Próg filtra antyspamowego"
 
 #: mailu/ui/forms.py:81
 msgid "Save settings"
-msgstr "Enregistrer les préférences"
+msgstr "Zapisz ustawienia"
 
 #: mailu/ui/forms.py:86
 msgid "Password check"
-msgstr "Vérifier le mot de passe"
+msgstr ""
 
 #: mailu/ui/forms.py:87 mailu/ui/templates/sidebar.html:16
 msgid "Update password"
-msgstr "Changer de mot de passe"
+msgstr "Zmień hasło"
 
 #: mailu/ui/forms.py:91
 msgid "Enable forwarding"
-msgstr "Activer la redirection"
+msgstr "Włącz przekierowanie poczty"
 
 #: mailu/ui/forms.py:94 mailu/ui/forms.py:123
 #: mailu/ui/templates/alias/list.html:20
 msgid "Destination"
-msgstr "Destination"
+msgstr "Adres docelowy"
 
 #: mailu/ui/forms.py:96 mailu/ui/forms.py:104
 msgid "Update"
-msgstr "Mettre à jour"
+msgstr "Aktualizuj"
 
 #: mailu/ui/forms.py:100
 msgid "Enable automatic reply"
-msgstr "Activer les réponses automatique"
+msgstr "Włącz automatyczną odpowiedź"
 
 #: mailu/ui/forms.py:101
 msgid "Reply subject"
-msgstr "Sujet du message"
+msgstr "Temat odpowiedzi"
 
 #: mailu/ui/forms.py:102
 msgid "Reply body"
-msgstr "Corps de la réponse"
+msgstr "Treść odpowiedzi"
 
 #: mailu/ui/forms.py:120
 msgid "Alias"
@@ -130,27 +131,27 @@ msgstr "Alias"
 
 #: mailu/ui/forms.py:122
 msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"
-msgstr "Utiliser la syntaxe SQL LIKE (par exemple pour les alias catch-all)"
+msgstr "Używaj składni SQL LIKE (np. do adresów catch-all)"
 
 #: mailu/ui/forms.py:129
 msgid "Admin email"
-msgstr "Email de l'administrateur"
+msgstr "E-mail administratora"
 
 #: mailu/ui/forms.py:130 mailu/ui/forms.py:135 mailu/ui/forms.py:148
 msgid "Submit"
-msgstr "Valider"
+msgstr "Prześlij"
 
 #: mailu/ui/forms.py:134
 msgid "Manager email"
-msgstr "E-mail du gérant"
+msgstr ""
 
 #: mailu/ui/forms.py:139
 msgid "Protocol"
-msgstr "Protocole"
+msgstr "Protokół"
 
 #: mailu/ui/forms.py:142
 msgid "Hostname or IP"
-msgstr "Nom d'hôte ou adresse IP"
+msgstr "Nazwa hosta lub adres IP"
 
 #: mailu/ui/forms.py:143
 msgid "TCP port"
@@ -158,120 +159,120 @@ msgstr "Port TCP"
 
 #: mailu/ui/forms.py:144
 msgid "Enable TLS"
-msgstr "Activer TLS"
+msgstr "Włącz TLS"
 
 #: mailu/ui/forms.py:145 mailu/ui/templates/fetch/list.html:20
 msgid "Username"
-msgstr "Nom d'utilisateur"
+msgstr "Nazwa użytkownika"
 
 #: mailu/ui/templates/confirm.html:4
 msgid "Confirm action"
-msgstr "Confirmer"
+msgstr "Potwierdź wykonanie czynności"
 
 #: mailu/ui/templates/confirm.html:13
 msgid "You are about to %(action)s. Please confirm your action."
-msgstr "Vous allez %(action)s. Merci de confirmer votre action."
+msgstr "Zamierzasz wykonać następujące czynności: %(action)s. Potwierdź wykonanie czynności."
 
 #: mailu/ui/templates/docker-error.html:4
 msgid "Docker error"
-msgstr "Erreur Docker"
+msgstr "Błąd Dockera"
 
 #: mailu/ui/templates/docker-error.html:12
 msgid "An error occurred while talking to the Docker server."
-msgstr "Une erreur s'est produite en communiquant avec le serveur Docker."
+msgstr "Wystąpił błąd komunikacji z serwerem Dockera."
 
 #: mailu/admin/templates/login.html:6
 msgid "Your account"
-msgstr "Votre compte"
+msgstr "Twoje konto"
 
 #: mailu/ui/templates/login.html:8
 msgid "to access the administration tools"
-msgstr "pour accéder aux outils d'administration"
+msgstr ""
 
 #: mailu/ui/templates/services.html:4 mailu/ui/templates/sidebar.html:44
 msgid "Services status"
-msgstr "Etat des services"
+msgstr "Status usług"
 
 #: mailu/ui/templates/services.html:10
 msgid "Service"
-msgstr "Service"
+msgstr "Usługa"
 
 #: mailu/ui/templates/fetch/list.html:23 mailu/ui/templates/services.html:11
 msgid "Status"
-msgstr "Etat"
+msgstr "Status"
 
 #: mailu/ui/templates/services.html:12
 msgid "PID"
-msgstr "PID"
+msgstr ""
 
 #: mailu/ui/templates/services.html:13
 msgid "Image"
-msgstr "Image"
+msgstr ""
 
 #: mailu/ui/templates/services.html:14
 msgid "Started"
-msgstr "Démarré depuis"
+msgstr ""
 
 #: mailu/ui/templates/services.html:15
 msgid "Last update"
-msgstr "Dernière mise à jour"
+msgstr "Ostatnia aktualizacja"
 
 #: mailu/ui/templates/sidebar.html:8
 msgid "My account"
-msgstr "Mon compte"
+msgstr "Moje konto"
 
 #: mailu/ui/templates/sidebar.html:11 mailu/ui/templates/user/list.html:34
 msgid "Settings"
-msgstr "Préférences"
+msgstr "Ustawienia"
 
 #: mailu/ui/templates/sidebar.html:21 mailu/ui/templates/user/list.html:35
 msgid "Auto-forward"
-msgstr "Redirection"
+msgstr "Automatyczne przekierowanie"
 
 #: mailu/ui/templates/sidebar.html:26 mailu/ui/templates/user/list.html:36
 msgid "Auto-reply"
-msgstr "Réponse automatique"
+msgstr "Automatyczna odpowiedź"
 
 #: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:31
 #: mailu/ui/templates/user/list.html:37
 msgid "Fetched accounts"
-msgstr "Comptes externes"
+msgstr ""
 
 #: mailu/ui/templates/sidebar.html:93
 msgid "Sign out"
-msgstr "Déconnexion"
+msgstr "Wyloguj"
 
 #: mailu/ui/templates/sidebar.html:40
 msgid "Administration"
-msgstr "Administration"
+msgstr "Administracja"
 
 #: mailu/ui/templates/sidebar.html:54
 msgid "Administrators"
-msgstr "Administrateurs"
+msgstr "Administratorzy"
 
 #: mailu/ui/templates/sidebar.html:66
 msgid "Mail domains"
-msgstr "Domaines"
+msgstr "Domeny pocztowe"
 
 #: mailu/ui/templates/sidebar.html:87
 msgid "Help"
-msgstr "Aide"
+msgstr "Pomoc"
 
 #: mailu/ui/templates/working.html:4
 msgid "We are still working on this feature!"
-msgstr "Cette fonctionnalité est en cours de développement !"
+msgstr ""
 
 #: mailu/ui/templates/admin/create.html:4
 msgid "Add a global administrator"
-msgstr "Ajouter un administrateur global"
+msgstr "Dodaj administratora globalnego"
 
 #: mailu/ui/templates/admin/list.html:4
 msgid "Global administrators"
-msgstr "Administrateurs globaux"
+msgstr "Administratorzy globalni"
 
 #: mailu/ui/templates/admin/list.html:9
 msgid "Add administrator"
-msgstr "Ajouter un administrateur"
+msgstr "Dodaj administratora"
 
 #: mailu/ui/templates/admin/list.html:16 mailu/ui/templates/alias/list.html:18
 #: mailu/ui/templates/alternative/list.html:18
@@ -280,7 +281,7 @@ msgstr "Ajouter un administrateur"
 #: mailu/ui/templates/relay/list.html:16 mailu/ui/templates/token/list.html:18
 #: mailu/ui/templates/user/list.html:18
 msgid "Actions"
-msgstr "Actions"
+msgstr "Czynności"
 
 #: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
 #: mailu/ui/templates/manager/list.html:19 mailu/ui/templates/user/list.html:20
@@ -294,23 +295,23 @@ msgstr "E-mail"
 #: mailu/ui/templates/relay/list.html:27 mailu/ui/templates/token/list.html:26
 #: mailu/ui/templates/user/list.html:31
 msgid "Delete"
-msgstr "Supprimer"
+msgstr "Usuń"
 
 #: mailu/ui/templates/alias/create.html:4
 msgid "Create alias"
-msgstr "Créer un alias"
+msgstr "Utwórz alias"
 
 #: mailu/ui/templates/alias/edit.html:4
 msgid "Edit alias"
-msgstr "Modifier un alias"
+msgstr "Edytuj alias"
 
 #: mailu/ui/templates/alias/list.html:4
 msgid "Alias list"
-msgstr "Liste des alias"
+msgstr "Lista aliasów"
 
 #: mailu/ui/templates/alias/list.html:12
 msgid "Add alias"
-msgstr "Ajouter un alias"
+msgstr "Dodaj alias"
 
 #: mailu/ui/templates/alias/list.html:22
 #: mailu/ui/templates/alternative/list.html:20
@@ -318,306 +319,306 @@ msgstr "Ajouter un alias"
 #: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:21
 #: mailu/ui/templates/user/list.html:24
 msgid "Created"
-msgstr "Création"
+msgstr ""
 
 #: mailu/ui/templates/alias/list.html:23 mailu/ui/templates/domain/list.html:23
 #: mailu/ui/templates/fetch/list.html:25 mailu/ui/templates/relay/list.html:21
 #: mailu/ui/templates/user/list.html:25
 msgid "Last edit"
-msgstr "Dernière modification"
+msgstr "Ostatnia edycja"
 
 #: mailu/ui/templates/alias/list.html:28 mailu/ui/templates/domain/list.html:30
 #: mailu/ui/templates/fetch/list.html:30 mailu/ui/templates/relay/list.html:26
 #: mailu/ui/templates/user/list.html:30
 msgid "Edit"
-msgstr "Modifier"
+msgstr "Edytuj"
 
 #: mailu/ui/templates/domain/create.html:4
 #: mailu/ui/templates/domain/list.html:9
 msgid "New domain"
-msgstr "Nouveau domaine"
+msgstr "Nowa domena"
 
 #: mailu/ui/templates/domain/details.html:4
 msgid "Domain details"
-msgstr "Détails du domaine"
+msgstr "Szczegóły domeny"
 
 #: mailu/ui/templates/domain/details.html:13
 msgid "Regenerate keys"
-msgstr "Regénérer les clés"
+msgstr "Wygeneruj ponownie klucze"
 
 #: mailu/ui/templates/domain/details.html:25
 msgid "DNS MX entry"
-msgstr "Entrée DNS MX"
+msgstr "Wpis MX DNS"
 
 #: mailu/ui/templates/domain/details.html:29
 msgid "DNS SPF entries"
-msgstr "Entrées DNS SPF"
+msgstr "Wpisy SPF DNS"
 
 #: mailu/ui/templates/domain/details.html:36
 msgid "DKIM public key"
-msgstr "Clé publique DKIM"
+msgstr "Publiczny klucz DKIM"
 
 #: mailu/ui/templates/domain/details.html:40
 msgid "DNS DKIM entry"
-msgstr "Entrée DNS DKIM"
+msgstr "Wpis DKIM DNS"
 
 #: mailu/ui/templates/domain/details.html:44
 msgid "DNS DMARC entry"
-msgstr "Entrée DNS DMARC"
+msgstr "Wpis DMARC DNS"
 
 #: mailu/ui/templates/domain/edit.html:4
 msgid "Edit domain"
-msgstr "Modifier le domaine"
+msgstr "Edytuj domenę"
 
 #: mailu/ui/templates/domain/list.html:4
 msgid "Domain list"
-msgstr "Liste des domaines"
+msgstr "Lista domen"
 
 #: mailu/ui/templates/domain/list.html:17
 msgid "Manage"
-msgstr "Gérer"
+msgstr "Zarządzaj"
 
 #: mailu/ui/templates/domain/list.html:19
 msgid "Mailbox count"
-msgstr "Nombre de boîtes mail"
+msgstr "Liczba skrzynek pocztowych"
 
 #: mailu/ui/templates/domain/list.html:20
 msgid "Alias count"
-msgstr "Nombre d'alias"
+msgstr "Liczba aliasów"
 
 #: mailu/ui/templates/domain/list.html:28
 msgid "Details"
-msgstr "Détails"
+msgstr "Szczegóły"
 
 #: mailu/ui/templates/domain/list.html:35
 msgid "Users"
-msgstr "Utilisateurs"
+msgstr "Użytkownicy"
 
 #: mailu/ui/templates/domain/list.html:36
 msgid "Aliases"
-msgstr "Alias"
+msgstr "Aliasy"
 
 #: mailu/ui/templates/domain/list.html:37
 msgid "Managers"
-msgstr "Gérants"
+msgstr ""
 
 #: mailu/ui/templates/fetch/create.html:4
 msgid "Add a fetched account"
-msgstr "Ajouter un compte externe"
+msgstr ""
 
 #: mailu/ui/templates/fetch/edit.html:4
 msgid "Update a fetched account"
-msgstr "Modifier un compte externe"
+msgstr ""
 
 #: mailu/ui/templates/fetch/list.html:12
 msgid "Add an account"
-msgstr "Ajouter un compte"
+msgstr "Dodaj konto"
 
 #: mailu/ui/templates/fetch/list.html:19
 msgid "Endpoint"
-msgstr "Source"
+msgstr ""
 
 #: mailu/ui/templates/fetch/list.html:22
 msgid "Last check"
-msgstr "Dernier relevé"
+msgstr ""
 
 #: mailu/ui/templates/manager/create.html:4
 msgid "Add a manager"
-msgstr "Ajouter un gérant"
+msgstr ""
 
 #: mailu/ui/templates/manager/list.html:4
 msgid "Manager list"
-msgstr "Liste des gérants"
+msgstr ""
 
 #: mailu/ui/templates/manager/list.html:12
 msgid "Add manager"
-msgstr "Ajouter le gérant"
+msgstr ""
 
 #: mailu/ui/forms.py:152
 msgid "Announcement subject"
-msgstr "Sujet de l'annonce"
+msgstr "Temat ogłoszenia"
 
 #: mailu/ui/forms.py:154
 msgid "Announcement body"
-msgstr "Corps de l'annonce"
+msgstr "Treść ogłoszenia"
 
 #: mailu/ui/forms.py:156
 msgid "Send"
-msgstr "Envoyer"
+msgstr "Wyślij"
 
 #: mailu/ui/templates/announcement.html:4
 msgid "Public announcement"
-msgstr "Annonce globale"
+msgstr "Publiczne ogłoszenie"
 
 #: mailu/ui/templates/announcement.html:8
 msgid "from"
-msgstr "de"
+msgstr "od"
 
 #: mailu/ui/templates/sidebar.html:49
 msgid "Announcement"
-msgstr "Annonce"
+msgstr "Ogłoszenie"
 
 #: mailu/ui/templates/user/create.html:4
 msgid "New user"
-msgstr "Nouvel utilisateur"
+msgstr "Nowy użytkownik"
 
 #: mailu/ui/templates/user/edit.html:4
 msgid "Edit user"
-msgstr "Modifier l'utilisateur"
+msgstr "Edytuj użytkownika"
 
 #: mailu/ui/templates/user/forward.html:4
 msgid "Forward emails"
-msgstr "Faire suivre les emails"
+msgstr "Przekieruj wiadomości e-mail"
 
 #: mailu/ui/templates/user/list.html:4
 msgid "User list"
-msgstr "Utilisateurs"
+msgstr "Lista użytkowników"
 
 #: mailu/ui/templates/user/list.html:12
 msgid "Add user"
-msgstr "Ajouter un utilisateur"
+msgstr "Dodaj użytkownika"
 
 #: mailu/ui/templates/user/list.html:19 mailu/ui/templates/user/settings.html:4
 msgid "User settings"
-msgstr "Options de l'utilisateur"
+msgstr "Ustawienia użytkownika"
 
 #: mailu/ui/templates/user/list.html:21
 msgid "Features"
-msgstr "Fonctionnalités"
+msgstr ""
 
 #: mailu/ui/templates/user/password.html:4
 msgid "Password update"
-msgstr "Modifier le mot de passe"
+msgstr "Zmiana hasła"
 
 #: mailu/ui/templates/user/reply.html:4
 msgid "Automatic reply"
-msgstr "Réponse automatique"
+msgstr "Automatyczna odpowiedź"
 
 #: mailu/ui/forms.py:49
 msgid "Maximum user quota"
-msgstr "Quota maximum par utilisateur"
+msgstr ""
 
 #: mailu/ui/forms.py:92
 msgid "Keep a copy of the emails"
-msgstr "Conserver une copie des messages"
+msgstr "Przechowuj kopię wiadomości"
 
 #: mailu/ui/forms.py:147
 msgid "Keep emails on the server"
-msgstr "Conserver les messages sur le serveur"
+msgstr "Przechowuj wiadomości na serwerze"
 
 #: mailu/ui/templates/fetch/list.html:21
 msgid "Keep emails"
-msgstr "Conserver les messages"
+msgstr "Przechowuj wiadomości"
 
 #: mailu/ui/templates/fetch/list.html:35
 msgid "yes"
-msgstr "oui"
+msgstr "Tak"
 
 #: mailu/ui/templates/fetch/list.html:35
 msgid "no"
-msgstr "non"
+msgstr "Nie"
 
 #: mailu/ui/forms.py:55
 msgid "Alternative name"
-msgstr "Nom alternatif"
+msgstr ""
 
 #: mailu/ui/forms.py:60
 msgid "Relayed domain name"
-msgstr "Nom du domaine relayé"
+msgstr ""
 
 #: mailu/ui/forms.py:61 mailu/ui/templates/relay/list.html:18
 msgid "Remote host"
-msgstr "Hôte distant"
+msgstr ""
 
 #: mailu/ui/templates/sidebar.html:59
 msgid "Relayed domains"
-msgstr "Domaines relayé"
+msgstr ""
 
 #: mailu/ui/templates/alternative/create.html:4
 msgid "Create alternative domain"
-msgstr "Nouveau domaine alternatif"
+msgstr ""
 
 #: mailu/ui/templates/alternative/list.html:4
 msgid "Alternative domain list"
-msgstr "Liste des domaines alternatifs"
+msgstr ""
 
 #: mailu/ui/templates/alternative/list.html:12
 msgid "Add alternative"
-msgstr "Ajouter une alternative"
+msgstr ""
 
 #: mailu/ui/templates/alternative/list.html:19
 msgid "Name"
-msgstr "Nom"
+msgstr ""
 
 #: mailu/ui/templates/domain/list.html:39
 msgid "Alternatives"
-msgstr "Alternatives"
+msgstr ""
 
 #: mailu/ui/templates/relay/create.html:4
 msgid "New relay domain"
-msgstr "Nouveau domaine relayé"
+msgstr ""
 
 #: mailu/ui/templates/relay/edit.html:4
 msgid "Edit relayd domain"
-msgstr "Modifier le domaine relayé"
+msgstr ""
 
 #: mailu/ui/templates/relay/list.html:4
 msgid "Relayed domain list"
-msgstr "Liste des domaines relayés"
+msgstr ""
 
 #: mailu/ui/templates/relay/list.html:9
 msgid "New relayed domain"
-msgstr "Nouveau domaine relayé"
+msgstr ""
 
 #: mailu/ui/forms.py:109
 msgid "Your token (write it down, as it will never be displayed again)"
-msgstr "Votre jeton (à conserver, il ne sera plus affiché par la suite)"
+msgstr ""
 
 #: mailu/ui/forms.py:114 mailu/ui/templates/token/list.html:20
 msgid "Authorized IP"
-msgstr "Adresse IP autorisée"
+msgstr ""
 
 #: mailu/ui/templates/sidebar.html:36 mailu/ui/templates/token/list.html:4
 msgid "Authentication tokens"
-msgstr "Jetons d'authentification"
+msgstr ""
 
 #: mailu/ui/templates/sidebar.html:72
 msgid "Go to"
-msgstr "Navigation"
+msgstr ""
 
 #: mailu/ui/templates/sidebar.html:76
 msgid "Webmail"
-msgstr "Webmail"
+msgstr ""
 
 #: mailu/ui/templates/sidebar.html:82
 msgid "Website"
-msgstr "Site web"
+msgstr "Strona internetowa"
 
 #: mailu/ui/templates/token/create.html:4
 msgid "Create an authentication token"
-msgstr "Créer un jeton d'authentification"
+msgstr ""
 
 #: mailu/ui/templates/token/list.html:12
 msgid "New token"
-msgstr "Nouveau jeton"
+msgstr ""
 
 #: mailu/ui/templates/user/create.html:15
 msgid "General"
-msgstr "Général"
+msgstr ""
 
 #: mailu/ui/templates/user/create.html:21
 msgid "Features and quotas"
-msgstr "Fonctionnalités et quotas"
+msgstr ""
 
 #: mailu/ui/templates/user/settings.html:14
 msgid "General settings"
-msgstr "Général"
+msgstr "Ustawienia ogólne"
 
 #: mailu/ui/templates/user/settings.html:18
 msgid "Antispam"
-msgstr "Antispam"
+msgstr "Filtr antyspamowy"
 
 #: mailu/ui/forms.py:80
 msgid "Spam filter tolerance"
-msgstr "Tolérance du filtre antispam"
+msgstr ""
 

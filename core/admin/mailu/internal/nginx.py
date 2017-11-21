@@ -37,27 +37,32 @@ def handle_authentication(headers):
         password = urllib.parse.unquote(headers["Auth-Pass"])
         ip = urllib.parse.unquote(headers["Client-Ip"])
         user = models.User.query.get(user_email)
+        status = False
         if user:
             for token in user.tokens:
                 if (token.check_password(password) and
                     (not token.ip or token.ip == ip)):
-                        return {
-                            "Auth-Status": "OK",
-                            "Auth-Server": server,
-                            "Auth-Port": port
-                        }
+                        status = True
             if user.check_password(password):
-                return {
-                    "Auth-Status": "OK",
-                    "Auth-Server": server,
-                    "Auth-Port": port
-                }
-        status, code = get_status(protocol, "authentication")
-        return {
-            "Auth-Status": status,
-            "Auth-Error-Code": code,
-            "Auth-Wait": 0
-        }
+                status = True
+            if status:
+                if protocol == "imap" and not user.enable_imap:
+                    status = False
+                elif protocol == "pop3" and not user.enable_pop:
+                    status = False
+        if status:
+            return {
+                "Auth-Status": "OK",
+                "Auth-Server": server,
+                "Auth-Port": port
+            }
+        else:
+            status, code = get_status(protocol, "authentication")
+            return {
+                "Auth-Status": status,
+                "Auth-Error-Code": code,
+                "Auth-Wait": 0
+            }
     # Unexpected
     return {}
 

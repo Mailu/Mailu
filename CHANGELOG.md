@@ -5,6 +5,28 @@ Notable changes to this project are documented in the current file. For more
 details about individual changes, see the Git log. You should read this before
 upgrading Freposte.io as some changes will include useful notes.
 
+v1.5.1 - 2017-11-21
+-------------------
+
+- Global: add a DNS-based instance count tracker, use the ``DISABLE_STATISTICS``
+  setting to disable it.
+- Global: specify container dependencies in the Compose configuration, update
+  your ``docker-compose.yml``.
+- Feature: add a *mail* TLS flavor that only enforces TLS for email connections.
+- Feature: welcome emails, see the configuration for details
+- Feature: end date for vacations, see the automatic reply page
+- L10N: dutch loca is now available
+- L10N: swedish loca is now available
+- L10N: italian loca is now partially available
+- L10N: chinese loca is now available
+- Upstream: upgrade to Roundcube 1.3.3
+- Enhancement: use the alpine image for redis
+- Enhancement: use a dynamic worker count for Nginx
+- Bug: fix the pop3 proxy
+- Bug: fix DNS resolution bugs in the frontend
+- Bug: fix Webdav authentication
+- Bug: properly honor enabled features (imap and pop3) per user
+
 v1.5.0 - 2017-11-05
 -------------------
 

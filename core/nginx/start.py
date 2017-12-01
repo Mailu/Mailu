@@ -7,10 +7,6 @@ import subprocess
 if os.path.exists("/var/run/nginx.pid"):
     os.remove("/var/run/nginx.pid")
 
-# Actual startup script
-if not os.path.exists("/certs/dhparam.pem") and os.environ["TLS_FLAVOR"] != "notls":
-    os.system("openssl dhparam -out /certs/dhparam.pem 4096")
-
 if os.environ["TLS_FLAVOR"] == "letsencrypt":
     subprocess.Popen(["/letsencrypt.py"])
 

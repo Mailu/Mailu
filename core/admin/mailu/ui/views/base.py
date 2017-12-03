@@ -20,7 +20,7 @@ def login():
         user = models.User.login(form.email.data, form.pw.data)
         if user:
             flask_login.login_user(user)
-            endpoint = flask.request.args.get('next')
+            endpoint = flask.request.args.get('next', '.index')
             return flask.redirect(flask.url_for(endpoint)
                 or flask.url_for('.index'))
         else:

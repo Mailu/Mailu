@@ -3,6 +3,9 @@
 import os
 import subprocess
 
+# Check if a stale pid file exists
+if os.path.exists("/var/log/nginx.pid"):
+    os.remove("/var/log/nginx.pid")
 
 # Actual startup script
 if not os.path.exists("/certs/dhparam.pem") and os.environ["TLS_FLAVOR"] != "notls":

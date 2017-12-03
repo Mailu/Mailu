@@ -47,6 +47,7 @@ class DomainForm(flask_wtf.FlaskForm):
     max_users = fields_.IntegerField(_('Maximum user count'), default=10)
     max_aliases = fields_.IntegerField(_('Maximum alias count'), default=10)
     max_quota_bytes = fields_.IntegerSliderField(_('Maximum user quota'), default=0)
+    signup_enabled = fields.BooleanField(_('Enable sign-up'), default=False)
     comment = fields.StringField(_('Comment'))
     submit = fields.SubmitField(_('Create'))
 
@@ -72,6 +73,13 @@ class UserForm(flask_wtf.FlaskForm):
     enable_pop = fields.BooleanField(_('Allow POP3 access'), default=True)
     comment = fields.StringField(_('Comment'))
     submit = fields.SubmitField(_('Save'))
+
+
+class UserSignupForm(flask_wtf.FlaskForm):
+    localpart = fields.StringField(_('Email address'))
+    pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
+    pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
+    submit = fields.SubmitField(_('Sign up'))
 
 
 class UserSettingsForm(flask_wtf.FlaskForm):

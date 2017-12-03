@@ -153,3 +153,35 @@ def user_reply(user_email):
             return flask.redirect(
                 flask.url_for('.user_list', domain_name=user.domain.name))
     return flask.render_template('user/reply.html', form=form, user=user)
+
+
+@ui.route('/user/signup', methods=['GET', 'POST'])
+@ui.route('/user/signup/<domain_name>', methods=['GET', 'POST'])
+def user_signup(domain_name=None):
+    available_domains = {
+        domain.name: domain
+        for domain in models.Domain.query.filter_by(signup_enabled=True).all()
+        if not domain.max_users or len(domain.users) < domain.max_users
+    }
+    if not available_domains:
+        flask.flash('No domain available for registration')
+    if not domain_name:
+        return flask.render_template('user/signup_domain.html',
+            available_domains=available_domains)
+    domain = available_domains.get(domain_name) or flask.abort(404)
+    quota_bytes = min(config['DEFAULT_QUOTA'], domain.max_quota_bytes)
+    form = forms.UserSignupForm()
+    if form.validate_on_submit():
+        if domain.has_email(form.localpart.data):
+            flask.flash('Email is already used', 'error')
+        else:
+            user = models.User(domain=domain)
+            form.populate_obj(user)
+            user.set_password(form.pw.data)
+            user.quota_bytes = quota_bytes
+            db.session.add(user)
+            db.session.commit()
+            user.send_welcome()
+            flask.flash('Successfully signed up %s' % user)
+            return flask.redirect(flask.url_for('.index'))
+    return flask.render_template('user/signup.html', domain=domain, form=form)

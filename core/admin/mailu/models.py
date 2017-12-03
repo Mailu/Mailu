@@ -60,6 +60,7 @@ class Domain(Base):
     max_users = db.Column(db.Integer, nullable=False, default=0)
     max_aliases = db.Column(db.Integer, nullable=False, default=0)
     max_quota_bytes = db.Column(db.Integer(), nullable=False, default=0)
+    signup_enabled = db.Column(db.Boolean(), nullable=False, default=False)
 
     @property
     def dkim_key(self):

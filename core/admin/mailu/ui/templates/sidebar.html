@@ -100,10 +100,17 @@
     </li>
     {% else %}
     <li>
-      <a href="#">
+      <a href="{{ url_for('.login') }}">
         <i class="fa fa-sign-in"></i> <span>{% trans %}Sign in{% endtrans %}</span>
       </a>
     </li>
+    {% if signup_domains %}
+    <li>
+      <a href="{{ url_for('.user_signup') }}">
+        <i class="fa fa-user-plus"></i> <span>{% trans %}Sign up{% endtrans %}</span>
+      </a>
+    </li>
+    {% endif %}
     {% endif %}
   </ul>
 </section>

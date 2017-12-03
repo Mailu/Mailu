@@ -44,6 +44,7 @@ default_config = {
     'WELCOME_BODY': 'Dummy welcome body',
     'DKIM_SELECTOR': 'dkim',
     'DKIM_PATH': '/dkim/{domain}.{selector}.key',
+    'DEFAULT_QUOTA': 1000000000,
     # Web settings
     'SITENAME': 'Mailu',
     'WEBSITE': 'https://mailu.io',
@@ -93,8 +94,10 @@ def handle_needs_login():
 
 @app.context_processor
 def inject_defaults():
+    signup_domains = models.Domain.query.filter_by(signup_enabled=True).all()
     return dict(
         current_user=flask_login.current_user,
+        signup_domains=signup_domains,
         config=app.config
     )
 

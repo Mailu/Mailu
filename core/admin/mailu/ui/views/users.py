@@ -1,4 +1,4 @@
-from mailu import db, models
+from mailu import db, models, app
 from mailu.ui import ui, access, forms
 
 import flask
@@ -169,7 +169,7 @@ def user_signup(domain_name=None):
         return flask.render_template('user/signup_domain.html',
             available_domains=available_domains)
     domain = available_domains.get(domain_name) or flask.abort(404)
-    quota_bytes = min(config['DEFAULT_QUOTA'], domain.max_quota_bytes)
+    quota_bytes = domain.max_quota_bytes or app.config['DEFAULT_QUOTA']
     form = forms.UserSignupForm()
     if form.validate_on_submit():
         if domain.has_email(form.localpart.data):

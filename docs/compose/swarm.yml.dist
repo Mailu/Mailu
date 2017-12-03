@@ -1,0 +1,193 @@
+version: "3.3"
+services:
+  http:
+    image: mailu/nginx:1.4
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+    volumes:
+      - "/mnt/docker/apps/mailu/data/certs:/certs"
+    environment:
+      - VIRTUAL_HOST=example.com
+      - CERT_NAME=default
+      - ENABLE_CERTBOT=True
+      - EXPOSE_ADMIN=yes
+      - NGINX_SSL_DHPARAM_BITS=2048
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+           - node.labels.mailer == true
+  redis:
+    image: redis:latest
+    volumes:
+      - "/mnt/docker/apps/mailu/data/redis:/data"
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+           - node.labels.mailer == true
+  imap:
+    image: mailu/dovecot:1.4
+    environment:
+      - DOMAIN=example.com
+      - HOSTNAME=mail.example.com
+      - HOSTNAMES=example.com,mail.example.com
+      - POSTMASTER=admin
+    ports:
+      - "0.0.0.0:110:110"
+      - "0.0.0.0:143:143"
+      - "0.0.0.0:993:993"
+      - "0.0.0.0:995:995"
+      - "0.0.0.0:4190:4190"
+    volumes:
+      - "/mnt/docker/apps/mailu/data/data:/data"
+      - "/mnt/docker/apps/mailu/data/mail:/mail"
+      - "/mnt/docker/apps/mailu/data/certs:/certs"
+      - "/mnt/docker/apps/mailu/data/overrides:/overrides"
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+           - node.labels.mailer == true
+  smtp:
+    image: mailu/postfix:1.4
+    environment:
+      - DOMAIN=example.com
+      - HOSTNAME=mail.example.com
+      - HOSTNAMES=example.com,mail.example.com
+      - MESSAGE_SIZE_LIMIT=50000000
+      - RELAYHOST=
+      - RELAYNETS=172.16.0.0/12
+    ports:
+      - "25:25"
+      - "465:465"
+      - "587:587"
+    volumes:
+      - "/mnt/docker/apps/mailu/data/data:/data"
+      - "/mnt/docker/apps/mailu/data/certs:/certs"
+      - "/mnt/docker/apps/mailu/data/overrides:/overrides"
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+           - node.labels.mailer == true
+  milter:
+    image: mailu/rmilter:1.4
+    volumes:
+      - "/mnt/docker/apps/mailu/data/filter:/data"
+      - "/mnt/docker/apps/mailu/data/dkim:/dkim"
+      - "/mnt/docker/apps/mailu/data/overrides:/overrides"
+    environment:
+      - DOMAIN=example.com
+
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+           - node.labels.mailer == true
+  antispam:
+    image: mailu/rspamd:1.4
+    volumes:
+      - "/mnt/docker/apps/mailu/data/filter:/var/lib/rspamd"
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+           - node.labels.mailer == true
+  antivirus:
+    image: mailu/clamav:1.4
+    volumes:
+      - "/mnt/docker/apps/mailu/data/filter:/data"
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+           - node.labels.mailer == true
+  webdav:
+    image: mailu/none:1.4
+    volumes:
+      - "/mnt/docker/apps/mailu/data/dav:/data"
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+           - node.labels.mailer == true
+  admin:
+    image: mailu/admin:1.4
+    environment:
+      - DOMAIN=example.com
+      - POSTMASTER=admin
+      - SECRET_KEY=some_secret_key
+      - DEBUG=False
+    expose:
+      - "8000:80"
+    volumes:
+      - "/mnt/docker/apps/mailu/data/data:/data"
+      - "/mnt/docker/apps/mailu/data/dkim:/dkim"
+      - "/mnt/docker/apps/mailu/data/certs:/certs"
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+           - node.labels.mailer == true
+  webmail:
+    image: "mailu/rainloop:1.4"
+    volumes:
+      - "/mnt/docker/apps/mailu/data/webmail:/data"
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+           - node.labels.mailer == true
+  fetchmail:
+    image: mailu/fetchmail:1.4
+    volumes:
+      - "/mnt/docker/apps/mailu/data/data:/data"
+    environment:
+      - DOMAIN=example.com
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+           - node.labels.mailer == true

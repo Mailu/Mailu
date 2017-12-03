@@ -121,3 +121,25 @@ Finally, you must create the initial admin user account:
   docker-compose run --rm admin python manage.py admin root example.net password
 
 This will create a user named ``root@example.net`` with password ``password`` and administration privileges. Connect to the Web admin interface and change the password to a strong one.
+
+Docker Swarm Support
+-----------
+Minimal Docker Swarm stack example is available in ``/docs/compose/swarm.yml.dist``.
+By default Mailu will be deployed only on nodes with a ``mailer=true`` label set:
+
+.. code-block:: bash
+
+  docker node update --label-add 'mailer=true' your_node_name
+
+To use the latest version:
+
+.. code-block:: bash
+
+  wget -O swarm.yml https://raw.githubusercontent.com/Mailu/Mailu/stable/docs/compose/swarm.yml.dist
+
+Don't forget to adjust hostname, domain names, paths, etc. before using the template. After it you can start like this:
+
+.. code-block:: bash
+
+  docker stack deploy -c swarm.yml mailu
+  docker stack ps mailu

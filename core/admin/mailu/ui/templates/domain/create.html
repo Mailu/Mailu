@@ -13,6 +13,7 @@
   {{ macros.form_field(form.max_quota_bytes, step=1000000000, max=50000000000,
       prepend='<span class="input-group-addon"><span id="quota">'+((form.max_quota_bytes.data//1000000000).__str__() if form.max_quota_bytes.data else '∞')+'</span> GiB</span>',
       oninput='$("#quota").text(this.value == 0  ? "∞" : this.value/1000000000);') }}
+  {{ macros.form_field(form.signup_enabled) }}
   {{ macros.form_field(form.comment) }}
   {{ macros.form_field(form.submit) }}
 </form>

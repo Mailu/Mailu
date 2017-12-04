@@ -12,6 +12,8 @@ import docker
 import socket
 import uuid
 
+from werkzeug.contrib import fixers
+
 # Create application
 app = flask.Flask(__name__)
 
@@ -110,9 +112,10 @@ class PrefixMiddleware(object):
         self.app = app
 
     def __call__(self, environ, start_response):
+        print(environ)
         prefix = environ.get('HTTP_X_FORWARDED_PREFIX', '')
         if prefix:
             environ['SCRIPT_NAME'] = prefix
         return self.app(environ, start_response)
 
-app.wsgi_app = PrefixMiddleware(app.wsgi_app)
+app.wsgi_app = PrefixMiddleware(fixers.ProxyFix(app.wsgi_app))

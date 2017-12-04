@@ -29,5 +29,6 @@ if args["TLS"] and not all(os.path.exists(file_path) for file_path in args["TLS"
 
 # Build final configuration paths
 convert("/conf/tls.conf", "/etc/nginx/tls.conf", args)
+convert("/conf/proxy.conf", "/etc/nginx/proxy.conf", args)
 convert("/conf/nginx.conf", "/etc/nginx/nginx.conf", args)
 os.system("nginx -s reload")

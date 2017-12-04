@@ -91,6 +91,8 @@ smtpd_recipient_restrictions =
   reject_unverified_recipient,
   permit
 
+unverified_recipient_reject_reason = Address lookup failure
+
 ###############
 # Milter
 ###############

@@ -16,8 +16,10 @@ with open("/etc/resolv.conf") as handle:
 # TLS configuration
 args["TLS"] = {
     "cert": ("/certs/cert.pem", "/certs/key.pem"),
-    "mail": ("/certs/cert.pem", "/certs/key.pem"),
     "letsencrypt": ("/certs/letsencrypt/live/mailu/fullchain.pem",
+        "/certs/letsencrypt/live/mailu/privkey.pem"),
+    "mail": ("/certs/cert.pem", "/certs/key.pem"),
+    "mail-letsencrypt": ("/certs/letsencrypt/live/mailu/fullchain.pem",
         "/certs/letsencrypt/live/mailu/privkey.pem"),
     "notls": None
 }[args["TLS_FLAVOR"]]
@@ -25,7 +27,6 @@ args["TLS"] = {
 if args["TLS"] and not all(os.path.exists(file_path) for file_path in args["TLS"]):
     print("Missing cert or key file, disabling TLS")
     args["TLS_ERROR"] = "yes"
-
 
 # Build final configuration paths
 convert("/conf/tls.conf", "/etc/nginx/tls.conf", args)

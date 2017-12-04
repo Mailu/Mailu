@@ -7,7 +7,7 @@ import subprocess
 if os.path.exists("/var/log/nginx.pid"):
     os.remove("/var/log/nginx.pid")
 
-if os.environ["TLS_FLAVOR"] == "letsencrypt":
+if os.environ["TLS_FLAVOR"] in [ "letsencrypt","mail-letsencrypt" ]:
     subprocess.Popen(["/letsencrypt.py"])
 
 subprocess.call(["/config.py"])

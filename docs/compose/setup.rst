@@ -52,6 +52,8 @@ values:
 - ``letsencrypt`` will use the Letsencrypt! CA to generate automatic ceriticates;
 - ``mail`` is similar to ``cert`` except that TLS will only be served for
   emails (IMAP and SMTP), not HTTP (use it behind reverse proxies);
+- ``mail-letsencrypt`` is similar to ``letsencrypt`` except that TLS will only be served for
+  emails (IMAP and SMTP), not HTTP (use it behind reverse proxies);
 - ``notls`` will disable TLS, this is not recommended except for testing.
 
 Enable optional features
@@ -92,6 +94,12 @@ setting. The configuration option must be one of the following:
 
 Make sure that you have at least 1GB or memory for ClamAV to load its signature
 database.
+
+If you run Mailu behind a reverse proxy you can use ``REAL_IP_HEADER`` and
+``REAL_IP_FROM`` to set the values of respective the Nginx directives
+``real_ip_header`` and ``set_real_ip_from``. The ``REAL_IP_FROM`` configuration
+option is a comma-separated list of IPs (or CIDRs) of which for each a
+``set_real_ip_from`` directive is added in the Nginx configuration file.
 
 Finish setting up TLS
 ---------------------

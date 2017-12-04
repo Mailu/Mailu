@@ -61,6 +61,7 @@ virtual_mailbox_domains = ${sql}sqlite-virtual_mailbox_domains.cf
 virtual_mailbox_maps = $virtual_alias_maps
 
 # Mails are transported if required, then forwarded to Dovecot for delivery
+relay_domains = ${sql}sqlite-transport.cf
 transport_maps = ${sql}sqlite-transport.cf
 virtual_transport = lmtp:inet:imap:2525
 

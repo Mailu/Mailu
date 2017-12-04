@@ -112,7 +112,6 @@ class PrefixMiddleware(object):
         self.app = app
 
     def __call__(self, environ, start_response):
-        print(environ)
         prefix = environ.get('HTTP_X_FORWARDED_PREFIX', '')
         if prefix:
             environ['SCRIPT_NAME'] = prefix

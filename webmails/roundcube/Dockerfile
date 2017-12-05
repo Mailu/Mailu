@@ -21,6 +21,8 @@ RUN rm -rf /var/www/html/ \
  && rm -rf CHANGELOG INSTALL LICENSE README.md UPGRADING composer.json-dist installer \
  && chown -R www-data: logs
 
+COPY php.ini /usr/local/etc/php/conf.d/roundcube.ini
+
 COPY config.inc.php /var/www/html/config/
 
 COPY start.sh /start.sh

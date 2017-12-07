@@ -88,6 +88,11 @@ smtpd_recipient_restrictions =
   reject_non_fqdn_sender,
   reject_unknown_sender_domain,
   reject_unknown_recipient_domain,
+  {%- if BLACKLISTS -%}
+  {%- for BLACKLIST in BLACKLISTS.split(",") %}
+  reject_rbl_client {{ BLACKLIST|trim }},
+  {%- endfor -%}
+  {% endif %}
   permit
 
 ###############

@@ -10,7 +10,13 @@
 
 {% block main_action %}
 {% if current_user.global_admin %}
-<a class="btn btn-primary" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}">{% trans %}Regenerate keys{% endtrans %}</a>
+<a class="btn btn-primary" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}">
+  {% if domain.dkim_publickey %}
+  {% trans %}Regenerate keys{% endtrans %}
+  {% else %}
+  {% trans %}Generate keys{% endtrans %}
+  {% endif %}
+</a>
 {% endif %}
 {% endblock %}
 

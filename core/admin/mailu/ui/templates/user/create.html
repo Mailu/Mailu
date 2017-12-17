@@ -20,8 +20,8 @@
 
   {% call macros.box(_("Features and quotas"), theme="success") %}
   {{ macros.form_field(form.quota_bytes, step=1000000000, max=(max_quota_bytes or domain.max_quota_bytes or 50000000000),
-      prepend='<span class="input-group-addon"><span id="quota">'+(form.quota_bytes.data//1000000000).__str__()+'</span> GiB</span>',
-      oninput='$("#quota").text(this.value/1000000000);') }}
+      prepend='<span class="input-group-addon"><span id="quota">'+((form.quota_bytes.data//1000000000).__str__() if form.quota_bytes.data else '∞')+'</span> GiB</span>',
+      oninput='$("#quota").text(this.value == 0  ? "∞" : this.value/1000000000);') }}
   {{ macros.form_field(form.enable_imap) }}
   {{ macros.form_field(form.enable_pop) }}
   {% endcall %}

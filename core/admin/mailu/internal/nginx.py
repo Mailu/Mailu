@@ -1,5 +1,6 @@
-from mailu import db, models
+from mailu import db, models, app
 
+import re
 import socket
 import urllib
 
@@ -73,14 +74,19 @@ def get_status(protocol, status):
     status, codes = STATUSES[status]
     return status, codes[protocol]
 
+def extract_host_port(host_and_port, default_port):
+    host, _, port = re.match('^(.*)(:([0-9]*))?$', host_and_port).groups()
+    return host, int(port) if port else default_port
 
 def get_server(protocol, authenticated=False):
     if protocol == "imap":
-        hostname, port = "imap", 143
+        hostname, port = extract_host_port(app.config['HOST_IMAP'], 143)
     elif protocol == "pop3":
-        hostname, port = "imap", 110
+        hostname, port = extract_host_port(app.config['HOST_POP3'], 110)
     elif protocol == "smtp":
-        hostname = "smtp"
-        port = 10025 if authenticated else 25
+        if authenticated:
+            hostname, port = extract_host_port(app.config['HOST_AUTHSMTP'], 10025)
+        else:
+            hostname, port = extract_host_port(app.config['HOST_SMTP'], 25)
     address = socket.gethostbyname(hostname)
     return address, port

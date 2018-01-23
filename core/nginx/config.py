@@ -12,6 +12,14 @@ with open("/etc/resolv.conf") as handle:
     content = handle.read().split()
     args["RESOLVER"] = content[content.index("nameserver") + 1]
 
+if "HOST_WEBMAIL" not in args:
+    args["HOST_WEBMAIL"] = "webmail"
+if "HOST_ADMIN" not in args:
+    args["HOST_ADMIN"] = "admin"
+if "HOST_WEBDAV" not in args:
+    args["HOST_WEBDAV"] = "webdav:5232"
+if "HOST_ANTISPAM" not in args:
+    args["HOST_ANTISPAM"] = "antispam:11334"
 
 # TLS configuration
 args["TLS"] = {

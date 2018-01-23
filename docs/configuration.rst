@@ -69,3 +69,21 @@ Advanced settings
 The ``PASSWORD_SCHEME`` is the password encryption scheme. You should use the
 default value, unless you are importing password from a separate system and
 want to keep using the old password encryption scheme.
+
+Infrastructure settings
+-----------------------
+
+Various environment variables ``HOST_*`` can be used to run Mailu containers
+separately from a supported orchestrator. It is used by the various components
+to find the location of the other containers it depends on. They can contain an
+optional port number. Those variables are:
+
+- ``HOST_IMAP``: the container that is running the IMAP server (default: ``imap``, port 143)
+- ``HOST_POP3``: the container that is running the POP3 server (default: ``imap``, port 110)
+- ``HOST_SMTP``: the container that is running the SMTP server (default: ``smtp``, port 25)
+- ``HOST_AUTHSMTP``: the container that is running the authenticated SMTP server for the webnmail (default: ``smtp``, port 10025)
+- ``HOST_ADMIN``: the container that is running the admin interface (default: ``admin``)
+- ``HOST_ANTISPAM``: the container that is running the antispam service (default: ``antispam:11334``)
+- ``HOST_WEBMAIL``: the container that is running the webmail (default: ``webmail``)
+- ``HOST_WEBDAV``: the container that is running the webdav server (default: ``webdav:5232``)
+

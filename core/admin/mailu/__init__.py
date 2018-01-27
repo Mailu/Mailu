@@ -54,6 +54,11 @@ default_config = {
     'WEB_WEBMAIL': '/webmail',
     # Advanced settings
     'PASSWORD_SCHEME': 'SHA512-CRYPT',
+    # Host settings
+    'HOST_IMAP': 'imap',
+    'HOST_POP3': 'imap',
+    'HOST_SMTP': 'smtp',
+    'HOST_AUTHSMTP': os.environ.get('HOST_SMTP', 'smtp'),
 }
 
 # Load configuration from the environment if available

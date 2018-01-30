@@ -50,7 +50,7 @@ like ``localpart+custom@domain.tld`` to deliver mail to ``localpart@domain.tld``
 This is useful to provide external parties with different email addresses and
 later classify incoming mail based on the custom part.
 
-The ``DMAR_RUA`` and ``DMARC_RUF`` are DMARC protocol specific values. They hold
+The ``DMARC_RUA`` and ``DMARC_RUF`` are DMARC protocol specific values. They hold
 the localpart for DMARC rua and ruf email addresses.
 
 Web settings

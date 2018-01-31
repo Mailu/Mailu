@@ -9,7 +9,9 @@ import shutil
 convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 
 # Actual startup script
-os.environ["FRONT_ADDRESS"] = socket.gethostbyname("front")
+os.environ["FRONT_ADDRESS"] = socket.gethostbyname(os.environ.get("FRONT_ADDRESS", "front"))
+os.environ["HOST_ANTISPAM"] = os.environ.get("HOST_ANTISPAM", "antispam:11332")
+os.environ["HOST_LMTP"] = os.environ.get("HOST_LMTP", "imap:2525")
 
 for postfix_file in glob.glob("/conf/*.cf"):
     convert(postfix_file, os.path.join("/etc/postfix", os.path.basename(postfix_file)))

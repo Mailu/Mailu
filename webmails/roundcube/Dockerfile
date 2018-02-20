@@ -20,7 +20,7 @@ RUN rm -rf /var/www/html/ \
  && cd html \
  && rm -rf CHANGELOG INSTALL LICENSE README.md UPGRADING composer.json-dist installer \
  && sed -i 's,mod_php5.c,mod_php7.c,g' .htaccess \
- && chown -R www-data: logs
+ && chown -R www-data: logs temp
 
 COPY php.ini /usr/local/etc/php/conf.d/roundcube.ini
 

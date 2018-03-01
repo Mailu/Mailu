@@ -51,7 +51,7 @@ user_delete
 config_update
 -------------
 
-This command sole purpose is for importing users/aliases in bulk and synchronizing DB entries with external YAML template:
+The sole purpose of this command is for importing users/aliases in bulk and synchronizing DB entries with external YAML template:
 
 .. code-block:: bash
 

@@ -29,7 +29,7 @@ for the ``VERSION_TAG`` branch, use:
 Then open the ``.env`` file to setup the mail server. Modify the ``ROOT`` setting
 to match your setup directory if different from ``/mailu``.
 
-Mdify the ``VERSION`` configuration in the ``.env`` file to reflect the version you picked.
+Modify the ``VERSION`` configuration in the ``.env`` file to reflect the version you picked.
 
 Set the common configuration values
 -----------------------------------
@@ -65,11 +65,11 @@ default configuration.
 A Webmail is a Web interface exposing an email client. Mailu webmails are
 bound to the internal IMAP and SMTP server for users to access their mailbox through
 the Web. By exposing a complex application such as a Webmail, you should be aware of
-the security implications such an increase of attack surface. The ``WEBMAIL``
+the security implications caused by such an increase of attack surface. The ``WEBMAIL``
 configuration option must be one of the following:
 
 - ``none`` is the default value, no Webmail service will be exposed;
-- ``roundcube`` will run the popular Roundcube Webmail ;
+- ``roundcube`` will run the popular Roundcube Webmail;
 - ``rainloop`` will run the popular Rainloop Webmail.
 
 The administration interface is not exposed on the public address by default,

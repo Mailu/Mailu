@@ -141,4 +141,4 @@ Disable completely Mailu reverse proxy
 
 You can simply disable Mailu reverse proxy by removing the ``front`` section from the ``docker-compose.yml`` and use your own means to reverse proxy requests to the proper containers.
 
-Be careful with this method as resolving container addresses outside the Docker Compose structure is a tricky task: there is no guaranty that addresses will remain after a restart and you are almost certain that addresses will change after every upgrade (and whenever containers are recreated).
+Be careful with this method as resolving container addresses outside the Docker Compose structure is a tricky task: there is no guarantee that addresses will remain after a restart and you are almost certain that addresses will change after every upgrade (and whenever containers are recreated).

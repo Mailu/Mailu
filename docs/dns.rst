@@ -22,7 +22,7 @@ Set that name in the ``HOSTNAME`` configuration entry. Then depending on your do
 
 Also, ``a.b.c.d`` should be set in your ``BIND_INTERFACE`` configuration unless your server is in a DMZ and you are using port forwards to expose the services.
 
-Finally, make sure that you have a proper TLS certificate for you mail server hostname and install it according to the instructions in the [[Setup Guide]].
+Finally, make sure that you have a proper TLS certificate for your mail server hostname and install it according to the instructions in the [[Setup Guide]].
 
 MX entries
 ----------

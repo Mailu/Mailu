@@ -33,9 +33,8 @@ Pick a Mailu version
 
 Mailu is shipped in multiple versions.
 
-- ``stable`` is the default version and features a stable server, it gets bugfixes
-  and patches but features are included every month or so after a couple weeks of
-  testing. This is the default setting and should match most requirements.
+- ``1.5`` features the most recent stable version for Mailu. This is the
+  recommended build for new setups, old setups should migrate when possible.
 
 - ``1.0``, ``1.1``, and other version branches feature old versions of Mailu
   they will not receive any more patches (except for the stable one) and you should

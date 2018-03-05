@@ -14,7 +14,8 @@ $config['plugins'] = array(
     'archive',
     'zipdownload',
     'markasjunk',
-    'managesieve'
+    'managesieve',
+    'enigma'
 );
 
 // Mail servers
@@ -44,3 +45,6 @@ $config['managesieve_conn_options'] = $ssl_no_check;
 
 // skin name: folder from skins/
 $config['skin'] = 'larry';
+
+// Enigma gpg plugin
+$config['enigma_pgp_homedir'] = '/data/gpg';

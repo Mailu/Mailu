@@ -97,6 +97,8 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/webmail:/data"
+    depends_on:
+      - imap
 
   fetchmail:
     image: mailu/fetchmail:$VERSION

@@ -37,7 +37,7 @@ make sure that you either:
 
 If you chose to create a dedicated partition, simply mount it to
 ``/var/lib/docker``. You could also create a separate partition (*ext4* is a
-sane default)  ans mount it to ``/mailu`` for storing e-mail data.
+sane default) and mount it to ``/mailu`` for storing e-mail data.
 
 Docker supports *AUFS* over *ext4* and *btrfs* as stable storage drivers.
 Other filesystems are supported such as *OverlayFS*. If you know what you are

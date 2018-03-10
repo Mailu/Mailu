@@ -1,3 +1,4 @@
 flask
 flask-bootstrap
 redis
+gitpython

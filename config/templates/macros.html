@@ -1,0 +1,22 @@
+{% macro panel(style, title) %}
+  <div class="panel panel-{{ style }}">
+    <div class="panel-heading">
+      <h3 class="panel-title">{{ title }}</h3>
+    </div>
+    <div class="panel-body">
+      {{ caller() }}
+    </div>
+  </div>
+{% endmacro %}
+
+{% macro radio(name, value, emph, text) %}
+  <div class="radio">
+    <label>
+      <input type="radio" name="{{ name }}" value="{{ value }}">
+      {% if emph %}
+      <strong>{{ emph }}</strong>,
+      {% endif %}
+      {{ text }}
+    </label>
+  </div>
+{% endmacro %}

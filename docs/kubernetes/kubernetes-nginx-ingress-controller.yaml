@@ -73,11 +73,6 @@ spec:
             scheme: HTTP
           initialDelaySeconds: 10
           timeoutSeconds: 1
-        ports:
-        - containerPort: 25
-          hostPort: 25
-        - containerPort: 443
-          hostPort: 443
         env:
           - name: POD_NAME
             valueFrom:

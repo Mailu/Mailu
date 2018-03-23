@@ -5,7 +5,11 @@ import os
 import socket
 import glob
 import shutil
-	
+
+if os.environ["DB_TYPE"] = "mysql":
+	if os.environ["HOST_DB"] = "":
+		os.environ["HOST_DB"] = "database:3306"
+
 convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 
 # Actual startup script

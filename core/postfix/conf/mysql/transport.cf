@@ -1,3 +1,7 @@
-dbpath = /data/main.db
+hosts = {{ HOST_DB }}
+user = mailu
+password = mailu
+dbname = mailu
+
 query =
   SELECT 'smtp:['||smtp||']' FROM relay WHERE name='%s'

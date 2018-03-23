@@ -20,7 +20,7 @@ mynetworks = 127.0.0.1/32 [::1]/128 {{ RELAYNETS }}
 alias_maps =
 
 # DB configuration
-sql = {{ DB_TYPE }}:${config_directory}/{{ DB_TYPE }}/
+sql = {{ DB_TYPE }}:${config_directory}/
 
 # Only accept virtual emails
 mydestination =

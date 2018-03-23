@@ -7,9 +7,10 @@ import glob
 import shutil
 
 if os.environ["DB_TYPE"] == "mysql":
-	os.environ["HOST_DB"] = socket.gethostbyname("database")
-	if os.environ["HOST_DB"] == "":
+	if "HOST_DB" not in os.environ:
 		os.environ["HOST_DB"] = "database:3306"
+else:
+	os.environ["DB_TYPE"] = "sqlite"
 
 convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 
@@ -19,9 +20,8 @@ os.environ["FRONT_ADDRESS"] = socket.gethostbyname("front")
 for postfix_file in glob.glob("/conf/*.cf"):
     convert(postfix_file, os.path.join("/etc/postfix", os.path.basename(postfix_file)))
 
-for maps_file in glob.glob(os.path.join('/conf/', os.environ["DB_TYPE"],"/*.cf")):
-    convert(maps_file, os.path.join("/etc/postfix", os.path.basename(maps_file)))
-
+for maps_file in glob.glob("/conf/" + os.environ["DB_TYPE"] + "/*.cf"):
+	convert(maps_file, os.path.join("/etc/postfix", os.path.basename(maps_file)))
 
 if os.path.exists("/overrides/postfix.cf"):
     for line in open("/overrides/postfix.cf").read().strip().split("\n"):

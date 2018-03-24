@@ -3,6 +3,11 @@
 MYSQL_DATABASE=mailu
 MYSQL_USER=mailu
 MYSQL_PASSWORD=mailu
+# Import my.cnf if available
+if [ -d "/data/my.cnf" ]; then
+	echo "[i] my.cnf exist, using non default configuration"
+	cp /data/my.cnf /etc/mysql/my.cnf
+fi
 
 if [ -d "/run/mysqld" ]; then
 	echo "[i] mysqld already present, skipping creation"
@@ -54,14 +59,14 @@ EOF
 		echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';" >> $tfile
 	    fi
 	fi
-	
+
     #Import SQL Dump if available
     if [ -e "/data/mailu.sql" ]; then
 	    echo "[i] Previous Mailu installation exist, importing it"
 	    echo "USE mailu;" >> $tfile
 	    cat /data/mailu.sql >> $tfile
     fi
-    
+
 	/usr/bin/mysqld --user=mysql --bootstrap --verbose=0 < $tfile
 	rm -f $tfile
 

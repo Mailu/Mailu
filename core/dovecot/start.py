@@ -5,7 +5,7 @@ import os
 import socket
 import glob
 
-if os.environ["DB_TYPE"] == "mysql":
+if "DB_TYPE" in os.environ and os.environ["DB_TYPE"] == "mysql":
 	if "DB_HOST" not in os.environ:
 		os.environ["DB_HOST"] = "database:3306"
 	if "DB_USER" not in os.environ:

@@ -6,7 +6,7 @@ import os
 import tempfile
 import shlex
 import subprocess
-
+import pymysql
 
 FETCHMAIL = """
 fetchmail -N \
@@ -40,7 +40,7 @@ def fetchmail(fetchmailrc):
 def run(connection, cursor, debug):
     cursor.execute("""
         SELECT user_email, protocol, host, port, tls, username, password, keep
-        FROM fetch
+        FROM `fetch`
     """)
     for line in cursor.fetchall():
         fetchmailrc = ""
@@ -75,7 +75,7 @@ def run(connection, cursor, debug):
                 print(error_message)
         finally:
             cursor.execute("""
-                UPDATE fetch SET error=?, last_check=datetime('now')
+                UPDATE `fetch` SET error=?, last_check=datetime('now')
                 WHERE user_email=?
             """, (error_message.split("\n")[0], user_email))
             connection.commit()
@@ -83,8 +83,21 @@ def run(connection, cursor, debug):
 
 if __name__ == "__main__":
     debug = os.environ.get("DEBUG", None) == "True"
-    db_path = os.environ.get("DB_PATH", "/data/main.db")
-    connection = sqlite3.connect(db_path)
+    if "DB_TYPE" in os.environ and os.environ["DB_TYPE"] == "mysql":
+    	if "DB_HOST" not in os.environ:
+    		os.environ["DB_HOST"] = "database"
+    	if "DB_USER" not in os.environ:
+    		os.environ["DB_USER"] = "mailu"
+    	if "DB_PASSWORD" not in os.environ:
+    		os.environ["DB_PASSWORD"] = "mailu"
+    	if "DB_DATABASE" not in os.environ:
+    		os.environ["DB_DATABASE"] = "mailu"
+    	connection = pymysql.connect(host=os.environ["DB_HOST"], port=3306, user=os.environ["DB_USER"], passwd=os.environ["DB_PASSWORD"], db=os.environ["DB_DATABASE"])
+    else:
+    	os.environ["DB_TYPE"] = "sqlite"
+    	db_path = os.environ.get("DB_PATH", "/data/main.db")
+    	connection = sqlite3.connect(db_path)
+
     while True:
         cursor = connection.cursor()
         run(connection, cursor, debug)

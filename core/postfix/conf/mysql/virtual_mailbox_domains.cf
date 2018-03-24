@@ -1,7 +1,7 @@
-hosts = {{ HOST_DB }}
-user = mailu
-password = mailu
-dbname = mailu
+hosts = {{ DB_HOST }}
+user = {{ DB_USER }}
+password = {{ DB_PASSWORD }}
+dbname = {{ DB_DATABASE }}
 
 query =
   SELECT name FROM domain WHERE name='%s'

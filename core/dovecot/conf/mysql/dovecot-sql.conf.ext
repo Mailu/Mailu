@@ -1,5 +1,5 @@
 driver = mysql
-connect = host={{ HOST_DB }} dbname=mailu user=mailu password=mailu
+connect = host={{ DB_HOST }} dbname={{ DB_DATABASE }} user={{ DB_USER }} password={{ DB_PASSWORD }}
 
 # Return the user hashed password
 password_query = \

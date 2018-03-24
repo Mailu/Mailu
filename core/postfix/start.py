@@ -7,8 +7,14 @@ import glob
 import shutil
 
 if os.environ["DB_TYPE"] == "mysql":
-	if "HOST_DB" not in os.environ:
-		os.environ["HOST_DB"] = "database:3306"
+	if "DB_HOST" not in os.environ:
+		os.environ["DB_HOST"] = "database:3306"
+	if "DB_USER" not in os.environ:
+		os.environ["DB_USER"] = "mailu"
+	if "DB_PASSWORD" not in os.environ:
+		os.environ["DB_PASSWORD"] = "mailu"
+	if "DB_DATABASE" not in os.environ:
+		os.environ["DB_DATABASE"] = "mailu"
 else:
 	os.environ["DB_TYPE"] = "sqlite"
 

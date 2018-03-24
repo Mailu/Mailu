@@ -1,8 +1,5 @@
 #!/bin/sh
 
-MYSQL_DATABASE=mailu
-MYSQL_USER=mailu
-MYSQL_PASSWORD=mailu
 # Import my.cnf if available
 if [ -e "/data/my.cnf" ]; then
 	echo "[i] my.cnf exist, using non default configuration"
@@ -33,9 +30,9 @@ else
 		echo "[i] MySQL root Password: $MYSQL_ROOT_PASSWORD"
 	fi
 
-	MYSQL_DATABASE=${MYSQL_DATABASE:-""}
-	MYSQL_USER=${MYSQL_USER:-""}
-	MYSQL_PASSWORD=${MYSQL_PASSWORD:-""}
+	MYSQL_DATABASE=${DB_DATABASE:-"mailu"}
+	MYSQL_USER=${DB_USER:-"mailu"}
+	MYSQL_PASSWORD=${DB_PASSWORD:-"mailu"}
 
 	tfile=`mktemp`
 	if [ ! -f "$tfile" ]; then

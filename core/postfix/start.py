@@ -8,7 +8,7 @@ import shutil
 
 if "DB_TYPE" in os.environ and os.environ["DB_TYPE"] == "mysql":
 	if "DB_HOST" not in os.environ:
-		os.environ["DB_HOST"] = "database:3306"
+		os.environ["DB_HOST"] = "database"
 	if "DB_USER" not in os.environ:
 		os.environ["DB_USER"] = "mailu"
 	if "DB_PASSWORD" not in os.environ:

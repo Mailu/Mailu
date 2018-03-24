@@ -9,6 +9,6 @@ password_query = \
 
 # Mostly get the user quota
 user_query = \
- SELECT '*:bytes=' || user.quota_bytes AS quota_rule \
+ SELECT '*:bytes=' || user.quota_bytes AS userdb_quota_rule \
    FROM user \
   WHERE user.email = '%u'

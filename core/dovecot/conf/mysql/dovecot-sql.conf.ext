@@ -1,0 +1,14 @@
+driver = mysql
+connect = host={{ HOST_DB }} dbname=mailu user=mailu password=mailu
+
+# Return the user hashed password
+password_query = \
+ SELECT NULL as password, 'Y' as nopassword, '{{ FRONT_ADDRESS }}{% if WEBMAIL_ADDRESS %},{{ WEBMAIL_ADDRESS }}{% endif %}' as allow_nets \
+   FROM user \
+  WHERE user.email = '%u'
+
+# Mostly get the user quota
+user_query = \
+ SELECT '*:bytes=' || user.quota_bytes AS quota_rule \
+   FROM user \
+  WHERE user.email = '%u'

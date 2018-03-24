@@ -4,7 +4,7 @@ MYSQL_DATABASE=mailu
 MYSQL_USER=mailu
 MYSQL_PASSWORD=mailu
 # Import my.cnf if available
-if [ -d "/data/my.cnf" ]; then
+if [ -e "/data/my.cnf" ]; then
 	echo "[i] my.cnf exist, using non default configuration"
 	cp /data/my.cnf /etc/mysql/my.cnf
 fi

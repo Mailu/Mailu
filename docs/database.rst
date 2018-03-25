@@ -8,8 +8,9 @@ MYSQL
 ----
 In order to use it environment variable `DB_TYPE=mysql`
 You can use the optional `database` container to start a MariaDB server.
-It will automaticaly load any mailu.sql file located in `/data`.
-You can also put your own `my.cnf` config file.
+It will automaticaly load file in `/data`:
+    - `mailu.sql` file that should contain sql to execute (database backup)
+    - `my.cnf` file containing MariaDB config file
 
 Default configuration use in `database` container is :
     DB_HOST = "database"
@@ -18,3 +19,5 @@ Default configuration use in `database` container is :
     DB_PASSWORD = "mailu"
     DB_DATABASE = "mailu"
 Those can be override by setting your own environment variable.
+
+If using database container you want to map a `/var/lib/mysql` to a volume for persistency

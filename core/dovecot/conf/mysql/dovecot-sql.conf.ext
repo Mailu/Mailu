@@ -1,5 +1,5 @@
 driver = mysql
-connect = host={{ DB_HOST }} dbname={{ DB_DATABASE }} user={{ DB_USER }} password={{ DB_PASSWORD }}
+connect = host={{ DB_HOST }} dbname={{ DB_DATABASE }} user={{ DB_USER }} password={{ DB_PASSWORD }} port={{ DB_PORT }}
 
 # Return the user hashed password
 password_query = \

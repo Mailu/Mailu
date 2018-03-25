@@ -86,13 +86,15 @@ if __name__ == "__main__":
     if "DB_TYPE" in os.environ and os.environ["DB_TYPE"] == "mysql":
     	if "DB_HOST" not in os.environ:
     		os.environ["DB_HOST"] = "database"
+        if "DB_PORT" not in os.environ:
+    		os.environ["DB_PORT"] = "3306"
     	if "DB_USER" not in os.environ:
     		os.environ["DB_USER"] = "mailu"
     	if "DB_PASSWORD" not in os.environ:
     		os.environ["DB_PASSWORD"] = "mailu"
     	if "DB_DATABASE" not in os.environ:
     		os.environ["DB_DATABASE"] = "mailu"
-    	connection = pymysql.connect(host=os.environ["DB_HOST"], port=3306, user=os.environ["DB_USER"], passwd=os.environ["DB_PASSWORD"], db=os.environ["DB_DATABASE"])
+    	connection = pymysql.connect(host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], user=os.environ["DB_USER"], passwd=os.environ["DB_PASSWORD"], db=os.environ["DB_DATABASE"])
     else:
     	os.environ["DB_TYPE"] = "sqlite"
     	db_path = os.environ.get("DB_PATH", "/data/main.db")

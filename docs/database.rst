@@ -13,6 +13,7 @@ You can also put your own `my.cnf` config file.
 
 Default configuration use in `database` container is :
     DB_HOST = "database"
+    DB_PORT = "3306"
     DB_USER = "mailu"
     DB_PASSWORD = "mailu"
     DB_DATABASE = "mailu"

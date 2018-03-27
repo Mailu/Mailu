@@ -11,6 +11,8 @@ convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()
 os.environ["FRONT_ADDRESS"] = socket.gethostbyname(os.environ.get("FRONT_ADDRESS", "front"))
 if os.environ["WEBMAIL"] != "none":
 	os.environ["WEBMAIL_ADDRESS"] = socket.gethostbyname(os.environ.get("WEBMAIL_ADDRESS", "webmail"))
+if os.environ.get("MANAGESIEVE_ADDRESS", "") != "":
+	os.environ["MANAGESIEVE_ADDRESS"] = socket.gethostbyname(os.environ.get("MANAGESIEVE_ADDRESS", "managesieve"))
 
 for dovecot_file in glob.glob("/conf/*"):
     convert(dovecot_file, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))

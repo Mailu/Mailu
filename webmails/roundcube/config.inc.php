@@ -19,15 +19,15 @@ $config['plugins'] = array(
 );
 
 // Mail servers
-$config['default_host'] = 'front';
+$config['default_host'] = getenv('FRONT_ADDRESS') || 'front';
 $config['default_port'] = 10143;
-$config['smtp_server'] = 'front';
+$config['smtp_server'] = getenv('FRONT_ADDRESS') || 'front';
 $config['smtp_port'] = 10025;
 $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 
 // Sieve script management
-$config['managesieve_host'] = 'imap';
+$config['managesieve_host'] = getenv('IMAP_ADDRESS') || 'imap';
 $config['managesieve_usetls'] = false;
 
 // We access the IMAP and SMTP servers locally with internal names, SSL

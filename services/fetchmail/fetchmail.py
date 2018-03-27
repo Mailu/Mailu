@@ -6,6 +6,7 @@ import os
 import tempfile
 import shlex
 import subprocess
+import re
 
 
 FETCHMAIL = """
@@ -18,11 +19,14 @@ RC_LINE = """
 poll "{host}" proto {protocol}  port {port}
     user "{username}" password "{password}"
     is "{user_email}"
-    smtphost "smtp"
+    smtphost "{smtphost}"
     {options}
     sslproto 'AUTO'
 """
 
+def extract_host_port(host_and_port, default_port):
+    host, _, port = re.match('^(.*)(:([0-9]*))?$', host_and_port).groups()
+    return host, int(port) if port else default_port
 
 def escape_rc_string(arg):
     return arg.replace("\\", "\\\\").replace('"', '\\"')
@@ -42,6 +46,11 @@ def run(connection, cursor, debug):
         SELECT user_email, protocol, host, port, tls, username, password, keep
         FROM fetch
     """)
+    smtphost, smtpport = extract_host_port(os.environ.get("HOST_SMTP", "smtp"), None)
+    if smtpport is None:
+        smtphostport = smtphost
+    else:
+        smtphostport = "%s/%d" % (smtphost, smtpport)
     for line in cursor.fetchall():
         fetchmailrc = ""
         user_email, protocol, host, port, tls, username, password, keep = line
@@ -53,6 +62,7 @@ def run(connection, cursor, debug):
             protocol=protocol,
             host=escape_rc_string(host),
             port=port,
+            smtphost=smtphostport,
             username=escape_rc_string(username),
             password=escape_rc_string(password),
             options=options

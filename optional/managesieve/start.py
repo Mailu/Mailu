@@ -15,4 +15,5 @@ for dovecot_file in glob.glob("/conf/*"):
     convert(dovecot_file, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))
 
 # Run postfix
+os.system("chown -R mail:mail /var/lib/dovecot")
 os.execv("/usr/sbin/dovecot", ["dovecot", "-c", "/etc/dovecot/dovecot.conf", "-F"])

@@ -1,0 +1,10 @@
+hosts = {{ DB_HOST }}
+port = {{ DB_PORT }}
+user = {{ DB_USER }}
+password = {{ DB_PASSWORD }}
+dbname = {{ DB_DATABASE }}
+
+query =
+  SELECT name FROM domain WHERE name='%s'
+  UNION
+  SELECT name FROM alternative WHERE name='%s'

@@ -1,0 +1,8 @@
+hosts = {{ DB_HOST }}
+port = {{ DB_PORT }}
+user = {{ DB_USER }}
+password = {{ DB_PASSWORD }}
+dbname = {{ DB_DATABASE }}
+
+query =
+  SELECT 'smtp:['||smtp||']' FROM relay WHERE name='%s'

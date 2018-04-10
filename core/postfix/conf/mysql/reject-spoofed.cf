@@ -1,0 +1,10 @@
+hosts = {{ DB_HOST }}
+port = {{ DB_PORT }}
+user = {{ DB_USER }}
+password = {{ DB_PASSWORD }}
+dbname = {{ DB_DATABASE }}
+
+query =
+  SELECT 'REJECT' FROM domain WHERE name='%s'
+  UNION
+  SELECT 'REJECT' FROM alternative WHERE name='%s'

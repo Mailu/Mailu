@@ -65,6 +65,20 @@ default_config = {
 for key, value in default_config.items():
     app.config[key] = os.environ.get(key, value)
 
+# Load specific DB connections (mysql://username:password@server/db)
+if "DB_TYPE" in os.environ and os.environ["DB_TYPE"] == "mysql":
+    if "DB_HOST" not in os.environ:
+        os.environ["DB_HOST"] = "database"
+    if "DB_PORT" not in os.environ:
+		os.environ["DB_PORT"] = "3306"
+    if "DB_USER" not in os.environ:
+        os.environ["DB_USER"] = "mailu"
+    if "DB_PASSWORD" not in os.environ:
+        os.environ["DB_PASSWORD"] = "mailu"
+    if "DB_DATABASE" not in os.environ:
+        os.environ["DB_DATABASE"] = "mailu"
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DB_TYPE"]+"+pymysql://"+os.environ["DB_USER"]+":"+os.environ["DB_PASSWORD"]+"@"+os.environ["DB_HOST"]+":"+os.environ["DB_PORT"]+"/"+os.environ["DB_DATABASE"]
+
 # Base application
 flask_bootstrap.Bootstrap(app)
 db = flask_sqlalchemy.SQLAlchemy(app)

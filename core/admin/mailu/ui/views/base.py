@@ -58,3 +58,8 @@ def announcement():
         form.announcement_body.data = ''
         flask.flash('Your announcement was sent', 'success')
     return flask.render_template('announcement.html', form=form)
+
+
+@ui.route('/client', methods=['GET'])
+def client():
+    return flask.render_template('client.html')

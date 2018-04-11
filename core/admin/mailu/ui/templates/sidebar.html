@@ -78,6 +78,11 @@
     </li>
     {% endif %}
     <li>
+      <a href="{{ url_for('.client') }}">
+        <i class="fa fa-laptop"></i> <span>{% trans %}Client setup{% endtrans %}</span>
+      </a>
+    </li>
+    <li>
       <a href="{{ config["WEBSITE"] }}">
         <i class="fa fa-globe"></i> <span>{% trans %}Website{% endtrans %}</span>
       </a>

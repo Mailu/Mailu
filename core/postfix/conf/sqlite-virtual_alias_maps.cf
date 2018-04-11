@@ -2,16 +2,16 @@ dbpath = /data/main.db
 query =
   SELECT destination
    FROM
-     (SELECT destination, email, wildcard, localpart FROM alias
+     (SELECT destination, email, wildcard, localpart, localpart||'@'||alternative.name AS alt_email FROM alias LEFT JOIN alternative ON alias.domain_name = alternative.domain_name
       UNION
-      SELECT (CASE WHEN forward_enabled=1 THEN (CASE WHEN forward_keep=1 THEN email||',' ELSE '' END)||forward_destination ELSE email END) AS destination, email, 0 as wildcard, localpart FROM user
+      SELECT (CASE WHEN forward_enabled=1 THEN (CASE WHEN forward_keep=1 THEN email||',' ELSE '' END)||forward_destination ELSE email END) AS destination, email, 0 as wildcard, localpart, localpart||'@'||alternative.name as alt_email FROM user LEFT JOIN alternative ON user.domain_name = alternative.domain_name
       UNION
-      SELECT '@'||domain_name as destination, '@'||name as email, 0 as wildcard, '' as localpart FROM alternative)
+      SELECT '@'||domain_name as destination, '@'||name as email, 0 as wildcard, '' as localpart, NULL AS alt_email FROM alternative)
    WHERE
      (
       wildcard = 0
       AND
-      email = '%s'
+      (email = '%s' OR alt_email = '%s')
      ) OR (
       wildcard = 1
       AND

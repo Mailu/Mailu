@@ -79,6 +79,7 @@ class UserSignupForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('Email address'), [validators.DataRequired(), validators.Regexp("^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+$")])
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
+    captcha = flask_wtf.RecaptchaField()
     submit = fields.SubmitField(_('Sign up'))
 
 

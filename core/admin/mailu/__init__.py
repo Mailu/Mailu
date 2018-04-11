@@ -52,6 +52,8 @@ default_config = {
     'WEBSITE': 'https://mailu.io',
     'WEB_ADMIN': '/admin',
     'WEB_WEBMAIL': '/webmail',
+    'RECAPTCHA_PUBLIC_KEY': '',
+    'RECAPTCHA_PRIVATE_KEY': '',
     # Advanced settings
     'PASSWORD_SCHEME': 'SHA512-CRYPT',
     # Host settings

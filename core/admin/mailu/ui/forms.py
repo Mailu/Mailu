@@ -87,6 +87,11 @@ class UserSettingsForm(flask_wtf.FlaskForm):
     displayed_name = fields.StringField(_('Displayed name'))
     spam_enabled = fields.BooleanField(_('Enable spam filter'))
     spam_threshold = fields_.IntegerSliderField(_('Spam filter tolerance'))
+    forward_enabled = fields.BooleanField(_('Enable forwarding'))
+    forward_keep = fields.BooleanField(_('Keep a copy of the emails'))
+    forward_destination = fields.StringField(
+        _('Destination'), [validators.Optional(), validators.Email()]
+    )
     submit = fields.SubmitField(_('Save settings'))
 
 
@@ -94,15 +99,6 @@ class UserPasswordForm(flask_wtf.FlaskForm):
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
     pw2 = fields.PasswordField(_('Password check'), [validators.DataRequired()])
     submit = fields.SubmitField(_('Update password'))
-
-
-class UserForwardForm(flask_wtf.FlaskForm):
-    forward_enabled = fields.BooleanField(_('Enable forwarding'))
-    forward_keep = fields.BooleanField(_('Keep a copy of the emails'))
-    forward_destination = fields.StringField(
-        _('Destination'), [validators.Optional(), validators.Email()]
-    )
-    submit = fields.SubmitField(_('Update'))
 
 
 class UserReplyForm(flask_wtf.FlaskForm):

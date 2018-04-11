@@ -11,9 +11,6 @@
 {% block content %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
-  {% call macros.box(title=_("General settings")) %}
-  {{ macros.form_field(form.displayed_name) }}
-  {% endcall %}
 
   {% call macros.box(title=_("Antispam")) %}
   {{ macros.form_field(form.spam_enabled) }}
@@ -21,6 +18,17 @@
       prepend='<span class="input-group-addon"><span id="threshold">'+form.spam_threshold.data.__str__()+'</span>&nbsp;/&nbsp;100</span>',
       oninput='$("#threshold").text(this.value);') }}
   {% endcall %}
+
+  {% call macros.box(title=_("Auto-forward")) %}
+  {{ macros.form_field(form.forward_enabled,
+      onchange="if(this.checked){$('#forward_destination,#forward_keep').removeAttr('disabled')}
+                else{$('#forward_destination,#forward_keep').attr('disabled', '')}") }}
+  {{ macros.form_field(form.forward_keep,
+      **{("enabled" if user.forward_enabled else "disabled"): ""}) }}
+  {{ macros.form_field(form.forward_destination,
+      **{("enabled" if user.forward_enabled else "disabled"): ""}) }}
+  {% endcall %}
+
   {{ macros.form_field(form.submit) }}
 </form>
 {% endblock %}

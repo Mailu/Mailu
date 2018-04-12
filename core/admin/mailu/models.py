@@ -38,6 +38,19 @@ class CommaSeparatedList(db.TypeDecorator):
         return filter(bool, value.split(","))
 
 
+class Idna(db.TypeDecorator):
+    """ Stores a Unicode string in it's IDNA representation (ASCII only)
+    """
+
+    impl = db.String
+
+    def process_bind_param(self, value, dialect):
+        return value.encode("idna")
+
+    def process_result_value(self, value, dialect):
+        return value.decode("idna")
+
+
 class Base(db.Model):
     """ Base class for all models
     """
@@ -54,7 +67,7 @@ class Domain(Base):
     """
     __tablename__ = "domain"
 
-    name = db.Column(db.String(80), primary_key=True, nullable=False)
+    name = db.Column(Idna, primary_key=True, nullable=False)
     managers = db.relationship('User', secondary=managers,
         backref=db.backref('manager_of'), lazy='dynamic')
     max_users = db.Column(db.Integer, nullable=False, default=0)

@@ -15,7 +15,7 @@ import smtplib
 
 # Many-to-many association table for domain managers
 managers = db.Table('manager',
-    db.Column('domain_name', db.String(80), db.ForeignKey('domain.name')),
+    db.Column('domain_name', Idna, db.ForeignKey('domain.name')),
     db.Column('user_email', db.String(255), db.ForeignKey('user.email'))
 )
 
@@ -123,8 +123,8 @@ class Alternative(Base):
 
     __tablename__ = "alternative"
 
-    name = db.Column(db.String(80), primary_key=True, nullable=False)
-    domain_name = db.Column(db.String(80), db.ForeignKey(Domain.name))
+    name = db.Column(Idna, primary_key=True, nullable=False)
+    domain_name = db.Column(Idna, db.ForeignKey(Domain.name))
     domain = db.relationship(Domain,
         backref=db.backref('alternatives', cascade='all, delete-orphan'))
 
@@ -139,8 +139,8 @@ class Relay(Base):
 
     __tablename__ = "relay"
 
-    name = db.Column(db.String(80), primary_key=True, nullable=False)
-    smtp = db.Column(db.String(80), nullable=True)
+    name = db.Column(Idna, primary_key=True, nullable=False)
+    smtp = db.Column(Idna, nullable=True)
 
     def __str__(self):
         return self.name
@@ -154,7 +154,7 @@ class Email(object):
 
     @declarative.declared_attr
     def domain_name(cls):
-        return db.Column(db.String(80), db.ForeignKey(Domain.name),
+        return db.Column(Idna, db.ForeignKey(Domain.name),
             nullable=False)
 
     # This field is redundant with both localpart and domain name.

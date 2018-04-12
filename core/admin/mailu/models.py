@@ -11,6 +11,20 @@ import time
 import os
 import glob
 import smtplib
+import idna
+
+
+class Idna(db.TypeDecorator):
+    """ Stores a Unicode string in it's IDNA representation (ASCII only)
+    """
+
+    impl = db.String
+
+    def process_bind_param(self, value, dialect):
+        return idna.encode(value)
+
+    def process_result_value(self, value, dialect):
+        return idna.decode(value)
 
 
 # Many-to-many association table for domain managers
@@ -36,19 +50,6 @@ class CommaSeparatedList(db.TypeDecorator):
 
     def process_result_value(self, value, dialect):
         return filter(bool, value.split(","))
-
-
-class Idna(db.TypeDecorator):
-    """ Stores a Unicode string in it's IDNA representation (ASCII only)
-    """
-
-    impl = db.String
-
-    def process_bind_param(self, value, dialect):
-        return value.encode("idna")
-
-    def process_result_value(self, value, dialect):
-        return value.decode("idna")
 
 
 class Base(db.Model):

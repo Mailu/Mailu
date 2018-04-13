@@ -165,7 +165,7 @@ class Email(object):
     def email(cls):
         updater = lambda context: "{0}@{1}".format(
             context.current_parameters["localpart"],
-            context.current_parameters["domain_name"],
+            idna.encode(context.current_parameters["domain_name"]).decode('ascii'),
         )
         return db.Column(db.String(255, collation="NOCASE"),
             primary_key=True, nullable=False,

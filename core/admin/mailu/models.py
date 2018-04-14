@@ -18,7 +18,7 @@ class IdnaDomain(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
 
-    impl = db.String
+    impl = db.String(80)
 
 
     def process_bind_param(self, value, dialect):
@@ -32,7 +32,7 @@ class IdnaEmail(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
 
-    impl = db.String
+    impl = db.String(255, collation="NOCASE")
 
 
     def process_bind_param(self, value, dialect):

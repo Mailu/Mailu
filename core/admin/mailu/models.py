@@ -263,6 +263,9 @@ class User(Base, Email):
         default=scheme_dict[app.config['PASSWORD_SCHEME']],
     )
 
+    def is_enabled(self):
+        return self.enabled
+
     def check_password(self, password):
         reference = re.match('({[^}]+})?(.*)', self.password).group(2)
         return User.pw_context.verify(password, reference)
@@ -299,7 +302,7 @@ class User(Base, Email):
     @classmethod
     def login(cls, email, password):
         user = cls.query.get(email)
-        return user if (user and user.check_password(password)) else None
+        return user if (user and user.check_password(password) and user.is_enabled()) else None
 
 login_manager.user_loader(User.query.get)
 

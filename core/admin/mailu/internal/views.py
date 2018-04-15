@@ -27,7 +27,8 @@ def admin_authentication():
     """ Fails if the user is not an authenticated admin.
     """
     if (not flask_login.current_user.is_anonymous
-        and flask_login.current_user.global_admin):
+        and flask_login.current_user.global_admin
+        and flask_login.current_user.enabled):
         return ""
     return flask.abort(403)
 

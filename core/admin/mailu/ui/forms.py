@@ -72,6 +72,7 @@ class UserForm(flask_wtf.FlaskForm):
     enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)
     enable_pop = fields.BooleanField(_('Allow POP3 access'), default=True)
     comment = fields.StringField(_('Comment'))
+    enabled = fields.BooleanField(_('Enabled'), default=True)
     submit = fields.SubmitField(_('Save'))
 
 

@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
       libpng12-dev \
  && docker-php-ext-install pdo_mysql mcrypt zip
 
-ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.3.4/roundcubemail-1.3.4-complete.tar.gz
+ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.3.6/roundcubemail-1.3.6-complete.tar.gz
 
 RUN echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini
 

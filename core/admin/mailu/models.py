@@ -162,7 +162,7 @@ class Email(object):
         """
         from_address = '{}@{}'.format(
             app.config['POSTMASTER'], app.config['DOMAIN'])
-        with smtplib.SMTP('smtp', port=10025) as smtp:
+        with smtplib.SMTP(app.config['HOST_AUTHSMTP'], port=10025) as smtp:
             msg = text.MIMEText(body)
             msg['Subject'] = subject
             msg['From'] = from_address

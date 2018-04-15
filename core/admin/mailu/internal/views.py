@@ -27,7 +27,8 @@ def admin_authentication():
     """ Fails if the user is not an authenticated admin.
     """
     if (not flask_login.current_user.is_anonymous
-        and flask_login.current_user.global_admin):
+        and flask_login.current_user.global_admin
+        and flask_login.current_user.enabled):
         return ""
     return flask.abort(403)
 
@@ -41,7 +42,7 @@ def basic_authentication():
         encoded = authorization.replace("Basic ", "")
         user_email, password = base64.b64decode(encoded).split(b":")
         user = models.User.query.get(user_email.decode("utf8"))
-        if user and user.check_password(password.decode("utf8")):
+        if user and user.enabled and user.check_password(password.decode("utf8")):
             response = flask.Response()
             response.headers["X-User"] = user.email
             return response

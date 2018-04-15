@@ -51,7 +51,7 @@ def handle_authentication(headers):
                     status = False
                 elif protocol == "pop3" and not user.enable_pop:
                     status = False
-        if status:
+        if status and user.enabled:
             return {
                 "Auth-Status": "OK",
                 "Auth-Server": server,

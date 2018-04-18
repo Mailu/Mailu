@@ -16,3 +16,4 @@ docker-py
 tabulate
 PyYAML
 PyOpenSSL
+dnspython

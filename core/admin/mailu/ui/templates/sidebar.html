@@ -92,6 +92,13 @@
         <i class="fa fa-life-ring"></i> <span>{% trans %}Help{% endtrans %}</span>
       </a>
     </li>
+    {% if config['DOMAIN_REGISTRATION'] %}
+    <li>
+      <a href="{{ url_for('.domain_signup') }}">
+        <i class="fa fa-plus-square"></i> <span>{% trans %}Register a domain{% endtrans %}</span>
+      </a>
+    </li>
+    {% endif %}
     {% if current_user.is_authenticated %}
     <li>
       <a href="{{ url_for('.logout') }}">

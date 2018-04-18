@@ -27,6 +27,7 @@ default_config = {
     'BOOTSTRAP_SERVE_LOCAL': True,
     'RATELIMIT_STORAGE_URL': 'redis://redis',
     'DEBUG': False,
+    'DOMAIN_REGISTRATION': False,
     # Statistics management
     'INSTANCE_ID_PATH': '/data/instance',
     'STATS_ENDPOINT': '0.{}.stats.mailu.io',

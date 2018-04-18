@@ -52,6 +52,15 @@ class DomainForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Create'))
 
 
+class DomainSignupForm(flask_wtf.FlaskForm):
+    name = fields.StringField(_('Domain name'), [validators.DataRequired()])
+    localpart = fields.StringField(_('Initial admin'), [validators.DataRequired()])
+    pw = fields.PasswordField(_('Admin password'), [validators.DataRequired()])
+    pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
+    captcha = flask_wtf.RecaptchaField()
+    submit = fields.SubmitField(_('Create'))
+
+
 class AlternativeForm(flask_wtf.FlaskForm):
     name = fields.StringField(_('Alternative name'), [validators.DataRequired()])
     submit = fields.SubmitField(_('Create'))

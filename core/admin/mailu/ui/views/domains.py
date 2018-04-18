@@ -2,7 +2,9 @@ from mailu import app, db, models
 from mailu.ui import ui, forms, access
 
 import flask
+import flask_login
 import wtforms_components
+import dns.resolver
 
 
 @ui.route('/domain', methods=['GET'])
@@ -73,3 +75,52 @@ def domain_genkeys(domain_name):
     domain.generate_dkim_key()
     return flask.redirect(
         flask.url_for(".domain_details", domain_name=domain_name))
+
+
+@ui.route('/domain/signup', methods=['GET', 'POST'])
+def domain_signup(domain_name=None):
+    if not app.config['DOMAIN_REGISTRATION']:
+        flask.abort(403)
+    form = forms.DomainSignupForm()
+    if flask_login.current_user.is_authenticated:
+        del form.localpart
+        del form.pw
+        del form.pw2
+    if form.validate_on_submit():
+        conflicting_domain = models.Domain.query.get(form.name.data)
+        conflicting_alternative = models.Alternative.query.get(form.name.data)
+        conflicting_relay = models.Relay.query.get(form.name.data)
+        hostnames = app.config['HOSTNAMES'].split(',')
+        if conflicting_domain or conflicting_alternative or conflicting_relay:
+            flask.flash('Domain %s is already used' % form.name.data, 'error')
+        else:
+            # Check if the domain MX actually points to this server
+            try:
+                mxok = any(str(rset).split()[-1][:-1] in hostnames
+                           for rset in dns.resolver.query(form.name.data, 'MX'))
+            except Exception as e:
+                mxok = False
+            if mxok:
+                # Actually create the domain
+                domain = models.Domain()
+                form.populate_obj(domain)
+                domain.max_quota_bytes = app.config['DEFAULT_QUOTA']
+                domain.max_users = 10
+                domain.max_aliases = 10
+                db.session.add(domain)
+                if flask_login.current_user.is_authenticated:
+                    user = models.User.query.get(flask_login.current_user.email)
+                else:
+                    user = models.User()
+                    user.domain = domain
+                    form.populate_obj(user)
+                    user.set_password(form.pw.data)
+                    user.quota_bytes = domain.max_quota_bytes
+                db.session.add(user)
+                domain.managers.append(user)
+                db.session.commit()
+                flask.flash('Domain %s created' % domain)
+                return flask.redirect(flask.url_for('.domain_list'))
+            else:
+                flask.flash('The MX record was not properly set', 'error')
+    return flask.render_template('domain/signup.html', form=form)

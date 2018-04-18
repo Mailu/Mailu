@@ -12,3 +12,7 @@ user_query = \
  SELECT '*:bytes=' || user.quota_bytes AS quota_rule \
    FROM user \
   WHERE user.email = '%u'
+
+# For using doveadm -A:
+iterate_query = \
+ SELECT user.email AS user FROM user

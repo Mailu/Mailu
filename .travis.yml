@@ -5,4 +5,4 @@ install:
   - pip install -r docs/requirements.txt
 script:
   - sphinx-versioning build -b -B 1.5 -r 1.5 -w '^[0-9.]*$' -w master -W '^$' docs/ build/
-  - python docs/conf.py build $DEPLOY_HOST $DEPLOY_USERNAME $DEPLOY_PASSWORD $DEPLOY_REMOTEDIR
+  - python "docs/conf.py" "build" "$DEPLOY_HOST" "$DEPLOY_USERNAME" "$DEPLOY_PASSWORD" "$DEPLOY_REMOTEDIR"

@@ -12,6 +12,7 @@ import os
 import glob
 import smtplib
 import idna
+import dns
 
 
 class IdnaDomain(db.TypeDecorator):

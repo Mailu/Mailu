@@ -260,7 +260,7 @@ class User(Base, Email):
 
     @property
     def quota_bytes_used(self):
-        return quota.get(self.email) or 0
+        return quota.get(self.email + "/quota/storage") or 0
 
     scheme_dict = {'SHA512-CRYPT': "sha512_crypt",
                    'SHA256-CRYPT': "sha256_crypt",

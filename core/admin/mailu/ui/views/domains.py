@@ -90,23 +90,15 @@ def domain_signup(domain_name=None):
         conflicting_domain = models.Domain.query.get(form.name.data)
         conflicting_alternative = models.Alternative.query.get(form.name.data)
         conflicting_relay = models.Relay.query.get(form.name.data)
-        hostnames = app.config['HOSTNAMES'].split(',')
         if conflicting_domain or conflicting_alternative or conflicting_relay:
             flask.flash('Domain %s is already used' % form.name.data, 'error')
         else:
-            # Check if the domain MX actually points to this server
-            try:
-                mxok = any(str(rset).split()[-1][:-1] in hostnames
-                           for rset in dns.resolver.query(form.name.data, 'MX'))
-            except Exception as e:
-                mxok = False
-            if mxok:
-                # Actually create the domain
-                domain = models.Domain()
-                form.populate_obj(domain)
-                domain.max_quota_bytes = app.config['DEFAULT_QUOTA']
-                domain.max_users = 10
-                domain.max_aliases = 10
+            domain = models.Domain()
+            form.populate_obj(domain)
+            domain.max_quota_bytes = app.config['DEFAULT_QUOTA']
+            domain.max_users = 10
+            domain.max_aliases = 10
+            if domain.check_mx():
                 db.session.add(domain)
                 if flask_login.current_user.is_authenticated:
                     user = models.User.query.get(flask_login.current_user.email)

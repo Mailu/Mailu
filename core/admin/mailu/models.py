@@ -135,6 +135,16 @@ class Domain(Base):
         else:
             return False
 
+    def check_mx(self):
+        try:
+            hostnames = app.config['HOSTNAMES'].split(',')
+            return any(
+                str(rset).split()[-1][:-1] in hostnames
+                for rset in dns.resolver.query(self.name, 'MX')
+            )
+        except Exception as e:
+            return False
+
     def __str__(self):
         return self.name
 

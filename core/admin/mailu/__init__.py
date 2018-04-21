@@ -25,7 +25,7 @@ default_config = {
     'BABEL_DEFAULT_LOCALE': 'en',
     'BABEL_DEFAULT_TIMEZONE': 'UTC',
     'BOOTSTRAP_SERVE_LOCAL': True,
-    'RATELIMIT_STORAGE_URL': 'redis://redis',
+    'RATELIMIT_STORAGE_URL': 'redis://redis/2',
     'DEBUG': False,
     'DOMAIN_REGISTRATION': False,
     # Statistics management

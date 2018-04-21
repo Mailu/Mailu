@@ -11,12 +11,53 @@ import time
 import os
 import glob
 import smtplib
+import idna
+
+
+class IdnaDomain(db.TypeDecorator):
+    """ Stores a Unicode string in it's IDNA representation (ASCII only)
+    """
+
+    impl = db.String(80)
+
+
+    def process_bind_param(self, value, dialect):
+        return idna.encode(value)
+
+    def process_result_value(self, value, dialect):
+        return idna.decode(value)
+
+
+class IdnaEmail(db.TypeDecorator):
+    """ Stores a Unicode string in it's IDNA representation (ASCII only)
+    """
+
+    impl = db.String(255, collation="NOCASE")
+
+
+    def process_bind_param(self, value, dialect):
+        localpart, domain_name = value.split('@')
+
+        email = "{0}@{1}".format(
+            localpart,
+            idna.encode(domain_name).decode('ascii'),
+        )
+        return email
+
+    def process_result_value(self, value, dialect):
+        localpart, domain_name = value.split('@')
+
+        email = "{0}@{1}".format(
+            localpart,
+            idna.decode(domain_name),
+        )
+        return email
 
 
 # Many-to-many association table for domain managers
 managers = db.Table('manager',
-    db.Column('domain_name', db.String(80), db.ForeignKey('domain.name')),
-    db.Column('user_email', db.String(255), db.ForeignKey('user.email'))
+    db.Column('domain_name', IdnaDomain, db.ForeignKey('domain.name')),
+    db.Column('user_email', IdnaEmail, db.ForeignKey('user.email'))
 )
 
 
@@ -25,6 +66,7 @@ class CommaSeparatedList(db.TypeDecorator):
     """
 
     impl = db.String
+
 
     def process_bind_param(self, value, dialect):
         if type(value) is not list:
@@ -54,7 +96,7 @@ class Domain(Base):
     """
     __tablename__ = "domain"
 
-    name = db.Column(db.String(80), primary_key=True, nullable=False)
+    name = db.Column(IdnaDomain, primary_key=True, nullable=False)
     managers = db.relationship('User', secondary=managers,
         backref=db.backref('manager_of'), lazy='dynamic')
     max_users = db.Column(db.Integer, nullable=False, default=0)
@@ -110,8 +152,8 @@ class Alternative(Base):
 
     __tablename__ = "alternative"
 
-    name = db.Column(db.String(80), primary_key=True, nullable=False)
-    domain_name = db.Column(db.String(80), db.ForeignKey(Domain.name))
+    name = db.Column(IdnaDomain, primary_key=True, nullable=False)
+    domain_name = db.Column(IdnaDomain, db.ForeignKey(Domain.name))
     domain = db.relationship(Domain,
         backref=db.backref('alternatives', cascade='all, delete-orphan'))
 
@@ -141,19 +183,19 @@ class Email(object):
 
     @declarative.declared_attr
     def domain_name(cls):
-        return db.Column(db.String(80), db.ForeignKey(Domain.name),
-            nullable=False)
+        return db.Column(IdnaDomain, db.ForeignKey(Domain.name),
+            nullable=False, default=IdnaDomain)
 
     # This field is redundant with both localpart and domain name.
     # It is however very useful for quick lookups without joining tables,
-    # especially when the mail server il reading the database.
+    # especially when the mail server is reading the database.
     @declarative.declared_attr
     def email(cls):
         updater = lambda context: "{0}@{1}".format(
             context.current_parameters["localpart"],
             context.current_parameters["domain_name"],
         )
-        return db.Column(db.String(255, collation="NOCASE"),
+        return db.Column(IdnaEmail,
             primary_key=True, nullable=False,
             default=updater)
 

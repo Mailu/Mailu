@@ -1,4 +1,4 @@
-from mailu import app, db, dkim, login_manager
+from mailu import app, db, dkim, login_manager, quota
 
 from sqlalchemy.ext import declarative
 from passlib import context, hash
@@ -20,9 +20,8 @@ class IdnaDomain(db.TypeDecorator):
 
     impl = db.String(80)
 
-
     def process_bind_param(self, value, dialect):
-        return idna.encode(value)
+        return idna.encode(value).decode("ascii")
 
     def process_result_value(self, value, dialect):
         return idna.decode(value)
@@ -34,31 +33,19 @@ class IdnaEmail(db.TypeDecorator):
 
     impl = db.String(255, collation="NOCASE")
 
-
     def process_bind_param(self, value, dialect):
         localpart, domain_name = value.split('@')
-
-        email = "{0}@{1}".format(
+        return "{0}@{1}".format(
             localpart,
             idna.encode(domain_name).decode('ascii'),
         )
-        return email
 
     def process_result_value(self, value, dialect):
         localpart, domain_name = value.split('@')
-
-        email = "{0}@{1}".format(
+        return "{0}@{1}".format(
             localpart,
             idna.decode(domain_name),
         )
-        return email
-
-
-# Many-to-many association table for domain managers
-managers = db.Table('manager',
-    db.Column('domain_name', IdnaDomain, db.ForeignKey('domain.name')),
-    db.Column('user_email', IdnaEmail, db.ForeignKey('user.email'))
-)
 
 
 class CommaSeparatedList(db.TypeDecorator):
@@ -66,7 +53,6 @@ class CommaSeparatedList(db.TypeDecorator):
     """
 
     impl = db.String
-
 
     def process_bind_param(self, value, dialect):
         if type(value) is not list:
@@ -78,6 +64,13 @@ class CommaSeparatedList(db.TypeDecorator):
 
     def process_result_value(self, value, dialect):
         return filter(bool, value.split(","))
+
+
+# Many-to-many association table for domain managers
+managers = db.Table('manager',
+    db.Column('domain_name', IdnaDomain, db.ForeignKey('domain.name')),
+    db.Column('user_email', IdnaEmail, db.ForeignKey('user.email'))
+)
 
 
 class Base(db.Model):
@@ -263,6 +256,10 @@ class User(Base, Email):
 
     def get_id(self):
         return self.email
+
+    @property
+    def quota_bytes_used(self):
+        return quota.get(self.email) or 0
 
     scheme_dict = {'SHA512-CRYPT': "sha512_crypt",
                    'SHA256-CRYPT': "sha256_crypt",

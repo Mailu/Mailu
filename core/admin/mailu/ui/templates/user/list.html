@@ -40,7 +40,7 @@
     {% if user.enable_imap %}<span class="label label-info">imap</span>{% endif %}
     {% if user.enable_pop %}<span class="label label-info">pop3</span>{% endif %}
   </td>
-  <td>{{ (user.quota_bytes | filesizeformat) if user.quota_bytes else '∞' }}</td>
+  <td>{{ user.quota_bytes_used | filesizeformat }} / {{ (user.quota_bytes | filesizeformat) if user.quota_bytes else '∞' }}</td>
   <td>{{ user.comment or '-' }}</td>
   <td>{{ user.created_at }}</td>
   <td>{{ user.updated_at or '' }}</td>

@@ -9,6 +9,7 @@ convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()
 
 # Actual startup script
 os.environ["FRONT_ADDRESS"] = socket.gethostbyname("front")
+os.environ["REDIS_ADDRESS"] = socket.gethostbyname("redis")
 if os.environ["WEBMAIL"] != "none":
 	os.environ["WEBMAIL_ADDRESS"] = socket.gethostbyname("webmail")
 

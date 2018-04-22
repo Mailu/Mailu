@@ -1,18 +1,11 @@
-
 msgid ""
 msgstr ""
-"Project-Id-Version:  Mailu\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-04-22 12:10+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: zh_Hans_CN\n"
-"Language-Team: zh_Hans_CN <LL@li.org>\n"
-"Plural-Forms: nplurals=1; plural=0\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.3\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: Mailu\n"
+"Language: zh-CN\n"
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."
@@ -51,14 +44,6 @@ msgstr "最大用户数"
 msgid "Maximum alias count"
 msgstr "最大别名数"
 
-#: mailu/ui/forms.py:49
-msgid "Maximum user quota"
-msgstr "最大用户容量"
-
-#: mailu/ui/forms.py:50
-msgid "Enable sign-up"
-msgstr ""
-
 #: mailu/ui/forms.py:51 mailu/ui/forms.py:72 mailu/ui/forms.py:83
 #: mailu/ui/forms.py:128 mailu/ui/forms.py:140
 #: mailu/ui/templates/alias/list.html:21 mailu/ui/templates/domain/list.html:21
@@ -72,29 +57,9 @@ msgstr "说明"
 msgid "Create"
 msgstr "创建"
 
-#: mailu/ui/forms.py:57
-msgid "Initial admin"
-msgstr ""
-
-#: mailu/ui/forms.py:58
-msgid "Admin password"
-msgstr ""
-
 #: mailu/ui/forms.py:59 mailu/ui/forms.py:79 mailu/ui/forms.py:91
 msgid "Confirm password"
 msgstr "确认密码"
-
-#: mailu/ui/forms.py:65
-msgid "Alternative name"
-msgstr "替代名称"
-
-#: mailu/ui/forms.py:70
-msgid "Relayed domain name"
-msgstr "中继域域名"
-
-#: mailu/ui/forms.py:71 mailu/ui/templates/relay/list.html:18
-msgid "Remote host"
-msgstr "远程主机"
 
 #: mailu/ui/forms.py:80 mailu/ui/templates/user/list.html:22
 #: mailu/ui/templates/user/signup_domain.html:16
@@ -109,23 +74,9 @@ msgstr "允许IMAP访问"
 msgid "Allow POP3 access"
 msgstr "允许POP3访问"
 
-#: mailu/ui/forms.py:84
-msgid "Enabled"
-msgstr ""
-
 #: mailu/ui/forms.py:85
 msgid "Save"
 msgstr "保存"
-
-#: mailu/ui/forms.py:89
-msgid "Email address"
-msgstr ""
-
-#: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
-#: mailu/ui/templates/user/signup.html:4
-#: mailu/ui/templates/user/signup_domain.html:4
-msgid "Sign up"
-msgstr ""
 
 #: mailu/ui/forms.py:97
 msgid "Displayed name"
@@ -135,22 +86,9 @@ msgstr "显示名称"
 msgid "Enable spam filter"
 msgstr "启用垃圾邮件过滤"
 
-#: mailu/ui/forms.py:99
-msgid "Spam filter tolerance"
-msgstr ""
-
-#: mailu/ui/forms.py:100
-msgid "Enable forwarding"
-msgstr "启用转发"
-
-#: mailu/ui/forms.py:101
-msgid "Keep a copy of the emails"
-msgstr "保留电子邮件副本"
-
-#: mailu/ui/forms.py:103 mailu/ui/forms.py:139
-#: mailu/ui/templates/alias/list.html:20
-msgid "Destination"
-msgstr "目的地址"
+#: mailu/ui/forms.py:80
+msgid "Spam filter threshold"
+msgstr "垃圾邮件过滤器阈值"
 
 #: mailu/ui/forms.py:105
 msgid "Save settings"
@@ -164,6 +102,19 @@ msgstr "检查密码"
 msgid "Update password"
 msgstr "更新密码"
 
+#: mailu/ui/forms.py:100
+msgid "Enable forwarding"
+msgstr "启用转发"
+
+#: mailu/ui/forms.py:103 mailu/ui/forms.py:139
+#: mailu/ui/templates/alias/list.html:20
+msgid "Destination"
+msgstr "目的地址"
+
+#: mailu/ui/forms.py:120
+msgid "Update"
+msgstr "更新"
+
 #: mailu/ui/forms.py:115
 msgid "Enable automatic reply"
 msgstr "启用自动回复"
@@ -175,22 +126,6 @@ msgstr "回复主题"
 #: mailu/ui/forms.py:117
 msgid "Reply body"
 msgstr "回复正文"
-
-#: mailu/ui/forms.py:119
-msgid "End of vacation"
-msgstr ""
-
-#: mailu/ui/forms.py:120
-msgid "Update"
-msgstr "更新"
-
-#: mailu/ui/forms.py:125
-msgid "Your token (write it down, as it will never be displayed again)"
-msgstr "您的令牌（请保存下来，它只显示这一次）"
-
-#: mailu/ui/forms.py:130 mailu/ui/templates/token/list.html:20
-msgid "Authorized IP"
-msgstr "授权IP"
 
 #: mailu/ui/forms.py:136
 msgid "Alias"
@@ -234,46 +169,13 @@ msgstr "启用TLS"
 msgid "Username"
 msgstr "用户名"
 
-#: mailu/ui/forms.py:163
-msgid "Keep emails on the server"
-msgstr "电子邮件保存在服务器上"
-
-#: mailu/ui/forms.py:168
-msgid "Announcement subject"
-msgstr "公告主题"
-
-#: mailu/ui/forms.py:170
-msgid "Announcement body"
-msgstr "公告正文"
-
-#: mailu/ui/forms.py:172
-msgid "Send"
-msgstr "发送"
-
-#: mailu/ui/templates/announcement.html:4
-msgid "Public announcement"
-msgstr "公告"
-
-#: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:82
-msgid "Client setup"
-msgstr ""
-
-#: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
-msgid "Mail protocol"
-msgstr ""
-
-#: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
-msgid "Server name"
-msgstr ""
-
 #: mailu/ui/templates/confirm.html:4
 msgid "Confirm action"
 msgstr "确认操作"
 
 #: mailu/ui/templates/confirm.html:13
-#, python-format
 msgid "You are about to %(action)s. Please confirm your action."
-msgstr "你即将%(action)s。请确认您的操作。"
+msgstr "即将%(action)s，请确认您的操作。"
 
 #: mailu/ui/templates/docker-error.html:4
 msgid "Docker error"
@@ -282,6 +184,10 @@ msgstr "Docker错误"
 #: mailu/ui/templates/docker-error.html:12
 msgid "An error occurred while talking to the Docker server."
 msgstr "Docker服务器通信出错"
+
+#: mailu/admin/templates/login.html:6
+msgid "Your account"
+msgstr "你的帐户"
 
 #: mailu/ui/templates/login.html:8
 msgid "to access the administration tools"
@@ -323,6 +229,10 @@ msgstr "我的帐户"
 msgid "Settings"
 msgstr "设置"
 
+#: mailu/ui/templates/user/settings.html:22
+msgid "Auto-forward"
+msgstr "自动转发"
+
 #: mailu/ui/templates/sidebar.html:21 mailu/ui/templates/user/list.html:35
 msgid "Auto-reply"
 msgstr "自动回复"
@@ -332,61 +242,29 @@ msgstr "自动回复"
 msgid "Fetched accounts"
 msgstr "代收帐户"
 
-#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/token/list.html:4
-msgid "Authentication tokens"
-msgstr "认证令牌"
+#: mailu/ui/templates/sidebar.html:105
+msgid "Sign out"
+msgstr "登出"
 
 #: mailu/ui/templates/sidebar.html:35
 msgid "Administration"
 msgstr "管理"
 
-#: mailu/ui/templates/sidebar.html:44
-msgid "Announcement"
-msgstr "公告"
-
 #: mailu/ui/templates/sidebar.html:49
 msgid "Administrators"
 msgstr "管理员"
-
-#: mailu/ui/templates/sidebar.html:54
-msgid "Relayed domains"
-msgstr "中继域"
-
-#: mailu/ui/templates/sidebar.html:59 mailu/ui/templates/user/settings.html:15
-msgid "Antispam"
-msgstr "反垃圾邮件"
 
 #: mailu/ui/templates/sidebar.html:66
 msgid "Mail domains"
 msgstr "邮件域"
 
-#: mailu/ui/templates/sidebar.html:72
-msgid "Go to"
-msgstr "转到"
-
-#: mailu/ui/templates/sidebar.html:76
-msgid "Webmail"
-msgstr "网页邮箱"
-
-#: mailu/ui/templates/sidebar.html:87
-msgid "Website"
-msgstr "网站"
-
 #: mailu/ui/templates/sidebar.html:92
 msgid "Help"
-msgstr "帮帮我"
-
-#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
-msgid "Register a domain"
-msgstr ""
-
-#: mailu/ui/templates/sidebar.html:105
-msgid "Sign out"
-msgstr "登出"
+msgstr "帮助"
 
 #: mailu/ui/templates/working.html:4
 msgid "We are still working on this feature!"
-msgstr "开发中……"
+msgstr "该功能开发中……"
 
 #: mailu/ui/templates/admin/create.html:4
 msgid "Add a global administrator"
@@ -459,22 +337,6 @@ msgstr "上次编辑"
 msgid "Edit"
 msgstr "编辑"
 
-#: mailu/ui/templates/alternative/create.html:4
-msgid "Create alternative domain"
-msgstr "创建替代域"
-
-#: mailu/ui/templates/alternative/list.html:4
-msgid "Alternative domain list"
-msgstr "替代域名列表"
-
-#: mailu/ui/templates/alternative/list.html:12
-msgid "Add alternative"
-msgstr "添加替代"
-
-#: mailu/ui/templates/alternative/list.html:19
-msgid "Name"
-msgstr "名称"
-
 #: mailu/ui/templates/domain/create.html:4
 #: mailu/ui/templates/domain/list.html:9
 msgid "New domain"
@@ -487,10 +349,6 @@ msgstr "域详情"
 #: mailu/ui/templates/domain/details.html:15
 msgid "Regenerate keys"
 msgstr "重新生成密钥"
-
-#: mailu/ui/templates/domain/details.html:17
-msgid "Generate keys"
-msgstr ""
 
 #: mailu/ui/templates/domain/details.html:31
 msgid "DNS MX entry"
@@ -548,27 +406,6 @@ msgstr "别名"
 msgid "Managers"
 msgstr "管理员"
 
-#: mailu/ui/templates/domain/list.html:39
-msgid "Alternatives"
-msgstr "备择方案"
-
-#: mailu/ui/templates/domain/signup.html:13
-msgid ""
-"In order to register a new domain, you must first setup the\n"
-"    domain zone so that the domain <code>MX</code> points to this server"
-msgstr ""
-
-#: mailu/ui/templates/domain/signup.html:18
-msgid ""
-"If you do not know how to setup an <code>MX</code> record for your DNS "
-"zone,\n"
-"    please contact your DNS provider or administrator. Also, please wait "
-"a\n"
-"    couple minutes after the <code>MX</code> is set so the local server "
-"cache\n"
-"    expires."
-msgstr ""
-
 #: mailu/ui/templates/fetch/create.html:4
 msgid "Add a fetched account"
 msgstr "添加一个代收帐户"
@@ -585,21 +422,9 @@ msgstr "添加一个帐户"
 msgid "Endpoint"
 msgstr "端点"
 
-#: mailu/ui/templates/fetch/list.html:21
-msgid "Keep emails"
-msgstr "保存电子邮件"
-
 #: mailu/ui/templates/fetch/list.html:22
 msgid "Last check"
 msgstr "上次检查"
-
-#: mailu/ui/templates/fetch/list.html:35
-msgid "yes"
-msgstr "是"
-
-#: mailu/ui/templates/fetch/list.html:35
-msgid "no"
-msgstr "否"
 
 #: mailu/ui/templates/manager/create.html:4
 msgid "Add a manager"
@@ -613,41 +438,33 @@ msgstr "管理员列表"
 msgid "Add manager"
 msgstr "添加管理员"
 
-#: mailu/ui/templates/relay/create.html:4
-msgid "New relay domain"
-msgstr "新的中继域"
+#: mailu/ui/forms.py:168
+msgid "Announcement subject"
+msgstr "公告主题"
 
-#: mailu/ui/templates/relay/edit.html:4
-msgid "Edit relayd domain"
-msgstr "编辑中继域"
+#: mailu/ui/forms.py:170
+msgid "Announcement body"
+msgstr "公告正文"
 
-#: mailu/ui/templates/relay/list.html:4
-msgid "Relayed domain list"
-msgstr "中继域列表"
+#: mailu/ui/forms.py:172
+msgid "Send"
+msgstr "发送"
 
-#: mailu/ui/templates/relay/list.html:9
-msgid "New relayed domain"
-msgstr "新的中继域"
+#: mailu/ui/templates/announcement.html:4
+msgid "Public announcement"
+msgstr "公告"
 
-#: mailu/ui/templates/token/create.html:4
-msgid "Create an authentication token"
-msgstr "创建一个认证令牌"
+#: mailu/ui/templates/announcement.html:8
+msgid "from"
+msgstr "来自"
 
-#: mailu/ui/templates/token/list.html:12
-msgid "New token"
-msgstr "新的令牌"
+#: mailu/ui/templates/sidebar.html:44
+msgid "Announcement"
+msgstr "公告"
 
 #: mailu/ui/templates/user/create.html:4
 msgid "New user"
 msgstr "新用户"
-
-#: mailu/ui/templates/user/create.html:15
-msgid "General"
-msgstr "一般"
-
-#: mailu/ui/templates/user/create.html:22
-msgid "Features and quotas"
-msgstr "功能和配额"
 
 #: mailu/ui/templates/user/edit.html:4
 msgid "Edit user"
@@ -681,9 +498,195 @@ msgstr "密码更新"
 msgid "Automatic reply"
 msgstr "自动回复"
 
-#: mailu/ui/templates/user/settings.html:22
-msgid "Auto-forward"
-msgstr "自动转发"
+#: mailu/ui/forms.py:49
+msgid "Maximum user quota"
+msgstr "最大用户容量"
+
+#: mailu/ui/forms.py:101
+msgid "Keep a copy of the emails"
+msgstr "保留电子邮件副本"
+
+#: mailu/ui/forms.py:163
+msgid "Keep emails on the server"
+msgstr "保留电子邮件在服务器上"
+
+#: mailu/ui/templates/fetch/list.html:21
+msgid "Keep emails"
+msgstr "保存电子邮件"
+
+#: mailu/ui/templates/fetch/list.html:35
+msgid "yes"
+msgstr "是"
+
+#: mailu/ui/templates/fetch/list.html:35
+msgid "no"
+msgstr "否"
+
+#: mailu/ui/forms.py:65
+msgid "Alternative name"
+msgstr "替代名称"
+
+#: mailu/ui/forms.py:70
+msgid "Relayed domain name"
+msgstr "中继域域名"
+
+#: mailu/ui/forms.py:71 mailu/ui/templates/relay/list.html:18
+msgid "Remote host"
+msgstr "远程主机"
+
+#: mailu/ui/templates/sidebar.html:54
+msgid "Relayed domains"
+msgstr "中继域"
+
+#: mailu/ui/templates/alternative/create.html:4
+msgid "Create alternative domain"
+msgstr "创建替代域"
+
+#: mailu/ui/templates/alternative/list.html:4
+msgid "Alternative domain list"
+msgstr "替代域名列表"
+
+#: mailu/ui/templates/alternative/list.html:12
+msgid "Add alternative"
+msgstr "添加替代"
+
+#: mailu/ui/templates/alternative/list.html:19
+msgid "Name"
+msgstr "名称"
+
+#: mailu/ui/templates/domain/list.html:39
+msgid "Alternatives"
+msgstr "备择方案"
+
+#: mailu/ui/templates/relay/create.html:4
+msgid "New relay domain"
+msgstr "新的中继域"
+
+#: mailu/ui/templates/relay/edit.html:4
+msgid "Edit relayd domain"
+msgstr "编辑中继域"
+
+#: mailu/ui/templates/relay/list.html:4
+msgid "Relayed domain list"
+msgstr "中继域列表"
+
+#: mailu/ui/templates/relay/list.html:9
+msgid "New relayed domain"
+msgstr "新的中继域"
+
+#: mailu/ui/forms.py:125
+msgid "Your token (write it down, as it will never be displayed again)"
+msgstr "您的令牌（请记录，它只显示这一次）"
+
+#: mailu/ui/forms.py:130 mailu/ui/templates/token/list.html:20
+msgid "Authorized IP"
+msgstr "授权IP"
+
+#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/token/list.html:4
+msgid "Authentication tokens"
+msgstr "认证令牌"
+
+#: mailu/ui/templates/sidebar.html:72
+msgid "Go to"
+msgstr "转到"
+
+#: mailu/ui/templates/sidebar.html:76
+msgid "Webmail"
+msgstr "网页邮箱"
+
+#: mailu/ui/templates/sidebar.html:87
+msgid "Website"
+msgstr "网站"
+
+#: mailu/ui/templates/token/create.html:4
+msgid "Create an authentication token"
+msgstr "创建一个认证令牌"
+
+#: mailu/ui/templates/token/list.html:12
+msgid "New token"
+msgstr "新的令牌"
+
+#: mailu/ui/templates/user/create.html:15
+msgid "General"
+msgstr "通用"
+
+#: mailu/ui/templates/user/create.html:22
+msgid "Features and quotas"
+msgstr "功能和配额"
+
+#: mailu/ui/templates/user/settings.html:14
+msgid "General settings"
+msgstr "常规设置"
+
+#: mailu/ui/templates/sidebar.html:59 mailu/ui/templates/user/settings.html:15
+msgid "Antispam"
+msgstr "反垃圾邮件"
+
+#: mailu/ui/forms.py:99
+msgid "Spam filter tolerance"
+msgstr "垃圾邮件过滤器容忍度"
+
+#: mailu/ui/forms.py:50
+msgid "Enable sign-up"
+msgstr ""
+
+#: mailu/ui/forms.py:57
+msgid "Initial admin"
+msgstr ""
+
+#: mailu/ui/forms.py:58
+msgid "Admin password"
+msgstr ""
+
+#: mailu/ui/forms.py:84
+msgid "Enabled"
+msgstr ""
+
+#: mailu/ui/forms.py:89
+msgid "Email address"
+msgstr ""
+
+#: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
+#: mailu/ui/templates/user/signup.html:4
+#: mailu/ui/templates/user/signup_domain.html:4
+msgid "Sign up"
+msgstr ""
+
+#: mailu/ui/forms.py:119
+msgid "End of vacation"
+msgstr ""
+
+#: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:82
+msgid "Client setup"
+msgstr ""
+
+#: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
+msgid "Mail protocol"
+msgstr ""
+
+#: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
+msgid "Server name"
+msgstr ""
+
+#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
+msgid "Register a domain"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:17
+msgid "Generate keys"
+msgstr ""
+
+#: mailu/ui/templates/domain/signup.html:13
+msgid "In order to register a new domain, you must first setup the\n"
+"    domain zone so that the domain <code>MX</code> points to this server"
+msgstr ""
+
+#: mailu/ui/templates/domain/signup.html:18
+msgid "If you do not know how to setup an <code>MX</code> record for your DNS zone,\n"
+"    please contact your DNS provider or administrator. Also, please wait a\n"
+"    couple minutes after the <code>MX</code> is set so the local server cache\n"
+"    expires."
+msgstr ""
 
 #: mailu/ui/templates/user/signup_domain.html:8
 msgid "pick a domain for the new account"
@@ -696,16 +699,4 @@ msgstr ""
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
 msgstr ""
-
-#~ msgid "Spam filter threshold"
-#~ msgstr "垃圾邮件过滤器阈值"
-
-#~ msgid "Your account"
-#~ msgstr "你的帐户"
-
-#~ msgid "from"
-#~ msgstr "来自"
-
-#~ msgid "General settings"
-#~ msgstr "常规设置"
 

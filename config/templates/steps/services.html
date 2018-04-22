@@ -1,0 +1,52 @@
+{% call macros.panel("info", "Step 3 - pick some features") %}
+<p>Mailu comes with multiple base features, including a specific admin
+interface, Web email clients (webmails), antispam, antivirus, etc. If you
+wish to disable some of these features, you are free to do so.</p>
+
+<p>The admin interface is the main Mailu-specific bit, it provides tools to
+manage your email domains, users, etc.</p>
+
+<div class="form-group">
+  <label>Enable the admin UI (and path to the admin UI)</label>
+  <div class="input-group">
+    <div class="input-group-addon"><input type="checkbox" name="admin_enabled" checked></div>
+    <input class="form-control" type="text" name="admin_path" value="/admin">
+  </div>
+</div>
+
+<p>Emails will be available through IMAP and POP3. You may also enable a Web
+email client. These do add some complexity but provide an easier way of
+accessing messages for beginner users.</p>
+
+<div class="form-group">
+  <label>Enable Web email client (and path to the Web email client)</label>
+  <div class="input-group">
+    <div class="input-group-addon"><input type="checkbox" name="webmail_enabled" checked></div>
+    <input class="form-control" type="text" name="webmail_path" value="/webmail">
+  </div>
+  <p></p>
+  <div class="radio">
+    {{ macros.radio("webmail_type", "roundcube", "RoundCube", "popular Webmail running on top of PHP") }}
+    {{ macros.radio("webmail_type", "rainloop", "Rainloop", "lightweight Webmail based on PHP, no database") }}
+  </div>
+</div>
+
+<p>Email filtering is a really important features. You can still disable it, which
+will prevent Mailu from doing spam filtering, virus filtering, and from applying
+white and blacklists that you may configure in the admin interface. You may
+also disable the antivirus if required (it does use aroung 1GB of ram).</p>
+
+<div class="form-check form-check-inline">
+  <label class="form-check-label">
+    <input class="form-check-input" type="checkbox" name="antispam_enabled" checked>
+    Enable the filtering service
+  </label>
+</div>
+<div class="form-check form-check-inline">
+  <label class="form-check-label">
+    <input class="form-check-input" type="checkbox" name="antivirus_enabled" checked>
+    Enable the antivirus service
+  </label>
+</div>
+
+{% endcall %}

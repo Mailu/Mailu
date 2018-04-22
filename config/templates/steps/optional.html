@@ -1,0 +1,16 @@
+{% call macros.panel("info", "Step 4 - enable optional features") %}
+<p>Mailu also comes with less common optional features that you might wish
+to enable.</p>
+
+<p>The DAV service enables contacts and calendar storage through Mailu,
+it is especially userful when synchronizing your desktop and mobile devices.</p>
+
+<div class="form-group">
+  <label>Enable the DAV service (and path to the DAV service)</label>
+  <div class="input-group">
+    <div class="input-group-addon"><input type="checkbox" name="dav_enabled" checked></div>
+    <input class="form-control" type="text" name="admin_path" value="/webdav">
+  </div>
+</div>
+
+{% endcall %}

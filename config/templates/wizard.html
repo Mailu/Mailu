@@ -1,9 +1,6 @@
 {% extends "base.html" %}
 
-{% block content %}
-<div class="container">
-  <h1>Mailu configuration - {{ branch }}</h1>
-
+{% block page %}
   {% call macros.panel("warning", "Before starting, read the docs!") %}
   Mailu is not perfectly documented, but still has a lot of documentation
   available at <a href="https://mailu.io">mailu.io</a>. Make sure you read
@@ -14,9 +11,9 @@
   <form method="post" action="{{ url_for(".submit") }}">
   {% include "steps/flavor.html" %}
   {% include "steps/expose.html" %}
+  {% include "steps/services.html" %}
+  {% include "steps/optional.html" %}
 
   <input class="btn btn-primary" type="submit" value="Setup Mailu">
   </form>
-
-</div>
 {% endblock %}

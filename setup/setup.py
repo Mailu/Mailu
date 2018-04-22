@@ -21,7 +21,7 @@ def main(upstream, dest, dev=True):
             if not VERSION_BRANCH.match(name):
                 continue
             branch.checkout()
-            config_path = os.path.join(clone_path, "config")
+            config_path = os.path.join(clone_path, "setup")
             if os.path.exists(config_path):
                 shutil.copytree(config_path, os.path.join(dest, name))
                 print("Imported branch {}".format(name))

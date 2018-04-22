@@ -18,7 +18,6 @@
   <th>{% trans %}Domain name{% endtrans %}</th>
   <th>{% trans %}Mailbox count{% endtrans %}</th>
   <th>{% trans %}Alias count{% endtrans %}</th>
-  <th>{% trans %}Status{% endtrans %}</th>
   <th>{% trans %}Comment{% endtrans %}</th>
   <th>{% trans %}Created{% endtrans %}</th>
   <th>{% trans %}Last edit{% endtrans %}</th>
@@ -43,7 +42,6 @@
   <td>{{ domain.name }}</td>
   <td>{{ domain.users | count }} / {{ domain.max_users or '∞' }}</td>
   <td>{{ domain.aliases | count }} / {{ domain.max_aliases or '∞' }}</td>
-  <td>{{ 'ok' if domain.check_mx() else 'MX error' }}</td>
   <td>{{ domain.comment or '' }}</td>
   <td>{{ domain.created_at }}</td>
   <td>{{ domain.updated_at or '' }}</td>

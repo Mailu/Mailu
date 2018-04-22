@@ -28,7 +28,7 @@
   <td>{{ domain.name }}</td>
 </tr>
 <tr>
-  <th>{% trans %}DNS MX entry{% endtrans %}</th>
+  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa {{ 'fa-check-circle' if domain.check_mx() else 'fa-exclamation-circle' }}"></i></th>
   <td><pre>{{ domain.name }}. 600 IN MX 10 {{ hostname }}.</pre></td>
 </tr>
 <tr>

@@ -21,6 +21,7 @@ def render_flavor(flavor, template, data):
     )
 
 
+@app.add_template_global
 def secret(length=16):
     charset = string.ascii_uppercase + string.digits
     return ''.join(
@@ -29,28 +30,34 @@ def secret(length=16):
     )
 
 
-def build_app(setup_path):
+def build_app(path):
+
+    versions = [
+        version for version in os.listdir(path)
+        if os.path.isdir(os.path.join(path, version))
+    ]
 
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
-    app.jinja_env.globals.update(dict(
-        secret=secret
-    ))
 
-    versions = [
-        path for path in os.listdir(setup_path)
-        if os.path.isdir(os.path.join(setup_path, path))
-    ]
+    @app.context_processor
+    def app_context():
+        return dict(versions=versions)
+
+    @app.route("/")
+    def index():
+        return flask.redirect(flask.url_for('{}.wizard'.format(versions[-1])))
 
     for version in versions:
-
         bp = flask.Blueprint(version, __name__)
-        template_dir = os.path.join(setup_path, version, "templates")
-        flavor_dir = os.path.join(setup_path, version, "flavors")
         bp.jinja_loader = jinja2.ChoiceLoader([
-            jinja2.FileSystemLoader(template_dir),
-            jinja2.FileSystemLoader(flavor_dir)
+            jinja2.FileSystemLoader(os.path.join(path, version, "templates")),
+            jinja2.FileSystemLoader(os.path.join(path, version, "flavors"))
         ])
+
+        @bp.context_processor
+        def bp_context(version=version):
+            return dict(version=version)
 
         @bp.route("/")
         def wizard():
@@ -58,11 +65,10 @@ def build_app(setup_path):
 
         @bp.route("/submit", methods=["POST"])
         def submit():
-            uid = str(uuid.uuid4())
             data = flask.request.form.copy()
-            data.update(dict(uid=uid, version=version))
-            db.set(uid, json.dumps(data))
-            return flask.redirect(flask.url_for('.setup', uid=uid))
+            data['uid'] = str(uuid.uuid4())
+            db.set(data['uid'], json.dumps(data))
+            return flask.redirect(flask.url_for('.setup', uid=data['uid']))
 
         @bp.route("/setup/<uid>", methods=["GET"])
         def setup(uid):
@@ -81,7 +87,6 @@ def build_app(setup_path):
             )
 
         app.register_blueprint(bp, url_prefix="/{}".format(version))
-        print("Serving version {}".format(version))
 
 
 if __name__ == "__main__":

@@ -1,17 +1,32 @@
 import flask
 import flask_bootstrap
 import redis
+import json
 import os
 import jinja2
+import uuid
+
 
 app = flask.Flask(__name__)
 flask_bootstrap.Bootstrap(app)
-db = redis.StrictRedis(host='localhost', port=6379, db=0)
+db = redis.StrictRedis(host='redis', port=6379, db=0)
+
+
+def render_flavor(flavor, template, *args, **kwargs):
+    return flask.render_template(
+        os.path.join(flavor, template),
+        *args, **kwargs
+    )
 
 
 def build_app(setup_path):
 
-    for version in ("master", "1.8"):
+    versions = [
+        path for path in os.listdir(setup_path)
+        if os.path.isdir(os.path.join(setup_path, path))
+    ]
+
+    for version in versions:
 
         bp = flask.Blueprint(version, __name__)
         template_dir = os.path.join(setup_path, version, "templates")
@@ -25,14 +40,30 @@ def build_app(setup_path):
         def wizard():
             return flask.render_template('wizard.html')
 
+        @bp.route("/submit", methods=["POST"])
+        def submit():
+            uid = uuid.uuid4()
+            db.set(uid, json.dumps(flask.request.form))
+            return flask.redirect(flask.url_for('.setup', uid=uid))
 
-        @bp.route("/setup", methods=["POST"])
-        def setup():
-            flavor = flask.request.form.get("flavor", "compose")
-            rendered = render_flavor(flavor, "setup.html")
+        @bp.route("/setup/<uid>", methods=["GET"])
+        def setup(uid):
+            data = json.loads(db.get(uid))
+            flavor = data.get("flavor", "compose")
+            rendered = render_flavor(flavor, "setup.html", uid=uid, data=data)
             return flask.render_template("setup.html", contents=rendered)
 
+        @bp.route("/file/<uid>/<filepath>", methods=["GET"])
+        def file(uid, filepath):
+            data = json.loads(db.get(uid))
+            flavor = data.get("flavor", "compose")
+            return flask.Response(
+                render_flavor(flavor, filepath, uid=uid, data=data),
+                mimetype="application/text"
+            )
+
         app.register_blueprint(bp, url_prefix="/{}".format(version))
+        print("Serving version {}".format(version))
 
 
 

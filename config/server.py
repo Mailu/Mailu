@@ -58,7 +58,7 @@ def build_app(setup_path):
 
         @bp.route("/submit", methods=["POST"])
         def submit():
-            uid = uuid.uuid4()
+            uid = str(uuid.uuid4())
             data = flask.request.form.copy()
             data.update(dict(uid=uid, version=version))
             db.set(uid, json.dumps(data))

@@ -628,75 +628,75 @@ msgstr "Tolérance du filtre antispam"
 
 #: mailu/ui/forms.py:50
 msgid "Enable sign-up"
-msgstr ""
+msgstr "Autoriser l'inscription"
 
 #: mailu/ui/forms.py:57
 msgid "Initial admin"
-msgstr ""
+msgstr "Administrateur initial"
 
 #: mailu/ui/forms.py:58
 msgid "Admin password"
-msgstr ""
+msgstr "Mot de passe administrateur"
 
 #: mailu/ui/forms.py:84
 msgid "Enabled"
-msgstr ""
+msgstr "Activé"
 
 #: mailu/ui/forms.py:89
 msgid "Email address"
-msgstr ""
+msgstr "Adresse e-mail"
 
 #: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
 #: mailu/ui/templates/user/signup.html:4
 #: mailu/ui/templates/user/signup_domain.html:4
 msgid "Sign up"
-msgstr ""
+msgstr "S'inscrire"
 
 #: mailu/ui/forms.py:119
 msgid "End of vacation"
-msgstr ""
+msgstr "Fin du mode vacance"
 
 #: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:82
 msgid "Client setup"
-msgstr ""
+msgstr "Configuration client"
 
 #: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
 msgid "Mail protocol"
-msgstr ""
+msgstr "Protocole"
 
 #: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
 msgid "Server name"
-msgstr ""
+msgstr "Nom du serveur"
 
 #: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
 msgid "Register a domain"
-msgstr ""
+msgstr "Inscrire un domaine"
 
 #: mailu/ui/templates/domain/details.html:17
 msgid "Generate keys"
-msgstr ""
+msgstr "Générer les clés"
 
 #: mailu/ui/templates/domain/signup.html:13
 msgid "In order to register a new domain, you must first setup the\n"
 "    domain zone so that the domain <code>MX</code> points to this server"
-msgstr ""
+msgstr "Pour enregistrer un nouveau domaine, vous devez d'abord configurer la zone DNS de sorte que le <code>MX</code> du domaine pointe sur ce serveur."
 
 #: mailu/ui/templates/domain/signup.html:18
 msgid "If you do not know how to setup an <code>MX</code> record for your DNS zone,\n"
 "    please contact your DNS provider or administrator. Also, please wait a\n"
 "    couple minutes after the <code>MX</code> is set so the local server cache\n"
 "    expires."
-msgstr ""
+msgstr "Si vous ne savez pas comment configurer un enregistrement <code>MX</code>, contactez votre fournisseur de DNS ou votre administrateur. Egalement, attendez quelques minutes après avoir modifié le <code>MX</code>, le temps que le cache local au serveur soit rafraîchi."
 
 #: mailu/ui/templates/user/signup_domain.html:8
 msgid "pick a domain for the new account"
-msgstr ""
+msgstr "choix du domaine pour le compte"
 
 #: mailu/ui/templates/user/signup_domain.html:14
 msgid "Domain"
-msgstr ""
+msgstr "Domaine"
 
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
-msgstr ""
+msgstr "Places disponibles"
 

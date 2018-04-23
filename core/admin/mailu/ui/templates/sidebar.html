@@ -35,11 +35,6 @@
     <li class="header">{% trans %}Administration{% endtrans %}</li>
     {% if current_user.global_admin %}
     <li>
-      <a href="{{ url_for('.services') }}">
-        <i class="fa fa-dashboard"></i> <span>{% trans %}Services status{% endtrans %}</span>
-      </a>
-    </li>
-    <li>
       <a href="{{ url_for('.announcement') }}">
         <i class="fa fa-bullhorn"></i> <span>{% trans %}Announcement{% endtrans %}</span>
       </a>

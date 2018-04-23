@@ -35,16 +35,6 @@ def logout():
     return flask.redirect(flask.url_for('.index'))
 
 
-@ui.route('/services', methods=['GET'])
-@access.global_admin
-def services():
-    try:
-        containers = dockercli.get()
-    except Exception as error:
-        return flask.render_template('docker-error.html', error=error)
-    return flask.render_template('services.html', containers=containers)
-
-
 @ui.route('/announcement', methods=['GET', 'POST'])
 @access.global_admin
 def announcement():

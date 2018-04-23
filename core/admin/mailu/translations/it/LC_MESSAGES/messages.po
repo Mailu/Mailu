@@ -194,34 +194,6 @@ msgstr "Il tuo account"
 msgid "to access the administration tools"
 msgstr ""
 
-#: mailu/ui/templates/services.html:4 mailu/ui/templates/sidebar.html:39
-msgid "Services status"
-msgstr ""
-
-#: mailu/ui/templates/services.html:10
-msgid "Service"
-msgstr ""
-
-#: mailu/ui/templates/fetch/list.html:23 mailu/ui/templates/services.html:11
-msgid "Status"
-msgstr "Stato"
-
-#: mailu/ui/templates/services.html:12
-msgid "PID"
-msgstr "PID"
-
-#: mailu/ui/templates/services.html:13
-msgid "Image"
-msgstr "Immagine"
-
-#: mailu/ui/templates/services.html:14
-msgid "Started"
-msgstr "Avviato"
-
-#: mailu/ui/templates/services.html:15
-msgid "Last update"
-msgstr "Ultimo aggiornamento"
-
 #: mailu/ui/templates/sidebar.html:8
 msgid "My account"
 msgstr "Il mio account"

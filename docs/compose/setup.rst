@@ -107,10 +107,11 @@ Finish setting up TLS
 Mailu relies heavily on TLS and must have a key pair and a certificate
 available, at least for the hostname configured in the ``.env`` file.
 
-If you set ``TLS_FLAVOR`` to ``cert`` or if then you must create a ``certs`` directory
+If you set ``TLS_FLAVOR`` to ``cert`` or ``mail`` then you must create a ``certs`` directory
 in your root path and setup a key-certificate pair there:
-- ``cert.pem`` contains the certificate,
-- ``key.pem`` contains the key pair.
+
+- ``cert.pem`` contains the certificate (override with ``TLS_CERT_FILENAME``),
+- ``key.pem`` contains the key pair (override with ``TLS_KEYPAIR_FILENAME``).
 
 Start Mailu
 -----------

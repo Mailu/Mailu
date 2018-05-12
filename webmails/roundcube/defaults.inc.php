@@ -1209,7 +1209,7 @@ $config['addressbook_search_mods'] = null;  // Example: array('name'=>1, 'firstn
 $config['delete_always'] = false;
 
 // Directly delete messages in Junk instead of moving to Trash
-$config['delete_junk'] = false;
+$config['delete_junk'] = true;
 
 // Behavior if a received message requests a message delivery notification (read receipt)
 // 0 = ask the user, 1 = send automatically, 2 = ignore (never send or ask)

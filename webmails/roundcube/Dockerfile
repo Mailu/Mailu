@@ -24,7 +24,7 @@ RUN rm -rf /var/www/html/ \
 
 COPY php.ini /usr/local/etc/php/conf.d/roundcube.ini
 
-COPY config.inc.php /var/www/html/config/
+COPY config.inc.php defaults.inc.php /var/www/html/config/
 
 COPY start.sh /start.sh
 

@@ -193,34 +193,6 @@ msgstr "你的帐户"
 msgid "to access the administration tools"
 msgstr "访问管理员工具"
 
-#: mailu/ui/templates/services.html:4 mailu/ui/templates/sidebar.html:39
-msgid "Services status"
-msgstr "服务状态"
-
-#: mailu/ui/templates/services.html:10
-msgid "Service"
-msgstr "服务"
-
-#: mailu/ui/templates/fetch/list.html:23 mailu/ui/templates/services.html:11
-msgid "Status"
-msgstr "状态"
-
-#: mailu/ui/templates/services.html:12
-msgid "PID"
-msgstr "进程ID"
-
-#: mailu/ui/templates/services.html:13
-msgid "Image"
-msgstr "镜像"
-
-#: mailu/ui/templates/services.html:14
-msgid "Started"
-msgstr "已开始"
-
-#: mailu/ui/templates/services.html:15
-msgid "Last update"
-msgstr "最后更新"
-
 #: mailu/ui/templates/sidebar.html:8
 msgid "My account"
 msgstr "我的帐户"

@@ -22,11 +22,13 @@ if "HOST_ANTISPAM" not in args:
     args["HOST_ANTISPAM"] = "antispam:11334"
 
 # TLS configuration
+cert_name = os.getenv("TLS_CERT_FILENAME", default="cert.pem")
+keypair_name = os.getenv("TLS_KEYPAIR_FILENAME", default="key.pem")
 args["TLS"] = {
-    "cert": ("/certs/cert.pem", "/certs/key.pem"),
+    "cert": ("/certs/%s" % cert_name, "/certs/%s" % keypair_name),
     "letsencrypt": ("/certs/letsencrypt/live/mailu/fullchain.pem",
         "/certs/letsencrypt/live/mailu/privkey.pem"),
-    "mail": ("/certs/cert.pem", "/certs/key.pem"),
+    "mail": ("/certs/%s" % cert_name, "/certs/%s" % keypair_name),
     "mail-letsencrypt": ("/certs/letsencrypt/live/mailu/fullchain.pem",
         "/certs/letsencrypt/live/mailu/privkey.pem"),
     "notls": None

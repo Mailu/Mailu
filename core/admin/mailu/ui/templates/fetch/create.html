@@ -22,6 +22,10 @@
   {{ macros.form_field(form.password) }}
   {% endcall %}
 
+  {% call macros.box(title="Settings") %}
+  {{ macros.form_field(form.keep) }}
+  {% endcall %}
+
   {{ macros.form_field(form.submit) }}
 </form>
 {% endblock %}

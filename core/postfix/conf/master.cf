@@ -3,7 +3,6 @@
 
 # Exposed SMTP service
 smtp      inet  n       -       n       -       -       smtpd
-  -o smtpd_milters=inet:{{ HOST_ANTISPAM }}
 
 # Internal SMTP service
 10025     inet  n       -       n       -       -       smtpd

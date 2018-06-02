@@ -206,14 +206,21 @@ class Email(object):
     def sendmail(self, subject, body):
         """ Send an email to the address.
         """
-        from_address = '{}@{}'.format(
-            app.config['POSTMASTER'], app.config['DOMAIN'])
+        from_address = "{0}@{1}".format(
+            app.config['POSTMASTER'],
+            idna.encode(app.config['DOMAIN']).decode('ascii'),
+        )
         with smtplib.SMTP(app.config['HOST_AUTHSMTP'], port=10025) as smtp:
+            to_address = "{0}@{1}".format(
+                self.localpart,
+                idna.encode(self.domain_name).decode('ascii'),
+            )
             msg = text.MIMEText(body)
             msg['Subject'] = subject
             msg['From'] = from_address
-            msg['To'] = self.email
-            smtp.sendmail(from_address, [self.email], msg.as_string())
+            msg['To'] = to_address
+            smtp.sendmail(from_address, [to_address], msg.as_string())
+
 
     def __str__(self):
         return self.email

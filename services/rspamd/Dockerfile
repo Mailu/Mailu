@@ -7,4 +7,7 @@ RUN mkdir /run/rspamd
 COPY conf/ /conf
 COPY start.py /start.py
 
+# Temporary fix to remove references to rspamd-fuzzy for now
+RUN sed -i '/fuzzy/,$d' /etc/rspamd/rspamd.conf
+
 CMD /start.py

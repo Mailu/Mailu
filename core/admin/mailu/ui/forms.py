@@ -6,6 +6,7 @@ import flask_login
 import flask_wtf
 import re
 
+LOCALPART_REGEX = "^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+$"
 
 class DestinationField(fields.SelectMultipleField):
     """ Allow for multiple emails selection from current user choices and
@@ -74,7 +75,7 @@ class RelayForm(flask_wtf.FlaskForm):
 
 
 class UserForm(flask_wtf.FlaskForm):
-    localpart = fields.StringField(_('E-mail'), [validators.DataRequired()])
+    localpart = fields.StringField(_('E-mail'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
     quota_bytes = fields_.IntegerSliderField(_('Quota'), default=1000000000)
@@ -86,7 +87,7 @@ class UserForm(flask_wtf.FlaskForm):
 
 
 class UserSignupForm(flask_wtf.FlaskForm):
-    localpart = fields.StringField(_('Email address'), [validators.DataRequired(), validators.Regexp("^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+$")])
+    localpart = fields.StringField(_('Email address'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
     captcha = flask_wtf.RecaptchaField()

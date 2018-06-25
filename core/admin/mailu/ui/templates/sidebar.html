@@ -32,7 +32,9 @@
       </a>
     </li>
 
+    {% if current_user.manager_of or current_user.global_admin %}
     <li class="header">{% trans %}Administration{% endtrans %}</li>
+    {% endif %}
     {% if current_user.global_admin %}
     <li>
       <a href="{{ url_for('.announcement') }}">

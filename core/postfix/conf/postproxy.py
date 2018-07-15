@@ -70,7 +70,7 @@ class NetstringProtocol(asyncio.Protocol):
 
 
 class SocketmapProtocol(NetstringProtocol):
-    """ TCP protocol to answer Postfix socketmap and proxify lookups to
+    """ Protocol to answer Postfix socketmap and proxify lookups to
     an outside object.
 
     See http://www.postfix.org/socketmap_table.5.html for details on the
@@ -122,6 +122,79 @@ class SocketmapProtocol(NetstringProtocol):
         return lambda: cls(table_map)
 
 
+class DictProtocol(asyncio.Protocol):
+    """ Protocol to answer Dovecot dict requests, as implemented in Dict proxy.
+
+    There is very little documentation about the protocol, most of it was
+    reverse-engineered from :
+
+    https://github.com/dovecot/core/blob/master/src/dict/dict-connection.c
+    https://github.com/dovecot/core/blob/master/src/dict/dict-commands.c
+    https://github.com/dovecot/core/blob/master/src/lib-dict/dict-client.h
+    """
+
+    DATA_TYPES = {0: str, 1: int}
+
+    def __init__(self, table_map):
+        self.table_map = table_map
+        self.major_version = None
+        self.minor_version = None
+        self.dict = None
+        super(DictProtocol, self).__init__()
+
+    def connection_made(self, transport):
+        logging.info('Connect {}'.format(transport.get_extra_info('peername')))
+        self.transport = transport
+
+    def data_received(self, data):
+        logging.debug("Received {}".format(data))
+        for line in data.split(b"\n"):
+            if len(line) < 2:
+                continue
+            command = DictProtocol.COMMANDS.get(line[0])
+            if command is None:
+                logging.warning('Unknown command {}'.format(line[0]))
+                return self.transport.abort()
+            args = line[1:].strip().split(b"\t")
+            try:
+                command(self, *args)
+            except Exception:
+                logging.exception("Error when processing request")
+                return self.transport.abort()
+
+    def process_hello(self, major, minor, value_type, user, dict_name):
+        self.major, self.minor = int(major), int(minor)
+        logging.debug('Client version {}.{}'.format(self.major, self.minor))
+        assert self.major == 2
+        self.value_type = DictProtocol.DATA_TYPES[int(value_type)]
+        self.user = user
+        self.dict = self.table_map[dict_name.decode("ascii")]
+        logging.debug("Value type {}, user {}, dict {}".format(
+            self.value_type, self.user, dict_name))
+
+    def process_lookup(self, key):
+        logging.debug("Looking up {}".format(key))
+        self.reply(b"O", json.dumps({}))
+
+    def reply(self, command, *args):
+        logging.debug("Replying {} with {}".format(command, args))
+        self.transport.write(command)
+        for arg in args:
+            self.transport.write("b\t" + arg.replace(b"\t", b"\t\t"))
+        self.transport.write("\n")
+
+    @classmethod
+    def factory(cls, table_map):
+        """ Provide a protocol factory for a given map instance.
+        """
+        return lambda: cls(table_map)
+
+    COMMANDS = {
+        ord("H"): process_hello,
+        ord("L"): process_lookup
+    }
+
+
 class UrlTable(object):
     """ Resolve an entry by querying a parametrized GET URL.
     """
@@ -144,23 +217,26 @@ class UrlTable(object):
 def main():
     """ Run the asyncio loop.
     """
-    parser = argparse.ArgumentParser("Postfix Socketmap proxy")
-    parser.add_argument("--bind", help="address to bind to", required=True)
-    parser.add_argument("--port", type=int, help="port to bind to", required=True)
+    # Reference tables
+    server_types = dict(postfix=SocketmapProtocol, dovecot=DictProtocol)
+    table_types = dict(url=UrlTable)
+    # Argument parsing
+    parser = argparse.ArgumentParser("Postfix and Dovecot map proxy")
+    parser.add_argument("--socket", help="path to a socket", required=True)
+    parser.add_argument("--mode", choices=server_types.keys(), required=True)
     parser.add_argument("--name", help="name of the table", action="append")
-    parser.add_argument("--type", help="type of the table", action="append")
+    parser.add_argument("--type", choices=table_types.keys(), action="append")
     parser.add_argument("--param", help="table parameter", action="append")
     args = parser.parse_args()
     # Prepare the maps
-    table_types = dict(url=UrlTable)
     table_map = {name: table_types[table_type](param)
                  for name, table_type, param
-                 in zip(args.name, args.type, args.param)}
+                 in zip(args.name, args.type, args.param)} if args.name else {}
     # Run the main loop
     logging.basicConfig(level=logging.DEBUG)
     loop = asyncio.get_event_loop()
-    server = loop.run_until_complete(loop.create_server(
-        SocketmapProtocol.factory(table_map), args.bind, args.port
+    server = loop.run_until_complete(loop.create_unix_server(
+        server_types[args.mode].factory(table_map), args.socket
     ))
     try:
         loop.run_forever()

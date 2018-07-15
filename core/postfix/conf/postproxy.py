@@ -10,6 +10,7 @@ import aiohttp
 import logging
 import urllib
 import argparse
+import json
 
 
 class NetstringProtocol(asyncio.Protocol):
@@ -108,7 +109,7 @@ class SocketmapProtocol(NetstringProtocol):
             return self.send_string(b'TEMP no such map')
         try:
             result = await table.get(key)
-            return self.send_string(b'OK ' + result.encode('utf8'))
+            return self.send_string(b'OK ' + str(result).encode('utf8'))
         except KeyError:
             return self.send_string(b'NOTFOUND ')
         except Exception:
@@ -157,7 +158,7 @@ class DictProtocol(asyncio.Protocol):
                 return self.transport.abort()
             args = line[1:].strip().split(b"\t")
             try:
-                command(self, *args)
+                return command(self, *args)
             except Exception:
                 logging.exception("Error when processing request")
                 return self.transport.abort()
@@ -172,9 +173,11 @@ class DictProtocol(asyncio.Protocol):
         logging.debug("Value type {}, user {}, dict {}".format(
             self.value_type, self.user, dict_name))
 
-    def process_lookup(self, key):
+    async def process_lookup(self, key):
         logging.debug("Looking up {}".format(key))
-        self.reply(b"O", json.dumps({}))
+        result = await self.dict.get(key)
+        response = result if type(result) is str else json.dumps(result)
+        return self.reply(b"O", response)
 
     def reply(self, command, *args):
         logging.debug("Replying {} with {}".format(command, args))
@@ -210,7 +213,7 @@ class UrlTable(object):
         async with aiohttp.ClientSession() as session:
             async with session.get(self.url_pattern.format(key)) as request:
                 if request.status == 200:
-                    result = await request.text()
+                    result = await request.json()
                     return result
 
 

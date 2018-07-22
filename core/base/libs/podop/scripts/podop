@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+
+import argparse
+
+from podop import run_server, SERVER_TYPES, TABLE_TYPES
+
+
+def main():
+    """ Run a podop server based on CLI arguments
+    """
+    parser = argparse.ArgumentParser("Postfix and Dovecot proxy")
+    parser.add_argument("--socket", help="path to the socket", required=True)
+    parser.add_argument("--mode", choices=SERVER_TYPES.keys(), required=True)
+    parser.add_argument("--name", help="name of the table", action="append")
+    parser.add_argument("--type", choices=TABLE_TYPES.keys(), action="append")
+    parser.add_argument("--param", help="table parameter", action="append")
+    args = parser.parse_args()
+    run_server(
+        args.mode, args.socket,
+        zip(args.name, args.type, args.param) if args.name else []
+    )
+
+
+if __name__ == "__main__":
+    main()

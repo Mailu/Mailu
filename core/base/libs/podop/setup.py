@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="podop",
-    version="0.2",
+    version="0.2.1",
     description="Postfix and Dovecot proxy",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -15,6 +15,7 @@ setup(
     author_email="pierre@jaury.eu",
     url="https://github.com/mailu/podop.git",
     packages=["podop"],
+    include_package_data=True,
     scripts=["scripts/podop"],
     install_requires=[
         "aiohttp"

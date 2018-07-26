@@ -1,9 +1,9 @@
 FROM alpine:edge
 
-RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
- && apk add --no-cache \
-     dovecot dovecot-sqlite dovecot-pigeonhole-plugin dovecot-pigeonhole-plugin-extdata \
-     rspamd-client@testing python py-jinja2
+RUN apk add --no-cache \
+     dovecot dovecot-pop3d dovecot-lmtpd dovecot-pigeonhole-plugin rspamd-client \
+     python3 py3-pip \
+ && pip3 install jinja2 podop
 
 COPY conf /conf
 COPY sieve /var/lib/dovecot

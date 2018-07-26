@@ -19,8 +19,8 @@ mynetworks = 127.0.0.1/32 [::1]/128 {{ RELAYNETS }}
 # Empty alias list to override the configuration variable and disable NIS
 alias_maps =
 
-# SQLite configuration
-sql = sqlite:${config_directory}/
+# Podop configuration
+podop = socketmap:unix:/tmp/podop.socket:
 
 # Only accept virtual emails
 mydestination =
@@ -56,13 +56,13 @@ smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
 # The alias map actually returns both aliases and local mailboxes, which is
 # required for reject_unlisted_sender to work properly
-virtual_alias_maps = ${sql}sqlite-virtual_alias_maps.cf
-virtual_mailbox_domains = ${sql}sqlite-virtual_mailbox_domains.cf
-virtual_mailbox_maps = $virtual_alias_maps
+virtual_alias_maps = ${podop}alias
+virtual_mailbox_domains = ${podop}domains
+virtual_mailbox_maps = ${podop}mailbox
 
 # Mails are transported if required, then forwarded to Dovecot for delivery
-relay_domains = ${sql}sqlite-transport.cf
-transport_maps = ${sql}sqlite-transport.cf
+relay_domains = ${podop}transport
+transport_maps = ${podop}transport
 virtual_transport = lmtp:inet:{{ HOST_LMTP }}
 
 # In order to prevent Postfix from running DNS query, enforce the use of the
@@ -84,7 +84,7 @@ smtpd_helo_required = yes
 
 smtpd_recipient_restrictions =
   permit_mynetworks,
-  check_sender_access ${sql}sqlite-reject-spoofed.cf,
+  check_sender_access ${podop}spoofed
   reject_non_fqdn_sender,
   reject_unknown_sender_domain,
   reject_unknown_recipient_domain,

@@ -1,6 +1,8 @@
 FROM alpine
 
-RUN apk add --no-cache postfix postfix-sqlite postfix-pcre rsyslog python py-jinja2
+RUN apk add --no-cache postfix postfix-pcre rsyslog \
+    python3 py3-pip \
+ && pip3 install jinja2 podop
 
 COPY conf /conf
 COPY start.py /start.py

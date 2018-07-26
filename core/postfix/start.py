@@ -1,11 +1,25 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import jinja2
 import os
 import socket
 import glob
 import shutil
-	
+import multiprocessing
+
+from podop import run_server
+
+
+def start_podop():
+    os.setuid(100)
+    run_server(40, "postfix", "/tmp/podop.socket", [
+		("transport", "url", "http://admin/internal/postfix/transport/§"),
+		("alias", "url", "http://admin/internal/postfix/alias/§"),
+		("domains", "url", "http://admin/internal/postfix/domains/§"),
+        ("mailbox", "url", "http://admin/internal/postfix/mailbox/§"),
+        ("spoofed", "url", "http://admin/internal/postfix/spoofed/§"),
+    ])
+
 convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 
 # Actual startup script
@@ -32,7 +46,8 @@ for map_file in glob.glob("/overrides/*.map"):
 
 convert("/conf/rsyslog.conf", "/etc/rsyslog.conf")
 
-# Run postfix
+# Run Podop and Postfix
+multiprocessing.Process(target=start_podop).start()
 if os.path.exists("/var/run/rsyslogd.pid"):
     os.remove("/var/run/rsyslogd.pid")
 os.system("/usr/lib/postfix/post-install meta_directory=/etc/postfix create-missing")

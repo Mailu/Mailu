@@ -5,6 +5,7 @@ It is able to proxify postfix maps and dovecot dicts to any table
 
 import asyncio
 import logging
+import sys
 
 from podop import postfix, dovecot, table
 
@@ -19,7 +20,7 @@ TABLE_TYPES = dict(
 )
 
 
-def run_server(server_type, socket, tables):
+def run_server(verbosity, server_type, socket, tables):
     """ Run the server, given its type, socket path and table list
 
     The table list must be a list of tuples (name, type, param)
@@ -30,7 +31,8 @@ def run_server(server_type, socket, tables):
         for name, table_type, param in tables
     }
     # Run the main loop
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(stream=sys.stderr, level=max(3 - verbosity, 0) * 10,
+                        format='%(name)s (%(levelname)s): %(message)s')
     loop = asyncio.get_event_loop()
     server = loop.run_until_complete(loop.create_unix_server(
         SERVER_TYPES[server_type].factory(table_map), socket

@@ -51,6 +51,8 @@ class NetstringProtocol(asyncio.Protocol):
                 self.string_received(string)
 
     def string_received(self, string):
+        """ A new netstring was received
+        """
         pass
 
     def send_string(self, string):
@@ -81,15 +83,13 @@ class SocketmapProtocol(NetstringProtocol):
         self.transport = transport
 
     def string_received(self, string):
+        # The postfix format contains a space for separating the map name and
+        # the key
         space = string.find(0x20)
         if space != -1:
             name = string[:space].decode('ascii')
             key = string[space+1:].decode('utf8')
             return asyncio.async(self.process_request(name, key))
-
-    def send_string(self, string):
-        logging.debug("Send {}".format(string))
-        super(SocketmapProtocol, self).send_string(string)
 
     async def process_request(self, name, key):
         """ Process a request by querying the provided map.

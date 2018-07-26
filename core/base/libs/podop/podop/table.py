@@ -16,11 +16,30 @@ class UrlTable(object):
         """
         self.url_pattern = url_pattern.replace('§', '{}')
 
-    async def get(self, key):
-        logging.debug("Getting {} from url table".format(key))
+    async def get(self, key, ns=None):
+        """ Get the given key in the provided namespace
+        """
+        if ns is not None:
+            key += "/" + ns
         async with aiohttp.ClientSession() as session:
             async with session.get(self.url_pattern.format(key)) as request:
                 if request.status == 200:
                     result = await request.json()
-                    logging.debug("Got {} from url table".format(result))
+                    return result
+
+    async def set(self, key, value, ns=None):
+        """ Set a value for the given key in the provided namespace
+        """
+        if ns is not None:
+            key += "/" + ns
+        async with aiohttp.ClientSession() as session:
+            await session.post(self.url_pattern.format(key), json=value)
+
+    async def iter(self, cat):
+        """ Iterate the given key (experimental)
+        """
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.url_pattern.format(cat)) as request:
+                if request.status == 200:
+                    result = await request.json()
                     return result

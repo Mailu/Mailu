@@ -1,5 +1,6 @@
 from mailu import db, models, app, limiter
 from mailu.internal import internal, nginx
+from sqlalchemy import or_
 
 import flask
 import flask_login
@@ -49,3 +50,47 @@ def basic_authentication():
     response = flask.Response(status=401)
     response.headers["WWW-Authenticate"] = 'Basic realm="Login Required"'
     return response
+
+
+@internal.route("/postfix/alias/<alias>")
+def postfix_alias_map(alias):
+    localpart, domain = alias.split('@', 1) if '@' in alias else (None, alias)
+    alternative = models.Alternative.query.get(domain)
+    if alternative:
+        domain = alternative.domain_name
+    email = '{}@{}'.format(localpart, domain)
+    if localpart is None:
+        return domain
+    else:
+        alias_obj = models.Alias.resolve(localpart, domain)
+        if alias_obj:
+            return alias_obj.destination
+        user_obj = models.User.query.get(email)
+        if user_obj:
+            return user_obj.destination
+        flask.abort(404)
+
+
+@internal.route("/dovecot/auth/passdb/<user_email>")
+def dovecot_passdb_dict(user_email):
+    user = models.User.query.get(user_email) or flask.abort(403)
+    return flask.jsonify({
+        "password": user.password,
+    })
+
+
+@internal.route("/dovecot/auth/userdb/<user_email>")
+def dovecot_userdb_dict(user_email):
+    user = models.User.query.get(user_email) or flask.abort(403)
+    return flask.jsonify({
+        "quota_rule": "*:bytes={}".format(user.quota_bytes)
+    })
+
+
+@internal.route("/dovecot/quota/quota/<ns>/<user_email>", methods=["POST"])
+def dovecot_quota(ns, user_email):
+    user = models.User.query.get(user_email) or flask.abort(403)
+    if ns == "storage":
+        user.quota_bytes_used = flask.request.get_json()
+        db.session.commit()
+    return flask.jsonify(None)

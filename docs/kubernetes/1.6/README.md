@@ -36,7 +36,11 @@ spec:
     server: https://acme-v02.api.letsencrypt.org/directory
 ```
 
-### Things to change
+## Deploying Mailu
+
+All manifests can be found in the `mailu` subdirectory. All commands below need to be run from this subdirectory
+
+### Personalization
 - All services run in the same namespace, currently `mailu-mailserver`. So if you want to use a different one, change the `namespace` value in **every** file
 - Check the `storage-class` field in the `pvc.yaml` file, you can also change the sizes to your liking. Note that you need `RWX` (read-write-many) and `RWO` (read-write-once) storageclasses.
 - Check the `configmap.yaml` and adapt it to your needs. Be sure to check the kubernetes DNS values at the end (if you use a different namespace)

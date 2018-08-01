@@ -89,6 +89,7 @@ Now you should be able to login on the mail account: `https://mail.example.com/a
 
 ## Adaptations
 
+### Postfix
 I noticed you need an override for the `postfix` server in order to be able to send mail. I noticed Google wasn't able to deliver mail to my account and it had to do with the `smtpd_authorized_xclient_hosts` value in the config file. The config can be read [here](https://github.com/hacor/Mailu/blob/master/core/postfix/conf/main.cf#L35) and is pointing to a single IP of the service. But the requests come from the host IPs (the NGINX Ingress proxy) and they don't use the service specific IP.
 
 Enter the `postfix` pod:
@@ -117,6 +118,40 @@ Save and close the file and exit. Now you need to delete the pod in order to rec
 ```bash
 kubectl -n mailu-mailserver delete po/mailu-smtp-....
 ```
+
+### Dovecot
+- If you are using Dovecot on a shared file system (Glusterfs, NFS,...), you need to create a special override otherwise a lot of indexing errors will occur on your Dovecot pod.
+- I also higher the number of max connections per IP. Now it's limited to 10.
+Enter the dovecot pod:
+
+```bash
+kubectl -n mailu-mailserver get po
+kubectl -n mailu-mailserver exec -it mailu-imap-.... /bin/sh
+```
+
+Create the file `/overrides/dovecot.conf`
+
+```bash
+vi /overrides/dovecot.conf
+```
+
+And enter following contents:
+```bash
+mail_nfs_index = yes
+mail_nfs_storage = yes
+mail_fsync = always
+mmap_disable = yes
+mail_max_userip_connections=100
+```
+
+Save and close the file and delete the imap pod to get it recreated.
+
+```bash
+kubectl -n mailu-mailserver delete po/mailu-imap-....
+```
+
+Wait for the pod to recreate and you're online!
+Happy mailing!
 
 Wait for the pod to recreate and you're online!
 Happy mailing!

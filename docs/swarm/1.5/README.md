@@ -61,13 +61,14 @@ With this default networking mode, I cannot get login working properly... As fou
 
 The main consequence/limitation will be that the front services will *not* be available on every node, but only on the node where it will be deployed. In my case, I have only one manager and I choose to deploy the front service to the manager node, so I know on wich IP the front service will be available (aka the IP adress of my manager node).
 
-### Variable substitution 
-The docker stack deploy command doesn't support variable substitution in the .yml file itself (vut we still can use .env file to pass variables to the services). As a consequence we need to adjust the docker-compose file to :
+### Variable substitution and docker-compose.yml
+The docker stack deploy command doesn't support variable substitution in the .yml file itself (but we still can use .env file to pass variables to the services). As a consequence we need to adjust the docker-compose file in order to :
 - remove all variables : $VERSION , $BIND_ADDRESS4 , $BIND_ADDRESS6 , $ANTIVIRUS , $WEBMAIL , etc
 - change the way we define the volumes (nfs share in our case)
+- add a deploy section for every service
 
 ### Docker compose 
-A working docker-compose-stack.yml file is available here:
+An example of docker-compose-stack.yml file is available here:
 
 ```yaml
 

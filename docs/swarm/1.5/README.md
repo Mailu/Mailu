@@ -337,3 +337,28 @@ volumes:
       o: "addr=192.168.0.30,nolock,soft,rw"
       device: ":/mnt/Pool1/pv/mailu/redis"
 ```
+
+### Deploy mailu on the docker swarm
+Run the following command:
+```bash
+docker stack deploy -c docker-compose-stack.yml mailu
+```
+See how the services are being deployed:
+```bash
+core@coreos-01 ~ $ docker service ls
+ID                  NAME                                 MODE                REPLICAS            IMAGE                                     PORTS
+ywnsetmtkb1l        mailu_antivirus                      replicated          1/1                 mailu/none:1.5
+pqokiaz0q128        mailu_fetchmail                      replicated          1/1                 mailu/fetchmail:1.5
+```
+check a specific service:
+```bash
+core@coreos-01 ~ $ docker service ps mailu_fetchmail
+ID                  NAME                IMAGE                 NODE                DESIRED STATE       CURRENT STATE         ERROR               PORTS
+tbu8ppgsdffj        mailu_fetchmail.1   mailu/fetchmail:1.5   coreos-01           Running             Running 11 days ago
+```
+
+### Remove the stack
+Run the follwoing command:
+```bash
+core@coreos-01 ~ $ docker stack rm mailu
+```

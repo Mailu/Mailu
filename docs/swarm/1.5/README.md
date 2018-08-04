@@ -331,16 +331,6 @@ volumes:
       type: "nfs"
       o: "addr=192.168.0.30,nolock,soft,rw"
       device: ":/mnt/Pool1/pv/mailu/certs"
-  mailu_nginx.conf:
-    driver_opts:
-      type: "nfs"
-      o: "addr=192.168.0.30,nolock,soft,rw"
-      device: ":/mnt/Pool1/pv/mailu/1.5/nginx.conf.wp"
-  mailu_tls.conf:
-    driver_opts:
-      type: "nfs"
-      o: "addr=192.168.0.30,nolock,soft,rw"
-      device: ":/mnt/Pool1/pv/mailu/1.5/tls.conf"
   mailu_redis:
     driver_opts:
       type: "nfs"

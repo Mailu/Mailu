@@ -109,7 +109,7 @@ services:
         published: 587
         mode: host
     volumes:
-#      - "/mailu/certs:/certs"
+#      - "$ROOT/certs:/certs"
       - type: volume
         source: mailu_certs
         target: /certs
@@ -123,7 +123,7 @@ services:
     image: redis:alpine
     restart: always
     volumes:
-#      - "/mailu/redis:/data"
+#      - "$ROOT/redis:/data"
       - type: volume
         source: mailu_redis
         target: /data
@@ -209,7 +209,7 @@ services:
     restart: always
     env_file: .env
     volumes:
-#      - "/mailu/filter:/data"
+#      - "$ROOT/filter:/data"
       - type: volume
         source: mailu_filter
         target: /data
@@ -224,7 +224,7 @@ services:
     restart: always
     env_file: .env
     volumes:
-#      - /mailu/dav:/data"
+#      - "$ROOT/dav:/data"
       - type: volume
         source: mailu_dav
         target: /data
@@ -239,11 +239,11 @@ services:
     restart: always
     env_file: .env
     volumes:
-#      - "/mailu/data:/data"
+#      - "$ROOT/data:/data"
       - type: volume
         source: mailu_data
         target: /data
-#      - "/mailu/dkim:/dkim"
+#      - "$ROOT/dkim:/dkim"
       - type: volume
         source: mailu_dkim
         target: /dkim
@@ -261,7 +261,7 @@ services:
     restart: always
     env_file: .env
     volumes:
-#      - "/mailu/webmail:/data"
+#      - "$ROOT/webmail:/data"
       - type: volume
         source: mailu_data
         target: /data
@@ -278,7 +278,7 @@ services:
     restart: always
     env_file: .env
     volumes:
-#      - "/mailu/data:/data"
+#      - "$ROOT/data:/data"
       - type: volume
         source: mailu_data
         target: /data

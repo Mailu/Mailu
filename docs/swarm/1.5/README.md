@@ -1,4 +1,4 @@
-# Install Mailu master on kubernetes
+# Install Mailu on a docker swarm
 
 ## Prequisites
 
@@ -6,7 +6,7 @@
 
 You need to have a swarm running
 
-In order to deploy mailu on a swarm, you will first need to initialize it:
+In order to deploy Mailu on a swarm, you will first need to initialize it:
 The main command will be:
 ```bash
 docker swarm init --advertise-addr <IP_ADDR>
@@ -29,10 +29,10 @@ mzrm9nbdggsfz4sgq6dhs5i6n     flying-dutchman     Ready               Active    
 ```
 
 ### Volume definition
-For data persistance (the mailu services might be launched/relaunched on any of the swarm nodes), we need to have mailu data stored in a manner accessible by every manager or worker in the swarm.
+For data persistance (the Mailu services might be launched/relaunched on any of the swarm nodes), we need to have Mailu data stored in a manner accessible by every manager or worker in the swarm.
 Hereafter we will use a NFS share:
 ```bash
-core@coreos-01 ~/git/Mailu/docs $ showmount -e 192.168.0.30
+core@coreos-01 ~ $ showmount -e 192.168.0.30
 Export list for 192.168.0.30:
 /mnt/Pool1/pv            192.168.0.0
 ```
@@ -42,7 +42,7 @@ on the nfs server, I am using the following /etc/exports
 $more /etc/exports
 /mnt/Pool1/pv -alldirs -mapall=root -network 192.168.0.0 -mask 255.255.255.0 
 ```
-on the nfs server, I created the mailu directory (in fact I copied a working mailu set-up)
+on the nfs server, I created the Mailu directory (in fact I copied a working Mailu set-up)
 ```bash
 $mkdir /mnt/Pool1/pv/mailu
 ```
@@ -338,7 +338,7 @@ volumes:
       device: ":/mnt/Pool1/pv/mailu/redis"
 ```
 
-### Deploy mailu on the docker swarm
+### Deploy Mailu on the docker swarm
 Run the following command:
 ```bash
 docker stack deploy -c docker-compose-stack.yml mailu

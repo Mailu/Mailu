@@ -6,21 +6,25 @@
 
 You need to have a swarm running
 
-```bash
 In order to deploy mailu on a swarm, you will first need to initialize it:
-The main command will be docker swarm init --advertise-addr <IP_ADDR>
+The main command will be:
+```bash
+docker swarm init --advertise-addr <IP_ADDR>
+```
 See https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/
-If you want to add other managers or workers, please use docker swarm join --token xxxxx 
+If you want to add other managers or workers, please use:
+```bash
+docker swarm join --token xxxxx 
+```
 See https://docs.docker.com/engine/swarm/join-nodes/
 
-You have now a working swarm, and you can check its status with
-docker node ls 
+You have now a working swarm, and you can check its status with:
 ```bash
 core@coreos-01 ~/git/Mailu/docs/swarm/1.5 $ docker node ls
 ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
-ptpmtgih78v9q14mapt5hyxrb     black-pearl         Ready               Active                                  18.06.0-ce
-sczlqi2pigpw7117hbkh71nvb *   coreos-01           Ready               Active              Leader              18.03.1-ce
-mzrm98cc9i2y8obvi2fzo5i6n     flying-dutchman     Ready               Active                                  18.06.0-ce
+xhgeekkrlttpmtgmapt5hyxrb     black-pearl         Ready               Active                                  18.06.0-ce
+sczlqjgfhehsfdjhfhhph1nvb *   coreos-01           Ready               Active              Leader              18.03.1-ce
+mzrm9nbdggsfz4sgq6dhs5i6n     flying-dutchman     Ready               Active                                  18.06.0-ce
 ```
 
 ### Volume definition

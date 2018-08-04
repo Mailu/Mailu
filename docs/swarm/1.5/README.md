@@ -59,7 +59,8 @@ core@coreos-01 ~ $ sudo umount /mnt/local/
 
 ### Networking mode
 On a swarm, the services are available (default mode) through a routing mesh managed by docker itself. With this mode, each service is given a virtual IP adress and docker manages the routing between this virtual IP and the container(s) provinding this service.
-With this default networking mode, I cannot get login working properly... As found in https://github.com/Mailu/Mailu/issues/375 ,  a workaround is to use the dnsrr networking mode at least for the front services
+With this default networking mode, I cannot get login working properly... As found in https://github.com/Mailu/Mailu/issues/375 ,  a workaround is to use the dnsrr networking mode at least for the front services.
+
 The main consequence/limiation will be that the front services will *not* be available on every node, but only on the node where it will be deployed. In my case, I have only one manager and I choose to deploy the front service to the manager node, so I know on wich IP the front service will be available (aka the IP adress of my manager node).
 
 ### Variable substitution 
@@ -133,8 +134,7 @@ services:
         constraints: [node.role == manager]
 
   imap:
-#    image: mailu/dovecot:$VERSION
-    image: ofthesun9/dovecot:1.5
+    image: mailu/dovecot:1.5
     restart: always
     env_file: .env
     volumes:
@@ -159,7 +159,7 @@ services:
         constraints: [node.role == manager]
 
   smtp:
-    image: ofthesun9/postfix:1.5
+    image: mailu/postfix:1.5
     restart: always
     env_file: .env
     volumes:
@@ -180,8 +180,7 @@ services:
         constraints: [node.role == manager]
 
   antispam:
-#    image: mailu/rspamd:$VERSION
-    image: ofthesun9/rspamd:fuzzydev
+    image: mailu/rspamd:1.5
     restart: always
     env_file: .env
     depends_on:
@@ -236,7 +235,7 @@ services:
         constraints: [node.role == manager]
 
   admin:
-    image: ofthesun9/admin:1.5-backports
+    image: mailu/admin:1.5
     restart: always
     env_file: .env
     volumes:

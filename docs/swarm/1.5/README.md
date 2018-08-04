@@ -4,9 +4,7 @@
 
 ### Swarm
 
-You need to have a swarm running
-
-In order to deploy Mailu on a swarm, you will first need to initialize it:
+In order to deploy Mailu on a swarm, you will first need to initialize the swarm:
 The main command will be:
 ```bash
 docker swarm init --advertise-addr <IP_ADDR>

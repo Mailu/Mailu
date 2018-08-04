@@ -69,7 +69,7 @@ The docker stack deploy command doesn't support variable substitution in the .ym
 - change the way we define the volumes (nfs share in our case)
 
 ### Docker compose 
-A working docker-compose.yml file is avalable here:
+A working docker-compose-stack.yml file is available here:
 
 ```yaml
 

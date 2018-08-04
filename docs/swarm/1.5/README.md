@@ -61,7 +61,7 @@ core@coreos-01 ~ $ sudo umount /mnt/local/
 On a swarm, the services are available (default mode) through a routing mesh managed by docker itself. With this mode, each service is given a virtual IP adress and docker manages the routing between this virtual IP and the container(s) provinding this service.
 With this default networking mode, I cannot get login working properly... As found in https://github.com/Mailu/Mailu/issues/375 ,  a workaround is to use the dnsrr networking mode at least for the front services.
 
-The main consequence/limiation will be that the front services will *not* be available on every node, but only on the node where it will be deployed. In my case, I have only one manager and I choose to deploy the front service to the manager node, so I know on wich IP the front service will be available (aka the IP adress of my manager node).
+The main consequence/limitation will be that the front services will *not* be available on every node, but only on the node where it will be deployed. In my case, I have only one manager and I choose to deploy the front service to the manager node, so I know on wich IP the front service will be available (aka the IP adress of my manager node).
 
 ### Variable substitution 
 The docker stack deploy command doesn't support variable substitution in the .yml file itself (vut we still can use .env file to pass variables to the services). As a consequence we need to adjust the docker-compose file to :

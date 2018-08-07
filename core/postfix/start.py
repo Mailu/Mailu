@@ -5,11 +5,26 @@ import os
 import socket
 import glob
 import shutil
-	
+import time
+
 convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 
 # Actual startup script
-os.environ["FRONT_ADDRESS"] = socket.gethostbyname(os.environ.get("FRONT_ADDRESS", "front"))
+i = 0
+t = 10
+while True:
+	i += 1
+	try:
+		os.environ["FRONT_ADDRESS"] = socket.gethostbyname(os.environ.get("FRONT_ADDRESS", "front"))
+	except socket.gaierror as err:
+		print(err)
+		if i >= t:
+			print("Giving up!")
+			raise
+		print("Waiting 10 seconds for retry...")
+		time.sleep(10)
+		continue
+	break
 os.environ["HOST_ANTISPAM"] = os.environ.get("HOST_ANTISPAM", "antispam:11332")
 os.environ["HOST_LMTP"] = os.environ.get("HOST_LMTP", "imap:2525")
 

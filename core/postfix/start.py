@@ -17,11 +17,8 @@ while True:
 	try:
 		os.environ["FRONT_ADDRESS"] = socket.gethostbyname(os.environ.get("FRONT_ADDRESS", "front"))
 	except socket.gaierror as err:
-		print(err)
 		if i >= t:
-			print("Giving up!")
 			raise
-		print("Waiting 10 seconds for retry...")
 		time.sleep(10)
 		continue
 	break

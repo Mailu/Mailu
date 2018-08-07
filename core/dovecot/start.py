@@ -19,11 +19,8 @@ while True:
 		if os.environ["WEBMAIL"] != "none":
 			os.environ["WEBMAIL_ADDRESS"] = socket.gethostbyname(os.environ.get("WEBMAIL_ADDRESS", "webmail"))
 	except socket.gaierror as err:
-		print(err)
 		if i >= t:
-			print("Giving up!")
 			raise
-		print("Waiting 10 seconds for retry...")
 		time.sleep(10)
 		continue
 	break

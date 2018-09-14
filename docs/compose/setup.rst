@@ -90,7 +90,7 @@ setting. The configuration option must be one of the following:
 - ``none`` disables antivirus checks;
 - ``clamav`` is the default values, the popular ClamAV antivirus is enabled.
 
-Make sure that you have at least 1GB or memory for ClamAV to load its signature
+Make sure that you have at least 1GB of memory for ClamAV to load its signature
 database.
 
 Finish setting up TLS

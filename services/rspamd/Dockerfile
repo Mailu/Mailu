@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.7
 
 RUN apk add --no-cache python py-jinja2 rspamd rspamd-controller rspamd-proxy ca-certificates
 

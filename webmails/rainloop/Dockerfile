@@ -16,6 +16,8 @@ RUN rm -rf /var/www/html/ \
  && find . -type f -exec chmod 644 {} \; \
  && chown -R www-data: *
 
+RUN usermod -u 1000 www-data
+
 COPY include.php /var/www/html/include.php
 COPY php.ini /usr/local/etc/php/conf.d/rainloop.ini
 

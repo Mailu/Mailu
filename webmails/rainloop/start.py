@@ -9,6 +9,7 @@ convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()
 # Actual startup script
 os.environ["FRONT_ADDRESS"] = os.environ.get("FRONT_ADDRESS", "front")
 os.environ["IMAP_ADDRESS"] = os.environ.get("IMAP_ADDRESS", "imap")
+os.environ["WEBDAV_ADDRESS"] = os.environ.get("WEBDAV_ADDRESS", "webdav")
 
 base = "/data/_data_/_default_/"
 shutil.rmtree(base + "domains/", ignore_errors=True)

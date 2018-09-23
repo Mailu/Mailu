@@ -1,8 +1,11 @@
-language: python
-python:
-  - "3.6"
-install:
-  - pip install -r docs/requirements.txt
+sudo: required
+services: docker
+addons:
+  apt:
+    packages:
+      - docker-ce
+env:
+  - VERSION=$TRAVIS_BRANCH
+
 script:
-  - sphinx-versioning build -b -B 1.5 -r 1.5 -w '^[0-9.]*$' -w master -W '^$' docs/ build/
-  - python "docs/conf.py" "build" "$DEPLOY_HOST" "$DEPLOY_USERNAME" "$DEPLOY_PASSWORD" "$DEPLOY_REMOTEDIR"
+- docker-compose -f tests/build.yml -p Mailu build

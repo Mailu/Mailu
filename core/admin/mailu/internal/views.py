@@ -71,6 +71,26 @@ def postfix_alias_map(alias):
         flask.abort(404)
 
 
+@internal.route("/postfix/alias/domain/<domain>")
+def postfix_alias_domain(domain):
+    pass
+
+
+@internal.route("/postfix/alias/map/<alias>")
+def postfix_alias_map(alias):
+    pass
+
+
+@internal.route("/postfix/mailbox/domain/<domain>")
+def postfix_mailbox_domain(domain):
+    pass
+
+
+@internal.route("/postfix/mailbox/map/<mailbox>")
+def postfix_mailbox_map(domain):
+    pass
+
+
 @internal.route("/dovecot/auth/passdb/<user_email>")
 def dovecot_passdb_dict(user_email):
     user = models.User.query.get(user_email) or flask.abort(403)

@@ -56,9 +56,9 @@ smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
 # The alias map actually returns both aliases and local mailboxes, which is
 # required for reject_unlisted_sender to work properly
-virtual_alias_maps = ${podop}alias
-virtual_mailbox_domains = ${podop}domains
-virtual_mailbox_maps = ${podop}mailbox
+virtual_alias_maps = ${podop}alias/domain
+virtual_mailbox_domains = ${podop}mailbox/domain
+virtual_mailbox_maps = ${podop}mailbox/map
 
 # Mails are transported if required, then forwarded to Dovecot for delivery
 relay_domains = ${podop}transport

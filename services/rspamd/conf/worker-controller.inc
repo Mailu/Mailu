@@ -1,3 +1,3 @@
 bind_socket = "*:11334";
 password = "mailu";
-secure_ip = "{{ FRONT_ADDRESS }}";
+secure_ip = "{{ FRONT_ADDRESS }} {{ POD_ADDRESS_RANGE }}";

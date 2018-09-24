@@ -32,7 +32,7 @@ relayhost = {{ RELAYHOST }}
 recipient_delimiter = {{ RECIPIENT_DELIMITER }}
 
 # Only the front server is allowed to perform xclient
-smtpd_authorized_xclient_hosts={{ FRONT_ADDRESS }}
+smtpd_authorized_xclient_hosts={{ FRONT_ADDRESS }} {{ POD_ADDRESS_RANGE }}
 
 ###############
 # TLS

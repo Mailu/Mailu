@@ -15,7 +15,7 @@ def start_podop():
     run_server(40, "postfix", "/tmp/podop.socket", [
 		("transport", "url", "http://admin/internal/postfix/transport/§"),
 		("alias", "url", "http://admin/internal/postfix/alias/§"),
-		("domains", "url", "http://admin/internal/postfix/domains/§"),
+		("domain", "url", "http://admin/internal/postfix/domain/§"),
         ("mailbox", "url", "http://admin/internal/postfix/mailbox/§"),
         ("spoofed", "url", "http://admin/internal/postfix/spoofed/§"),
     ])

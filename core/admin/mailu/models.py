@@ -268,7 +268,7 @@ class User(Base, Email):
 
     @property
     def destination(self):
-        if self.foward_enabled:
+        if self.forward_enabled:
             result = self.self.forward_destination
             if self.forward_keep:
                 result += ',' + self.email
@@ -339,13 +339,13 @@ class Alias(Base, Email):
     @classmethod
     def resolve(cls, localpart, domain_name):
         return cls.query.filter(
-            sqlalchemy._and(cls.domain_name == domain_name,
-                sqlalchemy._or(
+            sqlalchemy.and_(cls.domain_name == domain_name,
+                sqlalchemy.or_(
                     cls.localpart == localpart,
                     cls.wildcard.like(localpart)
                 )
             )
-        )
+        ).first()
 
 
 class Token(Base):

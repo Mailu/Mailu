@@ -1,7 +1,7 @@
-FROM alpine:edge
+FROM alpine:3.7
 
 RUN apk add --no-cache \
-     dovecot dovecot-pop3d dovecot-lmtpd dovecot-pigeonhole-plugin rspamd-client \
+     dovecot dovecot-pop3d dovecot-lmtpd dovecot-pigeonhole-plugin dovecot-fts-lucene rspamd-client \
      python3 py3-pip \
  && pip3 install jinja2 podop
 

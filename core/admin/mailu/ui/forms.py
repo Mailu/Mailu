@@ -6,6 +6,7 @@ import flask_login
 import flask_wtf
 import re
 
+LOCALPART_REGEX = "^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+$"
 
 class DestinationField(fields.SelectMultipleField):
     """ Allow for multiple emails selection from current user choices and
@@ -49,7 +50,7 @@ class DomainForm(flask_wtf.FlaskForm):
     max_quota_bytes = fields_.IntegerSliderField(_('Maximum user quota'), default=0)
     signup_enabled = fields.BooleanField(_('Enable sign-up'), default=False)
     comment = fields.StringField(_('Comment'))
-    submit = fields.SubmitField(_('Create'))
+    submit = fields.SubmitField(_('Save'))
 
 
 class DomainSignupForm(flask_wtf.FlaskForm):
@@ -63,18 +64,18 @@ class DomainSignupForm(flask_wtf.FlaskForm):
 
 class AlternativeForm(flask_wtf.FlaskForm):
     name = fields.StringField(_('Alternative name'), [validators.DataRequired()])
-    submit = fields.SubmitField(_('Create'))
+    submit = fields.SubmitField(_('Save'))
 
 
 class RelayForm(flask_wtf.FlaskForm):
     name = fields.StringField(_('Relayed domain name'), [validators.DataRequired()])
     smtp = fields.StringField(_('Remote host'))
     comment = fields.StringField(_('Comment'))
-    submit = fields.SubmitField(_('Create'))
+    submit = fields.SubmitField(_('Save'))
 
 
 class UserForm(flask_wtf.FlaskForm):
-    localpart = fields.StringField(_('E-mail'), [validators.DataRequired()])
+    localpart = fields.StringField(_('E-mail'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
     quota_bytes = fields_.IntegerSliderField(_('Quota'), default=1000000000)
@@ -86,7 +87,7 @@ class UserForm(flask_wtf.FlaskForm):
 
 
 class UserSignupForm(flask_wtf.FlaskForm):
-    localpart = fields.StringField(_('Email address'), [validators.DataRequired(), validators.Regexp("^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+$")])
+    localpart = fields.StringField(_('Email address'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
     captcha = flask_wtf.RecaptchaField()
@@ -129,7 +130,7 @@ class TokenForm(flask_wtf.FlaskForm):
     ip = fields.StringField(
         _('Authorized IP'), [validators.Optional(), validators.IPAddress()]
     )
-    submit = fields.SubmitField(_('Create'))
+    submit = fields.SubmitField(_('Save'))
 
 
 class AliasForm(flask_wtf.FlaskForm):
@@ -138,7 +139,7 @@ class AliasForm(flask_wtf.FlaskForm):
         _('Use SQL LIKE Syntax (e.g. for catch-all aliases)'))
     destination = DestinationField(_('Destination'))
     comment = fields.StringField(_('Comment'))
-    submit = fields.SubmitField(_('Create'))
+    submit = fields.SubmitField(_('Save'))
 
 
 class AdminForm(flask_wtf.FlaskForm):

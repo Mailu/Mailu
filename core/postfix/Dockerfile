@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine:3.7
 
 RUN apk add --no-cache postfix postfix-pcre rsyslog \
     python3 py3-pip \

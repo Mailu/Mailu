@@ -6,6 +6,7 @@ $config = array();
 $config['db_dsnw'] = 'sqlite:////data/roundcube.db';
 $config['temp_dir'] = '/tmp/';
 $config['des_key'] = getenv('SECRET_KEY');
+$config['cipher_method'] = 'AES-256-CBC';
 $config['identities_level'] = 3;
 $config['reply_all_mode'] = 1;
 
@@ -18,16 +19,19 @@ $config['plugins'] = array(
     'enigma'
 );
 
+$front = getenv('FRONT_ADDRESS') ? getenv('FRONT_ADDRESS') : 'front';
+$imap  = getenv('IMAP_ADDRESS')  ? getenv('IMAP_ADDRESS')  : 'imap';
+
 // Mail servers
-$config['default_host'] = getenv('FRONT_ADDRESS') || 'front';
+$config['default_host'] = $front;
 $config['default_port'] = 10143;
-$config['smtp_server'] = getenv('FRONT_ADDRESS') || 'front';
+$config['smtp_server'] = $front;
 $config['smtp_port'] = 10025;
 $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 
 // Sieve script management
-$config['managesieve_host'] = getenv('IMAP_ADDRESS') || 'imap';
+$config['managesieve_host'] = $imap;
 $config['managesieve_usetls'] = false;
 
 // We access the IMAP and SMTP servers locally with internal names, SSL

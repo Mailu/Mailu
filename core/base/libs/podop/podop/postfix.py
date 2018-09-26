@@ -58,6 +58,7 @@ class NetstringProtocol(asyncio.Protocol):
     def send_string(self, string):
         """ Send a netstring
         """
+        logging.debug("Replying {}".format(string))
         self.transport.write(str(len(string)).encode('ascii'))
         self.transport.write(b':')
         self.transport.write(string)
@@ -85,6 +86,7 @@ class SocketmapProtocol(NetstringProtocol):
     def string_received(self, string):
         # The postfix format contains a space for separating the map name and
         # the key
+        logging.debug("Received {}".format(string))
         space = string.find(0x20)
         if space != -1:
             name = string[:space].decode('ascii')

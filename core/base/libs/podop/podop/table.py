@@ -28,6 +28,10 @@ class UrlTable(object):
                     result = await request.json()
                     logging.debug("Table get {} is {}".format(key, result))
                     return result
+                elif request.status == 404:
+                    raise KeyError()
+                else:
+                    raise Exception(request.status)
 
     async def set(self, key, value, ns=None):
         """ Set a value for the given key in the provided namespace

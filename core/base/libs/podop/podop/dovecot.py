@@ -81,11 +81,10 @@ class DictProtocol(asyncio.Protocol):
         logging.debug("Looking up {}".format(key))
         # Priv and shared keys are handled slighlty differently
         key_type, key = key.decode("utf8").split("/", 1)
-        result = await self.dict.get(
-            key, ns=(self.user if key_type == "priv" else None)
-        )
-        # Handle various response types
-        if result is not None:
+        try:
+            result = await self.dict.get(
+                key, ns=(self.user if key_type == "priv" else None)
+            )
             if type(result) is str:
                 response = result.encode("utf8")
             elif type(result) is bytes:
@@ -93,7 +92,7 @@ class DictProtocol(asyncio.Protocol):
             else:
                 response = json.dumps(result).encode("ascii")
             return self.reply(b"O", response)
-        else:
+        except KeyError:
             return self.reply(b"N")
 
     def process_begin(self, transaction_id):

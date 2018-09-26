@@ -19,17 +19,20 @@ class UrlTable(object):
     async def get(self, key, ns=None):
         """ Get the given key in the provided namespace
         """
+        logging.debug("Table get {}".format(key))
         if ns is not None:
             key += "/" + ns
         async with aiohttp.ClientSession() as session:
             async with session.get(self.url_pattern.format(key)) as request:
                 if request.status == 200:
                     result = await request.json()
+                    logging.debug("Table get {} is {}".format(key, result))
                     return result
 
     async def set(self, key, value, ns=None):
         """ Set a value for the given key in the provided namespace
         """
+        logging.debug("Table set {} to {}".format(key, value))
         if ns is not None:
             key += "/" + ns
         async with aiohttp.ClientSession() as session:
@@ -38,6 +41,7 @@ class UrlTable(object):
     async def iter(self, cat):
         """ Iterate the given key (experimental)
         """
+        logging.debug("Table iter {}".format(cat))
         async with aiohttp.ClientSession() as session:
             async with session.get(self.url_pattern.format(cat)) as request:
                 if request.status == 200:

@@ -6,6 +6,7 @@ import flask
 import flask_login
 import base64
 import urllib
+import datetime
 
 
 @internal.route("/auth/email")
@@ -127,4 +128,31 @@ def dovecot_sieve_name(script, user_email):
 def dovecot_sieve_data(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     return flask.jsonify(flask.render_template("default.sieve", user=user))
+
+
+@internal.route("/fetch")
+def fetch_list():
+    return flask.jsonify([
+        {
+            "id": fetch.id,
+            "tls": fetch.tls,
+            "keep": fetch.keep,
+            "user_email": fetch.user_email,
+            "protocol": fetch.protocol,
+            "host": fetch.host,
+            "port": fetch.port,
+            "username": fetch.username,
+            "password": fetch.password
+        } for fetch in models.Fetch.query.all()
+    ])
+
+
+@internal.route("/fetch/<fetch_id>", methods=["POST"])
+def fetch_done(fetch_id):
+    fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
+    fetch.last_check = datetime.datetime.now()
+    fetch.error_message = str(flask.request.get_json())
+    db.session.add(fetch)
+    db.session.commit()
+    return ""
 

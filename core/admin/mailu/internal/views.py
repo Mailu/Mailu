@@ -76,7 +76,7 @@ def postfix_alias_map(alias):
     else:
         alias_obj = models.Alias.resolve(localpart, domain)
         if alias_obj:
-            return flask.jsonify(alias_obj.destination)
+            return flask.jsonify(",".join(alias_obj.destination))
         user_obj = models.User.query.get(email)
         if user_obj:
             return flask.jsonify(user_obj.destination)

@@ -118,11 +118,8 @@ def dovecot_quota(ns, user_email):
     return flask.jsonify(None)
 
 
-@internal.route("/dovecot/sieve/name/<script>/<user_email>")
+@internal.route("/dovecot/sieve/name/default/<user_email>")
 def dovecot_sieve(script, user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
-    if script == "default":
-        return flask.jsonify(flask.render_template("default.sieve", user=user))
-    else:
-        flask.abort(404)
+    return flask.jsonify(flask.render_template("default.sieve", user=user))
 

@@ -122,7 +122,7 @@ def dovecot_quota(ns, user_email):
 def dovecot_sieve(script, user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     if script == "default":
-        pass
+        return flask.jsonify(flask.render_template("default.sieve"))
     else:
         flask.abort(404)
 

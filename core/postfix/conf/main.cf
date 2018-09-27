@@ -62,8 +62,8 @@ virtual_mailbox_domains = ${podop}domain
 virtual_mailbox_maps = ${podop}mailbox
 
 # Mails are transported if required, then forwarded to Dovecot for delivery
-# relay_domains = ${podop}transport
-# transport_maps = ${podop}transport
+relay_domains = ${podop}transport
+transport_maps = ${podop}transport
 virtual_transport = lmtp:inet:{{ HOST_LMTP }}
 
 # In order to prevent Postfix from running DNS query, enforce the use of the

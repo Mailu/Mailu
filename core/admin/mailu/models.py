@@ -341,8 +341,13 @@ class Alias(Base, Email):
         return cls.query.filter(
             sqlalchemy.and_(cls.domain_name == domain_name,
                 sqlalchemy.or_(
-                    cls.localpart == localpart,
-                    cls.wildcard.like(localpart)
+                    sqlalchemy.and_(
+                        cls.wildcard == False,
+                        cls.localpart == localpart
+                    ), sqlalchemy.and_(
+                        cls.wildcard == True,
+                        sqlalchemy.bindparam("l", localpart).like(cls.localpart)
+                    )
                 )
             )
         ).first()

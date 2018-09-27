@@ -93,7 +93,7 @@ def postfix_transport(email):
     return flask.abort(404)
 
 
-@internal.route("/dovecot/auth/passdb/<user_email>")
+@internal.route("/dovecot/passdb/<user_email>")
 def dovecot_passdb_dict(user_email):
     user = models.User.query.get(user_email) or flask.abort(403)
     return flask.jsonify({
@@ -101,7 +101,7 @@ def dovecot_passdb_dict(user_email):
     })
 
 
-@internal.route("/dovecot/auth/userdb/<user_email>")
+@internal.route("/dovecot/userdb/<user_email>")
 def dovecot_userdb_dict(user_email):
     user = models.User.query.get(user_email) or flask.abort(403)
     return flask.jsonify({
@@ -109,10 +109,11 @@ def dovecot_userdb_dict(user_email):
     })
 
 
-@internal.route("/dovecot/quota/quota/<ns>/<user_email>", methods=["POST"])
+@internal.route("/dovecot/quota/<ns>/<user_email>", methods=["POST"])
 def dovecot_quota(ns, user_email):
     user = models.User.query.get(user_email) or flask.abort(403)
     if ns == "storage":
         user.quota_bytes_used = flask.request.get_json()
         db.session.commit()
     return flask.jsonify(None)
+

@@ -12,9 +12,9 @@ from podop import run_server
 def start_podop():
     os.setuid(8)
     run_server(40, "dovecot", "/tmp/podop.socket", [
-		("quota", "url", "http://admin/internal/dovecot/quota/§"),
-		("auth", "url", "http://admin/internal/dovecot/auth/§"),
-		("sieve", "url", "http://admin/internal/dovecot/sieve/§"),
+		("quota", "url", "http://admin/internal/dovecot/§"),
+		("auth", "url", "http://admin/internal/dovecot/§"),
+		("sieve", "url", "http://admin/internal/dovecot/§"),
     ])
 
 convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))

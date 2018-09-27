@@ -22,7 +22,7 @@ convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()
 # Actual startup script
 os.environ["FRONT_ADDRESS"] = socket.gethostbyname(os.environ.get("FRONT_ADDRESS", "front"))
 
-for dovecot_file in glob.glob("/conf/*"):
+for dovecot_file in glob.glob("/conf/*.conf"):
     convert(dovecot_file, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))
 
 # Run Podop, then postfix

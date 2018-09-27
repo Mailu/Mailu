@@ -125,9 +125,7 @@ class DictProtocol(asyncio.Protocol):
     def reply(self, command, *args):
         logging.debug("Replying {} with {}".format(command, args))
         self.transport.write(command)
-        self.transport.write(b"\t".join(
-            arg.replace(b"\t", b"\t\t") for arg in args
-        ))
+        self.transport.write(b"\t".join(map(tabescape, args)))
         self.transport.write(b"\n")
 
     @classmethod
@@ -143,3 +141,25 @@ class DictProtocol(asyncio.Protocol):
         ord("C"): process_commit,
         ord("S"): process_set
     }
+
+
+def tabescape(unescaped):
+    """ Escape a string using the specific Dovecot tabescape
+    See: https://github.com/dovecot/core/blob/master/src/lib/strescape.c
+    """
+    return unescaped.replace(b"\x01", b"\x011")\
+                    .replace(b"\x00", b"\x010")\
+                    .replace(b"\t",   b"\x01t")\
+                    .replace(b"\n",   b"\x01n")\
+                    .replace(b"\r",   b"\x01r")
+
+
+def tabunescape(escaped):
+    """ Unescape a string using the specific Dovecot tabescape
+    See: https://github.com/dovecot/core/blob/master/src/lib/strescape.c
+    """
+    return escaped.replace(b"\x01r", b"\r")\
+                  .replace(b"\x01n", b"\n")\
+                  .replace(b"\x01t", b"\t")\
+                  .replace(b"\x010", b"\x00")\
+                  .replace(b"\x011", b"\x01")

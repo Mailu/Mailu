@@ -50,4 +50,4 @@ services:
     image: mailu/docs:$VERSION
     build:
       context: ../
-      dockerfile: ../docs/Dockerfile
+      dockerfile: docs/Dockerfile

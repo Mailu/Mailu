@@ -12,7 +12,7 @@ from podop import run_server
 
 def start_podop():
     os.setuid(100)
-    run_server(40, "postfix", "/tmp/podop.socket", [
+    run_server(3 if "DEBUG" in os.environ else 1, "postfix", "/tmp/podop.socket", [
 		("transport", "url", "http://admin/internal/postfix/transport/§"),
 		("alias", "url", "http://admin/internal/postfix/alias/§"),
 		("domain", "url", "http://admin/internal/postfix/domain/§"),

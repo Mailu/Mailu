@@ -11,7 +11,7 @@ from podop import run_server
 
 def start_podop():
     os.setuid(8)
-    run_server(3 if "DEBUG" in os.environ else 1, "dovecot", "/tmp/podop.socket", [
+    run_server(3 if "DEBUG" in os.environ else 0, "dovecot", "/tmp/podop.socket", [
 		("quota", "url", "http://admin/internal/dovecot/§"),
 		("auth", "url", "http://admin/internal/dovecot/§"),
 		("sieve", "url", "http://admin/internal/dovecot/§"),

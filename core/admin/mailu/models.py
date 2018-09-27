@@ -249,6 +249,8 @@ class User(Base, Email):
     reply_enabled = db.Column(db.Boolean(), nullable=False, default=False)
     reply_subject = db.Column(db.String(255), nullable=True, default=None)
     reply_body = db.Column(db.Text(), nullable=True, default=None)
+    reply_startdate = db.Column(db.Date, nullable=False,
+        default=date(1900, 1, 1))
     reply_enddate = db.Column(db.Date, nullable=False,
         default=date(2999, 12, 31))
 

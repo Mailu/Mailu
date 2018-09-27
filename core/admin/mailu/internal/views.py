@@ -95,7 +95,7 @@ def postfix_transport(email):
 
 @internal.route("/dovecot/passdb/<user_email>")
 def dovecot_passdb_dict(user_email):
-    user = models.User.query.get(user_email) or flask.abort(403)
+    user = models.User.query.get(user_email) or flask.abort(404)
     return flask.jsonify({
         "password": user.password,
     })
@@ -103,7 +103,7 @@ def dovecot_passdb_dict(user_email):
 
 @internal.route("/dovecot/userdb/<user_email>")
 def dovecot_userdb_dict(user_email):
-    user = models.User.query.get(user_email) or flask.abort(403)
+    user = models.User.query.get(user_email) or flask.abort(404)
     return flask.jsonify({
         "quota_rule": "*:bytes={}".format(user.quota_bytes)
     })
@@ -111,9 +111,18 @@ def dovecot_userdb_dict(user_email):
 
 @internal.route("/dovecot/quota/<ns>/<user_email>", methods=["POST"])
 def dovecot_quota(ns, user_email):
-    user = models.User.query.get(user_email) or flask.abort(403)
+    user = models.User.query.get(user_email) or flask.abort(404)
     if ns == "storage":
         user.quota_bytes_used = flask.request.get_json()
         db.session.commit()
     return flask.jsonify(None)
+
+
+@internal.route("/dovecot/sieve/name/<script>/<user_email>")
+def dovecot_sieve(script, user_email):
+    user = models.User.query.get(user_email) or flask.abort(404)
+    if script == "default":
+        pass
+    else:
+        flask.abort(404)
 

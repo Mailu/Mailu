@@ -48,6 +48,4 @@ services:
 
   docs:
     image: mailu/docs:$VERSION
-    build:
-      context: ../
-      dockerfile: docs/Dockerfile
+    build: ../docs

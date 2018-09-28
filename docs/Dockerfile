@@ -1,13 +1,14 @@
 FROM python:3-alpine
 
-RUN apk add --no-cache git
+COPY requirements.txt /requirements.txt
 
-COPY docs/requirements.txt requirements.txt
 RUN pip install -r /requirements.txt \
- && mkdir /src
+ && apk add --no-cache nginx \
+ && mkdir /run/nginx
 
-WORKDIR /src
-COPY .git /src/.git
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY . /docs
 
-RUN sphinx-versioning build -b -B 1.5 -r 1.5 -w '^[0-9.]*$' -w master -W '^$' /src /build
+RUN sphinx-build /docs /build
 
+CMD nginx -g "daemon off;"

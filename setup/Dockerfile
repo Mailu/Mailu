@@ -15,4 +15,4 @@ RUN python setup.py https://github.com/mailu/mailu /data
 
 EXPOSE 80/tcp
 
-CMD gunicorn -w 4 -b 0.0.0.0:80 -b [::]:80 --access-logfile - --error-logfile - --preload main:app
+CMD gunicorn -w 4 -b :80 --access-logfile - --error-logfile - --preload main:app

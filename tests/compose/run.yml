@@ -16,15 +16,6 @@ services:
     - "$BIND_ADDRESS4:25:25"
     - "$BIND_ADDRESS4:465:465"
     - "$BIND_ADDRESS4:587:587"
-    - "$BIND_ADDRESS6:80:80"
-    - "$BIND_ADDRESS6:443:443"
-    - "$BIND_ADDRESS6:110:110"
-    - "$BIND_ADDRESS6:143:143"
-    - "$BIND_ADDRESS6:993:993"
-    - "$BIND_ADDRESS6:995:995"
-    - "$BIND_ADDRESS6:25:25"
-    - "$BIND_ADDRESS6:465:465"
-    - "$BIND_ADDRESS6:587:587"
     volumes:
       - "$ROOT/certs:/certs"
 

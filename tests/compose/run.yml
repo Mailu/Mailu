@@ -1,0 +1,108 @@
+version: '2'
+
+services:
+
+  front:
+    image: mailu/nginx:$VERSION
+    restart: no
+    env_file: $ENV_FILE
+    ports:
+    - "$BIND_ADDRESS4:80:80"
+    - "$BIND_ADDRESS4:443:443"
+    - "$BIND_ADDRESS4:110:110"
+    - "$BIND_ADDRESS4:143:143"
+    - "$BIND_ADDRESS4:993:993"
+    - "$BIND_ADDRESS4:995:995"
+    - "$BIND_ADDRESS4:25:25"
+    - "$BIND_ADDRESS4:465:465"
+    - "$BIND_ADDRESS4:587:587"
+    - "$BIND_ADDRESS6:80:80"
+    - "$BIND_ADDRESS6:443:443"
+    - "$BIND_ADDRESS6:110:110"
+    - "$BIND_ADDRESS6:143:143"
+    - "$BIND_ADDRESS6:993:993"
+    - "$BIND_ADDRESS6:995:995"
+    - "$BIND_ADDRESS6:25:25"
+    - "$BIND_ADDRESS6:465:465"
+    - "$BIND_ADDRESS6:587:587"
+    volumes:
+      - "$ROOT/certs:/certs"
+
+  redis:
+    image: redis:alpine
+    restart: no
+    volumes:
+      - "$ROOT/redis:/data"
+
+  imap:
+    image: mailu/dovecot:$VERSION
+    restart: no
+    env_file: $ENV_FILE
+    volumes:
+      - "$ROOT/data:/data"
+      - "$ROOT/mail:/mail"
+      - "$ROOT/overrides:/overrides"
+    depends_on:
+      - front
+
+  smtp:
+    image: mailu/postfix:$VERSION
+    restart: no
+    env_file: $ENV_FILE
+    volumes:
+      - "$ROOT/data:/data"
+      - "$ROOT/overrides:/overrides"
+    depends_on:
+      - front
+
+  antispam:
+    image: mailu/rspamd:$VERSION
+    restart: no
+    env_file: $ENV_FILE
+    volumes:
+      - "$ROOT/filter:/var/lib/rspamd"
+      - "$ROOT/dkim:/dkim"
+      - "$ROOT/overrides/rspamd:/etc/rspamd/override.d"
+    depends_on:
+      - front
+
+  antivirus:
+    image: mailu/$ANTIVIRUS:$VERSION
+    restart: no
+    env_file: $ENV_FILE
+    volumes:
+      - "$ROOT/filter:/data"
+
+  webdav:
+    image: mailu/$WEBDAV:$VERSION
+    restart: no
+    env_file: $ENV_FILE
+    volumes:
+      - "$ROOT/dav:/data"
+
+  admin:
+    image: mailu/admin:$VERSION
+    restart: no
+    env_file: $ENV_FILE
+    volumes:
+      - "$ROOT/data:/data"
+      - "$ROOT/dkim:/dkim"
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - redis
+
+  webmail:
+    image: "mailu/$WEBMAIL:$VERSION"
+    restart: no
+    env_file: $ENV_FILE
+    volumes:
+      - "$ROOT/webmail:/data"
+    depends_on:
+      - imap
+
+  fetchmail:
+    image: mailu/fetchmail:$VERSION
+    restart: no
+    env_file: $ENV_FILE
+    volumes:
+      - "$ROOT/data:/data"

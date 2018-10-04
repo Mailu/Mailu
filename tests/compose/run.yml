@@ -4,8 +4,8 @@ services:
 
   front:
     image: mailu/nginx:$VERSION
-    restart: no
-    env_file: $ENV_FILE
+    restart: 'no'
+    env_file: $PWD/.env
     ports:
     - "$BIND_ADDRESS4:80:80"
     - "$BIND_ADDRESS4:443:443"
@@ -30,14 +30,14 @@ services:
 
   redis:
     image: redis:alpine
-    restart: no
+    restart: 'no'
     volumes:
       - "$ROOT/redis:/data"
 
   imap:
     image: mailu/dovecot:$VERSION
-    restart: no
-    env_file: $ENV_FILE
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/mail:/mail"
@@ -47,8 +47,8 @@ services:
 
   smtp:
     image: mailu/postfix:$VERSION
-    restart: no
-    env_file: $ENV_FILE
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/overrides:/overrides"
@@ -57,8 +57,8 @@ services:
 
   antispam:
     image: mailu/rspamd:$VERSION
-    restart: no
-    env_file: $ENV_FILE
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
       - "$ROOT/filter:/var/lib/rspamd"
       - "$ROOT/dkim:/dkim"
@@ -68,22 +68,22 @@ services:
 
   antivirus:
     image: mailu/$ANTIVIRUS:$VERSION
-    restart: no
-    env_file: $ENV_FILE
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
       - "$ROOT/filter:/data"
 
   webdav:
     image: mailu/$WEBDAV:$VERSION
-    restart: no
-    env_file: $ENV_FILE
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
       - "$ROOT/dav:/data"
 
   admin:
     image: mailu/admin:$VERSION
-    restart: no
-    env_file: $ENV_FILE
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/dkim:/dkim"
@@ -93,8 +93,8 @@ services:
 
   webmail:
     image: "mailu/$WEBMAIL:$VERSION"
-    restart: no
-    env_file: $ENV_FILE
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
       - "$ROOT/webmail:/data"
     depends_on:
@@ -102,7 +102,7 @@ services:
 
   fetchmail:
     image: mailu/fetchmail:$VERSION
-    restart: no
-    env_file: $ENV_FILE
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
       - "$ROOT/data:/data"

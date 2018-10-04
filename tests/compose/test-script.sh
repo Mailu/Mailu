@@ -1,5 +1,5 @@
 #!/bin/bash
-for file in ../*.env ; do
+for file in tests/compose/*.env ; do
 	cp $file .env
-	docker-compose -f ../run.yml up -d
+	docker-compose -f tests/compose/run.yml up -d
 done

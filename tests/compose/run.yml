@@ -3,7 +3,7 @@ version: '2'
 services:
 
   front:
-    image: mailu/nginx:$VERSION
+    image: $DOCKER_ORG/nginx:$VERSION
     restart: 'no'
     env_file: $PWD/.env
     ports:
@@ -26,7 +26,7 @@ services:
       - "$ROOT/redis:/data"
 
   imap:
-    image: mailu/dovecot:$VERSION
+    image: $DOCKER_ORG/dovecot:$VERSION
     restart: 'no'
     env_file: $PWD/.env
     volumes:
@@ -37,7 +37,7 @@ services:
       - front
 
   smtp:
-    image: mailu/postfix:$VERSION
+    image: $DOCKER_ORG/postfix:$VERSION
     restart: 'no'
     env_file: $PWD/.env
     volumes:
@@ -47,7 +47,7 @@ services:
       - front
 
   antispam:
-    image: mailu/rspamd:$VERSION
+    image: $DOCKER_ORG/rspamd:$VERSION
     restart: 'no'
     env_file: $PWD/.env
     volumes:
@@ -58,21 +58,21 @@ services:
       - front
 
   antivirus:
-    image: mailu/$ANTIVIRUS:$VERSION
+    image: $DOCKER_ORG/$ANTIVIRUS:$VERSION
     restart: 'no'
     env_file: $PWD/.env
     volumes:
       - "$ROOT/filter:/data"
 
   webdav:
-    image: mailu/$WEBDAV:$VERSION
+    image: $DOCKER_ORG/$WEBDAV:$VERSION
     restart: 'no'
     env_file: $PWD/.env
     volumes:
       - "$ROOT/dav:/data"
 
   admin:
-    image: mailu/admin:$VERSION
+    image: $DOCKER_ORG/admin:$VERSION
     restart: 'no'
     env_file: $PWD/.env
     volumes:
@@ -83,7 +83,7 @@ services:
       - redis
 
   webmail:
-    image: "mailu/$WEBMAIL:$VERSION"
+    image: "$DOCKER_ORG/$WEBMAIL:$VERSION"
     restart: 'no'
     env_file: $PWD/.env
     volumes:
@@ -92,7 +92,7 @@ services:
       - imap
 
   fetchmail:
-    image: mailu/fetchmail:$VERSION
+    image: $DOCKER_ORG/fetchmail:$VERSION
     restart: 'no'
     env_file: $PWD/.env
     volumes:

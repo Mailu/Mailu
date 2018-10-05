@@ -8,7 +8,7 @@ containers=(
 	redis_1
 	antivirus_1
 	webdav_1
-#	fetchmail_1
+	fetchmail_1
 	front_1
 )
 
@@ -32,7 +32,7 @@ for file in tests/compose/*.env ; do
 	cp $file .env
 	docker-compose -f tests/compose/run.yml -p $DOCKER_ORG up -d
 	sleep 1m
-	docker ps
+	docker ps -a
 	container_logs
 	containers_check || exit 1
 done

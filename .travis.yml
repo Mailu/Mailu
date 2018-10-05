@@ -11,3 +11,7 @@ script:
   - docker-compose -f tests/build.yml -p Mailu build
   - tests/compose/test-script.sh
 
+deploy:
+  provider: script
+  script: bash tests/deploy.sh
+

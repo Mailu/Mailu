@@ -12,11 +12,6 @@ containers=(
 	front
 )
 
-# Default to mailu for DOCKER_ORG
-if [ -z "$DOCKER_ORG" ]; then
-	export DOCKER_ORG="mailu"
-fi
-
 # Verbose sleep, to prevent Travis to cancel the build
 # First argument is desired sleep time in minutes
 v_sleep() {

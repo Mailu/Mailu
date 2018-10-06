@@ -8,6 +8,8 @@ env:
   - VERSION=$TRAVIS_BRANCH
 
 script:
+  # Default to mailu for DOCKER_ORG
+  - if [ -z "$DOCKER_ORG" ]; then; export DOCKER_ORG="mailu"; fi
   - docker-compose -f tests/build.yml -p Mailu build
   - tests/compose/test-script.sh
 

@@ -1,0 +1,11 @@
+rules:
+  default: null
+  branches:
+    master:
+      protection:
+        required_status_checks:
+          strict: true
+          contexts:
+            - continuous-integration/travis-ci 
+        required_pull_request_reviews:
+          required_approving_review_count: 2

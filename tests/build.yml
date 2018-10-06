@@ -45,3 +45,7 @@ services:
   none:
     image: mailu/none:$VERSION
     build: ../core/none
+
+  docs:
+    image: mailu/docs:$VERSION
+    build: ../docs

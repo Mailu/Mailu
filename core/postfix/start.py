@@ -5,11 +5,12 @@ import os
 import socket
 import glob
 import shutil
+import tenacity
 from tenacity import retry
 
 convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 
-@retry(stop=stop_after_attempt(10), wait=wait_random(min=2, max=5))
+@retry(stop=tenacity.stop_after_attempt(10), wait=tenacity.wait_random(min=2, max=5))
 def resolve():
 	os.environ["FRONT_ADDRESS"] = socket.gethostbyname(os.environ.get("FRONT_ADDRESS", "front"))
 

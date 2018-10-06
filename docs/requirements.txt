@@ -3,3 +3,4 @@ Sphinx
 sphinx-autobuild
 sphinx-rtd-theme
 sphinxcontrib-versioning
+paramiko

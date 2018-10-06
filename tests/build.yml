@@ -49,3 +49,8 @@ services:
   docs:
     image: $DOCKER_ORG/docs:$VERSION
     build: ../docs
+
+  setup:
+    image: $DOCKER_ORG/setup:$VERSION
+    build: ../setup
+

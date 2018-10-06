@@ -12,6 +12,11 @@ containers=(
 	front_1
 )
 
+# Default to mailu for DOCKER_ORG
+if [ -z "$DOCKER_ORG" ]; then
+	export DOCKER_ORG="mailu"
+fi
+
 containers_check() {
 	STATUS=0
 	for container in "${containers[@]}"; do

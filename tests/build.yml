@@ -47,5 +47,5 @@ services:
     build: ../core/none
 
   docs:
-    image: mailu/docs:$VERSION
+    image: $DOCKER_ORG/docs:$VERSION
     build: ../docs

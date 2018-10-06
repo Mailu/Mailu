@@ -40,3 +40,15 @@ def postfix_transport(email):
     localpart, domain = email.split('@', 1) if '@' in email else (None, email)
     relay = models.Relay.query.get(domain) or flask.abort(404)
     return flask.jsonify("smtp:[{}]".format(relay.smtp))
+
+
+@internal.route("/postfix/sender/<sender>")
+def postfix_sender(sender):
+    """ Simply reject any sender that pretends to be from a local domain
+    """
+    localpart, domain_name = sender.split('@', 1) if '@' in sender else (None, sender)
+    domain = models.Domain.query.get(domain_name)
+    alternative = models.Alternative.query.get(domain_name)
+    if domain or alternative:
+        return flask.jsonify("REJECT")
+    return flask.abort(404)

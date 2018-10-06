@@ -87,6 +87,7 @@ smtpd_helo_required = yes
 
 smtpd_client_restrictions =
   permit_mynetworks,
+  check_sender_access ${podop}sender,
   reject_non_fqdn_sender,
   reject_unknown_sender_domain,
   reject_unknown_recipient_domain,

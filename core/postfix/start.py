@@ -17,6 +17,7 @@ def start_podop():
 		("alias", "url", "http://admin/internal/postfix/alias/§"),
 		("domain", "url", "http://admin/internal/postfix/domain/§"),
         ("mailbox", "url", "http://admin/internal/postfix/mailbox/§"),
+        ("sender", "url", "http://admin/internal/postfix/sender/§")
     ])
 
 convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))

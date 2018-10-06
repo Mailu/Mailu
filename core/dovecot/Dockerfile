@@ -4,7 +4,7 @@ RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/re
  && apk add --no-cache \
      dovecot dovecot-sqlite dovecot-pigeonhole-plugin dovecot-pigeonhole-plugin-extdata \
      dovecot-fts-lucene rspamd-client@testing python py-jinja2 py-pip \
- && pip install --upgrade pip
+ && pip install --upgrade pip \
  && pip install tenacity
 
 COPY conf /conf

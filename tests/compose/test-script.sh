@@ -17,8 +17,19 @@ if [ -z "$DOCKER_ORG" ]; then
 	export DOCKER_ORG="mailu"
 fi
 
+# Verbose sleep, to prevent Travis to cancel the build
+# First argument is desired sleep time in minutes
+v_sleep() {
+	COUNT=$1
+	until [ $COUNT -eq 0 ]; do
+		echo "Sleep for $COUNT more minutes"
+		sleep 1m
+		((COUNT--))
+	done;
+}
+
 containers_check() {
-	sleep 1m
+	v_sleep 1
 	STATUS=0
 	for container in "${containers[@]}"; do
 		echo "Checking ${DOCKER_ORG}_${container}"

@@ -33,12 +33,24 @@ container_logs() {
         done
 }
 
+clean() {
+	docker-compose -f tests/compose/run.yml -p $DOCKER_ORG down || exit 1
+	rm -fv .env
+}
+
+# Cleanup before callig exit
+die() {
+	clean
+	exit $1
+}
+
 for file in tests/compose/*.env ; do
 	cp $file .env
 	docker-compose -f tests/compose/run.yml -p $DOCKER_ORG up -d
 	sleep 1m
 	docker ps -a
 	container_logs
-	containers_check || exit 1
+	containers_check || die 1
+	clean
 done
 

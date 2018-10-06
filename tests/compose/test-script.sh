@@ -1,15 +1,15 @@
 #!/bin/bash
 containers=(
-	webmail_1
-	imap_1
-	smtp_1
-	antispam_1
-	admin_1
-	redis_1
-	antivirus_1
-	webdav_1
-	fetchmail_1
-	front_1
+	webmail
+	imap
+	smtp
+	antispam
+	admin
+	redis
+	antivirus
+	webdav
+	fetchmail
+	front
 )
 
 # Default to mailu for DOCKER_ORG
@@ -29,20 +29,21 @@ v_sleep() {
 }
 
 containers_check() {
-	v_sleep 1
-	STATUS=0
+	status=0
 	for container in "${containers[@]}"; do
-		echo "Checking ${DOCKER_ORG}_${container}"
-		docker inspect "${DOCKER_ORG}_${container}" | grep '"Status": "running"' || STATUS=1
+		name="${DOCKER_ORG}_${container}_1"
+		echo "Checking $name"
+		docker inspect "$name" | grep '"Status": "running"' || status=1
 	done
 	docker ps -a
-	return $STATUS
+	return $status
 }
 
 container_logs() {
 	for container in "${containers[@]}"; do
-                echo "Showing logs for ${DOCKER_ORG}_${container}"
-                docker container logs "${DOCKER_ORG}_${container}"
+		name="${DOCKER_ORG}_${container}_1"
+                echo "Showing logs for $name"
+                docker container logs "$name"
         done
 }
 
@@ -60,6 +61,7 @@ die() {
 for file in tests/compose/*.env ; do
 	cp $file .env
 	docker-compose -f tests/compose/run.yml -p $DOCKER_ORG up -d
+	v_sleep 1
 	container_logs
 	containers_check || die 1
 	clean

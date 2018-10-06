@@ -2,6 +2,8 @@
 # General
 ###############
 
+debug_peer_list = 0.0.0.0/0
+
 # Main domain and hostname
 mydomain = {{ DOMAIN }}
 myhostname = {{ HOSTNAMES.split(",")[0] }}
@@ -85,7 +87,6 @@ smtpd_helo_required = yes
 
 smtpd_client_restrictions =
   permit_mynetworks,
-  reject_unauth_destination,
   reject_non_fqdn_sender,
   reject_unknown_sender_domain,
   reject_unknown_recipient_domain,
@@ -95,7 +96,7 @@ smtpd_client_restrictions =
 smtpd_relay_restrictions =
   permit_mynetworks,
   permit_sasl_authenticated,
-  reject
+  reject_unauth_destination
 
 unverified_recipient_reject_reason = Address lookup failure
 

@@ -18,11 +18,13 @@ if [ -z "$DOCKER_ORG" ]; then
 fi
 
 containers_check() {
+	sleep 1m
 	STATUS=0
 	for container in "${containers[@]}"; do
 		echo "Checking ${DOCKER_ORG}_${container}"
 		docker inspect "${DOCKER_ORG}_${container}" | grep '"Status": "running"' || STATUS=1
 	done
+	docker ps -a
 	return $STATUS
 }
 
@@ -47,8 +49,6 @@ die() {
 for file in tests/compose/*.env ; do
 	cp $file .env
 	docker-compose -f tests/compose/run.yml -p $DOCKER_ORG up -d
-	sleep 1m
-	docker ps -a
 	container_logs
 	containers_check || die 1
 	clean

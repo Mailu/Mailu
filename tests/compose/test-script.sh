@@ -61,6 +61,7 @@ die() {
 for file in tests/compose/*.env ; do
 	cp $file .env
 	docker-compose -f tests/compose/run.yml -p $DOCKER_ORG up -d
+	echo "\n" # Clean terminal distortion from docker-compose in travis
 	v_sleep 1
 	container_logs
 	containers_check || die 1

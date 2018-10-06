@@ -16,4 +16,5 @@ deploy:
   script: bash tests/deploy.sh
   on:
     all_branches: true
+    condition: -z $DOCKER_UN
 

@@ -8,7 +8,7 @@ containers=(
 	redis
 	antivirus
 	webdav
-	fetchmail
+#	fetchmail
 	front
 )
 

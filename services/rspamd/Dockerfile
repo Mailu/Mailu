@@ -9,4 +9,6 @@ COPY start.py /start.py
 
 EXPOSE 11332/tcp 11334/tcp
 
+VOLUME ["/var/lib/rspamd"]
+
 CMD /start.py

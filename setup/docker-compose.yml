@@ -1,0 +1,13 @@
+# This file is used to run the mailu/setup utility
+
+version: '2'
+
+services:
+  redis:
+    image: redis:alpine
+
+  setup:
+    image: mailu/setup
+    ports:
+      - "80:80"
+

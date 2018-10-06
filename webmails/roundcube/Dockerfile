@@ -1,11 +1,8 @@
-FROM php:7.0-apache
+FROM php:7.2-apache
 
 RUN apt-get update && apt-get install -y \
-      libfreetype6-dev \
-      libjpeg62-turbo-dev \
-      libmcrypt-dev \
-      libpng-dev \
- && docker-php-ext-install pdo_mysql mcrypt zip
+      zlib1g-dev \
+ && docker-php-ext-install zip
 
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.3.7/roundcubemail-1.3.7-complete.tar.gz
 
@@ -27,5 +24,8 @@ COPY php.ini /usr/local/etc/php/conf.d/roundcube.ini
 COPY config.inc.php /var/www/html/config/
 
 COPY start.sh /start.sh
+
+EXPOSE 80/tcp
+VOLUME ["/data"]
 
 CMD ["/start.sh"]

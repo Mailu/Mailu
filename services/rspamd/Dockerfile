@@ -1,6 +1,8 @@
 FROM alpine:edge
 
-RUN apk add --no-cache python py-jinja2 rspamd rspamd-controller rspamd-proxy ca-certificates
+RUN apk add --no-cache python py-jinja2 rspamd rspamd-controller rspamd-proxy ca-certificates py-pip \
+ && pip install --upgrade pip \
+ && pip install tenacity
 
 RUN mkdir /run/rspamd
 

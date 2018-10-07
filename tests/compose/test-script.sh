@@ -12,16 +12,8 @@ containers=(
 	front
 )
 
-# Verbose sleep, to prevent Travis to cancel the build
-# First argument is desired sleep time in minutes
-v_sleep() {
-	COUNT=$1
-	until [ $COUNT -eq 0 ]; do
-		echo "Sleep for $COUNT more minutes"
-		sleep 1m
-		((COUNT--))
-	done;
-}
+# Time to sleep in minutes after starting the containers
+WAIT=1
 
 containers_check() {
 	status=0
@@ -56,8 +48,8 @@ die() {
 for file in tests/compose/*.env ; do
 	cp $file .env
 	docker-compose -f tests/compose/run.yml -p $DOCKER_ORG up -d
-	echo "\n" # Clean terminal distortion from docker-compose in travis
-	v_sleep 1
+	echo -e "\nSleeping for ${WAIT} minutes" # Clean terminal distortion from docker-compose in travis
+	travis_wait sleep ${WAIT}m || sleep ${WAIT}m #Fallback sleep for local run
 	container_logs
 	containers_check || die 1
 	clean

@@ -269,7 +269,8 @@ class User(Base, Email):
     def quota_bytes_used(self):
         return quota.get(self.email + "/quota/storage") or 0
 
-    scheme_dict = {'SHA512-CRYPT': "sha512_crypt",
+    scheme_dict = {'PBKDF2': "pbkdf2_sha512",
+                   'SHA512-CRYPT': "sha512_crypt",
                    'SHA256-CRYPT': "sha256_crypt",
                    'MD5-CRYPT': "md5_crypt",
                    'CRYPT': "des_crypt"}

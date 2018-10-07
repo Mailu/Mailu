@@ -221,6 +221,28 @@ class Email(object):
             msg['To'] = to_address
             smtp.sendmail(from_address, [to_address], msg.as_string())
 
+    @classmethod
+    def resolve_domain(cls, email):
+        localpart, domain_name = email.split('@', 1) if '@' in email else (None, email)
+        alternative = models.Alternative.query.get(domain_name)
+        if alternative:
+            domain_name = alternative.domain_name
+        return (localpart, domain_name)
+
+    @classmethod
+    def resolve_destination(cls, localpart, domain_name, ignore_forward_keep=False):
+        alias = models.Alias.resolve(localpart, domain_name)
+        if alias:
+            return alias.destination
+        user = models.User.query.get('{}@{}'.format(localpart, domain_name))
+        if user:
+            if user.forward_enabled:
+                destination = user.forward_destination
+                if user.forward_keep or ignore_forward_keep:
+                    destination.append(user.email)
+            else:
+                destination = [user.email]
+            return destination
 
     def __str__(self):
         return self.email
@@ -245,7 +267,7 @@ class User(Base, Email):
 
     # Filters
     forward_enabled = db.Column(db.Boolean(), nullable=False, default=False)
-    forward_destination = db.Column(db.String(255), nullable=True, default=None)
+    forward_destination = db.Column(CommaSeparatedList(), nullable=True, default=None)
     forward_keep = db.Column(db.Boolean(), nullable=False, default=True)
     reply_enabled = db.Column(db.Boolean(), nullable=False, default=False)
     reply_subject = db.Column(db.String(255), nullable=True, default=None)
@@ -265,16 +287,6 @@ class User(Base, Email):
 
     def get_id(self):
         return self.email
-
-    @property
-    def destination(self):
-        if self.forward_enabled:
-            result = self.self.forward_destination
-            if self.forward_keep:
-                result += ',' + self.email
-            return result
-        else:
-            return self.email
 
     scheme_dict = {'SHA512-CRYPT': "sha512_crypt",
                    'SHA256-CRYPT': "sha256_crypt",

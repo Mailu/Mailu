@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+
+  front:
+    image: mailu/nginx:$VERSION
+    build: ../core/nginx
+
+  imap:
+    image: mailu/dovecot:$VERSION
+    build: ../core/dovecot
+
+  smtp:
+    image: mailu/postfix:$VERSION
+    build: ../core/postfix
+
+  antispam:
+    image: mailu/rspamd:$VERSION
+    build: ../services/rspamd
+
+  antivirus:
+    image: mailu/clamav:$VERSION
+    build: ../optional/clamav
+
+  webdav:
+    image: mailu/radicale:$VERSION
+    build: ../optional/radicale
+
+  admin:
+    image: mailu/admin:$VERSION
+    build: ../core/admin
+
+  roundcube:
+    image: mailu/roundcube:$VERSION
+    build: ../webmails/roundcube
+
+  rainloop:
+    image: mailu/rainloop:$VERSION
+    build: ../webmails/rainloop
+
+  fetchmail:
+    image: mailu/fetchmail:$VERSION
+    build: ../services/fetchmail
+
+  none:
+    image: mailu/none:$VERSION
+    build: ../core/none
+
+  docs:
+    image: mailu/docs:$VERSION
+    build: ../docs

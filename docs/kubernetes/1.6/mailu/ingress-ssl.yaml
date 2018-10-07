@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: mailu-ssl-ingress
+  namespace: mailu-mailserver
+  annotations:
+    kubernetes.io/ingress.class: tectonic
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    ingress.kubernetes.io/ssl-redirect: "true"
+    # Replace letsencrypt-prod with the name of the certificate issuer
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    #ingress.kubernetes.io/rewrite-target: "/"
+    #ingress.kubernetes.io/app-root: "/ui"
+    #ingress.kubernetes.io/follow-redirects: "true"
+  labels:
+    app: mailu
+    role: mail
+    tier: backend
+spec:
+  tls:
+  - hosts:
+    - "mail.example.com"
+    secretName: letsencrypt-certs-all # If unsure how to generate these, check out https://github.com/ployst/docker-letsencrypt
+  rules:
+  - host: "mail.example.com"
+    http:
+      paths:
+      - path: "/"
+        backend:
+          serviceName: front
+          servicePort: 80

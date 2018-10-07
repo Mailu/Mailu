@@ -64,7 +64,7 @@ virtual_mailbox_maps = socketmap:unix:/tmp/podop.socket:alias
 In order to simplify the configuration, you can setup a shortcut.
 
 ```
-podop = socketmap:unic:/tmp/podop.socket
+podop = socketmap:unix:/tmp/podop.socket
 virtual_alias_maps = ${podop}:alias
 virtual_mailbox_domains = ${podop}:domain
 virtual_mailbox_maps = ${podop}:alias

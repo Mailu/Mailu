@@ -80,14 +80,14 @@ lmtp_host_lookup = native
 smtpd_delay_reject = yes
 
 # Allowed senders are: the user or one of the alias destinations
-smtpd_sender_login_maps = $virtual_alias_maps
+smtpd_sender_login_maps = ${podop}senderlogin
 
 # Restrictions for incoming SMTP, other restrictions are applied in master.cf
 smtpd_helo_required = yes
 
 smtpd_client_restrictions =
   permit_mynetworks,
-  check_sender_access ${podop}sender,
+  check_sender_access ${podop}senderaccess,
   reject_non_fqdn_sender,
   reject_unknown_sender_domain,
   reject_unknown_recipient_domain,

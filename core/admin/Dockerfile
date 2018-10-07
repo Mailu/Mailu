@@ -17,5 +17,6 @@ COPY start.sh /start.sh
 RUN pybabel compile -d mailu/translations
 
 EXPOSE 80/tcp
+VOLUME ["/data"]
 
 CMD ["/start.sh"]

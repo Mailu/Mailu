@@ -6,5 +6,6 @@ COPY conf /etc/clamav
 COPY start.sh /start.sh
 
 EXPOSE 3310/tcp
+VOLUME ["/data"]
 
 CMD ["/start.sh"]

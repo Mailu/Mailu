@@ -12,4 +12,6 @@ RUN sed -i '/fuzzy/,$d' /etc/rspamd/rspamd.conf
 
 EXPOSE 11332/tcp 11334/tcp
 
+VOLUME ["/var/lib/rspamd"]
+
 CMD /start.py

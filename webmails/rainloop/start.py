@@ -18,7 +18,7 @@ os.makedirs(base + "configs", exist_ok=True)
 convert("/default.ini", "/data/_data_/_default_/domains/default.ini")
 convert("/config.ini", "/data/_data_/_default_/configs/config.ini")
 
-os.execv("/usr/local/bin/apache2-foreground", ["apache2-foreground"])
-
 os.system("chown -R www-data:www-data /data")
+
+os.execv("/usr/local/bin/apache2-foreground", ["apache2-foreground"])
 

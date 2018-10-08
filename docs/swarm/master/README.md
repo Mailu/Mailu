@@ -57,8 +57,11 @@ core@coreos-01 ~ $ sudo umount /mnt/local/
 
 
 ### Networking mode
-On a swarm, the services are available (default mode) through a routing mesh managed by docker itself. With this mode, each service is given a virtual IP adress and docker manages the routing between this virtual IP and the container(s) providing this service. 
+On this example, we are using:
+- the mesh routing mode (default mode). With this mode, each service is given a virtual IP adress and docker manages the routing between this virtual IP and the container(s) providing this service. 
+- the default ingress mode.
 
+## Allow authentification with the mesh routing
 In order to allow every (front & webmail) container to access the other services, we will use the variable POD_ADDRESS_RANGE.
 
 Let's create the mailu_default network:
@@ -68,8 +71,22 @@ core@coreos-01 ~ $ docker network inspect mailu_default | grep Subnet
                     "Subnet": "10.0.1.0/24",
 ```
 In the docker-compose.yml file, we will then use POD_ADDRESS_RANGE = 10.0.1.0/24 
+In fact, imap & smtp logs doesn't show the IPs from the front(s) container(s), but the IP of  "mailu_default-endpoint". So it is sufficient to set POD_ADDRESS_RANGE to this specific ip (which can be found by inspecting mailu_default network). The issue is that this endpoint is created while the stack is created, I did'nt figure a way to determine this IP before the stack creation...
 
-Nota: on my setup, imap & smtp logs doesn't show the IPs from the front(s) container(s), but the IP of  "mailu_default-endpoint". So it might be sufficient to set POD_ADDRESS_RANGE to this specific ip (which can be found by inspecting mailu_default network)
+## Limitation with the ingress mode
+With the default ingress mode, the front(s) container(s) will see origin IP(s) all being 10.255.0.x (which is the ingress-endpoint, can be found by inspecting the ingress network)
+
+This issue is known and discussed here:
+
+https://github.com/moby/moby/issues/25526
+
+A workaround (using network host mode and global deployment) is discussed here:
+
+https://github.com/moby/moby/issues/25526#issuecomment-336363408 
+
+## Don't create an open relay !
+As a side effect of this ingress mode "feature", make sure that the ingress subnet is not in your RELAYHOST, otherwise you would create an smtp open relay :-(
+
 
 ### Scalability
 - smtp and imap are scalable

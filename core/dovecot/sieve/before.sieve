@@ -34,6 +34,7 @@ if exists "X-Virus" {
 }
 
 if allof (string :is "${extdata.reply_enabled}" "1",
+          currentdate :value "ge" "date" "${extdata.reply_startdate}",
           currentdate :value "le" "date" "${extdata.reply_enddate}")
 {
   vacation :days 1 :subject "${extdata.reply_subject}" "${extdata.reply_body}";

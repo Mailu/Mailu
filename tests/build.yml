@@ -6,6 +6,10 @@ services:
     image: $DOCKER_ORG/nginx:$VERSION
     build: ../core/nginx
 
+  unbound:
+    image: $DOCKER_ORG/unbound:$VERSION
+    build: ../core/unbound
+
   imap:
     image: $DOCKER_ORG/dovecot:$VERSION
     build: ../core/dovecot

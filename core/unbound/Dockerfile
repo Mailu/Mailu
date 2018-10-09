@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.8
 
 RUN apk add --no-cache unbound curl \
 	&& curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache \

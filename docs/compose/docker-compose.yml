@@ -1,4 +1,4 @@
-version: '2.1'
+version: '2'
 
 services:
 
@@ -30,20 +30,14 @@ services:
     depends_on:
       - unbound
     dns:
-      - ${IPV4_NETWORK:-172.22.1}.254
-    networks:
-      backend:
-        aliases:
-          - front
+      - 10.177.20.254
 
   unbound:
     image: mailu/unbound:$VERSION
     restart: always
     networks:
-      backend:
-        ipv4_address: ${IPV4_NETWORK:-172.22.1}.254
-        aliases:
-          - unbound
+      default:
+        ipv4_address: 10.177.20.254
 
   redis:
     image: redis:alpine
@@ -51,13 +45,9 @@ services:
     volumes:
       - "$ROOT/redis:/data"
     dns:
-      - ${IPV4_NETWORK:-172.22.1}.254
+      - 10.177.20.254
     depends_on:
       - unbound
-    networks:
-      backend:
-        aliases:
-          - redis
 
   imap:
     image: mailu/dovecot:$VERSION
@@ -71,11 +61,7 @@ services:
       - front
       - unbound
     dns:
-      - ${IPV4_NETWORK:-172.22.1}.254
-    networks:
-      backend:
-        aliases:
-          - imap
+      - 10.177.20.254
 
   smtp:
     image: mailu/postfix:$VERSION
@@ -88,11 +74,7 @@ services:
       - front
       - unbound
     dns:
-      - ${IPV4_NETWORK:-172.22.1}.254
-    networks:
-      backend:
-        aliases:
-          - smtp
+      - 10.177.20.254
 
   antispam:
     image: mailu/rspamd:$VERSION
@@ -106,11 +88,7 @@ services:
       - front
       - unbound
     dns:
-      - ${IPV4_NETWORK:-172.22.1}.254
-    networks:
-      backend:
-        aliases:
-          - antispam
+      - 10.177.20.254
 
   antivirus:
     image: mailu/$ANTIVIRUS:$VERSION
@@ -121,11 +99,7 @@ services:
     depends_on:
       - unbound
     dns:
-      - ${IPV4_NETWORK:-172.22.1}.254
-    networks:
-      backend:
-        aliases:
-          - antivirus
+      - 10.177.20.254
 
   webdav:
     image: mailu/$WEBDAV:$VERSION
@@ -136,11 +110,7 @@ services:
     depends_on:
       - unbound
     dns:
-      - ${IPV4_NETWORK:-172.22.1}.254
-    networks:
-      backend:
-        aliases:
-          - webdav
+      - 10.177.20.254
 
   admin:
     image: mailu/admin:$VERSION
@@ -154,11 +124,7 @@ services:
       - redis
       - unbound
     dns:
-      - ${IPV4_NETWORK:-172.22.1}.254
-    networks:
-      backend:
-        aliases:
-          - admin
+      - 10.177.20.254
 
   webmail:
     image: "mailu/$WEBMAIL:$VERSION"
@@ -170,11 +136,7 @@ services:
       - imap
       - unbound
     dns:
-      - ${IPV4_NETWORK:-172.22.1}.254
-    networks:
-      backend:
-        aliases:
-          - webmail
+      - 10.177.20.254
 
   fetchmail:
     image: mailu/fetchmail:$VERSION
@@ -185,16 +147,12 @@ services:
     depends_on:
       - unbound
     dns:
-      - ${IPV4_NETWORK:-172.22.1}.254
-    networks:
-      backend:
-        aliases:
-          - fetchmail
+      - 10.177.20.254
 
 networks:
-  backend:
+  default:
     driver: bridge
     ipam:
       driver: default
       config:
-        - subnet: ${IPV4_NETWORK:-172.22.1}.0/24
+        - subnet: 10.177.20.0/24

@@ -4,7 +4,6 @@ from mailu.internal import internal, nginx
 import flask
 import flask_login
 import base64
-import urllib
 
 
 @internal.route("/auth/email")

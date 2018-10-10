@@ -25,4 +25,7 @@ COPY config.inc.php /var/www/html/config/
 
 COPY start.sh /start.sh
 
+EXPOSE 80/tcp
+VOLUME ["/data"]
+
 CMD ["/start.sh"]

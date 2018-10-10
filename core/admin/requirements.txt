@@ -17,3 +17,4 @@ tabulate
 PyYAML
 PyOpenSSL
 dnspython
+bcrypt

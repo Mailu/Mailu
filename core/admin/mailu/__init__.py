@@ -57,7 +57,7 @@ default_config = {
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
     # Advanced settings
-    'PASSWORD_SCHEME': 'SHA512-CRYPT',
+    'PASSWORD_SCHEME': 'BLF-CRYPT',
     # Host settings
     'HOST_IMAP': 'imap',
     'HOST_POP3': 'imap',

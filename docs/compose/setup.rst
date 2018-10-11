@@ -48,7 +48,7 @@ values:
   emails (IMAP and SMTP), not HTTP (use it behind reverse proxies);
 - ``mail-letsencrypt`` is similar to ``letsencrypt`` except that TLS will only be served for
   emails (IMAP and SMTP), not HTTP (use it behind reverse proxies);
-- ``notls`` will disable TLS, this is not recommended except for testing
+- ``notls`` will disable TLS, this is not recommended except for testing.
 
 .. note::
 

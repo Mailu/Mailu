@@ -11,7 +11,6 @@ import os
 import docker
 import socket
 import uuid
-import redis
 
 from werkzeug.contrib import fixers
 
@@ -88,9 +87,6 @@ manager.add_command('db', flask_migrate.MigrateCommand)
 # Babel configuration
 babel = flask_babel.Babel(app)
 translations = list(map(str, babel.list_translations()))
-
-# Quota manager
-quota = redis.Redis.from_url(app.config.get("QUOTA_STORAGE_URL"))
 
 @babel.localeselector
 def get_locale():

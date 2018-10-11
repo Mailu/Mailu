@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.8
 
 RUN apk add --no-cache clamav rsyslog wget clamav-libunrar
 

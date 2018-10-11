@@ -39,7 +39,6 @@ services:
     restart: always
     env_file: .env
     volumes:
-      - "$ROOT/data:/data"
       - "$ROOT/mail:/mail"
       - "$ROOT/overrides:/overrides"
     depends_on:
@@ -50,7 +49,6 @@ services:
     restart: always
     env_file: .env
     volumes:
-      - "$ROOT/data:/data"
       - "$ROOT/overrides:/overrides"
     depends_on:
       - front
@@ -104,5 +102,3 @@ services:
     image: mailu/fetchmail:$VERSION
     restart: always
     env_file: .env
-    volumes:
-      - "$ROOT/data:/data"

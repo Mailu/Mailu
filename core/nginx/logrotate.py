@@ -7,7 +7,7 @@ import subprocess
 
 command = [
     "logrotate"
-    "/etc/logrotate"
+    "/conf/logrotate.conf"
 ]
 
 # Run logrotate every day

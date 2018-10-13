@@ -27,6 +27,7 @@ services:
     - "$BIND_ADDRESS6:587:587"
     volumes:
       - "$ROOT/certs:/certs"
+      - "$ROOT/log:/var/log/nginx"
 
   redis:
     image: redis:alpine

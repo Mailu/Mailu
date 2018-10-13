@@ -6,7 +6,7 @@ import subprocess
 
 
 command = [
-    "logrotate"
+    "logrotate",
     "/conf/logrotate.conf"
 ]
 

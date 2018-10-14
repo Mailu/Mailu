@@ -12,7 +12,5 @@ command = [
 
 # Run logrotate every day
 while True:
-#    time.sleep(86400)
-# Test value
-    time.sleep(60)
+    time.sleep(86400)
     subprocess.call(command)

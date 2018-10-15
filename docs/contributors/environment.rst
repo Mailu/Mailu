@@ -89,3 +89,20 @@ Any change to the files will automatically restart the Web server and reload the
 
 When using the development environment, a debugging toolbar is displayed on the right side
 of the screen, that you can open to access query details, internal variables, etc.
+
+Documentation
+-------------
+
+Documentation is maintained in the ``docs`` directory and are maintained as `reStructuredText`_ files. It is possible to run a local documentation server for reviewing purposes, using Docker:
+
+.. code-block:: bash
+
+  cd <Mailu repo>
+  docker build -t docs docs
+  docker run -p 127.0.0.1:8080:80 docs
+
+You can now read the local documentation by navigating to http://localhost:8080.
+
+.. note:: After modifying the documentation, the image needs to be rebuild and the container restarted for the changes to become visible.
+
+.. _`reStructuredText`: http://docutils.sourceforge.net/rst.html

@@ -1,5 +1,0 @@
-dbpath = /data/main.db
-query =
-  SELECT name FROM domain WHERE name='%s'
-  UNION
-  SELECT name FROM alternative WHERE name='%s'

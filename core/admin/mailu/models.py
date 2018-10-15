@@ -1,11 +1,11 @@
-from mailu import app, db, dkim, login_manager, quota
+from mailu import app, db, dkim, login_manager
 
 from sqlalchemy.ext import declarative
 from passlib import context, hash
 from datetime import datetime, date
 from email.mime import text
 
-
+import sqlalchemy
 import re
 import time
 import os
@@ -235,6 +235,7 @@ class User(Base, Email):
         backref=db.backref('users', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
     quota_bytes = db.Column(db.Integer(), nullable=False, default=10**9)
+    quota_bytes_used = db.Column(db.Integer(), nullable=False, default=0)
     global_admin = db.Column(db.Boolean(), nullable=False, default=False)
     enabled = db.Column(db.Boolean(), nullable=False, default=True)
 
@@ -268,8 +269,23 @@ class User(Base, Email):
         return self.email
 
     @property
-    def quota_bytes_used(self):
-        return quota.get(self.email + "/quota/storage") or 0
+    def destination(self):
+        if self.forward_enabled:
+            result = self.self.forward_destination
+            if self.forward_keep:
+                result += ',' + self.email
+            return result
+        else:
+            return self.email
+
+    @property
+    def reply_active(self):
+        now = datetime.datetime.now()
+        return (
+            self.reply_enabled and
+            self.reply_startdate < now and
+            self.reply_enddate > now
+        )
 
     scheme_dict = {'SHA512-CRYPT': "sha512_crypt",
                    'SHA256-CRYPT': "sha256_crypt",
@@ -330,6 +346,22 @@ class Alias(Base, Email):
         backref=db.backref('aliases', cascade='all, delete-orphan'))
     wildcard = db.Column(db.Boolean(), nullable=False, default=False)
     destination = db.Column(CommaSeparatedList, nullable=False, default=[])
+
+    @classmethod
+    def resolve(cls, localpart, domain_name):
+        return cls.query.filter(
+            sqlalchemy.and_(cls.domain_name == domain_name,
+                sqlalchemy.or_(
+                    sqlalchemy.and_(
+                        cls.wildcard == False,
+                        cls.localpart == localpart
+                    ), sqlalchemy.and_(
+                        cls.wildcard == True,
+                        sqlalchemy.bindparam("l", localpart).like(cls.localpart)
+                    )
+                )
+            )
+        ).first()
 
 
 class Token(Base):

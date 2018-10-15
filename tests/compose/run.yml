@@ -3,9 +3,9 @@ version: '2'
 services:
 
   front:
-    image: mailu/nginx:$VERSION
-    restart: always
-    env_file: .env
+    image: $DOCKER_ORG/nginx:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
     ports:
     - "$BIND_ADDRESS4:80:80"
     - "$BIND_ADDRESS4:443:443"
@@ -16,47 +16,40 @@ services:
     - "$BIND_ADDRESS4:25:25"
     - "$BIND_ADDRESS4:465:465"
     - "$BIND_ADDRESS4:587:587"
-    - "$BIND_ADDRESS6:80:80"
-    - "$BIND_ADDRESS6:443:443"
-    - "$BIND_ADDRESS6:110:110"
-    - "$BIND_ADDRESS6:143:143"
-    - "$BIND_ADDRESS6:993:993"
-    - "$BIND_ADDRESS6:995:995"
-    - "$BIND_ADDRESS6:25:25"
-    - "$BIND_ADDRESS6:465:465"
-    - "$BIND_ADDRESS6:587:587"
     volumes:
       - "$ROOT/certs:/certs"
 
   redis:
     image: redis:alpine
-    restart: always
+    restart: 'no'
     volumes:
       - "$ROOT/redis:/data"
 
   imap:
-    image: mailu/dovecot:$VERSION
-    restart: always
-    env_file: .env
+    image: $DOCKER_ORG/dovecot:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
+      - "$ROOT/data:/data"
       - "$ROOT/mail:/mail"
       - "$ROOT/overrides:/overrides"
     depends_on:
       - front
 
   smtp:
-    image: mailu/postfix:$VERSION
-    restart: always
-    env_file: .env
+    image: $DOCKER_ORG/postfix:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
+      - "$ROOT/data:/data"
       - "$ROOT/overrides:/overrides"
     depends_on:
       - front
 
   antispam:
-    image: mailu/rspamd:$VERSION
-    restart: always
-    env_file: .env
+    image: $DOCKER_ORG/rspamd:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
       - "$ROOT/filter:/var/lib/rspamd"
       - "$ROOT/dkim:/dkim"
@@ -65,23 +58,23 @@ services:
       - front
 
   antivirus:
-    image: mailu/$ANTIVIRUS:$VERSION
-    restart: always
-    env_file: .env
+    image: $DOCKER_ORG/$ANTIVIRUS:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
       - "$ROOT/filter:/data"
 
   webdav:
-    image: mailu/$WEBDAV:$VERSION
-    restart: always
-    env_file: .env
+    image: $DOCKER_ORG/$WEBDAV:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
       - "$ROOT/dav:/data"
 
   admin:
-    image: mailu/admin:$VERSION
-    restart: always
-    env_file: .env
+    image: $DOCKER_ORG/admin:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/dkim:/dkim"
@@ -90,15 +83,17 @@ services:
       - redis
 
   webmail:
-    image: "mailu/$WEBMAIL:$VERSION"
-    restart: always
-    env_file: .env
+    image: "$DOCKER_ORG/$WEBMAIL:$VERSION"
+    restart: 'no'
+    env_file: $PWD/.env
     volumes:
       - "$ROOT/webmail:/data"
     depends_on:
       - imap
 
   fetchmail:
-    image: mailu/fetchmail:$VERSION
-    restart: always
-    env_file: .env
+    image: $DOCKER_ORG/fetchmail:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
+    volumes:
+      - "$ROOT/data:/data"

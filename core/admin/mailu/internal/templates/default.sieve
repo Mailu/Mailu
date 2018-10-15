@@ -8,8 +8,6 @@ require "regex";
 require "relational";
 require "date";
 require "comparator-i;ascii-numeric";
-require "vnd.dovecot.extdata";
-require "vnd.dovecot.execute";
 require "spamtestplus";
 require "editheader";
 require "index";
@@ -20,22 +18,20 @@ if header :index 2 :matches "Received" "from * by * for <*>; *"
   addheader "Delivered-To" "<${3}>";
 }
 
-if allof (string :is "${extdata.spam_enabled}" "1",
-          spamtest :percent :value "gt" :comparator "i;ascii-numeric"  "${extdata.spam_threshold}")
+{% if user.spam_enabled %}
+if spamtest :percent :value "gt" :comparator "i;ascii-numeric"  "{{ user.spam_threshold }}"
 {
   setflag "\\seen";
   fileinto :create "Junk";
   stop;
 }
+{% endif %}
 
 if exists "X-Virus" {
   discard;
   stop;
 }
 
-if allof (string :is "${extdata.reply_enabled}" "1",
-          currentdate :value "ge" "date" "${extdata.reply_startdate}",
-          currentdate :value "le" "date" "${extdata.reply_enddate}")
-{
-  vacation :days 1 :subject "${extdata.reply_subject}" "${extdata.reply_body}";
-}
+{% if user.reply_active and  %}
+vacation :days 1 :subject "{{ user.reply_subject }}" "{{ user.reply_body }}";
+{% endif %}

@@ -287,7 +287,8 @@ class User(Base, Email):
             self.reply_enddate > now
         )
 
-    scheme_dict = {'SHA512-CRYPT': "sha512_crypt",
+    scheme_dict = {'BLF-CRYPT': "bcrypt",
+                   'SHA512-CRYPT': "sha512_crypt",
                    'SHA256-CRYPT': "sha256_crypt",
                    'MD5-CRYPT': "md5_crypt",
                    'CRYPT': "des_crypt"}

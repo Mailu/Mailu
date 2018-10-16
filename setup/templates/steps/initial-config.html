@@ -1,0 +1,58 @@
+{% call macros.panel("info", "Step 0 - Initial configuration") %}
+<p>Before starting some variables must be st</p>
+
+<div class="form-group">
+  <label>Root path: </label>
+  <input class="form-control" type="text" name="root" placeholder="/mailu">
+</div>
+
+<div class="form-group">
+  <label>Main mail domain</label>
+  <input class="form-control" type="text" name="domain" placeholder="e.g. mailu.io">
+</div>
+
+<div class="form-group">
+  <label>Postmaster local part (will append the main mail domain)</label>
+  <input class="form-control" type="text" name="postmaster" placeholder="default: admin">
+</div>
+
+<div class="form-group">
+  <label>Choose how secure connections will behave </label>
+  <br/>
+  <select name="tls_flavor">
+  	{% for tlsflavor in ["letsencrypt", "cert", "notls", "mail", "mail-letsencrypt"] %}
+  	<option value="{{ tlsflavor }}" >{{ tlsflavor }}</option>
+  	{% endfor %}
+  </select>
+</div>
+
+<div class="form-group">
+  <label>Authentication rate limit (per source IP address)</label>
+  <input class="form-control" type="text" name="auth_ratelimit" placeholder="eg 10/minute;1000/hour">
+</div>
+
+<div class="form-check form-check-inline">
+  <label class="form-check-label">
+    <input class="form-check-input" type="checkbox" name="disable_statistics" value="True">
+    Opt-out of statistics
+  </label>
+</div>
+
+<div class="form-group">
+  <label>Website name</label>
+  <input class="form-control" type="text" name="site_name" placeholder="Mailu">
+</div>
+
+<div class="form-group">
+  <label>Linked Website URL</label>
+  <input class="form-control" type="text" name="website" placeholder="https://mailu.io">
+</div>
+
+<div class="form-check form-check-inline">
+  <label class="form-check-label">
+    <input class="form-check-input" type="checkbox" name="domain_registration" value="true">
+    Domain registration
+  </label>
+</div>
+
+{% endcall %}

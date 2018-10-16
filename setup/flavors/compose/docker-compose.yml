@@ -71,7 +71,7 @@ services:
       - front
 
   # Optional services
-  {% if enable_antispam %}
+  {% if antispam_enabled %}
   antispam:
     image: mailu/rspamd:{{ version }}
     restart: always
@@ -84,7 +84,7 @@ services:
       - front
   {% endif %}
 
-  {% if enable_antivirus %}
+  {% if antivirus_enabled %}
   antivirus:
     image: mailu/clamav:{{ version }}
     restart: always
@@ -93,9 +93,9 @@ services:
       - "{{ root }}/filter:/data"
   {% endif %}
 
-  {% if enable_webdav %}
+  {% if webdav_enabled %}
   webdav:
-    image: mailu/radivale:{{ version }}
+    image: mailu/radicale:{{ version }}
     restart: always
     env_file: {{ env }}
     volumes:
@@ -112,7 +112,7 @@ services:
   {% endif %}
 
   # Webmail
-  {% if enable_webmail %}
+  {% if webmail_enabled %}
   webmail:
     image: mailu/{{ webmail }}:{{ version }}
     restart: always

@@ -9,7 +9,7 @@ manage your email domains, users, etc.</p>
 <div class="form-group">
   <label>Enable the admin UI (and path to the admin UI)</label>
   <div class="input-group">
-    <div class="input-group-addon"><input type="checkbox" name="admin_enabled" checked></div>
+    <div class="input-group-addon"><input type="checkbox" name="admin_enabled" value="true"></div>
     <input class="form-control" type="text" name="admin_path" value="/admin">
   </div>
 </div>
@@ -21,7 +21,7 @@ accessing messages for beginner users.</p>
 <div class="form-group">
   <label>Enable Web email client (and path to the Web email client)</label>
   <div class="input-group">
-    <div class="input-group-addon"><input type="checkbox" name="webmail_enabled" checked></div>
+    <div class="input-group-addon"><input type="checkbox" name="webmail_enabled" value="true"></div>
     <input class="form-control" type="text" name="webmail_path" value="/webmail">
   </div>
   <p></p>
@@ -38,14 +38,21 @@ also disable the antivirus if required (it does use aroung 1GB of ram).</p>
 
 <div class="form-check form-check-inline">
   <label class="form-check-label">
-    <input class="form-check-input" type="checkbox" name="antispam_enabled" checked>
+    <input class="form-check-input" type="checkbox" name="antispam_enabled" value="rspamd">
     Enable the filtering service
   </label>
 </div>
 <div class="form-check form-check-inline">
   <label class="form-check-label">
-    <input class="form-check-input" type="checkbox" name="antivirus_enabled" checked>
+    <input class="form-check-input" type="checkbox" name="antivirus_enabled" value="clamav">
     Enable the antivirus service
+  </label>
+</div>
+
+<div class="form-check form-check-inline">
+  <label class="form-check-label">
+    <input class="form-check-input" type="checkbox" name="webdav_enabled" value="radicale">
+    Enable the webdav service
   </label>
 </div>
 

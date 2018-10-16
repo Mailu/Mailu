@@ -9,11 +9,11 @@
   {% endcall %}
 
   <form method="post" action="{{ url_for(".submit") }}">
-  {% include "steps/root.html" %}
+  {% include "steps/initial-config.html" %}
   {% include "steps/flavor.html" %}
   {% include "steps/expose.html" %}
   {% include "steps/services.html" %}
-  {% include "steps/optional.html" %}
+<!--   {% include "steps/optional.html" %} -->
 
   <input class="btn btn-primary" type="submit" value="Setup Mailu">
   </form>

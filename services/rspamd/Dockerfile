@@ -1,6 +1,6 @@
 FROM alpine:3.8
 
-RUN apk add --no-cache python py-jinja2 rspamd rspamd-controller rspamd-proxy ca-certificates py-pip \
+RUN apk add --no-cache python py-jinja2 rspamd rspamd-controller rspamd-proxy ca-certificates py-pip curl \
  && pip install --upgrade pip \
  && pip install tenacity
 
@@ -17,3 +17,5 @@ EXPOSE 11332/tcp 11334/tcp
 VOLUME ["/var/lib/rspamd"]
 
 CMD /start.py
+
+HEALTHCHECK CMD curl -f -L http://localhost:11334/ || exit 1

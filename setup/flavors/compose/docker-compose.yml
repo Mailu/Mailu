@@ -19,8 +19,8 @@ services:
     restart: always
     env_file: {{ env }}
     env:
-      - TLS_FLAVOR={{ tls_flavor or 'letsencrypt' }}
-      - ADMIN={{ expose_admin or 'no' }}
+      - TLS_FLAVOR={{ tls_flavor }}
+      - ADMIN={{ admin_enabled or 'no' }}
     ports:
     {% for port in (80, 443, 25, 465, 587, 110, 995, 143, 993) %}
     {% if bind4 %}
@@ -39,7 +39,7 @@ services:
     image: mailu/admin:{{ version }}
     restart: always
     env_file: {{ env }}
-    {% if not expose_admin %}
+    {% if not admin_enabled %}
     ports:
       - 127.0.0.1:8080:80
     {% endif %}
@@ -102,7 +102,7 @@ services:
       - "{{ root }}/dav:/data"
   {% endif %}
 
-  {% if enable_fetchmail %}
+  {% if fetchmail_enabled %}
   fetchmail:
     image: mailu/fetchmail:{{ version }}
     restart: always
@@ -114,7 +114,7 @@ services:
   # Webmail
   {% if webmail_enabled %}
   webmail:
-    image: mailu/{{ webmail }}:{{ version }}
+    image: mailu/{{ webmail_type }}:{{ version }}
     restart: always
     env_file: {{ env }}
     volumes:

@@ -9,6 +9,7 @@
   {% endcall %}
 
   <form method="post" action="{{ url_for(".submit") }}">
+  {% include "steps/root.html" %}
   {% include "steps/flavor.html" %}
   {% include "steps/expose.html" %}
   {% include "steps/services.html" %}

@@ -32,9 +32,11 @@ def secret(length=16):
 
 def build_app(path):
 
+    #Hardcoded master as the only version for test purposes
     versions = [
-        version for version in os.listdir(path)
-        if os.path.isdir(os.path.join(path, version))
+    #    version for version in os.listdir(path)
+    #    if os.path.isdir(os.path.join(path, version))
+         "master"
     ]
 
     app.jinja_env.trim_blocks = True

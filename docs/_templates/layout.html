@@ -1,0 +1,9 @@
+{% extends "!layout.html" %}
+{% block document %}
+{% if version != stable_version %}
+<div class="wy-alert info">
+    <p>You are currently browsing documentation for the <b>{{ version }}</b> branch. Documentation for the stable <b>{{ stable_version }}</b> branch can be found <a href="/{{ stable_version }}/">here</a>.</p>
+</div>
+{% endif %}
+{{ super() }}
+{% endblock %}

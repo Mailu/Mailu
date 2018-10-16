@@ -36,6 +36,7 @@ html_context = {
     'github_user': 'mailu',
     'github_repo': 'mailu',
     'github_version': version,
+    'stable_version': '1.5',
     'versions': [
         ('1.5', '/1.5/'),
         ('master', '/master/')

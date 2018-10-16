@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 #
 
+import os
+
 extensions = ['sphinx.ext.imgmath', 'sphinx.ext.viewcode']
 templates_path = ['_templates']
 source_suffix = '.rst'
@@ -33,6 +35,10 @@ html_context = {
     'display_github': True,
     'github_user': 'mailu',
     'github_repo': 'mailu',
-    'github_version': 'master',
+    'github_version': os.environ.get('VERSION', 'master'),
+    'versions': [
+        ('1.5', '/1.5/'),
+        ('master', '/master/')
+    ],
     'conf_py_path': '/docs/'
 }

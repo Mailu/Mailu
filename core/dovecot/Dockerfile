@@ -13,3 +13,5 @@ EXPOSE 110/tcp 143/tcp 993/tcp 4190/tcp 2525/tcp
 VOLUME ["/data", "/mail"]
 
 CMD /start.py
+
+HEALTHCHECK CMD echo QUIT|nc localhost 110|grep "Dovecot ready."

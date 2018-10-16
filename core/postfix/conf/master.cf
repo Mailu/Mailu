@@ -7,7 +7,7 @@ smtp      inet  n       -       n       -       -       smtpd
 # Internal SMTP service
 10025     inet  n       -       n       -       -       smtpd
   -o smtpd_sasl_auth_enable=yes
-  -o smtpd_recipient_restrictions=reject_unlisted_sender,reject_sender_login_mismatch,permit
+  -o smtpd_recipient_restrictions=reject_unlisted_sender,reject_authenticated_sender_login_mismatch,permit
   -o cleanup_service_name=outclean
 outclean  unix n       -       n       -       0       cleanup
   -o header_checks=pcre:/etc/postfix/outclean_header_filter.cf

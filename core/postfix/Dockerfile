@@ -7,8 +7,11 @@ RUN apk add --no-cache postfix postfix-pcre rsyslog \
 
 COPY conf /conf
 COPY start.py /start.py
+COPY health.sh /health.sh
 
 EXPOSE 25/tcp 10025/tcp
 VOLUME ["/data"]
 
 CMD /start.py
+
+HEALTHCHECK CMD /health.sh

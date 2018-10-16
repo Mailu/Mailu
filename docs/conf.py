@@ -11,9 +11,9 @@ master_doc = 'index'
 project = 'Mailu'
 copyright = '2018, Mailu authors'
 author = 'Mailu authors'
-version = release = 'latest'
+version = release = os.environ.get('VERSION', 'master')
 language = None
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'Dockerfile', 'docker-compose.yml']
 pygments_style = 'sphinx'
 todo_include_todos = False
 html_theme = 'sphinx_rtd_theme'
@@ -35,7 +35,7 @@ html_context = {
     'display_github': True,
     'github_user': 'mailu',
     'github_repo': 'mailu',
-    'github_version': os.environ.get('VERSION', 'master'),
+    'github_version': version,
     'versions': [
         ('1.5', '/1.5/'),
         ('master', '/master/')

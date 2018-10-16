@@ -9,3 +9,5 @@ EXPOSE 3310/tcp
 VOLUME ["/data"]
 
 CMD ["/start.sh"]
+
+HEALTHCHECK CMD [ "$(echo PING | nc localhost 3310)" = "PONG" ]

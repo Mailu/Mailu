@@ -3,45 +3,54 @@ version: '3'
 services:
 
   front:
-    image: mailu/nginx:$VERSION
+    image: $DOCKER_ORG/nginx:$VERSION
     build: ../core/nginx
 
   imap:
-    image: mailu/dovecot:$VERSION
+    image: $DOCKER_ORG/dovecot:$VERSION
     build: ../core/dovecot
 
   smtp:
-    image: mailu/postfix:$VERSION
+    image: $DOCKER_ORG/postfix:$VERSION
     build: ../core/postfix
 
   antispam:
-    image: mailu/rspamd:$VERSION
+    image: $DOCKER_ORG/rspamd:$VERSION
     build: ../services/rspamd
 
   antivirus:
-    image: mailu/clamav:$VERSION
+    image: $DOCKER_ORG/clamav:$VERSION
     build: ../optional/clamav
 
   webdav:
-    image: mailu/radicale:$VERSION
+    image: $DOCKER_ORG/radicale:$VERSION
     build: ../optional/radicale
 
   admin:
-    image: mailu/admin:$VERSION
+    image: $DOCKER_ORG/admin:$VERSION
     build: ../core/admin
 
   roundcube:
-    image: mailu/roundcube:$VERSION
+    image: $DOCKER_ORG/roundcube:$VERSION
     build: ../webmails/roundcube
 
   rainloop:
-    image: mailu/rainloop:$VERSION
+    image: $DOCKER_ORG/rainloop:$VERSION
     build: ../webmails/rainloop
 
   fetchmail:
-    image: mailu/fetchmail:$VERSION
+    image: $DOCKER_ORG/fetchmail:$VERSION
     build: ../services/fetchmail
 
   none:
-    image: mailu/none:$VERSION
+    image: $DOCKER_ORG/none:$VERSION
     build: ../core/none
+
+  docs:
+    image: $DOCKER_ORG/docs:$VERSION
+    build: ../docs
+
+  setup:
+    image: $DOCKER_ORG/setup:$VERSION
+    build: ../setup
+

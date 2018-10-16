@@ -2,8 +2,6 @@
 # General
 ###############
 
-debug_peer_list = 0.0.0.0/0
-
 # Main domain and hostname
 mydomain = {{ DOMAIN }}
 myhostname = {{ HOSTNAMES.split(",")[0] }}

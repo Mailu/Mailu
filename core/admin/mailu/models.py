@@ -64,7 +64,7 @@ class CommaSeparatedList(db.TypeDecorator):
         return ",".join(value)
 
     def process_result_value(self, value, dialect):
-        return filter(bool, value.split(","))
+        return filter(bool, value.split(",")) if value else []
 
 
 # Many-to-many association table for domain managers

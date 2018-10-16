@@ -7,7 +7,7 @@ services:
     restart: 'no'
     env_file: $PWD/.env
     logging:
-      driver: journald
+      driver: $LOG_DRIVER
     ports:
     - "$BIND_ADDRESS4:80:80"
     - "$BIND_ADDRESS4:443:443"

@@ -280,7 +280,7 @@ class User(Base, Email):
 
     @property
     def reply_active(self):
-        now = datetime.datetime.now()
+        now = date.today()
         return (
             self.reply_enabled and
             self.reply_startdate < now and

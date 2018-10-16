@@ -32,6 +32,6 @@ if exists "X-Virus" {
   stop;
 }
 
-{% if user.reply_active and  %}
+{% if user.reply_active  %}
 vacation :days 1 :subject "{{ user.reply_subject }}" "{{ user.reply_body }}";
 {% endif %}

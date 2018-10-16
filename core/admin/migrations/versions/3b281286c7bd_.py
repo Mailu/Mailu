@@ -1,13 +1,13 @@
 """ Add a start day for vacations
 
 Revision ID: 3b281286c7bd
-Revises: 049fed905da7
+Revises: 25fd6c7bcb4a
 Create Date: 2018-09-27 22:20:08.158553
 
 """
 
 revision = '3b281286c7bd'
-down_revision = '049fed905da7'
+down_revision = '25fd6c7bcb4a'
 
 from alembic import op
 import sqlalchemy as sa

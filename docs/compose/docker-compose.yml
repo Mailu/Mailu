@@ -6,6 +6,8 @@ services:
     image: mailu/nginx:$VERSION
     restart: always
     env_file: .env
+    logging:
+      driver: $LOG_DRIVER
     ports:
     - "$BIND_ADDRESS4:80:80"
     - "$BIND_ADDRESS4:443:443"
@@ -39,7 +41,6 @@ services:
     restart: always
     env_file: .env
     volumes:
-      - "$ROOT/data:/data"
       - "$ROOT/mail:/mail"
       - "$ROOT/overrides:/overrides"
     depends_on:
@@ -50,7 +51,6 @@ services:
     restart: always
     env_file: .env
     volumes:
-      - "$ROOT/data:/data"
       - "$ROOT/overrides:/overrides"
     depends_on:
       - front
@@ -104,5 +104,3 @@ services:
     image: mailu/fetchmail:$VERSION
     restart: always
     env_file: .env
-    volumes:
-      - "$ROOT/data:/data"

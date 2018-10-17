@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-import sqlite3
 import time
 import os
 import tempfile
 import shlex
 import subprocess
 import re
+import requests
 
 
 FETCHMAIL = """
@@ -14,6 +14,7 @@ fetchmail -N \
     --sslcertck --sslcertpath /etc/ssl/certs \
     -f {}
 """
+
 
 RC_LINE = """
 poll "{host}" proto {protocol}  port {port}
@@ -24,9 +25,11 @@ poll "{host}" proto {protocol}  port {port}
     sslproto 'AUTO'
 """
 
+
 def extract_host_port(host_and_port, default_port):
     host, _, port = re.match('^(.*)(:([0-9]*))?$', host_and_port).groups()
     return host, int(port) if port else default_port
+
 
 def escape_rc_string(arg):
     return arg.replace("\\", "\\\\").replace('"', '\\"')
@@ -41,30 +44,26 @@ def fetchmail(fetchmailrc):
         return output
 
 
-def run(connection, cursor, debug):
-    cursor.execute("""
-        SELECT user_email, protocol, host, port, tls, username, password, keep
-        FROM fetch
-    """)
+def run(debug):
+    fetches = requests.get("http://admin/internal/fetch").json()
     smtphost, smtpport = extract_host_port(os.environ.get("HOST_SMTP", "smtp"), None)
     if smtpport is None:
         smtphostport = smtphost
     else:
         smtphostport = "%s/%d" % (smtphost, smtpport)
-    for line in cursor.fetchall():
+    for fetch in fetches:
         fetchmailrc = ""
-        user_email, protocol, host, port, tls, username, password, keep = line
         options = "options antispam 501, 504, 550, 553, 554"
-        options += " ssl" if tls else ""
-        options += " keep" if keep else " fetchall"
+        options += " ssl" if fetch["tls"] else ""
+        options += " keep" if fetch["keep"] else " fetchall"
         fetchmailrc += RC_LINE.format(
-            user_email=escape_rc_string(user_email),
-            protocol=protocol,
-            host=escape_rc_string(host),
-            port=port,
+            user_email=escape_rc_string(fetch["user_email"]),
+            protocol=fetch["protocol"],
+            host=escape_rc_string(fetch["host"]),
+            port=fetch["port"],
             smtphost=smtphostport,
-            username=escape_rc_string(username),
-            password=escape_rc_string(password),
+            username=escape_rc_string(fetch["username"]),
+            password=escape_rc_string(fetch["password"]),
             options=options
         )
         if debug:
@@ -77,26 +76,20 @@ def run(connection, cursor, debug):
             # No mail is not an error
             if not error_message.startswith("fetchmail: No mail"):
                 print(error_message)
-            user_info = "for %s at %s" % (user_email, host)
+            user_info = "for %s at %s" % (fetch["user_email"], fetch["host"])
             # Number of messages seen is not a error as well
             if ("messages" in error_message and
                     "(seen " in error_message and
                     user_info in error_message):
                 print(error_message)
         finally:
-            cursor.execute("""
-                UPDATE fetch SET error=?, last_check=datetime('now')
-                WHERE user_email=?
-            """, (error_message.split("\n")[0], user_email))
-            connection.commit()
+            requests.post("http://admin/internal/fetch/{}".format(fetch["id"]),
+                json=error_message.split("\n")[0]
+            )
 
 
 if __name__ == "__main__":
-    debug = os.environ.get("DEBUG", None) == "True"
-    db_path = os.environ.get("DB_PATH", "/data/main.db")
-    connection = sqlite3.connect(db_path)
     while True:
-        cursor = connection.cursor()
-        run(connection, cursor, debug)
-        cursor.close()
         time.sleep(int(os.environ.get("FETCHMAIL_DELAY", 60)))
+        run(os.environ.get("DEBUG", None) == "True")
+

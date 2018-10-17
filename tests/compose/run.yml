@@ -1,0 +1,101 @@
+version: '2'
+
+services:
+
+  front:
+    image: $DOCKER_ORG/nginx:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
+    logging:
+      driver: $LOG_DRIVER
+    ports:
+    - "$BIND_ADDRESS4:80:80"
+    - "$BIND_ADDRESS4:443:443"
+    - "$BIND_ADDRESS4:110:110"
+    - "$BIND_ADDRESS4:143:143"
+    - "$BIND_ADDRESS4:993:993"
+    - "$BIND_ADDRESS4:995:995"
+    - "$BIND_ADDRESS4:25:25"
+    - "$BIND_ADDRESS4:465:465"
+    - "$BIND_ADDRESS4:587:587"
+    volumes:
+      - "$ROOT/certs:/certs"
+
+  redis:
+    image: redis:alpine
+    restart: 'no'
+    volumes:
+      - "$ROOT/redis:/data"
+
+  imap:
+    image: $DOCKER_ORG/dovecot:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
+    volumes:
+      - "$ROOT/data:/data"
+      - "$ROOT/mail:/mail"
+      - "$ROOT/overrides:/overrides"
+    depends_on:
+      - front
+
+  smtp:
+    image: $DOCKER_ORG/postfix:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
+    volumes:
+      - "$ROOT/data:/data"
+      - "$ROOT/overrides:/overrides"
+    depends_on:
+      - front
+
+  antispam:
+    image: $DOCKER_ORG/rspamd:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
+    volumes:
+      - "$ROOT/filter:/var/lib/rspamd"
+      - "$ROOT/dkim:/dkim"
+      - "$ROOT/overrides/rspamd:/etc/rspamd/override.d"
+    depends_on:
+      - front
+
+  antivirus:
+    image: $DOCKER_ORG/$ANTIVIRUS:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
+    volumes:
+      - "$ROOT/filter:/data"
+
+  webdav:
+    image: $DOCKER_ORG/$WEBDAV:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
+    volumes:
+      - "$ROOT/dav:/data"
+
+  admin:
+    image: $DOCKER_ORG/admin:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
+    volumes:
+      - "$ROOT/data:/data"
+      - "$ROOT/dkim:/dkim"
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - redis
+
+  webmail:
+    image: "$DOCKER_ORG/$WEBMAIL:$VERSION"
+    restart: 'no'
+    env_file: $PWD/.env
+    volumes:
+      - "$ROOT/webmail:/data"
+    depends_on:
+      - imap
+
+  fetchmail:
+    image: $DOCKER_ORG/fetchmail:$VERSION
+    restart: 'no'
+    env_file: $PWD/.env
+    volumes:
+      - "$ROOT/data:/data"

@@ -32,7 +32,7 @@ user. Make sure you complete the requirements for the flavor you chose.
 
 You should also have at least a DNS hostname and a DNS name for receiving
 emails. Some instructions are provided on the matter in the article
-[Setup your DNS](dns).
+:ref:`dns_setup`.
 
 .. _`MFAshby's fork`: https://github.com/MFAshby/Mailu
 
@@ -68,10 +68,9 @@ Make sure that you test properly before going live!
 - Try to receive an email from an external service
 - Check the logs (``docker-compose logs -f servicenamehere``) to look for
   warnings or errors
-- Use an open relay checker like `mailradar`_
+- Use an open relay checker like `mxtoolbox`_
   to ensure you're not contributing to the spam problem on the internet.
-  All tests there should result in "Relay denied".
 - If using DMARC, be sure to check the reports you get to verify that legitimate
   email is getting through and forgeries are being properly blocked.
 
-  .. _mailradar: http://www.mailradar.com/openrelay/
+  .. _mxtoolbox: https://mxtoolbox.com/diagnostic.aspx

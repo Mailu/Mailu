@@ -6,7 +6,8 @@ import socket
 import flask
 
 
-internal = flask.Blueprint('internal', __name__)
+internal = flask.Blueprint('internal', __name__, template_folder='templates')
+
 
 @internal.app_errorhandler(RateLimitExceeded)
 def rate_limit_handler(e):
@@ -17,6 +18,7 @@ def rate_limit_handler(e):
         response.headers['Auth-Wait'] = '3'
     return response
 
+
 @limiter.request_filter
 def whitelist_webmail():
     try:
@@ -26,4 +28,4 @@ def whitelist_webmail():
         return False
 
 
-from mailu.internal import views
+from mailu.internal.views import *

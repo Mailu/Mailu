@@ -26,35 +26,60 @@ for the ``VERSION_TAG`` branch, use:
   wget https://mailu.io/VERSION_TAG/_downloads/docker-compose.yml
   wget https://mailu.io/VERSION_TAG/_downloads/.env
 
-Then open the ``.env`` file to setup the mail server. Modify the ``ROOT`` setting
-to match your setup directory if different from ``/mailu``.
+Important configuration variables
+---------------------------------
 
-Modify the ``VERSION`` configuration in the ``.env`` file to reflect the version you picked.
+Open the ``.env`` file and review the following variable settings:
 
-Set the common configuration values
------------------------------------
+- Change ``ROOT`` if you have your setup directory in a different location then ``/mailu``.
+- Check ``VERSION`` to reflect the version you picked. (``master`` or ``1.5``).
 
-Open the ``.env`` file and set configuration settings after reading the configuration
-documentation. Some settings are specific to the Docker Compose setup.
+Make sure to read the comments in the file and instructions from the :ref:`common_cfg` section.
 
-Modify ``BIND_ADDRESS4`` to match the public IP address assigned to your server.
-This address should be configured on one of the network interfaces of the server.
-If the address is not configured directly (NAT) on any of the network interfaces or if
-you would simply like the server to listen on all interfaces, use ``0.0.0.0``.
-
-Modify ``BIND_ADDRESS6`` to match the public IPv6 address assigned to your server.
-The behavior is identical to ``BIND_ADDRESS4``.
+TLS certificates
+````````````````
 
 Set the ``TLS_FLAVOR`` to one of the following
 values:
 
 - ``cert`` is the default and requires certificates to be setup manually;
-- ``letsencrypt`` will use the Letsencrypt! CA to generate automatic ceriticates;
+- ``letsencrypt`` will use the *Letsencrypt!* CA to generate automatic ceriticates;
 - ``mail`` is similar to ``cert`` except that TLS will only be served for
   emails (IMAP and SMTP), not HTTP (use it behind reverse proxies);
 - ``mail-letsencrypt`` is similar to ``letsencrypt`` except that TLS will only be served for
   emails (IMAP and SMTP), not HTTP (use it behind reverse proxies);
 - ``notls`` will disable TLS, this is not recommended except for testing.
+
+.. note::
+
+  When using *Letsencrypt!* you have to make sure that the DNS ``A`` and ``AAAA`` records for the
+  all hostnames mentioned in the ``HOSTNAMES`` variable match with the ip adresses of you server.
+  Or else certificate generation will fail! See also: :ref:`dns_setup`.
+
+Bind address
+````````````
+
+Modify ``BIND_ADDRESS4`` and ``BIND_ADDRESS6`` to match the public IP addresses assigned to your server. For IPv6 you will need the ``<global>`` scope address. 
+
+You can find those addresses by running the following:
+
+.. code-block:: bash
+
+  [root@mailu ~]$ ifconfig eth0
+  eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+          inet 125.189.138.127  netmask 255.255.255.0  broadcast 5.189.138.255
+          inet6 fd21:aab2:717c:cc5a::1  prefixlen 64  scopeid 0x0<global>
+          inet6 fe2f:2a73:43a8:7a1b::1  prefixlen 64  scopeid 0x20<link>
+          ether 00:50:56:3c:b2:23  txqueuelen 1000  (Ethernet)
+          RX packets 174866612  bytes 127773819607 (118.9 GiB)
+          RX errors 0  dropped 0  overruns 0  frame 0
+          TX packets 19905110  bytes 2191519656 (2.0 GiB)
+          TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+If the address is not configured directly (NAT) on any of the network interfaces or if
+you would simply like the server to listen on all interfaces, use ``0.0.0.0`` and ``::``. Note that running is this mode is not supported and can lead to `issues`_.
+
+.. _issues: https://github.com/Mailu/Mailu/issues/641
 
 Enable optional features
 ------------------------

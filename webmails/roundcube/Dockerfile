@@ -1,14 +1,12 @@
 FROM php:7.2-apache
 
-RUN apt-get update && apt-get install -y \
-      zlib1g-dev \
- && docker-php-ext-install zip
-
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.3.7/roundcubemail-1.3.7-complete.tar.gz
 
-RUN echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini
-
-RUN rm -rf /var/www/html/ \
+RUN apt-get update && apt-get install -y \
+      zlib1g-dev \
+ && docker-php-ext-install zip \
+ && echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini \
+ && rm -rf /var/www/html/ \
  && cd /var/www \
  && curl -L -O ${ROUNDCUBE_URL} \
  && tar -xf *.tar.gz \
@@ -17,7 +15,8 @@ RUN rm -rf /var/www/html/ \
  && cd html \
  && rm -rf CHANGELOG INSTALL LICENSE README.md UPGRADING composer.json-dist installer \
  && sed -i 's,mod_php5.c,mod_php7.c,g' .htaccess \
- && chown -R www-data: logs temp
+ && chown -R www-data: logs temp \
+ && rm -rf /var/lib/apt/lists
 
 COPY php.ini /usr/local/etc/php/conf.d/roundcube.ini
 

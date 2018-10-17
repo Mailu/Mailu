@@ -1,12 +1,20 @@
 Mailu configuration settings
 ============================
 
+.. _common_cfg:
+
 Common configuration
 --------------------
 
 The ``SECRET_KEY`` **must** be changed for every setup and set to a 16 bytes
 randomly generated value. It is intended to secure authentication cookies
-among other critical uses.
+among other critical uses. This can be generated with a utility such as *pwgen*,
+which can be installed on most Linux systems:
+
+.. code-block:: bash
+
+  apt-get install pwgen
+  pwgen 16 1
 
 The ``DOMAIN`` holds the main e-mail domain for the server. This email domain
 is used for bounce emails, for generating the postmaster email and other

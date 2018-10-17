@@ -11,7 +11,6 @@ import os
 import docker
 import socket
 import uuid
-import redis
 
 from werkzeug.contrib import fixers
 
@@ -58,7 +57,7 @@ default_config = {
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
     # Advanced settings
-    'PASSWORD_SCHEME': 'SHA512-CRYPT',
+    'PASSWORD_SCHEME': 'BLF-CRYPT',
     # Host settings
     'HOST_IMAP': 'imap',
     'HOST_POP3': 'imap',
@@ -88,9 +87,6 @@ manager.add_command('db', flask_migrate.MigrateCommand)
 # Babel configuration
 babel = flask_babel.Babel(app)
 translations = list(map(str, babel.list_translations()))
-
-# Quota manager
-quota = redis.Redis.from_url(app.config.get("QUOTA_STORAGE_URL"))
 
 @babel.localeselector
 def get_locale():

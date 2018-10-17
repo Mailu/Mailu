@@ -9,6 +9,6 @@ services:
   setup:
     image: mailu/setup
     ports:
-      - "80:80"
+      - "8000:80"
     build: .
 

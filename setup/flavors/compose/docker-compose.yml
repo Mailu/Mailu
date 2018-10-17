@@ -20,7 +20,7 @@ services:
     env_file: {{ env }}
     env:
       - TLS_FLAVOR={{ tls_flavor }}
-      - ADMIN={{ admin_enabled or 'no' }}
+      - ADMIN={{ admin_enabled or 'false' }}
     ports:
     {% for port in (80, 443, 25, 465, 587, 110, 995, 143, 993) %}
     {% if bind4 %}
@@ -112,7 +112,7 @@ services:
   {% endif %}
 
   # Webmail
-  {% if webmail_enabled %}
+  {% if webmail_type != 'none' %}
   webmail:
     image: mailu/{{ webmail_type }}:{{ version }}
     restart: always

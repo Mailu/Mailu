@@ -18,16 +18,23 @@ manage your email domains, users, etc.</p>
 email client. These do add some complexity but provide an easier way of
 accessing messages for beginner users.</p>
 
+<!-- 	Switched from radio buttons to dropdown menu in order to remove the checkbox -->
 <div class="form-group">
   <label>Enable Web email client (and path to the Web email client)</label>
-  <div class="input-group">
-    <div class="input-group-addon"><input type="checkbox" name="webmail_enabled" value="true"></div>
-    <input class="form-control" type="text" name="webmail_path" value="/webmail">
-  </div>
+<!--   <div class="radio"> -->
+<!--     {{ macros.radio("webmail_type", "roundcube", "RoundCube", "popular Webmail running on top of PHP") }} -->
+<!--     {{ macros.radio("webmail_type", "rainloop", "Rainloop", "lightweight Webmail based on PHP, no database") }} -->
+<!--   </div> -->
+  <br/>
+  <select name="webmail_type">
+  	{% for webmailtype in ["none", "roundcube", "rainloop"] %}
+  	<option value="{{ webmailtype }}" >{{ webmailtype }}</option>
+  	{% endfor %}
+  </select>
   <p></p>
-  <div class="radio">
-    {{ macros.radio("webmail_type", "roundcube", "RoundCube", "popular Webmail running on top of PHP") }}
-    {{ macros.radio("webmail_type", "rainloop", "Rainloop", "lightweight Webmail based on PHP, no database") }}
+  <div class="input-group">
+<!--     <div class="input-group-addon"><input type="checkbox" name="webmail_enabled" value="true"></div> -->
+    <input class="form-control" type="text" name="webmail_path" value="/webmail">
   </div>
 </div>
 

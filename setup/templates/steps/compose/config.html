@@ -3,12 +3,15 @@
 
 <div class="form-group">
   <label>Root path: </label>
-  <input class="form-control" type="text" name="root" value="/mailu">
+<!--   Validates path -->
+  <input class="form-control" type="text" name="root" value="/mailu" required pattern="^/[-_A-Za-z0-9]+(/[-_A-Za-z0-9]*)*">
 </div>
 
 <div class="form-group">
   <label>Main mail domain</label>
-  <input class="form-control" type="text" name="domain" placeholder="e.g. mailu.io">
+<!--   Validates domain name -->
+  <input class="form-control" type="text" name="domain" placeholder="e.g. mailu.io" 
+  		required pattern="^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$">
 </div>
 
 <div class="form-check form-check-inline">
@@ -20,7 +23,7 @@
 
 <div class="form-group">
   <label>Postmaster local part (will append the main mail domain)</label>
-  <input class="form-control" type="text" name="postmaster" value="admin">
+  <input class="form-control" type="text" name="postmaster" value="admin" required>
 </div>
 
 <div class="form-group">
@@ -35,8 +38,11 @@
 
 <div class="form-group">
   <label>Authentication rate limit (per source IP address)</label>
-  <p><input class="form-control" style="width: 7%; display: inline;" type="text" name="auth_ratelimit_pm">/minute;
-  <input class="form-control" style="width: 7%; display: inline;;" type="text" name="auth_ratelimit_ph">/hour</p>
+<!--   Validates number input only -->
+  <p><input class="form-control" style="width: 7%; display: inline;" type="number" name="auth_ratelimit_pm" 
+  		value="10" required >/minute;
+  <input class="form-control" style="width: 7%; display: inline;;" type="number" name="auth_ratelimit_ph"
+  		value="1000" required >/hour</p>
 </div>
 
 <div class="form-check form-check-inline">
@@ -48,12 +54,14 @@
 
 <div class="form-group">
   <label>Website name</label>
-  <input class="form-control" type="text" name="site_name" value="Mailu">
+  <input class="form-control" type="text" name="site_name" value="Mailu" required>
 </div>
 
 <div class="form-group">
   <label>Linked Website URL</label>
-  <input class="form-control" type="text" name="website" value="https://mailu.io">
+<!--   Validates url with or without https:// -->
+  <input class="form-control" type="url" name="website" value="https://mailu.io" required
+  		pattern="^(https?://)?([a-zA-Z0-9]([a-zA-ZäöüÄÖÜ0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$">
 </div>
 
 {% endcall %}

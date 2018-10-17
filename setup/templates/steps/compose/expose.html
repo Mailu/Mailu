@@ -14,12 +14,16 @@ avoid generic all-interfaces addresses like <code>0.0.0.0</code> or <code>::</co
 
 <div class="form-group">
   <label>IPv4 listen address</label>
-  <input class="form-control" type="text" name="bind4" placeholder="1.2.3.4">
+<!--   Validates IPv4 address -->
+  <input class="form-control" type="text" name="bind4" value="127.0.0.1" required
+  		pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$">
 </div>
 
 <div class="form-group">
   <label>IPv6 listen address</label>
-  <input class="form-control" type="text" name="bind6" placeholder="2001:be4:1234::1">
+<!--   Validates IPv6 address -->
+  <input class="form-control" type="text" name="bind6" value="::1"
+  		pattern="/^(((?=.*(::))(?!.*\3.+\3))\3?|([\dA-F]{1,4}(\3|:\b|$)|\2))(?4){5}((?4){2}|(((2[0-4]|1\d|[1-9])?\d|25[0-5])\.?\b){4})\z/i">
 </div>
 
 <p>You server will be available under a main hostname but may expose multiple public
@@ -28,6 +32,8 @@ hostnames in its <code>MX</code> record. Hostnames must be coma-separated.</p>
 
 <div class="form-group">
   <label>Public hostnames</label>
-  <input class="form-control" type="text" name="hostnames" placeholder="my.host.name,other.host.name" multiple>
+<!--   Validates hostname or list of hostnames -->
+  <input class="form-control" type="text" name="hostnames" placeholder="my.host.name,other.host.name" multiple required
+    	pattern="^(?:(?:\w+(?:-+\w+)*\.)+[a-z]+)*(?:,(?:(?:\w+(?:-+\w+)*\.)+[a-z]+)\s*)*$">
 </div>
 {% endcall %}

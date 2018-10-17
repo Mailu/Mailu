@@ -276,7 +276,8 @@ class User(Base, Email):
         else:
             return self.email
 
-    scheme_dict = {'BLF-CRYPT': "bcrypt",
+    scheme_dict = {'PBKDF2': "pbkdf2_sha512",
+                   'BLF-CRYPT': "bcrypt",
                    'SHA512-CRYPT': "sha512_crypt",
                    'SHA256-CRYPT': "sha256_crypt",
                    'MD5-CRYPT': "md5_crypt",
@@ -287,8 +288,14 @@ class User(Base, Email):
     )
 
     def check_password(self, password):
+        context = User.pw_context
         reference = re.match('({[^}]+})?(.*)', self.password).group(2)
-        return User.pw_context.verify(password, reference)
+        result = context.verify(password, reference)
+        if result and context.identify(reference) != context.default_scheme():
+            self.set_password(password)
+            db.session.add(self)
+            db.session.commit()
+        return result
 
     def set_password(self, password, hash_scheme=app.config['PASSWORD_SCHEME'], raw=False):
         """Set password for user with specified encryption scheme

@@ -1,5 +1,5 @@
 {% call macros.panel("info", "Step 2 - Initial configuration") %}
-<p>Before starting some variables must be st</p>
+<p>Before starting some variables must be set</p>
 
 <div class="form-group">
   <label>Root path: </label>
@@ -26,15 +26,15 @@
   <input class="form-control" type="text" name="postmaster" value="admin" required>
 </div>
 
-<div class="form-group">
-  <label>Choose how secure connections will behave </label>
-  <br/>
-  <select name="tls_flavor">
-  	{% for tlsflavor in ["letsencrypt", "cert", "notls", "mail", "mail-letsencrypt"] %}
-  	<option value="{{ tlsflavor }}" >{{ tlsflavor }}</option>
-  	{% endfor %}
-  </select>
-</div>
+<!-- <div class="form-group"> -->
+<!--   <label>Choose how secure connections will behave </label> -->
+<!--   <br/> -->
+<!--   <select name="tls_flavor"> -->
+<!--   	{% for tlsflavor in ["letsencrypt", "cert", "notls", "mail", "mail-letsencrypt"] %} -->
+<!--   	<option value="{{ tlsflavor }}" >{{ tlsflavor }}</option> -->
+<!--   	{% endfor %} -->
+<!--   </select> -->
+<!-- </div> -->
 
 <div class="form-group">
   <label>Authentication rate limit (per source IP address)</label>

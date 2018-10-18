@@ -26,7 +26,7 @@ accessing messages for beginner users.</p>
 <!--     {{ macros.radio("webmail_type", "rainloop", "Rainloop", "lightweight Webmail based on PHP, no database") }} -->
 <!--   </div> -->
   <br/>
-  <select name="webmail_type">
+  <select class="btn btn-primary dropdown-toggle" name="webmail_type">
   	{% for webmailtype in ["none", "roundcube", "rainloop"] %}
   	<option value="{{ webmailtype }}" >{{ webmailtype }}</option>
   	{% endfor %}

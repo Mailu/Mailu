@@ -8,7 +8,7 @@
   <h1>Mailu configuration</h1>
   <p>
     Version
-    <select onchange="window.location.href=this.value;">
+    <select onchange="window.location.href=this.value;" class="btn btn-primary dropdown-toggle">
       {% for available in versions %}
       <option value="{{ url_for('{}.wizard'.format(available)) }}" {% if available == version %}selected{% endif %}>{{ available }}</option>
       {% endfor %}

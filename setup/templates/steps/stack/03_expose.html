@@ -1,0 +1,21 @@
+{% call macros.panel("info", "Step 4 - expose Mailu to the world") %}
+<p>A mail server must be exposed to the world to receive emails, send emails,
+and let users access their mailboxes. Mailu has some flexibility in the way
+you expose it to the world.</p>
+
+<div class="form-group">
+  <label>Subnet</label>
+  <input class="form-control" type="text" name="subnet" required pattern="^\d+$">
+</div>
+
+<p>You server will be available under a main hostname but may expose multiple public
+hostnames. Every e-mail domain that points to this server must have one of the
+hostnames in its <code>MX</code> record. Hostnames must be coma-separated.</p>
+
+<div class="form-group">
+  <label>Public hostnames</label>
+<!--   Validates hostname or list of hostnames -->
+  <input class="form-control" type="text" name="hostnames" placeholder="my.host.name,other.host.name" multiple required
+    	pattern="^(?:(?:\w+(?:-+\w+)*\.)+[a-z]+)*(?:,(?:(?:\w+(?:-+\w+)*\.)+[a-z]+)\s*)*$">
+</div>
+{% endcall %}

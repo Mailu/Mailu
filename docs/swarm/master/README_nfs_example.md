@@ -29,7 +29,34 @@ mzrm9nbdggsfz4sgq6dhs5i6n     flying-dutchman     Ready               Active    
 
 ### Volume definition
 For data persistance (the Mailu services might be launched/relaunched on any of the swarm nodes), we need to have Mailu data stored in a manner accessible by every manager or worker in the swarm.
-Hereafter we will assume that "Mailu Data" is available on every node at "$ROOT/certs:/certs". (GlusterFS and nfs shares have been successfully used)
+Hereafter we will use a NFS share:
+```bash
+core@coreos-01 ~ $ showmount -e 192.168.0.30
+Export list for 192.168.0.30:
+/mnt/Pool1/pv            192.168.0.0
+```
+
+on the nfs server, I am using the following /etc/exports
+```bash
+$more /etc/exports
+/mnt/Pool1/pv -alldirs -mapall=root -network 192.168.0.0 -mask 255.255.255.0 
+```
+on the nfs server, I created the Mailu directory (in fact I copied a working Mailu set-up)
+```bash
+$mkdir /mnt/Pool1/pv/mailu
+```
+
+On your manager node, mount the nfs share to check that the share is available:
+```bash
+core@coreos-01 ~ $ sudo mount -t nfs 192.168.0.30:/mnt/Pool1/pv/mailu /mnt/local/
+```
+If this is ok, you can umount it:
+```bash
+core@coreos-01 ~ $ sudo umount /mnt/local/
+```
+
+
+## Networking mode
 On this example, we are using:
 - the mesh routing mode (default mode). With this mode, each service is given a virtual IP adress and docker manages the routing between this virtual IP and the container(s) providing this service. 
 - the default ingress mode.
@@ -108,7 +135,10 @@ services:
       - target: 587
         published: 587
     volumes:
-      - "$ROOT/certs:/certs"
+#      - "$ROOT/certs:/certs"
+      - type: volume
+        source: mailu_certs
+        target: /certs
     deploy:
       replicas: 2
 
@@ -116,7 +146,10 @@ services:
     image: redis:alpine
     restart: always
     volumes:
-      - "$ROOT/redis:/data"
+#      - "$ROOT/redis:/data"
+      - type: volume
+        source: mailu_redis
+        target: /data
     deploy:
       replicas: 1
 
@@ -127,8 +160,14 @@ services:
     environment:
       - POD_ADDRESS_RANGE=10.0.1.0/24
     volumes:
-      - "$ROOT/mail:/mail"
-      - "$ROOT/overrides:/overrides"
+#      - "$ROOT/mail:/mail"
+      - type: volume
+        source: mailu_mail
+        target: /mail
+#      - "$ROOT/overrides:/overrides"
+      - type: volume
+        source: mailu_overrides
+        target: /overrides
     depends_on:
       - front
     deploy:
@@ -141,7 +180,10 @@ services:
     environment:
       - POD_ADDRESS_RANGE=10.0.1.0/24
     volumes:
-      - "$ROOT/overrides:/overrides"
+#      - "$ROOT/overrides:/overrides"
+      - type: volume
+        source: mailu_overrides
+        target: /overrides
     depends_on:
       - front
     deploy:
@@ -153,12 +195,21 @@ services:
     env_file: .env
     environment:
       - POD_ADDRESS_RANGE=10.0.1.0/24
-    volumes:
-      - "$ROOT/filter:/var/lib/rspamd"
-      - "$ROOT/dkim:/dkim"
-      - "$ROOT/overrides/rspamd:/etc/rspamd/override.d"
     depends_on:
       - front
+    volumes:
+#      - "$ROOT/filter:/var/lib/rspamd"
+      - type: volume
+        source: mailu_filter
+        target: /var/lib/rspamd
+#      - "$ROOT/dkim:/dkim"
+      - type: volume
+        source: mailu_dkim
+        target: /dkim
+#      - "$ROOT/overrides/rspamd:/etc/rspamd/override.d"
+      - type: volume
+        source: mailu_overrides_rspamd
+        target: /etc/rspamd/override.d
     deploy:
       replicas: 1
 
@@ -167,7 +218,10 @@ services:
     restart: always
     env_file: .env
     volumes:
-      - "$ROOT/filter:/data"
+#      - "$ROOT/filter:/data"
+      - type: volume
+        source: mailu_filter
+        target: /data
     deploy:
       replicas: 1
 
@@ -176,7 +230,10 @@ services:
     restart: always
     env_file: .env
     volumes:
-      - "$ROOT/dav:/data"
+#      - "$ROOT/dav:/data"
+      - type: volume
+        source: mailu_dav
+        target: /data
     deploy:
       replicas: 1
 
@@ -185,8 +242,14 @@ services:
     restart: always
     env_file: .env
     volumes:
-      - "$ROOT/data:/data"
-      - "$ROOT/dkim:/dkim"
+#      - "$ROOT/data:/data"
+      - type: volume
+        source: mailu_data
+        target: /data
+#      - "$ROOT/dkim:/dkim"
+      - type: volume
+        source: mailu_dkim
+        target: /dkim
       - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - redis
@@ -198,7 +261,10 @@ services:
     restart: always
     env_file: .env
     volumes:
-      - "$ROOT/webmail:/data"
+#      - "$ROOT/webmail:/data"
+      - type: volume
+        source: mailu_data
+        target: /data
     depends_on:
       - imap
     deploy:
@@ -216,6 +282,53 @@ networks:
   default:
     external:
       name: mailu_default
+
+volumes:
+  mailu_filter:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.30,soft,rw"
+      device: ":/mnt/Pool1/pv/mailu/filter"
+  mailu_dkim:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.30,soft,rw"
+      device: ":/mnt/Pool1/pv/mailu/dkim"
+  mailu_overrides_rspamd:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.30,soft,rw"
+      device: ":/mnt/Pool1/pv/mailu/overrides/rspamd"
+  mailu_data:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.30,soft,rw"
+      device: ":/mnt/Pool1/pv/mailu/data"
+  mailu_mail:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.30,soft,rw"
+      device: ":/mnt/Pool1/pv/mailu/mail"
+  mailu_overrides:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.30,soft,rw"
+      device: ":/mnt/Pool1/pv/mailu/overrides"
+  mailu_dav:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.30,soft,rw"
+      device: ":/mnt/Pool1/pv/mailu/dav"
+  mailu_certs:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.30,soft,rw"
+      device: ":/mnt/Pool1/pv/mailu/certs"
+  mailu_redis:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.30,soft,rw"
+      device: ":/mnt/Pool1/pv/mailu/redis"
 ```
 
 ## Deploy Mailu on the docker swarm
@@ -235,10 +348,6 @@ check a specific service:
 core@coreos-01 ~ $ docker service ps mailu_fetchmail
 ID                  NAME                IMAGE                 NODE                DESIRED STATE       CURRENT STATE         ERROR               PORTS
 tbu8ppgsdffj        mailu_fetchmail.1   mailu/fetchmail:master   coreos-01           Running             Running 11 days ago
-```
-You might also have a look on the logs:
-```bash
-core@coreos-01 ~ $ docker service logs -f mailu_fetchmail
 ```
 
 ## Remove the stack

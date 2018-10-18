@@ -75,10 +75,9 @@ Instead, we will use the following work-around:
 ``` echo "$(docker-compose -f /mnt/docker/apps/mailu/docker-compose.yml config 2>/dev/null)" | docker stack deploy -c- mailu ```
 
 We need also to:
-- change the way we define the volumes (nfs share in our case)
 - add a deploy section for every service
-- the way the ports are defined for the front service
-- add the POD_ADDRESS_RANGE definition imap, smtp and antispam services
+- modify the way the ports are defined for the front service
+- add the POD_ADDRESS_RANGE definition for imap, smtp and antispam services
 
 ## Docker compose 
 An example of docker-compose-stack.yml file is available here:

@@ -1,18 +1,25 @@
-from mailu import models
+from mailu import models, create_app
 
 from flask import current_app as app
+from flask import cli as flask_cli
 
 import flask
 import os
 import socket
 import uuid
+import click
 
 
-manager = flask_script.Manager()
 db = models.db
 
 
-@manager.command
+@click.group()
+def cli(cls=flask_cli.FlaskGroup, create_app=mailu.create_app):
+    """ Main command group
+    """
+
+
+@cli.command()
 def advertise():
     """ Advertise this server against statistic services.
     """
@@ -30,7 +37,10 @@ def advertise():
             pass
 
 
-@manager.command
+@cli.command()
+@cli.argument('localpart', help='localpart for the new admin')
+@cli.argument('domain_name', help='domain name for the new admin')
+@cli.argument('password', help='plain password for the new admin')
 def admin(localpart, domain_name, password):
     """ Create an admin user
     """
@@ -48,7 +58,11 @@ def admin(localpart, domain_name, password):
     db.session.commit()
 
 
-@manager.command
+@cli.command()
+@cli.argument('localpart', help='localpart for the new user')
+@cli.argument('domain_name', help='domain name for the new user')
+@cli.argument('password', help='plain password for the new user')
+@cli.argument('hash_scheme', help='password hashing scheme')
 def user(localpart, domain_name, password,
          hash_scheme=app.config['PASSWORD_SCHEME']):
     """ Create a user
@@ -67,10 +81,11 @@ def user(localpart, domain_name, password,
     db.session.commit()
 
 
-@manager.option('-n', '--domain_name', dest='domain_name')
-@manager.option('-u', '--max_users', dest='max_users')
-@manager.option('-a', '--max_aliases', dest='max_aliases')
-@manager.option('-q', '--max_quota_bytes', dest='max_quota_bytes')
+@cli.command()
+@cli.option('-n', '--domain_name', dest='domain_name')
+@cli.option('-u', '--max_users', dest='max_users')
+@cli.option('-a', '--max_aliases', dest='max_aliases')
+@cli.option('-q', '--max_quota_bytes', dest='max_quota_bytes')
 def domain(domain_name, max_users=0, max_aliases=0, max_quota_bytes=0):
     domain = models.Domain.query.get(domain_name)
     if not domain:
@@ -79,14 +94,14 @@ def domain(domain_name, max_users=0, max_aliases=0, max_quota_bytes=0):
         db.session.commit()
 
 
-@manager.command
+@cli.command()
+@cli.argument('localpart', help='localpart for the new user')
+@cli.argument('domain_name', help='domain name for the new user')
+@cli.argument('password_hash', help='password hash for the new user')
+@cli.argument('hash_scheme', help='password hashing scheme')
 def user_import(localpart, domain_name, password_hash,
                 hash_scheme=app.config['PASSWORD_SCHEME']):
-    """ Import a user along with password hash. Available hashes:
-                   'SHA512-CRYPT'
-                   'SHA256-CRYPT'
-                   'MD5-CRYPT'
-                   'CRYPT'
+    """ Import a user along with password hash.
     """
     domain = models.Domain.query.get(domain_name)
     if not domain:
@@ -102,7 +117,9 @@ def user_import(localpart, domain_name, password_hash,
     db.session.commit()
 
 
-@manager.command
+@cli.command()
+@cli.option('-v', dest='verbose')
+@cli.option('-d', dest='delete_objects')
 def config_update(verbose=False, delete_objects=False):
     """sync configuration with data from YAML-formatted stdin"""
     import yaml
@@ -241,7 +258,8 @@ def config_update(verbose=False, delete_objects=False):
     db.session.commit()
 
 
-@manager.command
+@cli.command()
+@cli.argument('email', help='email address to be deleted')
 def user_delete(email):
     """delete user"""
     user = models.User.query.get(email)
@@ -250,7 +268,8 @@ def user_delete(email):
     db.session.commit()
 
 
-@manager.command
+@cli.command()
+@cli.argument('email', help='email alias to be deleted')
 def alias_delete(email):
     """delete alias"""
     alias = models.Alias.query.get(email)
@@ -259,7 +278,10 @@ def alias_delete(email):
     db.session.commit()
 
 
-@manager.command
+@cli.command()
+@cli.argument('localpart', help='localpart for the new alias')
+@cli.argument('domain_name', help='domain name for the new alias')
+@cli.argument('destination', help='destination for the new alias')
 def alias(localpart, domain_name, destination):
     """ Create an alias
     """
@@ -276,30 +298,32 @@ def alias(localpart, domain_name, destination):
     db.session.add(alias)
     db.session.commit()
 
-# Set limits to a domain
 
-
-@manager.command
+@cli.command()
+@cli.argument('domain_name', help='domain to be updated')
+@cli.argument('max_users', help='maximum user count')
+@cli.argument('max_aliases', help='maximum alias count')
+@cli.argument('max_quota_bytes', help='maximum quota bytes par user')
 def setlimits(domain_name, max_users, max_aliases, max_quota_bytes):
+    """ Set domain limits
+    """
     domain = models.Domain.query.get(domain_name)
     domain.max_users = max_users
     domain.max_aliases = max_aliases
     domain.max_quota_bytes = max_quota_bytes
-
     db.session.add(domain)
     db.session.commit()
 
-# Make the user manager of a domain
 
-
-@manager.command
+@cli.command()
+@cli.argument('domain_name', help='target domain name')
+@cli.argument('user_name', help='username inside the target domain')
 def setmanager(domain_name, user_name='manager'):
+    """ Make a user manager of a domain
+    """
     domain = models.Domain.query.get(domain_name)
     manageruser = models.User.query.get(user_name + '@' + domain_name)
     domain.managers.append(manageruser)
     db.session.add(domain)
     db.session.commit()
 
-
-if __name__ == "__main__":
-    manager.run()

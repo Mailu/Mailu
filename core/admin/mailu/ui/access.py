@@ -1,4 +1,4 @@
-from mailu import db, models
+from mailu import models
 from mailu.ui import forms
 
 import flask

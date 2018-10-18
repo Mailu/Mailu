@@ -1,4 +1,4 @@
-from mailu import db, models
+from mailu import models
 from mailu.ui import ui, forms, access
 
 import flask
@@ -24,8 +24,8 @@ def fetch_create(user_email):
     if form.validate_on_submit():
         fetch = models.Fetch(user=user)
         form.populate_obj(fetch)
-        db.session.add(fetch)
-        db.session.commit()
+        models.db.session.add(fetch)
+        models.db.session.commit()
         flask.flash('Fetch configuration created')
         return flask.redirect(
             flask.url_for('.fetch_list', user_email=user.email))
@@ -39,7 +39,7 @@ def fetch_edit(fetch_id):
     form = forms.FetchForm(obj=fetch)
     if form.validate_on_submit():
         form.populate_obj(fetch)
-        db.session.commit()
+        models.db.session.commit()
         flask.flash('Fetch configuration updated')
         return flask.redirect(
             flask.url_for('.fetch_list', user_email=fetch.user.email))
@@ -53,8 +53,8 @@ def fetch_edit(fetch_id):
 def fetch_delete(fetch_id):
     fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
     user = fetch.user
-    db.session.delete(fetch)
-    db.session.commit()
+    models.db.session.delete(fetch)
+    models.db.session.commit()
     flask.flash('Fetch configuration delete')
     return flask.redirect(
         flask.url_for('.fetch_list', user_email=user.email))

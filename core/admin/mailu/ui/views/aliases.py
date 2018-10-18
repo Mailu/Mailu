@@ -1,4 +1,4 @@
-from mailu import db, models
+from mailu import models
 from mailu.ui import ui, forms, access
 
 import flask
@@ -27,8 +27,8 @@ def alias_create(domain_name):
         else:
             alias = models.Alias(domain=domain)
             form.populate_obj(alias)
-            db.session.add(alias)
-            db.session.commit()
+            models.db.session.add(alias)
+            models.db.session.commit()
             flask.flash('Alias %s created' % alias)
             return flask.redirect(
                 flask.url_for('.alias_list', domain_name=domain.name))
@@ -45,7 +45,7 @@ def alias_edit(alias):
     form.localpart.validators = []
     if form.validate_on_submit():
         form.populate_obj(alias)
-        db.session.commit()
+        models.db.session.commit()
         flask.flash('Alias %s updated' % alias)
         return flask.redirect(
             flask.url_for('.alias_list', domain_name=alias.domain.name))
@@ -59,8 +59,8 @@ def alias_edit(alias):
 def alias_delete(alias):
     alias = models.Alias.query.get(alias) or flask.abort(404)
     domain = alias.domain
-    db.session.delete(alias)
-    db.session.commit()
+    models.db.session.delete(alias)
+    models.db.session.commit()
     flask.flash('Alias %s deleted' % alias)
     return flask.redirect(
         flask.url_for('.alias_list', domain_name=domain.name))

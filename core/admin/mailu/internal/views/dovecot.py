@@ -1,5 +1,6 @@
-from mailu import db, models
+from mailu import models
 from mailu.internal import internal
+from flask import current_app as app
 
 import flask
 
@@ -25,7 +26,7 @@ def dovecot_quota(ns, user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     if ns == "storage":
         user.quota_bytes_used = flask.request.get_json()
-        db.session.commit()
+        models.db.session.commit()
     return flask.jsonify(None)
 
 

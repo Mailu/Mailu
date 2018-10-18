@@ -1,4 +1,5 @@
-from mailu import db, models, app
+from mailu import models
+from flask import current_app as app
 
 import re
 import socket

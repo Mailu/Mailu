@@ -1,4 +1,4 @@
-from mailu import db, models
+from mailu import models
 from mailu.ui import ui, forms, access
 
 import flask
@@ -25,8 +25,8 @@ def relay_create():
         else:
             relay = models.Relay()
             form.populate_obj(relay)
-            db.session.add(relay)
-            db.session.commit()
+            models.db.session.add(relay)
+            models.db.session.commit()
             flask.flash('Relayed domain %s created' % relay)
             return flask.redirect(flask.url_for('.relay_list'))
     return flask.render_template('relay/create.html', form=form)
@@ -41,7 +41,7 @@ def relay_edit(relay_name):
     form.name.validators = []
     if form.validate_on_submit():
         form.populate_obj(relay)
-        db.session.commit()
+        models.db.session.commit()
         flask.flash('Relayed domain %s saved' % relay)
         return flask.redirect(flask.url_for('.relay_list'))
     return flask.render_template('relay/edit.html', form=form,
@@ -53,8 +53,8 @@ def relay_edit(relay_name):
 @access.confirmation_required("delete {relay_name}")
 def relay_delete(relay_name):
     relay = models.Relay.query.get(relay_name) or flask.abort(404)
-    db.session.delete(relay)
-    db.session.commit()
+    models.db.session.delete(relay)
+    models.db.session.commit()
     flask.flash('Relayed domain %s deleted' % relay)
     return flask.redirect(flask.url_for('.relay_list'))
 

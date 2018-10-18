@@ -1,5 +1,6 @@
-from mailu import db, models, app
+from mailu import models
 from mailu.ui import ui, access, forms
+from flask import current_app as app
 
 import flask
 import flask_login
@@ -33,8 +34,8 @@ def user_create(domain_name):
             user = models.User(domain=domain)
             form.populate_obj(user)
             user.set_password(form.pw.data)
-            db.session.add(user)
-            db.session.commit()
+            models.db.session.add(user)
+            models.db.session.commit()
             user.send_welcome()
             flask.flash('User %s created' % user)
             return flask.redirect(
@@ -63,7 +64,7 @@ def user_edit(user_email):
         form.populate_obj(user)
         if form.pw.data:
             user.set_password(form.pw.data)
-        db.session.commit()
+        models.db.session.commit()
         flask.flash('User %s updated' % user)
         return flask.redirect(
             flask.url_for('.user_list', domain_name=user.domain.name))
@@ -77,8 +78,8 @@ def user_edit(user_email):
 def user_delete(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     domain = user.domain
-    db.session.delete(user)
-    db.session.commit()
+    models.db.session.delete(user)
+    models.db.session.commit()
     flask.flash('User %s deleted' % user)
     return flask.redirect(
         flask.url_for('.user_list', domain_name=domain.name))
@@ -93,7 +94,7 @@ def user_settings(user_email):
     form = forms.UserSettingsForm(obj=user)
     if form.validate_on_submit():
         form.populate_obj(user)
-        db.session.commit()
+        models.db.session.commit()
         flask.flash('Settings updated for %s' % user)
         if user_email:
             return flask.redirect(
@@ -113,7 +114,7 @@ def user_password(user_email):
             flask.flash('Passwords do not match', 'error')
         else:
             user.set_password(form.pw.data)
-            db.session.commit()
+            models.db.session.commit()
             flask.flash('Password updated for %s' % user)
             if user_email:
                 return flask.redirect(flask.url_for('.user_list',
@@ -130,7 +131,7 @@ def user_forward(user_email):
     form = forms.UserForwardForm(obj=user)
     if form.validate_on_submit():
         form.populate_obj(user)
-        db.session.commit()
+        models.db.session.commit()
         flask.flash('Forward destination updated for %s' % user)
         if user_email:
             return flask.redirect(
@@ -147,7 +148,7 @@ def user_reply(user_email):
     form = forms.UserReplyForm(obj=user)
     if form.validate_on_submit():
         form.populate_obj(user)
-        db.session.commit()
+        models.db.session.commit()
         flask.flash('Auto-reply message updated for %s' % user)
         if user_email:
             return flask.redirect(
@@ -179,8 +180,8 @@ def user_signup(domain_name=None):
             form.populate_obj(user)
             user.set_password(form.pw.data)
             user.quota_bytes = quota_bytes
-            db.session.add(user)
-            db.session.commit()
+            models.db.session.add(user)
+            models.db.session.commit()
             user.send_welcome()
             flask.flash('Successfully signed up %s' % user)
             return flask.redirect(flask.url_for('.index'))

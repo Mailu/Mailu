@@ -1,10 +1,12 @@
-from mailu import app, db, dkim, login_manager
+from mailu import dkim
 
 from sqlalchemy.ext import declarative
 from passlib import context, hash
 from datetime import datetime, date
 from email.mime import text
+from flask import current_app as app
 
+import flask_sqlalchemy
 import sqlalchemy
 import re
 import time
@@ -13,6 +15,9 @@ import glob
 import smtplib
 import idna
 import dns
+
+
+db = flask_sqlalchemy.SQLAlchemy()
 
 
 class IdnaDomain(db.TypeDecorator):
@@ -65,6 +70,27 @@ class CommaSeparatedList(db.TypeDecorator):
 
     def process_result_value(self, value, dialect):
         return filter(bool, value.split(","))
+
+
+class JSONEncoded(db.TypeDecorator):
+    """Represents an immutable structure as a json-encoded string.
+    """
+
+    impl = db.String
+
+    def process_bind_param(self, value, dialect):
+        return json.dumps(value) if value else None
+
+    def process_result_value(self, value, dialect):
+        return json.loads(value) if value else None
+
+
+class Config(db.Model):
+    """ In-database configuration values
+    """
+
+    name = db.Column(db.String(255), primary_key=True, nullable=False)
+    value = db.Column(JSONEncoded)
 
 
 # Many-to-many association table for domain managers
@@ -323,8 +349,6 @@ class User(Base, Email):
     def login(cls, email, password):
         user = cls.query.get(email)
         return user if (user and user.enabled and user.check_password(password)) else None
-
-login_manager.user_loader(User.query.get)
 
 
 class Alias(Base, Email):

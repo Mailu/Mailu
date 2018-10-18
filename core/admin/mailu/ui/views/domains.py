@@ -1,5 +1,6 @@
-from mailu import app, db, models
+from mailu import models
 from mailu.ui import ui, forms, access
+from flask import current_app as app
 
 import flask
 import flask_login
@@ -26,8 +27,8 @@ def domain_create():
         else:
             domain = models.Domain()
             form.populate_obj(domain)
-            db.session.add(domain)
-            db.session.commit()
+            models.db.session.add(domain)
+            models.db.session.commit()
             flask.flash('Domain %s created' % domain)
             return flask.redirect(flask.url_for('.domain_list'))
     return flask.render_template('domain/create.html', form=form)
@@ -42,7 +43,7 @@ def domain_edit(domain_name):
     form.name.validators = []
     if form.validate_on_submit():
         form.populate_obj(domain)
-        db.session.commit()
+        models.db.session.commit()
         flask.flash('Domain %s saved' % domain)
         return flask.redirect(flask.url_for('.domain_list'))
     return flask.render_template('domain/edit.html', form=form,
@@ -54,8 +55,8 @@ def domain_edit(domain_name):
 @access.confirmation_required("delete {domain_name}")
 def domain_delete(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
-    db.session.delete(domain)
-    db.session.commit()
+    models.db.session.delete(domain)
+    models.db.session.commit()
     flask.flash('Domain %s deleted' % domain)
     return flask.redirect(flask.url_for('.domain_list'))
 
@@ -99,7 +100,7 @@ def domain_signup(domain_name=None):
             domain.max_users = 10
             domain.max_aliases = 10
             if domain.check_mx():
-                db.session.add(domain)
+                models.db.session.add(domain)
                 if flask_login.current_user.is_authenticated:
                     user = models.User.query.get(flask_login.current_user.email)
                 else:
@@ -108,9 +109,9 @@ def domain_signup(domain_name=None):
                     form.populate_obj(user)
                     user.set_password(form.pw.data)
                     user.quota_bytes = domain.max_quota_bytes
-                db.session.add(user)
+                models.db.session.add(user)
                 domain.managers.append(user)
-                db.session.commit()
+                models.db.session.commit()
                 flask.flash('Domain %s created' % domain)
                 return flask.redirect(flask.url_for('.domain_list'))
             else:

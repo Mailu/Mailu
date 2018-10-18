@@ -1,4 +1,4 @@
-from mailu import db, models
+from mailu import models
 from mailu.ui import ui, forms, access
 
 import flask
@@ -30,7 +30,7 @@ def manager_create(domain_name):
             flask.flash('User %s is already manager' % user, 'error')
         else:
             domain.managers.append(user)
-            db.session.commit()
+            models.db.session.commit()
             flask.flash('User %s can now manage %s' % (user, domain.name))
             return flask.redirect(
                 flask.url_for('.manager_list', domain_name=domain.name))
@@ -46,7 +46,7 @@ def manager_delete(domain_name, user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     if user in domain.managers:
         domain.managers.remove(user)
-        db.session.commit()
+        models.db.session.commit()
         flask.flash('User %s can no longer manager %s' % (user, domain))
     else:
         flask.flash('User %s is not manager' % user, 'error')

@@ -1,10 +1,8 @@
-from mailu import dockercli, app, db, models
+from mailu import models
 from mailu.ui import ui, forms, access
 
 import flask
 import flask_login
-
-from urllib import parse
 
 
 @ui.route('/', methods=["GET"])

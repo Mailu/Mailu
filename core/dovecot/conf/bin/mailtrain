@@ -1,3 +1,0 @@
-#!/bin/sh
-
-rspamc -h antispam:11334 -P mailu "learn_$1" /dev/stdin <&0

@@ -4,7 +4,7 @@ import os
 DEFAULT_CONFIG = {
     # Specific to the admin UI
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
-    'SQLALCHEMY_TRACK_MODIFICATIONS': False,
+    'SQLALCHEMY_TRACK_MODIFICATIONS': True,
     'DOCKER_SOCKET': 'unix:///var/run/docker.sock',
     'BABEL_DEFAULT_LOCALE': 'en',
     'BABEL_DEFAULT_TIMEZONE': 'UTC',
@@ -13,6 +13,7 @@ DEFAULT_CONFIG = {
     'QUOTA_STORAGE_URL': 'redis://redis/1',
     'DEBUG': False,
     'DOMAIN_REGISTRATION': False,
+    'TEMPLATES_AUTO_RELOAD': True,
     # Statistics management
     'INSTANCE_ID_PATH': '/data/instance',
     'STATS_ENDPOINT': '0.{}.stats.mailu.io',
@@ -58,13 +59,29 @@ class ConfigManager(object):
     """
 
     def __init__(self):
-        self.config = {
-            os.environ.get(key, value)
+        self.config = dict()
+
+    def init_app(self, app):
+        self.config.update(app.config)
+        self.config.update({
+            key: os.environ.get(key, value)
             for key, value in DEFAULT_CONFIG.items()
-        }
+        })
+        app.config = self
+
+    def setdefault(self, key, value):
+        if key not in self.config:
+            self.config[key] = value
+        return self.config[key]
 
     def get(self, *args):
         return self.config.get(*args)
 
     def __getitem__(self, key):
-        return self.get(key)
+        return self.config.get(key)
+
+    def __setitem__(self, key, value):
+        self.config[key] = value
+
+    def __contains__(self, key):
+        return key in self.config

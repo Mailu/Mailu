@@ -14,12 +14,13 @@ db = models.db
 
 
 @click.group()
-def cli(cls=flask_cli.FlaskGroup, create_app=mailu.create_app):
+def cli(cls=flask_cli.FlaskGroup, create_app=create_app):
     """ Main command group
     """
 
 
 @cli.command()
+@flask_cli.with_appcontext
 def advertise():
     """ Advertise this server against statistic services.
     """
@@ -38,9 +39,10 @@ def advertise():
 
 
 @cli.command()
-@cli.argument('localpart', help='localpart for the new admin')
-@cli.argument('domain_name', help='domain name for the new admin')
-@cli.argument('password', help='plain password for the new admin')
+@click.argument('localpart')
+@click.argument('domain_name')
+@click.argument('password')
+@flask_cli.with_appcontext
 def admin(localpart, domain_name, password):
     """ Create an admin user
     """
@@ -59,14 +61,16 @@ def admin(localpart, domain_name, password):
 
 
 @cli.command()
-@cli.argument('localpart', help='localpart for the new user')
-@cli.argument('domain_name', help='domain name for the new user')
-@cli.argument('password', help='plain password for the new user')
-@cli.argument('hash_scheme', help='password hashing scheme')
-def user(localpart, domain_name, password,
-         hash_scheme=app.config['PASSWORD_SCHEME']):
+@click.argument('localpart')
+@click.argument('domain_name')
+@click.argument('password')
+@click.argument('hash_scheme')
+@flask_cli.with_appcontext
+def user(localpart, domain_name, password, hash_scheme=None):
     """ Create a user
     """
+    if hash_scheme is None:
+        hash_scheme = app.config['PASSWORD_SCHEME']
     domain = models.Domain.query.get(domain_name)
     if not domain:
         domain = models.Domain(name=domain_name)
@@ -82,10 +86,11 @@ def user(localpart, domain_name, password,
 
 
 @cli.command()
-@cli.option('-n', '--domain_name', dest='domain_name')
-@cli.option('-u', '--max_users', dest='max_users')
-@cli.option('-a', '--max_aliases', dest='max_aliases')
-@cli.option('-q', '--max_quota_bytes', dest='max_quota_bytes')
+@click.option('-n', '--domain_name')
+@click.option('-u', '--max_users')
+@click.option('-a', '--max_aliases')
+@click.option('-q', '--max_quota_bytes')
+@flask_cli.with_appcontext
 def domain(domain_name, max_users=0, max_aliases=0, max_quota_bytes=0):
     domain = models.Domain.query.get(domain_name)
     if not domain:
@@ -95,14 +100,16 @@ def domain(domain_name, max_users=0, max_aliases=0, max_quota_bytes=0):
 
 
 @cli.command()
-@cli.argument('localpart', help='localpart for the new user')
-@cli.argument('domain_name', help='domain name for the new user')
-@cli.argument('password_hash', help='password hash for the new user')
-@cli.argument('hash_scheme', help='password hashing scheme')
-def user_import(localpart, domain_name, password_hash,
-                hash_scheme=app.config['PASSWORD_SCHEME']):
+@click.argument('localpart')
+@click.argument('domain_name')
+@click.argument('password_hash')
+@click.argument('hash_scheme')
+@flask_cli.with_appcontext
+def user_import(localpart, domain_name, password_hash, hash_scheme = None):
     """ Import a user along with password hash.
     """
+    if hash_scheme is None:
+        hash_scheme = app.config['PASSWORD_SCHEME']
     domain = models.Domain.query.get(domain_name)
     if not domain:
         domain = models.Domain(name=domain_name)
@@ -118,8 +125,9 @@ def user_import(localpart, domain_name, password_hash,
 
 
 @cli.command()
-@cli.option('-v', dest='verbose')
-@cli.option('-d', dest='delete_objects')
+@click.option('-v', '--verbose')
+@click.option('-d', '--delete_objects')
+@flask_cli.with_appcontext
 def config_update(verbose=False, delete_objects=False):
     """sync configuration with data from YAML-formatted stdin"""
     import yaml
@@ -259,7 +267,8 @@ def config_update(verbose=False, delete_objects=False):
 
 
 @cli.command()
-@cli.argument('email', help='email address to be deleted')
+@click.argument('email')
+@flask_cli.with_appcontext
 def user_delete(email):
     """delete user"""
     user = models.User.query.get(email)
@@ -269,7 +278,8 @@ def user_delete(email):
 
 
 @cli.command()
-@cli.argument('email', help='email alias to be deleted')
+@click.argument('email')
+@flask_cli.with_appcontext
 def alias_delete(email):
     """delete alias"""
     alias = models.Alias.query.get(email)
@@ -279,9 +289,10 @@ def alias_delete(email):
 
 
 @cli.command()
-@cli.argument('localpart', help='localpart for the new alias')
-@cli.argument('domain_name', help='domain name for the new alias')
-@cli.argument('destination', help='destination for the new alias')
+@click.argument('localpart')
+@click.argument('domain_name')
+@click.argument('destination')
+@flask_cli.with_appcontext
 def alias(localpart, domain_name, destination):
     """ Create an alias
     """
@@ -300,10 +311,11 @@ def alias(localpart, domain_name, destination):
 
 
 @cli.command()
-@cli.argument('domain_name', help='domain to be updated')
-@cli.argument('max_users', help='maximum user count')
-@cli.argument('max_aliases', help='maximum alias count')
-@cli.argument('max_quota_bytes', help='maximum quota bytes par user')
+@click.argument('domain_name')
+@click.argument('max_users')
+@click.argument('max_aliases')
+@click.argument('max_quota_bytes')
+@flask_cli.with_appcontext
 def setlimits(domain_name, max_users, max_aliases, max_quota_bytes):
     """ Set domain limits
     """
@@ -316,8 +328,9 @@ def setlimits(domain_name, max_users, max_aliases, max_quota_bytes):
 
 
 @cli.command()
-@cli.argument('domain_name', help='target domain name')
-@cli.argument('user_name', help='username inside the target domain')
+@click.argument('domain_name')
+@click.argument('user_name')
+@flask_cli.with_appcontext
 def setmanager(domain_name, user_name='manager'):
     """ Make a user manager of a domain
     """
@@ -327,3 +340,6 @@ def setmanager(domain_name, user_name='manager'):
     db.session.add(domain)
     db.session.commit()
 
+
+if __name__ == '__main__':
+    cli()

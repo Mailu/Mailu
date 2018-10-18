@@ -1,3 +1,5 @@
+from mailu import models
+
 import flask
 import flask_login
 import flask_script
@@ -5,13 +7,14 @@ import flask_migrate
 import flask_babel
 import flask_limiter
 
+from werkzeug.contrib import fixers
+
 
 # Login configuration
 login = flask_login.LoginManager()
 login.login_view = "ui.login"
-login.user_loader(models.User.query.get)
 
-@login_manager.unauthorized_handler
+@login.unauthorized_handler
 def handle_needs_login():
     return flask.redirect(
         flask.url_for('ui.login', next=flask.request.endpoint)

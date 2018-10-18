@@ -307,24 +307,28 @@ class User(Base, Email):
                    'SHA256-CRYPT': "sha256_crypt",
                    'MD5-CRYPT': "md5_crypt",
                    'CRYPT': "des_crypt"}
-    pw_context = context.CryptContext(
-        schemes = scheme_dict.values(),
-        default=scheme_dict[app.config['PASSWORD_SCHEME']],
-    )
+
+    def get_password_context(self):
+        return context.CryptContext(
+            schemes=self.scheme_dict.values(),
+            default=self.scheme_dict[app.config['PASSWORD_SCHEME']],
+        )
 
     def check_password(self, password):
         reference = re.match('({[^}]+})?(.*)', self.password).group(2)
-        return User.pw_context.verify(password, reference)
+        return self.get_password_context().verify(password, reference)
 
-    def set_password(self, password, hash_scheme=app.config['PASSWORD_SCHEME'], raw=False):
+    def set_password(self, password, hash_scheme=None, raw=False):
         """Set password for user with specified encryption scheme
            @password: plain text password to encrypt (if raw == True the hash itself)
         """
+        if hash_scheme is None:
+            hash_scheme = app.config['PASSWORD_SCHEME']
         # for the list of hash schemes see https://wiki2.dovecot.org/Authentication/PasswordSchemes
         if raw:
             self.password = '{'+hash_scheme+'}' + password
         else:
-            self.password = '{'+hash_scheme+'}' + User.pw_context.encrypt(password, self.scheme_dict[hash_scheme])
+            self.password = '{'+hash_scheme+'}' + self.get_password_context().encrypt(password, self.scheme_dict[hash_scheme])
 
     def get_managed_domains(self):
         if self.global_admin:

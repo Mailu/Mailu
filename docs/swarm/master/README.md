@@ -29,7 +29,9 @@ mzrm9nbdggsfz4sgq6dhs5i6n     flying-dutchman     Ready               Active    
 
 ### Volume definition
 For data persistance (the Mailu services might be launched/relaunched on any of the swarm nodes), we need to have Mailu data stored in a manner accessible by every manager or worker in the swarm.
-Hereafter we will assume that "Mailu Data" is available on every node at "$ROOT/certs:/certs". (GlusterFS and nfs shares have been successfully used)
+
+Hereafter we will assume that "Mailu Data" is available on every node at "$ROOT/certs:/certs" (GlusterFS and nfs shares have been successfully used).
+
 On this example, we are using:
 - the mesh routing mode (default mode). With this mode, each service is given a virtual IP adress and docker manages the routing between this virtual IP and the container(s) providing this service. 
 - the default ingress mode.
@@ -67,13 +69,16 @@ As a side effect of this ingress mode "feature", make sure that the ingress subn
 - redis, antispam, antivirus, fetchmail, admin, webdav have not been tested (hence replicas=1 in the following docker-compose.yml file)
 
 ## Variable substitution and docker-compose.yml
-The docker stack deploy command doesn't support variable substitution in the .yml file itself. As a consequence, we need to use the following work-around:
+The docker stack deploy command doesn't support variable substitution in the .yml file itself. 
+As a consequence, we cannot simply use ``` docker stack deploy -c docker.compose.yml mailu ```
+Instead, we will use the following work-around:
 ``` echo "$(docker-compose -f /mnt/docker/apps/mailu/docker-compose.yml config 2>/dev/null)" | docker stack deploy -c- mailu ```
 
 We need also to:
 - change the way we define the volumes (nfs share in our case)
 - add a deploy section for every service
 - the way the ports are defined for the front service
+- add the POD_ADDRESS_RANGE definition imap, smtp and antispam services
 
 ## Docker compose 
 An example of docker-compose-stack.yml file is available here:

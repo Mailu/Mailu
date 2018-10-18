@@ -65,6 +65,11 @@ def build_app(path):
         def wizard():
             return flask.render_template('wizard.html')
 
+        @bp.route("/submit_flavor", methods=["POST"])
+        def submit_flavor():
+            data = flask.request.form.copy()
+            return flask.render_template('wizard.html', flavor=data["flavor"])
+
         @bp.route("/submit", methods=["POST"])
         def submit():
             data = flask.request.form.copy()

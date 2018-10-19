@@ -10,14 +10,12 @@ services:
   # External dependencies
   redis:
     image: redis:alpine
-    restart: always
     volumes:
       - "{{ root }}/redis:/data"
 
   # Core services
   front:
     image: mailu/nginx:{{ version }}
-    restart: always
     env_file: {{ env }}
     ports:
     {% for port in (80, 443, 25, 465, 587, 110, 995, 143, 993) %}
@@ -33,7 +31,6 @@ services:
 
   admin:
     image: mailu/admin:{{ version }}
-    restart: always
     env_file: {{ env }}
     {% if not admin_enabled %}
     ports:
@@ -47,7 +44,6 @@ services:
 
   imap:
     image: mailu/dovecot:{{ version }}
-    restart: always
     env_file: {{ env }}
     volumes:
       - "{{ root }}/mail:/mail"
@@ -57,7 +53,6 @@ services:
 
   smtp:
     image: mailu/postfix:{{ version }}
-    restart: always
     env_file: {{ env }}
     volumes:
       - "{{ root }}/overrides:/overrides"
@@ -68,7 +63,6 @@ services:
   {% if antispam_enabled %}
   antispam:
     image: mailu/rspamd:{{ version }}
-    restart: always
     env_file: {{ env }}
     volumes:
       - "{{ root }}/filter:/var/lib/rspamd"
@@ -81,7 +75,6 @@ services:
   {% if antivirus_enabled %}
   antivirus:
     image: mailu/clamav:{{ version }}
-    restart: always
     env_file: {{ env }}
     volumes:
       - "{{ root }}/filter:/data"
@@ -90,7 +83,6 @@ services:
   {% if webdav_enabled %}
   webdav:
     image: mailu/radicale:{{ version }}
-    restart: always
     env_file: {{ env }}
     volumes:
       - "{{ root }}/dav:/data"
@@ -99,7 +91,6 @@ services:
   {% if fetchmail_enabled %}
   fetchmail:
     image: mailu/fetchmail:{{ version }}
-    restart: always
     env_file: {{ env }}
   {% endif %}
 
@@ -107,7 +98,6 @@ services:
   {% if webmail_type != 'none' %}
   webmail:
     image: mailu/{{ webmail_type }}:{{ version }}
-    restart: always
     env_file: {{ env }}
     volumes:
       - "{{ root }}/webmail:/data"

@@ -278,7 +278,6 @@ class User(Base, Email):
         else:
             return self.email
 
-
     @property
     def reply_active(self):
         now = date.today()

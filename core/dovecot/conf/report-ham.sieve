@@ -8,4 +8,4 @@ if string "${mailbox}" "Trash" {
   stop;
 }
 
-execute :pipe "mailtrain" "ham";
+execute :pipe "ham";

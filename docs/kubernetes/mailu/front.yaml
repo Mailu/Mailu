@@ -25,8 +25,8 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: node-role.kubernetes.io/master
-                operator: DoesNotExist
+              - key: node-role.kubernetes.io/node
+                operator: Exists
       hostNetwork: true
       nodeSelector:
         node-role.kubernetes.io/node: ""

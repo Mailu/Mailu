@@ -40,7 +40,7 @@
     TLS_FLAVOR: "cert"
 
     # Authentication rate limit (per source IP address)
-    AUTH_RATELIMIT: "100/minute;10000/hour"
+    AUTH_RATELIMIT: "10/minute;1000/hour"
 
     # Opt-out of statistics, replace with "True" to opt out
     DISABLE_STATISTICS: "False"
@@ -52,7 +52,6 @@
     # Use Kubernetes Ingress Controller to handle all actions on port 80 and 443
     # This way we can make use of the advantages of the cert-manager deployment
     KUBERNETES_INGRESS: "true"
-    POD_ADDRESS_RANGE: "10.2.0.0/16"
 
     ###################################
     # Optional features
@@ -72,9 +71,6 @@
     # Antivirus solution (value: clamav, none)
     ANTIVIRUS: "clamav"
 
-    # The password for the rspamd web interface
-    RSPAMD_PASSWORD: "Secr3tPassWord"
-
     ###################################
     # Mail settings
     ###################################
@@ -82,11 +78,6 @@
     # Message size limit in bytes
     # Default: accept messages up to 50MB
     MESSAGE_SIZE_LIMIT: "50000000"
-
-    # Networks granted relay permissions, make sure that you include your Docker
-    # internal network (default to 172.17.0.0/16)
-    # For kubernetes this is the CIDR of the pod network
-    RELAYNETS: "10.2.0.0/16"
 
     # Will relay all outgoing mails if configured
     #RELAYHOST=

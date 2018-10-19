@@ -39,11 +39,13 @@ Before you can use Mailu, you must create the primary administrator user account
 <pre><code>docker-compose exec admin python manage.py admin {{ postmaster }} {{ domain }} PASSWORD
 </pre></code>
 
-Login the the admin interface to change the password for a safe one, at
+<p>Login to the admin interface to change the password for a safe one, at
 {% if admin_enabled %}
-one of the hostnames ({{ hostnames }}){{ admin_path }}.
+one of the hostnames 
+<a href="https://{{ hostnames.split(',')[0] }}{{ admin_path }}">{{ hostnames.split(',')[0] }}{{ admin_path }}</a>.
 {% else %}
-http://127.0.0.1:8080 (only directly from the host running docker).
+<a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a> (only directly from the host running docker).
 {% endif %}
 And choose the "Update password" option in the left menu.
+</p>
 {% endcall %}

@@ -68,8 +68,8 @@ def build_app(path):
         @bp.route("/submit_flavor", methods=["POST"])
         def submit_flavor():
             data = flask.request.form.copy()
-            flavor_files = sorted(os.listdir(path + "/" + version + "/templates/steps/" + data["flavor"]))
-            return flask.render_template('wizard.html', flavor=data["flavor"], flavor_files=flavor_files)
+            steps = sorted(os.listdir(path + "/" + version + "/templates/steps/" + data["flavor"]))
+            return flask.render_template('wizard.html', flavor=data["flavor"], steps=steps)
 
         @bp.route("/submit", methods=["POST"])
         def submit():

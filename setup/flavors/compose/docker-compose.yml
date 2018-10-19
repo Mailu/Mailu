@@ -19,9 +19,6 @@ services:
     image: mailu/nginx:{{ version }}
     restart: always
     env_file: {{ env }}
-    environment:
-      - TLS_FLAVOR={{ tls_flavor }}
-      - ADMIN={{ admin_enabled or 'false' }}
     ports:
     {% for port in (80, 443, 25, 465, 587, 110, 995, 143, 993) %}
     {% if bind4 %}

@@ -21,10 +21,10 @@ spec:
               name: mailu-config
         resources:
           requests:
-            memory: 500Mi
-            cpu: 200m
+            memory: 2Gi
+            cpu: 500m
           limits:
-            memory: 1Gi
+            memory: 2Gi
             cpu: 500m
         volumeMounts:
           - mountPath: /data

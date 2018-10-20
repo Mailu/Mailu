@@ -250,6 +250,8 @@ class User(Base, Email):
     reply_enabled = db.Column(db.Boolean(), nullable=False, default=False)
     reply_subject = db.Column(db.String(255), nullable=True, default=None)
     reply_body = db.Column(db.Text(), nullable=True, default=None)
+    reply_startdate = db.Column(db.Date, nullable=False,
+        default=date(1900, 1, 1))
     reply_enddate = db.Column(db.Date, nullable=False,
         default=date(2999, 12, 31))
 
@@ -275,6 +277,15 @@ class User(Base, Email):
             return result
         else:
             return self.email
+
+    @property
+    def reply_active(self):
+        now = date.today()
+        return (
+            self.reply_enabled and
+            self.reply_startdate < now and
+            self.reply_enddate > now
+        )
 
     scheme_dict = {'PBKDF2': "pbkdf2_sha512",
                    'BLF-CRYPT': "bcrypt",

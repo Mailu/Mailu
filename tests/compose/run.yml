@@ -6,6 +6,8 @@ services:
     image: $DOCKER_ORG/nginx:$VERSION
     restart: 'no'
     env_file: $PWD/.env
+    logging:
+      driver: $LOG_DRIVER
     ports:
     - "$BIND_ADDRESS4:80:80"
     - "$BIND_ADDRESS4:443:443"

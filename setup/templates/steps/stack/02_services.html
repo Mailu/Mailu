@@ -1,0 +1,62 @@
+{% call macros.panel("info", "Step 3 - pick some features") %}
+<p>Mailu comes with multiple base features, including a specific admin
+interface, Web email clients (webmails), antispam, antivirus, etc. If you
+wish to disable some of these features, you are free to do so.</p>
+
+<p>Emails will be available through IMAP and POP3. You may also enable a Web
+email client. These do add some complexity but provide an easier way of
+accessing messages for beginner users.</p>
+
+<!-- 	Switched from radio buttons to dropdown menu in order to remove the checkbox -->
+<div class="form-group">
+  <label>Enable Web email client (and path to the Web email client)</label>
+<!--   <div class="radio"> -->
+<!--     {{ macros.radio("webmail_type", "roundcube", "RoundCube", "popular Webmail running on top of PHP") }} -->
+<!--     {{ macros.radio("webmail_type", "rainloop", "Rainloop", "lightweight Webmail based on PHP, no database") }} -->
+<!--   </div> -->
+  <br/>
+  <select class="btn btn-primary dropdown-toggle" name="webmail_type">
+  	{% for webmailtype in ["none", "roundcube", "rainloop"] %}
+  	<option value="{{ webmailtype }}" >{{ webmailtype }}</option>
+  	{% endfor %}
+  </select>
+  <p></p>
+  <div class="input-group">
+<!--     <div class="input-group-addon"><input type="checkbox" name="webmail_enabled" value="true"></div> -->
+    <input class="form-control" type="text" name="webmail_path" value="/webmail">
+  </div>
+</div>
+
+<p>Email filtering is a really important features. You can still disable it, which
+will prevent Mailu from doing spam filtering, virus filtering, and from applying
+white and blacklists that you may configure in the admin interface. You may
+also disable the antivirus if required (it does use aroung 1GB of ram).</p>
+
+<div class="form-check form-check-inline">
+  <label class="form-check-label">
+    <input class="form-check-input" type="checkbox" name="antispam_enabled" value="rspamd" checked>
+    Enable the spam filtering service
+  </label>
+</div>
+<div class="form-check form-check-inline">
+  <label class="form-check-label">
+    <input class="form-check-input" type="checkbox" name="antivirus_enabled" value="clamav">
+    Enable the antivirus service
+  </label>
+</div>
+
+<div class="form-check form-check-inline">
+  <label class="form-check-label">
+    <input class="form-check-input" type="checkbox" name="webdav_enabled" value="radicale">
+    Enable the webdav service
+  </label>
+</div>
+
+<div class="form-check form-check-inline">
+  <label class="form-check-label">
+    <input class="form-check-input" type="checkbox" name="fetchmail_enabled" value="true">
+    Enable fetchmail
+  </label>
+</div>
+
+{% endcall %}

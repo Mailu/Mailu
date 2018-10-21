@@ -32,9 +32,11 @@ def secret(length=16):
 
 def build_app(path):
 
+    #Hardcoded master as the only version for test purposes
     versions = [
-        version for version in os.listdir(path)
-        if os.path.isdir(os.path.join(path, version))
+    #    version for version in os.listdir(path)
+    #    if os.path.isdir(os.path.join(path, version))
+         "master"
     ]
 
     app.jinja_env.trim_blocks = True
@@ -62,6 +64,12 @@ def build_app(path):
         @bp.route("/")
         def wizard():
             return flask.render_template('wizard.html')
+
+        @bp.route("/submit_flavor", methods=["POST"])
+        def submit_flavor():
+            data = flask.request.form.copy()
+            steps = sorted(os.listdir(path + "/" + version + "/templates/steps/" + data["flavor"]))
+            return flask.render_template('wizard.html', flavor=data["flavor"], steps=steps)
 
         @bp.route("/submit", methods=["POST"])
         def submit():

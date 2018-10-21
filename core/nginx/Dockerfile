@@ -13,4 +13,4 @@ VOLUME ["/certs"]
 
 CMD /start.py
 
-HEALTHCHECK CMD curl -f -L http://localhost/ || exit 1
+HEALTHCHECK CMD curl -k -f -L http://localhost/health || exit 1

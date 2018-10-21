@@ -13,4 +13,4 @@ VOLUME ["/data"]
 
 CMD /start.py
 
-HEALTHCHECK CMD echo QUIT|nc localhost 25|grep "220 .* ESMTP Postfix"
+HEALTHCHECK --start-period=350s CMD echo QUIT|nc localhost 25|grep "220 .* ESMTP Postfix"

@@ -250,6 +250,8 @@ class User(Base, Email):
     reply_enabled = db.Column(db.Boolean(), nullable=False, default=False)
     reply_subject = db.Column(db.String(255), nullable=True, default=None)
     reply_body = db.Column(db.Text(), nullable=True, default=None)
+    reply_startdate = db.Column(db.Date, nullable=False,
+        default=date(1900, 1, 1))
     reply_enddate = db.Column(db.Date, nullable=False,
         default=date(2999, 12, 31))
 
@@ -276,7 +278,17 @@ class User(Base, Email):
         else:
             return self.email
 
-    scheme_dict = {'BLF-CRYPT': "bcrypt",
+    @property
+    def reply_active(self):
+        now = date.today()
+        return (
+            self.reply_enabled and
+            self.reply_startdate < now and
+            self.reply_enddate > now
+        )
+
+    scheme_dict = {'PBKDF2': "pbkdf2_sha512",
+                   'BLF-CRYPT': "bcrypt",
                    'SHA512-CRYPT': "sha512_crypt",
                    'SHA256-CRYPT': "sha256_crypt",
                    'MD5-CRYPT': "md5_crypt",
@@ -287,8 +299,14 @@ class User(Base, Email):
     )
 
     def check_password(self, password):
+        context = User.pw_context
         reference = re.match('({[^}]+})?(.*)', self.password).group(2)
-        return User.pw_context.verify(password, reference)
+        result = context.verify(password, reference)
+        if result and context.identify(reference) != context.default_scheme():
+            self.set_password(password)
+            db.session.add(self)
+            db.session.commit()
+        return result
 
     def set_password(self, password, hash_scheme=app.config['PASSWORD_SCHEME'], raw=False):
         """Set password for user with specified encryption scheme

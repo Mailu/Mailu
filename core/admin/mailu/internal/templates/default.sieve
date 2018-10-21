@@ -32,9 +32,6 @@ if exists "X-Virus" {
   stop;
 }
 
-{% if user.reply_enabled %}
-if currentdate :value "le" "date" "{{ user.reply_enddate }}"
-{
- vacation :days 1 :subject "{{ user.reply_subject }}" "{{ user.reply_body }}";
-}
+{% if user.reply_active  %}
+vacation :days 1 :subject "{{ user.reply_subject }}" "{{ user.reply_body }}";
 {% endif %}

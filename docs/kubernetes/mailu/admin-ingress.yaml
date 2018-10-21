@@ -1,0 +1,86 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: mailu-admin-ingress
+  namespace: mailu-mailserver
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    certmanager.k8s.io/cluster-issuer: letsencrypt-stage
+    ingress.kubernetes.io/permanent-redirect: "https://mail.example.com/admin/ui/"
+    ingress.kubernetes.io/follow-redirects: "true"
+  labels:
+    app: mailu
+    role: mail
+    tier: backend
+spec:
+  tls:
+  - hosts:
+    - "mail.example.com"
+    secretName: letsencrypt-certs-all # If unsure how to generate these, check out https://github.com/ployst/docker-letsencrypt
+  rules:
+  - host: "mail.example.com"
+    http:
+      paths:
+      - path: "/admin"
+        backend:
+          serviceName: admin
+          servicePort: 80
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: mailu-admin-ui-ingress
+  namespace: mailu-mailserver
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    certmanager.k8s.io/cluster-issuer: letsencrypt-stage
+    ingress.kubernetes.io/rewrite-target: "/ui"
+    ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-Forwarded-Prefix /admin;
+  labels:
+    app: mailu
+    role: mail
+    tier: backend
+spec:
+  tls:
+  - hosts:
+    - "mail.example.com"
+    secretName: letsencrypt-certs-all # If unsure how to generate these, check out https://github.com/ployst/docker-letsencrypt
+  rules:
+  - host: "mail.example.com"
+    http:
+      paths:
+      - path: "/admin/ui"
+        backend:
+          serviceName: admin
+          servicePort: 80
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: mailu-admin-static-ingress
+  namespace: mailu-mailserver
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    certmanager.k8s.io/cluster-issuer: letsencrypt-stage
+    ingress.kubernetes.io/rewrite-target: "/static"
+    ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-Forwarded-Prefix /admin;
+  labels:
+    app: mailu
+    role: mail
+    tier: backend
+spec:
+  tls:
+  - hosts:
+    - "mail.example.com"
+    secretName: letsencrypt-certs-all # If unsure how to generate these, check out https://github.com/ployst/docker-letsencrypt
+  rules:
+  - host: "mail.example.com"
+    http:
+      paths:
+      - path: "/admin/static"
+        backend:
+          serviceName: admin
+          servicePort: 80

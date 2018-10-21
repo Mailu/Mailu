@@ -55,7 +55,7 @@ the version of Mailu that you are running.
     configuration
     compose/requirements
     compose/setup
-    kubernetes/stable/index
+    kubernetes/mailu/index
     dns
     reverse
 

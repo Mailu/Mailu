@@ -1,10 +1,10 @@
 {% import "macros.html" as macros %}
 
 {% call macros.panel("info", "Step 1 - Download your configuration files") %}
-<p>Docker Compose expects a project file, named <code>docker-compose.yml</code>
+<p>Docker Stack expects a project file, named <code>docker-compose.yml</code>
 in a project directory. First create your project directory.</p>
 
-<pre><code>mkdir {{ root }}
+<pre><code>mkdir -p /{{ root }}/{redis,certs,data,dkim,mail,overrides/rspamd,filter,dav,webmail}
 </pre></code>
 
 <p>Then download the project file. A side configuration file makes it easier
@@ -26,17 +26,26 @@ files before going any further.</p>
 <p>When you are done checking them, check them one last time.</p>
 {% endcall %}
 
-{% call macros.panel("info", "Step 3 - Start the Compose project") %}
-<p>To start your compose project, simply run the Docker Compose <code>up</code>
-command.</p>
+{% call macros.panel("info", "Step 3 - Deploy docker stack") %}
+<p>To deploy the docker stack use the following commands. For more information about setting up docker swarm nodes read the
+	<a href="https://docs.docker.com/get-started">docker documentation</a></p>
 
 <pre><code>cd {{ root }}
-docker-compose up -d
+docker swarm init
+docker stack deploy -c docker-compose.yml mailu
 </pre></code>
+
+In the docker stack deploy command, mailu is the app name. Feel free to change it.<br/>
+In order to display the running container you can use<br/>
+<pre><code>docker ps</code></pre>
+or
+<pre><code>docker stack ps --no-trunc mailu</code></pre>
+Command for removing docker stack is
+<pre><code>docker stack rm mailu</code></pre>
 
 Before you can use Mailu, you must create the primary administrator user account. This should be {{ postmaster }}@{{ domain }}. Use the following command, changing PASSWORD to your liking:
 
-<pre><code>docker-compose exec admin python manage.py admin {{ postmaster }} {{ domain }} PASSWORD
+<pre><code>docker exec $(docker ps | grep admin | cut -d ' ' -f1) python manage.py admin {{ postmaster }} {{ domain }} PASSWORD 
 </pre></code>
 
 <p>Login to the admin interface to change the password for a safe one, at

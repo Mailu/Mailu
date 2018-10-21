@@ -1,0 +1,31 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: mailu-webmail-ingress
+  namespace: mailu-mailserver
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    certmanager.k8s.io/cluster-issuer: letsencrypt-stage
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header Host $http_host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
+  labels:
+    app: mailu
+    role: mail
+    tier: backend
+spec:
+  tls:
+  - hosts:
+    - "webmail.example.com"
+    secretName: letsencrypt-webmail # If unsure how to generate these, check out https://github.com/ployst/docker-letsencrypt
+  rules:
+    - host: "webmail.example.com"
+      http:
+        paths:
+        - path: "/"
+          backend:
+            serviceName: webmail
+            servicePort: 80

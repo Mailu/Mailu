@@ -2,7 +2,7 @@ FROM alpine:3.8
 
 RUN apk add --no-cache \
      dovecot dovecot-pigeonhole-plugin dovecot-fts-lucene rspamd-client \
-     python3 py3-pip \
+     bash python3 py3-pip \
  && pip3 install --upgrade pip \
  && pip3 install jinja2 podop tenacity
 

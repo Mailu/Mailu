@@ -10,8 +10,10 @@ RUN apk add --no-cache git curl \
 COPY server.py ./server.py
 COPY setup.py ./setup.py
 COPY main.py ./main.py
+COPY flavors /data/master/flavors
+COPY templates /data/master/templates
 
-RUN python setup.py https://github.com/mailu/mailu /data
+#RUN python setup.py https://github.com/mailu/mailu /data
 
 EXPOSE 80/tcp
 

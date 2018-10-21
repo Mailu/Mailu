@@ -18,4 +18,4 @@ VOLUME ["/var/lib/rspamd"]
 
 CMD /start.py
 
-HEALTHCHECK CMD curl -f -L http://localhost:11334/ || exit 1
+HEALTHCHECK --start-period=350s CMD curl -f -L http://localhost:11334/ || exit 1

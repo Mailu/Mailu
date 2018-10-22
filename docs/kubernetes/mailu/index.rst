@@ -1,5 +1,7 @@
-Install Mailu master on kubernetes
-==================================
+.. _kubernetes:
+
+Kubernetes setup
+================
 
 Prequisites
 -----------

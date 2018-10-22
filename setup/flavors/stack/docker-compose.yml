@@ -10,7 +10,6 @@ services:
 # External dependencies
   redis:
     image: redis:alpine
-    restart: always
     volumes:
       - "{{ root }}/redis:/data"
 
@@ -18,6 +17,8 @@ services:
   front:
     image: mailu/nginx:{{ version }}
     env_file: {{ env }}
+    logging:
+      driver: {{ log_driver or 'json-file' }}
     ports:
     {% for port in (80, 443, 25, 465, 587, 110, 995, 143, 993) %}
       - target: {{ port }}
@@ -27,7 +28,7 @@ services:
     volumes:
       - "{{ root }}/certs:/certs"
     deploy:
-      replicas: 1
+      replicas: {{ front_replicas }}
 
   admin:
     image: mailu/admin:{{ version }}
@@ -40,7 +41,7 @@ services:
       - "{{ root }}/data:/data"
       - "{{ root }}/dkim:/dkim"
     deploy:
-      replicas: 1
+      replicas: {{ admin_replicas }}
 
   imap:
     image: mailu/dovecot:{{ version }}
@@ -52,7 +53,7 @@ services:
       - "{{ root }}/mail:/mail"
       - "{{ root }}/overrides:/overrides"
     deploy:
-      replicas: 1
+      replicas: {{ imap_replicas }}
 
   smtp:
     image: mailu/postfix:{{ version }}
@@ -62,7 +63,7 @@ services:
     volumes:
       - "{{ root }}/overrides:/overrides"
     deploy:
-      replicas: 1
+      replicas: {{ smtp_replicas }}
 
   # Optional services
   {% if antispam_enabled %}

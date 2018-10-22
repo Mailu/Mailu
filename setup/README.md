@@ -15,7 +15,7 @@ Eg: Adding a WIP step we'll create `templates/steps/kubernetes/wip.html`
 wip.html will start with
 
 ```
-{% call macros.panel("info", "Step X - Work in progress")
+{% call macros.panel("info", "Step X - Work in progress") %}
 ``` 
 
 and end with 
@@ -31,7 +31,7 @@ In the example below the string entered in the input field is stored in the vari
 
 In order to user the variable furter you use it like `{{ var_test }}`
 
-In the setup page (`flavors/kubernetes/setup`) you cand add steps by importing macros
+In the setup page (`flavors/kubernetes/setup.html`) you cand add steps by importing macros
 
 ```
 {% import "macros.html" as macros %}
@@ -42,5 +42,18 @@ and start and end every step with
 {% call macros.panel("info", "Step X - Title") %}
 -------------------
 {% endcall %}
+```
+
+### Generating a file
+Create the file template in `flavors/kubernetes/` (eg. file.txt) in which you save your variables
+```
+ROOT = {{ root }}
+MY_VAR = {{ var_test }}
+```
+
+When you submit to Setup Mailu the file will be generated. In order to get the file add the following command to setup.html
+
+```
+<p>curl {{ url_for('.file', uid=uid, filepath='file.txt', _external=True) }} > file.txt</p>
 ```
 

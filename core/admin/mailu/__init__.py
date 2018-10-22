@@ -12,7 +12,7 @@ import docker
 import socket
 import uuid
 
-from werkzeug.contrib import fixers
+from werkzeug.contrib import fixers, profiler
 
 # Create application
 app = flask.Flask(__name__)
@@ -57,12 +57,15 @@ default_config = {
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
     # Advanced settings
-    'PASSWORD_SCHEME': 'SHA512-CRYPT',
+    'PASSWORD_SCHEME': 'BLF-CRYPT',
     # Host settings
     'HOST_IMAP': 'imap',
     'HOST_POP3': 'imap',
     'HOST_SMTP': 'smtp',
+    'HOST_WEBMAIL': 'webmail',
+    'HOST_FRONT': 'front',
     'HOST_AUTHSMTP': os.environ.get('HOST_SMTP', 'smtp'),
+    'POD_ADDRESS_RANGE': None
 }
 
 # Load configuration from the environment if available
@@ -79,6 +82,10 @@ limiter = flask_limiter.Limiter(app, key_func=lambda: current_user.username)
 if app.config.get("DEBUG"):
     import flask_debugtoolbar
     toolbar = flask_debugtoolbar.DebugToolbarExtension(app)
+
+# Profiler
+if app.config.get("DEBUG"):
+    app.wsgi_app = profiler.ProfilerMiddleware(app.wsgi_app, restrictions=[30])
 
 # Manager commnad
 manager = flask_script.Manager(app)
@@ -128,5 +135,6 @@ class PrefixMiddleware(object):
         if prefix:
             environ['SCRIPT_NAME'] = prefix
         return self.app(environ, start_response)
+
 
 app.wsgi_app = PrefixMiddleware(fixers.ProxyFix(app.wsgi_app))

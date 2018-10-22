@@ -2,8 +2,6 @@
 # General
 ###############
 
-debug_peer_list = 0.0.0.0/0
-
 # Main domain and hostname
 mydomain = {{ DOMAIN }}
 myhostname = {{ HOSTNAMES.split(",")[0] }}
@@ -34,7 +32,7 @@ relayhost = {{ RELAYHOST }}
 recipient_delimiter = {{ RECIPIENT_DELIMITER }}
 
 # Only the front server is allowed to perform xclient
-smtpd_authorized_xclient_hosts={{ FRONT_ADDRESS }}
+smtpd_authorized_xclient_hosts={{ FRONT_ADDRESS }} {{ POD_ADDRESS_RANGE }}
 
 ###############
 # TLS

@@ -21,7 +21,7 @@
     VERSION: "master"
 
     # Set to a randomly generated 16 bytes string
-    SECRET_KEY: "YourKeyHere"
+    SECRET_KEY: "MySup3rS3cr3tPas"
 
     # Address where listening ports should bind
     BIND_ADDRESS4: "127.0.0.1"
@@ -44,6 +44,14 @@
 
     # Opt-out of statistics, replace with "True" to opt out
     DISABLE_STATISTICS: "False"
+
+    ###################################
+    # Kubernetes configuration
+    ###################################
+
+    # Use Kubernetes Ingress Controller to handle all actions on port 80 and 443
+    # This way we can make use of the advantages of the cert-manager deployment
+    KUBERNETES_INGRESS: "true"
 
     ###################################
     # Optional features
@@ -71,18 +79,17 @@
     # Default: accept messages up to 50MB
     MESSAGE_SIZE_LIMIT: "50000000"
 
-    # Networks granted relay permissions, make sure that you include your Docker
-    # internal network (default to 172.17.0.0/16)
-    # For kubernetes this is the CIDR of the pod network
-    RELAYNETS: "10.2.0.0/16"
-    POD_ADDRESS_RANGE: "10.2.0.0/16"
-
-
     # Will relay all outgoing mails if configured
     #RELAYHOST=
 
     # This part is needed for the XCLIENT login for postfix. This should be the POD ADDRESS range
     FRONT_ADDRESS: "front.mailu-mailserver.svc.cluster.local"
+
+    # This value  is needed by the webmail to find the correct imap backend
+    IMAP_ADDRESS: "imap.mailu-mailserver.svc.cluster.local"
+
+    # This value is used by Dovecot to find the Redis server in the cluster
+    REDIS_ADDRESS: "redis.mailu-mailserver.svc.cluster.local"
 
     # Fetchmail delay
     FETCHMAIL_DELAY: "600"
@@ -106,13 +113,16 @@
     ###################################
 
     # Path to the admin interface if enabled
+    # Kubernetes addition: You need to change ALL the ingresses, when you want this URL to be different!!!
     WEB_ADMIN: "/admin"
 
     # Path to the webmail if enabled
+    # Currently, this is not used, because we intended to use a different subdomain: webmail.example.com
+    # This option can be added in a feature release
     WEB_WEBMAIL: "/webmail"
 
     # Website name
-    SITENAME: "AppSynth"
+    SITENAME: "Mailu"
 
     # Linked Website URL
     WEBSITE: "https://example.com"

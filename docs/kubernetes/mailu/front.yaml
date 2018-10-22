@@ -1,23 +1,41 @@
-
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: apps/v1beta2
+kind: DaemonSet
 metadata:
   name: mailu-front
   namespace: mailu-mailserver
+  labels:
+    k8s-app: mail-loadbalancer
+    component: ingress-controller
+    type: nginx
 spec:
-  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: mail-loadbalancer
+      component: ingress-controller
+      type: nginx
   template:
     metadata:
       labels:
-        app: mailu-front
-        role: mail
-        tier: backend
+        k8s-app: mail-loadbalancer
+        component: ingress-controller
+        type: nginx
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/node
+                operator: Exists
+      hostNetwork: true
+      nodeSelector:
+        node-role.kubernetes.io/node: ""
+      dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
       terminationGracePeriodSeconds: 60
       containers:
       - name: front
-        image: mailu/nginx:latest
+        image: mailu/nginx:master
         imagePullPolicy: Always
         envFrom:
           - configMapRef:
@@ -26,12 +44,6 @@ spec:
           - name: certs
             mountPath: /certs
         ports:
-          - name: http
-            containerPort: 80
-            protocol: TCP
-          - name: https
-            containerPort: 443
-            protocol: TCP
           - name: pop3
             containerPort: 110
             protocol: TCP
@@ -85,21 +97,15 @@ metadata:
   name: front
   namespace: mailu-mailserver
   labels:
-    app: mailu-admin
-    role: mail
-    tier: backend
+    k8s-app: mail-loadbalancer
+    component: ingress-controller
+    type: nginx
 spec:
   selector:
-    app: mailu-front
-    role: mail
-    tier: backend
+    k8s-app: mail-loadbalancer
+    component: ingress-controller
+    type: nginx
   ports:
-  - name: http
-    port: 80
-    protocol: TCP
-  - name: https
-    port: 443
-    protocol: TCP
   - name: pop3
     port: 110
     protocol: TCP

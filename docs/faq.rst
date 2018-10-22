@@ -89,8 +89,79 @@ our ongoing `project management`_ discussion issue.
 Deployment related
 ------------------
 
+How does Mailu scale up?
+````````````````````````
+
+Recent works allow Mailu to be deployed in Docker Swarm and Kubernetes.
+This means it can be scaled horizontally. For more information, refer to :ref:`kubernetes`
+or the `Docker swarm howto`_.
+
+*Issue reference:* `165`_, `520`_.
+
+How to achieve HA / failover?
+`````````````````````````````
+
+The mailboxes and databases for Mailu are kept on the host filesystem under ``$ROOT/``.
+For making the **storage** highly available, all sorts of techniques can be used:
+
+- Local raid-1
+- btrfs in raid configuration
+- Distributed network filesystems such as GlusterFS or CEPH
+
+Note that no storage HA solution can protect against incidental deletes or file corruptions.
+Therefore it is advised to create backups on a regular base!
+
+A backup MX can be configured as **failover**. For this you need a separate server running
+Mailu. On that server, your domains will need to be setup as "Relayed domains", pointing
+to you main server. MX records for the mail domains with a higher priority number will have
+to point to this server. Please be aware that a backup MX can act as a `spam magnet`_.
+
+For **service** HA, please see: `How does Mailu scale up?`_
+
+
+*Issue reference:* `177`_, `591`_.
+
+.. _`spam magnet`: https://blog.zensoftware.co.uk/2012/07/02/why-we-tend-to-recommend-not-having-a-secondary-mx-these-days/
+
+
+Can I run Mailu without host iptables?
+``````````````````````````````````````
+
+When disabling iptables in docker, its forwarding proxy process takes over.
+This creates the situation that every incoming connection on port 25 seems to come from the
+local network (docker's 172.17.x.x) and is accepted. This causes an open relay!
+
+For that reason we do **not** support deployment on Docker hosts without iptables.
+
+*Issue reference:* `332`_.
+
+How can I override settings?
+````````````````````````````
+
+Postfix, dovecot and Rspamd support overriding configuration files. Override files belong in
+``$ROOT/overrides``. Please refer to the official documentation of those programs for the
+correct syntax. The following file names will be taken as override configuration:
+
+- `Postfix`_ - ``postfix.cf``;
+- `Dovecot`_ - ``dovecot.conf``;
+- `Rspamd`_ - All files in the ``rspamd`` sub-directory.
+
+.. _`Postfix`: http://www.postfix.org/postconf.5.html
+.. _`Dovecot`: https://wiki.dovecot.org/ConfigFile
+.. _`Rspamd`: https://www.rspamd.com/doc/configuration/index.html
+
+.. _`Docker swarm howto`: https://github.com/Mailu/Mailu/tree/master/docs/swarm/master
+.. _`165`: https://github.com/Mailu/Mailu/issues/165
+.. _`177`: https://github.com/Mailu/Mailu/issues/177
+.. _`332`: https://github.com/Mailu/Mailu/issues/332
+.. _`520`: https://github.com/Mailu/Mailu/issues/520
+.. _`591`: https://github.com/Mailu/Mailu/issues/591
+
 Technical issues
 ----------------
+
+In this section we are trying to cover the most common problems our users are having.
+If your issue is not listed here, please consult issues with the `troubleshooting tag`_.
 
 Changes in .env don't propagate
 ```````````````````````````````
@@ -103,7 +174,7 @@ down and up again. A container restart is not sufficient.
   docker-compose down && \
   docker-compose up -d
 
-*Issue reference:* `615`_,
+*Issue reference:* `615`_.
 
 TLS certificate issues
 ``````````````````````
@@ -170,9 +241,36 @@ See also :ref:`external_certs`.
 
 *Issue reference:* `426`_, `615`_.
 
+Do you support Fail2Ban?
+````````````````````````
+Fail2Ban is not included in Mailu. Fail2Ban needs to modify the host's IP tables in order to
+ban the addresses. We consider such a program should be run on the host system and not
+inside a container. The ``front`` container does use authentication rate limiting to slow
+down brute force attacks.
 
-WIP: Link to `troubleshooting`_ related issues will be in the bottom of this section.
+We *do* provide a possibility to export the logs from the ``front`` service to the host.
+For this you need to set ``LOG_DRIVER=journald`` or ``syslog``, depending on the log
+manager of the host. You will need to setup the proper Regex in the Fail2Ban configuration.
+Be aware that webmail authentication appears to come form the Docker network,
+so don't ban those addresses!
 
+*Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_.
+
+Users can't change their password from webmail
+``````````````````````````````````````````````
+
+All users have the abilty to login to the admin interface. Non-admin users
+have only restricted funtionality such as changing their password and the
+spam filter weight settings.
+
+*Issue reference:* `503`_.
+
+.. _`troubleshooting tag`: https://github.com/Mailu/Mailu/issues?utf8=%E2%9C%93&q=label%3Afaq%2Ftroubleshooting
+.. _`85`: https://github.com/Mailu/Mailu/issues/85
+.. _`116`: https://github.com/Mailu/Mailu/issues/116
+.. _`171`: https://github.com/Mailu/Mailu/issues/171
 .. _`426`: https://github.com/Mailu/Mailu/issues/426
+.. _`503`: https://github.com/Mailu/Mailu/issues/503
+.. _`584`: https://github.com/Mailu/Mailu/issues/584
+.. _`592`: https://github.com/Mailu/Mailu/issues/592
 .. _`615`: https://github.com/Mailu/Mailu/issues/615
-.. _`troubleshooting`: https://github.com/Mailu/Mailu/issues?utf8=%E2%9C%93&q=label%3Afaq%2Ftroubleshooting

@@ -3,7 +3,7 @@ FROM php:7.2-apache
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.3.7/roundcubemail-1.3.7-complete.tar.gz
 
 RUN apt-get update && apt-get install -y \
-      zlib1g-dev \
+      zlib1g-dev python3 \
  && docker-php-ext-install zip \
  && echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini \
  && rm -rf /var/www/html/ \
@@ -22,9 +22,9 @@ COPY php.ini /usr/local/etc/php/conf.d/roundcube.ini
 
 COPY config.inc.php /var/www/html/config/
 
-COPY start.sh /start.sh
+COPY start.py /start.py
 
 EXPOSE 80/tcp
 VOLUME ["/data"]
 
-CMD ["/start.sh"]
+CMD /start.py

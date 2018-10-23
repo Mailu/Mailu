@@ -19,4 +19,4 @@ RUN pybabel compile -d mailu/translations
 EXPOSE 80/tcp
 VOLUME ["/data"]
 
-CMD python /start.py
+CMD /start.py

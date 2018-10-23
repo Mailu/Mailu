@@ -148,6 +148,9 @@
     # Header to take the real ip from
     #REAL_IP_HEADER:
 
+    # Add your specific password to rspamd
+    RSPAMD_PASSWORD: "Your_secret_password_here"
+
     # IPs for nginx set_real_ip_from (CIDR list separated by commas)
     #REAL_IP_FROM:
 

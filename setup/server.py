@@ -7,6 +7,7 @@ import jinja2
 import uuid
 import string
 import random
+import ipaddress
 
 
 app = flask.Flask(__name__)
@@ -75,6 +76,7 @@ def build_app(path):
         def submit():
             data = flask.request.form.copy()
             data['uid'] = str(uuid.uuid4())
+            data['dns'] = str(ipaddress.IPv4Network(data['subnet'])[-2])
             db.set(data['uid'], json.dumps(data))
             return flask.redirect(flask.url_for('.setup', uid=data['uid']))
 

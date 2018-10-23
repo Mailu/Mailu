@@ -1,3 +1,5 @@
+.. _dns_setup:
+
 Setting up your DNS
 ===================
 

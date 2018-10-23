@@ -4,10 +4,10 @@ RUN mkdir -p /app
 WORKDIR /app
 
 COPY requirements-prod.txt requirements.txt
-RUN apk add --no-cache openssl \
+RUN apk add --no-cache openssl curl \
  && apk add --no-cache --virtual build-dep openssl-dev libffi-dev python-dev build-base \
  && pip install -r requirements.txt \
- && apk del build-dep
+ && apk del --no-cache build-dep
 
 COPY mailu ./mailu
 COPY migrations ./migrations
@@ -20,3 +20,5 @@ EXPOSE 80/tcp
 VOLUME ["/data"]
 
 CMD ["/start.sh"]
+
+HEALTHCHECK CMD curl -f -L http://localhost/ui || exit 1

@@ -1,11 +1,14 @@
-FROM alpine:edge
+FROM alpine:3.8
 
 RUN apk add --no-cache clamav rsyslog wget clamav-libunrar
 
 COPY conf /etc/clamav
 COPY start.sh /start.sh
+COPY health.sh /health.sh
 
 EXPOSE 3310/tcp
 VOLUME ["/data"]
 
 CMD ["/start.sh"]
+
+HEALTHCHECK CMD /health.sh

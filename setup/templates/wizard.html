@@ -8,12 +8,18 @@
   ready when using this wizard.
   {% endcall %}
 
-  <form method="post" action="{{ url_for(".submit") }}">
+  <form method="post" action="{{ url_for(".submit_flavor") }}">
   {% include "steps/flavor.html" %}
-  {% include "steps/expose.html" %}
-  {% include "steps/services.html" %}
-  {% include "steps/optional.html" %}
-
+  <input class="btn btn-primary" type="submit" value="Next >" style="margin-bottom: 15px">
+  </form>
+  {% if flavor %}
+  <form method="post" action="{{ url_for(".submit") }}">
+  <input type="hidden" name="flavor" value="{{ flavor }}">
+  {% include "steps/config.html" %}
+  {%for file in steps %}
+  {% include "steps/" + flavor + "/" + file %}
+  {% endfor %}
   <input class="btn btn-primary" type="submit" value="Setup Mailu">
+  {% endif %}
   </form>
 {% endblock %}

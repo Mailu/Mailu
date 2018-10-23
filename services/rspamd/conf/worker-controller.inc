@@ -1,3 +1,4 @@
+type = "controller";
 bind_socket = "*:11334";
 password = "mailu";
-secure_ip = "{{ FRONT_ADDRESS }}";
+secure_ip = "{% if POD_ADDRESS_RANGE %}{{ POD_ADDRESS_RANGE }}{% else %}{{ FRONT_ADDRESS }}{% endif %}";

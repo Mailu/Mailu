@@ -6,6 +6,7 @@ One of Mailu use cases is as part of a larger services platform, where maybe oth
 In such a configuration, one would usually run a frontend reverse proxy to serve all Web contents based on criteria like the requested hostname (virtual hosts) and/or the requested path. Mailu Web frontend is disabled in the default setup for security reasons, it is however expected that most users will enable it at some point. Also, due to Docker Compose configuration structure, it is impossible for us to make disabling the Web frontend completely available through a configuration variable. This guide was written to help users setup such an architecture.
 
 There are basically three options, from the most to the least recommended one:
+
 - have Mailu Web frontend listen locally and use your own Web frontend on top of it
 - override Mailu Web frontend configuration
 - disable Mailu Web frontend completely and use your own

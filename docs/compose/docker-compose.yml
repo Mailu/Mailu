@@ -29,27 +29,12 @@ services:
     - "$BIND_ADDRESS6:587:587"
     volumes:
       - "$ROOT/certs:/certs"
-    depends_on:
-      - unbound
-    dns:
-      - 10.177.20.254
-
-  unbound:
-    image: mailu/unbound:$VERSION
-    restart: always
-    networks:
-      default:
-        ipv4_address: 10.177.20.254
 
   redis:
     image: redis:alpine
     restart: always
     volumes:
       - "$ROOT/redis:/data"
-    dns:
-      - 10.177.20.254
-    depends_on:
-      - unbound
 
   imap:
     image: mailu/dovecot:$VERSION
@@ -60,9 +45,6 @@ services:
       - "$ROOT/overrides:/overrides"
     depends_on:
       - front
-      - unbound
-    dns:
-      - 10.177.20.254
 
   smtp:
     image: mailu/postfix:$VERSION
@@ -72,9 +54,6 @@ services:
       - "$ROOT/overrides:/overrides"
     depends_on:
       - front
-      - unbound
-    dns:
-      - 10.177.20.254
 
   antispam:
     image: mailu/rspamd:$VERSION
@@ -86,9 +65,6 @@ services:
       - "$ROOT/overrides/rspamd:/etc/rspamd/override.d"
     depends_on:
       - front
-      - unbound
-    dns:
-      - 10.177.20.254
 
   antivirus:
     image: mailu/$ANTIVIRUS:$VERSION
@@ -96,10 +72,6 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/filter:/data"
-    depends_on:
-      - unbound
-    dns:
-      - 10.177.20.254
 
   webdav:
     image: mailu/$WEBDAV:$VERSION
@@ -107,10 +79,6 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/dav:/data"
-    depends_on:
-      - unbound
-    dns:
-      - 10.177.20.254
 
   admin:
     image: mailu/admin:$VERSION
@@ -122,9 +90,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - redis
-      - unbound
-    dns:
-      - 10.177.20.254
 
   webmail:
     image: "mailu/$WEBMAIL:$VERSION"
@@ -134,24 +99,8 @@ services:
       - "$ROOT/webmail:/data"
     depends_on:
       - imap
-      - unbound
-    dns:
-      - 10.177.20.254
 
   fetchmail:
     image: mailu/fetchmail:$VERSION
     restart: always
     env_file: .env
-    depends_on:
-      - unbound
-    dns:
-      - 10.177.20.254
-
-networks:
-  default:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.177.20.0/24
-

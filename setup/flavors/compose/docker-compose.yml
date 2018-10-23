@@ -29,7 +29,7 @@ services:
     volumes:
       - "{{ root }}/certs:/certs"
       
-  {% if resolver_enabled %}      
+  {% if resolver_enabled %}
   resolver:
     image: mailu/unbound:{{ version }}
     env_file: {{ env }}
@@ -68,7 +68,7 @@ services:
       - "{{ root }}/overrides:/overrides"
     depends_on:
       - front
-  	{% if resolver_enabled %}
+    {% if resolver_enabled %}
       - resolver
     dns:
       - {{ dns }}

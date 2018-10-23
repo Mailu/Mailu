@@ -32,6 +32,7 @@ services:
   {% if resolver_enabled %}      
   resolver:
     image: mailu/unbound:{{ version }}
+    env_file: {{ env }}
     restart: always
     networks:
       default:

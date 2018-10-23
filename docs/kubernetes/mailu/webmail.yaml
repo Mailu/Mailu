@@ -2,62 +2,57 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: mailu-admin
+  name: mailu-roundcube
   namespace: mailu-mailserver
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: mailu-admin
+        app: mailu-roundcube
         role: mail
-        tier: backend
+        tier: frontend
     spec:
       containers:
-      - name: admin
-        image: mailu/admin:master
+      - name: roundcube
+        image: mailu/roundcube:master
         imagePullPolicy: Always
         envFrom:
           - configMapRef:
               name: mailu-config
-        volumeMounts:
-          - name: maildata
-            mountPath: /data
-            subPath: maildata
-          - name: maildata
-            mountPath: /dkim
-            subPath: dkim
-        ports:
-          - name: http
-            containerPort: 80
-            protocol: TCP
         resources:
           requests:
-            memory: 500Mi
-            cpu: 500m
+            memory: 100Mi
+            cpu: 100m
           limits:
-            memory: 500Mi
-            cpu: 500m
+            memory: 200Mi
+            cpu: 200m
+        volumeMounts:
+          - mountPath: /data
+            name: maildata
+            subPath: webmail
+        ports:
+          - containerPort: 80
       volumes:
         - name: maildata
           persistentVolumeClaim:
             claimName: mail-storage
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
-  name: admin
+  name: webmail
   namespace: mailu-mailserver
   labels:
-    app: mailu-admin
+    app: mailu-roundcube
     role: mail
-    tier: backend
+    tier: frontend
 spec:
   selector:
-    app: mailu-admin
+    app: mailu-roundcube
     role: mail
-    tier: backend
+    tier: frontend
+  ports:
   ports:
   - name: http
     port: 80

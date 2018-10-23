@@ -272,6 +272,8 @@ class User(Base, Email):
     reply_enabled = db.Column(db.Boolean(), nullable=False, default=False)
     reply_subject = db.Column(db.String(255), nullable=True, default=None)
     reply_body = db.Column(db.Text(), nullable=True, default=None)
+    reply_startdate = db.Column(db.Date, nullable=False,
+        default=date(1900, 1, 1))
     reply_enddate = db.Column(db.Date, nullable=False,
         default=date(2999, 12, 31))
 
@@ -287,7 +289,26 @@ class User(Base, Email):
 
     def get_id(self):
         return self.email
-      
+
+    @property
+    def destination(self):
+        if self.forward_enabled:
+            result = self.self.forward_destination
+            if self.forward_keep:
+                result += ',' + self.email
+            return result
+        else:
+            return self.email
+
+    @property
+    def reply_active(self):
+        now = date.today()
+        return (
+            self.reply_enabled and
+            self.reply_startdate < now and
+            self.reply_enddate > now
+        )
+
     scheme_dict = {'PBKDF2': "pbkdf2_sha512",
                    'BLF-CRYPT': "bcrypt",
                    'SHA512-CRYPT': "sha512_crypt",

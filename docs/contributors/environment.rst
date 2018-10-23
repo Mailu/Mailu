@@ -113,7 +113,8 @@ Documentation is maintained in the ``docs`` directory and are maintained as `reS
   docker build -t docs docs
   docker run -p 127.0.0.1:8080:80 docs
 
-You can now read the local documentation by navigating to http://localhost:8080.
+In a local build Docker always assumes the version to be master.
+You can read the local documentation by navigating to http://localhost:8080/master.
 
 .. note:: After modifying the documentation, the image needs to be rebuild and the container restarted for the changes to become visible.
 

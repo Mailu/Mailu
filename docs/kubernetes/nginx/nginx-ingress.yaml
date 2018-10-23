@@ -2,15 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   # keep it under 24 chars
-  name: appsynth-lb
+  name: ingress-lb
   namespace: kube-ingress
   labels:
-    k8s-app: appsynth-lb
+    k8s-app: ingress-lb
     component: ingress-controller
 spec:
   type: ClusterIP
   selector:
-    k8s-app: appsynth-lb
+    k8s-app: ingress-lb
     component: ingress-controller
   ports:
     - name: http
@@ -35,13 +35,6 @@ metadata:
   name: tcp-services
   namespace: kube-ingress
 data:
-  25: "mailu-mailserver/front:25"
-  110: "mailu-mailserver/front:110"
-  465: "mailu-mailserver/front:465"
-  587: "mailu-mailserver/front:587"
-  143: "mailu-mailserver/front:143"
-  993: "mailu-mailserver/front:993"
-  995: "mailu-mailserver/front:995"
 
 ---
 apiVersion: v1
@@ -61,7 +54,7 @@ metadata:
     prometheus.io/port: "10254"
     prometheus.io/scrape: "true"
   labels:
-    k8s-app: appsynth-lb
+    k8s-app: ingress-lb
     component: ingress-controller
     type: nginx
 spec:
@@ -71,13 +64,13 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      k8s-app: appsynth-lb
+      k8s-app: ingress-lb
       component: ingress-controller
       type: nginx
   template:
     metadata:
       labels:
-        k8s-app: appsynth-lb
+        k8s-app: ingress-lb
         component: ingress-controller
         type: nginx
     spec:
@@ -94,14 +87,11 @@ spec:
           image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.16.2
           args:
           - /nginx-ingress-controller
-          - --configmap=$(POD_NAMESPACE)/tectonic-custom-error
           - --default-backend-service=$(POD_NAMESPACE)/default-http-backend
-          #- --default-ssl-certificate=tectonic-system/tectonic-ingress-tls-secret
           - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services
           - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
           - --annotations-prefix=ingress.kubernetes.io
           - --enable-ssl-passthrough
-          - --ingress-class=tectonic
           # use downward API
           env:
             - name: POD_NAME
@@ -115,10 +105,8 @@ spec:
           ports:
             - name: http
               containerPort: 80
-              hostPort: 80
             - name: https
               containerPort: 443
-              hostPort: 443
           readinessProbe:
             httpGet:
               path: /healthz
@@ -134,6 +122,6 @@ spec:
       hostNetwork: true
       nodeSelector:
         node-role.kubernetes.io/node: ""
-      dnsPolicy: ClusterFirst
+      dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
       terminationGracePeriodSeconds: 60

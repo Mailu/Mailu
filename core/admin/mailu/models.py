@@ -224,17 +224,17 @@ class Email(object):
     @classmethod
     def resolve_domain(cls, email):
         localpart, domain_name = email.split('@', 1) if '@' in email else (None, email)
-        alternative = models.Alternative.query.get(domain_name)
+        alternative = Alternative.query.get(domain_name)
         if alternative:
             domain_name = alternative.domain_name
         return (localpart, domain_name)
 
     @classmethod
     def resolve_destination(cls, localpart, domain_name, ignore_forward_keep=False):
-        alias = models.Alias.resolve(localpart, domain_name)
+        alias = Alias.resolve(localpart, domain_name)
         if alias:
             return alias.destination
-        user = models.User.query.get('{}@{}'.format(localpart, domain_name))
+        user = User.query.get('{}@{}'.format(localpart, domain_name))
         if user:
             if user.forward_enabled:
                 destination = user.forward_destination

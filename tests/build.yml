@@ -8,7 +8,7 @@ services:
 
   resolver:
     image: ${DOCKER_ORG:-mailu}/unbound:${VERSION:-local}
-    build: ../core/unbound
+    build: ../services/unbound
 
   imap:
     image: ${DOCKER_ORG:-mailu}/dovecot:${VERSION:-local}

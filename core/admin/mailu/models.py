@@ -271,7 +271,7 @@ class User(Base, Email):
     @property
     def destination(self):
         if self.forward_enabled:
-            result = self.self.forward_destination
+            result = self.forward_destination
             if self.forward_keep:
                 result += ',' + self.email
             return result

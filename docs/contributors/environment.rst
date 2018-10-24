@@ -5,39 +5,51 @@ Docker containers
 -----------------
 
 The development environment is quite similar to the production one. You should always use
-the ``master`` version when developing. Simply add a build directive to the images
-you are working on in the ``docker-compose.yml``:
+the ``master`` version when developing.
 
-.. code-block:: yaml
+Building images
+```````````````
 
-  webdav:
-    build: ./optional/radicale
-    image: mailu/$WEBDAV:$VERSION
-    restart: always
-    env_file: .env
-    volumes:
-      - "$ROOT/dav:/data"
-
-  admin:
-    build: ./core/admin
-    image: mailu/admin:$VERSION
-    restart: always
-    env_file: .env
-    volumes:
-      - "$ROOT/data:/data"
-      - "$ROOT/dkim:/dkim"
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    depends_on:
-      - redis
-
-
-The build these containers.
+We supply a separate ``test/build.yml`` file for
+convenience. To build all Mailu containers:
 
 .. code-block:: bash
 
-  docker-compose build admin webdav
+  docker-compose -f tests/build.yml build
 
-Then you can simply start the stack as normal, newly-built images will be used.
+The ``build.yml`` file has two variables:
+
+#. ``$DOCKER_ORG``: First part of the image tag. Defaults to *mailu* and needs to be changed
+   only  when pushing to your own Docker hub account.
+#. ``$VERSION``: Last part of the image tag. Defaults to *local* to differentiate from pulled
+   images.
+
+To re-build only specific containers at a later time.
+
+.. code-block:: bash
+
+  docker-compose -f tests/build.yml build admin webdav
+
+If you have to push the images to Docker Hub for testing in Docker Swarm or a remote
+host, you have to define ``DOCKER_ORG`` (usually your Docker user-name) and login to
+the hub.
+
+.. code-block:: bash
+
+  docker login
+  Username: Foo
+  Password: Bar
+  export DOCKER_ORG="Foo"
+  export VERSION="feat-extra-app"
+  docker-compose -f tests/build.yml build
+  docker-compose -f tests/build.yml push
+
+Running containers
+``````````````````
+
+To run the newly created images: ``cd`` to your project directory. Edit ``.env`` to set
+``VERSION`` to the same value as used during the build, which defaults to ``local``.
+After that you can run:
 
 .. code-block:: bash
 
@@ -101,7 +113,8 @@ Documentation is maintained in the ``docs`` directory and are maintained as `reS
   docker build -t docs docs
   docker run -p 127.0.0.1:8080:80 docs
 
-You can now read the local documentation by navigating to http://localhost:8080.
+In a local build Docker always assumes the version to be master.
+You can read the local documentation by navigating to http://localhost:8080/master.
 
 .. note:: After modifying the documentation, the image needs to be rebuild and the container restarted for the changes to become visible.
 

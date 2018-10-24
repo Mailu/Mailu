@@ -12,3 +12,5 @@ EXPOSE 25/tcp 10025/tcp
 VOLUME ["/data"]
 
 CMD /start.py
+
+HEALTHCHECK --start-period=350s CMD echo QUIT|nc localhost 25|grep "220 .* ESMTP Postfix"

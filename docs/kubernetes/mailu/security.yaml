@@ -31,6 +31,9 @@ spec:
           - name: antispam
             containerPort: 11332
             protocol: TCP
+          - name: antispam-http
+            containerPort: 11334
+            protocol: TCP
         volumeMounts:
           - name: filter
             subPath: filter
@@ -87,6 +90,9 @@ spec:
   - name: antispam
     port: 11332
     protocol: TCP
+  - name: antispam-http
+    protocol: TCP
+    port: 11334
 
 ---
 

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <h1>Mailu configuration - {{ branch }}</h1>
+
+  {% call macros.panel("success", "Your configuration was generated") %}
+  <p>The following steps will guide you towards downloading and using your
+  configuration files. Keep in mind that you should review every downloaded
+  file before running anything based on it.</p>
+  <p>If you encounter issues while setting Mailu up, please review the
+  documentation first, then check if an issue is open for that specific
+  problem. If not, you may either use Github to open an issue and detail what
+  your problem or bug looks like, or join us on Matrix and discuss it
+  with contributors.</p>
+  {% endcall %}
+
+  {% autoescape false %}
+  {{ contents }}
+  {% endautoescape %}
+
+</div>
+{% endblock %}

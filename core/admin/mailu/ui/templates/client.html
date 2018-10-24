@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% trans %}Client setup{% endtrans %}
+{% endblock %}
+
+{% block subtitle %}
+configure your email client
+{% endblock %}
+
+{% block content %}
+{% call macros.box(title="Incoming mail") %}
+<table class="table table-bordered">
+  <tbody>
+    <tr>
+      <th>{% trans %}Mail protocol{% endtrans %}</th>
+      <td>IMAP</td>
+    </tr>
+    <tr>
+      <th>{% trans %}TCP port{% endtrans %}</th>
+      <td>{{ "143" if config["TLS_FLAVOR"] == "notls" else "993 (TLS) or 143 (STARTTLS)" }}</td>
+    </tr>
+    <tr>
+      <th>{% trans %}Server name{% endtrans %}</th>
+      <td><pre>{{ config["HOSTNAMES"].split(',')[0] }}</pre></td>
+    </tr>
+    <tr>
+      <th>{% trans %}Username{% endtrans %}</th>
+      <td><pre>{{ current_user if current_user.is_authenticated else "******" }}</pre></td>
+    </tr>
+    <tr>
+      <th>{% trans %}Password{% endtrans %}</th>
+      <td><pre>*******</pre></td>
+    </tr>
+  </tbody>
+</table>
+{% endcall %}
+
+{% call macros.box(title="Outgoing mail") %}
+<table class="table table-bordered">
+  <tbody>
+    <tr>
+      <th>{% trans %}Mail protocol{% endtrans %}</th>
+      <td>SMTP</td>
+    </tr>
+    <tr>
+      <th>{% trans %}TCP port{% endtrans %}</th>
+      <td>{{ "25" if config["TLS_FLAVOR"] == "notls" else "465 (TLS) or 587 (STARTTLS)" }}</td>
+    </tr>
+    <tr>
+      <th>{% trans %}Server name{% endtrans %}</th>
+      <td><pre>{{ config["HOSTNAMES"].split(',')[0] }}</pre></td>
+    </tr>
+    <tr>
+      <th>{% trans %}Username{% endtrans %}</th>
+      <td><pre>{{ current_user or "******" }}</pre></td>
+    </tr>
+    <tr>
+      <th>{% trans %}Password{% endtrans %}</th>
+      <td><pre>*******</pre></td>
+    </tr>
+  </tbody>
+</table>
+{% endcall %}
+{% endblock %}

@@ -1,0 +1,113 @@
+###############
+# General
+###############
+
+# Main domain and hostname
+mydomain = {{ DOMAIN }}
+myhostname = {{ HOSTNAMES.split(",")[0] }}
+myorigin = $mydomain
+
+# Queue location
+queue_directory = /queue
+
+# Message size limit
+message_size_limit = {{ MESSAGE_SIZE_LIMIT }}
+
+# Relayed networks
+mynetworks = 127.0.0.1/32 [::1]/128 {{ RELAYNETS }}
+
+# Empty alias list to override the configuration variable and disable NIS
+alias_maps =
+
+# Podop configuration
+podop = socketmap:unix:/tmp/podop.socket:
+
+# Only accept virtual emails
+mydestination =
+
+# Relayhost if any is configured
+relayhost = {{ RELAYHOST }}
+
+# Recipient delimiter for extended addresses
+recipient_delimiter = {{ RECIPIENT_DELIMITER }}
+
+# Only the front server is allowed to perform xclient
+smtpd_authorized_xclient_hosts={{ FRONT_ADDRESS }} {{ POD_ADDRESS_RANGE }}
+
+###############
+# TLS
+###############
+
+# General TLS configuration
+tls_high_cipherlist = EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA256:EECDH:+CAMELLIA128:+AES128:+SSLv3:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!IDEA:!ECDSA:kEDH:CAMELLIA128-SHA:AES128-SHA
+tls_preempt_cipherlist = yes
+tls_ssl_options = NO_COMPRESSION
+
+# Outgoing TLS is more flexible because 1. not all receiving servers will
+# support TLS, 2. not all will have and up-to-date TLS stack.
+smtp_tls_security_level = may
+smtp_tls_mandatory_protocols = !SSLv2, !SSLv3
+smtp_tls_protocols =!SSLv2,!SSLv3
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+
+###############
+# Virtual
+###############
+
+# The alias map actually returns both aliases and local mailboxes, which is
+# required for reject_unlisted_sender to work properly
+virtual_alias_domains =
+virtual_alias_maps = ${podop}alias
+virtual_mailbox_domains = ${podop}domain
+virtual_mailbox_maps = ${podop}mailbox
+
+# Mails are transported if required, then forwarded to Dovecot for delivery
+relay_domains = ${podop}transport
+transport_maps = ${podop}transport
+virtual_transport = lmtp:inet:{{ HOST_LMTP }}
+
+# In order to prevent Postfix from running DNS query, enforce the use of the
+# native DNS stack, that will check /etc/hosts properly.
+lmtp_host_lookup = native
+
+###############
+# Restrictions
+###############
+
+# Delay all rejects until all information can be logged
+smtpd_delay_reject = yes
+
+# Allowed senders are: the user or one of the alias destinations
+smtpd_sender_login_maps = $virtual_alias_maps
+
+# Restrictions for incoming SMTP, other restrictions are applied in master.cf
+smtpd_helo_required = yes
+
+smtpd_client_restrictions =
+  permit_mynetworks,
+  check_sender_access ${podop}sender,
+  reject_non_fqdn_sender,
+  reject_unknown_sender_domain,
+  reject_unknown_recipient_domain,
+  reject_unverified_recipient,
+  permit
+
+smtpd_relay_restrictions =
+  permit_mynetworks,
+  permit_sasl_authenticated,
+  reject_unauth_destination
+
+unverified_recipient_reject_reason = Address lookup failure
+
+###############
+# Milter
+###############
+
+smtpd_milters = inet:{{ HOST_ANTISPAM }}
+milter_protocol = 6
+milter_mail_macros = i {mail_addr} {client_addr} {client_name} {auth_authen}
+milter_default_action = tempfail
+
+###############
+# Extra Settings
+###############

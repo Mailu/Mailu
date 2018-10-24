@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% trans %}Add a global administrator{% endtrans %}
+{% endblock %}
+
+{% block content %}
+{% call macros.box() %}
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {{ macros.form_field(form.admin, id='admin') }}
+  {{ macros.form_field(form.submit) }}
+  <script>
+    $("#admin").select2();
+  </script>
+</form>
+{% endcall %}
+{% endblock %}

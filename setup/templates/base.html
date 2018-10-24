@@ -1,0 +1,22 @@
+{% extends "bootstrap/base.html" %}
+{% import "macros.html" as macros %}
+
+{% block title %}Mailu setup{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Mailu configuration</h1>
+  <p>
+    Version
+    <select onchange="window.location.href=this.value;" class="btn btn-primary dropdown-toggle">
+      {% for available in versions %}
+      <option value="{{ url_for('{}.wizard'.format(available)) }}" {% if available == version %}selected{% endif %}>{{ available }}</option>
+      {% endfor %}
+    </select>
+  </p>
+
+  {% block page %}{% endblock %}
+
+</div>
+<p></p>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% trans %}Public announcement{% endtrans %}
+{% endblock %}
+
+{% block content %}
+{% call macros.box() %}
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {{ macros.form_field(form.announcement_subject) }}
+  {{ macros.form_field(form.announcement_body, rows=10) }}
+  {{ macros.form_field(form.submit) }}
+</form>
+{% endcall %}
+{% endblock %}

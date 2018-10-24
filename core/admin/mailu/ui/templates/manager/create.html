@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% trans %}Add a manager{% endtrans %}
+{% endblock %}
+
+{% block subtitle %}
+{{ domain }}
+{% endblock %}
+
+{% block content %}
+{% call macros.box() %}
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {{ macros.form_field(form.manager, id='manager') }}
+  {{ macros.form_field(form.submit) }}
+  <script>
+    $("#manager").select2();
+  </script>
+</form>
+{% endcall %}
+{% endblock %}

@@ -135,9 +135,6 @@ services:
       - "{{ root }}/webmail:/data"
     depends_on:
       - imap
-      - resolver
-    dns:
-      - {{ dns }}
   {% endif %}
   
 {% if resolver_enabled %}

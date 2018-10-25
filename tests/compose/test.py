@@ -7,7 +7,8 @@ from colorama import Fore, Style
 # Declare variables for service name and sleep time
 test_name=sys.argv[1]
 timeout=int(sys.argv[2])
-compose_file="tests/compose/" + test_name + "/docker-compose.yml"
+test_path="tests/compose/" + test_name + "/"
+compose_file=test_path + "docker-compose.yml"
 
 client = docker.APIClient(base_url='unix://var/run/docker.sock')
 
@@ -68,11 +69,11 @@ def print_logs():
 #Iterating over hooks in test folder and running them  
 def hooks():
     print("Running hooks")
-    for test_file in sorted(os.listdir(test_name + "/")):
+    for test_file in sorted(os.listdir(test_path)):
         if test_file.endswith(".py"):
-            os.system("python3 " + test_name + "/" + test_file)
+            os.system("python3 " + test_path + test_file)
         elif test_file.endswith(".sh"):
-            os.system("./" + test_name + "/" + test_file)
+            os.system("./" + test_path + test_file)
       
 # Start up containers
 os.system("docker-compose -f " + compose_file + " -p ${DOCKER_ORG:-mailu} up -d ")

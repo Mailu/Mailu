@@ -66,7 +66,15 @@ services:
       - front
 
   # Optional services
-
+  antispam:
+    image: mailu/rspamd:master
+    env_file: mailu.env
+    volumes:
+      - "/mailu/filter:/var/lib/rspamd"
+      - "/mailu/dkim:/dkim"
+      - "/mailu/overrides/rspamd:/etc/rspamd/override.d"
+    depends_on:
+      - front
 
 
 

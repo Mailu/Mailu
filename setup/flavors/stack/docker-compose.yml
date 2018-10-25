@@ -65,8 +65,6 @@ services:
     deploy:
       replicas: {{ smtp_replicas }}
 
-  # Optional services
-  {% if antispam_enabled %}
   antispam:
     image: ${DOCKER_ORG:-mailu}/rspamd:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
@@ -78,8 +76,8 @@ services:
       - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d"
     deploy:
       replicas: 1
-  {% endif %}
 
+  # Optional services
   {% if antivirus_enabled %}
   antivirus:
     image: ${DOCKER_ORG:-mailu}/clamav:${MAILU_VERSION:-{{ version }}}

@@ -66,8 +66,6 @@ services:
     depends_on:
       - front
 
-  # Optional services
-  {% if antispam_enabled %}
   antispam:
     image: ${DOCKER_ORG:-mailu}/rspamd:${MAILU_VERSION:-{{ version }}}
     restart: always
@@ -78,8 +76,8 @@ services:
       - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d"
     depends_on:
       - front
-  {% endif %}
 
+  # Optional services
   {% if antivirus_enabled %}
   antivirus:
     image: ${DOCKER_ORG:-mailu}/clamav:${MAILU_VERSION:-{{ version }}}

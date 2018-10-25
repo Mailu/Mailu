@@ -6,12 +6,17 @@ addons:
       - docker-ce
 env:
   - VERSION=$TRAVIS_BRANCH
+language: python
+python:
+  - "3.6"
+install:
+  - pip install -r tests/requirements.txt
 
 script:
   # Default to mailu for DOCKER_ORG
   - if [ -z "$DOCKER_ORG" ]; then export DOCKER_ORG="mailu"; fi
   - docker-compose -f tests/build.yml build
-  - tests/compose/test-script.sh
+  - python tests/compose/test.py
 
 deploy:
   provider: script

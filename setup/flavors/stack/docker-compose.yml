@@ -15,7 +15,7 @@ services:
 
 # Core services
   front:
-    image: mailu/nginx:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/nginx:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     logging:
       driver: {{ log_driver or 'json-file' }}
@@ -31,7 +31,7 @@ services:
       replicas: {{ front_replicas }}
 
   admin:
-    image: mailu/admin:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/admin:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     {% if not admin_enabled %}
     ports:
@@ -44,7 +44,7 @@ services:
       replicas: {{ admin_replicas }}
 
   imap:
-    image: mailu/dovecot:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/dovecot:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     environment:
     # Default to 10.0.1.0/24
@@ -56,7 +56,7 @@ services:
       replicas: {{ imap_replicas }}
 
   smtp:
-    image: mailu/postfix:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/postfix:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     environment:
       - POD_ADDRESS_RANGE={{ subnet }}
@@ -68,7 +68,7 @@ services:
   # Optional services
   {% if antispam_enabled %}
   antispam:
-    image: mailu/rspamd:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/rspamd:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     environment:
       - POD_ADDRESS_RANGE={{ subnet }}
@@ -82,7 +82,7 @@ services:
 
   {% if antivirus_enabled %}
   antivirus:
-    image: mailu/clamav:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/clamav:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
       - "{{ root }}/filter:/data"
@@ -92,7 +92,7 @@ services:
 
   {% if webdav_enabled %}
   webdav:
-    image: mailu/none:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/none:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
       - "{{ root }}/dav:/data"
@@ -102,7 +102,7 @@ services:
 
   {% if fetchmail_enabled %}
   fetchmail:
-    image: mailu/fetchmail:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/fetchmail:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
       - "{{ root }}/data:/data"
@@ -112,7 +112,7 @@ services:
 
   {% if webmail_type != 'none' %}
   webmail:
-    image: mailu/roundcube:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/roundcube:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
       - "{{ root }}/webmail:/data"

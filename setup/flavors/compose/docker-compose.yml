@@ -16,7 +16,7 @@ services:
 
   # Core services
   front:
-    image: mailu/nginx:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/nginx:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
     logging:
@@ -34,7 +34,7 @@ services:
       - "{{ root }}/certs:/certs"
 
   admin:
-    image: mailu/admin:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/admin:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
     {% if not admin_enabled %}
@@ -48,7 +48,7 @@ services:
       - redis
 
   imap:
-    image: mailu/dovecot:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/dovecot:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
     volumes:
@@ -58,7 +58,7 @@ services:
       - front
 
   smtp:
-    image: mailu/postfix:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/postfix:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
     volumes:
@@ -69,7 +69,7 @@ services:
   # Optional services
   {% if antispam_enabled %}
   antispam:
-    image: mailu/rspamd:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/rspamd:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
     volumes:
@@ -82,7 +82,7 @@ services:
 
   {% if antivirus_enabled %}
   antivirus:
-    image: mailu/clamav:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/clamav:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
     volumes:
@@ -91,7 +91,7 @@ services:
 
   {% if webdav_enabled %}
   webdav:
-    image: mailu/radicale:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/radicale:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
     volumes:
@@ -100,7 +100,7 @@ services:
 
   {% if fetchmail_enabled %}
   fetchmail:
-    image: mailu/fetchmail:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/fetchmail:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
   {% endif %}
@@ -108,7 +108,7 @@ services:
   # Webmail
   {% if webmail_type != 'none' %}
   webmail:
-    image: mailu/{{ webmail_type }}:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/{{ webmail_type }}:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
     volumes:

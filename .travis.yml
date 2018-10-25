@@ -12,10 +12,17 @@ python:
 install:
   - pip install -r tests/requirements.txt
 
-script:
+before_script:
   - docker-compose -f tests/build.yml build
+  
+script:
 # test.py, test name and timeout between start and tests.
   - python tests/compose/test.py core 1
+  - python tests/compose/test.py fetchmail 1
+  - travis_wait python tests/compose/test.py filters 10
+  - python tests/compose/test.py rainloop 1
+  - python tests/compose/test.py roundcube 1
+  - python tests/compose/test.py webdav 1
 
 deploy:
   provider: script

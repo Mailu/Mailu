@@ -9,13 +9,17 @@ services:
   # External dependencies
   redis:
     image: redis:alpine
+    restart: always
     volumes:
       - "/mailu/redis:/data"
 
   # Core services
   front:
-    image: mailu/nginx:master
+    image: ${DOCKER_ORG:-mailu}/nginx:${MAILU_VERSION:-master}
+    restart: always
     env_file: mailu.env
+    logging:
+      driver: json-file
     ports:
       - "127.0.0.1:80:80"
       - "::1:80:80"
@@ -37,10 +41,10 @@ services:
       - "::1:993:993"
     volumes:
       - "/mailu/certs:/certs"
-      
 
   admin:
-    image: mailu/admin:master
+    image: ${DOCKER_ORG:-mailu}/admin:${MAILU_VERSION:-master}
+    restart: always
     env_file: mailu.env
     volumes:
       - "/mailu/data:/data"
@@ -49,7 +53,8 @@ services:
       - redis
 
   imap:
-    image: mailu/dovecot:master
+    image: ${DOCKER_ORG:-mailu}/dovecot:${MAILU_VERSION:-master}
+    restart: always
     env_file: mailu.env
     volumes:
       - "/mailu/mail:/mail"
@@ -58,16 +63,17 @@ services:
       - front
 
   smtp:
-    image: mailu/postfix:master
+    image: ${DOCKER_ORG:-mailu}/postfix:${MAILU_VERSION:-master}
+    restart: always
     env_file: mailu.env
     volumes:
       - "/mailu/overrides:/overrides"
     depends_on:
       - front
 
-  # Optional services
   antispam:
-    image: mailu/rspamd:master
+    image: ${DOCKER_ORG:-mailu}/rspamd:${MAILU_VERSION:-master}
+    restart: always
     env_file: mailu.env
     volumes:
       - "/mailu/filter:/var/lib/rspamd"
@@ -76,7 +82,16 @@ services:
     depends_on:
       - front
 
+  # Optional services
+
 
 
   # Webmail
-  
+  webmail:
+    image: ${DOCKER_ORG:-mailu}/roundcube:${MAILU_VERSION:-master}
+    restart: always
+    env_file: mailu.env
+    volumes:
+      - "/mailu/webmail:/data"
+    depends_on:
+      - imap

@@ -68,11 +68,29 @@ Or in plain english: if receivers start to classify your mail as spam, this post
 manage your email domains, users, etc.</p>
 
 <div class="form-group">
-  <label>Enable the admin UI (and path to the admin UI)</label>
-  <div class="input-group">
-    <div class="input-group-addon"><input type="checkbox" name="admin_enabled" value="true"></div>
-    <input class="form-control" type="text" name="admin_path" value="/admin">
-  </div>
+    <input type="checkbox" name="admin_enabled" value="true" id="admin">
+  	<label>Enable the admin UI (and path to the admin UI)</label>
+    <input class="form-control" type="text" name="admin_path" id="admin_path" style="display: none">
 </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script type = "text/javascript" language = "javascript">
+	$(document).ready(function() {
+		if ($('#admin').prop('checked')) {
+			$("#admin_path").show();
+			$("#admin_path").attr("value", "/admin");
+		}
+		$("#admin").change(function() {
+			if ($(this).is(":checked")) {
+				$("#admin_path").show();
+				$("#admin_path").attr("value", "/admin");
+			} else {
+				$("#admin_path").hide();
+				$("#admin_path").attr("value", "");
+			}
+		});
+	});
+</script>
 
 {% endcall %}

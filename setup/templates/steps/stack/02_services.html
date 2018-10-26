@@ -15,15 +15,14 @@ accessing messages for beginner users.</p>
 <!--     {{ macros.radio("webmail_type", "rainloop", "Rainloop", "lightweight Webmail based on PHP, no database") }} -->
 <!--   </div> -->
   <br/>
-  <select class="btn btn-primary dropdown-toggle" name="webmail_type">
+  <select class="btn btn-primary dropdown-toggle" name="webmail_type" id="webmail">
   	{% for webmailtype in ["none", "roundcube", "rainloop"] %}
   	<option value="{{ webmailtype }}" >{{ webmailtype }}</option>
   	{% endfor %}
   </select>
   <p></p>
   <div class="input-group">
-<!--     <div class="input-group-addon"><input type="checkbox" name="webmail_enabled" value="true"></div> -->
-    <input class="form-control" type="text" name="webmail_path" value="/webmail">
+    <input class="form-control" type="text" name="webmail_path" id="webmail_path" style="display: none">
   </div>
 </div>
 
@@ -52,5 +51,28 @@ also disable the antivirus if required (it does use aroung 1GB of ram).</p>
     Enable fetchmail
   </label>
 </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script type = "text/javascript" language = "javascript">
+	$(document).ready(function() {
+		if ($("#webmail").val() == 'none') {
+			$("#webmail_path").hide();
+         	$("#webmail_path").attr("value", "");
+		} else {
+			$("#webmail_path").show();
+      		$("#webmail_path").attr("value", "/webmail");
+		}
+		$("#webmail").click(function () {
+           if (this.value == 'none') {
+        	   $("#webmail_path").hide();
+        	   $("#webmail_path").attr("value", "");
+           } else {
+        	   $("#webmail_path").show();
+        	   $("#webmail_path").attr("value", "/webmail");
+           }
+        });
+	 });
+</script>
 
 {% endcall %}

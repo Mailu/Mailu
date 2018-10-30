@@ -28,6 +28,16 @@ services:
     {% endfor %}
     volumes:
       - "{{ root }}/certs:/certs"
+      
+  {% if resolver_enabled %}
+  resolver:
+    image: mailu/unbound:{{ version }}
+    env_file: {{ env }}
+    restart: always
+    networks:
+      default:
+        ipv4_address: {{ dns }}
+  {% endif %}
 
   admin:
     image: mailu/admin:{{ version }}
@@ -58,6 +68,11 @@ services:
       - "{{ root }}/overrides:/overrides"
     depends_on:
       - front
+    {% if resolver_enabled %}
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
 
   # Optional services
   {% if antispam_enabled %}
@@ -70,6 +85,11 @@ services:
       - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d"
     depends_on:
       - front
+    {% if resolver_enabled %}
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
   {% endif %}
 
   {% if antivirus_enabled %}
@@ -78,6 +98,12 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/filter:/data"
+    {% if resolver_enabled %}
+    depends_on:
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
   {% endif %}
 
   {% if webdav_enabled %}
@@ -92,6 +118,12 @@ services:
   fetchmail:
     image: mailu/fetchmail:{{ version }}
     env_file: {{ env }}
+    {% if resolver_enabled %}
+    depends_on:
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
   {% endif %}
 
   # Webmail
@@ -104,3 +136,13 @@ services:
     depends_on:
       - imap
   {% endif %}
+  
+{% if resolver_enabled %}
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: {{ subnet }}
+{% endif %}

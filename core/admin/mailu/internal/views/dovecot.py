@@ -3,7 +3,7 @@ from mailu.internal import internal
 
 import flask
 import socket
-
+import os
 
 @internal.route("/dovecot/passdb/<user_email>")
 def dovecot_passdb_dict(user_email):
@@ -13,7 +13,8 @@ def dovecot_passdb_dict(user_email):
         app.config.get("POD_ADDRESS_RANGE") or
         socket.gethostbyname(app.config["HOST_FRONT"])
     )
-    allow_nets.append(socket.gethostbyname(app.config["HOST_WEBMAIL"]))
+    if os.environ["WEBMAIL"] != "none":
+        allow_nets.append(socket.gethostbyname(app.config["HOST_WEBMAIL"]))
     print(allow_nets)
     return flask.jsonify({
         "password": None,

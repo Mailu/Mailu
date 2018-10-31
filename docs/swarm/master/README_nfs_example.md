@@ -157,8 +157,6 @@ services:
     image: mailu/dovecot:$VERSION
     restart: always
     env_file: .env
-    environment:
-      - POD_ADDRESS_RANGE=10.0.1.0/24
     volumes:
 #      - "$ROOT/mail:/mail"
       - type: volume
@@ -241,6 +239,8 @@ services:
     image: mailu/admin:$VERSION
     restart: always
     env_file: .env
+    environment:
+      - POD_ADDRESS_RANGE=10.0.1.0/24
     volumes:
 #      - "$ROOT/data:/data"
       - type: volume

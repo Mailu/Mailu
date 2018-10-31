@@ -1,5 +1,9 @@
-FROM python:3-alpine
-
+FROM alpine:3.8
+# python3 shared with most images
+RUN apk add --no-cache \
+    python3 py3-pip \
+  && pip3 install --upgrade pip
+# Image specific layers under this line
 RUN apk add --no-cache clamav rsyslog wget clamav-libunrar
 
 COPY conf /etc/clamav

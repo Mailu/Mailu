@@ -1,7 +1,12 @@
-FROM python:3-alpine
-
+FROM alpine:3.8
+# python3 shared with most images
+RUN apk add --no-cache \
+    python3 py3-pip \
+  && pip3 install --upgrade pip
+# Shared layer between rspamd, postfix, dovecot, unbound and nginx
+RUN pip3 install jinja2
+# Image specific layers under this line
 RUN apk add --no-cache unbound curl bind-tools \
-  && pip3 install jinja2 \
   && curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache \
   && chown root:unbound /etc/unbound \
   && chmod 775 /etc/unbound \

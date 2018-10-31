@@ -1,9 +1,13 @@
 FROM php:7.2-apache
+#Shared layer between rainloop and roundcube
+RUN apt-get update && apt-get install -y \
+  python3 curl \
+  && rm -rf /var/lib/apt/lists
 
 ENV RAINLOOP_URL https://github.com/RainLoop/rainloop-webmail/releases/download/v1.12.1/rainloop-community-1.12.1.zip
 
 RUN apt-get update && apt-get install -y \
-      unzip python3 python3-jinja2 curl \
+      unzip python3-jinja2 \
  && rm -rf /var/www/html/ \
  && mkdir /var/www/html \
  && cd /var/www/html \

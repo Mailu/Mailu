@@ -1,8 +1,14 @@
 FROM alpine:3.8
-
-RUN apk add --no-cache python py-jinja2 rspamd rspamd-controller rspamd-proxy rspamd-fuzzy ca-certificates py-pip curl\
- && pip install --upgrade pip \
- && pip install tenacity
+# python3 shared with most images
+RUN apk add --no-cache \
+    python3 py3-pip \
+  && pip3 install --upgrade pip
+# Shared layer between rspamd, postfix, dovecot, unbound and nginx
+RUN pip3 install jinja2
+# Shared layer between rspamd, postfix, dovecot
+RUN pip3 install tenacity
+# Image specific layers under this line
+RUN apk add --no-cache rspamd rspamd-controller rspamd-proxy rspamd-fuzzy ca-certificates curl
 
 RUN mkdir /run/rspamd
 

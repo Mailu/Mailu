@@ -28,6 +28,33 @@ Logs are managed by Docker directly. You can easily read your logs using:
 
 Docker is able to forward logs to multiple log engines. Read the following documentation for details: https://docs.docker.com/engine/admin/logging/overview/.
 
+.. _external_certs:
+
+Managing of external Let's encrypt certificates
+-----------------------------------------------
+
+When you are not using the embedded ``letsencrypt`` option from Mailu,
+you cannot make use of it's symlink functionality in the ``letsencrypt/live`` directory.
+You should take care that after every renewal new certificates are copied to ``/mailu/certs`` and
+the *nginx* process in the ``front`` container is reloaded.
+
+In the case of *certbot* you could write a script to be executed as `deploy hook`_.  Example:
+
+.. code-block:: bash
+
+  #!/bin/sh
+  cp /etc/letsencrypt/live/domain.com/privkey.pem /mailu/certs/key.pem || exit 1
+  cp /etc/letsencrypt/live/domain.com/fullchain.pem /mailu/certs/cert.pem || exit 1
+  docker exec mailu_front_1 nginx -s reload
+
+And the certbot command you will use in crontab would look something like:
+
+.. code-block:: bash
+
+  52 0,12 * * * root /usr/bin/certbot renew --deploy-hook /path/to/script.sh
+
+.. _`deploy hook`: https://certbot.eff.org/docs/using.html#renewing-certificates
+
 Migrating an instance
 ---------------------
 

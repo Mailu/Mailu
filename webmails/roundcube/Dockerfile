@@ -1,6 +1,6 @@
 FROM php:7.2-apache
 
-ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.3.7/roundcubemail-1.3.7-complete.tar.gz
+ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.3.8/roundcubemail-1.3.8-complete.tar.gz
 
 RUN apt-get update && apt-get install -y \
       zlib1g-dev curl python3 \

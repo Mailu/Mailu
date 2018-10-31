@@ -1,5 +1,7 @@
-Install Mailu master on kubernetes
-==================================
+.. _kubernetes:
+
+Kubernetes setup
+================
 
 Prequisites
 -----------
@@ -189,5 +191,5 @@ This problem can be easily fixed by running following commands:
 
 .. code:: bash
 
-    kubectl -n mailu-mailserver exec -it maolu-imap-... /bin/sh
+    kubectl -n mailu-mailserver exec -it mailu-imap-... /bin/sh
     chmod 777 /data/main.db

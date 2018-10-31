@@ -6,6 +6,10 @@ services:
     image: ${DOCKER_ORG:-mailu}/nginx:${MAILU_VERSION:-local}
     build: ../core/nginx
 
+  resolver:
+    image: ${DOCKER_ORG:-mailu}/unbound:${VERSION:-local}
+    build: ../services/unbound
+
   imap:
     image: ${DOCKER_ORG:-mailu}/dovecot:${MAILU_VERSION:-local}
     build: ../core/dovecot

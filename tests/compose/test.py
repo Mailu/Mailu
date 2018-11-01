@@ -74,8 +74,19 @@ def hooks():
             os.system("python3 " + test_path + test_file)
         elif test_file.endswith(".sh"):
             os.system("./" + test_path + test_file)
-      
+
+#Create admin and user
+def create_users():
+    print("Creating admin account...")
+    os.system("docker-compose -p $DOCKER_ORG exec admin python manage.py admin admin mailu.io password")
+    print("Admin account created")
+    print("Creating user account...")
+    os.system("docker-compose -p $DOCKER_ORG exec admin python manage.py user --hash_scheme='SHA512-CRYPT' user mailu.io 'password'")
+    print("User account created")
+
 # Start up containers
+os.system("mkdir -p /mailu && cp -r tests/certs /mailu")
+os.system("chmod 600 /mailu/certs/* ")
 os.system("docker-compose -f " + compose_file + " -p ${DOCKER_ORG:-mailu} up -d ")
 print()
 sleep()
@@ -84,6 +95,7 @@ os.system("docker ps -a")
 print()
 health_checks()
 print()
+create_users()
 hooks()
 print()
 stop(0)

@@ -1,10 +1,16 @@
 FROM alpine:3.8
-
+# python3 shared with most images
 RUN apk add --no-cache \
-     dovecot dovecot-pigeonhole-plugin dovecot-fts-lucene rspamd-client \
-     bash python3 py3-pip \
- && pip3 install --upgrade pip \
- && pip3 install jinja2 podop tenacity
+    python3 py3-pip \
+  && pip3 install --upgrade pip
+# Shared layer between rspamd, postfix, dovecot, unbound and nginx
+RUN pip3 install jinja2
+# Shared layer between rspamd, postfix, dovecot
+RUN pip3 install tenacity
+# Image specific layers under this line
+RUN apk add --no-cache \
+  dovecot dovecot-pigeonhole-plugin dovecot-fts-lucene rspamd-client bash \
+  && pip3 install podop
 
 COPY conf /conf
 COPY start.py /start.py

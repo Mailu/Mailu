@@ -1,9 +1,13 @@
 FROM alpine:3.8
-
+# python3 shared with most images
+RUN apk add --no-cache \
+    python3 py3-pip \
+  && pip3 install --upgrade pip
+# Shared layer between rspamd, postfix, dovecot, unbound and nginx
+RUN pip3 install jinja2
+# Image specific layers under this line
 RUN apk add --no-cache certbot nginx nginx-mod-mail openssl curl \
- python py-jinja2 py-requests-toolbelt py-pip \
- && pip install --upgrade pip \
- && pip install idna
+ && pip3 install idna requests
 
 COPY conf /conf
 COPY *.py /

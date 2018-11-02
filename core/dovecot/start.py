@@ -21,15 +21,12 @@ def start_podop():
 
 convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 
-@retry(stop=tenacity.stop_after_attempt(100), wait=tenacity.wait_random(min=2, max=5))
-def resolve():
-	os.environ["FRONT_ADDRESS"] = socket.gethostbyname(os.environ.get("FRONT_ADDRESS", "front"))
-	os.environ["REDIS_ADDRESS"] = socket.gethostbyname(os.environ.get("REDIS_ADDRESS", "redis"))
-	if os.environ["WEBMAIL"] != "none":
-		os.environ["WEBMAIL_ADDRESS"] = socket.gethostbyname(os.environ.get("WEBMAIL_ADDRESS", "webmail"))
-
 # Actual startup script
-resolve()
+resolve = retry(socket.gethostbyname, stop=tenacity.stop_after_attempt(100), wait=tenacity.wait_random(min=2, max=5))
+os.environ["FRONT_ADDRESS"] = resolve(os.environ.get("FRONT_ADDRESS", "front"))
+os.environ["REDIS_ADDRESS"] = resolve(os.environ.get("REDIS_ADDRESS", "redis"))
+if os.environ["WEBMAIL"] != "none":
+    os.environ["WEBMAIL_ADDRESS"] = resolve(os.environ.get("WEBMAIL_ADDRESS", "webmail"))
 
 for dovecot_file in glob.glob("/conf/*.conf"):
     convert(dovecot_file, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))

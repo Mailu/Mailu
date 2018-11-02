@@ -1,9 +1,13 @@
 FROM php:7.2-apache
+#Shared layer between rainloop and roundcube
+RUN apt-get update && apt-get install -y \
+  python3 curl \
+  && rm -rf /var/lib/apt/lists
 
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.3.8/roundcubemail-1.3.8-complete.tar.gz
 
 RUN apt-get update && apt-get install -y \
-      zlib1g-dev curl \
+      zlib1g-dev \
  && docker-php-ext-install zip \
  && echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini \
  && rm -rf /var/www/html/ \
@@ -19,14 +23,12 @@ RUN apt-get update && apt-get install -y \
  && rm -rf /var/lib/apt/lists
 
 COPY php.ini /usr/local/etc/php/conf.d/roundcube.ini
-
 COPY config.inc.php /var/www/html/config/
-
-COPY start.sh /start.sh
+COPY start.py /start.py
 
 EXPOSE 80/tcp
 VOLUME ["/data"]
 
-CMD ["/start.sh"]
+CMD /start.py
 
 HEALTHCHECK CMD curl -f -L http://localhost/ || exit 1

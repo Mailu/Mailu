@@ -35,11 +35,14 @@ class IdnaEmail(db.TypeDecorator):
     impl = db.String(255, collation="NOCASE")
 
     def process_bind_param(self, value, dialect):
-        localpart, domain_name = value.split('@')
-        return "{0}@{1}".format(
-            localpart,
-            idna.encode(domain_name).decode('ascii'),
-        )
+        try:
+            localpart, domain_name = value.split('@')
+            return "{0}@{1}".format(
+                localpart,
+                idna.encode(domain_name).decode('ascii'),
+            )
+        except:
+            pass
 
     def process_result_value(self, value, dialect):
         localpart, domain_name = value.split('@')

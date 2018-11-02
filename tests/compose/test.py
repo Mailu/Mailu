@@ -17,7 +17,7 @@ containers = []
 # Stop containers
 def stop(exit_code):
     print_logs()
-    os.system("docker-compose -f " + compose_file + " down")
+    print(os.popen("docker-compose -f " + compose_file + " down").read())
     sys.exit(exit_code)
 
 # Sleep for a defined amount of time
@@ -64,25 +64,25 @@ def print_logs():
     #Iterating through docker container inspect list and print logs
     for container in containers:
         print(Fore.LIGHTMAGENTA_EX + "Printing logs for: " + Fore.GREEN + container['Name'] + Style.RESET_ALL)
-        os.system('docker container logs ' + container['Name'])
+        print(os.popen('docker container logs ' + container['Name']).read())
 
 #Iterating over hooks in test folder and running them
 def hooks():
     print("Running hooks")
     for test_file in sorted(os.listdir(test_path)):
         if test_file.endswith(".py"):
-            os.system("python3 " + test_path + test_file)
+            print(os.popen("python3 " + test_path + test_file).read())
         elif test_file.endswith(".sh"):
-            os.system("./" + test_path + test_file)
+            print(os.popen("./" + test_path + test_file).read())
 
-    os.system("python3 tests/compose/email_test.py")
+    print(os.popen("python3 tests/compose/email_test.py").read())
 
 # Start up containers
-os.system("docker-compose -f " + compose_file + " up -d ")
+print(os.popen("docker-compose -f " + compose_file + " up -d ").read())
 print()
 sleep()
 print()
-os.system("docker ps -a")
+print(os.popen("docker ps -a").read())
 print()
 health_checks()
 print()

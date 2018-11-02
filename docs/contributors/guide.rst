@@ -13,6 +13,8 @@ Docker best practices and be as generic as possible :
  - interesting settings should be available as environment variables
  - base images should be well-trusted (officiel Alpine or Debian for instance).
 
+.. _git_workflow:
+
 Git workflow
 ------------
 

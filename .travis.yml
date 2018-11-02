@@ -18,10 +18,6 @@ install:
 before_script:
   - docker-compose -v
   - docker-compose -f tests/build.yml build
-  - docker-compose up -d admin
-  - docker-compose exec admin python manage.py admin admin mailu.io password
-  - docker-compose exec admin python manage.py user --hash_scheme='SHA512-CRYPT' user mailu.io 'password'
-  - docker-compose down
   
 script:
 # test.py, test name and timeout between start and tests.

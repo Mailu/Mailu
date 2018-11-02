@@ -78,8 +78,6 @@ def hooks():
     os.system("python3 tests/compose/email_test.py")
 
 # Start up containers
-os.system("mkdir -p /mailu && cp -r tests/certs /mailu")
-os.system("chmod 600 /mailu/certs/* ")
 os.system("docker-compose -f " + compose_file + " up -d ")
 print()
 sleep()

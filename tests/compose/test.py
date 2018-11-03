@@ -3,6 +3,7 @@ import os
 import time
 import docker
 from colorama import Fore, Style
+import subprocess
 
 # Declare variables for service name and sleep time
 test_name=sys.argv[1]
@@ -17,7 +18,7 @@ containers = []
 # Stop containers
 def stop(exit_code):
     print_logs()
-    print(os.popen("docker-compose -f " + compose_file + " down").read())
+    print(subprocess.check_output("docker-compose -f " + compose_file + " down", shell=True))
     sys.exit(exit_code)
 
 # Sleep for a defined amount of time
@@ -64,25 +65,25 @@ def print_logs():
     #Iterating through docker container inspect list and print logs
     for container in containers:
         print(Fore.LIGHTMAGENTA_EX + "Printing logs for: " + Fore.GREEN + container['Name'] + Style.RESET_ALL)
-        print(os.popen('docker container logs ' + container['Name']).read())
+        print(subprocess.check_output('docker container logs ' + container['Name'], shell=True))
 
 #Iterating over hooks in test folder and running them
 def hooks():
     print("Running hooks")
     for test_file in sorted(os.listdir(test_path)):
         if test_file.endswith(".py"):
-            print(os.popen("python3 " + test_path + test_file).read())
+            print(subprocess.check_output("python3 " + test_path + test_file, shell=True))
         elif test_file.endswith(".sh"):
-            print(os.popen("./" + test_path + test_file).read())
+            print(subprocess.check_output("./" + test_path + test_file, shell=True))
 
-    print(os.popen("python3 tests/compose/email_test.py").read())
+    print(subprocess.check_output("python3 tests/email_test.py", shell=True))
 
 # Start up containers
-print(os.popen("docker-compose -f " + compose_file + " up -d ").read())
+print(subprocess.check_output("docker-compose -f " + compose_file + " up -d", shell=True))
 print()
 sleep()
 print()
-print(os.popen("docker ps -a").read())
+print(subprocess.check_output("docker ps -a", shell=True))
 print()
 health_checks()
 print()

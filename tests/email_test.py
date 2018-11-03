@@ -3,6 +3,7 @@ import random
 import smtplib
 import imaplib
 import time
+import sys
 
 def secret(length=16):
     charset = string.ascii_uppercase + string.digits
@@ -44,7 +45,8 @@ def read_email():
     if secret_message in str(data[0][1]):
         print("Success!")
     else:
-        print("Failed! Something went wrong")    
+        print("Failed! Something went wrong")
+        sys.exit(1)
     server.close()
     server.logout()
 

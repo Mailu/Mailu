@@ -18,6 +18,7 @@ containers = []
 # Stop containers
 def stop(exit_code):
     print_logs()
+    sys.stdout.flush()
     print(subprocess.check_output("docker-compose -f " + compose_file + " down", shell=True))
     sys.exit(exit_code)
 
@@ -65,6 +66,7 @@ def print_logs():
     #Iterating through docker container inspect list and print logs
     for container in containers:
         print(Fore.LIGHTMAGENTA_EX + "Printing logs for: " + Fore.GREEN + container['Name'] + Style.RESET_ALL)
+        sys.stdout.flush()
         print(subprocess.check_output('docker container logs ' + container['Name'], shell=True))
 
 #Iterating over hooks in test folder and running them
@@ -72,17 +74,22 @@ def hooks():
     print("Running hooks")
     for test_file in sorted(os.listdir(test_path)):
         if test_file.endswith(".py"):
+            sys.stdout.flush()
             print(subprocess.check_output("python3 " + test_path + test_file, shell=True))
         elif test_file.endswith(".sh"):
+            sys.stdout.flush()
             print(subprocess.check_output("./" + test_path + test_file, shell=True))
-
+    
+    sys.stdout.flush()
     print(subprocess.check_output("python3 tests/email_test.py", shell=True))
 
 # Start up containers
+sys.stdout.flush()
 print(subprocess.check_output("docker-compose -f " + compose_file + " up -d", shell=True))
 print()
 sleep()
 print()
+sys.stdout.flush()
 print(subprocess.check_output("docker ps -a", shell=True))
 print()
 health_checks()

@@ -19,7 +19,7 @@ containers = []
 def stop(exit_code):
     print_logs()
     sys.stdout.flush()
-    print(subprocess.check_output("docker-compose -f " + compose_file + " down", shell=True))
+    print(subprocess.check_output("docker-compose -f " + compose_file + " down", shell=True).decode())
     sys.exit(exit_code)
 
 # Sleep for a defined amount of time
@@ -67,30 +67,31 @@ def print_logs():
     for container in containers:
         print(Fore.LIGHTMAGENTA_EX + "Printing logs for: " + Fore.GREEN + container['Name'] + Style.RESET_ALL)
         sys.stdout.flush()
-        print(subprocess.check_output('docker container logs ' + container['Name'], shell=True))
+        print(subprocess.check_output('docker container logs ' + container['Name'], shell=True).decode())
 
 #Iterating over hooks in test folder and running them
 def hooks():
-    print("Running hooks")
+    print(Fore.LIGHTMAGENTA_EX + "Running hooks" + Style.RESET_ALL)
     for test_file in sorted(os.listdir(test_path)):
-        if test_file.endswith(".py"):
-            sys.stdout.flush()
-            print(subprocess.check_output("python3 " + test_path + test_file, shell=True))
-        elif test_file.endswith(".sh"):
-            sys.stdout.flush()
-            print(subprocess.check_output("./" + test_path + test_file, shell=True))
-    
-    sys.stdout.flush()
-    print(subprocess.check_output("python3 tests/email_test.py", shell=True))
+        try:
+            if test_file.endswith(".py"):
+                sys.stdout.flush()
+                print(subprocess.check_output("python3 " + test_path + test_file, shell=True).decode())
+            elif test_file.endswith(".sh"):
+                sys.stdout.flush()
+                print(subprocess.check_output("./" + test_path + test_file, shell=True).decode())
+        except subprocess.CalledProcessError as e:
+            sys.stderr.write("[ERROR]: output = %s, error code = %s\n" % (e.output.decode(), e.returncode))
+            stop(1)
 
 # Start up containers
 sys.stdout.flush()
-print(subprocess.check_output("docker-compose -f " + compose_file + " up -d", shell=True))
+print(subprocess.check_output("docker-compose -f " + compose_file + " up -d", shell=True).decode())
 print()
 sleep()
 print()
 sys.stdout.flush()
-print(subprocess.check_output("docker ps -a", shell=True))
+print(subprocess.check_output("docker ps -a", shell=True).decode())
 print()
 health_checks()
 print()

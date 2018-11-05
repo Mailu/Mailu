@@ -1,19 +1,9 @@
-import string
-import random
 import smtplib
 import imaplib
 import time
 import sys
 
-def secret(length=16):
-    charset = string.ascii_uppercase + string.digits
-    return ''.join(
-        random.SystemRandom().choice(charset)
-        for _ in range(length)
-    )
-  
-#Generating secret message    
-secret_message = secret(16)
+email_msg = sys.argv[1]
 
 #Login to smt server and sending email with secret message    
 def send_email(msg):
@@ -42,16 +32,16 @@ def read_email():
     
     print("email received with message " + str(data[0][1])) 
     
-    if secret_message in str(data[0][1]):
+    if email_msg in str(data[0][1]):
         print("Success!")
     else:
-        print("Failed! Something went wrong")
+        print("Failed receiving email with message %s" % email_msg)
         sys.exit(1)
     server.close()
     server.logout()
 
     
-send_email(secret_message)
+send_email(email_msg)
 print("Sleeping for 1m")
 time.sleep(60)
 read_email()

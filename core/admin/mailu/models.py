@@ -41,7 +41,7 @@ class IdnaEmail(db.TypeDecorator):
                 localpart,
                 idna.encode(domain_name).decode('ascii'),
             )
-        except:
+        except ValueError:
             pass
 
     def process_result_value(self, value, dialect):

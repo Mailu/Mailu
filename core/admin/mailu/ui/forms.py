@@ -90,9 +90,10 @@ class UserSignupForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('Email address'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
-    captcha = flask_wtf.RecaptchaField()
     submit = fields.SubmitField(_('Sign up'))
 
+class UserSignupFormCaptcha(UserSignupForm):
+    captcha = flask_wtf.RecaptchaField()
 
 class UserSettingsForm(flask_wtf.FlaskForm):
     displayed_name = fields.StringField(_('Displayed name'))

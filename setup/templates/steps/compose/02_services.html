@@ -54,25 +54,7 @@ also disable the antivirus if required (it does use aroung 1GB of ram).</p>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
-<script type = "text/javascript" language = "javascript">
-	$(document).ready(function() {
-		if ($("#webmail").val() == 'none') {
-			$("#webmail_path").hide();
-         	$("#webmail_path").attr("value", "");
-		} else {
-			$("#webmail_path").show();
-      		$("#webmail_path").attr("value", "/webmail");
-		}
-		$("#webmail").click(function () {
-           if (this.value == 'none') {
-        	   $("#webmail_path").hide();
-        	   $("#webmail_path").attr("value", "");
-           } else {
-        	   $("#webmail_path").show();
-        	   $("#webmail_path").attr("value", "/webmail");
-           }
-        });
-	 });
-</script>
+<script type="text/javascript" src="{{ url_for('static', filename='render.js') }}"></script>
+
 
 {% endcall %}

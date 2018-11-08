@@ -47,3 +47,7 @@ class PrefixMiddleware(object):
         app.wsgi_app = self
 
 proxy = PrefixMiddleware()
+
+
+# Data migrate
+migrate = flask_migrate.Migrate()

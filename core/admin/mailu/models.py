@@ -350,6 +350,10 @@ class User(Base, Email):
                 app.config["WELCOME_BODY"])
 
     @classmethod
+    def get(cls, email):
+        return cls.query.get(email)
+
+    @classmethod
     def login(cls, email, password):
         user = cls.query.get(email)
         return user if (user and user.enabled and user.check_password(password)) else None

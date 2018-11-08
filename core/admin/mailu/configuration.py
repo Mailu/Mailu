@@ -4,7 +4,7 @@ import os
 DEFAULT_CONFIG = {
     # Specific to the admin UI
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
-    'SQLALCHEMY_TRACK_MODIFICATIONS': True,
+    'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     'DOCKER_SOCKET': 'unix:///var/run/docker.sock',
     'BABEL_DEFAULT_LOCALE': 'en',
     'BABEL_DEFAULT_TIMEZONE': 'UTC',
@@ -54,7 +54,7 @@ DEFAULT_CONFIG = {
 }
 
 
-class ConfigManager(object):
+class ConfigManager(dict):
     """ Naive configuration manager that uses environment only
     """
 
@@ -76,6 +76,9 @@ class ConfigManager(object):
 
     def get(self, *args):
         return self.config.get(*args)
+
+    def keys(self):
+        return self.config.keys()
 
     def __getitem__(self, key):
         return self.config.get(key)

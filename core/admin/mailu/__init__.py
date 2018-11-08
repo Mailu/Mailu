@@ -20,8 +20,9 @@ def create_app_from_config(config):
     utils.limiter.init_app(app)
     utils.babel.init_app(app)
     utils.login.init_app(app)
-    utils.login.user_loader(models.User.query.get)
+    utils.login.user_loader(models.User.get)
     utils.proxy.init_app(app)
+    utils.migrate.init_app(app, models.db)
 
     # Initialize debugging tools
     if app.config.get("DEBUG"):

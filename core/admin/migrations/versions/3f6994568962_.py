@@ -13,8 +13,6 @@ down_revision = '2335c80a6bc3'
 from alembic import op
 import sqlalchemy as sa
 
-from mailu import app
-
 
 fetch_table = sa.Table(
     'fetch',
@@ -24,13 +22,7 @@ fetch_table = sa.Table(
 
 
 def upgrade():
-    connection = op.get_bind()
     op.add_column('fetch', sa.Column('keep', sa.Boolean(), nullable=False, server_default=sa.sql.expression.false()))
-    # also apply the current config value if set
-    if app.config.get("FETCHMAIL_KEEP", "False") == "True":
-        connection.execute(
-            fetch_table.update().values(keep=True)
-        )
 
 
 def downgrade():

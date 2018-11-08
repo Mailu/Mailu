@@ -1,4 +1,4 @@
-from mailu import models, create_app
+from mailu import models
 
 from flask import current_app as app
 from flask import cli as flask_cli
@@ -14,12 +14,12 @@ db = models.db
 
 
 @click.group()
-def cli(cls=flask_cli.FlaskGroup, create_app=create_app):
-    """ Main command group
+def mailu(cls=flask_cli.FlaskGroup):
+    """ Mailu command line
     """
 
 
-@cli.command()
+@mailu.command()
 @flask_cli.with_appcontext
 def advertise():
     """ Advertise this server against statistic services.
@@ -38,7 +38,7 @@ def advertise():
             pass
 
 
-@cli.command()
+@mailu.command()
 @click.argument('localpart')
 @click.argument('domain_name')
 @click.argument('password')
@@ -60,7 +60,7 @@ def admin(localpart, domain_name, password):
     db.session.commit()
 
 
-@cli.command()
+@mailu.command()
 @click.argument('localpart')
 @click.argument('domain_name')
 @click.argument('password')
@@ -85,7 +85,7 @@ def user(localpart, domain_name, password, hash_scheme=None):
     db.session.commit()
 
 
-@cli.command()
+@mailu.command()
 @click.option('-n', '--domain_name')
 @click.option('-u', '--max_users')
 @click.option('-a', '--max_aliases')
@@ -99,7 +99,7 @@ def domain(domain_name, max_users=0, max_aliases=0, max_quota_bytes=0):
         db.session.commit()
 
 
-@cli.command()
+@mailu.command()
 @click.argument('localpart')
 @click.argument('domain_name')
 @click.argument('password_hash')
@@ -124,7 +124,7 @@ def user_import(localpart, domain_name, password_hash, hash_scheme = None):
     db.session.commit()
 
 
-@cli.command()
+@mailu.command()
 @click.option('-v', '--verbose')
 @click.option('-d', '--delete_objects')
 @flask_cli.with_appcontext
@@ -266,7 +266,7 @@ def config_update(verbose=False, delete_objects=False):
     db.session.commit()
 
 
-@cli.command()
+@mailu.command()
 @click.argument('email')
 @flask_cli.with_appcontext
 def user_delete(email):
@@ -277,7 +277,7 @@ def user_delete(email):
     db.session.commit()
 
 
-@cli.command()
+@mailu.command()
 @click.argument('email')
 @flask_cli.with_appcontext
 def alias_delete(email):
@@ -288,7 +288,7 @@ def alias_delete(email):
     db.session.commit()
 
 
-@cli.command()
+@mailu.command()
 @click.argument('localpart')
 @click.argument('domain_name')
 @click.argument('destination')
@@ -310,7 +310,7 @@ def alias(localpart, domain_name, destination):
     db.session.commit()
 
 
-@cli.command()
+@mailu.command()
 @click.argument('domain_name')
 @click.argument('max_users')
 @click.argument('max_aliases')
@@ -327,7 +327,7 @@ def setlimits(domain_name, max_users, max_aliases, max_quota_bytes):
     db.session.commit()
 
 
-@cli.command()
+@mailu.command()
 @click.argument('domain_name')
 @click.argument('user_name')
 @flask_cli.with_appcontext

@@ -1,7 +1,7 @@
 import flask
 import flask_bootstrap
 
-from mailu import utils, debug, models, configuration
+from mailu import utils, debug, models, manage, configuration
 
 
 def create_app_from_config(config):
@@ -9,6 +9,7 @@ def create_app_from_config(config):
     """
     app = flask.Flask(__name__)
     app.app_context().push()
+    app.cli.add_command(manage.mailu)
 
     # Bootstrap is used for basic JS and CSS loading
     # TODO: remove this and use statically generated assets instead

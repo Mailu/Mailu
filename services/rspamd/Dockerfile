@@ -1,19 +1,24 @@
 FROM alpine:3.8
-
-RUN apk add --no-cache python py-jinja2 rspamd rspamd-controller rspamd-proxy ca-certificates py-pip \
- && pip install --upgrade pip \
- && pip install tenacity
+# python3 shared with most images
+RUN apk add --no-cache \
+    python3 py3-pip \
+  && pip3 install --upgrade pip
+# Shared layer between rspamd, postfix, dovecot, unbound and nginx
+RUN pip3 install jinja2
+# Shared layer between rspamd, postfix, dovecot
+RUN pip3 install tenacity
+# Image specific layers under this line
+RUN apk add --no-cache rspamd rspamd-controller rspamd-proxy rspamd-fuzzy ca-certificates curl
 
 RUN mkdir /run/rspamd
 
 COPY conf/ /conf
 COPY start.py /start.py
 
-# Temporary fix to remove references to rspamd-fuzzy for now
-RUN sed -i '/fuzzy/,$d' /etc/rspamd/rspamd.conf
-
-EXPOSE 11332/tcp 11334/tcp
+EXPOSE 11332/tcp 11334/tcp 11335/tcp
 
 VOLUME ["/var/lib/rspamd"]
 
 CMD /start.py
+
+HEALTHCHECK --start-period=350s CMD curl -f -L http://localhost:11334/ || exit 1

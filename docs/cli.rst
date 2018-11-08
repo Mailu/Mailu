@@ -39,7 +39,7 @@ primary difference with simple `user` command is that password is being imported
 
 .. code-block:: bash
 
-  docker-compose exec admin flask mailu user --hash_scheme='SHA512-CRYPT' myuser example.net '$6$51ebe0cb9f1dab48effa2a0ad8660cb489b445936b9ffd812a0b8f46bca66dd549fea530ce'
+  docker-compose run --rm admin python manage.py user --hash_scheme='SHA512-CRYPT' myuser example.net '$6$51ebe0cb9f1dab48effa2a0ad8660cb489b445936b9ffd812a0b8f46bca66dd549fea530ce'
 
 user_delete
 ------------

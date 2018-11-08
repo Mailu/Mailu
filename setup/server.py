@@ -7,6 +7,7 @@ import jinja2
 import uuid
 import string
 import random
+import ipaddress
 
 
 app = flask.Flask(__name__)
@@ -32,9 +33,11 @@ def secret(length=16):
 
 def build_app(path):
 
+    #Hardcoded master as the only version for test purposes
     versions = [
-        version for version in os.listdir(path)
-        if os.path.isdir(os.path.join(path, version))
+    #    version for version in os.listdir(path)
+    #    if os.path.isdir(os.path.join(path, version))
+         "master"
     ]
 
     app.jinja_env.trim_blocks = True
@@ -63,10 +66,17 @@ def build_app(path):
         def wizard():
             return flask.render_template('wizard.html')
 
+        @bp.route("/submit_flavor", methods=["POST"])
+        def submit_flavor():
+            data = flask.request.form.copy()
+            steps = sorted(os.listdir(path + "/" + version + "/templates/steps/" + data["flavor"]))
+            return flask.render_template('wizard.html', flavor=data["flavor"], steps=steps)
+
         @bp.route("/submit", methods=["POST"])
         def submit():
             data = flask.request.form.copy()
             data['uid'] = str(uuid.uuid4())
+            data['dns'] = str(ipaddress.IPv4Network(data['subnet'])[-2])
             db.set(data['uid'], json.dumps(data))
             return flask.redirect(flask.url_for('.setup', uid=data['uid']))
 

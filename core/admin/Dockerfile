@@ -11,12 +11,12 @@ RUN apk add --no-cache openssl \
 
 COPY mailu ./mailu
 COPY migrations ./migrations
-COPY manage.py .
 COPY start.sh /start.sh
 
 RUN pybabel compile -d mailu/translations
 
 EXPOSE 80/tcp
 VOLUME ["/data"]
+ENV FLASK_APP mailu
 
 CMD ["/start.sh"]

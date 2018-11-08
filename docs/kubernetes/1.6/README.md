@@ -82,7 +82,7 @@ And in the pod run the following command. The command uses following entries:
 - `password` the chosen password for the user
 
 ```bash
-python manage.py admin root example.com password
+flask mailu admin root example.com password
 ```
 
 Now you should be able to login on the mail account: `https://mail.example.com/admin`

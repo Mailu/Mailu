@@ -330,7 +330,7 @@ class User(Base, Email):
         )
 
     def check_password(self, password):
-        context = User.pw_context
+        context = self.get_password_context()
         reference = re.match('({[^}]+})?(.*)', self.password).group(2)
         result = context.verify(password, reference)
         if result and context.identify(reference) != context.default_scheme():

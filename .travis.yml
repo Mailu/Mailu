@@ -18,7 +18,8 @@ install:
 before_script:
   - docker-compose -v
   - docker-compose -f tests/build.yml build
-  
+  - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
+
 script:
 # test.py, test name and timeout between start and tests.
   - python tests/compose/test.py core 1

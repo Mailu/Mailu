@@ -10,13 +10,17 @@ services:
   # External dependencies
   redis:
     image: redis:alpine
+    restart: always
     volumes:
       - "{{ root }}/redis:/data"
 
   # Core services
   front:
-    image: mailu/nginx:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/nginx:${MAILU_VERSION:-{{ version }}}
+    restart: always
     env_file: {{ env }}
+    logging:
+      driver: {{ log_driver or 'json-file' }}
     ports:
     {% for port in (80, 443, 25, 465, 587, 110, 995, 143, 993) %}
     {% if bind4 %}
@@ -40,7 +44,8 @@ services:
   {% endif %}
 
   admin:
-    image: mailu/admin:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/admin:${MAILU_VERSION:-{{ version }}}
+    restart: always
     env_file: {{ env }}
     {% if not admin_enabled %}
     ports:
@@ -53,7 +58,8 @@ services:
       - redis
 
   imap:
-    image: mailu/dovecot:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/dovecot:${MAILU_VERSION:-{{ version }}}
+    restart: always
     env_file: {{ env }}
     volumes:
       - "{{ root }}/mail:/mail"
@@ -62,7 +68,8 @@ services:
       - front
 
   smtp:
-    image: mailu/postfix:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/postfix:${MAILU_VERSION:-{{ version }}}
+    restart: always
     env_file: {{ env }}
     volumes:
       - "{{ root }}/overrides:/overrides"
@@ -74,10 +81,9 @@ services:
       - {{ dns }}
     {% endif %}
 
-  # Optional services
-  {% if antispam_enabled %}
   antispam:
-    image: mailu/rspamd:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/rspamd:${MAILU_VERSION:-{{ version }}}
+    restart: always
     env_file: {{ env }}
     volumes:
       - "{{ root }}/filter:/var/lib/rspamd"
@@ -90,11 +96,12 @@ services:
     dns:
       - {{ dns }}
     {% endif %}
-  {% endif %}
 
+  # Optional services
   {% if antivirus_enabled %}
   antivirus:
-    image: mailu/clamav:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/clamav:${MAILU_VERSION:-{{ version }}}
+    restart: always
     env_file: {{ env }}
     volumes:
       - "{{ root }}/filter:/data"
@@ -108,7 +115,8 @@ services:
 
   {% if webdav_enabled %}
   webdav:
-    image: mailu/radicale:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/radicale:${MAILU_VERSION:-{{ version }}}
+    restart: always
     env_file: {{ env }}
     volumes:
       - "{{ root }}/dav:/data"
@@ -116,7 +124,8 @@ services:
 
   {% if fetchmail_enabled %}
   fetchmail:
-    image: mailu/fetchmail:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/fetchmail:${MAILU_VERSION:-{{ version }}}
+    restart: always
     env_file: {{ env }}
     {% if resolver_enabled %}
     depends_on:
@@ -129,7 +138,8 @@ services:
   # Webmail
   {% if webmail_type != 'none' %}
   webmail:
-    image: mailu/{{ webmail_type }}:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/{{ webmail_type }}:${MAILU_VERSION:-{{ version }}}
+    restart: always
     env_file: {{ env }}
     volumes:
       - "{{ root }}/webmail:/data"

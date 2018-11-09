@@ -4,14 +4,30 @@ addons:
   apt:
     packages:
       - docker-ce
+
 env:
-  - VERSION=$TRAVIS_BRANCH
+  - MAILU_VERSION=$TRAVIS_BRANCH
+language: python
+python:
+  - "3.6"
+install:
+  - pip install -r tests/requirements.txt
+  - sudo curl -L https://github.com/docker/compose/releases/download/1.23.0-rc3/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+  - sudo chmod +x /usr/local/bin/docker-compose
+
+before_script:
+  - docker-compose -v
+  - docker-compose -f tests/build.yml build
+  - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
 
 script:
-  # Default to mailu for DOCKER_ORG
-  - if [ -z "$DOCKER_ORG" ]; then export DOCKER_ORG="mailu"; fi
-  - docker-compose -f tests/build.yml build
-  - tests/compose/test-script.sh
+# test.py, test name and timeout between start and tests.
+  - python tests/compose/test.py core 1
+  - python tests/compose/test.py fetchmail 1
+  - travis_wait python tests/compose/test.py filters 10
+  - python tests/compose/test.py rainloop 1
+  - python tests/compose/test.py roundcube 1
+  - python tests/compose/test.py webdav 1
 
 deploy:
   provider: script
@@ -19,4 +35,3 @@ deploy:
   on:
     all_branches: true
     condition: -n $DOCKER_UN
-

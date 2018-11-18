@@ -1,0 +1,26 @@
+-- name: create_user!
+-- Create the mailu user if it does not exist.
+do $$
+begin
+    create user mailu;
+    exception when others then
+    raise notice 'not creating mailu user -- it already exists';
+end
+$$;
+
+-- name: update_pw!
+alter
+    user mailu
+    password :pw;
+
+-- name: check_db
+-- check if the mailu db exists
+select 1
+    from pg_database
+    where datname = 'mailu';
+
+-- name: create_db!
+-- create the mailu db
+create
+    database mailu
+    owner mailu;

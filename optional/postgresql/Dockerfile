@@ -16,8 +16,12 @@ COPY start.py /start.py
 COPY conf /conf
 
 ENV LANG en_US.UTF-8
-EXPOSE 5432
 
-RUN mkdir -p /run/postgresql && chown -R postgres:postgres /run/postgresql && chmod 2777 /run/postgresql
+RUN mkdir -p /var/lib/postgresql/data /run/postgresql \
+  && chown -R postgres:postgres /var/lib/postgresql/data /run/postgresql \
+  && chmod 2777 /run/postgresql
+
+VOLUME /var/lib/postgresql/data
+EXPOSE 5432
 
 CMD /start.py

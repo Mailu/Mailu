@@ -20,7 +20,7 @@ def setup():
     conn.close()
 
 # Bootstrap the database if postgresql is running for the first time
-if not os.path.exists('/var/lib/postgresql/data/pg_hba.conf'):
+if not os.path.exists('/var/lib/postgresql/data/pg_wal'):
     os.system("chown -R postgres:postgres /var/lib/postgresql")
     os.system("su - postgres -c 'initdb -D /var/lib/postgresql/data'")
 

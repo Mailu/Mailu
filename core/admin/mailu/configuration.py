@@ -67,7 +67,20 @@ class ConfigManager(dict):
             key: os.environ.get(key, value)
             for key, value in DEFAULT_CONFIG.items()
         })
+        if self.config['DB_FLAVOR'] != 'sqlite':
+            self.setsql()
         app.config = self
+
+    def setsql(self):
+        if not self.config['DB_PW']:
+            self.config['DB_PW'] = self.config['SECRET_KEY']
+        self.config['SQLALCHEMY_DATABASE_URI'] = '{driver}://{user}:{pw}@{url}/{db}'.format(
+            driver=self.config['DB_FLAVOR'],
+            user=self.config['DB_USER'],
+            pw=self.config['DB_PW'],
+            url=self.config['DB_URL'],
+            db=self.config['DB_NAME']
+        )
 
     def setdefault(self, key, value):
         if key not in self.config:

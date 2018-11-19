@@ -1,10 +1,20 @@
--- name: create_user!
+-- name: create_mailu_user!
 -- Create the mailu user if it does not exist.
 do $$
 begin
     create user mailu;
     exception when others then
-    raise notice 'not creating mailu user -- it already exists';
+    raise notice 'mailu user not created -- already exists';
+end
+$$;
+
+-- name: create_health_user!
+-- Create the mailu user if it does not exist.
+do $$
+begin
+    create user health;
+    exception when others then
+    raise notice 'health user not created -- already exists';
 end
 $$;
 

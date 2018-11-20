@@ -34,3 +34,10 @@ select 1
 create
     database mailu
     owner mailu;
+
+-- name: create_citext!
+-- Install the CIText extension
+create
+    extension
+    if not exists
+    citext;

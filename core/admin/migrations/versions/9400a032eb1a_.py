@@ -12,15 +12,21 @@ down_revision = '9c28df23f77e'
 
 from alembic import op
 import sqlalchemy as sa
-
+from flask import current_app as app
+from citext import CIText
 
 def upgrade():
+    if app.config['DB_FLAVOR'] == "postgresql":
+        email_type = CIText()
+    else:
+        email_type = sa.String(length=255, collation="NOCASE")
+
     op.create_table('token',
     sa.Column('created_at', sa.Date(), nullable=False),
     sa.Column('updated_at', sa.Date(), nullable=True),
     sa.Column('comment', sa.String(length=255), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_email', sa.String(length=255), nullable=False),
+    sa.Column('user_email', email_type),
     sa.Column('password', sa.String(length=255), nullable=False),
     sa.Column('ip', sa.String(length=255), nullable=True),
     sa.ForeignKeyConstraint(['user_email'], ['user.email'], ),

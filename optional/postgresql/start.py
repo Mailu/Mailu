@@ -7,7 +7,7 @@ import glob
 import os
 
 def setup():
-    conn =  psycopg2.connect('user=postgres')
+    conn =  psycopg2.connect(user = 'postgres')
     queries = anosql.load_queries('postgres', '/conf/queries.sql')
     # Mailu user
     queries.create_mailu_user(conn)
@@ -20,6 +20,10 @@ def setup():
         conn.set_isolation_level(0)
         queries.create_db(conn)
         conn.set_isolation_level(1)
+    conn.close()
+    conn = psycopg2.connect(user = 'postgres', database= 'mailu')
+    queries.create_citext(conn)
+    conn.commit()
     conn.close()
 
 # Bootstrap the database if postgresql is running for the first time

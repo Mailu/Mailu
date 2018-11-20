@@ -66,16 +66,20 @@ class ConfigManager(dict):
 
     def __init__(self):
         self.config = dict()
+        self.parse_env()
 
     def init_app(self, app):
         self.config.update(app.config)
+        self.parse_env()
+        if self.config['DB_FLAVOR'] != 'sqlite':
+            self.setsql()
+        app.config = self
+
+    def parse_env(self):
         self.config.update({
             key: os.environ.get(key, value)
             for key, value in DEFAULT_CONFIG.items()
         })
-        if self.config['DB_FLAVOR'] != 'sqlite':
-            self.setsql()
-        app.config = self
 
     def setsql(self):
         if not self.config['DB_PW']:

@@ -27,18 +27,18 @@ def setup():
     conn.close()
 
 # Bootstrap the database if postgresql is running for the first time
-if not os.path.exists('/var/lib/postgresql/data/pg_wal'):
-    os.system("chown -R postgres:postgres /var/lib/postgresql")
-    os.system("su - postgres -c 'initdb -D /var/lib/postgresql/data'")
+if not os.path.exists('/data/pg_wal'):
+    os.system("chown -R postgres:postgres /data")
+    os.system("su - postgres -c 'initdb -D /data'")
 
 convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 for pg_file in glob.glob("/conf/*.conf"):
-    convert(pg_file, os.path.join("/var/lib/postgresql/data", os.path.basename(pg_file)))
+    convert(pg_file, os.path.join("/data", os.path.basename(pg_file)))
 
 # Run postgresql locally for DB and user creation
-os.system("su - postgres -c 'pg_ctl start -D /var/lib/postgresql/data -o \"-h localhost\"'")
+os.system("su - postgres -c 'pg_ctl start -D /data -o \"-h localhost\"'")
 setup()
-os.system("su - postgres -c 'pg_ctl stop -m smart -w -D /var/lib/postgresql/data'")
+os.system("su - postgres -c 'pg_ctl stop -m smart -w -D /data'")
 
 # Run postgresql service
-os.system("su - postgres -c 'postgres -D /var/lib/postgresql/data -h \*'")
+os.system("su - postgres -c 'postgres -D /data -h \*'")

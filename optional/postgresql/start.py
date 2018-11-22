@@ -31,6 +31,12 @@ if not os.path.exists('/data/pg_wal'):
     os.system("chown -R postgres:postgres /data")
     os.system("su - postgres -c 'initdb -D /data'")
 
+# Create backup directory structure, if it does not yet exist
+os.system("mkdir -p /backup/dump")
+os.system("mkdir -p /backup/wal_archive")
+os.system("chown -R postgres:postgres /backup")
+
+# Render config files
 convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 for pg_file in glob.glob("/conf/*.conf"):
     convert(pg_file, os.path.join("/data", os.path.basename(pg_file)))

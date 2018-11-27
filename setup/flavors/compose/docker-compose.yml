@@ -13,6 +13,16 @@ services:
     restart: always
     volumes:
       - "{{ root }}/redis:/data"
+    
+  {% if db_flavor == 'postgresql' and postgresql == 'internal' %}    
+  database:
+    image: ${DOCKER_ORG:-mailu}/postgresql:${MAILU_VERSION:-{{ version }}}
+    restart: always
+    env_file: {{ env }}
+    volumes:
+      - "{{ root }}/data/psql_db:/data"
+      - "{{ root }}/data/psql_backup:/backup"
+   {% endif %}
 
   # Core services
   front:

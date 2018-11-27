@@ -19,6 +19,7 @@
   {%for file in steps %}
   {% include "steps/" + flavor + "/" + file %}
   {% endfor %}
+  {% include "steps/database.html" %}
   <input class="btn btn-primary" type="submit" value="Setup Mailu">
   {% endif %}
   </form>

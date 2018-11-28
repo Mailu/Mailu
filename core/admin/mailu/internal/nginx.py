@@ -1,4 +1,5 @@
 from mailu import db, models, app
+from mailu.internal.services import auth
 
 import re
 import socket
@@ -37,21 +38,10 @@ def handle_authentication(headers):
         user_email = urllib.parse.unquote(headers["Auth-User"])
         password = urllib.parse.unquote(headers["Auth-Pass"])
         ip = urllib.parse.unquote(headers["Client-Ip"])
-        user = models.User.query.get(user_email)
-        status = False
-        if user:
-            for token in user.tokens:
-                if (token.check_password(password) and
-                    (not token.ip or token.ip == ip)):
-                        status = True
-            if user.check_password(password):
-                status = True
-            if status:
-                if protocol == "imap" and not user.enable_imap:
-                    status = False
-                elif protocol == "pop3" and not user.enable_pop:
-                    status = False
-        if status and user.enabled:
+
+        status = auth.authenticate_user(user_email,password,protocol,ip)
+        
+        if status:
             return {
                 "Auth-Status": "OK",
                 "Auth-Server": server,

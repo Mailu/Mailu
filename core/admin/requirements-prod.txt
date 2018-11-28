@@ -7,7 +7,7 @@ certifi==2018.4.16
 cffi==1.11.5
 chardet==3.0.4
 click==6.7
-cryptography==2.2.2
+cryptography==2.4.2
 decorator==4.3.0
 dnspython==1.15.0
 docker-py==1.10.6
@@ -51,3 +51,4 @@ websocket-client==0.47.0
 Werkzeug==0.14.1
 WTForms==2.1
 WTForms-Components==0.10.3
+python-ldap==3.1.0

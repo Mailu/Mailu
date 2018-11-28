@@ -65,7 +65,13 @@ default_config = {
     'HOST_WEBMAIL': 'webmail',
     'HOST_FRONT': 'front',
     'HOST_AUTHSMTP': os.environ.get('HOST_SMTP', 'smtp'),
-    'POD_ADDRESS_RANGE': None
+    'POD_ADDRESS_RANGE': None,
+    'LDAP_SERVER_URI': None,
+    'LDAP_BIND_DN': 'cn=reader,dc=example,dc=com',
+    'LDAP_BIND_PASSWORD': 'really-secret-password',
+    'LDAP_BASE': 'ou=Users,dc=example,dc=com',
+    'LDAP_MAIL_ATTRIBUTE': 'mail',
+    'LDAP_SEARCH_FILTER': '(objectClass=*)'
 }
 
 # Load configuration from the environment if available

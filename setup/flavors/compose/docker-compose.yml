@@ -157,7 +157,7 @@ services:
       - imap
   {% endif %}
   
-{% if resolver_enabled %}
+{% if resolver_enabled or db_flavor == 'postgresql' %}
 networks:
   default:
     driver: bridge

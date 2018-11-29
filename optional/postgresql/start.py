@@ -5,6 +5,7 @@ import psycopg2
 import jinja2
 import glob
 import os
+import subprocess
 
 def setup():
     conn =  psycopg2.connect(user = 'postgres')
@@ -32,7 +33,6 @@ if not os.path.exists('/data/pg_wal'):
     os.system("su - postgres -c 'initdb -D /data'")
 
 # Create backup directory structure, if it does not yet exist
-os.system("mkdir -p /backup/dump")
 os.system("mkdir -p /backup/wal_archive")
 os.system("chown -R postgres:postgres /backup")
 
@@ -46,5 +46,9 @@ os.system("su - postgres -c 'pg_ctl start -D /data -o \"-h localhost\"'")
 setup()
 os.system("su - postgres -c 'pg_ctl stop -m smart -w -D /data'")
 
+out=open("/proc/1/fd/1", "w")
+err=open("/proc/1/fd/2", "w")
+# Run the cron deamon
+subprocess.Popen(["crond", "-f", "-d7"], stdout=out, stderr=err)
 # Run postgresql service
 os.system("su - postgres -c 'postgres -D /data -h \*'")

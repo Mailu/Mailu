@@ -38,7 +38,7 @@ if not os.listdir("/data"):
         subprocess.call(["tar", "--same-owner", "-zpxf", base_backups[-1] + "/base.tar.gz" , "-C", "/data"])
         if os.listdir("/backup/wal_archive"):
             with open("/data/recovery.conf", "w") as rec:
-                rec.write("restore_command = 'cp /backup/wal_archive/%f %p'\n")
+                rec.write("restore_command = 'gunzip < /backup/wal_archive/%f > %p'\n")
                 rec.write("standby_mode = off\n")
             os.system("chown postgres:postgres /data/recovery.conf")
             #os.system("sudo -u postgres pg_ctl start -D /data -o '-h \"''\" '")

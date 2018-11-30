@@ -4,7 +4,7 @@ dest="/backup/base-$(date +%F-%H%M)"
 last=$(ls -d /backup/base* | tail -n1)
 mkdir $dest || exit $?
 
-pg_basebackup --pgdata=$dest --format=tar --gzip --username=postgres || exit $?
+pg_basebackup --wal-method=none --pgdata=$dest --format=tar --gzip --username=postgres || exit $?
 
 # Clean old base backups, keep the last and the current.
 for d in /backup/base*; do

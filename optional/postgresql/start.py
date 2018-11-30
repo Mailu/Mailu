@@ -28,10 +28,23 @@ def setup():
     conn.commit()
     conn.close()
 
-# Bootstrap the database if postgresql is running for the first time
-if not os.path.exists('/data/pg_wal'):
+# Check if /data is empty
+if not os.listdir("/data"):
     os.system("chown -R postgres:postgres /data")
-    os.system("sudo -u postgres initdb -D /data")
+    os.system("chmod 0700 /data")
+    base_backups=glob.glob("/backup/base-*")
+    if base_backups:
+        # Restore the latest backup
+        subprocess.call(["tar", "--same-owner", "-zpxvf", base_backups[-1] + "/base.tar.gz" , "-C", "/data"])
+        if os.listdir("/backup/wal_archive"):
+            with open("/data/recovery.conf", "w") as rec:
+                rec.write("restore_command = 'cp /backup/wal_archive/%f %p'\n")
+                rec.write("standby_mode = off\n")
+            os.system("chown postgres:postgres /data/recovery.conf")
+            #os.system("sudo -u postgres pg_ctl start -D /data -o '-h \"''\" '")
+    else:
+        # Bootstrap the database
+        os.system("sudo -u postgres initdb -D /data")
 
 # Create backup directory structure, if it does not yet exist
 os.system("mkdir -p /backup/wal_archive")
@@ -42,8 +55,11 @@ convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()
 for pg_file in glob.glob("/conf/*.conf"):
     convert(pg_file, os.path.join("/data", os.path.basename(pg_file)))
 
-# Run postgresql locally for DB and user creation
+# (Re)start postgresql locally for DB and user creation
 os.system("sudo -u postgres pg_ctl start -D /data -o '-h \"''\" '")
+while os.path.isfile("recovery.conf"):
+    pass
+os.system("sudo -u postgres pg_ctl -D /data promote")
 setup()
 os.system("sudo -u postgres pg_ctl stop -m smart -w -D /data")
 

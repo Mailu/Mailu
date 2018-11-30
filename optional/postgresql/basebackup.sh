@@ -17,14 +17,12 @@ done
 # Clean the wall archive
 cd /backup/wal_archive || exit $?
 if [ $(ls *.*.backup | wc -l) -lt 2 ]; then
-    ls /backup/wal_archive
     exit 0
 fi
 # Find the single last wal.backup point
-prev_wal_start="$(ls *.*.backup | tail -n2 | head -n1)"
+prev_wal_start="$(ls *.*.backup | tail -n2 | head -n1 | cut -d '.' -f 1)"
 for f in $(ls) ; do
-    if [ "$f" \< "$prev_wal_start" ] || [ "$f" \= "$prev_wal_start" ]; then
+    if [ "$f" \< "$prev_wal_start" ]; then
         rm -v /backup/wal_archive/$f
     fi
 done
-ls /backup/wal_archive

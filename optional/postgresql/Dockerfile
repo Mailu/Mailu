@@ -7,7 +7,7 @@ RUN apk add --no-cache \
 RUN pip3 install jinja2
 # Image specific layers under this line
 RUN apk add --no-cache \
-    postgresql postgresql-libs postgresql-contrib busybox-suid sudo\
+    postgresql postgresql-libs postgresql-contrib busybox-suid sudo tar \
   && apk add --virtual .build-deps gcc musl-dev postgresql-dev python3-dev \
   && pip3 install psycopg2 anosql \
   && apk --purge del .build-deps

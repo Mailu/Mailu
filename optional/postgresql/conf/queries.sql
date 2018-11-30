@@ -18,6 +18,12 @@ begin
 end
 $$;
 
+-- name: grant_health!
+-- Grant connect permission for the health user
+grant connect
+    on database postgres
+    to health;
+
 -- name: update_pw!
 alter
     user mailu

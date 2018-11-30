@@ -105,3 +105,18 @@ addresses or connect to containers on the docker network:
 - ``FRONT_ADDRESS``: the nginx container address (default: ``front``)
 - ``WEBMAIL_ADDRESS``: the webmail container address (default: ``webmail``)
 - ``IMAP_ADDRESS``: the webmail container address (default: ``webmail``)
+
+
+LDAP-authentication settings
+-----------------------
+
+LDAP authentication is disabled by default and can be enabled by setting the environment variable ``LDAP_SERVER_URI``.
+By default all LDAP-users can authenticate for mail-access, if they have the ``mail``-attribute. This can be restricted by setting the LDAP-search-filter ``LDAP_SEARCH_FILTER``.
+Further the following configuration parameters can be set:
+
+- ``LDAP_SERVER_URI``: URI to access LDAP-server, e.g. 'ldap://localhost:389' (default: ``None``)
+- ``LDAP_BASE``: LDAP-BASE DN from where to start the user-search (default: 'ou=Users,dc=example,dc=com')
+- ``LDAP_BIND_DN``: LDAP-User DN which will be used for searching users (default: 'cn=reader,dc=example,dc=com')
+- ``LDAP_BIND_PASSWORD``: LDAP-password for LDAP-user set in ``LDAP_BIND_DN`` (default: 'really-secret-password')
+- ``LDAP_MAIL_ATTRIBUTE``: LDAP-attribute which contains the mail-address of the LDAP-users (default: 'mail')
+- ``LDAP_SEARCH_FILTER``: LDAP-search-filter which can be used to restrict the number of users, which are allowed to log into mail. (default: '(objectClass=*)')

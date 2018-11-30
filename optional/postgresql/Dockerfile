@@ -7,7 +7,7 @@ RUN apk add --no-cache \
 RUN pip3 install jinja2
 # Image specific layers under this line
 RUN apk add --no-cache \
-    postgresql postgresql-libs postgresql-contrib busybox-suid \
+    postgresql postgresql-libs postgresql-contrib busybox-suid sudo\
   && apk add --virtual .build-deps gcc musl-dev postgresql-dev python3-dev \
   && pip3 install psycopg2 anosql \
   && apk --purge del .build-deps
@@ -30,3 +30,4 @@ VOLUME /backup
 EXPOSE 5432
 
 CMD /start.py
+HEALTHCHECK CMD psql -h 127.0.0.1 -d postgres -U health -c "select 1 as ok;" || exit 1

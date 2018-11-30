@@ -15,6 +15,7 @@ def setup():
     queries.update_pw(conn, pw=os.environ.get("SECRET_KEY"))
     # Healthcheck user
     queries.create_health_user(conn)
+    queries.grant_health(conn)
     conn.commit()
     # create db cannot be atomic. But this script is the only active connection, this is kinda safe.
     if not queries.check_db(conn):
@@ -30,7 +31,7 @@ def setup():
 # Bootstrap the database if postgresql is running for the first time
 if not os.path.exists('/data/pg_wal'):
     os.system("chown -R postgres:postgres /data")
-    os.system("su - postgres -c 'initdb -D /data'")
+    os.system("sudo -u postgres initdb -D /data")
 
 # Create backup directory structure, if it does not yet exist
 os.system("mkdir -p /backup/wal_archive")
@@ -42,13 +43,13 @@ for pg_file in glob.glob("/conf/*.conf"):
     convert(pg_file, os.path.join("/data", os.path.basename(pg_file)))
 
 # Run postgresql locally for DB and user creation
-os.system("su - postgres -c 'pg_ctl start -D /data -o \"-h localhost\"'")
+os.system("sudo -u postgres pg_ctl start -D /data -o '-h \"''\" '")
 setup()
-os.system("su - postgres -c 'pg_ctl stop -m smart -w -D /data'")
+os.system("sudo -u postgres pg_ctl stop -m smart -w -D /data")
 
 out=open("/proc/1/fd/1", "w")
 err=open("/proc/1/fd/2", "w")
 # Run the cron deamon
-subprocess.Popen(["crond", "-f", "-d7"], stdout=out, stderr=err)
+subprocess.Popen(["crond", "-f"], stdout=out, stderr=err)
 # Run postgresql service
-os.system("su - postgres -c 'postgres -D /data -h \*'")
+os.system("sudo -u postgres postgres -D /data -h \*")

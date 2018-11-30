@@ -6,9 +6,6 @@ import logging
 logger = logging.getLogger('ldap_auth')
 
 ldap_server = None
-ldap_base = app.config.get('LDAP_BASE')
-ldap_mail_attribute = app.config.get('LDAP_MAIL_ATTRIBUTE')
-ldap_search_filter = app.config.get('LDAP_SEARCH_FILTER')
 
 def is_configured():
     return bool(app.config.get('LDAP_SERVER_URI'))
@@ -25,6 +22,10 @@ def init_reader_ldap_connection():
     ldap_server = con
 
 def get_user_by_mail(mail_address):
+    ldap_base = app.config.get('LDAP_BASE')
+    ldap_mail_attribute = app.config.get('LDAP_MAIL_ATTRIBUTE')
+    ldap_search_filter = app.config.get('LDAP_SEARCH_FILTER')
+    
     mail_filter = '({}={})'.format(ldap_mail_attribute,mail_address)
     search_query = "(&{}{})".format(ldap_search_filter,mail_filter)
 

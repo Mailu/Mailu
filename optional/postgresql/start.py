@@ -32,10 +32,10 @@ def setup():
 if not os.listdir("/data"):
     os.system("chown -R postgres:postgres /data")
     os.system("chmod 0700 /data")
-    base_backups=glob.glob("/backup/base-*")
+    base_backups=sorted(glob.glob("/backup/base-*"))
     if base_backups:
         # Restore the latest backup
-        subprocess.call(["tar", "--same-owner", "-zpxvf", base_backups[-1] + "/base.tar.gz" , "-C", "/data"])
+        subprocess.call(["tar", "--same-owner", "-zpxf", base_backups[-1] + "/base.tar.gz" , "-C", "/data"])
         if os.listdir("/backup/wal_archive"):
             with open("/data/recovery.conf", "w") as rec:
                 rec.write("restore_command = 'cp /backup/wal_archive/%f %p'\n")

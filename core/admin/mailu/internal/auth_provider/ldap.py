@@ -10,6 +10,9 @@ ldap_base = app.config.get('LDAP_BASE')
 ldap_mail_attribute = app.config.get('LDAP_MAIL_ATTRIBUTE')
 ldap_search_filter = app.config.get('LDAP_SEARCH_FILTER')
 
+def is_configured():
+    return bool(app.config.get('LDAP_SERVER_URI'))
+
 def init_ldap_connection():
     return ldap.initialize(app.config.get('LDAP_SERVER_URI'))
 

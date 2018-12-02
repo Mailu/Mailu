@@ -6,7 +6,9 @@ import flask
 
 @internal.route("/postfix/domain/<domain_name>")
 def postfix_mailbox_domain(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = models.Domain.query.get(domain_name) or \
+             models.Alternative.query.get(domain_name) or \
+             flask.abort(404)
     return flask.jsonify(domain.name)
 
 

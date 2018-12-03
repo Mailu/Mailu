@@ -14,7 +14,7 @@ queue_directory = /queue
 message_size_limit = {{ MESSAGE_SIZE_LIMIT }}
 
 # Relayed networks
-mynetworks = 127.0.0.1/32 [::1]/128 {{ RELAYNETS }}
+mynetworks = 127.0.0.1/32 [::1]/128 {{ SUBNET }} {{ RELAYNETS }}
 
 # Empty alias list to override the configuration variable and disable NIS
 alias_maps =
@@ -32,7 +32,8 @@ relayhost = {{ RELAYHOST }}
 recipient_delimiter = {{ RECIPIENT_DELIMITER }}
 
 # Only the front server is allowed to perform xclient
-smtpd_authorized_xclient_hosts={{ FRONT_ADDRESS }} {{ POD_ADDRESS_RANGE }}
+# In kubernetes and Docker swarm, such address cannot be determined using the hostname. Allow for the whole Mailu subnet instead.
+smtpd_authorized_xclient_hosts={{ POD_ADDRESS_RANGE or SUBNET }}
 
 ###############
 # TLS

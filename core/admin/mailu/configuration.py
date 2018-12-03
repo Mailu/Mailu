@@ -50,6 +50,7 @@ DEFAULT_CONFIG = {
     'HOST_WEBMAIL': 'webmail',
     'HOST_FRONT': 'front',
     'HOST_AUTHSMTP': os.environ.get('HOST_SMTP', 'smtp'),
+    'SUBNET': '192.168.203.0/24',
     'POD_ADDRESS_RANGE': None
 }
 

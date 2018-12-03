@@ -29,7 +29,7 @@ services:
       - "{{ root }}/certs:/certs"
     deploy:
       replicas: {{ front_replicas }}
-      
+
   {% if resolver_enabled %}
   resolver:
     image: mailu/unbound:{{ version }}
@@ -56,8 +56,6 @@ services:
     image: ${DOCKER_ORG:-mailu}/dovecot:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     environment:
-    # Default to 10.0.1.0/24
-      - POD_ADDRESS_RANGE={{ subnet }}
     volumes:
       - "{{ root }}/mail:/mail"
       - "{{ root }}/overrides:/overrides"
@@ -67,8 +65,6 @@ services:
   smtp:
     image: ${DOCKER_ORG:-mailu}/postfix:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
-    environment:
-      - POD_ADDRESS_RANGE={{ subnet }}
     volumes:
       - "{{ root }}/overrides:/overrides"
     deploy:
@@ -81,8 +77,6 @@ services:
   antispam:
     image: ${DOCKER_ORG:-mailu}/rspamd:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
-    environment:
-      - POD_ADDRESS_RANGE={{ subnet }}
     volumes:
       - "{{ root }}/filter:/var/lib/rspamd"
       - "{{ root }}/dkim:/dkim"

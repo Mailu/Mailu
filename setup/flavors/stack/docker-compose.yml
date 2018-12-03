@@ -13,12 +13,6 @@ services:
     volumes:
       - "{{ root }}/redis:/data"
 
-  {% if db_flavor == 'postgresql' and postgresql == 'internal' %}
-  database:
-    image: ${DOCKER_ORG:-mailu}/postgresql:${MAILU_VERSION:-{{ version }}}
-    env_file: {{ env }}
- {% endif %}
-
 # Core services
   front:
     image: ${DOCKER_ORG:-mailu}/nginx:${MAILU_VERSION:-{{ version }}}
@@ -147,6 +141,14 @@ services:
       - "{{ root }}/webmail:/data"
     deploy:
       replicas: 1
+  {% endif %}
+
+  {% if db_flavor == 'postgresql' and postgresql == 'internal' %}
+  database:
+    image: ${DOCKER_ORG:-mailu}/postgresql:${MAILU_VERSION:-{{ version }}}
+    env_file: {{ env }}
+    volumes:
+      - "{{ root }}/data/psql_backup:/backup"
   {% endif %}
 
 networks:

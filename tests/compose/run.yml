@@ -100,10 +100,10 @@ services:
     volumes:
       - "$ROOT/data:/data"
 
-  networks:
-    default:
-      driver: bridge
-      ipam:
-      driver: default
-      config:
-        - subnet: $SUBNET
+networks:
+  default:
+    driver: bridge
+    ipam:
+    driver: default
+    config:
+      - subnet: $SUBNET

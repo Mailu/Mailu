@@ -27,6 +27,8 @@ def postfix_alias_map(alias):
 
 @internal.route("/postfix/transport/<email>")
 def postfix_transport(email):
+    if email == '*':
+        return flask.abort(404)
     localpart, domain_name = models.Email.resolve_domain(email)
     relay = models.Relay.query.get(domain_name) or flask.abort(404)
     return flask.jsonify("smtp:[{}]".format(relay.smtp))

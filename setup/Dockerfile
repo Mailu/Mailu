@@ -12,6 +12,7 @@ COPY setup.py ./setup.py
 COPY main.py ./main.py
 COPY flavors /data/master/flavors
 COPY templates /data/master/templates
+COPY static ./static
 
 #RUN python setup.py https://github.com/mailu/mailu /data
 

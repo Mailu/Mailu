@@ -25,4 +25,4 @@ VOLUME ["/data"]
 
 CMD /start.py
 
-HEALTHCHECK CMD curl -f -L http://localhost/ui || exit 1
+HEALTHCHECK CMD curl -f -L http://localhost/ui/login?next=ui.index || exit 1

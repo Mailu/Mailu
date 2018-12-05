@@ -1,13 +1,13 @@
 # This file is used to run the mailu/setup utility
 
-version: '2'
+version: '3.6'
 
 services:
   redis:
     image: redis:alpine
 
   setup:
-    image: mailu/setup
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX}setup:${MAILU_VERSION:-master}
     ports:
       - "8000:80"
     build: .

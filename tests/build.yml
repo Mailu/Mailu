@@ -3,7 +3,7 @@ version: '3'
 services:
 
   front:
-    image: ${DOCKER_ORG:-mailu}/nginx:${VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/nginx:${MAILU_VERSION:-local}
     build: ../core/nginx
 
   resolver:
@@ -11,50 +11,50 @@ services:
     build: ../services/unbound
 
   imap:
-    image: ${DOCKER_ORG:-mailu}/dovecot:${VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/dovecot:${MAILU_VERSION:-local}
     build: ../core/dovecot
 
   smtp:
-    image: ${DOCKER_ORG:-mailu}/postfix:${VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/postfix:${MAILU_VERSION:-local}
     build: ../core/postfix
 
   antispam:
-    image: ${DOCKER_ORG:-mailu}/rspamd:${VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/rspamd:${MAILU_VERSION:-local}
     build: ../services/rspamd
 
   antivirus:
-    image: ${DOCKER_ORG:-mailu}/clamav:${VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/clamav:${MAILU_VERSION:-local}
     build: ../optional/clamav
 
   webdav:
-    image: ${DOCKER_ORG:-mailu}/radicale:${VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/radicale:${MAILU_VERSION:-local}
     build: ../optional/radicale
 
   admin:
-    image: ${DOCKER_ORG:-mailu}/admin:${VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/admin:${MAILU_VERSION:-local}
     build: ../core/admin
 
   roundcube:
-    image: ${DOCKER_ORG:-mailu}/roundcube:${VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/roundcube:${MAILU_VERSION:-local}
     build: ../webmails/roundcube
 
   rainloop:
-    image: ${DOCKER_ORG:-mailu}/rainloop:${VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/rainloop:${MAILU_VERSION:-local}
     build: ../webmails/rainloop
 
   fetchmail:
-    image: ${DOCKER_ORG:-mailu}/fetchmail:${VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/fetchmail:${MAILU_VERSION:-local}
     build: ../services/fetchmail
 
   none:
-    image: ${DOCKER_ORG:-mailu}/none:${VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/none:${MAILU_VERSION:-local}
     build: ../core/none
 
   docs:
-    image: ${DOCKER_ORG:-mailu}/docs:${VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/docs:${MAILU_VERSION:-local}
     build: ../docs
 
   setup:
-    image: ${DOCKER_ORG:-mailu}/setup:${VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/setup:${MAILU_VERSION:-local}
     build: ../setup
 

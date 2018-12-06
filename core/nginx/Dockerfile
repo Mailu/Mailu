@@ -8,4 +8,6 @@ RUN pip install "idna<2.7"
 COPY conf /conf
 COPY *.py /
 
+COPY dhparam.pem /certs/dhparam.pem
+
 CMD /start.py

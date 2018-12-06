@@ -17,7 +17,7 @@ migration script:
 
 .. code-block:: bash
 
-  python manage.py db migrate
+  flask db migrate
 
 This will generate a new script in ``migrations/versions`` that you must review
 before adding it for commit.
@@ -54,7 +54,7 @@ At that point, to start working on the changed database structure, you will need
 
 .. code-block:: bash
 
-  python manage.py db upgrade
+  flask db upgrade
 
 If any error arises, restore the backup, fix the migration script and try again.
 

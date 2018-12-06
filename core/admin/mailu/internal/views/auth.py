@@ -1,5 +1,6 @@
-from mailu import db, models, app, limiter
+from mailu import models, utils
 from mailu.internal import internal, nginx
+from flask import current_app as app
 
 import flask
 import flask_login
@@ -7,7 +8,7 @@ import base64
 
 
 @internal.route("/auth/email")
-@limiter.limit(
+@utils.limiter.limit(
     app.config["AUTH_RATELIMIT"],
     lambda: flask.request.headers["Client-Ip"]
 )

@@ -1,10 +1,12 @@
-from mailu import app, db, dkim, login_manager
+from mailu import dkim
 
 from sqlalchemy.ext import declarative
 from passlib import context, hash
 from datetime import datetime, date
 from email.mime import text
+from flask import current_app as app
 
+import flask_sqlalchemy
 import sqlalchemy
 import re
 import time
@@ -13,6 +15,9 @@ import glob
 import smtplib
 import idna
 import dns
+
+
+db = flask_sqlalchemy.SQLAlchemy()
 
 
 class IdnaDomain(db.TypeDecorator):
@@ -68,6 +73,27 @@ class CommaSeparatedList(db.TypeDecorator):
 
     def process_result_value(self, value, dialect):
         return filter(bool, value.split(",")) if value else []
+
+
+class JSONEncoded(db.TypeDecorator):
+    """Represents an immutable structure as a json-encoded string.
+    """
+
+    impl = db.String
+
+    def process_bind_param(self, value, dialect):
+        return json.dumps(value) if value else None
+
+    def process_result_value(self, value, dialect):
+        return json.loads(value) if value else None
+
+
+class Config(db.Model):
+    """ In-database configuration values
+    """
+
+    name = db.Column(db.String(255), primary_key=True, nullable=False)
+    value = db.Column(JSONEncoded)
 
 
 # Many-to-many association table for domain managers
@@ -318,13 +344,15 @@ class User(Base, Email):
                    'SHA256-CRYPT': "sha256_crypt",
                    'MD5-CRYPT': "md5_crypt",
                    'CRYPT': "des_crypt"}
-    pw_context = context.CryptContext(
-        schemes = scheme_dict.values(),
-        default=scheme_dict[app.config['PASSWORD_SCHEME']],
-    )
+
+    def get_password_context(self):
+        return context.CryptContext(
+            schemes=self.scheme_dict.values(),
+            default=self.scheme_dict[app.config['PASSWORD_SCHEME']],
+        )
 
     def check_password(self, password):
-        context = User.pw_context
+        context = self.get_password_context()
         reference = re.match('({[^}]+})?(.*)', self.password).group(2)
         result = context.verify(password, reference)
         if result and context.identify(reference) != context.default_scheme():
@@ -333,15 +361,17 @@ class User(Base, Email):
             db.session.commit()
         return result
 
-    def set_password(self, password, hash_scheme=app.config['PASSWORD_SCHEME'], raw=False):
+    def set_password(self, password, hash_scheme=None, raw=False):
         """Set password for user with specified encryption scheme
            @password: plain text password to encrypt (if raw == True the hash itself)
         """
+        if hash_scheme is None:
+            hash_scheme = app.config['PASSWORD_SCHEME']
         # for the list of hash schemes see https://wiki2.dovecot.org/Authentication/PasswordSchemes
         if raw:
             self.password = '{'+hash_scheme+'}' + password
         else:
-            self.password = '{'+hash_scheme+'}' + User.pw_context.encrypt(password, self.scheme_dict[hash_scheme])
+            self.password = '{'+hash_scheme+'}' + self.get_password_context().encrypt(password, self.scheme_dict[hash_scheme])
 
     def get_managed_domains(self):
         if self.global_admin:
@@ -363,11 +393,13 @@ class User(Base, Email):
                 app.config["WELCOME_BODY"])
 
     @classmethod
+    def get(cls, email):
+        return cls.query.get(email)
+
+    @classmethod
     def login(cls, email, password):
         user = cls.query.get(email)
         return user if (user and user.enabled and user.check_password(password)) else None
-
-login_manager.user_loader(User.query.get)
 
 
 class Alias(Base, Email):

@@ -3,6 +3,8 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
 import logging
+import tenacity
+from tenacity import retry
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -68,8 +70,8 @@ def run_migrations_online():
     engine = engine_from_config(config.get_section(config.config_ini_section),
                                 prefix='sqlalchemy.',
                                 poolclass=pool.NullPool)
+    connection = retry(engine.connect, stop=tenacity.stop_after_attempt(100), wait=tenacity.wait_random(min=2, max=5))()
 
-    connection = engine.connect()
     context.configure(connection=connection,
                       target_metadata=target_metadata,
                       process_revision_directives=process_revision_directives,

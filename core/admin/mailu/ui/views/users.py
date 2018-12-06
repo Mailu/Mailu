@@ -171,7 +171,11 @@ def user_signup(domain_name=None):
             available_domains=available_domains)
     domain = available_domains.get(domain_name) or flask.abort(404)
     quota_bytes = domain.max_quota_bytes or app.config['DEFAULT_QUOTA']
-    form = forms.UserSignupForm()
+    if app.config['RECAPTCHA_PUBLIC_KEY'] == "" or app.config['RECAPTCHA_PRIVATE_KEY'] == "":
+        form = forms.UserSignupForm()
+    else:
+        form = forms.UserSignupFormCaptcha()
+
     if form.validate_on_submit():
         if domain.has_email(form.localpart.data):
             flask.flash('Email is already used', 'error')

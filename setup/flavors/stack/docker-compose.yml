@@ -10,14 +10,15 @@ services:
 # External dependencies
   redis:
     image: redis:alpine
-    restart: always
     volumes:
       - "{{ root }}/redis:/data"
 
 # Core services
   front:
-    image: mailu/nginx:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/nginx:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
+    logging:
+      driver: {{ log_driver or 'json-file' }}
     ports:
     {% for port in (80, 443, 25, 465, 587, 110, 995, 143, 993) %}
       - target: {{ port }}
@@ -27,7 +28,7 @@ services:
     volumes:
       - "{{ root }}/certs:/certs"
     deploy:
-      replicas: 1
+      replicas: {{ front_replicas }}
       
   {% if resolver_enabled %}
   resolver:
@@ -39,7 +40,7 @@ services:
   {% endif %}
 
   admin:
-    image: mailu/admin:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/admin:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     {% if not admin_enabled %}
     ports:
@@ -49,10 +50,10 @@ services:
       - "{{ root }}/data:/data"
       - "{{ root }}/dkim:/dkim"
     deploy:
-      replicas: 1
+      replicas: {{ admin_replicas }}
 
   imap:
-    image: mailu/dovecot:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/dovecot:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     environment:
     # Default to 10.0.1.0/24
@@ -61,26 +62,24 @@ services:
       - "{{ root }}/mail:/mail"
       - "{{ root }}/overrides:/overrides"
     deploy:
-      replicas: 1
+      replicas: {{ imap_replicas }}
 
   smtp:
-    image: mailu/postfix:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/postfix:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     environment:
       - POD_ADDRESS_RANGE={{ subnet }}
     volumes:
       - "{{ root }}/overrides:/overrides"
     deploy:
-      replicas: 1
+      replicas: {{ smtp_replicas }}
     {% if resolver_enabled %}
     dns:
       - {{ dns }}
     {% endif %}
 
-  # Optional services
-  {% if antispam_enabled %}
   antispam:
-    image: mailu/rspamd:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/rspamd:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     environment:
       - POD_ADDRESS_RANGE={{ subnet }}
@@ -94,11 +93,11 @@ services:
     dns:
       - {{ dns }}
     {% endif %}
-  {% endif %}
 
+  # Optional services
   {% if antivirus_enabled %}
   antivirus:
-    image: mailu/clamav:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/clamav:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
       - "{{ root }}/filter:/data"
@@ -112,7 +111,7 @@ services:
 
   {% if webdav_enabled %}
   webdav:
-    image: mailu/none:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/none:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
       - "{{ root }}/dav:/data"
@@ -122,7 +121,7 @@ services:
 
   {% if fetchmail_enabled %}
   fetchmail:
-    image: mailu/fetchmail:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/fetchmail:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
       - "{{ root }}/data:/data"
@@ -136,7 +135,7 @@ services:
 
   {% if webmail_type != 'none' %}
   webmail:
-    image: mailu/roundcube:{{ version }}
+    image: ${DOCKER_ORG:-mailu}/roundcube:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
       - "{{ root }}/webmail:/data"

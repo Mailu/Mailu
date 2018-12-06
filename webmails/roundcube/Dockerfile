@@ -19,7 +19,8 @@ RUN rm -rf /var/www/html/ \
  && mv roundcubemail-* html \
  && cd html \
  && rm -rf CHANGELOG INSTALL LICENSE README.md UPGRADING composer.json-dist installer \
- && chown -R www-data: logs
+ && chown -R www-data: logs \
+ && sed -i 's/mod_php5.c/mod_php7.c/g' /var/www/html/.htaccess 
 
 COPY config.inc.php /var/www/html/config/
 

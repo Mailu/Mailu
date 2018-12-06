@@ -146,8 +146,7 @@ services:
     depends_on:
       - imap
   {% endif %}
-  
-{% if resolver_enabled %}
+
 networks:
   default:
     driver: bridge
@@ -155,4 +154,3 @@ networks:
       driver: default
       config:
         - subnet: {{ subnet }}
-{% endif %}

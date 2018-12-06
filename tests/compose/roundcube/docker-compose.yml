@@ -86,3 +86,12 @@ services:
       - "/mailu/webmail:/data"
     depends_on:
       - imap
+
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.203.0/24

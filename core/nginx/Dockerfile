@@ -7,7 +7,7 @@ RUN apk add --no-cache \
 RUN pip3 install jinja2
 # Image specific layers under this line
 RUN apk add --no-cache certbot nginx nginx-mod-mail openssl curl \
- && pip3 install idna requests
+ && pip3 install idna requests watchdog
 
 COPY conf /conf
 COPY *.py /

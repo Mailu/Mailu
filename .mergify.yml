@@ -10,6 +10,7 @@ pull_request_rules:
     conditions:
       - author~=(kaiyou|muhlemmer|mildred|HorayNarea|adi90x|hoellen|ofthesun9)
       - status-success=continuous-integration/travis-ci/pr
+      - label!=["review/need2"]
       - "#approved-reviews-by>=1"
     actions:
       merge:

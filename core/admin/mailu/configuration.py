@@ -3,8 +3,6 @@ import os
 
 DEFAULT_CONFIG = {
     # Specific to the admin UI
-    'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
-    'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     'DOCKER_SOCKET': 'unix:///var/run/docker.sock',
     'BABEL_DEFAULT_LOCALE': 'en',
     'BABEL_DEFAULT_TIMEZONE': 'UTC',
@@ -14,6 +12,14 @@ DEFAULT_CONFIG = {
     'DEBUG': False,
     'DOMAIN_REGISTRATION': False,
     'TEMPLATES_AUTO_RELOAD': True,
+    # Database settings
+    'DB_FLAVOR': 'sqlite',
+    'DB_USER': 'mailu',
+    'DB_PW': '',
+    'DB_URL': 'database',
+    'DB_NAME': 'mailu',
+    'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
+    'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     # Statistics management
     'INSTANCE_ID_PATH': '/data/instance',
     'STATS_ENDPOINT': '0.{}.stats.mailu.io',

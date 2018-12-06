@@ -16,7 +16,7 @@ import sqlalchemy as sa
 
 def upgrade():
     with op.batch_alter_table('user') as batch:
-        batch.alter_column('email', type_=sa.String(length=255, collation="NOCASE"))
+        batch.alter_column('email', type_=sa.String(length=255))
 
 
 def downgrade():

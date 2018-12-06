@@ -24,10 +24,10 @@ class IdnaDomain(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
 
-    impl = db.String(80)
+    impl = db.String(80, collation="NOCASE")
 
     def process_bind_param(self, value, dialect):
-        return idna.encode(value).decode("ascii")
+        return idna.encode(value).decode("ascii").lower()
 
     def process_result_value(self, value, dialect):
         return idna.decode(value)
@@ -45,7 +45,7 @@ class IdnaEmail(db.TypeDecorator):
             return "{0}@{1}".format(
                 localpart,
                 idna.encode(domain_name).decode('ascii'),
-            )
+            ).lower()
         except ValueError:
             pass
 

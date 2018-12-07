@@ -28,7 +28,8 @@ services:
     {% endfor %}
     volumes:
       - "{{ root }}/certs:/certs"
-      
+      - "{{ root }}/overrides/nginx:/overrides"
+
   {% if resolver_enabled %}
   resolver:
     image: mailu/unbound:{{ version }}

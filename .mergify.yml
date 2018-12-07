@@ -17,4 +17,4 @@ pull_request_rules:
       merge:
         method: merge
         strict: true
-      dismiss_reviews
+      dismiss_reviews:

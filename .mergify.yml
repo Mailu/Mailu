@@ -8,6 +8,8 @@ pull_request_rules:
         method: merge
         strict: true
       dismiss_reviews:
+        approved: true
+
   - name: Trusted author, successful travis and 1 approved review
     conditions:
       - author~=(kaiyou|muhlemmer|mildred|HorayNarea|adi90x|hoellen|ofthesun9)
@@ -18,3 +20,4 @@ pull_request_rules:
         method: merge
         strict: true
       dismiss_reviews:
+        approved: true

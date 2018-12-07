@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
  && rm -rf /var/lib/apt/lists
 
 COPY include.php /var/www/html/include.php
-COPY php.ini /usr/local/etc/php/conf.d/rainloop.ini
+COPY php.ini /php.ini
 
 COPY config.ini /config.ini
 COPY default.ini /default.ini

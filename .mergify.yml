@@ -6,6 +6,7 @@ pull_request_rules:
     actions:
       merge:
         method: merge
+        strict: true
   - name: Trusted author, successful travis and 1 approved review
     conditions:
       - author~=(kaiyou|muhlemmer|mildred|HorayNarea|adi90x|hoellen|ofthesun9)
@@ -14,3 +15,4 @@ pull_request_rules:
     actions:
       merge:
         method: merge
+        strict: true

@@ -1,4 +1,4 @@
-from mailu import db, models
+from mailu import models
 from mailu.internal import internal
 
 import flask
@@ -27,6 +27,6 @@ def fetch_done(fetch_id):
     fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
     fetch.last_check = datetime.datetime.now()
     fetch.error_message = str(flask.request.get_json())
-    db.session.add(fetch)
-    db.session.commit()
+    models.db.session.add(fetch)
+    models.db.session.commit()
     return ""

@@ -15,14 +15,14 @@ RUN apk add --no-cache openssl curl \
 
 COPY mailu ./mailu
 COPY migrations ./migrations
-COPY manage.py .
 COPY start.py /start.py
 
 RUN pybabel compile -d mailu/translations
 
 EXPOSE 80/tcp
 VOLUME ["/data"]
+ENV FLASK_APP mailu
 
 CMD /start.py
 
-HEALTHCHECK CMD curl -f -L http://localhost/ui || exit 1
+HEALTHCHECK CMD curl -f -L http://localhost/ui/login?next=ui.index || exit 1

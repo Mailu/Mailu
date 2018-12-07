@@ -1,10 +1,25 @@
-rules:
-  default: null
-  branches:
-    master:
-      protection:
-        required_status_checks:
-          contexts:
-            - continuous-integration/travis-ci 
-        required_pull_request_reviews:
-          required_approving_review_count: 2
+pull_request_rules:
+  - name: Successful travis and 2 approved reviews
+    conditions:
+      - status-success=continuous-integration/travis-ci/pr
+      - label!=["status"/wip","status/blocked"]
+      - "#approved-reviews-by>=2"
+    actions:
+      merge:
+        method: merge
+        strict: true
+      dismiss_reviews:
+        approved: true
+
+  - name: Trusted author, successful travis and 1 approved review
+    conditions:
+      - author~=(kaiyou|muhlemmer|mildred|HorayNarea|adi90x|hoellen|ofthesun9)
+      - status-success=continuous-integration/travis-ci/pr
+      - label!=["status"/wip","status/blocked","review/need2"]
+      - "#approved-reviews-by>=1"
+    actions:
+      merge:
+        method: merge
+        strict: true
+      dismiss_reviews:
+        approved: true

@@ -15,7 +15,7 @@ alias
 
 .. code-block:: bash
 
-  docker-compose run --rm admin python manage.py alias foo example.net "mail1@example.com,mail2@example.com"
+  docker-compose exec admin flask mailu alias foo example.net "mail1@example.com,mail2@example.com"
 
 
 alias_delete
@@ -23,14 +23,14 @@ alias_delete
 
 .. code-block:: bash
 
-  docker-compose run --rm admin python manage.py alias_delete foo@example.net
+  docker-compose exec admin flask mailu alias_delete foo@example.net
 
 user
 ----
 
 .. code-block:: bash
 
-  docker-compose run --rm admin python manage.py user --hash_scheme='SHA512-CRYPT' myuser example.net 'password123'
+  docker-compose exec admin flask mailu user --hash_scheme='SHA512-CRYPT' myuser example.net 'password123'
 
 user_import
 -----------
@@ -39,14 +39,14 @@ primary difference with simple `user` command is that password is being imported
 
 .. code-block:: bash
 
-  docker-compose run --rm admin python manage.py user_import --hash_scheme='SHA512-CRYPT' myuser example.net '$6$51ebe0cb9f1dab48effa2a0ad8660cb489b445936b9ffd812a0b8f46bca66dd549fea530ce'
+  docker-compose run --rm admin python manage.py user --hash_scheme='SHA512-CRYPT' myuser example.net '$6$51ebe0cb9f1dab48effa2a0ad8660cb489b445936b9ffd812a0b8f46bca66dd549fea530ce'
 
 user_delete
 ------------
 
 .. code-block:: bash
 
-  docker-compose run --rm admin python manage.py user_delete foo@example.net
+  docker-compose exec admin flask mailu user_delete foo@example.net
 
 config_update
 -------------
@@ -55,7 +55,7 @@ The sole purpose of this command is for importing users/aliases in bulk and sync
 
 .. code-block:: bash
 
-  cat mail-config.yml | docker-compose run --rm admin python manage.py config_update --delete_objects
+  cat mail-config.yml | docker-compose exec admin flask mailu config_update --delete_objects
 
 where mail-config.yml looks like:
 

@@ -1,4 +1,4 @@
-from mailu import db, models
+from mailu import models
 from mailu.ui import ui, forms, access
 
 import flask
@@ -26,8 +26,8 @@ def alternative_create(domain_name):
         else:
             alternative = models.Alternative(domain=domain)
             form.populate_obj(alternative)
-            db.session.add(alternative)
-            db.session.commit()
+            models.db.session.add(alternative)
+            models.db.session.commit()
             flask.flash('Alternative domain %s created' % alternative)
             return flask.redirect(
                 flask.url_for('.alternative_list', domain_name=domain.name))
@@ -41,8 +41,8 @@ def alternative_create(domain_name):
 def alternative_delete(alternative):
     alternative = models.Alternative.query.get(alternative) or flask.abort(404)
     domain = alternative.domain
-    db.session.delete(alternative)
-    db.session.commit()
+    models.db.session.delete(alternative)
+    models.db.session.commit()
     flask.flash('Alternative %s deleted' % alternative)
     return flask.redirect(
         flask.url_for('.alternative_list', domain_name=domain.name))

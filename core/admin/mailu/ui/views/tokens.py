@@ -1,4 +1,4 @@
-from mailu import db, models
+from mailu import models
 from mailu.ui import ui, forms, access
 
 from passlib import pwd
@@ -32,8 +32,8 @@ def token_create(user_email):
         token = models.Token(user=user)
         token.set_password(form.raw_password.data)
         form.populate_obj(token)
-        db.session.add(token)
-        db.session.commit()
+        models.db.session.add(token)
+        models.db.session.commit()
         flask.flash('Authentication token created')
         return flask.redirect(
             flask.url_for('.token_list', user_email=user.email))
@@ -46,8 +46,8 @@ def token_create(user_email):
 def token_delete(token_id):
     token = models.Token.query.get(token_id) or flask.abort(404)
     user = token.user
-    db.session.delete(token)
-    db.session.commit()
+    models.db.session.delete(token)
+    models.db.session.commit()
     flask.flash('Authentication token deleted')
     return flask.redirect(
         flask.url_for('.token_list', user_email=user.email))

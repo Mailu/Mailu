@@ -1,4 +1,4 @@
-from mailu import db, models
+from mailu import models
 from mailu.ui import ui, forms, access
 
 import flask
@@ -25,7 +25,7 @@ def admin_create():
         user = models.User.query.get(form.admin.data)
         if user:
             user.global_admin = True
-            db.session.commit()
+            models.db.session.commit()
             flask.flash('User %s is now admin' % user)
             return flask.redirect(flask.url_for('.admin_list'))
         else:
@@ -40,7 +40,7 @@ def admin_delete(admin):
     user = models.User.query.get(admin)
     if user:
         user.global_admin  = False
-        db.session.commit()
+        models.db.session.commit()
         flask.flash('User %s is no longer admin' % user)
         return flask.redirect(flask.url_for('.admin_list'))
     else:

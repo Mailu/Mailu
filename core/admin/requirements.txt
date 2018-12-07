@@ -12,7 +12,6 @@ redis
 WTForms-Components
 passlib
 gunicorn
-docker-py
 tabulate
 PyYAML
 PyOpenSSL

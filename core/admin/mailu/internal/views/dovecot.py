@@ -10,12 +10,9 @@ import os
 def dovecot_passdb_dict(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     allow_nets = []
-    allow_nets.append(
-        app.config.get("POD_ADDRESS_RANGE") or
-        socket.gethostbyname(app.config["HOST_FRONT"])
-    )
-    if os.environ["WEBMAIL"] != "none":
-        allow_nets.append(socket.gethostbyname(app.config["HOST_WEBMAIL"]))
+    allow_nets.append(app.config["SUBNET"])
+    if app.config["POD_ADDRESS_RANGE"]:
+        allow_nets.append(app.config["POD_ADDRESS_RANGE"])
     print(allow_nets)
     return flask.jsonify({
         "password": None,

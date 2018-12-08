@@ -15,4 +15,4 @@ VOLUME ["/data"]
 
 CMD /start.py
 
-HEALTHCHECK CMD /health.sh
+HEALTHCHECK --start-period=350s CMD /health.sh

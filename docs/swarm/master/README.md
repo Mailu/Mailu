@@ -30,7 +30,7 @@ mzrm9nbdggsfz4sgq6dhs5i6n     flying-dutchman     Ready               Active    
 ### Volume definition
 For data persistance (the Mailu services might be launched/relaunched on any of the swarm nodes), we need to have Mailu data stored in a manner accessible by every manager or worker in the swarm.
 
-Hereafter we will assume that "Mailu Data" is available on every node at "$ROOT/certs:/certs" (GlusterFS and nfs shares have been successfully used).
+Hereafter we will assume that "Mailu Data" is available on every node at "$ROOT" (GlusterFS and nfs shares have been successfully used).
 
 On this example, we are using:
 - the mesh routing mode (default mode). With this mode, each service is given a virtual IP adress and docker manages the routing between this virtual IP and the container(s) providing this service. 
@@ -77,7 +77,7 @@ Instead, we will use the following work-around:
 We need also to:
 - add a deploy section for every service
 - modify the way the ports are defined for the front service
-- add the POD_ADDRESS_RANGE definition for imap, smtp and antispam services
+- add the POD_ADDRESS_RANGE definition for admin (for imap), smtp and antispam services
 
 ## Docker compose 
 An example of docker-compose-stack.yml file is available here:
@@ -128,8 +128,6 @@ services:
     image: mailu/dovecot:$VERSION
     restart: always
     env_file: .env
-    environment:
-      - POD_ADDRESS_RANGE=10.0.1.0/24
     volumes:
       - "$ROOT/mail:/mail"
       - "$ROOT/overrides:/overrides"
@@ -188,6 +186,8 @@ services:
     image: mailu/admin:$VERSION
     restart: always
     env_file: .env
+    environment:
+      - POD_ADDRESS_RANGE=10.0.1.0/24
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/dkim:/dkim"

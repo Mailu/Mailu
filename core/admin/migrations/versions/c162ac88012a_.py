@@ -21,7 +21,7 @@ def upgrade():
     sa.Column('comment', sa.String(length=255), nullable=True),
     sa.Column('name', sa.String(length=80), nullable=False),
     sa.Column('smtp', sa.String(length=80), nullable=True),
-    sa.PrimaryKeyConstraint('name')
+    sa.PrimaryKeyConstraint('name', name=op.f('relay_pkey'))
     )
 
 

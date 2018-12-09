@@ -22,7 +22,7 @@ def upgrade():
         sa.Column('name', sa.String(length=80), nullable=False),
         sa.Column('max_users', sa.Integer(), nullable=False),
         sa.Column('max_aliases', sa.Integer(), nullable=False),
-        sa.PrimaryKeyConstraint('name')
+        sa.PrimaryKeyConstraint('name', name=op.f('domain_pkey'))
     )
     op.create_table('alias',
         sa.Column('created_at', sa.Date(), nullable=False),
@@ -32,8 +32,8 @@ def upgrade():
         sa.Column('destination', sa.String(length=1023), nullable=False),
         sa.Column('domain_name', sa.String(length=80), nullable=False),
         sa.Column('email', sa.String(length=255), nullable=False),
-        sa.ForeignKeyConstraint(['domain_name'], ['domain.name'], ),
-        sa.PrimaryKeyConstraint('email')
+        sa.ForeignKeyConstraint(['domain_name'], ['domain.name'], name=op.f('alias_domain_name_fkey')),
+        sa.PrimaryKeyConstraint('email', name=op.f('alias_pkey'))
     )
     op.create_table('user',
         sa.Column('created_at', sa.Date(), nullable=False),
@@ -55,8 +55,8 @@ def upgrade():
         sa.Column('spam_threshold', sa.Numeric(), nullable=False),
         sa.Column('domain_name', sa.String(length=80), nullable=False),
         sa.Column('email', sa.String(length=255), nullable=False),
-        sa.ForeignKeyConstraint(['domain_name'], ['domain.name'], ),
-        sa.PrimaryKeyConstraint('email')
+        sa.ForeignKeyConstraint(['domain_name'], ['domain.name'], name=op.f('user_domain_name_fkey')),
+        sa.PrimaryKeyConstraint('email', name=op.f('user_pkey'))
     )
     op.create_table('fetch',
         sa.Column('created_at', sa.Date(), nullable=False),
@@ -70,14 +70,14 @@ def upgrade():
         sa.Column('tls', sa.Boolean(), nullable=False),
         sa.Column('username', sa.String(length=255), nullable=False),
         sa.Column('password', sa.String(length=255), nullable=False),
-        sa.ForeignKeyConstraint(['user_email'], ['user.email'], ),
-        sa.PrimaryKeyConstraint('id')
+        sa.ForeignKeyConstraint(['user_email'], ['user.email'], name=op.f('fetch_user_email_fkey')),
+        sa.PrimaryKeyConstraint('id', name=op.f('fetch_pkey'))
         )
     op.create_table('manager',
         sa.Column('domain_name', sa.String(length=80), nullable=True),
         sa.Column('user_email', sa.String(length=255), nullable=True),
-        sa.ForeignKeyConstraint(['domain_name'], ['domain.name'], ),
-        sa.ForeignKeyConstraint(['user_email'], ['user.email'], )
+        sa.ForeignKeyConstraint(['domain_name'], ['domain.name'], name=op.f('manager_domain_name_fkey')),
+        sa.ForeignKeyConstraint(['user_email'], ['user.email'], name=op.f('manager_user_email_fkey'))
     )
 
 

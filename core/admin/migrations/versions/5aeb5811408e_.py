@@ -29,6 +29,7 @@ id_columns = lambda: [
 
 
 domain_table = sa.Table('domain', sa.MetaData(), name_column())
+relay_table = sa.Table('relay', sa.MetaData(), name_column())
 alternative_table = sa.Table('alternative', sa.MetaData(), name_column(), domain_name_column())
 user_table = sa.Table('user', sa.MetaData(), *email_columns())
 alias_table = sa.Table('alias', sa.MetaData(), *email_columns())
@@ -101,6 +102,13 @@ def upgrade():
             token_table.c.id == token.id
         ).values(
             user_email=token.user_email.lower()
+        ))
+    # lower relays
+    for relay in connection.execute(relay_table.select()):
+        connection.execute(relay_table.update().where(
+            relay_tbale.c.name == relay.name
+        ).values(
+            name=relay.name.lower()
         ))
     # lower managers
     for manager in connection.execute(manager_table.select()):

@@ -208,7 +208,7 @@ class Relay(Base):
 
     __tablename__ = "relay"
 
-    name = db.Column(db.String(80), primary_key=True, nullable=False)
+    name = db.Column(IdnaDomain, primary_key=True, nullable=False)
     smtp = db.Column(db.String(80), nullable=True)
 
     def __str__(self):

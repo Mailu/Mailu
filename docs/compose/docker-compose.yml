@@ -29,6 +29,7 @@ services:
     - "$BIND_ADDRESS6:587:587"
     volumes:
       - "$ROOT/certs:/certs"
+      - "$ROOT/overrides/nginx:/overrides"
 
   redis:
     image: redis:alpine

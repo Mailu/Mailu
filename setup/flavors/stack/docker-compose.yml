@@ -27,6 +27,7 @@ services:
     {% endfor %}
     volumes:
       - "{{ root }}/certs:/certs"
+      - "{{ root }}/overrides/nginx:/overrides"
     deploy:
       replicas: {{ front_replicas }}
 

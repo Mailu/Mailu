@@ -426,7 +426,7 @@ class Alias(Base, Email):
                     )
                 )
             )
-        ).first()
+        ).order_by(sqlalchemy.func.char_length(cls.localpart).desc()).first()
 
 
 class Token(Base):

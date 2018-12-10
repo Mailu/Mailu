@@ -21,11 +21,6 @@ import dns
 db = flask_sqlalchemy.SQLAlchemy()
 config = configuration.ConfigManager()
 
-def email_type():
-    if config['DB_FLAVOR'] == 'postgresql':
-        return CIText()
-    else:
-        return db.String(255, collation="NOCASE")
 
 class IdnaDomain(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
@@ -63,6 +58,9 @@ class IdnaEmail(db.TypeDecorator):
             idna.decode(domain_name),
         )
 
+    def __init__(self):
+        if config['DB_FLAVOR'] == 'postgresql':
+            self.impl = CIText()
 
 
 class CommaSeparatedList(db.TypeDecorator):
@@ -467,7 +465,7 @@ class Fetch(Base):
     __tablename__ = "fetch"
 
     id = db.Column(db.Integer(), primary_key=True)
-    user_email = db.Column(email_type(), db.ForeignKey(User.email),
+    user_email = db.Column(db.String(255), db.ForeignKey(User.email),
         nullable=False)
     user = db.relationship(User,
         backref=db.backref('fetches', cascade='all, delete-orphan'))

@@ -35,7 +35,7 @@ def upgrade():
          )
     # set default to 80%
     with op.batch_alter_table('user') as batch:
-        batch.alter_column('spam_threshold', server_default='80')
+        batch.alter_column('spam_threshold', default=80.)
 
 def downgrade():
     connection = op.get_bind()
@@ -50,4 +50,4 @@ def downgrade():
          )
     # set default to 10/15
     with op.batch_alter_table('user') as batch:
-        batch.alter_column('spam_threshold', server_default='10')
+        batch.alter_column('spam_threshold', default=10.)

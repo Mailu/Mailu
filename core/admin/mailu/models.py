@@ -309,7 +309,7 @@ class User(Base, Email):
     # Settings
     displayed_name = db.Column(db.String(160), nullable=False, default="")
     spam_enabled = db.Column(db.Boolean(), nullable=False, default=True)
-    spam_threshold = db.Column(db.Integer(), nullable=False, default=80)
+    spam_threshold = db.Column(db.Integer(), nullable=False, default=80.0)
 
     # Flask-login attributes
     is_authenticated = True
@@ -463,7 +463,7 @@ class Fetch(Base):
         nullable=False)
     user = db.relationship(User,
         backref=db.backref('fetches', cascade='all, delete-orphan'))
-    protocol = db.Column(db.Enum('imap', 'pop3', name='protocol'), nullable=False)
+    protocol = db.Column(db.Enum('imap', 'pop3'), nullable=False)
     host = db.Column(db.String(255), nullable=False)
     port = db.Column(db.Integer(), nullable=False)
     tls = db.Column(db.Boolean(), nullable=False)

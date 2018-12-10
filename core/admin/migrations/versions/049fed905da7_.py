@@ -12,13 +12,11 @@ down_revision = '49d77a93118e'
 
 from alembic import op
 import sqlalchemy as sa
-from flask import current_app as app
 
 
 def upgrade():
-    if app.config['DB_FLAVOR'] == 'sqlite':
-        with op.batch_alter_table('user') as batch:
-            batch.alter_column('email', type_=sa.String(length=255, collation="NOCASE"))
+    with op.batch_alter_table('user') as batch:
+        batch.alter_column('email', type_=sa.String(length=255, collation="NOCASE"))
 
 
 def downgrade():

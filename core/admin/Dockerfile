@@ -8,9 +8,8 @@ RUN mkdir -p /app
 WORKDIR /app
 
 COPY requirements-prod.txt requirements.txt
-RUN apk add --no-cache libressl curl postgresql-client \
- && apk add --no-cache --virtual build-dep \
- libressl-dev libffi-dev python3-dev build-base postgresql-dev \
+RUN apk add --no-cache openssl curl \
+ && apk add --no-cache --virtual build-dep openssl-dev libffi-dev python3-dev build-base \
  && pip3 install -r requirements.txt \
  && apk del --no-cache build-dep
 

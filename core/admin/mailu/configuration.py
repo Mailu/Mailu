@@ -13,10 +13,10 @@ DEFAULT_CONFIG = {
     'DOMAIN_REGISTRATION': False,
     'TEMPLATES_AUTO_RELOAD': True,
     # Database settings
-    'DB_FLAVOR': 'sqlite',
+    'DB_FLAVOR': None,
     'DB_USER': 'mailu',
-    'DB_PW': '',
-    'DB_URL': 'database',
+    'DB_PW': None,
+    'DB_HOST': 'database',
     'DB_NAME': 'mailu',
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
@@ -64,30 +64,29 @@ class ConfigManager(dict):
     """ Naive configuration manager that uses environment only
     """
 
+    DB_TEMPLATES = {
+        'sqlite': 'sqlite:////{DB_HOST}',
+        'postgresql': 'postgresql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}',
+        'mysql': 'mysql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}'
+    }
+
     def __init__(self):
         self.config = dict()
         self.parse_env()
 
     def init_app(self, app):
         self.config.update(app.config)
-        self.parse_env()
-        if self.config['DB_FLAVOR'] != 'sqlite':
-            self.setsql()
-        app.config = self
-
-    def parse_env(self):
+        # get environment variables
         self.config.update({
             key: os.environ.get(key, value)
             for key, value in DEFAULT_CONFIG.items()
         })
-        if self.config['SQL_FLAVOR'] != 'sqlite'
-            self.setsql()
+        # automatically set the sqlalchemy string
+        if self.config['DB_FLAVOR']:
+            template = self.DB_TEMPLATES[self.config['DB_FLAVOR']]
+            self.config['SQLALCHEMY_DATABASE_URI'] = template.format(**self.config)
+        # update the app config itself
         app.config = self
-
-    def setsql(self)
-        if not self.config['DB_PW']
-            self.config['DB_PW'] = self.config['SECRET_KEY']
-        self.config['SQLALCHEMY_DATABASE_URI'] = '{driver}://{user}:{pw}@{url}/{db}'.format(driver=DB_FLAVOR,user=DB_USER,pw=DB_PW,url=DB_URL,db=DB_NAME)
 
     def setdefault(self, key, value):
         if key not in self.config:

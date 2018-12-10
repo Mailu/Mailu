@@ -1,11 +1,10 @@
-from mailu import dkim, configuration
+from mailu import dkim
 
 from sqlalchemy.ext import declarative
 from passlib import context, hash
 from datetime import datetime, date
 from email.mime import text
 from flask import current_app as app
-from citext import CIText
 
 import flask_sqlalchemy
 import sqlalchemy
@@ -19,7 +18,6 @@ import dns
 
 
 db = flask_sqlalchemy.SQLAlchemy()
-config = configuration.ConfigManager()
 
 
 class IdnaDomain(db.TypeDecorator):
@@ -57,10 +55,6 @@ class IdnaEmail(db.TypeDecorator):
             localpart,
             idna.decode(domain_name),
         )
-
-    def __init__(self):
-        if config['DB_FLAVOR'] == 'postgresql':
-            self.impl = CIText()
 
 
 class CommaSeparatedList(db.TypeDecorator):

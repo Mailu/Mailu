@@ -64,7 +64,7 @@ def upgrade():
         sa.Column('comment', sa.String(length=255), nullable=True),
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('user_email', sa.String(length=255), nullable=False),
-        sa.Column('protocol', sa.Enum('imap', 'pop3', name='protocol'), nullable=False),
+        sa.Column('protocol', sa.Enum('imap', 'pop3'), nullable=False),
         sa.Column('host', sa.String(length=255), nullable=False),
         sa.Column('port', sa.Integer(), nullable=False),
         sa.Column('tls', sa.Boolean(), nullable=False),

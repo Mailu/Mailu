@@ -1,0 +1,1 @@
+11 4 * * 7 /basebackup.sh > /proc/1/fd/1 2>/proc/1/fd/2

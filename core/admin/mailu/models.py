@@ -1,10 +1,11 @@
-from mailu import dkim
+from mailu import dkim, configuration
 
 from sqlalchemy.ext import declarative
 from passlib import context, hash
 from datetime import datetime, date
 from email.mime import text
 from flask import current_app as app
+from citext import CIText
 
 import flask_sqlalchemy
 import sqlalchemy
@@ -18,7 +19,13 @@ import dns
 
 
 db = flask_sqlalchemy.SQLAlchemy()
+config = configuration.ConfigManager()
 
+def email_type():
+    if config['DB_FLAVOR'] == 'postgresql':
+        return CIText()
+    else:
+        return db.String(255, collation="NOCASE")
 
 class IdnaDomain(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
@@ -55,6 +62,7 @@ class IdnaEmail(db.TypeDecorator):
             localpart,
             idna.decode(domain_name),
         )
+
 
 
 class CommaSeparatedList(db.TypeDecorator):
@@ -309,7 +317,7 @@ class User(Base, Email):
     # Settings
     displayed_name = db.Column(db.String(160), nullable=False, default="")
     spam_enabled = db.Column(db.Boolean(), nullable=False, default=True)
-    spam_threshold = db.Column(db.Integer(), nullable=False, default=80.0)
+    spam_threshold = db.Column(db.Integer(), nullable=False, default=80)
 
     # Flask-login attributes
     is_authenticated = True
@@ -459,11 +467,11 @@ class Fetch(Base):
     __tablename__ = "fetch"
 
     id = db.Column(db.Integer(), primary_key=True)
-    user_email = db.Column(db.String(255), db.ForeignKey(User.email),
+    user_email = db.Column(email_type(), db.ForeignKey(User.email),
         nullable=False)
     user = db.relationship(User,
         backref=db.backref('fetches', cascade='all, delete-orphan'))
-    protocol = db.Column(db.Enum('imap', 'pop3'), nullable=False)
+    protocol = db.Column(db.Enum('imap', 'pop3', name='protocol'), nullable=False)
     host = db.Column(db.String(255), nullable=False)
     port = db.Column(db.Integer(), nullable=False)
     tls = db.Column(db.Boolean(), nullable=False)

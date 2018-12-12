@@ -105,11 +105,11 @@ services:
     image: mailu/fetchmail:$VERSION
     restart: always
     env_file: .env
-
-  networks:
-    default:
-      driver: bridge
-      ipam:
+    
+networks:
+  default:
+    driver: bridge
+    ipam:
       driver: default
       config:
         - subnet: $SUBNET

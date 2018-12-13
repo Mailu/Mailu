@@ -13,7 +13,6 @@ def dovecot_passdb_dict(user_email):
     allow_nets.append(app.config["SUBNET"])
     if app.config["POD_ADDRESS_RANGE"]:
         allow_nets.append(app.config["POD_ADDRESS_RANGE"])
-    print(allow_nets)
     return flask.jsonify({
         "password": None,
         "nopassword": "Y",

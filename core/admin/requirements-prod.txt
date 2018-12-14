@@ -1,13 +1,13 @@
 alembic==1.0.2
 asn1crypto==0.24.0
 Babel==2.6.0
-bcrypt==3.1.4
+bcrypt==3.1.5
 blinker==1.4
 cffi==1.11.5
 Click==7.0
 cryptography==2.3.1
 decorator==4.3.0
-dnspython==1.15.0
+dnspython==1.16.0
 dominate==2.3.4
 Flask==1.0.2
 Flask-Babel==0.12.2
@@ -15,7 +15,7 @@ Flask-Bootstrap==3.3.7.1
 Flask-DebugToolbar==0.10.1
 Flask-Limiter==1.0.1
 Flask-Login==0.4.1
-Flask-Migrate==2.3.0
+Flask-Migrate==2.3.1
 Flask-Script==2.0.6
 Flask-SQLAlchemy==2.3.2
 Flask-WTF==0.14.2
@@ -35,10 +35,11 @@ python-dateutil==2.7.5
 python-editor==1.0.3
 pytz==2018.7
 PyYAML==3.13
-redis==2.10.6
+redis==3.0.1
 six==1.11.0
 SQLAlchemy==1.2.13
 tabulate==0.8.2
+tenacity==5.0.2
 validators==0.12.2
 visitor==0.1.3
 Werkzeug==0.14.1

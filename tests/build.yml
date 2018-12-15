@@ -49,4 +49,7 @@ services:
 # Uncomment next section after docs Dockerfile creation.
 #  docs:
 #    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX}docs:${MAILU_VERSION:-local}
-#    build: ../docs
+#    build:
+#      context: ../docs
+#      args:
+#        version: ${MAILU_VERSION:-local}

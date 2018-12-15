@@ -1,2 +1,29 @@
+sudo: required
+services: docker
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+env:
+  - MAILU_VERSION=$TRAVIS_BRANCH
+language: python
+python:
+  - "3.6"
+install:
+  - sudo curl -L https://github.com/docker/compose/releases/download/1.23.0-rc3/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+  - sudo chmod +x /usr/local/bin/docker-compose
+
+before_script:
+  - docker-compose -v
+  - docker-compose -f tests/build.yml build
+
 script:
   - /bin/true
+
+deploy:
+  provider: script
+  script: bash tests/deploy.sh
+  on:
+    all_branches: true
+    condition: -n $DOCKER_UN

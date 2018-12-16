@@ -2,16 +2,18 @@
 # -*- coding: utf-8 -*-
 #
 
+import os
+
 extensions = ['sphinx.ext.imgmath', 'sphinx.ext.viewcode']
 templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'Mailu'
-copyright = '2017, Mailu authors'
+copyright = '2018, Mailu authors'
 author = 'Mailu authors'
-version = release = 'latest'
+version = release = os.environ.get('VERSION', 'master')
 language = None
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'Dockerfile', 'docker-compose.yml']
 pygments_style = 'sphinx'
 todo_include_todos = False
 html_theme = 'sphinx_rtd_theme'
@@ -23,7 +25,7 @@ htmlhelp_basename = 'Mailudoc'
 # to template names.
 html_sidebars = {
     '**': [
-        'relations.html',  # needs 'show_related': True theme option to display
+        'relations.html', 
         'searchbox.html',
     ]
 }
@@ -33,27 +35,11 @@ html_context = {
     'display_github': True,
     'github_user': 'mailu',
     'github_repo': 'mailu',
-    'github_version': 'master',
+    'github_version': version,
+    'stable_version': '1.5',
+    'versions': [
+        ('1.5', '/1.5/'),
+        ('master', '/master/')
+    ],
     'conf_py_path': '/docs/'
 }
-
-
-# Upload function when the script is called directly
-if __name__ == "__main__":
-    import os, sys, paramiko
-    build_dir, hostname, username, password, dest_dir = sys.argv[1:]
-    transport = paramiko.Transport((hostname, 22))
-    transport.connect(username=username, password=password)
-    sftp = paramiko.SFTPClient.from_transport(transport)
-    os.chdir(build_dir)
-    for dirpath, dirnames, filenames in os.walk("."):
-        remote_path = os.path.join(dest_dir, dirpath)
-        try:
-            sftp.mkdir(remote_path)
-        except:
-            pass
-        for filename in filenames:
-            sftp.put(
-                os.path.join(dirpath, filename),
-                os.path.join(remote_path, filename)
-            )

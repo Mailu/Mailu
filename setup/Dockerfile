@@ -16,5 +16,3 @@ COPY static ./static
 EXPOSE 80/tcp
 
 CMD gunicorn -w 4 -b :80 --access-logfile - --error-logfile - --preload main:app
-
-HEALTHCHECK CMD curl -f -L http://localhost/master/ || exit 1

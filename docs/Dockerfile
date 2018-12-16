@@ -18,5 +18,3 @@ RUN mkdir -p /build/$VERSION \
 EXPOSE 80/tcp
 
 CMD nginx -g "daemon off;"
-
-HEALTHCHECK CMD curl -f -L http://localhost/ || exit 1

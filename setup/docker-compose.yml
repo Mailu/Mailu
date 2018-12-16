@@ -8,6 +8,8 @@ services:
 
   setup_master:
     image: mailu/setup:master
+    networks:
+      - web
     env_file: .env
     environment:
       this_version: "master"
@@ -20,6 +22,8 @@ services:
 
   setup_release:
     image: mailu/setup:${RELEASE}
+    networks:
+      - web
     env_file: .env
     environment:
       this_version: ${RELEASE}
@@ -32,3 +36,7 @@ services:
       - traefik.main.frontend.rule=Host:${HOSTNAME};PathPrefix:/${RELEASE}/
     depends_on:
       - redis
+
+networks:
+  web:
+    external: true

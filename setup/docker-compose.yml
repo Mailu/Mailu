@@ -6,9 +6,37 @@ services:
   redis:
     image: redis:alpine
 
-  setup:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX}setup:${MAILU_VERSION:-master}
-    ports:
-      - "8000:80"
-    build: .
+  setup_master:
+    image: mailu/setup:master
+    networks:
+      - web
+    env_file: .env
+    environment:
+      this_version: "master"
+    labels:
+      - traefik.enable=true
+      - traefik.port=80
+      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/master/
+    depends_on:
+      - redis
 
+  setup_release:
+    image: mailu/setup:${RELEASE}
+    networks:
+      - web
+    env_file: .env
+    environment:
+      this_version: ${RELEASE}
+    labels:
+      - traefik.enable=true
+      - traefik.port=80
+      - traefik.root.frontend.redirect.regex=.*
+      - traefik.root.frontend.redirect.replacement=/${RELEASE}/
+      - traefik.root.frontend.rule=Host:${ADDRESS};PathPrefix:/
+      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/${RELEASE}/
+    depends_on:
+      - redis
+
+networks:
+  web:
+    external: true

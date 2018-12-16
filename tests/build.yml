@@ -46,10 +46,9 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX}none:${MAILU_VERSION:-local}
     build: ../core/none
 
-# Uncomment next section after docs Dockerfile creation.
-#  docs:
-#    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX}docs:${MAILU_VERSION:-local}
-#    build:
-#      context: ../docs
-#      args:
-#        version: ${MAILU_VERSION:-local}
+  docs:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX}docs:${MAILU_VERSION:-local}
+    build:
+      context: ../docs
+      args:
+        version: ${MAILU_VERSION:-local}

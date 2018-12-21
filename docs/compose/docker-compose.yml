@@ -88,7 +88,6 @@ services:
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/dkim:/dkim"
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - redis
 

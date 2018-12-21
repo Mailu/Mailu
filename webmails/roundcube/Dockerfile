@@ -2,7 +2,8 @@ FROM php:7.2-apache
 #Shared layer between rainloop and roundcube
 RUN apt-get update && apt-get install -y \
   python3 curl \
-  && rm -rf /var/lib/apt/lists
+  && rm -rf /var/lib/apt/lists \
+  && echo "ServerSignature Off" >> /etc/apache2/apache2.conf
 
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.3.8/roundcubemail-1.3.8-complete.tar.gz
 

@@ -45,7 +45,7 @@ Command for removing docker stack is
 
 Before you can use Mailu, you must create the primary administrator user account. This should be {{ postmaster }}@{{ domain }}. Use the following command, changing PASSWORD to your liking:
 
-<pre><code>docker exec $(docker ps | grep admin | cut -d ' ' -f1) python manage.py admin {{ postmaster }} {{ domain }} PASSWORD 
+<pre><code>docker exec $(docker ps | grep admin | cut -d ' ' -f1) flask mailu admin {{ postmaster }} {{ domain }} PASSWORD
 </pre></code>
 
 <p>Login to the admin interface to change the password for a safe one, at

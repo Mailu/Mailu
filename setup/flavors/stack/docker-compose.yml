@@ -105,7 +105,7 @@ services:
 
   {% if webdav_enabled %}
   webdav:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}none:${MAILU_VERSION:-{{ version }}}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}radicale:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
       - "{{ root }}/dav:/data"

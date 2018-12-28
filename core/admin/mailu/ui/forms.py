@@ -32,6 +32,14 @@ class DestinationField(fields.SelectMultipleField):
             if not self.validator.match(item):
                 raise validators.ValidationError(_('Invalid email address.'))
 
+class MultipleEmailAddressesVerify(object):
+    def __init__(self,message=_('Invalid email address.')):
+        self.message = message
+
+    def __call__(self, form, field):
+        pattern = re.compile(r'^([_a-z0-9\-]+)(\.[_a-z0-9\-]+)*@([a-z0-9\-]{2,}\.)*([a-z]{2,4})(,([_a-z0-9\-]+)(\.[_a-z0-9\-]+)*@([a-z0-9\-]{2,}\.)*([a-z]{2,4}))*$')
+        if not pattern.match(field.data.replace(" ", "")):
+            raise validators.ValidationError(self.message)
 
 class ConfirmationForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Confirm'))
@@ -101,9 +109,7 @@ class UserSettingsForm(flask_wtf.FlaskForm):
     spam_threshold = fields_.IntegerSliderField(_('Spam filter tolerance'))
     forward_enabled = fields.BooleanField(_('Enable forwarding'))
     forward_keep = fields.BooleanField(_('Keep a copy of the emails'))
-    forward_destination = fields.StringField(
-        _('Destination'), [validators.Optional(), validators.Email()]
-    )
+    forward_destination = fields.StringField(_('Destination'), [validators.Optional(), MultipleEmailAddressesVerify()])
     submit = fields.SubmitField(_('Save settings'))
 
 

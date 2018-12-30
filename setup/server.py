@@ -10,7 +10,9 @@ import random
 import ipaddress
 
 
-app = flask.Flask(__name__)
+version = os.getenv("this_version")
+static_url_path = "/" + version + "/static"
+app = flask.Flask(__name__,static_url_path=static_url_path)
 flask_bootstrap.Bootstrap(app)
 db = redis.StrictRedis(host='redis', port=6379, db=0)
 
@@ -39,8 +41,6 @@ def build_app(path):
     @app.context_processor
     def app_context():
         return dict(versions=os.getenv("VERSIONS","master").split(','))
-
-    version = os.getenv("this_version")
 
     prefix_bp = flask.Blueprint(version, __name__)
     prefix_bp.jinja_loader = jinja2.ChoiceLoader([

@@ -2,7 +2,7 @@
 
 function dump() {
     echo "$(date) Dumping certificates"
-    bash dumpcerts.sh /traefik/acme.json /tmp/work/
+    bash dumpcerts.sh /traefik/acme.json /tmp/work/ || return
 
     for crt_file in $(ls /tmp/work/certs/*); do
         pem_file=$(echo $crt_file | sed 's/certs/pem/g' | sed 's/.crt/-public.pem/g')

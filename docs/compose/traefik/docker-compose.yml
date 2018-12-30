@@ -20,7 +20,7 @@ services:
 
   certdumper:
     restart: always
-    image: nebukadneza/traefik-certdumper:latest
+    image: mailu/traefik-certdumper:$VERSION
     environment:
     # Make sure this is the same as the main=-domain in traefik.toml
     # !!! Also don’t forget to add "TRAEFIK_DOMAIN=[...]" to your .env!
@@ -41,7 +41,6 @@ services:
       - "traefik.frontend.rule=Host:$TRAEFIK_DOMAIN"
       - "traefik.docker.network=mailu_default"
     ports:
-      - "80" # Let’s not expose 80 or 443 on host, since that’s taken by traefik
       - "$BIND_ADDRESS4:110:110"
       - "$BIND_ADDRESS4:143:143"
       - "$BIND_ADDRESS4:993:993"
@@ -57,7 +56,6 @@ services:
       - "$BIND_ADDRESS6:465:465"
       - "$BIND_ADDRESS6:587:587"
     volumes:
-      - "$ROOT/certs:/certs" # Mount both certs directory (for dhparams.pem) and your domains key
       - "$ROOT/overrides/nginx:/overrides"
       - /data/traefik/ssl/$TRAEFIK_DOMAIN.crt:/certs/cert.pem
       - /data/traefik/ssl/$TRAEFIK_DOMAIN.key:/certs/key.pem

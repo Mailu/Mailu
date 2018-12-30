@@ -11,6 +11,10 @@
 {% block content %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
+  
+  {% call macros.box(title=_("Displayed name")) %}
+  {{ macros.form_field(form.displayed_name) }}
+  {% endcall %}
 
   {% call macros.box(title=_("Antispam")) %}
   {{ macros.form_field(form.spam_enabled) }}

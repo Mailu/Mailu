@@ -184,7 +184,7 @@ directory structure.
 
 If you do no posses the resources, but want to become an involved tester/reviewer.
 Please contact `muhlemmer on Matrix`_.
-He can provide access to a testing server, if a thrust relation can be established.
+He can provide access to a testing server, if a trust relation can be established.
 
 .. _`muhlemmer on Matrix`: https://matrix.to/#/@muhlemmer:matrix.org
 

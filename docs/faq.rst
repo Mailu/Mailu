@@ -312,12 +312,30 @@ spam filter weight settings.
 
 *Issue reference:* `503`_.
 
+rspamd: DNS query blocked on multi.uribl.com
+````````````````````````````````````````````
+
+This usually relates to the DNS server you are using. Most of the public servers block this query or there is a rate limit.
+In order to solve this, you most probably are better off using a root DNS resolver, such as `unbound`_. This can be done in multiple ways:
+
+- Use the *Mailu/unbound* container. This is an optional include when generating the ``docker-compose.yml`` file with the setup utility.
+- Setup unbound on the host and make sure the host's ``/etc/resolve.conf`` points to local host.
+  Docker will then forward all external DNS requests to the local server.
+- Set up an external DNS server with root resolving capabilities.
+
+In any case, using a dedicated DNS server will improve the performance of your mail server.
+
+*Issue reference:* `554`_, `681`_.
+
 .. _`troubleshooting tag`: https://github.com/Mailu/Mailu/issues?utf8=%E2%9C%93&q=label%3Afaq%2Ftroubleshooting
 .. _`85`: https://github.com/Mailu/Mailu/issues/85
 .. _`116`: https://github.com/Mailu/Mailu/issues/116
 .. _`171`: https://github.com/Mailu/Mailu/issues/171
 .. _`426`: https://github.com/Mailu/Mailu/issues/426
 .. _`503`: https://github.com/Mailu/Mailu/issues/503
+.. _`554`: https://github.com/Mailu/Mailu/issues/554
 .. _`584`: https://github.com/Mailu/Mailu/issues/584
 .. _`592`: https://github.com/Mailu/Mailu/issues/592
 .. _`615`: https://github.com/Mailu/Mailu/issues/615
+.. _`681`: https://github.com/Mailu/Mailu/pull/681
+.. _`unbound`: https://nlnetlabs.nl/projects/unbound/about/

@@ -168,6 +168,16 @@ For **service** HA, please see: `How does Mailu scale up?`_
 
 .. _`spam magnet`: https://blog.zensoftware.co.uk/2012/07/02/why-we-tend-to-recommend-not-having-a-secondary-mx-these-days/
 
+Does Mailu run on Rancher?
+``````````````````````````
+
+There is a rancher catalog for Mailu in the `Mailu/Rancher`_ repository. The user group for Rancher is small,
+so we cannot promise any support on this when you're heading into trouble. See the repository README for more details.
+
+*Issue reference:* `125`_.
+
+.. _`Mailu/Rancher`: https://github.com/Mailu/Rancher
+
 
 Can I run Mailu without host iptables?
 ``````````````````````````````````````
@@ -198,6 +208,7 @@ correct syntax. The following file names will be taken as override configuration
 .. _`Rspamd`: https://www.rspamd.com/doc/configuration/index.html
 
 .. _`Docker swarm howto`: https://github.com/Mailu/Mailu/tree/master/docs/swarm/master
+.. _`125`: https://github.com/Mailu/Mailu/issues/125
 .. _`165`: https://github.com/Mailu/Mailu/issues/165
 .. _`177`: https://github.com/Mailu/Mailu/issues/177
 .. _`332`: https://github.com/Mailu/Mailu/issues/332

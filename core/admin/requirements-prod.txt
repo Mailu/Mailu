@@ -46,3 +46,4 @@ WTForms==2.2.1
 WTForms-Components==0.10.3
 psycopg2
 tenacity
+mysqlclient

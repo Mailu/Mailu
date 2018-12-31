@@ -8,7 +8,7 @@ import os
 import subprocess
 
 def setup():
-    conn =  psycopg2.connect('user=postgres')
+    conn =  psycopg2.connect(user='postgres')
     queries = anosql.load_queries('postgres', '/conf/queries.sql')
     # Mailu user
     queries.create_mailu_user(conn)

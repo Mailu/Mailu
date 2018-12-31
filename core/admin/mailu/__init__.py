@@ -8,7 +8,6 @@ def create_app_from_config(config):
     """ Create a new application based on the given configuration
     """
     app = flask.Flask(__name__)
-    app.app_context().push()
     app.cli.add_command(manage.mailu)
 
     # Bootstrap is used for basic JS and CSS loading

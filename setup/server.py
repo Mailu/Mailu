@@ -34,70 +34,60 @@ def secret(length=16):
 
 def build_app(path):
 
-    #Hardcoded master as the only version for test purposes
-    versions = [
-    #    version for version in os.listdir(path)
-    #    if os.path.isdir(os.path.join(path, version))
-         "master"
-    ]
-
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
 
     @app.context_processor
     def app_context():
-        return dict(versions=versions)
+        return dict(versions=os.getenv("VERSIONS","master").split(','))
 
-    @app.route("/")
-    def index():
-        return flask.redirect(flask.url_for('{}.wizard'.format(versions[-1])))
+    version = os.getenv("this_version")
 
-    for version in versions:
-        bp = flask.Blueprint(version, __name__)
-        bp.jinja_loader = jinja2.ChoiceLoader([
-            jinja2.FileSystemLoader(os.path.join(path, version, "templates")),
-            jinja2.FileSystemLoader(os.path.join(path, version, "flavors"))
-        ])
+    bp = flask.Blueprint(version, __name__)
+    bp.jinja_loader = jinja2.ChoiceLoader([
+        jinja2.FileSystemLoader(os.path.join(path, "templates")),
+        jinja2.FileSystemLoader(os.path.join(path, "flavors"))
+    ])
 
-        @bp.context_processor
-        def bp_context(version=version):
-            return dict(version=version)
+    @bp.context_processor
+    def bp_context(version=version):
+        return dict(version=version)
 
-        @bp.route("/")
-        def wizard():
-            return flask.render_template('wizard.html')
+    @bp.route("/")
+    def wizard():
+        return flask.render_template('wizard.html')
 
-        @bp.route("/submit_flavor", methods=["POST"])
-        def submit_flavor():
-            data = flask.request.form.copy()
-            steps = sorted(os.listdir(path + "/" + version + "/templates/steps/" + data["flavor"]))
-            return flask.render_template('wizard.html', flavor=data["flavor"], steps=steps)
+    @bp.route("/submit_flavor", methods=["POST"])
+    def submit_flavor():
+        data = flask.request.form.copy()
+        steps = sorted(os.listdir(os.path.join(path, "templates", "steps", data["flavor"])))
+        return flask.render_template('wizard.html', flavor=data["flavor"], steps=steps)
 
-        @bp.route("/submit", methods=["POST"])
-        def submit():
-            data = flask.request.form.copy()
-            data['uid'] = str(uuid.uuid4())
-            data['dns'] = str(ipaddress.IPv4Network(data['subnet'])[-2])
-            db.set(data['uid'], json.dumps(data))
-            return flask.redirect(flask.url_for('.setup', uid=data['uid']))
+    @bp.route("/submit", methods=["POST"])
+    def submit():
+        data = flask.request.form.copy()
+        data['uid'] = str(uuid.uuid4())
+        data['dns'] = str(ipaddress.IPv4Network(data['subnet'])[-2])
+        db.set(data['uid'], json.dumps(data))
+        return flask.redirect(flask.url_for('.setup', uid=data['uid']))
 
-        @bp.route("/setup/<uid>", methods=["GET"])
-        def setup(uid):
-            data = json.loads(db.get(uid))
-            flavor = data.get("flavor", "compose")
-            rendered = render_flavor(flavor, "setup.html", data)
-            return flask.render_template("setup.html", contents=rendered)
+    @bp.route("/setup/<uid>", methods=["GET"])
+    def setup(uid):
+        data = json.loads(db.get(uid))
+        flavor = data.get("flavor", "compose")
+        rendered = render_flavor(flavor, "setup.html", data)
+        return flask.render_template("setup.html", contents=rendered)
 
-        @bp.route("/file/<uid>/<filepath>", methods=["GET"])
-        def file(uid, filepath):
-            data = json.loads(db.get(uid))
-            flavor = data.get("flavor", "compose")
-            return flask.Response(
-                render_flavor(flavor, filepath, data),
-                mimetype="application/text"
-            )
+    @bp.route("/file/<uid>/<filepath>", methods=["GET"])
+    def file(uid, filepath):
+        data = json.loads(db.get(uid))
+        flavor = data.get("flavor", "compose")
+        return flask.Response(
+            render_flavor(flavor, filepath, data),
+            mimetype="application/text"
+        )
 
-        app.register_blueprint(bp, url_prefix="/{}".format(version))
+    app.register_blueprint(bp, url_prefix="/{}".format(version))
 
 
 if __name__ == "__main__":

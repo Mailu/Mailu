@@ -9,7 +9,7 @@ import base64
 
 @internal.route("/auth/email")
 @utils.limiter.limit(
-    app.config["AUTH_RATELIMIT"],
+    lambda: app.config["AUTH_RATELIMIT"],
     lambda: flask.request.headers["Client-Ip"]
 )
 def nginx_authentication():

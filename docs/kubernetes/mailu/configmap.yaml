@@ -53,6 +53,11 @@
     # This way we can make use of the advantages of the cert-manager deployment
     KUBERNETES_INGRESS: "true"
 
+    # POD_ADDRESS_RANGE is normally provided by default with Kubernetes
+    # Only use this value when you are using Flannel, Calico or a special kind of CNI
+    # Provide the IPs of your network interface or bridge which is used for VXLAN network traffic
+    # POD_ADDRESS_RANGE: 10.2.0.0/16,10.1.6.0/24
+
     ###################################
     # Optional features
     ###################################

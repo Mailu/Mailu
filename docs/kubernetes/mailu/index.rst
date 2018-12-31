@@ -193,3 +193,18 @@ This problem can be easily fixed by running following commands:
 
     kubectl -n mailu-mailserver exec -it mailu-imap-... /bin/sh
     chmod 777 /data/main.db
+
+If the login problem still persists, or more specific, happens now and then and you see some Auth problems on your webmail or mail client, try following steps:
+
+- Add ``auth_debug=yes`` to the ``/overrides/dovecot.conf`` file and delete the pod in order to start a new one, which loads the configuration
+- Depending on your network configuration you could still see some ``allow_nets check failed`` results in the logs. This means that the IP is not allowed a login
+- If this is happening your network plugin has troubles with the Nginx Ingress Controller using the ``hostNetwork: true`` option. Known cases: Flannel and Calico.
+- You should uncomment ``POD_ADDRESS_RANGE`` in the ``configmap.yaml`` file and add the IP range of your pod network bridge (the range that sadly has failed the ``allowed_nets`` test)
+- Delete the IMAP pod and wait for it to restart
+
+.. code:: bash
+
+    kubectl -n mailu-mailserver get po
+    kubectl -n mailu-mailserver delete po/mailu-imap...
+
+Happy mailing!

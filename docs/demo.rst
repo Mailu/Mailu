@@ -5,21 +5,32 @@ The demo server is for demonstration and test purposes only. Please be
 respectful and keep the demo server functional for others to be able to try it
 out.
 
-The server is reset every day at 3am, french time. If you find the server is
-unusable, you can still ask for someone to reset it manually on our Matrix
-chat channel. Please do not open tickets everytime the server is down. Please
-do not open tickets if the server is quite slow: it *is* slow because the
-machine is a cheap leased server.
+If you find the server is unusable, you can ask for someone to reset it manually on our Matrix
+chat channel. Please do not open tickets every time the server is down.
+Please do not open tickets if the server is quite slow: it *is* slow because the
+services have only limited resources available.
 
-Keep in mind that the demo server is also used for some automated tests and runs
-the latest unstable version. If you find actual bugs when using the demo
-server, please report these!
+Keep in mind that the demo server runs the latest unstable (master) version.
+If you find actual bugs when using the demo server, please report these!
+
+Functionality
+-------------
+
+- The server is reset every day at 3am, UTC.
+- You can send mail from any client to the server.
+  However, the stmp server is made incapable of relaying the e-mail to the destination server.
+  As such, the mail will never arrive. This is to prevent abuse of the server.
+- The server is capable of receiving mail for any configured domains.
+- The server exposes IMAP, POP3 and SMTP as usual for connection with mail clients such as Thunderbird.
+- The containers have limited (throttled) CPU, this means it can respond slow during heavy operations.
+- The containers have limited memory available and will be killed when exceeded.
+  This is to prevent people from doing nasty things to the server as a whole.
 
 Connecting to the server
 ------------------------
 
  * Server name : ``test.mailu.io``
- * IP address : ``51.15.169.20``
+ * IP address : ``173.249.45.89``
  * Webmail : https://test.mailu.io/webmail/
  * Admin UI : https://test.mailu.io/admin/
  * Admin login : ``admin@test.mailu.io``

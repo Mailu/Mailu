@@ -53,7 +53,7 @@ configure your email client
     </tr>
     <tr>
       <th>{% trans %}Username{% endtrans %}</th>
-      <td><pre>{{ current_user or "******" }}</pre></td>
+      <td><pre>{{ current_user if current_user.is_authenticated else "******" }}</pre></td>
     </tr>
     <tr>
       <th>{% trans %}Password{% endtrans %}</th>

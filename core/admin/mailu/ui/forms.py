@@ -136,7 +136,7 @@ class TokenForm(flask_wtf.FlaskForm):
 
 
 class AliasForm(flask_wtf.FlaskForm):
-    localpart = fields.StringField(_('Alias'), [validators.DataRequired()])
+    localpart = fields.StringField(_('Alias'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
     wildcard = fields.BooleanField(
         _('Use SQL LIKE Syntax (e.g. for catch-all aliases)'))
     destination = DestinationField(_('Destination'))

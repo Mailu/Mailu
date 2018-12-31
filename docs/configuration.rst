@@ -24,6 +24,11 @@ The ``HOSTNAMES`` are all public hostnames for the mail server. Mailu supports
 a mail server with multiple hostnames. The first declared hostname is the main
 hostname and will be exposed over SMTP, IMAP, etc.
 
+The ``SUBNET`` defines the address range of the docker network used by Mailu.
+This should not conflict with any networks to which your system is connected.
+(Internal and external!). Normally this does not need to be changed,
+unless there is a conflict with existing networks.
+
 The ``POSTMASTER`` is the local part of the postmaster email address. It is
 recommended to setup a generic value and later configure a mail alias for that
 address.
@@ -40,9 +45,9 @@ be too low to avoid dropping legitimate emails and should not be too high to
 avoid filling the disks with large junk emails.
 
 The ``RELAYNETS`` are network addresses for which mail is relayed for free with
-no authentication required. This should be used with great care. It is
-recommended to include your Docker internal network addresses if other Docker
-containers use Mailu as their mail relay.
+no authentication required. This should be used with great care. If you want other
+Docker services' outbound mail to be relayed, you can set this to ``172.16.0.0/12``
+to include **all** Docker networks. The default is to leave this empty.
 
 The ``RELAYHOST`` is an optional address of a mail server relaying all outgoing
 mail.

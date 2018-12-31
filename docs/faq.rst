@@ -191,6 +191,8 @@ correct syntax. The following file names will be taken as override configuration
 - `Dovecot`_ - ``dovecot.conf``;
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
 
+*Issue reference:* `206`_.
+
 .. _`Postfix`: http://www.postfix.org/postconf.5.html
 .. _`Dovecot`: https://wiki.dovecot.org/ConfigFile
 .. _`Rspamd`: https://www.rspamd.com/doc/configuration/index.html
@@ -325,12 +327,13 @@ In order to solve this, you most probably are better off using a root DNS resolv
 
 In any case, using a dedicated DNS server will improve the performance of your mail server.
 
-*Issue reference:* `554`_, `681`_.
+*Issue reference:* `206`_, `554`_, `681`_.
 
 .. _`troubleshooting tag`: https://github.com/Mailu/Mailu/issues?utf8=%E2%9C%93&q=label%3Afaq%2Ftroubleshooting
 .. _`85`: https://github.com/Mailu/Mailu/issues/85
 .. _`116`: https://github.com/Mailu/Mailu/issues/116
 .. _`171`: https://github.com/Mailu/Mailu/issues/171
+.. _`206`: https://github.com/Mailu/Mailu/issues/206
 .. _`426`: https://github.com/Mailu/Mailu/issues/426
 .. _`503`: https://github.com/Mailu/Mailu/issues/503
 .. _`554`: https://github.com/Mailu/Mailu/issues/554

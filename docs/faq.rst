@@ -350,12 +350,29 @@ In any case, using a dedicated DNS server will improve the performance of your m
 
 *Issue reference:* `206`_, `554`_, `681`_.
 
+Is there a way to support more (older) ciphers?
+```````````````````````````````````````````````
+
+See `How can I override settings?`_ .
+You will need to add the protocols you wish to support in an override for the ``front`` container (Nginx).
+
+.. code-block:: bash
+
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  ssl_ciphers <list of ciphers>;
+
+We **strongly** advice against downgrading the TLS version and ciphers!
+
+*Issue reference:* `363`_, `698`_.
+
+
 .. _`troubleshooting tag`: https://github.com/Mailu/Mailu/issues?utf8=%E2%9C%93&q=label%3Afaq%2Ftroubleshooting
 .. _`85`: https://github.com/Mailu/Mailu/issues/85
 .. _`102`: https://github.com/Mailu/Mailu/issues/102
 .. _`116`: https://github.com/Mailu/Mailu/issues/116
 .. _`171`: https://github.com/Mailu/Mailu/issues/171
 .. _`206`: https://github.com/Mailu/Mailu/issues/206
+.. _`363`: https://github.com/Mailu/Mailu/issues/363
 .. _`426`: https://github.com/Mailu/Mailu/issues/426
 .. _`503`: https://github.com/Mailu/Mailu/issues/503
 .. _`554`: https://github.com/Mailu/Mailu/issues/554
@@ -363,4 +380,5 @@ In any case, using a dedicated DNS server will improve the performance of your m
 .. _`592`: https://github.com/Mailu/Mailu/issues/592
 .. _`615`: https://github.com/Mailu/Mailu/issues/615
 .. _`681`: https://github.com/Mailu/Mailu/pull/681
+.. _`698`: https://github.com/Mailu/Mailu/issues/698
 .. _`unbound`: https://nlnetlabs.nl/projects/unbound/about/

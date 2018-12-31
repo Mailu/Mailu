@@ -301,8 +301,18 @@ See also :ref:`external_certs`.
 
 *Issue reference:* `426`_, `615`_.
 
+How do I activate DKIM and DMARC?
+```````````````````````
+Go into the Domain Panel and choose the Domain you want to enable DKIM for.
+Click the first icon on the left side (domain details).
+Now click on the top right on the *"Regenerate Keys"* Button.
+This will generate the DKIM and DMARC entries for you.
+
+*Issue reference:* `102`_.
+
 Do you support Fail2Ban?
 ````````````````````````
+
 Fail2Ban is not included in Mailu. Fail2Ban needs to modify the host's IP tables in order to
 ban the addresses. We consider such a program should be run on the host system and not
 inside a container. The ``front`` container does use authentication rate limiting to slow
@@ -342,6 +352,7 @@ In any case, using a dedicated DNS server will improve the performance of your m
 
 .. _`troubleshooting tag`: https://github.com/Mailu/Mailu/issues?utf8=%E2%9C%93&q=label%3Afaq%2Ftroubleshooting
 .. _`85`: https://github.com/Mailu/Mailu/issues/85
+.. _`102`: https://github.com/Mailu/Mailu/issues/102
 .. _`116`: https://github.com/Mailu/Mailu/issues/116
 .. _`171`: https://github.com/Mailu/Mailu/issues/171
 .. _`206`: https://github.com/Mailu/Mailu/issues/206

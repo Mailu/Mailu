@@ -89,6 +89,51 @@ our ongoing `project management`_ discussion issue.
 Deployment related
 ------------------
 
+What is the difference between DOMAIN and HOSTNAMES?
+````````````````````````````````````````````````````
+
+Similair questions:
+
+- Changing domain doesn't work
+- Do I need a certificate for ``DOMAIN``?
+
+``DOMAIN`` is the main mail domain. Aka, server identification for outgoing mail. DMARC reports point to ``POSTMASTER`` @ ``DOMAIN``.
+These are really the only things it is used for. You don't need a cert for ``DOMAIN``, as it is a mail domain only and not used as host in any sense.
+However, it is usual that ``DOMAIN`` gets setup as one of the many mail domains. None of the mail domains ever need a certificate.
+TLS certificates work on host connection level only.
+
+``HOSTNAMES`` however, can be used to connect to the server. All host names supplied in this variable will need a certificate. When ``TLS_FLAVOR=letsencrypt`` is set,
+a certificate is requested automatically for all those domains.
+
+So when you have something like this:
+
+.. code-block:: bash
+
+  DOMAIN=example.com
+  POSTMASTER=me
+  HOSTNAMES=mail.example.com,mail.foo.com,bar.com
+  TLS_FLAVOR=letsencrypt
+
+- You'll end up with a DMARC address to ``me@example.com``.
+- Server identifies itself as the SMTP server of ``@example.com`` when sending mail. Make sure your reverse DNS hostname is part of that domain!
+- Your server will have certificates for the 3 hostnames. You will need to create ``A`` and ``AAAA`` records for those names,
+  pointing to the IP addresses of your server.
+- The admin interface generates ``MX`` and ``SPF`` examples which point to the first entry of ``HOSTNAMES`` but these are only examples.
+  You can modify them to use any other ``HOSTNAMES`` entry.
+
+You're mail service will be reachable for IMAP, POP3, SMTP and Webmail at the addresses:
+
+- mail.example.com
+- mail.foo.com
+- bar.com
+
+.. note::
+
+  In this case ``example.com`` is not reachable as a host and will not have a certificate.
+  It can be used as a mail domain if MX is setup to point to one of the ``HOSTNAMES``. However, it is possible to include ``example.com`` in ``HOSTNAMES``.
+
+*Issue reference:* `742`_, `747`_.
+
 How does Mailu scale up?
 ````````````````````````
 
@@ -154,6 +199,8 @@ correct syntax. The following file names will be taken as override configuration
 .. _`165`: https://github.com/Mailu/Mailu/issues/165
 .. _`177`: https://github.com/Mailu/Mailu/issues/177
 .. _`332`: https://github.com/Mailu/Mailu/issues/332
+.. _`742`: https://github.com/Mailu/Mailu/issues/742
+.. _`747`: https://github.com/Mailu/Mailu/issues/747
 .. _`520`: https://github.com/Mailu/Mailu/issues/520
 .. _`591`: https://github.com/Mailu/Mailu/issues/591
 

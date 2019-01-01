@@ -18,7 +18,7 @@ Functionality
 
 - The server is reset every day at 3am, UTC.
 - You can send mail from any client to the server.
-  However, the stmp server is made incapable of relaying the e-mail to the destination server.
+  However, the SMTP server is made incapable of relaying the e-mail to the destination server.
   As such, the mail will never arrive. This is to prevent abuse of the server.
 - The server is capable of receiving mail for any configured domains.
 - The server exposes IMAP, POP3 and SMTP as usual for connection with mail clients such as Thunderbird.

@@ -72,7 +72,7 @@ class CommaSeparatedList(db.TypeDecorator):
         return ",".join(value)
 
     def process_result_value(self, value, dialect):
-        return filter(bool, value.split(",")) if value else []
+        return list(filter(bool, value.split(","))) if value else []
 
 
 class JSONEncoded(db.TypeDecorator):

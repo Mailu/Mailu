@@ -89,6 +89,7 @@ class UserForm(flask_wtf.FlaskForm):
     quota_bytes = fields_.IntegerSliderField(_('Quota'), default=1000000000)
     enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)
     enable_pop = fields.BooleanField(_('Allow POP3 access'), default=True)
+    displayed_name = fields.StringField(_('Displayed name'))
     comment = fields.StringField(_('Comment'))
     enabled = fields.BooleanField(_('Enabled'), default=True)
     submit = fields.SubmitField(_('Save'))

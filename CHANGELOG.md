@@ -107,6 +107,7 @@ v1.6.0 - unreleased
 - Bug: Hostname resolving in start.py should retry on failure [docker swarm]  ([#555](https://github.com/Mailu/Mailu/issues/555))
 - Bug: Error when trying to log in with an account without domain ([#585](https://github.com/Mailu/Mailu/issues/585))
 - Bug: Fix rainloop permissions ([#637](https://github.com/Mailu/Mailu/issues/637))
+- Bug: Fix broken webmail and logo url in admin ([#792](https://github.com/Mailu/Mailu/issues/792))
 
 v1.5.1 - 2017-11-21
 -------------------

@@ -92,7 +92,7 @@ Deployment related
 What is the difference between DOMAIN and HOSTNAMES?
 ````````````````````````````````````````````````````
 
-Similair questions:
+Similar questions:
 
 - Changing domain doesn't work
 - Do I need a certificate for ``DOMAIN``?

@@ -138,17 +138,19 @@ For that reason we do **not** support deployment on Docker hosts without iptable
 How can I override settings?
 ````````````````````````````
 
-Postfix, dovecot and Rspamd support overriding configuration files. Override files belong in
+Postfix, Dovecot, Nginx and Rspamd support overriding configuration files. Override files belong in
 ``$ROOT/overrides``. Please refer to the official documentation of those programs for the
 correct syntax. The following file names will be taken as override configuration:
 
 - `Postfix`_ - ``postfix.cf``;
 - `Dovecot`_ - ``dovecot.conf``;
+- `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory.
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
 
 .. _`Postfix`: http://www.postfix.org/postconf.5.html
 .. _`Dovecot`: https://wiki.dovecot.org/ConfigFile
-.. _`Rspamd`: https://www.rspamd.com/doc/configuration/index.html
+.. _`NGINX`:   https://nginx.org/en/docs/
+.. _`Rspamd`:  https://www.rspamd.com/doc/configuration/index.html
 
 .. _`Docker swarm howto`: https://github.com/Mailu/Mailu/tree/master/docs/swarm/master
 .. _`165`: https://github.com/Mailu/Mailu/issues/165

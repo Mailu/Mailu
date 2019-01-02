@@ -7,7 +7,6 @@ pull_request_rules:
     actions:
       merge:
         method: merge
-        strict: true
       dismiss_reviews:
         approved: true
 
@@ -20,6 +19,5 @@ pull_request_rules:
     actions:
       merge:
         method: merge
-        strict: true
       dismiss_reviews:
         approved: true

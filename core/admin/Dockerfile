@@ -20,7 +20,7 @@ COPY start.py /start.py
 RUN pybabel compile -d mailu/translations
 
 EXPOSE 80/tcp
-VOLUME ["/data"]
+VOLUME ["/data","/dkim"]
 ENV FLASK_APP mailu
 
 CMD /start.py

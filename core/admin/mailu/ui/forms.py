@@ -32,6 +32,14 @@ class DestinationField(fields.SelectMultipleField):
             if not self.validator.match(item):
                 raise validators.ValidationError(_('Invalid email address.'))
 
+class MultipleEmailAddressesVerify(object):
+    def __init__(self,message=_('Invalid email address.')):
+        self.message = message
+
+    def __call__(self, form, field):
+        pattern = re.compile(r'^([_a-z0-9\-]+)(\.[_a-z0-9\-]+)*@([a-z0-9\-]{2,}\.)*([a-z]{2,4})(,([_a-z0-9\-]+)(\.[_a-z0-9\-]+)*@([a-z0-9\-]{2,}\.)*([a-z]{2,4}))*$')
+        if not pattern.match(field.data.replace(" ", "")):
+            raise validators.ValidationError(self.message)
 
 class ConfirmationForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Confirm'))
@@ -81,6 +89,7 @@ class UserForm(flask_wtf.FlaskForm):
     quota_bytes = fields_.IntegerSliderField(_('Quota'), default=1000000000)
     enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)
     enable_pop = fields.BooleanField(_('Allow POP3 access'), default=True)
+    displayed_name = fields.StringField(_('Displayed name'))
     comment = fields.StringField(_('Comment'))
     enabled = fields.BooleanField(_('Enabled'), default=True)
     submit = fields.SubmitField(_('Save'))
@@ -101,9 +110,7 @@ class UserSettingsForm(flask_wtf.FlaskForm):
     spam_threshold = fields_.IntegerSliderField(_('Spam filter tolerance'))
     forward_enabled = fields.BooleanField(_('Enable forwarding'))
     forward_keep = fields.BooleanField(_('Keep a copy of the emails'))
-    forward_destination = fields.StringField(
-        _('Destination'), [validators.Optional(), validators.Email()]
-    )
+    forward_destination = fields.StringField(_('Destination'), [validators.Optional(), MultipleEmailAddressesVerify()])
     submit = fields.SubmitField(_('Save settings'))
 
 
@@ -136,7 +143,7 @@ class TokenForm(flask_wtf.FlaskForm):
 
 
 class AliasForm(flask_wtf.FlaskForm):
-    localpart = fields.StringField(_('Alias'), [validators.DataRequired()])
+    localpart = fields.StringField(_('Alias'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
     wildcard = fields.BooleanField(
         _('Use SQL LIKE Syntax (e.g. for catch-all aliases)'))
     destination = DestinationField(_('Destination'))

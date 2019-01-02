@@ -89,6 +89,51 @@ our ongoing `project management`_ discussion issue.
 Deployment related
 ------------------
 
+What is the difference between DOMAIN and HOSTNAMES?
+````````````````````````````````````````````````````
+
+Similar questions:
+
+- Changing domain doesn't work
+- Do I need a certificate for ``DOMAIN``?
+
+``DOMAIN`` is the main mail domain. Aka, server identification for outgoing mail. DMARC reports point to ``POSTMASTER`` @ ``DOMAIN``.
+These are really the only things it is used for. You don't need a cert for ``DOMAIN``, as it is a mail domain only and not used as host in any sense.
+However, it is usual that ``DOMAIN`` gets setup as one of the many mail domains. None of the mail domains ever need a certificate.
+TLS certificates work on host connection level only.
+
+``HOSTNAMES`` however, can be used to connect to the server. All host names supplied in this variable will need a certificate. When ``TLS_FLAVOR=letsencrypt`` is set,
+a certificate is requested automatically for all those domains.
+
+So when you have something like this:
+
+.. code-block:: bash
+
+  DOMAIN=example.com
+  POSTMASTER=me
+  HOSTNAMES=mail.example.com,mail.foo.com,bar.com
+  TLS_FLAVOR=letsencrypt
+
+- You'll end up with a DMARC address to ``me@example.com``.
+- Server identifies itself as the SMTP server of ``@example.com`` when sending mail. Make sure your reverse DNS hostname is part of that domain!
+- Your server will have certificates for the 3 hostnames. You will need to create ``A`` and ``AAAA`` records for those names,
+  pointing to the IP addresses of your server.
+- The admin interface generates ``MX`` and ``SPF`` examples which point to the first entry of ``HOSTNAMES`` but these are only examples.
+  You can modify them to use any other ``HOSTNAMES`` entry.
+
+You're mail service will be reachable for IMAP, POP3, SMTP and Webmail at the addresses:
+
+- mail.example.com
+- mail.foo.com
+- bar.com
+
+.. note::
+
+  In this case ``example.com`` is not reachable as a host and will not have a certificate.
+  It can be used as a mail domain if MX is setup to point to one of the ``HOSTNAMES``. However, it is possible to include ``example.com`` in ``HOSTNAMES``.
+
+*Issue reference:* `742`_, `747`_.
+
 How does Mailu scale up?
 ````````````````````````
 
@@ -123,6 +168,16 @@ For **service** HA, please see: `How does Mailu scale up?`_
 
 .. _`spam magnet`: https://blog.zensoftware.co.uk/2012/07/02/why-we-tend-to-recommend-not-having-a-secondary-mx-these-days/
 
+Does Mailu run on Rancher?
+``````````````````````````
+
+There is a rancher catalog for Mailu in the `Mailu/Rancher`_ repository. The user group for Rancher is small,
+so we cannot promise any support on this when you're heading into trouble. See the repository README for more details.
+
+*Issue reference:* `125`_.
+
+.. _`Mailu/Rancher`: https://github.com/Mailu/Rancher
+
 
 Can I run Mailu without host iptables?
 ``````````````````````````````````````
@@ -138,22 +193,29 @@ For that reason we do **not** support deployment on Docker hosts without iptable
 How can I override settings?
 ````````````````````````````
 
-Postfix, dovecot and Rspamd support overriding configuration files. Override files belong in
+Postfix, Dovecot, Nginx and Rspamd support overriding configuration files. Override files belong in
 ``$ROOT/overrides``. Please refer to the official documentation of those programs for the
 correct syntax. The following file names will be taken as override configuration:
 
 - `Postfix`_ - ``postfix.cf``;
 - `Dovecot`_ - ``dovecot.conf``;
+- `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory.
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
+
+*Issue reference:* `206`_.
 
 .. _`Postfix`: http://www.postfix.org/postconf.5.html
 .. _`Dovecot`: https://wiki.dovecot.org/ConfigFile
-.. _`Rspamd`: https://www.rspamd.com/doc/configuration/index.html
+.. _`NGINX`:   https://nginx.org/en/docs/
+.. _`Rspamd`:  https://www.rspamd.com/doc/configuration/index.html
 
 .. _`Docker swarm howto`: https://github.com/Mailu/Mailu/tree/master/docs/swarm/master
+.. _`125`: https://github.com/Mailu/Mailu/issues/125
 .. _`165`: https://github.com/Mailu/Mailu/issues/165
 .. _`177`: https://github.com/Mailu/Mailu/issues/177
 .. _`332`: https://github.com/Mailu/Mailu/issues/332
+.. _`742`: https://github.com/Mailu/Mailu/issues/742
+.. _`747`: https://github.com/Mailu/Mailu/issues/747
 .. _`520`: https://github.com/Mailu/Mailu/issues/520
 .. _`591`: https://github.com/Mailu/Mailu/issues/591
 
@@ -241,8 +303,18 @@ See also :ref:`external_certs`.
 
 *Issue reference:* `426`_, `615`_.
 
+How do I activate DKIM and DMARC?
+```````````````````````
+Go into the Domain Panel and choose the Domain you want to enable DKIM for.
+Click the first icon on the left side (domain details).
+Now click on the top right on the *"Regenerate Keys"* Button.
+This will generate the DKIM and DMARC entries for you.
+
+*Issue reference:* `102`_.
+
 Do you support Fail2Ban?
 ````````````````````````
+
 Fail2Ban is not included in Mailu. Fail2Ban needs to modify the host's IP tables in order to
 ban the addresses. We consider such a program should be run on the host system and not
 inside a container. The ``front`` container does use authentication rate limiting to slow
@@ -265,12 +337,50 @@ spam filter weight settings.
 
 *Issue reference:* `503`_.
 
+rspamd: DNS query blocked on multi.uribl.com
+````````````````````````````````````````````
+
+This usually relates to the DNS server you are using. Most of the public servers block this query or there is a rate limit.
+In order to solve this, you most probably are better off using a root DNS resolver, such as `unbound`_. This can be done in multiple ways:
+
+- Use the *Mailu/unbound* container. This is an optional include when generating the ``docker-compose.yml`` file with the setup utility.
+- Setup unbound on the host and make sure the host's ``/etc/resolve.conf`` points to local host.
+  Docker will then forward all external DNS requests to the local server.
+- Set up an external DNS server with root resolving capabilities.
+
+In any case, using a dedicated DNS server will improve the performance of your mail server.
+
+*Issue reference:* `206`_, `554`_, `681`_.
+
+Is there a way to support more (older) ciphers?
+```````````````````````````````````````````````
+
+See `How can I override settings?`_ .
+You will need to add the protocols you wish to support in an override for the ``front`` container (Nginx).
+
+.. code-block:: bash
+
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  ssl_ciphers <list of ciphers>;
+
+We **strongly** advice against downgrading the TLS version and ciphers!
+
+*Issue reference:* `363`_, `698`_.
+
+
 .. _`troubleshooting tag`: https://github.com/Mailu/Mailu/issues?utf8=%E2%9C%93&q=label%3Afaq%2Ftroubleshooting
 .. _`85`: https://github.com/Mailu/Mailu/issues/85
+.. _`102`: https://github.com/Mailu/Mailu/issues/102
 .. _`116`: https://github.com/Mailu/Mailu/issues/116
 .. _`171`: https://github.com/Mailu/Mailu/issues/171
+.. _`206`: https://github.com/Mailu/Mailu/issues/206
+.. _`363`: https://github.com/Mailu/Mailu/issues/363
 .. _`426`: https://github.com/Mailu/Mailu/issues/426
 .. _`503`: https://github.com/Mailu/Mailu/issues/503
+.. _`554`: https://github.com/Mailu/Mailu/issues/554
 .. _`584`: https://github.com/Mailu/Mailu/issues/584
 .. _`592`: https://github.com/Mailu/Mailu/issues/592
 .. _`615`: https://github.com/Mailu/Mailu/issues/615
+.. _`681`: https://github.com/Mailu/Mailu/pull/681
+.. _`698`: https://github.com/Mailu/Mailu/issues/698
+.. _`unbound`: https://nlnetlabs.nl/projects/unbound/about/

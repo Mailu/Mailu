@@ -36,7 +36,7 @@ docker-compose -p mailu up -d
 
 Before you can use Mailu, you must create the primary administrator user account. This should be {{ postmaster }}@{{ domain }}. Use the following command, changing PASSWORD to your liking:
 
-<pre><code>docker-compose -p mailu exec admin python manage.py admin {{ postmaster }} {{ domain }} PASSWORD
+<pre><code>docker-compose -p mailu exec admin flask mailu admin {{ postmaster }} {{ domain }} PASSWORD
 </pre></code>
 
 <p>Login to the admin interface to change the password for a safe one, at

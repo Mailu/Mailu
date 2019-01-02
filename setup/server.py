@@ -12,7 +12,7 @@ import ipaddress
 
 version = os.getenv("this_version")
 static_url_path = "/" + version + "/static"
-app = flask.Flask(__name__,static_url_path=static_url_path)
+app = flask.Flask(__name__, static_url_path=static_url_path)
 flask_bootstrap.Bootstrap(app)
 db = redis.StrictRedis(host='redis', port=6379, db=0)
 

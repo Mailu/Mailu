@@ -12,13 +12,13 @@ def postfix_mailbox_domain(domain_name):
     return flask.jsonify(domain.name)
 
 
-@internal.route("/postfix/mailbox/<email>")
+@internal.route("/postfix/mailbox/<path:email>")
 def postfix_mailbox_map(email):
     user = models.User.query.get(email) or flask.abort(404)
     return flask.jsonify(user.email)
 
 
-@internal.route("/postfix/alias/<alias>")
+@internal.route("/postfix/alias/<path:alias>")
 def postfix_alias_map(alias):
     localpart, domain_name = models.Email.resolve_domain(alias)
     if localpart is None:
@@ -27,7 +27,7 @@ def postfix_alias_map(alias):
     return flask.jsonify(",".join(destination)) if destination else flask.abort(404)
 
 
-@internal.route("/postfix/transport/<email>")
+@internal.route("/postfix/transport/<path:email>")
 def postfix_transport(email):
     if email == '*':
         return flask.abort(404)
@@ -36,7 +36,7 @@ def postfix_transport(email):
     return flask.jsonify("smtp:[{}]".format(relay.smtp))
 
 
-@internal.route("/postfix/sender/login/<sender>")
+@internal.route("/postfix/sender/login/<path:sender>")
 def postfix_sender_login(sender):
     localpart, domain_name = models.Email.resolve_domain(sender)
     if localpart is None:
@@ -45,7 +45,7 @@ def postfix_sender_login(sender):
     return flask.jsonify(",".join(destination)) if destination else flask.abort(404)
 
 
-@internal.route("/postfix/sender/access/<sender>")
+@internal.route("/postfix/sender/access/<path:sender>")
 def postfix_sender_access(sender):
     """ Simply reject any sender that pretends to be from a local domain
     """

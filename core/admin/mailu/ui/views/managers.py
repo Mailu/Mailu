@@ -38,7 +38,7 @@ def manager_create(domain_name):
         domain=domain, form=form)
 
 
-@ui.route('/manager/delete/<domain_name>/<user_email>', methods=['GET', 'POST'])
+@ui.route('/manager/delete/<domain_name>/<path:user_email>', methods=['GET', 'POST'])
 @access.confirmation_required("remove manager {user_email}")
 @access.domain_admin(models.Domain, 'domain_name')
 def manager_delete(domain_name, user_email):

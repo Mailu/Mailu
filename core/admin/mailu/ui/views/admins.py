@@ -33,7 +33,7 @@ def admin_create():
     return flask.render_template('admin/create.html', form=form)
 
 
-@ui.route('/admin/delete/<admin>', methods=['GET', 'POST'])
+@ui.route('/admin/delete/<path:admin>', methods=['GET', 'POST'])
 @access.global_admin
 @access.confirmation_required("delete admin {admin}")
 def admin_delete(admin):

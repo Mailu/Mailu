@@ -36,7 +36,7 @@ def alias_create(domain_name):
         domain=domain, form=form)
 
 
-@ui.route('/alias/edit/<alias>', methods=['GET', 'POST'])
+@ui.route('/alias/edit/<path:alias>', methods=['GET', 'POST'])
 @access.domain_admin(models.Alias, 'alias')
 def alias_edit(alias):
     alias = models.Alias.query.get(alias) or flask.abort(404)
@@ -53,7 +53,7 @@ def alias_edit(alias):
         form=form, alias=alias, domain=alias.domain)
 
 
-@ui.route('/alias/delete/<alias>', methods=['GET', 'POST'])
+@ui.route('/alias/delete/<path:alias>', methods=['GET', 'POST'])
 @access.domain_admin(models.Alias, 'alias')
 @access.confirmation_required("delete {alias}")
 def alias_delete(alias):

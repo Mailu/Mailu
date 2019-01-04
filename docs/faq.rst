@@ -204,6 +204,41 @@ correct syntax. The following file names will be taken as override configuration
 
 *Issue reference:* `206`_.
 
+I want to integrate Nextcloud with Mailu
+````````````````````````````````````````
+
+First of all you have to to install next dependencies in Nextcloud
+
+.. code-block:: bash
+
+  apt-get update \
+   && apt-get install -y libc-client-dev libkrb5-dev \
+   && rm -rf /var/lib/apt/lists/* \
+   && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
+   && docker-php-ext-install imap
+
+Next, you have to enable External user support from Nextcloud Apps interface
+
+In the end you need to configure additional user backends in Nextcloud’s configuration config/config.php using the following syntax:
+
+.. code-block:: bash
+
+  <?php
+
+  'user_backends' => array(
+      array(
+          'class' => 'OC_User_IMAP',
+          'arguments' => array(
+              '{imap.example.com:993/imap/ssl}', 'example.com'
+          ),
+      ),
+  ),
+
+If a domain name (e.g. example.com) is specified, then this makes sure that only users from this domain will be allowed to login.
+After successfull login the domain part will be striped and the rest used as username in NextCloud. e.g. 'username@example.com' will be 'username' in NextCloud.
+
+*Issue reference:* `575`_.
+
 .. _`Postfix`: http://www.postfix.org/postconf.5.html
 .. _`Dovecot`: https://wiki.dovecot.org/ConfigFile
 .. _`NGINX`:   https://nginx.org/en/docs/
@@ -218,6 +253,7 @@ correct syntax. The following file names will be taken as override configuration
 .. _`747`: https://github.com/Mailu/Mailu/issues/747
 .. _`520`: https://github.com/Mailu/Mailu/issues/520
 .. _`591`: https://github.com/Mailu/Mailu/issues/591
+.. _`575`: https://github.com/Mailu/Mailu/issues/575
 
 Technical issues
 ----------------
@@ -304,7 +340,7 @@ See also :ref:`external_certs`.
 *Issue reference:* `426`_, `615`_.
 
 How do I activate DKIM and DMARC?
-```````````````````````
+`````````````````````````````````
 Go into the Domain Panel and choose the Domain you want to enable DKIM for.
 Click the first icon on the left side (domain details).
 Now click on the top right on the *"Regenerate Keys"* Button.
@@ -366,7 +402,6 @@ You will need to add the protocols you wish to support in an override for the ``
 We **strongly** advice against downgrading the TLS version and ciphers!
 
 *Issue reference:* `363`_, `698`_.
-
 
 .. _`troubleshooting tag`: https://github.com/Mailu/Mailu/issues?utf8=%E2%9C%93&q=label%3Afaq%2Ftroubleshooting
 .. _`85`: https://github.com/Mailu/Mailu/issues/85

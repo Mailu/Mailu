@@ -6,7 +6,7 @@ import flask
 import socket
 import os
 
-@internal.route("/dovecot/passdb/<user_email>")
+@internal.route("/dovecot/passdb/<path:user_email>")
 def dovecot_passdb_dict(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     allow_nets = []
@@ -20,7 +20,7 @@ def dovecot_passdb_dict(user_email):
     })
 
 
-@internal.route("/dovecot/userdb/<user_email>")
+@internal.route("/dovecot/userdb/<path:user_email>")
 def dovecot_userdb_dict(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     return flask.jsonify({
@@ -28,7 +28,7 @@ def dovecot_userdb_dict(user_email):
     })
 
 
-@internal.route("/dovecot/quota/<ns>/<user_email>", methods=["POST"])
+@internal.route("/dovecot/quota/<ns>/<path:user_email>", methods=["POST"])
 def dovecot_quota(ns, user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     if ns == "storage":
@@ -37,12 +37,12 @@ def dovecot_quota(ns, user_email):
     return flask.jsonify(None)
 
 
-@internal.route("/dovecot/sieve/name/<script>/<user_email>")
+@internal.route("/dovecot/sieve/name/<script>/<path:user_email>")
 def dovecot_sieve_name(script, user_email):
     return flask.jsonify(script)
 
 
-@internal.route("/dovecot/sieve/data/default/<user_email>")
+@internal.route("/dovecot/sieve/data/default/<path:user_email>")
 def dovecot_sieve_data(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     return flask.jsonify(flask.render_template("default.sieve", user=user))

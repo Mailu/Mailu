@@ -73,7 +73,6 @@ class ConfigManager(dict):
 
     def __init__(self):
         self.config = dict()
-        self.parse_env()
 
     def init_app(self, app):
         self.config.update(app.config)

@@ -207,7 +207,7 @@ correct syntax. The following file names will be taken as override configuration
 I want to integrate Nextcloud with Mailu
 ````````````````````````````````````````
 
-First of all you have to to install next dependencies in Nextcloud
+First of all you have to install dependencies required to authenticate users via imap in Nextcloud
 
 .. code-block:: bash
 

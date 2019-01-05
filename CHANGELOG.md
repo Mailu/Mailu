@@ -75,6 +75,7 @@ v1.6.0 - unreleased
 - Enhancement: Contribution documentation ([#700](https://github.com/Mailu/Mailu/issues/700))
 - Enhancement: Move Mailu Docker network to a fixed subnet ([#727](https://github.com/Mailu/Mailu/issues/727))
 - Enhancement: Added regex validation for alias username ([#764](https://github.com/Mailu/Mailu/issues/764))
+- Enhancement: Allow to disable aliases or users for a specific domain ([#799](https://github.com/Mailu/Mailu/issues/799))
 - Enhancement: Update documentation
 - Upstream: Update Roundcube
 - Upstream: Update Rainloop
@@ -108,6 +109,7 @@ v1.6.0 - unreleased
 - Bug: Error when trying to log in with an account without domain ([#585](https://github.com/Mailu/Mailu/issues/585))
 - Bug: Fix rainloop permissions ([#637](https://github.com/Mailu/Mailu/issues/637))
 - Bug: Fix broken webmail and logo url in admin ([#792](https://github.com/Mailu/Mailu/issues/792))
+- Bug: Don't allow negative values on domain creation/edit ([#799](https://github.com/Mailu/Mailu/issues/799))
 
 v1.5.1 - 2017-11-21
 -------------------

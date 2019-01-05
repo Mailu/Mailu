@@ -18,7 +18,7 @@
 {% for domain_name, domain in available_domains.items() %}
 <tr>
   <td><a href="{{ url_for('.user_signup', domain_name=domain_name) }}">{{ domain_name }}</a></td>
-  <td>{{ domain.max_users - (domain.users | count) if domain.max_users else '∞' }}</td>
+  <td>{{ '∞' if domain.max_users == -1 else domain.max_users - (domain.users | count)}}</td>
   <td>{{ domain.max_quota_bytes or config['DEFAULT_QUOTA'] | filesizeformat }}</td>
 </tr>
 {% endfor %}

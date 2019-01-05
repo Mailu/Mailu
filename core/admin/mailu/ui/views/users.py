@@ -18,7 +18,7 @@ def user_list(domain_name):
 @access.domain_admin(models.Domain, 'domain_name')
 def user_create(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
-    if domain.max_users and len(domain.users) >= domain.max_users:
+    if not domain.max_users == -1 and len(domain.users) >= domain.max_users:
         flask.flash('Too many users for domain %s' % domain, 'error')
         return flask.redirect(
             flask.url_for('.user_list', domain_name=domain.name))
@@ -168,7 +168,7 @@ def user_signup(domain_name=None):
     available_domains = {
         domain.name: domain
         for domain in models.Domain.query.filter_by(signup_enabled=True).all()
-        if not domain.max_users or len(domain.users) < domain.max_users
+        if domain.max_users == -1 or len(domain.users) < domain.max_users
     }
     if not available_domains:
         flask.flash('No domain available for registration')

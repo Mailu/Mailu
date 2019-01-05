@@ -53,8 +53,8 @@ class LoginForm(flask_wtf.FlaskForm):
 
 class DomainForm(flask_wtf.FlaskForm):
     name = fields.StringField(_('Domain name'), [validators.DataRequired()])
-    max_users = fields_.IntegerField(_('Maximum user count'), default=10)
-    max_aliases = fields_.IntegerField(_('Maximum alias count'), default=10)
+    max_users = fields_.IntegerField(_('Maximum user count'), [validators.NumberRange(min=-1)], default=10)
+    max_aliases = fields_.IntegerField(_('Maximum alias count'), [validators.NumberRange(min=-1)], default=10)
     max_quota_bytes = fields_.IntegerSliderField(_('Maximum user quota'), default=0)
     signup_enabled = fields.BooleanField(_('Enable sign-up'), default=False)
     comment = fields.StringField(_('Comment'))

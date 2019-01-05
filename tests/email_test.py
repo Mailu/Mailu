@@ -29,7 +29,7 @@ try:
     smtp_server.starttls()
     smtp_server.ehlo()
     smtp_server.login("admin@mailu.io", "password")
-    
+
     smtp_server.sendmail("admin@mailu.io", "user@mailu.io", msg.as_string())
     smtp_server.quit()
 except:
@@ -47,13 +47,19 @@ stat, count = imap_server.select('inbox')
 try:
     stat, data = imap_server.fetch(count[0], '(UID BODY[TEXT])')
 except :
+    print("Couldn’t list email in imap inbox")
     sys.exit(99)
-        
+
 if sys.argv[1] in str(data[0][1]):
     print("Success sending and receiving email!")
 else:
-    print("Failed receiving email with message %s" % sys.argv[1])
+    print("Failed receiving email with message %s, message not contained" % sys.argv[1])
     sys.exit(99)
-    
+
+typ, data = imap_server.search(None, 'ALL')
+for num in data[0].split():
+   imap_server.store(num, '+FLAGS', '\\Deleted')
+imap_server.expunge()
+
 imap_server.close()
 imap_server.logout()

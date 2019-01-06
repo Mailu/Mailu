@@ -7,7 +7,7 @@ $config['db_dsnw'] = 'sqlite:////data/roundcube.db';
 $config['temp_dir'] = '/tmp/';
 $config['des_key'] = getenv('SECRET_KEY');
 $config['cipher_method'] = 'AES-256-CBC';
-$config['identities_level'] = 3;
+$config['identities_level'] = 0;
 $config['reply_all_mode'] = 1;
 
 // List of active plugins (in plugins/ directory)

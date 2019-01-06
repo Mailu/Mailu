@@ -34,7 +34,7 @@ pyOpenSSL==18.0.0
 python-dateutil==2.7.5
 python-editor==1.0.3
 pytz==2018.7
-PyYAML==4.2b1
+PyYAML==4.2b4
 redis==3.0.1
 six==1.11.0
 SQLAlchemy==1.2.13

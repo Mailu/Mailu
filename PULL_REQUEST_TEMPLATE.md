@@ -4,7 +4,9 @@
 
 ## What does this PR do?
 
-
+### Related issue(s)
+- Mention an issue like: #001
+- Auto close an issue like: closes #001
 
 ## Prerequistes
 Before we can consider review and merge, please make sure the following list is done and checked.

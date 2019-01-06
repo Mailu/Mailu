@@ -3,7 +3,7 @@
 
 import aiohttp
 import logging
-
+from urllib.parse import quote
 
 class UrlTable(object):
     """ Resolve an entry by querying a parametrized GET URL.
@@ -23,7 +23,8 @@ class UrlTable(object):
         if ns is not None:
             key += "/" + ns
         async with aiohttp.ClientSession() as session:
-            async with session.get(self.url_pattern.format(key)) as request:
+            quoted_key = quote(key)
+            async with session.get(self.url_pattern.format(quoted_key)) as request:
                 if request.status == 200:
                     result = await request.json()
                     logging.debug("Table get {} is {}".format(key, result))
@@ -40,7 +41,8 @@ class UrlTable(object):
         if ns is not None:
             key += "/" + ns
         async with aiohttp.ClientSession() as session:
-            await session.post(self.url_pattern.format(key), json=value)
+            quoted_key = quote(key)
+            await session.post(self.url_pattern.format(quoted_key), json=value)
 
     async def iter(self, cat):
         """ Iterate the given key (experimental)

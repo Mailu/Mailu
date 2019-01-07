@@ -7,7 +7,7 @@ import sys
 
 args = os.environ.copy()
 
-log.basicConfig(stream=sys.stderr, level=args["LOG_LEVEL"] if "LOG_LEVEL" in args else "WARN")
+log.basicConfig(stream=sys.stderr, level=args["LOG_LEVEL"] if "LOG_LEVEL" in args else "WARNING")
 
 def convert(src, dst, args):
     logger = log.getLogger("convert()")

@@ -13,7 +13,7 @@ import sys
 from tenacity import retry
 from podop import run_server
 
-log.basicConfig(stream=sys.stderr, level=os.environ["LOG_LEVEL"] if "LOG_LEVEL" in os.environ else "WARN")
+log.basicConfig(stream=sys.stderr, level=os.environ["LOG_LEVEL"] if "LOG_LEVEL" in os.environ else "WARNING")
 
 def start_podop():
     os.setuid(100)

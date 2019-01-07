@@ -4,7 +4,7 @@ import os
 import logging as log
 import sys
 
-log.basicConfig(stream=sys.stderr, level=os.environ["LOG_LEVEL"] if "LOG_LEVEL" in os.environ else "WARN")
+log.basicConfig(stream=sys.stderr, level=os.environ["LOG_LEVEL"] if "LOG_LEVEL" in os.environ else "WARNING")
 logger=log.getLogger(__name__)
 
 # Bootstrap the database if clamav is running for the first time

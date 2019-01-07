@@ -10,7 +10,7 @@ import sys
 
 from tenacity import retry
 
-log.basicConfig(stream=sys.stderr, level=os.environ["LOG_LEVEL"] if "LOG_LEVEL" in os.environ else "WARN")
+log.basicConfig(stream=sys.stderr, level=os.environ["LOG_LEVEL"] if "LOG_LEVEL" in os.environ else "WARNING")
 
 def convert(src, dst):
     logger = log.getLogger("convert()")

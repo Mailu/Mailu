@@ -12,7 +12,10 @@ from tenacity import retry
 
 log.basicConfig(stream=sys.stderr, level=os.environ["LOG_LEVEL"] if "LOG_LEVEL" in os.environ else "WARN")
 
-convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
+def convert(src, dst):
+    logger = log.getLogger("convert()")
+    logger.debug("Source: %s, Destination: %s", src, dst)
+    open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 
 @retry(
     stop=tenacity.stop_after_attempt(100),

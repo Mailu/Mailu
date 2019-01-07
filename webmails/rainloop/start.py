@@ -3,8 +3,15 @@
 import jinja2
 import os
 import shutil
+import logging as log
+import sys
 
-convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
+log.basicConfig(stream=sys.stderr, level=os.environ["LOG_LEVEL"] if "LOG_LEVEL" in os.environ else "WARN")
+
+def convert(src, dst):
+    logger = log.getLogger("convert()")
+    logger.debug("Source: %s, Destination: %s", src, dst)
+    open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 
 # Actual startup script
 os.environ["FRONT_ADDRESS"] = os.environ.get("FRONT_ADDRESS", "front")

@@ -2,10 +2,17 @@
 
 import jinja2
 import os
-
-convert = lambda src, dst, args: open(dst, "w").write(jinja2.Template(open(src).read()).render(**args))
+import logging as log
+import sys
 
 args = os.environ.copy()
+
+log.basicConfig(stream=sys.stderr, level=args["LOG_LEVEL"] if "LOG_LEVEL" in args else "WARN")
+
+def convert(src, dst, args):
+    logger = log.getLogger("convert()")
+    logger.debug("Source: %s, Destination: %s", src, dst)
+    open(dst, "w").write(jinja2.Template(open(src).read()).render(**args))
 
 # Get the first DNS server
 with open("/etc/resolv.conf") as handle:

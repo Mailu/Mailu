@@ -27,7 +27,10 @@ def start_podop():
         ("senderlogin", "url", "http://admin/internal/postfix/sender/login/§")
     ])
 
-convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
+def convert(src, dst):
+    logger = log.getLogger("convert()")
+    logger.debug("Source: %s, Destination: %s", src, dst)
+    open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 
 @retry(
     stop=tenacity.stop_after_attempt(100),

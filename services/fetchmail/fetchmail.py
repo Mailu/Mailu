@@ -22,7 +22,7 @@ poll "{host}" proto {protocol}  port {port}
     is "{user_email}"
     smtphost "{smtphost}"
     {options}
-    sslproto 'AUTO'
+    sslproto 'auto'
 """
 
 

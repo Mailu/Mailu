@@ -9,7 +9,7 @@ RUN pip3 install jinja2
 RUN apk add --no-cache \
     postgresql postgresql-libs busybox-suid sudo tar \
   && apk add --virtual .build-deps gcc musl-dev postgresql-dev python3-dev \
-  && pip3 install psycopg2 anosql \
+  && pip3 install psycopg2 anosql==0.3.1 \
   && apk --purge del .build-deps
 
 COPY start.py /start.py

@@ -12,7 +12,7 @@ def setup():
     queries = anosql.load_queries('postgres', '/conf/queries.sql')
     # Mailu user
     queries.create_mailu_user(conn)
-    queries.update_pw(conn, pw=os.environ.get("SECRET_KEY"))
+    queries.update_pw(conn, pw=os.environ.get("DB_PW"))
     # Healthcheck user
     queries.create_health_user(conn)
     queries.grant_health(conn)

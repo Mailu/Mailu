@@ -7,7 +7,6 @@ import flask_login
 import wtforms
 import wtforms_components
 
-
 @ui.route('/user/list/<domain_name>', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
 def user_list(domain_name):
@@ -44,7 +43,7 @@ def user_create(domain_name):
         domain=domain, form=form)
 
 
-@ui.route('/user/edit/<user_email>', methods=['GET', 'POST'])
+@ui.route('/user/edit/<path:user_email>', methods=['GET', 'POST'])
 @access.domain_admin(models.User, 'user_email')
 def user_edit(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
@@ -72,7 +71,7 @@ def user_edit(user_email):
         domain=user.domain, max_quota_bytes=max_quota_bytes)
 
 
-@ui.route('/user/delete/<user_email>', methods=['GET', 'POST'])
+@ui.route('/user/delete/<path:user_email>', methods=['GET', 'POST'])
 @access.domain_admin(models.User, 'user_email')
 @access.confirmation_required("delete {user_email}")
 def user_delete(user_email):
@@ -86,15 +85,22 @@ def user_delete(user_email):
 
 
 @ui.route('/user/settings', methods=['GET', 'POST'], defaults={'user_email': None})
-@ui.route('/user/usersettings/<user_email>', methods=['GET', 'POST'])
+@ui.route('/user/usersettings/<path:user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def user_settings(user_email):
     user_email_or_current = user_email or flask_login.current_user.email
     user = models.User.query.get(user_email_or_current) or flask.abort(404)
     form = forms.UserSettingsForm(obj=user)
+    if isinstance(form.forward_destination.data,str):
+        data = form.forward_destination.data.replace(" ","").split(",")
+    else:
+        data = form.forward_destination.data
+    form.forward_destination.data = ", ".join(data)
     if form.validate_on_submit():
+        form.forward_destination.data = form.forward_destination.data.replace(" ","").split(",")
         form.populate_obj(user)
         models.db.session.commit()
+        form.forward_destination.data = ", ".join(form.forward_destination.data)
         flask.flash('Settings updated for %s' % user)
         if user_email:
             return flask.redirect(
@@ -103,7 +109,7 @@ def user_settings(user_email):
 
 
 @ui.route('/user/password', methods=['GET', 'POST'], defaults={'user_email': None})
-@ui.route('/user/password/<user_email>', methods=['GET', 'POST'])
+@ui.route('/user/password/<path:user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def user_password(user_email):
     user_email_or_current = user_email or flask_login.current_user.email
@@ -123,7 +129,7 @@ def user_password(user_email):
 
 
 @ui.route('/user/forward', methods=['GET', 'POST'], defaults={'user_email': None})
-@ui.route('/user/forward/<user_email>', methods=['GET', 'POST'])
+@ui.route('/user/forward/<path:user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def user_forward(user_email):
     user_email_or_current = user_email or flask_login.current_user.email
@@ -140,7 +146,7 @@ def user_forward(user_email):
 
 
 @ui.route('/user/reply', methods=['GET', 'POST'], defaults={'user_email': None})
-@ui.route('/user/reply/<user_email>', methods=['GET', 'POST'])
+@ui.route('/user/reply/<path:user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def user_reply(user_email):
     user_email_or_current = user_email or flask_login.current_user.email

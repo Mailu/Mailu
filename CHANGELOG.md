@@ -76,6 +76,7 @@ v1.6.0 - unreleased
 - Enhancement: Move Mailu Docker network to a fixed subnet ([#727](https://github.com/Mailu/Mailu/issues/727))
 - Enhancement: Added regex validation for alias username ([#764](https://github.com/Mailu/Mailu/issues/764))
 - Enhancement: Update documentation
+- Enhancement: Include favicon package ([#801](https://github.com/Mailu/Mailu/issues/801), ([#802](https://github.com/Mailu/Mailu/issues/802))
 - Upstream: Update Roundcube
 - Upstream: Update Rainloop
 - Bug: Rainloop fails with "domain not allowed" ([#93](https://github.com/Mailu/Mailu/issues/93))
@@ -107,6 +108,7 @@ v1.6.0 - unreleased
 - Bug: Hostname resolving in start.py should retry on failure [docker swarm]  ([#555](https://github.com/Mailu/Mailu/issues/555))
 - Bug: Error when trying to log in with an account without domain ([#585](https://github.com/Mailu/Mailu/issues/585))
 - Bug: Fix rainloop permissions ([#637](https://github.com/Mailu/Mailu/issues/637))
+- Bug: Fix broken webmail and logo url in admin ([#792](https://github.com/Mailu/Mailu/issues/792))
 
 v1.5.1 - 2017-11-21
 -------------------

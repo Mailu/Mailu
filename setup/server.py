@@ -11,7 +11,9 @@ import ipaddress
 import hashlib
 
 
-app = flask.Flask(__name__)
+version = os.getenv("this_version")
+static_url_path = "/" + version + "/static"
+app = flask.Flask(__name__, static_url_path=static_url_path)
 flask_bootstrap.Bootstrap(app)
 db = redis.StrictRedis(host='redis', port=6379, db=0)
 
@@ -41,29 +43,37 @@ def build_app(path):
     def app_context():
         return dict(versions=os.getenv("VERSIONS","master").split(','))
 
-    version = os.getenv("this_version")
-
-    bp = flask.Blueprint(version, __name__)
-    bp.jinja_loader = jinja2.ChoiceLoader([
+    prefix_bp = flask.Blueprint(version, __name__)
+    prefix_bp.jinja_loader = jinja2.ChoiceLoader([
         jinja2.FileSystemLoader(os.path.join(path, "templates")),
         jinja2.FileSystemLoader(os.path.join(path, "flavors"))
     ])
 
-    @bp.context_processor
+    root_bp = flask.Blueprint("root", __name__)
+    root_bp.jinja_loader = jinja2.ChoiceLoader([
+        jinja2.FileSystemLoader(os.path.join(path, "templates")),
+        jinja2.FileSystemLoader(os.path.join(path, "flavors"))
+    ])
+
+    @prefix_bp.context_processor
+    @root_bp.context_processor
     def bp_context(version=version):
         return dict(version=version)
 
-    @bp.route("/")
+    @prefix_bp.route("/")
+    @root_bp.route("/")
     def wizard():
         return flask.render_template('wizard.html')
 
-    @bp.route("/submit_flavor", methods=["POST"])
+    @prefix_bp.route("/submit_flavor", methods=["POST"])
+    @root_bp.route("/submit_flavor", methods=["POST"])
     def submit_flavor():
         data = flask.request.form.copy()
         steps = sorted(os.listdir(os.path.join(path, "templates", "steps", data["flavor"])))
         return flask.render_template('wizard.html', flavor=data["flavor"], steps=steps)
 
-    @bp.route("/submit", methods=["POST"])
+    @prefix_bp.route("/submit", methods=["POST"])
+    @root_bp.route("/submit", methods=["POST"])
     def submit():
         data = flask.request.form.copy()
         data['uid'] = str(uuid.uuid4())
@@ -71,14 +81,16 @@ def build_app(path):
         db.set(data['uid'], json.dumps(data))
         return flask.redirect(flask.url_for('.setup', uid=data['uid']))
 
-    @bp.route("/setup/<uid>", methods=["GET"])
+    @prefix_bp.route("/setup/<uid>", methods=["GET"])
+    @root_bp.route("/setup/<uid>", methods=["GET"])
     def setup(uid):
         data = json.loads(db.get(uid))
         flavor = data.get("flavor", "compose")
         rendered = render_flavor(flavor, "setup.html", data)
         return flask.render_template("setup.html", contents=rendered)
 
-    @bp.route("/file/<uid>/<filepath>", methods=["GET"])
+    @prefix_bp.route("/file/<uid>/<filepath>", methods=["GET"])
+    @root_bp.route("/file/<uid>/<filepath>", methods=["GET"])
     def file(uid, filepath):
         data = json.loads(db.get(uid))
         flavor = data.get("flavor", "compose")
@@ -87,7 +99,8 @@ def build_app(path):
             mimetype="application/text"
         )
 
-    app.register_blueprint(bp, url_prefix="/{}".format(version))
+    app.register_blueprint(prefix_bp, url_prefix="/{}".format(version))
+    app.register_blueprint(root_bp)
 
 
 if __name__ == "__main__":

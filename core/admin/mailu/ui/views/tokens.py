@@ -9,7 +9,7 @@ import wtforms_components
 
 
 @ui.route('/token/list', methods=['GET', 'POST'], defaults={'user_email': None})
-@ui.route('/token/list/<user_email>', methods=['GET'])
+@ui.route('/token/list/<path:user_email>', methods=['GET'])
 @access.owner(models.User, 'user_email')
 def token_list(user_email):
     user_email = user_email or flask_login.current_user.email
@@ -18,7 +18,7 @@ def token_list(user_email):
 
 
 @ui.route('/token/create', methods=['GET', 'POST'], defaults={'user_email': None})
-@ui.route('/token/create/<user_email>', methods=['GET', 'POST'])
+@ui.route('/token/create/<path:user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def token_create(user_email):
     user_email = user_email or flask_login.current_user.email

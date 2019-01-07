@@ -6,7 +6,7 @@ import flask_login
 
 
 @ui.route('/fetch/list', methods=['GET', 'POST'], defaults={'user_email': None})
-@ui.route('/fetch/list/<user_email>', methods=['GET'])
+@ui.route('/fetch/list/<path:user_email>', methods=['GET'])
 @access.owner(models.User, 'user_email')
 def fetch_list(user_email):
     user_email = user_email or flask_login.current_user.email
@@ -15,7 +15,7 @@ def fetch_list(user_email):
 
 
 @ui.route('/fetch/create', methods=['GET', 'POST'], defaults={'user_email': None})
-@ui.route('/fetch/create/<user_email>', methods=['GET', 'POST'])
+@ui.route('/fetch/create/<path:user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def fetch_create(user_email):
     user_email = user_email or flask_login.current_user.email

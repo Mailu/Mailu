@@ -7,14 +7,18 @@ import glob
 import shutil
 import tenacity
 import multiprocessing
+import logging as log
+import sys
 
 from tenacity import retry
 from podop import run_server
 
+log.basicConfig(stream=sys.stderr, level=os.environ["LOG_LEVEL"] if "LOG_LEVEL" in os.environ else "WARN")
 
 def start_podop():
     os.setuid(100)
-    run_server(3 if "DEBUG" in os.environ else 0, "postfix", "/tmp/podop.socket", [
+    # TODO: Remove verbosity setting from Podop?
+    run_server(0, "postfix", "/tmp/podop.socket", [
 		("transport", "url", "http://admin/internal/postfix/transport/§"),
 		("alias", "url", "http://admin/internal/postfix/alias/§"),
 		("domain", "url", "http://admin/internal/postfix/domain/§"),
@@ -25,9 +29,19 @@ def start_podop():
 
 convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 
-# Actual startup script
-resolve = retry(socket.gethostbyname, stop=tenacity.stop_after_attempt(100), wait=tenacity.wait_random(min=2, max=5))
+@retry(
+    stop=tenacity.stop_after_attempt(100),
+    wait=tenacity.wait_random(min=2, max=5),
+    before=tenacity.before_log(log.getLogger("tenacity.retry"), log.DEBUG),
+    before_sleep=tenacity.before_sleep_log(log.getLogger("tenacity.retry"), log.INFO),
+    after=tenacity.after_log(log.getLogger("tenacity.retry"), log.DEBUG)
+    )
+def resolve(hostname):
+    logger = log.getLogger("resolve()")
+    logger.info(hostname)
+    return socket.gethostbyname(hostname)
 
+# Actual startup script
 os.environ["FRONT_ADDRESS"] = resolve(os.environ.get("FRONT_ADDRESS", "front"))
 os.environ["HOST_ANTISPAM"] = os.environ.get("HOST_ANTISPAM", "antispam:11332")
 os.environ["HOST_LMTP"] = os.environ.get("HOST_LMTP", "imap:2525")

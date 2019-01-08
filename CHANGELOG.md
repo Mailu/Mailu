@@ -77,6 +77,7 @@ v1.6.0 - unreleased
 - Enhancement: Added regex validation for alias username ([#764](https://github.com/Mailu/Mailu/issues/764))
 - Enhancement: Update documentation
 - Enhancement: Include favicon package ([#801](https://github.com/Mailu/Mailu/issues/801), ([#802](https://github.com/Mailu/Mailu/issues/802))
+- Enhancement: Add logging at critical places in python start.py scripts. Implement LOG_LEVEL to control verbosity ([#588](https://github.com/Mailu/Mailu/issues/588))
 - Upstream: Update Roundcube
 - Upstream: Update Rainloop
 - Bug: Rainloop fails with "domain not allowed" ([#93](https://github.com/Mailu/Mailu/issues/93))

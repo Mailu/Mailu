@@ -33,5 +33,6 @@ for dovecot_file in glob.glob("/conf/*.conf"):
 
 # Run Podop, then postfix
 multiprocessing.Process(target=start_podop).start()
-os.system("chown -R mail:mail /mail /var/lib/dovecot /conf")
+os.system("chown mail:mail /mail")
+os.system("chown -R mail:mail /var/lib/dovecot /conf")
 os.execv("/usr/sbin/dovecot", ["dovecot", "-c", "/etc/dovecot/dovecot.conf", "-F"])

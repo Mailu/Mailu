@@ -10,7 +10,8 @@ RUN pip3 install tenacity
 # Image specific layers under this line
 RUN apk add --no-cache \
   dovecot dovecot-pigeonhole-plugin dovecot-fts-lucene rspamd-client bash \
-  && pip3 install podop
+  && pip3 install podop \
+  && mkdir /var/lib/dovecot
 
 COPY conf /conf
 COPY start.py /start.py

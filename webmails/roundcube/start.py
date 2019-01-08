@@ -5,7 +5,7 @@ import jinja2
 import logging as log
 import sys
 
-log.basicConfig(stream=sys.stderr, level=os.environ["LOG_LEVEL"] if "LOG_LEVEL" in os.environ else "WARNING")
+log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
 def convert(src, dst):
     logger = log.getLogger("convert()")

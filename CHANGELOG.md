@@ -111,7 +111,7 @@ v1.6.0 - unreleased
 - Bug: Fix rainloop permissions ([#637](https://github.com/Mailu/Mailu/issues/637))
 - Bug: Fix broken webmail and logo url in admin ([#792](https://github.com/Mailu/Mailu/issues/792))
 - Bug: Don't recursivly chown on mailboxes ([#776](https://github.com/Mailu/Mailu/issues/776))
-- Bug: Fetched accounts: Password field is of type "text" ([#789](https://github.com/issues/789))
+- Bug: Fetched accounts: Password field is of type "text" ([#789](https://github.com/Mailu/Mailu/issues/789))
 
 v1.5.1 - 2017-11-21
 -------------------

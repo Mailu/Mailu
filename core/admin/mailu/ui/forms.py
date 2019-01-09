@@ -84,7 +84,7 @@ class RelayForm(flask_wtf.FlaskForm):
 
 class UserForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('E-mail'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
-    pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
+    pw = fields.PasswordField(_('Password'))
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
     quota_bytes = fields_.IntegerSliderField(_('Quota'), default=1000000000)
     enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)

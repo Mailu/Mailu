@@ -111,6 +111,7 @@ v1.6.0 - unreleased
 - Bug: Fix rainloop permissions ([#637](https://github.com/Mailu/Mailu/issues/637))
 - Bug: Fix broken webmail and logo url in admin ([#792](https://github.com/Mailu/Mailu/issues/792))
 - Bug: Don't recursivly chown on mailboxes ([#776](https://github.com/Mailu/Mailu/issues/776))
+- Bug: Don't deliver alias and recipient-delimiter to overwhelming wildcard-alias ([#813](https://github.com/Mailu/Mailu/issues/813))
 
 v1.5.1 - 2017-11-21
 -------------------

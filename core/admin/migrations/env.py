@@ -72,7 +72,14 @@ def run_migrations_online():
     engine = engine_from_config(config.get_section(config.config_ini_section),
                                 prefix='sqlalchemy.',
                                 poolclass=pool.NullPool)
-    connection = retry(engine.connect, stop=tenacity.stop_after_attempt(100), wait=tenacity.wait_random(min=2, max=5))()
+
+    connection = tenacity.Retrying(
+        stop=tenacity.stop_after_attempt(100),
+        wait=tenacity.wait_random(min=2, max=5),
+        before=tenacity.before_log(logging.getLogger("tenacity.retry"), logging.DEBUG),
+        before_sleep=tenacity.before_sleep_log(logging.getLogger("tenacity.retry"), logging.INFO),
+        after=tenacity.after_log(logging.getLogger("tenacity.retry"), logging.DEBUG)
+        ).call(engine.connect)
 
     context.configure(connection=connection,
                       target_metadata=target_metadata,

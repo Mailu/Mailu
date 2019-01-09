@@ -43,18 +43,18 @@ def upgrade():
 
     # drop foreign key constraints
     with op.batch_alter_table('alias') as batch_op:
-        batch_op.drop_constraint('alias_domain_name_fkey')
+        batch_op.drop_constraint('alias_domain_name_fkey', type_='foreignkey')
     with op.batch_alter_table('alternative') as batch_op:
-        batch_op.drop_constraint('alternative_domain_name_fkey')
+        batch_op.drop_constraint('alternative_domain_name_fkey', type_='foreignkey')
     with op.batch_alter_table('manager') as batch_op:
-        batch_op.drop_constraint('manager_domain_name_fkey')
-        batch_op.drop_constraint('manager_user_email_fkey')
+        batch_op.drop_constraint('manager_domain_name_fkey', type_='foreignkey')
+        batch_op.drop_constraint('manager_user_email_fkey', type_='foreignkey')
     with op.batch_alter_table('token') as batch_op:
-        batch_op.drop_constraint('token_user_email_fkey')
+        batch_op.drop_constraint('token_user_email_fkey', type_='foreignkey')
     with op.batch_alter_table('fetch') as batch_op:
-        batch_op.drop_constraint('fetch_user_email_fkey')
+        batch_op.drop_constraint('fetch_user_email_fkey', type_='foreignkey')
     with op.batch_alter_table('user') as batch_op:
-        batch_op.drop_constraint('user_domain_name_fkey')
+        batch_op.drop_constraint('user_domain_name_fkey', type_='foreignkey')
 
     # lower domain names
     for domain in connection.execute(domain_table.select()):

@@ -9,7 +9,7 @@ RUN pip3 install jinja2
 RUN pip3 install tenacity
 # Image specific layers under this line
 RUN apk add --no-cache \
-  dovecot dovecot-pigeonhole-plugin dovecot-fts-lucene rspamd-client bash \
+  dovecot dovecot-pigeonhole-plugin rspamd-client bash \
   && pip3 install podop \
   && mkdir /var/lib/dovecot
 

@@ -31,7 +31,6 @@ v1.6.0 - unreleased
 - Feature: Add posibilty to run webmail on root ([#501](https://github.com/Mailu/Mailu/issues/501))
 - Feature: Upgrade docker-compose.yml to version 3 ([#539](https://github.com/Mailu/Mailu/issues/539))
 - Feature: Documentation to deploy mailu on a docker swarm ([#551](https://github.com/Mailu/Mailu/issues/551))
-- Feature: Add full-text search support ([#552](https://github.com/Mailu/Mailu/issues/552))
 - Feature: Add optional Maildir-Compression ([#553](https://github.com/Mailu/Mailu/issues/553))
 - Feature: Preserve rspamd history on container restart ([#561](https://github.com/Mailu/Mailu/issues/561))
 - Feature: FAQ ([#564](https://github.com/Mailu/Mailu/issues/564), [#677](https://github.com/Mailu/Mailu/issues/677))

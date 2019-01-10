@@ -267,10 +267,9 @@ class Email(object):
             localpart_stripped = localpart.rsplit(os.environ.get('RECIPIENT_DELIMITER'), 1)[0]
 
         pure_alias = Alias.resolve(localpart, domain_name)
-        pure_alias_has_wildcard = pure_alias and '%' in pure_alias.email and pure_alias.wildcard
         stripped_alias = Alias.resolve(localpart_stripped, domain_name)
 
-        if pure_alias and not pure_alias_has_wildcard:
+        if pure_alias and not pure_alias.wildcard:
             return pure_alias.destination
         elif stripped_alias:
             return stripped_alias.destination

@@ -4,7 +4,7 @@
 	<label>Which database back end would you like to use?</label>
 	<br/>
 	 <select class="btn btn-primary dropdown-toggle" name="db_flavor" id="database">
-		{% for dbflavor in ["sqlite", "postgresql"] %}
+		{% for dbflavor in ["sqlite", "postgresql", "mysql"] %}
 			<option value="{{ dbflavor }}" >{{ dbflavor }}</option>
 		{% endfor %}
 	</select>
@@ -23,16 +23,17 @@
 			</label>
 		</div>
 		<br/>
-		<div class="form-group" id="external_db" style="display: none">
-			<label>DB User</label>
-			<input class="form-control" type="text" name="db_user" placeholder="Username" id="db_user">
-			<label>Db Password</label>
-			<input class="form-control" type="password" name="db_pw" placeholder="Password" id="db_pw">
-			<label>Db URL</label>
-			<input class="form-control" type="text" name="db_url" placeholder="URL" id="db_url">
-			<label>Db Name</label>
-			<input class="form-control" type="text" name="db_name" placeholder="Database Name" id="db_name">
-		</div>
+	</div>
+	<div class="form-group" id="external_db" style="display: none">
+		<p>Set external database parameters</p>
+		<label>DB User</label>
+		<input class="form-control" type="text" name="db_user" placeholder="Username" id="db_user">
+		<label>Db Password</label>
+		<input class="form-control" type="password" name="db_pw" placeholder="Password" id="db_pw">
+		<label>Db URL</label>
+		<input class="form-control" type="text" name="db_url" placeholder="URL" id="db_url">
+		<label>Db Name</label>
+		<input class="form-control" type="text" name="db_name" placeholder="Database Name" id="db_name">
 	</div>
 </div>
 

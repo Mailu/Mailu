@@ -169,7 +169,7 @@ class FetchForm(flask_wtf.FlaskForm):
     port = fields.IntegerField(_('TCP port'), [validators.DataRequired(), validators.NumberRange(min=0, max=65535)])
     tls = fields.BooleanField(_('Enable TLS'))
     username = fields.StringField(_('Username'), [validators.DataRequired()])
-    password = fields.PasswordField(_('Password'), [validators.DataRequired()])
+    password = fields.PasswordField(_('Password'))
     keep = fields.BooleanField(_('Keep emails on the server'))
     submit = fields.SubmitField(_('Submit'))
 

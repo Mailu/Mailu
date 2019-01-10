@@ -2,9 +2,8 @@ Changing the database back-end
 ==============================
 
 By default Mailu uses a SQLite database. Recently, we have changed the internals of Mailu
-to enable the support of alternative database solutions. At this moment we have only included 
-the possibility to use a Postgresql database. This functionality should still be considered
-experimental!
+to enable the support of alternative database solutions as postgresql and mysql/mariadb.
+This functionality should still be considered experimental!
 
 Mailu Postgresql
 ----------------
@@ -41,10 +40,6 @@ password and sufficient privileges on the database to ``CREATE TABLE``, ``DROP``
 Usually making the user owner of the database would be the easiest thing to do.
 Don't forget to set ``pg_hba.conf`` accordingly.
 
-The database will also need the Citext extension installed.
-This is usually included in a package called "postgresql-contrib".
-The exact name may vary between distributions.
-
 The following commands can serve as an example on how to set up postgresql for Mailu usage.
 Adjust this to your own liking.
 
@@ -75,3 +70,43 @@ In ``pg_hba.conf`` there should be a line like this:
 
 Note that this example is the bare-minimum to get Mailu working. It goes without saying that
 the database admin will have to setup his own means of backups and TLS encrypted connections.
+
+External MySQL/Mariadb
+----------------------
+
+It is also possible to use a mysql/mariadb database server, hosted elsewhere.
+In this case you'll have to take to create an empty database for Mailu, corresponding user,
+password and sufficient privileges on the database to ``CREATE TABLE``, ``DROP`` etc.
+Usually making the user owner of the database would be the easiest thing to do.
+
+The following commands can serve as an example on how to set up mysql/mariadb for Mailu usage.
+Adjust this to your own liking.
+
+.. code-block:: sql
+
+  mysql> CREATE DATABASE mailu;
+  mysql> CREATE USER 'mailu'@'%' IDENTIFIED BY 'my-strong-password-here';
+  mysql> GRANT ALL PRIVILEGES ON mailu.* TO 'mailu'@'%';
+  mysql> FLUSH PRIVILEGES;
+  
+Note that if you get any errors related to ``caching_sha2_password`` it can be solved by changing the encryption 
+of the password to ``mysql_native_password`` instead of the latest authentication plugin ``caching_sha2_password``.
+
+.. code-block:: sql
+
+  mysql> SELECT host, user, plugin FROM mysql.user;
+  
+  +-----------+-------+-----------------------+
+  | host      | user  | plugin                |
+  +-----------+-------+-----------------------+
+  | %         | mailu | caching_sha2_password |
+  +-----------+-------+-----------------------+
+  
+  mysql> update mysql.user set plugin = 'mysql_native_password' where user = 'mailu';
+  mysql> SELECT host, user, plugin FROM mysql.user;
+  
+  +------+-------+-----------------------+
+  | host | user  | plugin                |
+  +------+-------+-----------------------+
+  | %    | mailu | mysql_native_password |
+  +------+-------+-----------------------+

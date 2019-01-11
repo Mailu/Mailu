@@ -16,7 +16,7 @@ def alias_list(domain_name):
 @access.domain_admin(models.Domain, 'domain_name')
 def alias_create(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
-    if domain.max_aliases and len(domain.aliases) >= domain.max_aliases:
+    if not domain.max_aliases == -1 and len(domain.aliases) >= domain.max_aliases:
         flask.flash('Too many aliases for domain %s' % domain, 'error')
         return flask.redirect(
             flask.url_for('.alias_list', domain_name=domain.name))

@@ -129,8 +129,8 @@ class Domain(Base):
     name = db.Column(IdnaDomain, primary_key=True, nullable=False)
     managers = db.relationship('User', secondary=managers,
         backref=db.backref('manager_of'), lazy='dynamic')
-    max_users = db.Column(db.Integer, nullable=False, default=0)
-    max_aliases = db.Column(db.Integer, nullable=False, default=0)
+    max_users = db.Column(db.Integer, nullable=False, default=-1)
+    max_aliases = db.Column(db.Integer, nullable=False, default=-1)
     max_quota_bytes = db.Column(db.Integer(), nullable=False, default=0)
     signup_enabled = db.Column(db.Boolean(), nullable=False, default=False)
 

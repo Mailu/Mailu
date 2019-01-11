@@ -91,7 +91,7 @@ def user(localpart, domain_name, password, hash_scheme=None):
 @click.option('-a', '--max_aliases')
 @click.option('-q', '--max_quota_bytes')
 @flask_cli.with_appcontext
-def domain(domain_name, max_users=0, max_aliases=0, max_quota_bytes=0):
+def domain(domain_name, max_users=-1, max_aliases=-1, max_quota_bytes=0):
     domain = models.Domain.query.get(domain_name)
     if not domain:
         domain = models.Domain(name=domain_name)
@@ -140,8 +140,8 @@ def config_update(verbose=False, delete_objects=False):
         if verbose:
             print(str(domain_config))
         domain_name = domain_config['name']
-        max_users = domain_config.get('max_users', 0)
-        max_aliases = domain_config.get('max_aliases', 0)
+        max_users = domain_config.get('max_users', -1)
+        max_aliases = domain_config.get('max_aliases', -1)
         max_quota_bytes = domain_config.get('max_quota_bytes', 0)
         tracked_domains.add(domain_name)
         domain = models.Domain.query.get(domain_name)

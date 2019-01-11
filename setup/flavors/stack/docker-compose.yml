@@ -31,15 +31,6 @@ services:
     deploy:
       replicas: {{ front_replicas }}
 
-  {% if resolver_enabled %}
-  resolver:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-{{ version }}}
-    env_file: {{ env }}
-    networks:
-      default:
-        ipv4_address: {{ dns }}
-  {% endif %}
-
   admin:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
@@ -69,10 +60,6 @@ services:
       - "{{ root }}/overrides:/overrides"
     deploy:
       replicas: {{ smtp_replicas }}
-    {% if resolver_enabled %}
-    dns:
-      - {{ dns }}
-    {% endif %}
 
   antispam:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-{{ version }}}
@@ -83,10 +70,6 @@ services:
       - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d"
     deploy:
       replicas: 1
-    {% if resolver_enabled %}
-    dns:
-      - {{ dns }}
-    {% endif %}
 
   # Optional services
   {% if antivirus_enabled %}
@@ -97,10 +80,6 @@ services:
       - "{{ root }}/filter:/data"
     deploy:
       replicas: 1
-    {% if resolver_enabled %}
-    dns:
-      - {{ dns }}
-    {% endif %}
   {% endif %}
 
   {% if webdav_enabled %}
@@ -121,10 +100,6 @@ services:
       - "{{ root }}/data:/data"
     deploy:
       replicas: 1
-    {% if resolver_enabled %}
-    dns:
-      - {{ dns }}
-    {% endif %}
   {% endif %}
 
   {% if webmail_type != 'none' %}

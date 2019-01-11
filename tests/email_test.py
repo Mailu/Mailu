@@ -58,7 +58,7 @@ else:
 
 typ, data = imap_server.search(None, 'ALL')
 for num in data[0].split():
-   imap_server.store(num, '+FLAGS', '\\Deleted')
+    imap_server.store(num, '+FLAGS', '\\Deleted')
 imap_server.expunge()
 
 imap_server.close()

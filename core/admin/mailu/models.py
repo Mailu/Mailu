@@ -273,16 +273,6 @@ class Email(object):
         if os.environ.get('RECIPIENT_DELIMITER') in localpart:
             localpart_stripped = localpart.rsplit(os.environ.get('RECIPIENT_DELIMITER'), 1)[0]
 
-        pure_alias = Alias.resolve(localpart, domain_name)
-        stripped_alias = Alias.resolve(localpart_stripped, domain_name)
-
-        if pure_alias and not pure_alias.wildcard:
-            return pure_alias.destination
-        elif stripped_alias:
-            return stripped_alias.destination
-        elif pure_alias:
-            return pure_alias.destination
-
         user = User.query.get('{}@{}'.format(localpart, domain_name))
         if not user and localpart_stripped:
             user = User.query.get('{}@{}'.format(localpart_stripped, domain_name))
@@ -294,6 +284,16 @@ class Email(object):
             else:
                 destination = [user.email]
             return destination
+
+        pure_alias = Alias.resolve(localpart, domain_name)
+        stripped_alias = Alias.resolve(localpart_stripped, domain_name)
+
+        if pure_alias and not pure_alias.wildcard:
+            return pure_alias.destination
+        elif stripped_alias:
+            return stripped_alias.destination
+        elif pure_alias:
+            return pure_alias.destination
 
     def __str__(self):
         return self.email

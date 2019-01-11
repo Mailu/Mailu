@@ -49,6 +49,7 @@ v1.6.0 - unreleased
 - Feature: Dynamic attachment size limit ([#731](https://github.com/Mailu/Mailu/issues/731))
 - Feature: Certificate watcher for external certs to reload nginx ([#732](https://github.com/Mailu/Mailu/issues/732))
 - Feature: Kubernetes
+- Feature: Supports postgresql and mysql database backends ([#420](https://github.com/Mailu/Mailu/issues/420))
 - Enhancement: Use pre-defined dhparam ([#322](https://github.com/Mailu/Mailu/issues/322))
 - Enhancement: Disable ssl_session_tickets ([#329](https://github.com/Mailu/Mailu/issues/329))
 - Enhancement: max attachment size in roundcube ([#338](https://github.com/Mailu/Mailu/issues/338))

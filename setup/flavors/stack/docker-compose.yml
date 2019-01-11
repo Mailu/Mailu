@@ -137,6 +137,14 @@ services:
       replicas: 1
   {% endif %}
 
+  {% if db_flavor == 'postgresql' and postgresql == 'internal' %}
+  database:
+    image: ${DOCKER_ORG:-mailu}/postgresql:${MAILU_VERSION:-{{ version }}}
+    env_file: {{ env }}
+    volumes:
+      - "{{ root }}/data/psql_backup:/backup"
+  {% endif %}
+
 networks:
   default:
     driver: overlay

@@ -8,6 +8,7 @@ import uuid
 import string
 import random
 import ipaddress
+import hashlib
 
 
 version = os.getenv("this_version")

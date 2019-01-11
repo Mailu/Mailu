@@ -17,7 +17,7 @@ def upgrade():
     op.create_table('config',
     sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('value', sa.String(length=255), nullable=True),
-    sa.PrimaryKeyConstraint('name')
+    sa.PrimaryKeyConstraint('name', name=op.f('config_pkey'))
     )
 
 

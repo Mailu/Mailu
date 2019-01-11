@@ -23,8 +23,8 @@ def upgrade():
     sa.Column('user_email', sa.String(length=255), nullable=False),
     sa.Column('password', sa.String(length=255), nullable=False),
     sa.Column('ip', sa.String(length=255), nullable=True),
-    sa.ForeignKeyConstraint(['user_email'], ['user.email'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.ForeignKeyConstraint(['user_email'], ['user.email'], name=op.f('token_user_email_fkey')),
+    sa.PrimaryKeyConstraint('id', name=op.f('token_pkey'))
     )
 
 

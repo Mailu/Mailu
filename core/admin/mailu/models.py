@@ -27,7 +27,7 @@ class IdnaDomain(db.TypeDecorator):
     impl = db.String(80)
 
     def process_bind_param(self, value, dialect):
-        return idna.encode(value).decode("ascii")
+        return idna.encode(value).decode("ascii").lower()
 
     def process_result_value(self, value, dialect):
         return idna.decode(value)
@@ -37,7 +37,7 @@ class IdnaEmail(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
 
-    impl = db.String(255, collation="NOCASE")
+    impl = db.String(255)
 
     def process_bind_param(self, value, dialect):
         try:
@@ -45,7 +45,7 @@ class IdnaEmail(db.TypeDecorator):
             return "{0}@{1}".format(
                 localpart,
                 idna.encode(domain_name).decode('ascii'),
-            )
+            ).lower()
         except ValueError:
             pass
 
@@ -88,30 +88,37 @@ class JSONEncoded(db.TypeDecorator):
         return json.loads(value) if value else None
 
 
-class Config(db.Model):
-    """ In-database configuration values
-    """
-
-    name = db.Column(db.String(255), primary_key=True, nullable=False)
-    value = db.Column(JSONEncoded)
-
-
-# Many-to-many association table for domain managers
-managers = db.Table('manager',
-    db.Column('domain_name', IdnaDomain, db.ForeignKey('domain.name')),
-    db.Column('user_email', IdnaEmail, db.ForeignKey('user.email'))
-)
-
-
 class Base(db.Model):
     """ Base class for all models
     """
 
     __abstract__ = True
 
+    metadata = sqlalchemy.schema.MetaData(
+        naming_convention={
+            "fk": "%(table_name)s_%(column_0_name)s_fkey",
+            "pk": "%(table_name)s_pkey"
+        }
+    )
+
     created_at = db.Column(db.Date, nullable=False, default=datetime.now)
     updated_at = db.Column(db.Date, nullable=True, onupdate=datetime.now)
     comment = db.Column(db.String(255), nullable=True)
+
+
+# Many-to-many association table for domain managers
+managers = db.Table('manager', Base.metadata,
+    db.Column('domain_name', IdnaDomain, db.ForeignKey('domain.name')),
+    db.Column('user_email', IdnaEmail, db.ForeignKey('user.email'))
+)
+
+
+class Config(Base):
+    """ In-database configuration values
+    """
+
+    name = db.Column(db.String(255), primary_key=True, nullable=False)
+    value = db.Column(JSONEncoded)
 
 
 class Domain(Base):
@@ -201,7 +208,7 @@ class Relay(Base):
 
     __tablename__ = "relay"
 
-    name = db.Column(db.String(80), primary_key=True, nullable=False)
+    name = db.Column(IdnaDomain, primary_key=True, nullable=False)
     smtp = db.Column(db.String(80), nullable=True)
 
     def __str__(self):
@@ -318,7 +325,7 @@ class User(Base, Email):
     # Settings
     displayed_name = db.Column(db.String(160), nullable=False, default="")
     spam_enabled = db.Column(db.Boolean(), nullable=False, default=True)
-    spam_threshold = db.Column(db.Integer(), nullable=False, default=80.0)
+    spam_threshold = db.Column(db.Integer(), nullable=False, default=80)
 
     # Flask-login attributes
     is_authenticated = True

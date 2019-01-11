@@ -3,8 +3,6 @@ import os
 
 DEFAULT_CONFIG = {
     # Specific to the admin UI
-    'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
-    'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     'DOCKER_SOCKET': 'unix:///var/run/docker.sock',
     'BABEL_DEFAULT_LOCALE': 'en',
     'BABEL_DEFAULT_TIMEZONE': 'UTC',
@@ -14,6 +12,14 @@ DEFAULT_CONFIG = {
     'DEBUG': False,
     'DOMAIN_REGISTRATION': False,
     'TEMPLATES_AUTO_RELOAD': True,
+    # Database settings
+    'DB_FLAVOR': None,
+    'DB_USER': 'mailu',
+    'DB_PW': None,
+    'DB_HOST': 'database',
+    'DB_NAME': 'mailu',
+    'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
+    'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     # Statistics management
     'INSTANCE_ID_PATH': '/data/instance',
     'STATS_ENDPOINT': '0.{}.stats.mailu.io',
@@ -59,15 +65,27 @@ class ConfigManager(dict):
     """ Naive configuration manager that uses environment only
     """
 
+    DB_TEMPLATES = {
+        'sqlite': 'sqlite:////{DB_HOST}',
+        'postgresql': 'postgresql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}',
+        'mysql': 'mysql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}'
+    }
+
     def __init__(self):
         self.config = dict()
 
     def init_app(self, app):
         self.config.update(app.config)
+        # get environment variables
         self.config.update({
             key: os.environ.get(key, value)
             for key, value in DEFAULT_CONFIG.items()
         })
+        # automatically set the sqlalchemy string
+        if self.config['DB_FLAVOR']:
+            template = self.DB_TEMPLATES[self.config['DB_FLAVOR']]
+            self.config['SQLALCHEMY_DATABASE_URI'] = template.format(**self.config)
+        # update the app config itself
         app.config = self
 
     def setdefault(self, key, value):

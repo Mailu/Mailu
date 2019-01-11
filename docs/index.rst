@@ -59,6 +59,7 @@ the version of Mailu that you are running.
     kubernetes/mailu/index
     dns
     reverse
+    database
 
 .. toctree::
     :maxdepth: 2

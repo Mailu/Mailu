@@ -17,3 +17,6 @@ PyYAML
 PyOpenSSL
 dnspython
 bcrypt
+tenacity
+mysqlclient
+psycopg2

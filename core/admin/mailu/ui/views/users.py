@@ -23,6 +23,7 @@ def user_create(domain_name):
         return flask.redirect(
             flask.url_for('.user_list', domain_name=domain.name))
     form = forms.UserForm()
+    form.pw.validators = [wtforms.validators.DataRequired()]
     if domain.max_quota_bytes:
         form.quota_bytes.validators = [
             wtforms.validators.NumberRange(max=domain.max_quota_bytes)]
@@ -54,7 +55,6 @@ def user_edit(user_email):
     # Create the form
     form = forms.UserForm(obj=user)
     wtforms_components.read_only(form.localpart)
-    form.pw.validators = []
     form.localpart.validators = []
     if max_quota_bytes:
         form.quota_bytes.validators = [

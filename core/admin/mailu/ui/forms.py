@@ -84,7 +84,7 @@ class RelayForm(flask_wtf.FlaskForm):
 
 class UserForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('E-mail'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
-    pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
+    pw = fields.PasswordField(_('Password'))
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
     quota_bytes = fields_.IntegerSliderField(_('Quota'), default=1000000000)
     enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)
@@ -165,11 +165,11 @@ class FetchForm(flask_wtf.FlaskForm):
     protocol = fields.SelectField(_('Protocol'), choices=[
         ('imap', 'IMAP'), ('pop3', 'POP3')
     ])
-    host = fields.StringField(_('Hostname or IP'))
-    port = fields.IntegerField(_('TCP port'))
+    host = fields.StringField(_('Hostname or IP'), [validators.DataRequired()])
+    port = fields.IntegerField(_('TCP port'), [validators.DataRequired(), validators.NumberRange(min=0, max=65535)])
     tls = fields.BooleanField(_('Enable TLS'))
-    username = fields.StringField(_('Username'))
-    password = fields.StringField(_('Password'))
+    username = fields.StringField(_('Username'), [validators.DataRequired()])
+    password = fields.PasswordField(_('Password'))
     keep = fields.BooleanField(_('Keep emails on the server'))
     submit = fields.SubmitField(_('Submit'))
 

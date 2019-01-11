@@ -71,6 +71,14 @@ Web settings
 
 The ``WEB_ADMIN`` contains the path to the main admin interface, while
 ``WEB_WEBMAIL`` contains the path to the Web email client.
+The ``WEBROOT_REDIRECT`` redirects all non-found queries to the set path.
+An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables classic
+behavior of a 404 result when not found.
+All three options need a leading slash (``/``) to work.
+
+  .. note:: ``WEBROOT_REDIRECT`` has to point to a valid path on the webserver.
+    This means it cannot point to any services which are not enabled.
+    For example, don't point it to ``/webmail`` when ``WEBMAIL=none``
 
 Both ``SITENAME`` and ``WEBSITE`` are customization options for the panel menu
 in the admin interface, while ``SITENAME`` is a customization option for
@@ -82,6 +90,13 @@ Advanced settings
 The ``PASSWORD_SCHEME`` is the password encryption scheme. You should use the
 default value, unless you are importing password from a separate system and
 want to keep using the old password encryption scheme.
+
+The ``LOG_LEVEL`` setting is used by the python start-up scripts as a logging threshold.
+Log messages equal or higher than this priority will be printed.
+Can be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG or NOTSET.
+See the `python docs`_ for more information.
+
+.. _`python docs`: https://docs.python.org/3.6/library/logging.html#logging-levels
 
 Infrastructure settings
 -----------------------

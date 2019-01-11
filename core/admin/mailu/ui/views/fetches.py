@@ -3,6 +3,7 @@ from mailu.ui import ui, forms, access
 
 import flask
 import flask_login
+import wtforms
 
 
 @ui.route('/fetch/list', methods=['GET', 'POST'], defaults={'user_email': None})
@@ -21,6 +22,7 @@ def fetch_create(user_email):
     user_email = user_email or flask_login.current_user.email
     user = models.User.query.get(user_email) or flask.abort(404)
     form = forms.FetchForm()
+    form.pw.validators = [wtforms.validators.DataRequired()]
     if form.validate_on_submit():
         fetch = models.Fetch(user=user)
         form.populate_obj(fetch)
@@ -38,6 +40,8 @@ def fetch_edit(fetch_id):
     fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
     form = forms.FetchForm(obj=fetch)
     if form.validate_on_submit():
+        if not form.password.data:
+            form.password.data = fetch.password
         form.populate_obj(fetch)
         models.db.session.commit()
         flask.flash('Fetch configuration updated')

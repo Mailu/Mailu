@@ -31,7 +31,6 @@ v1.6.0 - unreleased
 - Feature: Add posibilty to run webmail on root ([#501](https://github.com/Mailu/Mailu/issues/501))
 - Feature: Upgrade docker-compose.yml to version 3 ([#539](https://github.com/Mailu/Mailu/issues/539))
 - Feature: Documentation to deploy mailu on a docker swarm ([#551](https://github.com/Mailu/Mailu/issues/551))
-- Feature: Add full-text search support ([#552](https://github.com/Mailu/Mailu/issues/552))
 - Feature: Add optional Maildir-Compression ([#553](https://github.com/Mailu/Mailu/issues/553))
 - Feature: Preserve rspamd history on container restart ([#561](https://github.com/Mailu/Mailu/issues/561))
 - Feature: FAQ ([#564](https://github.com/Mailu/Mailu/issues/564), [#677](https://github.com/Mailu/Mailu/issues/677))
@@ -77,6 +76,9 @@ v1.6.0 - unreleased
 - Enhancement: Added regex validation for alias username ([#764](https://github.com/Mailu/Mailu/issues/764))
 - Enhancement: Allow to disable aliases or users for a specific domain ([#799](https://github.com/Mailu/Mailu/issues/799))
 - Enhancement: Update documentation
+- Enhancement: Include favicon package ([#801](https://github.com/Mailu/Mailu/issues/801), ([#802](https://github.com/Mailu/Mailu/issues/802))
+- Enhancement: Add logging at critical places in python start.py scripts. Implement LOG_LEVEL to control verbosity ([#588](https://github.com/Mailu/Mailu/issues/588))
+- Enhancement: Mark message as seen when reporting as spam
 - Upstream: Update Roundcube
 - Upstream: Update Rainloop
 - Bug: Rainloop fails with "domain not allowed" ([#93](https://github.com/Mailu/Mailu/issues/93))
@@ -110,6 +112,9 @@ v1.6.0 - unreleased
 - Bug: Fix rainloop permissions ([#637](https://github.com/Mailu/Mailu/issues/637))
 - Bug: Fix broken webmail and logo url in admin ([#792](https://github.com/Mailu/Mailu/issues/792))
 - Bug: Don't allow negative values on domain creation/edit ([#799](https://github.com/Mailu/Mailu/issues/799))
+- Bug: Don't recursivly chown on mailboxes ([#776](https://github.com/Mailu/Mailu/issues/776))
+- Bug: Fix forced password input for user edit ([#745](https://github.com/Mailu/Mailu/issues/745))
+- Bug: Fetched accounts: Password field is of type "text" ([#789](https://github.com/Mailu/Mailu/issues/789))
 
 v1.5.1 - 2017-11-21
 -------------------

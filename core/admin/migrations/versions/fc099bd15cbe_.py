@@ -1,14 +1,14 @@
 """change default unlimited value for max_users and max_aliases to -1
 
 Revision ID: fc099bd15cbe
-Revises: cd79ed46d9c2
+Revises: 5aeb5811408e
 Create Date: 2019-01-06 13:40:23.372373
 
 """
 
 # revision identifiers, used by Alembic.
 revision = 'fc099bd15cbe'
-down_revision = 'cd79ed46d9c2'
+down_revision = '5aeb5811408e'
 
 from alembic import op
 import sqlalchemy as sa

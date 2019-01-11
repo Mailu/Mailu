@@ -268,14 +268,20 @@ class Email(object):
     @classmethod
     def resolve_destination(cls, localpart, domain_name, ignore_forward_keep=False):
         localpart_stripped = None
+        stripped_alias = None
+
         if os.environ.get('RECIPIENT_DELIMITER') in localpart:
             localpart_stripped = localpart.rsplit(os.environ.get('RECIPIENT_DELIMITER'), 1)[0]
 
-        alias = Alias.resolve(localpart, domain_name)
-        if not alias and localpart_stripped:
-            alias = Alias.resolve(localpart_stripped, domain_name)
-        if alias:
-            return alias.destination
+        pure_alias = Alias.resolve(localpart, domain_name)
+        stripped_alias = Alias.resolve(localpart_stripped, domain_name)
+
+        if pure_alias and not pure_alias.wildcard:
+            return pure_alias.destination
+        elif stripped_alias:
+            return stripped_alias.destination
+        elif pure_alias:
+            return pure_alias.destination
 
         user = User.query.get('{}@{}'.format(localpart, domain_name))
         if not user and localpart_stripped:

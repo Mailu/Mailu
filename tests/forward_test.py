@@ -4,9 +4,6 @@ import time
 import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import ntpath
-from email.mime.base import MIMEBase
-from email import encoders
 
 msg = MIMEMultipart()
 msg['From'] = "admin@mailu.io"
@@ -52,7 +49,7 @@ else:
 
 typ, data = imap_server.search(None, 'ALL')
 for num in data[0].split():
-   imap_server.store(num, '+FLAGS', '\\Deleted')
+    imap_server.store(num, '+FLAGS', '\\Deleted')
 imap_server.expunge()
 
 imap_server.close()
@@ -80,7 +77,7 @@ else:
 
 typ, data = imap_server.search(None, 'ALL')
 for num in data[0].split():
-   imap_server.store(num, '+FLAGS', '\\Deleted')
+    imap_server.store(num, '+FLAGS', '\\Deleted')
 imap_server.expunge()
 
 imap_server.close()

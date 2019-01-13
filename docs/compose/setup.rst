@@ -154,3 +154,5 @@ Finally, you must create the initial admin user account:
   docker-compose exec admin flask mailu admin me example.net password
 
 This will create a user named ``me@example.net`` with password ``password`` and administration privileges. Connect to the Web admin interface and change the password to a strong one.
+
+  .. note:: It is vitally important that either a user with the same email as ``POSTMASTER`` in your ``.env`` exists, or you remember to create an alias with this name after you log in. All kinds of strange errors will occur as a result of not doing so!

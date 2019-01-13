@@ -137,7 +137,7 @@ class TokenForm(flask_wtf.FlaskForm):
     raw_password = fields.HiddenField([validators.DataRequired()])
     comment = fields.StringField(_('Comment'))
     ip = fields.StringField(
-        _('Authorized IP'), [validators.Optional(), validators.IPAddress()]
+        _('Authorized IP'), [validators.Optional(), validators.IPAddress(ipv6=True)]
     )
     submit = fields.SubmitField(_('Save'))
 

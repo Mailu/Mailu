@@ -41,7 +41,7 @@ def upgrade():
         sa.Column('comment', sa.String(length=255), nullable=True),
         sa.Column('localpart', sa.String(length=80), nullable=False),
         sa.Column('password', sa.String(length=255), nullable=False),
-        sa.Column('quota_bytes', sa.Integer(), nullable=False),
+        sa.Column('quota_bytes', sa.BigInteger(), nullable=False),
         sa.Column('global_admin', sa.Boolean(), nullable=False),
         sa.Column('enable_imap', sa.Boolean(), nullable=False),
         sa.Column('enable_pop', sa.Boolean(), nullable=False),

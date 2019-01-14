@@ -20,7 +20,7 @@ import sqlalchemy as sa
 
 def upgrade():
     with op.batch_alter_table('user') as batch:
-        batch.add_column(sa.Column('quota_bytes_used', sa.Integer(), nullable=False, server_default='0'))
+        batch.add_column(sa.Column('quota_bytes_used', sa.BigInteger(), nullable=False, server_default='0'))
 
 
 def downgrade():

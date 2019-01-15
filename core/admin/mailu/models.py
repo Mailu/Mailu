@@ -101,8 +101,8 @@ class Base(db.Model):
         }
     )
 
-    created_at = db.Column(db.Date, nullable=False, default=datetime.now)
-    updated_at = db.Column(db.Date, nullable=True, onupdate=datetime.now)
+    created_at = db.Column(db.Date, nullable=False, default=date.today)
+    updated_at = db.Column(db.Date, nullable=True, onupdate=date.today)
     comment = db.Column(db.String(255), nullable=True)
 
 

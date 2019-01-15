@@ -410,7 +410,7 @@ class User(Base, Email):
         return emails
 
     def send_welcome(self):
-        if app.config["WELCOME"].lower() == "true":
+        if app.config["WELCOME"]:
             self.sendmail(app.config["WELCOME_SUBJECT"],
                 app.config["WELCOME_BODY"])
 

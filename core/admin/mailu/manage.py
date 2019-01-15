@@ -31,7 +31,7 @@ def advertise():
         instance_id = str(uuid.uuid4())
         with open(app.config["INSTANCE_ID_PATH"], "w") as handle:
             handle.write(instance_id)
-    if app.config["DISABLE_STATISTICS"].lower() != "true":
+    if not app.config["DISABLE_STATISTICS"]:
         try:
             socket.gethostbyname(app.config["STATS_ENDPOINT"].format(instance_id))
         except:

@@ -1,19 +1,15 @@
 {% call macros.panel("info", "Step 3 - pick some features") %}
 <p>Mailu comes with multiple base features, including a specific admin
-interface, Web email clients (webmails), antispam, antivirus, etc. If you
-wish to disable some of these features, you are free to do so.</p>
-
-<p>Emails will be available through IMAP and POP3. You may also enable a Web
-email client. These do add some complexity but provide an easier way of
-accessing messages for beginner users.</p>
+interface, Web email clients, antispam, antivirus, etc.
+In this section you can enable the services to you liking.</p>
 
 <!-- 	Switched from radio buttons to dropdown menu in order to remove the checkbox -->
+<p>A Webmail is a Web interface exposing an email client. Mailu webmails are
+bound to the internal IMAP and SMTP server for users to access their mailbox through
+the Web. By exposing a complex application such as a Webmail, you should be aware of
+the security implications caused by such an increase of attack surface.<p>
 <div class="form-group">
   <label>Enable Web email client (and path to the Web email client)</label>
-<!--   <div class="radio"> -->
-<!--     {{ macros.radio("webmail_type", "roundcube", "RoundCube", "popular Webmail running on top of PHP") }} -->
-<!--     {{ macros.radio("webmail_type", "rainloop", "Rainloop", "lightweight Webmail based on PHP, no database") }} -->
-<!--   </div> -->
   <br/>
   <select class="btn btn-primary dropdown-toggle" name="webmail_type" id="webmail">
   	{% for webmailtype in ["none", "roundcube", "rainloop"] %}
@@ -26,10 +22,9 @@ accessing messages for beginner users.</p>
   </div>
 </div>
 
-<p>Email filtering is a really important features. You can still disable it, which
-will prevent Mailu from doing spam filtering, virus filtering, and from applying
-white and blacklists that you may configure in the admin interface. You may
-also disable the antivirus if required (it does use aroung 1GB of ram).</p>
+<p>An antivirus server helps fighting large scale virus spreading campaigns that leverage
+e-mail for initial infection. Make sure that you have at least 1GB of memory for ClamAV to
+load its signature database.</p>
 
 <div class="form-check form-check-inline">
   <label class="form-check-label">
@@ -38,12 +33,17 @@ also disable the antivirus if required (it does use aroung 1GB of ram).</p>
   </label>
 </div>
 
+<p>A Webdav server exposes a Dav interface over HTTP so that clients can store
+contacts or calendars using the mail account.</p>
+
 <div class="form-check form-check-inline">
   <label class="form-check-label">
     <input class="form-check-input" type="checkbox" name="webdav_enabled" value="radicale">
     Enable the webdav service
   </label>
 </div>
+
+<p>Fetchmail allows to download mails over IMAP/POP3 and uploads it your Mailu mailbox.</p>
 
 <div class="form-check form-check-inline">
   <label class="form-check-label">

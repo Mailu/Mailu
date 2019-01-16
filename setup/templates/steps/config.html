@@ -1,8 +1,17 @@
+{% if flavor == "stack" %}
+{% call macros.panel("danger", "Docker stack / swarm is experimental") %}
+Setup is capable of generating a somewhat decent docker-compose.yml,
+for the docker stack flavor. However its usage is for advanced users an is experimental.
+Expect many challenges is shared mail storage and fail-over scenarios! Some user experiences
+have been <a href="https://github.com/Mailu/Mailu/blob/master/docs/swarm/master/README.md">shared on GitHub.</a>
+{% endcall %}
+{% endif %}
+
 {% call macros.panel("info", "Step 2 - Initial configuration") %}
 <p>Before starting some variables must be set</p>
 
 <div class="form-group">
-  <label>Root path: </label>
+  <label>Mailu storage path: </label>
 <!--   Validates path -->
   <input class="form-control" type="text" name="root" value="/mailu" required pattern="^/[-_A-Za-z0-9]+(/[-_A-Za-z0-9]*)*">
 </div>
@@ -27,7 +36,7 @@ Or in plain english: if receivers start to classify your mail as spam, this post
 </div>
 
 <div class="form-group">
-  <label>Choose how you wish to handle security (TLS) certificates</label>
+  <label>Choose how you wish to handle security <a href="https://mailu.io/{{ version }}/compose/setup.html#tls-certificates">TLS certificates</a></label>
   <br/>
   <select class="btn btn-primary dropdown-toggle" name="tls_flavor">
   	{% for tlsflavor in ["letsencrypt", "cert", "notls", "mail", "mail-letsencrypt"] %}

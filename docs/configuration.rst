@@ -1,5 +1,9 @@
-Mailu configuration settings
-============================
+Configuration reference
+=======================
+
+This page explains the variables found in ``mailu.env``.
+In most cases ``mailu.env`` is setup correctly by the setup utility and can be left as-is.
+However, some advanced settings or modifications can be done by modifying this file.
 
 .. _common_cfg:
 
@@ -36,6 +40,9 @@ address.
 The ``AUTH_RATELIMIT`` holds a security setting for fighting attackers that
 try to guess user passwords. The value is the limit of requests that a single
 IP address can perform against IMAP, POP and SMTP authentication endpoints.
+
+The ``TLS_FLAVOR`` sets how Mailu handles TLS connections. Setting this value to
+``notl`` will cause Mailu not to server any web content! More on :ref:`tls_flavor`.
 
 Mail settings
 -------------

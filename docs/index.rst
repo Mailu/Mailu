@@ -53,10 +53,10 @@ the version of Mailu that you are running.
     :caption: Setup
 
     setup
-    configuration
     compose/requirements
     compose/setup
     kubernetes/mailu/index
+    configuration
     dns
     reverse
     database

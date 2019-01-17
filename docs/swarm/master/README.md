@@ -291,7 +291,7 @@ core@coreos-01 ~ $ docker stack rm mailu
 
 ## Notes on unbound resolver
 
-In Docker compose flavor we currently have the option to include the unbound DNS resolver. This does not work in Docker Swarm, as it in not possible to configure any static IP addresses. There is an [open issue)](https://github.com/moby/moby/issues/24170]) on this over at Docker. However, this doesn't seem to move anywhere since some time now. For that reasons we've chosen not to include the unbound resolver in the stack flavor.
+In Docker compose flavor we currently have the option to include the unbound DNS resolver. This does not work in Docker Swarm, as it in not possible to configure any static IP addresses. There is an [open issue](https://github.com/moby/moby/issues/24170) for this at Docker. However, this doesn't seem to move anywhere since some time now. For that reasons we've chosen not to include the unbound resolver in the stack flavor.
 
 If you still want to benefit from Unbound as a system resolver, you can install it system-wide. The following procedure was done on a Fedora 28 system and might needs some adjustments for your system. Note that this will need to be done on every swarm node. In this example we will make use of `dnssec-trigger`, which is used to configure unbound. When installing this and running the service, unbound is pulled in as dependency and does not need to be installed, configured or run separately.
 

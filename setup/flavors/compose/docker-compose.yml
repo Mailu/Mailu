@@ -3,7 +3,7 @@
 # Please read the documentation before attempting any change.
 # Generated for {{ flavor }} flavor
 
-version: '3.6'
+version: '2.2'
 
 services:
 
@@ -160,8 +160,14 @@ services:
 
 networks:
   default:
+    {% if ipv6_enabled %}
+    enable_ipv6: true
+    {% endif %}
     driver: bridge
     ipam:
       driver: default
       config:
         - subnet: {{ subnet }}
+        {% if ipv6_enabled %}
+        - subnet: {{ subnet6 }}
+        {% endif %}

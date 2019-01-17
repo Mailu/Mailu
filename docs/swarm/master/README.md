@@ -1,5 +1,43 @@
 # Install Mailu on a docker swarm
 
+## Some warnings
+
+### How Docker swarm works
+
+Docker swarm enables replication and fail-over scenarios. As a feature, if a node dies or goes away, Docker will re-schedule it's containers on the remaining nodes.
+In order to take this decisions, docker swarm works on a consensus between managers regarding the state of nodes. Therefore it recommends to always have an uneven amount of manager nodes. This will always give a majority on either halve of a potential network split.
+
+### Storage
+
+On top of this some of Mailu's containers heavily rely on disk storage. As noted below, every host will need the same dataset on every host where related containers are run. So Dovecot IMAP needs `/mailu/mail` replicated to every node it *may* be scheduled to run. There are various solutions for this like NFS and GlusterFS.
+
+### When disaster strikes
+
+So imagine 3 swarm nodes and 3 GlusterFS endpoints:
+
+```
+node-A -> gluster-A --|
+node-B -> gluster-B --|--> Single file system
+node-C -> gluster-C --|
+```
+
+Each node has a connection to the shared file system and maintains connections between the other nodes. Let's say Dovecot is running on `node-A`. Now a network error / outage occurs on the route between `node-A` and the remaining nodes, but stays connected to the `gluster-A` endpoint. `node-B` and `node-C` conclude that `node-A` is down. They reschedule Dovecot to start on either one of them. Dovecot starts reading and writing its indexes to the **shared** filesystem. However, it is possible the Dovecot on `node-A` is still up and handling some client requests. I've seen cases where this situations resulted in:
+
+- Retained locks
+- Corrupted indexes
+- Users no longer able to read any of mail
+- Lost mail
+
+### It gets funkier
+
+Our original deployment also included `main.db` on the GlusterFS. Due to the above we corrupted it once and we decided to move it to local storage and restirct the `admin` container to that host only. This inspired us to put some legwork is supporting different database back-ends like MySQL and PostgreSQL. We highly recommend to use either of them, in favor of sqlite.
+
+### Conclusion
+
+Although the above situation is less-likely to occur on a stable (local) network, it does indicate a failure case where there is a probability of data-loss or downtime. It may help to create redundant networks, but the effort might be too much for the actual results. We will need to look into better and safer methods of replicating mail data. For now, we regret to have to inform you that Docker swarm deployment is **unstable** and should be avoided in production environments.
+
+-- @muhlemmer, 17th of January 2019.
+
 ## Prequisites
 
 ### Swarm

@@ -19,7 +19,7 @@ DEFAULT_CONFIG = {
     'DB_HOST': 'database',
     'DB_NAME': 'mailu',
     'SQLITE_DATABASE_FILE':'data/main.db'
-    'SQLALCHEMY_DATABASE_URI': '',
+    'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     # Statistics management
     'INSTANCE_ID_PATH': '/data/instance',

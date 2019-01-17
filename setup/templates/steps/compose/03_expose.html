@@ -31,8 +31,7 @@ avoid generic all-interfaces addresses like <code>0.0.0.0</code> or <code>::</co
 </div>
 
 <div class="form-group" id="ipv6" style="display: none">
-  <p><span class="label label-warning">Warning</span> You must use specific addresses, please
-	avoid generic all-interfaces addresses like <code>0.0.0.0</code> or <code>::</code>.</p>
+  <p><span class="label label-danger">Read this:</span> Docker currently does not expose the IPv6 ports properly, as it does not interface with <code>ip6tables</code>. Be sure to read our <a href="https://mailu.io/{{ version }}/faq.html#how-to-make-ipv6-work">FAQ section</a>!</p>
   <label>IPv6 listen address</label>
 <!--   Validates IPv6 address -->
   <input class="form-control" type="text" name="bind6" value="::1"

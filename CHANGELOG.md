@@ -80,6 +80,7 @@ v1.6.0 - unreleased
 - Enhancement: Include favicon package ([#801](https://github.com/Mailu/Mailu/issues/801), ([#802](https://github.com/Mailu/Mailu/issues/802))
 - Enhancement: Add logging at critical places in python start.py scripts. Implement LOG_LEVEL to control verbosity ([#588](https://github.com/Mailu/Mailu/issues/588))
 - Enhancement: Mark message as seen when reporting as spam
+- Enhancement: Better support and document IPv6 ([#827](https://github.com/Mailu/Mailu/issues/827))
 - Upstream: Update Roundcube
 - Upstream: Update Rainloop
 - Bug: Rainloop fails with "domain not allowed" ([#93](https://github.com/Mailu/Mailu/issues/93))

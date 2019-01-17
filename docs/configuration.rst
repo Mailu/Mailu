@@ -42,7 +42,7 @@ try to guess user passwords. The value is the limit of requests that a single
 IP address can perform against IMAP, POP and SMTP authentication endpoints.
 
 The ``TLS_FLAVOR`` sets how Mailu handles TLS connections. Setting this value to
-``notl`` will cause Mailu not to server any web content! More on :ref:`tls_flavor`.
+``notls`` will cause Mailu not to server any web content! More on :ref:`tls_flavor`.
 
 Mail settings
 -------------

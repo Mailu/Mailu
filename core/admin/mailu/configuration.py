@@ -18,7 +18,8 @@ DEFAULT_CONFIG = {
     'DB_PW': None,
     'DB_HOST': 'database',
     'DB_NAME': 'mailu',
-    'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
+    'SQLITE_DATABASE_FILE':'data/main.db'
+    'SQLALCHEMY_DATABASE_URI': '',
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     # Statistics management
     'INSTANCE_ID_PATH': '/data/instance',
@@ -66,7 +67,7 @@ class ConfigManager(dict):
     """
 
     DB_TEMPLATES = {
-        'sqlite': 'sqlite:////{DB_HOST}',
+        'sqlite': 'sqlite:////{SQLITE_DATABASE_FILE}',
         'postgresql': 'postgresql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}',
         'mysql': 'mysql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}'
     }

@@ -14,7 +14,7 @@ on any single person. And thus merging pull requests at much shorter time.
 On top of that we finally got around to creating a simple test suite on TravisCI,
 which is doing some e-mail sending and receiving. This greatly helps the reviewing process.
 
-Full a complete overview of changes, see our `changelog`_.
+For a complete overview of changes, see our `changelog`_.
 Here we'll try to give you the highlights.
 
 .. _`changelog`: https://github.com/Mailu/Mailu/blob/master/CHANGELOG.md

@@ -5,7 +5,7 @@ Notable changes to this project are documented in the current file. For more
 details about individual changes, see the Git log. You should read this before
 upgrading Freposte.io as some changes will include useful notes.
 
-v1.6.0 - unreleased
+v1.6.0 - 2019-01-18
 -------------------
 
 - Global: Architecture of the central container ([#56](https://github.com/Mailu/Mailu/issues/56), [#108](https://github.com/Mailu/Mailu/issues/108))

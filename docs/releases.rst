@@ -1,6 +1,95 @@
 Release notes
 =============
 
+Mailu 1.6 - 2019-01-18
+----------------------
+
+Its been more than a year since the release of 1.5! And what a year it has been...
+More then 800 commits are done since 1.5, containing thousands of additions.
+We had the honor of welcoming more and more contributors and we actually established
+a dedicated team of trusted contributors.
+
+With new review guidelines we now allow the project to grow without dependence
+on any single person. And thus merging pull requests at much shorter time.
+On top of that we finally got around to creating a simple test suite on TravisCI,
+which is doing some e-mail sending and receiving. This greatly helps the reviewing process.
+
+For a complete overview of changes, see our `changelog`_.
+Here we'll try to give you the highlights.
+
+.. _`changelog`: https://github.com/Mailu/Mailu/blob/master/CHANGELOG.md
+
+New functionality
+`````````````````
+
+We offer a lot new functions in the user experience. Some of the highlights would be quota
+support from the admin interface, optional user sign up with recaptcha, auto-reply start date,
+and a client setup page.
+
+Mailu now also offers a `setup utility`_.
+This utility helps users to generate a `docker-compose.yml` and `mailu.env` through guided steps.
+
+Documentation
+`````````````
+
+Quite some efforts were done in expanding the documentation of Mailu.
+We've added support for :ref:`kubernetes`, `Docker Swarm`_ and a :ref:`faq` section.
+There is now also a section on running the Mailu web interfaces behind :ref:`traefik_proxy`.
+
+We now also Dockerized the documentation, allowing for easy local running and versions
+management on our web server.
+
+.. _`Docker Swarm`: https://github.com/Mailu/Mailu/blob/master/docs/swarm/master/README.md
+
+Back-end
+````````
+
+Lots and lots of hours went in to the back-end. Work on numerous bugs,
+increased the general performance and allowing for better maintainability.
+
+We've reworked the complete interface with the database. All queries are now done
+through the Admin container, with that being the single point of contact with the
+database. Now we also support the usage of MySQL and PostgreSQL databases and Mailu
+comes with its own PostgreSQL image! This allows for Mailu to be used in larger scaled
+operations.
+
+Main software versions
+``````````````````````
+- Alpine 3.8.2
+- Python 3.6.6
+- SQLite 3.25.3
+- Postfix 3.3.0
+- Dovecot 2.3.2.1
+- Radicale 2.1.10
+- Rspamd 1.7.6
+- ClamAV 0.100.2
+- Nginx 1.14.2
+- Rainloop 1.12.1
+- Roundcube 1.3.8
+- Fetchmail 6.3.26
+- Unbound 1.7.3
+- Postgresql 10.5
+
+Upgrading
+`````````
+
+We've done some pretty intrusive works on the DB migrations scripts. Although thoroughly
+tested, we would recommend users to create a backup copy of ``/mailu/data/main.db`` somewhere.
+
+Use the `setup utility`_ to obtain new ``docker-compose.yml`` and ``mailu.env`` files.
+For this upgrade it is necessary to bring the project down and up, due to network definition changes:
+
+.. code-block:: bash
+
+  docker-compose pull
+  docker-compose down --remove-orphans
+  docker-compose up -d
+
+After everything runs successfully, ``/mailu/certs/dhparam.pem`` is no longer needed and can be deleted.
+It's included in the Mailu distribution by default now. Also the old ``.env`` can be deleted.
+
+.. _`setup utility`: https://setup.mailu.io
+
 Mailu 1.5 - 2017-11-05
 ----------------------
 

@@ -115,8 +115,10 @@ Depending on how you access the front server, you might want to add a ``proxy_re
 
 This will stop redirects (301 and 302) sent by the Webmail, nginx front and admin interface from sending you to ``localhost``.
 
-Use Traefik in another container as central system-reverse-proxy
---------------------------------------------------------------------
+.. _traefik_proxy:
+
+Traefik as reverse proxy
+------------------------
 
 `Traefik`_ is a popular reverse-proxy aimed at containerized systems.
 As such, many may wish to integrate Mailu into a system which already uses Traefik as its sole ingress/reverse-proxy.

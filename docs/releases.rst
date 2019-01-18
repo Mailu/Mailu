@@ -55,7 +55,7 @@ operations.
 
 Main software versions
 ``````````````````````
-- Alpine 3.8.1
+- Alpine 3.8.2
 - Python 3.6.6
 - SQLite 3.25.3
 - Postfix 3.3.0

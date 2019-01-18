@@ -29,7 +29,6 @@ v1.6.0 - unreleased
 - Feature: Automated Releases ([#487](https://github.com/Mailu/Mailu/issues/487))
 - Feature: Support for ARC ([#495](https://github.com/Mailu/Mailu/issues/495))
 - Feature: Add posibilty to run webmail on root ([#501](https://github.com/Mailu/Mailu/issues/501))
-- Feature: Upgrade docker-compose.yml to version 3 ([#539](https://github.com/Mailu/Mailu/issues/539))
 - Feature: Documentation to deploy mailu on a docker swarm ([#551](https://github.com/Mailu/Mailu/issues/551))
 - Feature: Add optional Maildir-Compression ([#553](https://github.com/Mailu/Mailu/issues/553))
 - Feature: Preserve rspamd history on container restart ([#561](https://github.com/Mailu/Mailu/issues/561))

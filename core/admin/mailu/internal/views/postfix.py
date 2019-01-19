@@ -49,5 +49,18 @@ def postfix_sender_login(sender):
 def postfix_sender_access(sender):
     """ Simply reject any sender that pretends to be from a local domain
     """
-    localpart, domain_name = models.Email.resolve_domain(sender)
-    return flask.jsonify("REJECT") if models.Domain.query.get(domain_name) else flask.abort(404)
+    if not is_void_address(sender):
+        localpart, domain_name = models.Email.resolve_domain(sender)
+        return flask.jsonify("REJECT") if models.Domain.query.get(domain_name) else flask.abort(404)
+    else:
+        return flask.abort(404)
+
+
+def is_void_address(email):
+    '''True if the email is void (null) email address.
+    '''
+    if email.startswith('<') and email.endswith('>'):
+        email = email[1:-1]
+    # Some MTAs use things like '<MAILER-DAEMON>' instead of '<>'; so let's
+    # consider void any such thing.
+    return '@' not in email

@@ -118,6 +118,7 @@ v1.6.0 - unreleased
 - Bug: Fetched accounts: Password field is of type "text" ([#789](https://github.com/Mailu/Mailu/issues/789))
 - Bug: Auto-forward destination not accepting top level domains ([#818](https://github.com/Mailu/Mailu/issues/818))
 - Bug: DOMAIN_REGISTRATION=False in .env was not treated correctly ([#830](https://github.com/Mailu/Mailu/issues/830))
+- Bug: Internal error when checking null sender address ([#846](https://github.com/Mailu/Mailu/issues/846))
 
 v1.5.1 - 2017-11-21
 -------------------

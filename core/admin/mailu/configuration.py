@@ -18,6 +18,7 @@ DEFAULT_CONFIG = {
     'DB_PW': None,
     'DB_HOST': 'database',
     'DB_NAME': 'mailu',
+    'SQLITE_DATABASE_FILE':'data/main.db',
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     # Statistics management
@@ -30,11 +31,11 @@ DEFAULT_CONFIG = {
     'POSTMASTER': 'postmaster',
     'TLS_FLAVOR': 'cert',
     'AUTH_RATELIMIT': '10/minute;1000/hour',
-    'DISABLE_STATISTICS': 'False',
+    'DISABLE_STATISTICS': False,
     # Mail settings
     'DMARC_RUA': None,
     'DMARC_RUF': None,
-    'WELCOME': 'False',
+    'WELCOME': False,
     'WELCOME_SUBJECT': 'Dummy welcome topic',
     'WELCOME_BODY': 'Dummy welcome body',
     'DKIM_SELECTOR': 'dkim',
@@ -66,7 +67,7 @@ class ConfigManager(dict):
     """
 
     DB_TEMPLATES = {
-        'sqlite': 'sqlite:////{DB_HOST}',
+        'sqlite': 'sqlite:////{SQLITE_DATABASE_FILE}',
         'postgresql': 'postgresql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}',
         'mysql': 'mysql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}'
     }
@@ -74,13 +75,21 @@ class ConfigManager(dict):
     def __init__(self):
         self.config = dict()
 
+    def __coerce_value(self, value):
+        if isinstance(value, str) and value.lower() in ('true','yes'):
+            return True
+        elif isinstance(value, str) and value.lower() in ('false', 'no'):
+            return False
+        return value
+
     def init_app(self, app):
         self.config.update(app.config)
         # get environment variables
         self.config.update({
-            key: os.environ.get(key, value)
+            key: self.__coerce_value(os.environ.get(key, value))
             for key, value in DEFAULT_CONFIG.items()
         })
+
         # automatically set the sqlalchemy string
         if self.config['DB_FLAVOR']:
             template = self.DB_TEMPLATES[self.config['DB_FLAVOR']]

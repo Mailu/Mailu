@@ -9,8 +9,5 @@ maintained by specific contributors.</p>
 <div class="radio">
   {{ macros.radio("flavor", "compose", "Compose", "simply using Docker Compose manager", flavor) }}
   {{ macros.radio("flavor", "stack", "Stack", "using stack deployments in a Swarm cluster", flavor) }}
-  {{ macros.radio("flavor", "rancher", "Rancher", "on top of the Rancher container manager", flavor) }}
-  {{ macros.radio("flavor", "kubernetes", "Kubernetes", "on top of the Kubernetes container manager", flavor) }}
 </div>
-
 {% endcall %}

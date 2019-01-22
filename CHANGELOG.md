@@ -5,7 +5,11 @@ Notable changes to this project are documented in the current file. For more
 details about individual changes, see the Git log. You should read this before
 upgrading Freposte.io as some changes will include useful notes.
 
-v1.6.0 - unreleased
+v1.6.1 - unreleased
+-------------------
+- Enhancement: Make Unbound drop privileges after binding to port
+
+v1.6.0 - 2019-01-18
 -------------------
 
 - Global: Architecture of the central container ([#56](https://github.com/Mailu/Mailu/issues/56), [#108](https://github.com/Mailu/Mailu/issues/108))
@@ -117,6 +121,8 @@ v1.6.0 - unreleased
 - Bug: Don't recursivly chown on mailboxes ([#776](https://github.com/Mailu/Mailu/issues/776))
 - Bug: Fix forced password input for user edit ([#745](https://github.com/Mailu/Mailu/issues/745))
 - Bug: Fetched accounts: Password field is of type "text" ([#789](https://github.com/Mailu/Mailu/issues/789))
+- Bug: Auto-forward destination not accepting top level domains ([#818](https://github.com/Mailu/Mailu/issues/818))
+- Bug: DOMAIN_REGISTRATION=False in .env was not treated correctly ([#830](https://github.com/Mailu/Mailu/issues/830))
 
 v1.5.1 - 2017-11-21
 -------------------

@@ -173,10 +173,20 @@ Finally, if you need to install packages inside the containers for debugging:
 Reviewing
 ---------
 
+Members of the **Mailu/contributors** team leave reviews to open PR's.
+In the case of a PR from a fellow team member, a single review is enough
+to initiate merging. In all other cases, two approving reviews are required.
+There is also a possibility to set the ``review/need2`` to require a second review.
+
+After Travis successfully tests the PR and the required amount of reviews are acquired,
+Mergify will trigger with a ``bors r+`` command. Bors will batch any approved PR's,
+merges them with master in a staging branch where Travis builds and tests the result.
+After a successful test, the actual master gets fast-forwarded to that point.
+
 System requirements
 ```````````````````
 
-Reviewing pull requests requires some additional git setup. First, for 90% of the review jobs,
+Reviewing pull requests sometimes requires some additional git setup. First, for 90% of the review jobs,
 you will need a PC or server that can expose all Mailu ports to the outside world. Also, a valid
 domain name would be required. This can be a simple free DynDNS account. Do not use a production
 server, as there are cases where data corruption occurs and you need to delete the ``/mailu``
@@ -187,6 +197,67 @@ Please contact `muhlemmer on Matrix`_.
 He can provide access to a testing server, if a trust relation can be established.
 
 .. _`muhlemmer on Matrix`: https://matrix.to/#/@muhlemmer:matrix.org
+
+.. _testing:
+
+Test images
+```````````
+
+All PR's automatically get build by Travis, controlled by `bors-ng`_.
+Some primitive auto testing is done.
+The resulting images get uploaded to Docker hub, under the
+tag name ``mailutest/<name>:pr-<no>``.
+
+For example, to test PR #500 against master, reviewers can use:
+
+.. code-block:: bash
+
+  export DOCKER_ORG="mailutest"
+  export MAILU_VERSION="pr-500"
+  docker-compose pull
+  docker-compose up -d
+
+You can now test the PR. Play around. See if (external) mails work. Check for whatever functionality the PR is
+trying to fix. When happy, you can approve the PR. When running into failures, mark the review as
+"request changes" and try to provide as much as possible details on the failure.
+(Logs, error codes from clients etc).
+
+.. _`bors-ng`: https://bors.tech/documentation/
+
+Additional commits
+``````````````````
+
+Sometimes users add new commits after ``bors try`` was  run automatically.
+In such cases, a reviewer will have to re-issue a ``bors try`` manually in order
+to get the latest changes in the test image. The reviewer will have to be sure the
+build finished successful before pulling the new images.
+
+Any previous reviews get dismissed automatically, whenever a new commit is done afterwards.
+
+When bors try fails
+```````````````````
+
+Sometimes Travis fails when another PR triggers a ``bors try`` command,
+before Travis cloned the git repository.
+Inspect the build log in the link provided by *bors-ng* to find out the cause.
+If you see something like the following error on top of the logs,
+feel free to write a comment with ``bors retry``.
+
+.. code-block:: bash
+
+  The command "git checkout -qf <hash>" failed and exited with 128 during .
+
+Please wait a few minutes to do so, not to interfere with other builds.
+Also, don't abuse this command if anything else went wrong,
+the author needs to try to fix it instead!
+
+Reviewing by git
+----------------
+
+Sometimes it might not be possible or enough to pull the test images from Docker hub.
+In those cases, it will be necessary to do a local git merge and perhaps manually building
+of the relevant images.
+
 
 Preparations
 ````````````
@@ -242,18 +313,6 @@ The following must be done on every PR or after every new commit to an existing 
 
 If git opens a editor for a commit message just save and exit as-is. If you have a merge conflict,
 see above and do the complete procedure from ``git fetch`` onward again.
-
-Test
-````
-
-You can now build and run the containers for testing. See the "`Docker containers`_" section for
-instructions. Play around. See if (external) mails work. Check for whatever functionality the PR is
-trying to fix. When happy, you can approve the PR. When running into failures, mark the review as
-"request changes" and try to provide as much as possible details on the failure.
-(Logs, error codes form clients etc).
-
-.. note:: Github marks positive reviews as obsolete when a new commit is added to a PR.
-  This requires a new review from your side.
 
 Web administration
 ------------------

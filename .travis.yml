@@ -1,3 +1,8 @@
+branches:
+  except:
+    - staging.tmp
+    - testing.tmp
+
 sudo: required
 services: docker
 addons:
@@ -7,6 +12,7 @@ addons:
 
 env:
   - MAILU_VERSION=$TRAVIS_BRANCH
+
 language: python
 python:
   - "3.6"
@@ -28,10 +34,4 @@ script:
   - python tests/compose/test.py rainloop 1
   - python tests/compose/test.py roundcube 1
   - python tests/compose/test.py webdav 1
-
-deploy:
-  provider: script
-  script: bash tests/deploy.sh
-  on:
-    all_branches: true
-    condition: -n $DOCKER_UN
+  - bash tests/deploy.sh

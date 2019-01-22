@@ -1,0 +1,17 @@
+pull_request_rules:
+  - name: 2 approved reviews
+    conditions:
+      - -label~=^(status/wip|status/blocked)$
+      - "#approved-reviews-by>=2"
+    actions:
+      comment:
+        message: bors r+
+
+  - name: Trusted author and 1 approved review
+    conditions:
+      - author~=(kaiyou|muhlemmer|mildred|HorayNarea|adi90x|hoellen|ofthesun9|Nebukadneza)
+      - -label~=^(status/wip|status/blocked|review/need2)$
+      - "#approved-reviews-by>=1"
+    actions:
+      comment:
+        message: bors r+

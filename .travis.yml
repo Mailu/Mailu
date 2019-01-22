@@ -1,3 +1,8 @@
+branches:
+  except:
+    - staging.tmp
+    - testing.tmp
+
 sudo: required
 services: docker
 addons:

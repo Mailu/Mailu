@@ -2,8 +2,9 @@ pull_request_rules:
   - name: Bors try
     conditions:
       - -label~=^(status/wip|status/blocked)$
-    comment:
-      message: 'bors try'
+    actions:
+      comment:
+        message: bors try
 
   - name: 2 approved reviews
     conditions:
@@ -11,7 +12,7 @@ pull_request_rules:
       - "#approved-reviews-by>=2"
     actions:
       comment:
-        - message="bors r+"
+        message: bors r+
 
   - name: Trusted author and 1 approved review
     conditions:
@@ -20,4 +21,4 @@ pull_request_rules:
       - "#approved-reviews-by>=1"
     actions:
       comment:
-        - message="bors r+"
+        message: bors r+

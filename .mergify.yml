@@ -1,0 +1,38 @@
+pull_request_rules:
+  - name: 2 approved reviews
+    conditions:
+      - -title~=(WIP|wip)
+      - -label~=^(status/wip|status/blocked)$
+      - status-success=Travis CI - Pull Request
+      - "#approved-reviews-by>=2"
+    actions:
+      comment:
+        message: bors r+
+
+  - name: Trusted author and 1 approved review
+    conditions:
+      - author~=^(kaiyou|muhlemmer|mildred|HorayNarea|adi90x|hoellen|ofthesun9|Nebukadneza)$
+      - -title~=(WIP|wip)
+      - -label~=^(status/wip|status/blocked|review/need2)$
+      - status-success=Travis CI - Pull Request
+      - "#approved-reviews-by>=1"
+    actions:
+      comment:
+        message: bors r+
+
+  - name: Backport to 1.6 branch
+    conditions:
+      - base=master
+      - label=type/backport
+    actions:
+      backport:
+        branches:
+          - '1.6'
+
+  - name: remove outdated reviews
+    conditions:
+      - base~=^(master|1.6)$
+    actions:
+      dismiss_reviews:
+        approved: True
+

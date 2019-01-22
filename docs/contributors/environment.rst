@@ -173,10 +173,20 @@ Finally, if you need to install packages inside the containers for debugging:
 Reviewing
 ---------
 
+Members of the **Mailu/contributors** team leave reviews to open PR's.
+In the case of a PR from a fellow team member, a single review is enough
+to initiate merging. In all other cases, two approving reviews are required.
+There is also a possibility to set the ``review/need2`` to require a second review.
+
+After Travis successfully tests the PR and the required amount of reviews are acquired,
+Mergify will trigger with a ``bors r+`` command. Bors will batch any approved PR's,
+merges them with master in a staging branch where Travis builds and tests the result.
+After a successful test, the actual master gets fast-forwarded to that point.
+
 System requirements
 ```````````````````
 
-Reviewing pull requests requires some additional git setup. First, for 90% of the review jobs,
+Reviewing pull requests sometimes requires some additional git setup. First, for 90% of the review jobs,
 you will need a PC or server that can expose all Mailu ports to the outside world. Also, a valid
 domain name would be required. This can be a simple free DynDNS account. Do not use a production
 server, as there are cases where data corruption occurs and you need to delete the ``/mailu``
@@ -187,6 +197,31 @@ Please contact `muhlemmer on Matrix`_.
 He can provide access to a testing server, if a trust relation can be established.
 
 .. _`muhlemmer on Matrix`: https://matrix.to/#/@muhlemmer:matrix.org
+
+.. _testing:
+
+Test images
+```````````
+
+All PR's get build by Travis and some primitive auto testing is
+done. The resulting images get uploaded to Docker hub, under the
+tag name ``mailutest/<name>:<target_branch>-<pr_no>``.
+
+For example, to test PR #500 against master, reviewers can use:
+
+.. code-block:: bash
+
+  export DOCKER_ORG="mailutest"
+  export MAILU_VERSION="master-500"
+  docker-compose up -d
+
+Reviewing by git
+----------------
+
+Sometimes it might not be possible or enough to pull the test images from Docker hub.
+In those cases, it will be necessary to do a local git merge and perhaps manually building
+of the relevant images.
+
 
 Preparations
 ````````````

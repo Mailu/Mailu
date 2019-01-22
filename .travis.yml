@@ -1,3 +1,8 @@
+branches:
+  except:
+    - staging.tmp
+    - testing.tmp
+
 sudo: required
 services: docker
 addons:
@@ -6,7 +11,8 @@ addons:
       - docker-ce
 
 env:
-  - MAILU_VERSION=$TRAVIS_BRANCH
+  - MAILU_VERSION=${TRAVIS_BRANCH////-}
+
 language: python
 python:
   - "3.6"
@@ -20,6 +26,7 @@ before_script:
   - docker-compose -f tests/build.yml build
   - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
 
+
 script:
 # test.py, test name and timeout between start and tests.
   - python tests/compose/test.py core 1
@@ -28,10 +35,4 @@ script:
   - python tests/compose/test.py rainloop 1
   - python tests/compose/test.py roundcube 1
   - python tests/compose/test.py webdav 1
-
-deploy:
-  provider: script
-  script: bash tests/deploy.sh
-  on:
-    all_branches: true
-    condition: -n $DOCKER_UN
+  - bash tests/deploy.sh

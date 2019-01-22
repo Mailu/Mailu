@@ -8,6 +8,7 @@ upgrading Freposte.io as some changes will include useful notes.
 v1.6.1 - unreleased
 -------------------
 - Enhancement: Make Unbound drop privileges after binding to port
+- Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
 
 v1.6.0 - 2019-01-18
 -------------------
@@ -84,7 +85,6 @@ v1.6.0 - 2019-01-18
 - Enhancement: Include favicon package ([#801](https://github.com/Mailu/Mailu/issues/801), ([#802](https://github.com/Mailu/Mailu/issues/802))
 - Enhancement: Add logging at critical places in python start.py scripts. Implement LOG_LEVEL to control verbosity ([#588](https://github.com/Mailu/Mailu/issues/588))
 - Enhancement: Mark message as seen when reporting as spam
-- Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
 - Upstream: Update Roundcube
 - Upstream: Update Rainloop
 - Bug: Rainloop fails with "domain not allowed" ([#93](https://github.com/Mailu/Mailu/issues/93))

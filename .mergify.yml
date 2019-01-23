@@ -17,3 +17,12 @@ pull_request_rules:
     actions:
       comment:
         message: bors r+
+
+  - name: Backport to 1.6 branch
+    conditions:
+      - base=master
+      - label=type/backport
+    actions:
+      backport:
+        branches:
+          - '1.6'

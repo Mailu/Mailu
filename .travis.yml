@@ -11,9 +11,11 @@ addons:
       - docker-ce
 
 env:
-  - MAILU_VERSION=$TRAVIS_BRANCH
-  - if [ $TRAVIS_PULL_REQUEST != false ] then; MAILU_VERSION=${TRAVIS_BRANCH}-${TRAVIS_PULL_REQUEST}; fi
-  - if [ $TRAVIS_PULL_REQUEST != false ] then; DOCKER_ORG=mailutest; fi
+  global:
+    - MAILU_VERSION=$TRAVIS_BRANCH
+    - if [ $TRAVIS_PULL_REQUEST != false ] then; MAILU_VERSION=${TRAVIS_BRANCH}-${TRAVIS_PULL_REQUEST}; fi
+    - if [ $TRAVIS_PULL_REQUEST != false ] then; DOCKER_ORG=mailutest; fi
+
 language: python
 python:
   - "3.6"

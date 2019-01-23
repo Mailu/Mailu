@@ -30,5 +30,5 @@ script:
 # test.py, test name and timeout between start and tests.
   - true
 
-after-success:
+after_success:
   - bash tests/deploy.sh

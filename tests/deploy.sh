@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Re-tag images fir PR testing
-if [ $TRAVIS_PULL_REQUEST != false ] then;
+if [ $TRAVIS_PULL_REQUEST != false ]; then
     export MAILU_VERSION="${TRAVIS_BRANCH}-${TRAVIS_PULL_REQUEST}"
     export DOCKER_ORG="mailutest"
     docker-compose -f tests/build.yml build

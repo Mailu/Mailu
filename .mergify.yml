@@ -1,6 +1,7 @@
 pull_request_rules:
   - name: 2 approved reviews
     conditions:
+      - -title~=(WIP|wip)
       - -label~=^(status/wip|status/blocked)$
       - "#approved-reviews-by>=2"
     actions:
@@ -9,7 +10,8 @@ pull_request_rules:
 
   - name: Trusted author and 1 approved review
     conditions:
-      - author~=(kaiyou|muhlemmer|mildred|HorayNarea|adi90x|hoellen|ofthesun9|Nebukadneza)
+      - author~=^(kaiyou|muhlemmer|mildred|HorayNarea|adi90x|hoellen|ofthesun9|Nebukadneza)$
+      - -title~=(WIP|wip)
       - -label~=^(status/wip|status/blocked|review/need2)$
       - "#approved-reviews-by>=1"
     actions:

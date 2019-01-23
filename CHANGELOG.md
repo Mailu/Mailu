@@ -8,6 +8,7 @@ upgrading Freposte.io as some changes will include useful notes.
 v1.6.1 - unreleased
 -------------------
 - Enhancement: Make Unbound drop privileges after binding to port
+- Bug: Can now create aliases with same string, but different case ([#867](https://github.com/Mailu/Mailu/issues/867))
 
 v1.6.0 - 2019-01-18
 -------------------

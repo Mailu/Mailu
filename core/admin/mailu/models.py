@@ -45,7 +45,7 @@ class IdnaEmail(db.TypeDecorator):
             return "{0}@{1}".format(
                 localpart,
                 idna.encode(domain_name).decode('ascii'),
-            ).lower()
+            )
         except ValueError:
             pass
 

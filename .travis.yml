@@ -12,6 +12,8 @@ addons:
 
 env:
   - MAILU_VERSION=$TRAVIS_BRANCH
+  - if [ $TRAVIS_PULL_REQUEST != false ] then; MAILU_VERSION=${TRAVIS_BRANCH}-${TRAVIS_PULL_REQUEST}; fi
+  - if [ $TRAVIS_PULL_REQUEST != false ] then; DOCKER_ORG=mailutest; fi
 language: python
 python:
   - "3.6"
@@ -34,9 +36,5 @@ script:
   - python tests/compose/test.py roundcube 1
   - python tests/compose/test.py webdav 1
 
-deploy:
-  provider: script
-  script: bash tests/deploy.sh
-  on:
-    all_branches: true
-    condition: -n $DOCKER_UN
+after-success:
+  - bash tests/deploy.sh

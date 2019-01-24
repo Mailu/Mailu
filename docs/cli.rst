@@ -4,11 +4,11 @@ Mailu command line
 Managing users and aliases can be done from CLI using commands:
 
 * alias
-* alias_delete
+* alias-delete
 * user
-* user_import
-* user_delete
-* config_update
+* user-import
+* user-delete
+* config-update
 
 alias
 -----
@@ -18,12 +18,12 @@ alias
   docker-compose exec admin flask mailu alias foo example.net "mail1@example.com,mail2@example.com"
 
 
-alias_delete
+alias-delete
 ------------
 
 .. code-block:: bash
 
-  docker-compose exec admin flask mailu alias_delete foo@example.net
+  docker-compose exec admin flask mailu alias-delete foo@example.net
 
 user
 ----
@@ -32,30 +32,30 @@ user
 
   docker-compose exec admin flask mailu user --hash_scheme='SHA512-CRYPT' myuser example.net 'password123'
 
-user_import
+user-import
 -----------
 
 primary difference with simple `user` command is that password is being imported as a hash - very useful when migrating users from other systems where only hash is known.
 
 .. code-block:: bash
 
-  docker-compose run --rm admin python manage.py user --hash_scheme='SHA512-CRYPT' myuser example.net '$6$51ebe0cb9f1dab48effa2a0ad8660cb489b445936b9ffd812a0b8f46bca66dd549fea530ce'
+  docker-compose run --rm admin flask mailu user-import --hash_scheme='SHA512-CRYPT' myuser example.net '$6$51ebe0cb9f1dab48effa2a0ad8660cb489b445936b9ffd812a0b8f46bca66dd549fea530ce'
 
-user_delete
+user-delete
 ------------
 
 .. code-block:: bash
 
-  docker-compose exec admin flask mailu user_delete foo@example.net
+  docker-compose exec admin flask mailu user-delete foo@example.net
 
-config_update
+config-update
 -------------
 
 The sole purpose of this command is for importing users/aliases in bulk and synchronizing DB entries with external YAML template:
 
 .. code-block:: bash
 
-  cat mail-config.yml | docker-compose exec admin flask mailu config_update --delete_objects
+  cat mail-config.yml | docker-compose exec admin flask mailu config-update --delete_objects
 
 where mail-config.yml looks like:
 
@@ -72,7 +72,7 @@ where mail-config.yml looks like:
       domain: example.com
       destination: "user1@example.com,user2@example.com"
 
-without ``--delete_object`` option config_update will only add/update new values but will *not* remove any entries missing in provided YAML input.
+without ``--delete_object`` option config-update will only add/update new values but will *not* remove any entries missing in provided YAML input.
 
 Users
 -----

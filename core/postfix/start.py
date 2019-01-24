@@ -1,16 +1,13 @@
 #!/usr/bin/python3
 
-import jinja2
 import os
-import socket
 import glob
 import shutil
-import tenacity
 import multiprocessing
 import logging as log
 import sys
+from mailustart import resolve, convert
 
-from tenacity import retry
 from podop import run_server
 
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
@@ -27,23 +24,6 @@ def start_podop():
         ("senderaccess", "url", url + "sender/access/§"),
         ("senderlogin", "url", url + "sender/login/§")
     ])
-
-def convert(src, dst):
-    logger = log.getLogger("convert()")
-    logger.debug("Source: %s, Destination: %s", src, dst)
-    open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
-
-@retry(
-    stop=tenacity.stop_after_attempt(100),
-    wait=tenacity.wait_random(min=2, max=5),
-    before=tenacity.before_log(log.getLogger("tenacity.retry"), log.DEBUG),
-    before_sleep=tenacity.before_sleep_log(log.getLogger("tenacity.retry"), log.INFO),
-    after=tenacity.after_log(log.getLogger("tenacity.retry"), log.DEBUG)
-    )
-def resolve(hostname):
-    logger = log.getLogger("resolve()")
-    logger.info(hostname)
-    return socket.gethostbyname(hostname)
 
 # Actual startup script
 os.environ["FRONT_ADDRESS"] = resolve(os.environ.get("FRONT_ADDRESS", "front"))

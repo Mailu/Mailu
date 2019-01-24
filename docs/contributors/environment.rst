@@ -220,7 +220,7 @@ For example, to test PR #500 against master, reviewers can use:
 You can now test the PR. Play around. See if (external) mails work. Check for whatever functionality the PR is
 trying to fix. When happy, you can approve the PR. When running into failures, mark the review as
 "request changes" and try to provide as much as possible details on the failure.
-(Logs, error codes form clients etc).
+(Logs, error codes from clients etc).
 
 .. _`bors-ng`: https://bors.tech/documentation/
 

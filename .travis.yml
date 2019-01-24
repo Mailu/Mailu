@@ -1,7 +1,10 @@
 branches:
-  except:
-    - staging.tmp
-    - testing.tmp
+  only:
+    - staging
+    - testing
+    - '1.5'
+    - '1.6'
+    - master
 
 sudo: required
 services: docker
@@ -35,4 +38,10 @@ script:
   - python tests/compose/test.py rainloop 1
   - python tests/compose/test.py roundcube 1
   - python tests/compose/test.py webdav 1
-  - bash tests/deploy.sh
+
+deploy:
+  provider: script
+  script: bash tests/deploy.sh
+  on:
+    all_branches: true
+    condition: -n $DOCKER_UN

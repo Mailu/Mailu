@@ -56,7 +56,7 @@ PR Workflow
 ````````````
 
 All pull requests have to be against the main ``master`` branch.
-The PR gets build by Travis and some primitive auto testing is done.
+The PR gets build by Travis and some primitive auto-testing is done.
 Test images get uploaded to a separate section in Docker hub.
 Reviewers will check the PR and test the resulting images.
 See the :ref:`testing` section for more info.

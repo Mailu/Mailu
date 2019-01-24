@@ -16,10 +16,11 @@ log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
 def start_podop():
     os.setuid(8)
+    url = "http://" + os.environ["ADMIN_ADDRESS"] + "/internal/dovecot/§"
     run_server(0, "dovecot", "/tmp/podop.socket", [
-		("quota", "url", "http://admin/internal/dovecot/§"),
-		("auth", "url", "http://admin/internal/dovecot/§"),
-		("sieve", "url", "http://admin/internal/dovecot/§"),
+		("quota", "url", url ),
+		("auth", "url", url),
+		("sieve", "url", url),
     ])
 
 def convert(src, dst):
@@ -42,6 +43,7 @@ def resolve(hostname):
 # Actual startup script
 os.environ["FRONT_ADDRESS"] = resolve(os.environ.get("FRONT_ADDRESS", "front"))
 os.environ["REDIS_ADDRESS"] = resolve(os.environ.get("REDIS_ADDRESS", "redis"))
+os.environ["ADMIN_ADDRESS"] = resolve(os.environ.get("ADMIN_ADDRESS", "admin"))
 if os.environ["WEBMAIL"] != "none":
     os.environ["WEBMAIL_ADDRESS"] = resolve(os.environ.get("WEBMAIL_ADDRESS", "webmail"))
 

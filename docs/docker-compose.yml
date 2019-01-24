@@ -1,28 +1,10 @@
+# This file is used to test the mailu/docs website
+# Deployment files can be found on github.com/mailu/infra
+
 version: '3'
 
-
 services:
-  docs_master:
-    image: mailu/docs:master
-    networks:
-      - web
-    labels:
-      - traefik.enable=true
-      - traefik.port=80
-      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/master/
-
-  docs_15:
-    image: mailu/docs:1.5
-    networks:
-      - web
-    labels:
-      - traefik.enable=true
-      - traefik.port=80
-      - traefik.root.frontend.redirect.regex=.*
-      - traefik.root.frontend.redirect.replacement=/1.5/
-      - traefik.root.frontend.rule=Host:${ADDRESS};PathPrefix:/
-      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/1.5/
-
-networks:
-  web:
-    external: true
+  docs:
+    image: ${DOCKER_ORG:-mailu}/docs:${MAILU_VERSION:-master}
+    ports:
+      - 127.0.0.1:8000:80

@@ -101,8 +101,8 @@ class Base(db.Model):
         }
     )
 
-    created_at = db.Column(db.Date, nullable=False, default=datetime.now)
-    updated_at = db.Column(db.Date, nullable=True, onupdate=datetime.now)
+    created_at = db.Column(db.Date, nullable=False, default=date.today)
+    updated_at = db.Column(db.Date, nullable=True, onupdate=date.today)
     comment = db.Column(db.String(255), nullable=True)
 
 
@@ -131,7 +131,7 @@ class Domain(Base):
         backref=db.backref('manager_of'), lazy='dynamic')
     max_users = db.Column(db.Integer, nullable=False, default=-1)
     max_aliases = db.Column(db.Integer, nullable=False, default=-1)
-    max_quota_bytes = db.Column(db.Integer(), nullable=False, default=0)
+    max_quota_bytes = db.Column(db.BigInteger(), nullable=False, default=0)
     signup_enabled = db.Column(db.Boolean(), nullable=False, default=False)
 
     @property
@@ -307,8 +307,8 @@ class User(Base, Email):
     domain = db.relationship(Domain,
         backref=db.backref('users', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
-    quota_bytes = db.Column(db.Integer(), nullable=False, default=10**9)
-    quota_bytes_used = db.Column(db.Integer(), nullable=False, default=0)
+    quota_bytes = db.Column(db.BigInteger(), nullable=False, default=10**9)
+    quota_bytes_used = db.Column(db.BigInteger(), nullable=False, default=0)
     global_admin = db.Column(db.Boolean(), nullable=False, default=False)
     enabled = db.Column(db.Boolean(), nullable=False, default=True)
 
@@ -410,7 +410,7 @@ class User(Base, Email):
         return emails
 
     def send_welcome(self):
-        if app.config["WELCOME"].lower() == "true":
+        if app.config["WELCOME"]:
             self.sendmail(app.config["WELCOME_SUBJECT"],
                 app.config["WELCOME_BODY"])
 

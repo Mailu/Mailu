@@ -12,7 +12,7 @@ import hashlib
 import time
 
 
-version = os.getenv("this_version")
+version = os.getenv("this_version", "master")
 static_url_path = "/" + version + "/static"
 app = flask.Flask(__name__, static_url_path=static_url_path)
 flask_bootstrap.Bootstrap(app)

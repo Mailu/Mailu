@@ -29,7 +29,6 @@ v1.6.0 - unreleased
 - Feature: Automated Releases ([#487](https://github.com/Mailu/Mailu/issues/487))
 - Feature: Support for ARC ([#495](https://github.com/Mailu/Mailu/issues/495))
 - Feature: Add posibilty to run webmail on root ([#501](https://github.com/Mailu/Mailu/issues/501))
-- Feature: Upgrade docker-compose.yml to version 3 ([#539](https://github.com/Mailu/Mailu/issues/539))
 - Feature: Documentation to deploy mailu on a docker swarm ([#551](https://github.com/Mailu/Mailu/issues/551))
 - Feature: Add optional Maildir-Compression ([#553](https://github.com/Mailu/Mailu/issues/553))
 - Feature: Preserve rspamd history on container restart ([#561](https://github.com/Mailu/Mailu/issues/561))
@@ -80,6 +79,7 @@ v1.6.0 - unreleased
 - Enhancement: Include favicon package ([#801](https://github.com/Mailu/Mailu/issues/801), ([#802](https://github.com/Mailu/Mailu/issues/802))
 - Enhancement: Add logging at critical places in python start.py scripts. Implement LOG_LEVEL to control verbosity ([#588](https://github.com/Mailu/Mailu/issues/588))
 - Enhancement: Mark message as seen when reporting as spam
+- Enhancement: Better support and document IPv6 ([#827](https://github.com/Mailu/Mailu/issues/827))
 - Upstream: Update Roundcube
 - Upstream: Update Rainloop
 - Bug: Rainloop fails with "domain not allowed" ([#93](https://github.com/Mailu/Mailu/issues/93))
@@ -116,6 +116,8 @@ v1.6.0 - unreleased
 - Bug: Don't recursivly chown on mailboxes ([#776](https://github.com/Mailu/Mailu/issues/776))
 - Bug: Fix forced password input for user edit ([#745](https://github.com/Mailu/Mailu/issues/745))
 - Bug: Fetched accounts: Password field is of type "text" ([#789](https://github.com/Mailu/Mailu/issues/789))
+- Bug: Auto-forward destination not accepting top level domains ([#818](https://github.com/Mailu/Mailu/issues/818))
+- Bug: DOMAIN_REGISTRATION=False in .env was not treated correctly ([#830](https://github.com/Mailu/Mailu/issues/830))
 
 v1.5.1 - 2017-11-21
 -------------------

@@ -28,8 +28,8 @@ def start_podop():
 # Actual startup script
 os.environ["FRONT_ADDRESS"] = resolve(os.environ.get("FRONT_ADDRESS", "front"))
 os.environ["ADMIN_ADDRESS"] = resolve(os.environ.get("ADMIN_ADDRESS", "admin"))
-os.environ["HOST_ANTISPAM"] = os.environ.get("HOST_ANTISPAM", "antispam:11332")
-os.environ["HOST_LMTP"] = os.environ.get("HOST_LMTP", "imap:2525")
+os.environ["HOST_ANTISPAM"] = resolve(os.environ.get("HOST_ANTISPAM", "antispam:11332"))
+os.environ["HOST_LMTP"] = resolve(os.environ.get("HOST_LMTP", "imap:2525"))
 
 for postfix_file in glob.glob("/conf/*.cf"):
     convert(postfix_file, os.path.join("/etc/postfix", os.path.basename(postfix_file)))

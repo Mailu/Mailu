@@ -1,6 +1,6 @@
 <p align="leftr"><img src="docs/assets/logomark.png" alt="Mailu" height="200px"></p>
 
-
+bogus
 Mailu is a simple yet full-featured mail server as a set of Docker images.
 It is free software (both as in free beer and as in free speech), open to
 suggestions and external contributions. The project aims at providing people

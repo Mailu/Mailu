@@ -1,0 +1,53 @@
+pull_request_rules:
+
+  - name: Build testing images; trigger bors try
+    conditions:
+      - -title~=(WIP|wip)
+      - -label~=^(status/wip|status/blocked)$
+      - -closed
+      - -merged
+    actions:
+      comment:
+        message: |
+          Thanks for submitting this pull request.
+          Bors-ng will now build test images. When it succeeds, we will continue to review and test your PR.
+          
+          bors try
+          
+          Note: if this build fails, [read this](http://mailu.io/master/contributors/environment.html#when-bors-try-fails).
+
+  - name: 2 approved reviews; trigger bors r+
+    conditions:
+      - -title~=(WIP|wip)
+      - -label~=^(status/wip|status/blocked)$
+      - "#approved-reviews-by>=2"
+    actions:
+      comment:
+        message: bors r+
+
+  - name: Trusted author and 1 approved review; trigger bors r+
+    conditions:
+      - author~=^(kaiyou|muhlemmer|mildred|HorayNarea|adi90x|hoellen|ofthesun9|Nebukadneza|ionutfilip)$
+      - -title~=(WIP|wip)
+      - -label~=^(status/wip|status/blocked|review/need2)$
+      - "#approved-reviews-by>=1"
+    actions:
+      comment:
+        message: bors r+
+
+  - name: Backport to 1.6 branch
+    conditions:
+      - base=master
+      - label=type/backport
+    actions:
+      backport:
+        branches:
+          - '1.6'
+
+  - name: remove outdated reviews
+    conditions:
+      - base~=^(master|1.6)$
+    actions:
+      dismiss_reviews:
+        approved: True
+

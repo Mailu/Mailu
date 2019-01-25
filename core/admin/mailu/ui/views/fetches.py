@@ -28,7 +28,10 @@ def fetch_create(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     form = forms.FetchForm()
     form.password.validators = [wtforms.validators.DataRequired()]
+<<<<<<< HEAD
     utils.formatCSVField(form.folders)
+=======
+>>>>>>> 34b31727 (Fix password validator for creating fetched accounts)
     if form.validate_on_submit():
         fetch = models.Fetch(user=user)
         form.populate_obj(fetch)

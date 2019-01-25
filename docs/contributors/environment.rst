@@ -227,12 +227,9 @@ trying to fix. When happy, you can approve the PR. When running into failures, m
 Additional commits
 ``````````````````
 
-Sometimes users add new commits after ``bors try`` was  run automatically.
-In such cases, a reviewer will have to re-issue a ``bors try`` manually in order
-to get the latest changes in the test image. The reviewer will have to be sure the
-build finished successful before pulling the new images.
-
-Any previous reviews get dismissed automatically, whenever a new commit is done afterwards.
+On every new commit ``bors try`` is  run automatically. Past approvals get dismissed automatically.
+When doing a subsequent review on the same PR, be sure to pull the latest image from docker hub
+after Bors confirms a successful build.
 
 When bors try fails
 ```````````````````

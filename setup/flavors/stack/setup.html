@@ -50,11 +50,16 @@ Before you can use Mailu, you must create the primary administrator user account
 
 <p>Login to the admin interface to change the password for a safe one, at
 {% if admin_enabled %}
-one of the hostnames 
+one of the hostnames
 <a href="https://{{ hostnames.split(',')[0] }}{{ admin_path }}">{{ hostnames.split(',')[0] }}{{ admin_path }}</a>.
 {% else %}
-<a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a> (only directly from the host running docker).
+<a href="http://127.0.0.1:8080/ui">http://127.0.0.1:8080/ui</a> (only directly from the host running docker).
+If you run mailu on a remote server, and wish to access the admin interface via a SSH tunnel, you can create a port-forward from your local machine to your server like
+<pre><code>ssh -L 127.0.0.1:8080:127.0.0.1:8080 &lt;user&gt;@&lt;server&gt;
+</pre></code>
+And access the above URL from your local machine.
+<br />
 {% endif %}
-And choose the "Update password" option in the left menu.
+Also, choose the "Update password" option in the left menu.
 </p>
 {% endcall %}

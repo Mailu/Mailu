@@ -5,6 +5,15 @@ Notable changes to this project are documented in the current file. For more
 details about individual changes, see the Git log. You should read this before
 upgrading Freposte.io as some changes will include useful notes.
 
+<<<<<<< HEAD
+=======
+v1.6.1 - unreleased
+-------------------
+- Enhancement: Make Unbound drop privileges after binding to port
+- Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
+- Bug: Fix creating new fetched accounts
+-
+>>>>>>> 34b31727... Fix password validator for creating fetched accounts
 v1.6.0 - 2019-01-18
 -------------------
 

@@ -13,4 +13,4 @@ services:
     depends_on:
       - redis
     ports:
-      - 127.0.0.1:8001:80
+      - 0.0.0.0:80:80

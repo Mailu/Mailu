@@ -14,6 +14,7 @@ v1.6.1 - unreleased
 - Enhancement: Stop using static assets, but build them using Webpack
 - Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
 - Enhancement: Missing wildcard option in alias flask command ([#869](https://github.com/Mailu/Mailu/issues/869))
+- Enhancement: Automatically create admin user on container startup if given appropriate environment variables
 - Bug: Fix creating new fetched accounts
 - Bug: Fix poor performance if ANTIVIRUS is configured to none.
 - Bug: Implement mailustart to resolve webmail in admin ([#716](https://github.com/Mailu/Mailu/issues/716))

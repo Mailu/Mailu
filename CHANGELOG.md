@@ -5,9 +5,11 @@ Notable changes to this project are documented in the current file. For more
 details about individual changes, see the Git log. You should read this before
 upgrading Freposte.io as some changes will include useful notes.
 
-v1.6.1 - unreleased
+v1.6.0 - backports
 -------------------
-- Enhancement: Make Unbound drop privileges after binding to port
+- Enhancement (security): Make Unbound drop privileges after binding to port
+- Bug: Internal error when checking null sender address ([#846](https://github.com/Mailu/Mailu/issues/846))
+- Bug: Fix environment variable inconsistency in `DB_URL` ([#861](https://github.com/Mailu/Mailu/issues/861))
 
 v1.6.0 - 2019-01-18
 -------------------
@@ -122,7 +124,6 @@ v1.6.0 - 2019-01-18
 - Bug: Fetched accounts: Password field is of type "text" ([#789](https://github.com/Mailu/Mailu/issues/789))
 - Bug: Auto-forward destination not accepting top level domains ([#818](https://github.com/Mailu/Mailu/issues/818))
 - Bug: DOMAIN_REGISTRATION=False in .env was not treated correctly ([#830](https://github.com/Mailu/Mailu/issues/830))
-- Bug: Internal error when checking null sender address ([#846](https://github.com/Mailu/Mailu/issues/846))
 
 v1.5.1 - 2017-11-21
 -------------------

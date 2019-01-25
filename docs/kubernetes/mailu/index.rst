@@ -131,10 +131,30 @@ And in the pod run the following command. The command uses following entries:
     python manage.py admin root example.com password
 
 - ``admin`` Make it an admin user
-- ``root`` The first part of the e-mail adres (ROOT@example.com)
+- ``root`` The first part of the e-mail address (ROOT@example.com)
 - ``example.com`` the domain appendix
 - ``password`` the chosen password for the user
 
+
+Now you should be able to login on the mail account: https://mail.example.com/admin
+
+
+Create the first admin account - automatically
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you want to have your user created automatically, you need to edit the Deployment descriptor and add 
+a few environment variables:
+
+.. code-block:: bash
+
+- INITIAL_ADMIN_ACCOUNT = ``root`` The first part of the e-mail address (ROOT@example.com)
+- INITIAL_ADMIN_DOMAIN = ``example.com`` the domain appendix
+- INITIAL_ADMIN_PW = ``password`` the chosen password for the user
+
+
+Optionally, you can add the environment ``INITIAL_ADMIN_MODE`` with the value ``update`` if you want to
+code to *always* update the password whenever container is started. Which could mean anytime, 
+so you probably do not want this :-)
 
 Now you should be able to login on the mail account: https://mail.example.com/admin
 

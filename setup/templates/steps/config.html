@@ -82,6 +82,13 @@ manage your email domains, users, etc.</p>
     <input class="form-control" type="text" name="admin_path" id="admin_path" style="display: none">
 </div>
 
+<div class="form-group">
+    <label>Webroot (<code>/</code>) redirect</label>
+    <p>The root/base of your web-server should redirect somewhere: This can be an the admin-interface or — as default — the webmailer. Note that if you change the webmail path below, you need to change this too.</p>
+    <p>Examples: <code>/webmail</code>; <code>/admin</code></p>
+    <input class="form-control" type="text" name="webroot_redirect" id="webroot_redirect" value="/webmail">
+</div>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 <script type="text/javascript" src="{{ url_for('static', filename='render.js') }}"></script>

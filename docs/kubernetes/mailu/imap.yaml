@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: imap
-        image: mailu/dovecot:master
+        image: mailu/dovecot:1.6
         imagePullPolicy: Always
         envFrom:
           - configMapRef:

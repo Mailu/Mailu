@@ -7,7 +7,17 @@ have been <a href="https://github.com/Mailu/Mailu/blob/master/docs/swarm/master/
 {% endcall %}
 {% endif %}
 
+{% if flavor == "kubernetes" %}
+{% call macros.panel("danger", "Kubernetes support is experimental") %}
+The setup utility can generate very basic Kubernetes manifests that don't cover all functionality of mailu.
+Currently the generated manifests only work with the nginx-ingress-controller and cert-manager.
+Using it without or with an different ingress controller will also not work. Letsencrypt also only works with cert-manager.
+The only database choice you have with kubernetes is the default sqlite.
+{% endcall %}
+{% endif %}
+
 {% call macros.panel("info", "Step 2 - Initial configuration") %}
+{% if flavor != 'kubernetes' %}
 <p>Before starting some variables must be set</p>
 
 <div class="form-group">
@@ -15,9 +25,10 @@ have been <a href="https://github.com/Mailu/Mailu/blob/master/docs/swarm/master/
 <!--   Validates path -->
   <input class="form-control" type="text" name="root" value="/mailu" required pattern="^/[-_A-Za-z0-9]+(/[-_A-Za-z0-9]*)*">
 </div>
+{% endif %}
 
 <p>In the next sections we need to set the postmaster address. This is a combination from the <i>postmaster</i> local part and the <i>main mail domain</i>.
-The <i>main mail domain</i> is also used as </i>"server display name"</i>. This is the way the SMTP server identifies himself when connecting to others.
+The <i>main mail domain</i> is also used as <i>"server display name"</i>. This is the way the SMTP server identifies himself when connecting to others.
 The Postmaster will get an e-mail address &lt;postmaster&gt;@&lt;main_domain&gt;. This address will receive the DMARC "rua" and "ruf" reports.
 Or in plain english: if receivers start to classify your mail as spam, this postmaster will be informed.</p>
 
@@ -26,7 +37,7 @@ Or in plain english: if receivers start to classify your mail as spam, this post
     Main mail domain and server display name.
   </label>
 <!--   Validates domain name -->
-  <input class="form-control" type="text" name="domain" placeholder="e.g. mailu.io" 
+  <input class="form-control" type="text" name="domain" placeholder="e.g. mailu.io"
   		required pattern="^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$">
 </div>
 
@@ -35,6 +46,7 @@ Or in plain english: if receivers start to classify your mail as spam, this post
   <input class="form-control" type="text" name="postmaster" value="admin" required>
 </div>
 
+{% if flavor != 'kubernetes' %} <!-- kubernetes uses cert-manager to get certs from letsencrypt -->
 <div class="form-group">
   <label>Choose how you wish to handle security <a href="https://mailu.io/{{ version }}/compose/setup.html#tls-certificates">TLS certificates</a></label>
   <br/>
@@ -44,11 +56,12 @@ Or in plain english: if receivers start to classify your mail as spam, this post
   	{% endfor %}
   </select>
 </div>
+{% endif %}
 
 <div class="form-group">
   <label>Authentication rate limit (per source IP address)</label>
 <!--   Validates number input only -->
-  <p><input class="form-control" style="width: 7%; display: inline;" type="number" name="auth_ratelimit_pm" 
+  <p><input class="form-control" style="width: 7%; display: inline;" type="number" name="auth_ratelimit_pm"
   		value="10" required >/minute;
   <input class="form-control" style="width: 7%; display: inline;;" type="number" name="auth_ratelimit_ph"
   		value="1000" required >/hour</p>

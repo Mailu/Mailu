@@ -2,17 +2,21 @@ $(document).ready(function() {
 	if ($("#webmail").val() == 'none') {
 		$("#webmail_path").hide();
 		$("#webmail_path").attr("value", "");
+        $("#webmail_host").parent().hide();
 	} else {
 		$("#webmail_path").show();
 		$("#webmail_path").attr("value", "/webmail");
+		$("#webmail_host").parent().show();
 	}
 	$("#webmail").click(function() {
 		if (this.value == 'none') {
 			$("#webmail_path").hide();
 			$("#webmail_path").attr("value", "");
+            $("#webmail_host").parent().hide();
 		} else {
 			$("#webmail_path").show();
 			$("#webmail_path").attr("value", "/webmail");
+            $("#webmail_host").parent().show();
 		}
 	});
 });

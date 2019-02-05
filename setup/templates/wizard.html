@@ -19,7 +19,9 @@
   {%for file in steps %}
   {% include "steps/" + flavor + "/" + file %}
   {% endfor %}
+  {% if flavor != 'kubernetes' %} <!-- Kubernetes currently only offers sqlite -->
   {% include "steps/database.html" %}
+  {% endif %}
   <input class="btn btn-primary" type="submit" value="Setup Mailu">
   {% endif %}
   </form>

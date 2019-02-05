@@ -1,0 +1,22 @@
+{% call macros.panel("info", "Step 4 - expose Mailu to the world") %}
+<div class="form-group">
+    <label>Subnet which is allowed to send mail without any authentication.</label>
+    <p>This should be your k8s pod cidr which depends by the used pod network.
+        The default for Weave Net is 10.32.0.0/12, Calico uses 192.168.0.0/16 and Flannel's default is
+        10.244.0.0/16.</p>
+    <input class="form-control" type="text" name="subnet" required
+           pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$"
+           placeholder="10.32.0.0/12">
+</div>
+
+<p>You server will be available under a main hostname but may expose multiple public
+    hostnames. Every e-mail domain that points to this server must have one of the
+    hostnames in its <code>MX</code> record. Hostnames must be coma-separated.</p>
+
+<div class="form-group">
+    <label>Public hostnames</label>
+    <!--   Validates hostname or list of hostnames -->
+    <input class="form-control" type="text" name="hostnames" placeholder="my.host.name,other.host.name" multiple
+           required pattern="^(?:(?:\w+(?:-+\w+)*\.)+[a-z]+)*(?:,(?:(?:\w+(?:-+\w+)*\.)+[a-z]+)\s*)*$">
+</div>
+{% endcall %}

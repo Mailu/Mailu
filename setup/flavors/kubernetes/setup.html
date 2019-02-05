@@ -1,0 +1,93 @@
+{% import "macros.html" as macros %}
+
+{% call macros.panel("info", "Step 1 - Install Dependencies") %}
+
+<p>You'll obviously need an Kubernetes cluster (tested with 1.13.0).</p>
+
+<p>
+    You'll also need the nginx-ingress-controller (at least 0.22.0) installed in the cluster. Other ingress-controllers
+    don't work yet.
+    Check the <a href="https://kubernetes.github.io/ingress-nginx/" target="_blank">nginx-ingress docs</a>
+    for more information and an install guide. When you use it as an DaemonSet have
+    <code>hostNetwork: true</code> make sure to also set <code>dnsPolicy: ClusterFirstWithHostNet</code>.
+    <!-- otherwise authentication for webdav and antispam at admin will fail because nginx can't resolve the dns name -->
+</p>
+
+<p>
+    Cert-manager is required for Let's Encrypt. You can find the docs and install guide for it
+    <a href="http://docs.cert-manager.io" target="_blank">here</a>.
+    In case you want to use your own certificates you can create a <code>certs</code> and
+    <code>certs-webmail</code>
+    secret once you have mailu installed.
+</p>
+
+{% endcall %}
+
+{% call macros.panel("info", "Step 2 - Download your configuration files and install") %}
+<p>First download all your kubernetes manifests using following commands.</p>
+
+<pre><code>wget {{ url_for('.file', uid=uid, filepath='admin.yaml', _external=True) }}
+{% if admin_enabled %}
+wget {{ url_for('.file', uid=uid, filepath='admin-ingress.yaml', _external=True) }}
+{% endif %}
+wget {{ url_for('.file', uid=uid, filepath='cert-issuer.yaml', _external=True) }}
+wget {{ url_for('.file', uid=uid, filepath='configmap.yaml', _external=True) }}
+{% if fetchmail_enabled %}
+wget {{ url_for('.file', uid=uid, filepath='fetchmail.yaml', _external=True) }}
+{% endif %}
+wget {{ url_for('.file', uid=uid, filepath='front.yaml', _external=True) }}
+wget {{ url_for('.file', uid=uid, filepath='imap.yaml', _external=True) }}
+wget {{ url_for('.file', uid=uid, filepath='pvc.yaml', _external=True) }}
+wget {{ url_for('.file', uid=uid, filepath='rbac.yaml', _external=True) }}
+wget {{ url_for('.file', uid=uid, filepath='redis.yaml', _external=True) }}
+wget {{ url_for('.file', uid=uid, filepath='security.yaml', _external=True) }}
+wget {{ url_for('.file', uid=uid, filepath='security-ingress.yaml', _external=True) }}
+wget {{ url_for('.file', uid=uid, filepath='smtp.yaml', _external=True) }}
+{% if webdav_enabled %}
+wget {{ url_for('.file', uid=uid, filepath='webdav.yaml', _external=True) }}
+wget {{ url_for('.file', uid=uid, filepath='webdav-ingress.yaml', _external=True) }}
+{% endif %}
+{% if webmail_type != 'none' %}
+wget {{ url_for('.file', uid=uid, filepath='webmail.yaml', _external=True) }}
+wget {{ url_for('.file', uid=uid, filepath='webmail-ingress.yaml', _external=True) }}
+{% endif %}
+</code></pre>
+
+<p>Then you can install mailu with these commands:</p>
+
+<pre><code>kubectl apply -f rbac.yaml
+kubectl apply -f . -R</code></pre>
+
+<p>When using cert-manager you can use the staging endpoint from Let's Encrypt by running following commands. If you
+    know that your cert-manager installation is able to issue certs you can leave the default production endpoint.</p>
+
+<pre><code>sed -i "s/letsencrypt-prod/letsencrypt-staging/g" *-ingress.yaml
+kubectl apply -f . -R</code></pre>
+
+<p>You can check whether a cert could be issued or not by running:</p>
+
+<pre><code>kubectl -n mailu-mailserver describe cert certs
+{% if webmail_type != 'none' %}
+kubectl -n mailu-mailserver describe cert certs-webmail
+{% endif %}</code></pre>
+
+<p>When a cert was issued and all mailu pods started you can add your first admin account:</p>
+
+<pre><code>export ADMIN_POD=$(kubectl -n mailu-mailserver get pods -o name | grep "admin" | cut -d "/" -f2)
+kubectl -n mailu-mailserver exec $ADMIN_POD flask mailu admin {{ postmaster }} {{ domain }} PASSWORD</code></pre>
+
+<p>Then you can login and change your password
+{% if admin_enabled %}
+at <a href="https://{{ hostnames.split(',')[0] }}{{ admin_path }}">{{ hostnames.split(',')[0] }}{{ admin_path }}</a>.
+{% else %}
+by port-forwarding the admin pod:</p>
+<pre><code>export ADMIN_POD=$(kubectl -n mailu-mailserver get pods -o name | grep "admin" | cut -d "/" -f2)
+kubectl -n mailu-mailserver port-forward $ADMIN_POD 8080:80</code></pre>
+<p>Which allows you to access <a href="http://localhost:8080/ui">localhost:8080/ui</a>.
+{% endif %}
+</p>
+
+<p>The mail ports for imap, pop3 and smtp are opened on any of your kubernetes nodes.
+   Therefore can point your mx record at some nodes from your cluster.</p>
+
+{% endcall %}

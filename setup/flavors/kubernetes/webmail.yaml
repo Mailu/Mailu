@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailu-{{ webmail_type }}
+  namespace: mailu-mailserver
+spec:
+  selector:
+    matchLabels:
+      app: "mailu-{{ webmail_type }}"
+      role: mail
+      tier: frontend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "mailu-{{ webmail_type }}"
+        role: mail
+        tier: frontend
+    spec:
+      containers:
+      - name: "{{ webmail_type }}"
+        image: mailu/{{ webmail_type }}:{{ version }}
+        imagePullPolicy: Always
+        envFrom:
+          - configMapRef:
+              name: mailu-config
+        resources:
+          requests:
+            memory: 100Mi
+            cpu: 100m
+          limits:
+            memory: 200Mi
+            cpu: 200m
+        volumeMounts:
+          - mountPath: /data
+            name: maildata
+            subPath: webmail
+        ports:
+          - containerPort: 80
+      volumes:
+        - name: maildata
+          persistentVolumeClaim:
+            claimName: mail-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webmail
+  namespace: mailu-mailserver
+  labels:
+    app: "mailu-{{ webmail_type }}"
+    role: mail
+    tier: frontend
+spec:
+  selector:
+    app: "mailu-{{ webmail_type }}"
+    role: mail
+    tier: frontend
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: radicale
-        image: mailu/radicale:master
+        image: mailu/radicale:1.6
         imagePullPolicy: Always
         envFrom:
           - configMapRef:

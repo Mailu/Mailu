@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: admin
-        image: mailu/admin:master
+        image: mailu/admin:1.6
         imagePullPolicy: Always
         envFrom:
           - configMapRef:

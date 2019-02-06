@@ -1,32 +1,27 @@
 #!/usr/bin/python3
 
-import jinja2
 import os
 import logging as log
 import sys
+from mailustart import resolve, convert
 
 args = os.environ.copy()
 
 log.basicConfig(stream=sys.stderr, level=args.get("LOG_LEVEL", "WARNING"))
-
-def convert(src, dst, args):
-    logger = log.getLogger("convert()")
-    logger.debug("Source: %s, Destination: %s", src, dst)
-    open(dst, "w").write(jinja2.Template(open(src).read()).render(**args))
 
 # Get the first DNS server
 with open("/etc/resolv.conf") as handle:
     content = handle.read().split()
     args["RESOLVER"] = content[content.index("nameserver") + 1]
 
-if "HOST_WEBMAIL" not in args:
-    args["HOST_WEBMAIL"] = "webmail"
-if "HOST_ADMIN" not in args:
-    args["HOST_ADMIN"] = "admin"
-if "HOST_WEBDAV" not in args:
-    args["HOST_WEBDAV"] = "webdav:5232"
-if "HOST_ANTISPAM" not in args:
-    args["HOST_ANTISPAM"] = "antispam:11334"
+args["HOST_ADMIN"] = resolve(args.get("HOST_ADMIN", "admin"))
+args["HOST_ANTISPAM"] = resolve(args.get("HOST_ANTISPAM", "antispam:11334"))
+args["HOST_WEBMAIL"] = args.get("HOST_WEBMAIL", "webmail")
+if args["WEBMAIL"] != "none":
+    args["HOST_WEBMAIL"] = resolve(args.get("HOST_WEBMAIL"))
+args["HOST_WEBDAV"] = args.get("HOST_WEBDAV", "webdav:5232")
+if args["WEBDAV"] != "none":
+    args["HOST_WEBDAV"] = resolve(args.get("HOST_WEBDAV"))
 
 # TLS configuration
 cert_name = os.getenv("TLS_CERT_FILENAME", default="cert.pem")

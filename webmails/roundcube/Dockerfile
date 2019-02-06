@@ -1,7 +1,7 @@
 FROM php:7.2-apache
 #Shared layer between rainloop and roundcube
 RUN apt-get update && apt-get install -y \
-  python3 curl \
+  python3 curl python3-pip git \
   && rm -rf /var/lib/apt/lists \
   && echo "ServerSignature Off" >> /etc/apache2/apache2.conf
 
@@ -22,6 +22,8 @@ RUN apt-get update && apt-get install -y \
  && sed -i 's,mod_php5.c,mod_php7.c,g' .htaccess \
  && chown -R www-data: logs temp \
  && rm -rf /var/lib/apt/lists
+
+ RUN pip3 install git+https://github.com/usrpro/MailuStart.git#egg=mailustart
 
 COPY php.ini /php.ini
 COPY config.inc.php /var/www/html/config/

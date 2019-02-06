@@ -1,16 +1,11 @@
 #!/usr/bin/python3
 
 import os
-import jinja2
 import logging as log
 import sys
+from mailustart import convert
 
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
-
-def convert(src, dst):
-    logger = log.getLogger("convert()")
-    logger.debug("Source: %s, Destination: %s", src, dst)
-    open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 
 os.environ["MAX_FILESIZE"] = str(int(int(os.environ.get("MESSAGE_SIZE_LIMIT"))*0.66/1048576))
 

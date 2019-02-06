@@ -7,6 +7,7 @@ upgrading Freposte.io as some changes will include useful notes.
 
 v1.6.1 - unreleased
 -------------------
+- Feature: Add Kubernetes to the setup utility ([#917](https://github.com/Mailu/Mailu/issues/917))
 - Enhancement: Make Unbound drop privileges after binding to port
 - Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
 - Bug: Fix creating new fetched accounts

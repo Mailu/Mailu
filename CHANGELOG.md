@@ -11,6 +11,7 @@ v1.6.1 - unreleased
 - Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
 - Bug: Fix creating new fetched accounts
 - Enhancement: Missing wildcard option in alias flask command ([#869](https://github.com/Mailu/Mailu/issues/869))
+- Bug: Fix poor performance if ANTIVIRUS is configured to none.
 
 v1.6.0 - 2019-01-18
 -------------------

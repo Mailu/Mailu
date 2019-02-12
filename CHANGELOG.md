@@ -565,6 +565,11 @@ deprecated before 1.8.0, you can switch to an external database server by then.
 - Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
 - Enhancement: Automatically create admin user on container startup if given appropriate environment variables
 - Enhancement: Missing wildcard option in alias flask command ([#869](https://github.com/Mailu/Mailu/issues/869))
+<<<<<<< HEAD
+=======
+- Bug: Fix poor performance if ANTIVIRUS is configured to none.
+- Bug: Fix typo in migration script ([#905](https://github.com/Mailu/Mailu/issues/905))
+>>>>>>> c1485f93 (Update CHANGELOG.md)
 
 v1.6.0 - 2019-01-18
 -------------------

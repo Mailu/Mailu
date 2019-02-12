@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: roundcube
-        image: mailu/roundcube:master
+        image: mailu/roundcube:1.6
         imagePullPolicy: Always
         envFrom:
           - configMapRef:

@@ -6,11 +6,11 @@ metadata:
   annotations:
     kubernetes.io/tls-acme: "true"
     certmanager.k8s.io/cluster-issuer: letsencrypt-stage
+    ingress.kubernetes.io/rewrite-target: "/"
+    ingress.kubernetes.io/auth-url: http://admin.mailu-mailserver.svc.cluster.local/internal/auth/admin
+    # Following snippet sets the password automatically because you're approved by the auth-url
     ingress.kubernetes.io/configuration-snippet: |
-      rewrite ^/admin/antispam/(.*) /$1 break;
-      auth_request /internal/auth/admin;
-      proxy_set_header X-Real-IP "";
-      proxy_set_header X-Forwarded-For "";
+      proxy_set_header Password "mailu";
   labels:
     app: mailu
     role: mail

@@ -13,6 +13,7 @@ v1.6.1 - unreleased
 - Bug: Fix creating new fetched accounts
 - Bug: Fix poor performance if ANTIVIRUS is configured to none.
 - Bug: Rename cli commands and their options (replace "\_" with "-") ([#877](https://github.com/Mailu/Mailu/issues/877))
+- Bug: Fix typo in migration script ([#905](https://github.com/Mailu/Mailu/issues/905))
 
 v1.6.0 - 2019-01-18
 -------------------

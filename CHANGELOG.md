@@ -9,9 +9,10 @@ v1.6.1 - unreleased
 -------------------
 - Enhancement: Make Unbound drop privileges after binding to port
 - Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
-- Bug: Fix creating new fetched accounts
 - Enhancement: Missing wildcard option in alias flask command ([#869](https://github.com/Mailu/Mailu/issues/869))
+- Bug: Fix creating new fetched accounts
 - Bug: Fix poor performance if ANTIVIRUS is configured to none.
+- Bug: Rename cli commands and their options (replace "\_" with "-") ([#877](https://github.com/Mailu/Mailu/issues/877))
 
 v1.6.0 - 2019-01-18
 -------------------

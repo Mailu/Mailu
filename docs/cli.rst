@@ -30,7 +30,8 @@ user
 
 .. code-block:: bash
 
-  docker-compose exec admin flask mailu user --hash_scheme='SHA512-CRYPT' myuser example.net 'password123'
+  docker-compose exec admin flask mailu user myuser example.net 'password123'
+
 
 user-import
 -----------
@@ -55,7 +56,7 @@ The sole purpose of this command is for importing users/aliases in bulk and sync
 
 .. code-block:: bash
 
-  cat mail-config.yml | docker-compose exec admin flask mailu config-update --delete_objects
+  cat mail-config.yml | docker-compose exec -T admin flask mailu config-update --delete-objects
 
 where mail-config.yml looks like:
 
@@ -72,7 +73,7 @@ where mail-config.yml looks like:
       domain: example.com
       destination: "user1@example.com,user2@example.com"
 
-without ``--delete_object`` option config-update will only add/update new values but will *not* remove any entries missing in provided YAML input.
+without ``--delete-object`` option config-update will only add/update new values but will *not* remove any entries missing in provided YAML input.
 
 Users
 -----

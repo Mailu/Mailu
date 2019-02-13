@@ -128,7 +128,7 @@ And in the pod run the following command. The command uses following entries:
 
 .. code-block:: bash
 
-    python manage.py admin root example.com password
+    flask mailu admin root example.com password
 
 - ``admin`` Make it an admin user
 - ``root`` The first part of the e-mail adres (ROOT@example.com)

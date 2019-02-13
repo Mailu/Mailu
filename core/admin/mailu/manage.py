@@ -64,7 +64,7 @@ def admin(localpart, domain_name, password):
 @click.argument('localpart')
 @click.argument('domain_name')
 @click.argument('password')
-@click.argument('hash_scheme')
+@click.argument('hash_scheme', required=False)
 @flask_cli.with_appcontext
 def user(localpart, domain_name, password, hash_scheme=None):
     """ Create a user
@@ -86,12 +86,14 @@ def user(localpart, domain_name, password, hash_scheme=None):
 
 
 @mailu.command()
-@click.option('-n', '--domain-name')
+@click.argument('domain_name')
 @click.option('-u', '--max-users')
 @click.option('-a', '--max-aliases')
 @click.option('-q', '--max-quota-bytes')
 @flask_cli.with_appcontext
 def domain(domain_name, max_users=-1, max_aliases=-1, max_quota_bytes=0):
+    """ Create a domain
+    """
     domain = models.Domain.query.get(domain_name)
     if not domain:
         domain = models.Domain(name=domain_name)

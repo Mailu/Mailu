@@ -292,8 +292,9 @@ def alias_delete(email):
 @click.argument('localpart')
 @click.argument('domain_name')
 @click.argument('destination')
+@click.option('-w', '--wildcard', is_flag=True)
 @flask_cli.with_appcontext
-def alias(localpart, domain_name, destination):
+def alias(localpart, domain_name, destination, wildcard=False):
     """ Create an alias
     """
     domain = models.Domain.query.get(domain_name)
@@ -303,6 +304,7 @@ def alias(localpart, domain_name, destination):
     alias = models.Alias(
         localpart=localpart,
         domain=domain,
+        wildcard=wildcard,
         destination=destination.split(','),
         email="%s@%s" % (localpart, domain_name)
     )

@@ -9,6 +9,7 @@ import string
 import random
 import ipaddress
 import hashlib
+import time
 
 
 version = os.getenv("this_version", "master")
@@ -33,6 +34,17 @@ def secret(length=16):
         for _ in range(length)
     )
 
+#Original copied from https://github.com/andrewlkho/ulagen
+def random_ipv6_subnet():
+    eui64 = uuid.getnode() >> 24 << 48 | 0xfffe000000 | uuid.getnode() & 0xffffff
+    eui64_canon = "-".join([format(eui64, "02X")[i:i+2] for i in range(0, 18, 2)])
+
+    h = hashlib.sha1()
+    h.update((eui64_canon + str(time.time() - time.mktime((1900, 1, 1, 0, 0, 0, 0, 1, -1)))).encode('utf-8'))
+    globalid = h.hexdigest()[0:10]
+
+    prefix = ":".join(("fd" + globalid[0:2], globalid[2:6], globalid[6:10]))
+    return prefix
 
 def build_app(path):
 
@@ -69,8 +81,9 @@ def build_app(path):
     @root_bp.route("/submit_flavor", methods=["POST"])
     def submit_flavor():
         data = flask.request.form.copy()
+        subnet6 = random_ipv6_subnet()
         steps = sorted(os.listdir(os.path.join(path, "templates", "steps", data["flavor"])))
-        return flask.render_template('wizard.html', flavor=data["flavor"], steps=steps)
+        return flask.render_template('wizard.html', flavor=data["flavor"], steps=steps, subnet6=subnet6)
 
     @prefix_bp.route("/submit", methods=["POST"])
     @root_bp.route("/submit", methods=["POST"])

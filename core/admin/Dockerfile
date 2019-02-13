@@ -1,8 +1,9 @@
 FROM alpine:3.8
 # python3 shared with most images
 RUN apk add --no-cache \
-    python3 py3-pip \
+    python3 py3-pip git \
   && pip3 install --upgrade pip
+RUN pip3 install git+https://github.com/usrpro/MailuStart.git#egg=mailustart
 # Image specific layers under this line
 RUN mkdir -p /app
 WORKDIR /app

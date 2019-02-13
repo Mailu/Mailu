@@ -86,3 +86,16 @@ $(document).ready(function() {
 		}
 	});
 });
+
+$(document).ready(function() {
+	if ($('#enable_ipv6').prop('checked')) {
+		$("#ipv6").show();
+	}
+	$("#enable_ipv6").change(function() {
+		if ($(this).is(":checked")) {
+			$("#ipv6").show();
+		} else {
+			$("#ipv6").hide();
+		}
+	});
+});

@@ -5,8 +5,11 @@ Notable changes to this project are documented in the current file. For more
 details about individual changes, see the Git log. You should read this before
 upgrading Freposte.io as some changes will include useful notes.
 
-v1.6.1 - unreleased
+v1.6.0 - backports
 -------------------
+- Enhancement (security): Make Unbound drop privileges after binding to port
+- Bug: Internal error when checking null sender address ([#846](https://github.com/Mailu/Mailu/issues/846))
+- Bug: Fix environment variable inconsistency in `DB_URL` ([#861](https://github.com/Mailu/Mailu/issues/861))
 - Enhancement: Make Unbound drop privileges after binding to port
 - Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
 - Bug: Fix creating new fetched accounts

@@ -5,6 +5,8 @@ Notable changes to this project are documented in the current file. For more
 details about individual changes, see the Git log. You should read this before
 upgrading Freposte.io as some changes will include useful notes.
 
+<!-- TOWNCRIER -->
+
 v1.6.1 - unreleased
 -------------------
 - Enhancement: Make Unbound drop privileges after binding to port

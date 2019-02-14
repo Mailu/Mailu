@@ -1,9 +1,9 @@
 [tool.towncrier]
     #package = "mypackage"
-    #package_dir = "src"
+    package_dir = "towncrier"
     filename = "CHANGELOG.md"
     underlines = ["-", "", ""]
-    template = "template.md"
+    template = "towncrier/template.md"
     title_format = "v{version} - {project_date}"
     issue_format = "[#{issue}](https://github.com/Mailu/Mailu/issues/{issue})"
-    start_string = "upgrading Freposte.io as some changes will include useful notes.\n"
+    start_string = "<!-- TOWNCRIER -->"

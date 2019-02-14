@@ -69,6 +69,24 @@ After some testing on master, we will approve and merge this new PR as well.
 At the end of every milestone, a new stable branch will be created from ``master``
 or any previous commit that matches the completion of the milestone.
 
+CHANGELOG
+`````````
+
+Adding entries in the CHANGELOG is an automated process which requires creation of a file under
+``towncrier/newsfragments`` directory.
+
+The start of the filename is the ticket number, and the content is what will end up in the news file.
+For example, if ticket #850 is about adding a new widget, the filename would be towncrier/newsfragments/850.feature
+and the content would be ``Feature that has just been added``.
+
+Supported file extensions are:
+
+- .feature: Signifying a new feature.
+- .bugfix: Signifying a bug fix.
+- .doc: Signifying a documentation improvement.
+- .removal: Signifying a deprecation or removal of public API.
+- .misc: A ticket has been closed, but it is not of interest to users.
+
 Forked projects
 ---------------
 

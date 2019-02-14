@@ -22,7 +22,7 @@ def fetch_create(user_email):
     user_email = user_email or flask_login.current_user.email
     user = models.User.query.get(user_email) or flask.abort(404)
     form = forms.FetchForm()
-    form.pw.validators = [wtforms.validators.DataRequired()]
+    form.password.validators = [wtforms.validators.DataRequired()]
     if form.validate_on_submit():
         fetch = models.Fetch(user=user)
         form.populate_obj(fetch)

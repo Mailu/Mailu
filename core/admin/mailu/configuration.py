@@ -9,8 +9,8 @@ DEFAULT_CONFIG = {
     'BABEL_DEFAULT_LOCALE': 'en',
     'BABEL_DEFAULT_TIMEZONE': 'UTC',
     'BOOTSTRAP_SERVE_LOCAL': True,
-    'RATELIMIT_STORAGE_URL': 'redis://redis/2',
-    'QUOTA_STORAGE_URL': 'redis://redis/1',
+    'RATELIMIT_STORAGE_URL': '',
+    'QUOTA_STORAGE_URL': '',
     'DEBUG': False,
     'DOMAIN_REGISTRATION': False,
     'TEMPLATES_AUTO_RELOAD': True,
@@ -106,6 +106,9 @@ class ConfigManager(dict):
         if self.config['DB_FLAVOR']:
             template = self.DB_TEMPLATES[self.config['DB_FLAVOR']]
             self.config['SQLALCHEMY_DATABASE_URI'] = template.format(**self.config)
+
+        self.config['RATELIMIT_STORAGE_URL'] = 'redis://{0}/2'.format(self.config['HOST_REDIS'])
+        self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['HOST_REDIS'])
         # update the app config itself
         app.config = self
 

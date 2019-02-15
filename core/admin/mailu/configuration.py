@@ -8,8 +8,8 @@ DEFAULT_CONFIG = {
     'BABEL_DEFAULT_LOCALE': 'en',
     'BABEL_DEFAULT_TIMEZONE': 'UTC',
     'BOOTSTRAP_SERVE_LOCAL': True,
-    'RATELIMIT_STORAGE_URL': 'redis://redis/2',
-    'QUOTA_STORAGE_URL': 'redis://redis/1',
+    'RATELIMIT_STORAGE_URL': '',
+    'QUOTA_STORAGE_URL': '',
     'DEBUG': False,
     'DOMAIN_REGISTRATION': False,
     'TEMPLATES_AUTO_RELOAD': True,
@@ -54,11 +54,16 @@ DEFAULT_CONFIG = {
     'PASSWORD_SCHEME': 'BLF-CRYPT',
     # Host settings
     'HOST_IMAP': 'imap',
+    'HOST_LMTP': 'imap:2525',
     'HOST_POP3': 'imap',
     'HOST_SMTP': 'smtp',
+    'HOST_AUTHSMTP': 'smtp',
+    'HOST_ADMIN': 'admin',
+    'HOST_ANTISPAM': 'antispam:11334',
     'HOST_WEBMAIL': 'webmail',
+    'HOST_WEBDAV': 'webdav:5232',
+    'HOST_REDIS': 'redis',
     'HOST_FRONT': 'front',
-    'HOST_AUTHSMTP': os.environ.get('HOST_SMTP', 'smtp'),
     'SUBNET': '192.168.203.0/24',
     'POD_ADDRESS_RANGE': None
 }
@@ -83,7 +88,8 @@ class ConfigManager(dict):
         optional = [item for item in self.OPTIONAL_HOSTS if item in self.config and self.config[item] != "none"]
         for item in list(self.HOSTS) + optional:
             host = 'HOST_' + item
-            self.config[host] = system.resolve_address(self.config[host])
+            address = item + '_ADDRESS'
+            self.config[address] = system.resolve_address(self.config[host])
 
     def __coerce_value(self, value):
         if isinstance(value, str) and value.lower() in ('true','yes'):
@@ -105,6 +111,9 @@ class ConfigManager(dict):
         if self.config['DB_FLAVOR']:
             template = self.DB_TEMPLATES[self.config['DB_FLAVOR']]
             self.config['SQLALCHEMY_DATABASE_URI'] = template.format(**self.config)
+
+        self.config['RATELIMIT_STORAGE_URL'] = 'redis://{0}/2'.format(self.config['REDIS_ADDRESS'])
+        self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['REDIS_ADDRESS'])
         # update the app config itself
         app.config = self
 

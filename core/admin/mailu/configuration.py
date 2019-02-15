@@ -1,5 +1,7 @@
 import os
 from mailustart import resolve
+import logging as log
+import sys
 
 DEFAULT_CONFIG = {
     # Specific to the admin UI
@@ -50,12 +52,14 @@ DEFAULT_CONFIG = {
     'RECAPTCHA_PRIVATE_KEY': '',
     # Advanced settings
     'PASSWORD_SCHEME': 'BLF-CRYPT',
+    'LOG_LEVEL': 'WARNING',
     # Host settings
     'HOST_IMAP': 'imap',
     'HOST_POP3': 'imap',
     'HOST_SMTP': 'smtp',
     'HOST_WEBMAIL': 'webmail',
     'HOST_FRONT': 'front',
+    'HOST_REDIS': 'redis',
     'HOST_AUTHSMTP': os.environ.get('HOST_SMTP', 'smtp'),
     'SUBNET': '192.168.203.0/24',
     'POD_ADDRESS_RANGE': None
@@ -79,6 +83,7 @@ class ConfigManager(dict):
         self.config['HOST_POP3'] = resolve(self.config['HOST_POP3'])
         self.config['HOST_AUTHSMTP'] = resolve(self.config['HOST_AUTHSMTP'])
         self.config['HOST_SMTP'] = resolve(self.config['HOST_SMTP'])
+        self.config['HOST_REDIS'] = resolve(self.config['HOST_REDIS'])
 
     def __coerce_value(self, value):
         if isinstance(value, str) and value.lower() in ('true','yes'):
@@ -94,6 +99,7 @@ class ConfigManager(dict):
             key: self.__coerce_value(os.environ.get(key, value))
             for key, value in DEFAULT_CONFIG.items()
         })
+        log.basicConfig(stream=sys.stderr, level=self.config["LOG_LEVEL"])
         self.resolve_host()
 
         # automatically set the sqlalchemy string

@@ -9,8 +9,8 @@ from mailustart import resolve, convert
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
 # Actual startup script
-os.environ["FRONT_ADDRESS"] = resolve(os.environ.get("FRONT_ADDRESS", "front"))
-os.environ["IMAP_ADDRESS"] = resolve(os.environ.get("IMAP_ADDRESS", "imap"))
+os.environ["FRONT_ADDRESS"] = resolve(os.environ.get("HOST_FRONT", "front"))
+os.environ["IMAP_ADDRESS"] = resolve(os.environ.get("HOST_IMAP", "imap"))
 
 os.environ["MAX_FILESIZE"] = str(int(int(os.environ.get("MESSAGE_SIZE_LIMIT"))*0.66/1048576))
 

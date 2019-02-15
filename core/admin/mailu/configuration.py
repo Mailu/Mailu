@@ -55,12 +55,16 @@ DEFAULT_CONFIG = {
     'LOG_LEVEL': 'WARNING',
     # Host settings
     'HOST_IMAP': 'imap',
+    'HOST_LMTP': 'imap:2525',
     'HOST_POP3': 'imap',
     'HOST_SMTP': 'smtp',
+    'HOST_AUTHSMTP': 'smtp',
+    'HOST_ADMIN': 'admin',
+    'HOST_ANTISPAM': 'antispam:11334',
     'HOST_WEBMAIL': 'webmail',
-    'HOST_FRONT': 'front',
+    'HOST_WEBDAV': 'webdav:5232',
     'HOST_REDIS': 'redis',
-    'HOST_AUTHSMTP': os.environ.get('HOST_SMTP', 'smtp'),
+    'HOST_FRONT': 'front',
     'SUBNET': '192.168.203.0/24',
     'POD_ADDRESS_RANGE': None
 }

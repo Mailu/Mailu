@@ -21,11 +21,11 @@ def start_podop():
     ])
 
 # Actual startup script
-os.environ["FRONT_ADDRESS"] = resolve(os.environ.get("FRONT_ADDRESS", "front"))
+os.environ["FRONT_ADDRESS"] = resolve(os.environ.get("HOST_FRONT", "front"))
 os.environ["REDIS_ADDRESS"] = resolve(os.environ.get("HOST_REDIS", "redis"))
-os.environ["ADMIN_ADDRESS"] = resolve(os.environ.get("ADMIN_ADDRESS", "admin"))
+os.environ["ADMIN_ADDRESS"] = resolve(os.environ.get("HOST_ADMIN", "admin"))
 if os.environ["WEBMAIL"] != "none":
-    os.environ["WEBMAIL_ADDRESS"] = resolve(os.environ.get("WEBMAIL_ADDRESS", "webmail"))
+    os.environ["WEBMAIL_ADDRESS"] = resolve(os.environ.get("HOST_WEBMAIL", "webmail"))
 
 for dovecot_file in glob.glob("/conf/*.conf"):
     convert(dovecot_file, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))

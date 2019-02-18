@@ -83,11 +83,11 @@ class ConfigManager(dict):
         self.config = dict()
 
     def resolve_host(self):
-        self.config['HOST_IMAP'] = resolve(self.config['HOST_IMAP'])
-        self.config['HOST_POP3'] = resolve(self.config['HOST_POP3'])
-        self.config['HOST_AUTHSMTP'] = resolve(self.config['HOST_AUTHSMTP'])
-        self.config['HOST_SMTP'] = resolve(self.config['HOST_SMTP'])
-        self.config['HOST_REDIS'] = resolve(self.config['HOST_REDIS'])
+        self.config['IMAP_ADDRESS'] = resolve(self.config['HOST_IMAP'])
+        self.config['POP3_ADDRESS'] = resolve(self.config['HOST_POP3'])
+        self.config['AUTHSMTP_ADDRESS'] = resolve(self.config['HOST_AUTHSMTP'])
+        self.config['SMTP_ADDRESS'] = resolve(self.config['HOST_SMTP'])
+        self.config['REDIS_ADDRESS'] = resolve(self.config['HOST_REDIS'])
 
     def __coerce_value(self, value):
         if isinstance(value, str) and value.lower() in ('true','yes'):
@@ -111,8 +111,8 @@ class ConfigManager(dict):
             template = self.DB_TEMPLATES[self.config['DB_FLAVOR']]
             self.config['SQLALCHEMY_DATABASE_URI'] = template.format(**self.config)
 
-        self.config['RATELIMIT_STORAGE_URL'] = 'redis://{0}/2'.format(self.config['HOST_REDIS'])
-        self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['HOST_REDIS'])
+        self.config['RATELIMIT_STORAGE_URL'] = 'redis://{0}/2'.format(self.config['REDIS_ADDRESS'])
+        self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['REDIS_ADDRESS'])
         # update the app config itself
         app.config = self
 

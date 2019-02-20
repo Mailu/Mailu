@@ -13,4 +13,4 @@ Before we can consider review and merge, please make sure the following list is 
 If an entry in not applicable, you can check it or remove it from the list.
 
 - [ ] In case of feature or enhancement: documentation updated accordingly
-- [ ] Unless it's docs or a minor change: add [changelog](https://mailu.io/1.6/contributors/guide.html#changelog) entry file.
+- [ ] Unless it's docs or a minor change: add [changelog](https://mailu.io/master/contributors/guide.html#changelog) entry file.

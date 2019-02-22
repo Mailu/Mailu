@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y \
 COPY include.php /var/www/html/include.php
 COPY php.ini /php.ini
 
-COPY config.ini /config.ini
+COPY application.ini /application.ini
 COPY default.ini /default.ini
 
 COPY start.py /start.py

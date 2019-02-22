@@ -19,7 +19,7 @@ RUN rm -rf /var/www/html/ \
 COPY include.php /var/www/html/include.php
 COPY php.ini /usr/local/etc/php/conf.d/rainloop.ini
 
-COPY config.ini /config.ini
+COPY application.ini /application.ini
 COPY default.ini /default.ini
 
 COPY start.sh /start.sh

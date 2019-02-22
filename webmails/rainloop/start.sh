@@ -5,7 +5,7 @@
 rm -f /data/_data_/_default_/domains/*
 mkdir -p /data/_data_/_default_/domains/ /data/_data_/_default_/configs/
 cp /default.ini /data/_data_/_default_/domains/
-cp /config.ini /data/_data_/_default_/configs/
+cp /application.ini /data/_data_/_default_/configs/
 
 # Fix some permissions
 chown -R www-data:www-data /data

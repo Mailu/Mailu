@@ -90,7 +90,10 @@ def build_app(path):
     def submit():
         data = flask.request.form.copy()
         data['uid'] = str(uuid.uuid4())
-        data['dns'] = str(ipaddress.IPv4Network(data['subnet'])[-2])
+        try:
+            data['dns'] = str(ipaddress.IPv4Network(data['subnet'])[-2])
+        except ValueError as err:
+            return "Error while generating files: " + str(err)
         db.set(data['uid'], json.dumps(data))
         return flask.redirect(flask.url_for('.setup', uid=data['uid']))
 

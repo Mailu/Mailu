@@ -27,6 +27,11 @@ mydestination =
 
 # Relayhost if any is configured
 relayhost = {{ RELAYHOST }}
+{% if RELAYUSER %}
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
+{% endif %}
 
 # Recipient delimiter for extended addresses
 recipient_delimiter = {{ RECIPIENT_DELIMITER }}

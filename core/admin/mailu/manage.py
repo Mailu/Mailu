@@ -64,7 +64,7 @@ def admin(localpart, domain_name, password):
 @click.argument('localpart')
 @click.argument('domain_name')
 @click.argument('password')
-@click.argument('hash_scheme')
+@click.argument('hash_scheme', required=False)
 @flask_cli.with_appcontext
 def user(localpart, domain_name, password, hash_scheme=None):
     """ Create a user
@@ -86,15 +86,18 @@ def user(localpart, domain_name, password, hash_scheme=None):
 
 
 @mailu.command()
-@click.option('-n', '--domain_name')
-@click.option('-u', '--max_users')
-@click.option('-a', '--max_aliases')
-@click.option('-q', '--max_quota_bytes')
+@click.argument('domain_name')
+@click.option('-u', '--max-users')
+@click.option('-a', '--max-aliases')
+@click.option('-q', '--max-quota-bytes')
 @flask_cli.with_appcontext
 def domain(domain_name, max_users=-1, max_aliases=-1, max_quota_bytes=0):
+    """ Create a domain
+    """
     domain = models.Domain.query.get(domain_name)
     if not domain:
-        domain = models.Domain(name=domain_name)
+        domain = models.Domain(name=domain_name, max_users=max_users,
+                               max_aliases=max_aliases, max_quota_bytes=max_quota_bytes)
         db.session.add(domain)
         db.session.commit()
 
@@ -126,7 +129,7 @@ def user_import(localpart, domain_name, password_hash, hash_scheme = None):
 
 @mailu.command()
 @click.option('-v', '--verbose')
-@click.option('-d', '--delete_objects')
+@click.option('-d', '--delete-objects')
 @flask_cli.with_appcontext
 def config_update(verbose=False, delete_objects=False):
     """sync configuration with data from YAML-formatted stdin"""

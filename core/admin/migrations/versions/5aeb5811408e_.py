@@ -106,7 +106,7 @@ def upgrade():
     # lower relays
     for relay in connection.execute(relay_table.select()):
         connection.execute(relay_table.update().where(
-            relay_tbale.c.name == relay.name
+            relay_table.c.name == relay.name
         ).values(
             name=relay.name.lower()
         ))

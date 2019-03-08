@@ -464,3 +464,7 @@ We **strongly** advice against downgrading the TLS version and ciphers!
 .. _`681`: https://github.com/Mailu/Mailu/pull/681
 .. _`698`: https://github.com/Mailu/Mailu/issues/698
 .. _`unbound`: https://nlnetlabs.nl/projects/unbound/about/
+
+A user gets ``Sender address rejected: Access denied. Please check the`` ``message recipient […] and try again`` even though the sender is legitimate?
+``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````
+First, check if you are really sure the user is a legitimate sender, i.e. the registered user is authenticated successfully and own either the account or alias he/she is trying to send from. If you are really sure this is correct, then the user might try to errornously send via port 25 insteadof the designated SMTP client-ports. Port 25 is meant for server-to-server delivery, while users should use port 587 or 465.

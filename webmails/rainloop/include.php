@@ -15,5 +15,5 @@ function __get_custom_data_full_path()
  */
 function __get_additional_configuration_name()
 {
-	return 'config.ini';
+	return 'application.ini';
 }

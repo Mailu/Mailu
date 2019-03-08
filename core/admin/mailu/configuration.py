@@ -80,8 +80,8 @@ class ConfigManager(dict):
         self.config['HOST_POP3'] = resolve(self.config['HOST_POP3'])
         self.config['HOST_AUTHSMTP'] = resolve(self.config['HOST_AUTHSMTP'])
         self.config['HOST_SMTP'] = resolve(self.config['HOST_SMTP'])
-        if self.config["WEBMAIL"] != "none":
-            self.config["HOST_WEBMAIL"] = resolve(self.config['HOST_WEBMAIL'])
+        if self.config['WEBMAIL'] != 'none':
+            self.config['HOST_WEBMAIL'] = resolve(self.config['HOST_WEBMAIL'])
 
     def __coerce_value(self, value):
         if isinstance(value, str) and value.lower() in ('true','yes'):

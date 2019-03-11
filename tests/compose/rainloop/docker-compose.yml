@@ -78,12 +78,12 @@ services:
 
 
   # Webmail
-  webmail:
+  webmail-rainloop:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rainloop:${MAILU_VERSION:-master}
     restart: always
     env_file: mailu.env
     volumes:
-      - "/mailu/webmail:/data"
+      - "/mailu/webmail-rainloop:/data"
     depends_on:
       - imap
 

@@ -78,12 +78,12 @@ services:
 
 
   # Webmail
-  webmail:
+  webmail-roundcube:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}roundcube:${MAILU_VERSION:-master}
     restart: always
     env_file: mailu.env
     volumes:
-      - "/mailu/webmail:/data"
+      - "/mailu/webmail-roundcube:/data"
     depends_on:
       - imap
 

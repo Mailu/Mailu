@@ -16,9 +16,15 @@ with open("/etc/resolv.conf") as handle:
 
 args["HOST_ADMIN"] = resolve(args.get("HOST_ADMIN", "admin"))
 args["HOST_ANTISPAM"] = resolve(args.get("HOST_ANTISPAM", "antispam:11334"))
-args["HOST_WEBMAIL"] = args.get("HOST_WEBMAIL", "webmail")
-if args["WEBMAIL"] != "none":
-    args["HOST_WEBMAIL"] = resolve(args.get("HOST_WEBMAIL"))
+
+args["HOST_WEBMAIL_RAINLOOP"] = args.get("HOST_WEBMAIL_RAINLOOP", "webmail-rainloop")
+if args["WEBMAIL_RAINLOOP"] == "true":
+    args["HOST_WEBMAIL_RAINLOOP"] = resolve(args.get("HOST_WEBMAIL_RAINLOOP"))
+
+args["HOST_WEBMAIL_ROUNDCUBE"] = args.get("HOST_WEBMAIL_ROUNDCUBE", "webmail-roundcube")
+if args["WEBMAIL_ROUNDCUBE"] == "true":
+    args["HOST_WEBMAIL_ROUNDCUBE"] = resolve(args.get("HOST_WEBMAIL_ROUNDCUBE"))
+
 args["HOST_WEBDAV"] = args.get("HOST_WEBDAV", "webdav:5232")
 if args["WEBDAV"] != "none":
     args["HOST_WEBDAV"] = resolve(args.get("HOST_WEBDAV"))

@@ -67,8 +67,9 @@
     # Run the admin interface in debug mode
     #DEBUG: "True"
 
-    # Choose which webmail to run if any (values: roundcube, rainloop, none)
-    WEBMAIL: "roundcube"
+    # Choose which webmail to run if any (value: true, false)
+    WEBMAIL_RAINLOOP: "false"
+    WEBMAIL_ROUNDCUBE: "true"
 
     # Dav server implementation (value: radicale, none)
     WEBDAV: "radicale"
@@ -122,9 +123,10 @@
     WEB_ADMIN: "/admin"
 
     # Path to the webmail if enabled
-    # Currently, this is not used, because we intended to use a different subdomain: webmail.example.com
+    # Currently, this is not used, because we intended to use a different subdomain: webmail-roundcube.example.com
     # This option can be added in a feature release
-    WEB_WEBMAIL: "/webmail"
+    WEB_WEBMAIL_RAINLOOP: "/webmail-rainloop"
+    WEB_WEBMAIL_ROUNDCUBE: "/webmail-roundcube"
 
     # Website name
     SITENAME: "Mailu"
@@ -161,7 +163,8 @@
     HOST_POP3: "imap.mailu-mailserver.svc.cluster.local"
     HOST_SMTP: "smtp.mailu-mailserver.svc.cluster.local"
     HOST_AUTHSMTP: "smtp.mailu-mailserver.svc.cluster.local"
-    HOST_WEBMAIL: "webmail.mailu-mailserver.svc.cluster.local"
+    HOST_WEBMAIL_RAINLOOP: "webmail-rainloop.mailu-mailserver.svc.cluster.local"
+    HOST_WEBMAIL_ROUNDCUBE: "webmail-roundcube.mailu-mailserver.svc.cluster.local"
     HOST_ADMIN: "admin.mailu-mailserver.svc.cluster.local"
     HOST_WEBDAV: "webdav.mailu-mailserver.svc.cluster.local:5232"
     HOST_ANTISPAM: "antispam.mailu-mailserver.svc.cluster.local:11332"

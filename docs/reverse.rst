@@ -48,15 +48,15 @@ Then on your own frontend, point to these local ports. In practice, you only nee
     }
   }
 
-Because the admin interface is served as ``/admin`` and the Webmail as ``/webmail`` you may also want to use a single virtual host and serve other applications (still Nginx):
+Because the admin interface is served as ``/admin`` and the Webmail as ``/webmail-rainloop`` and/or ``/webmail-roundcube`` you may also want to use a single virtual host and serve other applications (still Nginx):
 
 .. code-block:: nginx
 
   server {
     # [...] here goes your standard configuration
 
-    location /webmail {
-      proxy_pass https://localhost:8443/webmail;
+    location /webmail-rainloop {
+      proxy_pass https://localhost:8443/webmail-rainloop;
     }
 
     location /admin {
@@ -91,8 +91,8 @@ Here is an example configuration :
     server_name yourpublicname.tld;
     # [...] here goes your standard configuration
 
-    location /webmail {
-      proxy_pass https://localhost:8443/webmail;
+    location /webmail-rainloop {
+      proxy_pass https://localhost:8443/webmail-rainloop;
     }
   }
 
@@ -159,7 +159,7 @@ To support that use-case, Traefik can request ``SANs`` for your domain. Lets add
   [acme]
     [[acme.domains]]
       main = "your.doma.in" # this is the same as $TRAEFIK_DOMAIN!
-      sans = ["mail.your.doma.in", "webmail.your.doma.in", "smtp.your.doma.in"]
+      sans = ["mail.your.doma.in", "webmail-rainloop.your.doma.in", "webmail-roundcube.your.doma.in", "smtp.your.doma.in"]
 
 to your ``traefik.toml``. You might need to clear your ``acme.json``, if a certificate for one of these domains already exists.
 

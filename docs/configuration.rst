@@ -77,7 +77,8 @@ Web settings
 ------------
 
 The ``WEB_ADMIN`` contains the path to the main admin interface, while
-``WEB_WEBMAIL`` contains the path to the Web email client.
+``WEB_WEBMAIL_RAINLOOP`` and ``WEB_WEBMAIL_ROUNDCUBE`` contain the path
+to the Rainloop nad RoundCube Web email client.
 The ``WEBROOT_REDIRECT`` redirects all non-found queries to the set path.
 An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables classic
 behavior of a 404 result when not found.
@@ -85,7 +86,7 @@ All three options need a leading slash (``/``) to work.
 
   .. note:: ``WEBROOT_REDIRECT`` has to point to a valid path on the webserver.
     This means it cannot point to any services which are not enabled.
-    For example, don't point it to ``/webmail`` when ``WEBMAIL=none``
+    For example, don't point it to ``/webmail-rainloop`` when ``WEBMAIL_RAINLOOP=false``
 
 Both ``SITENAME`` and ``WEBSITE`` are customization options for the panel menu
 in the admin interface, while ``SITENAME`` is a customization option for
@@ -121,7 +122,8 @@ optional port number. Those variables are:
 - ``HOST_AUTHSMTP``: the container that is running the authenticated SMTP server for the webnmail (default: ``smtp``, port 10025)
 - ``HOST_ADMIN``: the container that is running the admin interface (default: ``admin``)
 - ``HOST_ANTISPAM``: the container that is running the antispam service (default: ``antispam:11334``)
-- ``HOST_WEBMAIL``: the container that is running the webmail (default: ``webmail``)
+- ``HOST_WEBMAIL_RAINLOOP``: the container that is running the Rainloop webmail (default: ``webmail-rainloop``)
+- ``HOST_WEBMAIL_ROUNDCUBE``: the container that is running the RoundCube webmail (default: ``webmail-roundcube``)
 - ``HOST_WEBDAV``: the container that is running the webdav server (default: ``webdav:5232``)
 - ``HOST_REDIS``: the container that is running the redis daemon (default: ``redis``)
 
@@ -130,5 +132,4 @@ specific port number. It is used to either whitelist connection from these
 addresses or connect to containers on the docker network:
 
 - ``FRONT_ADDRESS``: the nginx container address (default: ``front``)
-- ``WEBMAIL_ADDRESS``: the webmail container address (default: ``webmail``)
-- ``IMAP_ADDRESS``: the webmail container address (default: ``webmail``)
+- ``IMAP_ADDRESS``: the imap container address (default: ``imap``)

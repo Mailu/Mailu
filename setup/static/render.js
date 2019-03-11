@@ -1,34 +1,65 @@
 $(document).ready(function() {
-	if ($("#webmail").val() == 'none') {
-		$("#webmail_path").hide();
-		$("#webmail_path").attr("value", "");
-	} else {
-		$("#webmail_path").show();
-		$("#webmail_path").attr("value", "/webmail");
-	}
-	$("#webmail").click(function() {
-		if (this.value == 'none') {
-			$("#webmail_path").hide();
-			$("#webmail_path").attr("value", "");
-		} else {
-			$("#webmail_path").show();
-			$("#webmail_path").attr("value", "/webmail");
-		}
-	});
-});
-
-$(document).ready(function() {
 	if ($('#admin').prop('checked')) {
 		$("#admin_path").show();
 		$("#admin_path").attr("value", "/admin");
+		$("#admin_path").attr("pattern", "/[a-zA-Z0-9-]+");
+		$("#admin_path").attr("required", true);
 	}
 	$("#admin").change(function() {
 		if ($(this).is(":checked")) {
 			$("#admin_path").show();
 			$("#admin_path").attr("value", "/admin");
+			$("#admin_path").attr("pattern", "/[a-zA-Z0-9-]+");
+			$("#admin_path").attr("required", true);
 		} else {
 			$("#admin_path").hide();
+			$("#admin_path").attr("required", false);
+			$("#admin_path").attr("pattern", ".*");
 			$("#admin_path").attr("value", "");
+		}
+	});
+});
+
+$(document).ready(function() {
+	if ($('#webmail_rainloop_enabled').prop('checked')) {
+		$("#webmail_rainloop_path").show();
+		$("#webmail_rainloop_path").attr("value", "/webmail-rainloop");
+		$("#webmail_rainloop_path").attr("pattern", "/[a-zA-Z0-9-]+");
+		$("#webmail_rainloop_path").attr("required", true);
+	}
+	$("#webmail_rainloop_enabled").change(function() {
+		if ($(this).is(":checked")) {
+			$("#webmail_rainloop_path").show();
+			$("#webmail_rainloop_path").attr("value", "/webmail-rainloop");
+			$("#webmail_rainloop_path").attr("pattern", "/[a-zA-Z0-9-]+");
+			$("#webmail_rainloop_path").attr("required", true);
+		} else {
+			$("#webmail_rainloop_path").hide();
+			$("#webmail_rainloop_path").attr("required", false);
+			$("#webmail_rainloop_path").attr("pattern", ".*");
+			$("#webmail_rainloop_path").attr("value", "");
+		}
+	});
+});
+
+$(document).ready(function() {
+	if ($('#webmail_roundcube_enabled').prop('checked')) {
+		$("#webmail_roundcube_path").show();
+		$("#webmail_roundcube_path").attr("value", "/webmail-roundcube");
+		$("#webmail_roundcube_path").attr("pattern", "/[a-zA-Z0-9-]+");
+		$("#webmail_roundcube_path").attr("required", true);
+	}
+	$("#webmail_roundcube_enabled").change(function() {
+		if ($(this).is(":checked")) {
+			$("#webmail_roundcube_path").show();
+			$("#webmail_roundcube_path").attr("value", "/webmail-roundcube");
+			$("#webmail_roundcube_path").attr("pattern", "/[a-zA-Z0-9-]+");
+			$("#webmail_roundcube_path").attr("required", true);
+		} else {
+			$("#webmail_roundcube_path").hide();
+			$("#webmail_roundcube_path").attr("required", false);
+			$("#webmail_roundcube_path").attr("pattern", ".*");
+			$("#webmail_roundcube_path").attr("value", "");
 		}
 	});
 });

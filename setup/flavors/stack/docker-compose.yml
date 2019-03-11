@@ -102,12 +102,22 @@ services:
       replicas: 1
   {% endif %}
 
-  {% if webmail_type != 'none' %}
-  webmail:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}{{ webmail_type }}:${MAILU_VERSION:-{{ version }}}
+  {% if webmail_rainloop_enabled == 'true' %}
+  webmail-rainloop:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rainloop:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
-      - "{{ root }}/webmail:/data"
+      - "{{ root }}/webmail-rainloop:/data"
+    deploy:
+      replicas: 1
+  {% endif %}
+
+  {% if webmail_roundcube_enabled == 'true' %}
+  webmail-roundcube:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}roundcube:${MAILU_VERSION:-{{ version }}}
+    env_file: {{ env }}
+    volumes:
+      - "{{ root }}/webmail-roundcube:/data"
     deploy:
       replicas: 1
   {% endif %}

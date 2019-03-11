@@ -136,19 +136,31 @@ services:
     {% endif %}
   {% endif %}
 
-  # Webmail
-  {% if webmail_type != 'none' %}
-  webmail:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}{{ webmail_type }}:${MAILU_VERSION:-{{ version }}}
+  # Webmails
+  {% if webmail_rainloop_enabled == 'true' %}
+  webmail-rainloop:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rainloop:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
     volumes:
-      - "{{ root }}/webmail:/data"
+      - "{{ root }}/webmail-rainloop:/data"
+    depends_on:
+      - imap
+  {% endif %}
+
+  {% if webmail_roundcube_enabled == 'true' %}
+  webmail-roundcube:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}roundcube:${MAILU_VERSION:-{{ version }}}
+    restart: always
+    env_file: {{ env }}
+    volumes:
+      - "{{ root }}/webmail-roundcube:/data"
     depends_on:
       - imap
   {% endif %}
 
   {% if db_flavor == 'postgresql' and postgresql == 'internal' %}
+  # Database
   database:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postgresql:${MAILU_VERSION:-{{ version }}}
     restart: always

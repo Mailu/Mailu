@@ -3,27 +3,21 @@
 interface, Web email clients, antispam, antivirus, etc.
 In this section you can enable the services to you liking.</p>
 
-<!-- 	Switched from radio buttons to dropdown menu in order to remove the checkbox -->
 <p>A Webmail is a Web interface exposing an email client. Mailu webmails are
 bound to the internal IMAP and SMTP server for users to access their mailbox through
 the Web. By exposing a complex application such as a Webmail, you should be aware of
 the security implications caused by such an increase of attack surface.<p>
+
 <div class="form-group">
   <label>Enable Web email client (and path to the Web email client)</label>
-<!--   <div class="radio"> -->
-<!--     {{ macros.radio("webmail_type", "roundcube", "RoundCube", "popular Webmail running on top of PHP") }} -->
-<!--     {{ macros.radio("webmail_type", "rainloop", "Rainloop", "lightweight Webmail based on PHP, no database") }} -->
-<!--   </div> -->
-  <br/>
-  <select class="btn btn-primary dropdown-toggle" name="webmail_type" id="webmail">
-  	{% for webmailtype in ["none", "roundcube", "rainloop"] %}
-  	<option value="{{ webmailtype }}" >{{ webmailtype }}</option>
-  	{% endfor %}
-  </select>
-  <p></p>
-  <div class="input-group">
-    <input class="form-control" type="text" name="webmail_path" id="webmail_path" style="display: none">
-  </div>
+  <br>
+  <input type="checkbox" name="webmail_rainloop_enabled" value="true" id="webmail_rainloop_enabled">
+  <label>Rainloop</label>
+  <input class="form-control" type="text" name="webmail_rainloop_path" id="webmail_rainloop_path" style="display: none">
+  <br>
+  <input type="checkbox" name="webmail_roundcube_enabled" value="true" id="webmail_roundcube_enabled">
+  <label>RoundCube</label>
+  <input class="form-control" type="text" name="webmail_roundcube_path" id="webmail_roundcube_path" style="display: none">
 </div>
 
 <p>An antivirus server helps fighting large scale virus spreading campaigns that leverage
@@ -59,6 +53,5 @@ contacts or calendars using the mail account.</p>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 <script type="text/javascript" src="{{ url_for('static', filename='render.js') }}"></script>
-
 
 {% endcall %}

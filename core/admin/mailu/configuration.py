@@ -43,9 +43,10 @@ DEFAULT_CONFIG = {
     'DEFAULT_QUOTA': 1000000000,
     # Web settings
     'SITENAME': 'Mailu',
-    'WEBSITE': 'https://mailu.io',
+    'WEBSITE': None,
     'WEB_ADMIN': '/admin',
-    'WEB_WEBMAIL': '/webmail',
+    'WEB_WEBMAIL_RAINLOOP': None,
+    'WEB_WEBMAIL_ROUNDCUBE': None,
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
     # Advanced settings
@@ -54,7 +55,6 @@ DEFAULT_CONFIG = {
     'HOST_IMAP': 'imap',
     'HOST_POP3': 'imap',
     'HOST_SMTP': 'smtp',
-    'HOST_WEBMAIL': 'webmail',
     'HOST_FRONT': 'front',
     'HOST_AUTHSMTP': os.environ.get('HOST_SMTP', 'smtp'),
     'SUBNET': '192.168.203.0/24',

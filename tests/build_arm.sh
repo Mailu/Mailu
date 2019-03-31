@@ -6,4 +6,4 @@ QEMU="$(which qemu-arm-static)"
 cp $QEMU ../webmails/rainloop/
 cp $QEMU ../webmails/roundcube/
 
-docker-compose -f build.yml build --build-arg DISTRO=$DISTRO --build-arg PHP_DISTRO=$PHP # --parallel
+docker-compose -f build.yml build --build-arg DISTRO=$DISTRO --build-arg PHP_DISTRO=$PHP $@  # --parallel

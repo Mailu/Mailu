@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
   && rm -rf /var/lib/apt/lists \
   && echo "ServerSignature Off" >> /etc/apache2/apache2.conf
 
-ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.3.8/roundcubemail-1.3.8-complete.tar.gz
+ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.3.9/roundcubemail-1.3.9-complete.tar.gz
 
 RUN apt-get update && apt-get install -y \
       zlib1g-dev python3-jinja2 \

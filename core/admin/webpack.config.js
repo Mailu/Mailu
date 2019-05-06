@@ -9,9 +9,8 @@ module.exports = {
         vendor: "./assets/vendor.js"
     },
     output: {
-        path: path.resolve(__dirname, "mailu/ui/static/"),
-        filename: "[name].js",
-        publicPath: "/static"
+        path: path.resolve(__dirname, "static/"),
+        filename: "[name].js"
     },
     module: {
         rules: [

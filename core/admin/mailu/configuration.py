@@ -1,5 +1,6 @@
 import os
-from mailustart import resolve
+
+from socrate import system
 
 DEFAULT_CONFIG = {
     # Specific to the admin UI
@@ -72,16 +73,15 @@ class ConfigManager(dict):
         'mysql': 'mysql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}'
     }
 
+    HOSTS = ('HOST_IMAP', 'HOST_POP3', 'HOST_AUTHSMTP', 'HOST_SMTP',
+             'HOST_WEBMAIL')
+
     def __init__(self):
         self.config = dict()
 
     def resolve_host(self):
-        self.config['HOST_IMAP'] = resolve(self.config['HOST_IMAP'])
-        self.config['HOST_POP3'] = resolve(self.config['HOST_POP3'])
-        self.config['HOST_AUTHSMTP'] = resolve(self.config['HOST_AUTHSMTP'])
-        self.config['HOST_SMTP'] = resolve(self.config['HOST_SMTP'])
-        if self.config['WEBMAIL'] != 'none':
-            self.config['HOST_WEBMAIL'] = resolve(self.config['HOST_WEBMAIL'])
+        for item in self.HOSTS:
+            self.config[item] = system.resolve_address(self.config[item])
 
     def __coerce_value(self, value):
         if isinstance(value, str) and value.lower() in ('true','yes'):

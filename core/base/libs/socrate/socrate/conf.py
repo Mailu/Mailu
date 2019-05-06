@@ -3,13 +3,22 @@ import importlib
 
 
 def jinja(source, environ, destination=None):
-    """ Render a Jinja configuration file
+    """ Render a Jinja configuration file, supports file handle or path
     """
-    with open(source, "r") as template:
-        result = jinja2.Template(template.read()).render(environ)
+    close_source = close_destination = False
+    if type(source) is str:
+        source = open(source, "r")
+        close_source = True
+    if type(destination) is str:
+        destination = open(destination, "w")
+        close_destination = True
+    result = jinja2.Template(source.read()).render(environ)
+    if close_source:
+        source.close()
     if destination is not None:
-        with open(destination, "w") as handle:
-            handle.write(result)
+        destination.write(result)
+        if close_destination:
+            destination.close()
     return result
 
 
@@ -28,7 +37,7 @@ def merge(*objects):
             for obj in objects for key in obj.keys()
         }
     elif mode is list:
-        return sum(objects)
+        return sum(objects, [])
     else:
         raise ValueError("Cannot merge objects of type {}: {}".format(
             mode, objects))

@@ -193,6 +193,34 @@ msgstr "Ваша учетная запись"
 msgid "to access the administration tools"
 msgstr "для доступа к утилитам администрирования"
 
+#: mailu/ui/templates/services.html:4 mailu/ui/templates/sidebar.html:39
+msgid "Services status"
+msgstr "Статусы сервисов"
+
+#: mailu/ui/templates/services.html:10
+msgid "Service"
+msgstr "Сервис"
+
+#: mailu/ui/templates/fetch/list.html:23 mailu/ui/templates/services.html:11
+msgid "Status"
+msgstr "Статус"
+
+#: mailu/ui/templates/services.html:12
+msgid "PID"
+msgstr "PID"
+
+#: mailu/ui/templates/services.html:13
+msgid "Image"
+msgstr "Изображение"
+
+#: mailu/ui/templates/services.html:14
+msgid "Started"
+msgstr "Начато"
+
+#: mailu/ui/templates/services.html:15
+msgid "Last update"
+msgstr "Последнее обновление"
+
 #: mailu/ui/templates/sidebar.html:8
 msgid "My account"
 msgstr "Моя учетная запись"
@@ -600,75 +628,79 @@ msgstr "Порог спам-фильтра"
 
 #: mailu/ui/forms.py:50
 msgid "Enable sign-up"
-msgstr ""
+msgstr "Разрешить регистрацию"
 
 #: mailu/ui/forms.py:57
 msgid "Initial admin"
-msgstr ""
+msgstr "Начальный админ"
 
 #: mailu/ui/forms.py:58
 msgid "Admin password"
-msgstr ""
+msgstr "Пароль администратора"
 
 #: mailu/ui/forms.py:84
 msgid "Enabled"
-msgstr ""
+msgstr "Включено"
 
 #: mailu/ui/forms.py:89
 msgid "Email address"
-msgstr ""
+msgstr "Почтовый адрес"
 
 #: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
 #: mailu/ui/templates/user/signup.html:4
 #: mailu/ui/templates/user/signup_domain.html:4
 msgid "Sign up"
-msgstr ""
+msgstr "Регистрация"
 
 #: mailu/ui/forms.py:119
 msgid "End of vacation"
-msgstr ""
+msgstr "Конец отпуска"
 
 #: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:82
 msgid "Client setup"
-msgstr ""
+msgstr "Настройка клиента"
 
 #: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
 msgid "Mail protocol"
-msgstr ""
+msgstr "Почтовый протокол"
 
 #: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
 msgid "Server name"
-msgstr ""
+msgstr "Имя сервера"
 
 #: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
 msgid "Register a domain"
-msgstr ""
+msgstr "Зарегистрировать домен"
 
 #: mailu/ui/templates/domain/details.html:17
 msgid "Generate keys"
-msgstr ""
+msgstr "Сгенерировать ключи"
 
 #: mailu/ui/templates/domain/signup.html:13
 msgid "In order to register a new domain, you must first setup the\n"
 "    domain zone so that the domain <code>MX</code> points to this server"
-msgstr ""
+msgstr "Чтобы зарегистрировать новый домен, вы должны сначала настроить\n"
+"    доменная зона, так что домен <code> MX </ code> указывает на этот сервер"
 
 #: mailu/ui/templates/domain/signup.html:18
 msgid "If you do not know how to setup an <code>MX</code> record for your DNS zone,\n"
 "    please contact your DNS provider or administrator. Also, please wait a\n"
 "    couple minutes after the <code>MX</code> is set so the local server cache\n"
 "    expires."
-msgstr ""
+msgstr "Если вы не знаете, как настроить запись <code> MX </ code> для своей зоны DNS,\n"
+"    пожалуйста, свяжитесь с вашим поставщиком DNS или администратором. Также, пожалуйста, подождите\n"
+"    через пару минут после установки <code> MX </ code>, чтобы кэш локального сервера\n"
+"    истекает."
 
 #: mailu/ui/templates/user/signup_domain.html:8
 msgid "pick a domain for the new account"
-msgstr ""
+msgstr "выбрать домен для новой учетной записи"
 
 #: mailu/ui/templates/user/signup_domain.html:14
 msgid "Domain"
-msgstr ""
+msgstr "Домен"
 
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
-msgstr ""
+msgstr "Доступные слоты"
 

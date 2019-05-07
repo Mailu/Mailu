@@ -1,4 +1,4 @@
 #!/bin/bash
 
-tee >(rspamc -h antispam:11334 -P mailu learn_spam /dev/stdin) \
-    >(rspamc -h antispam:11334 -P mailu -f 11 fuzzy_add /dev/stdin)
+tee >(rspamc -h ${HOST_ANTISPAM:-antispam:11334} -P mailu learn_spam /dev/stdin) \
+    >(rspamc -h ${HOST_ANTISPAM:-antispam:11334} -P mailu -f 11 fuzzy_add /dev/stdin)

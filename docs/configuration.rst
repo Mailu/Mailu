@@ -147,6 +147,7 @@ optional port number. Those variables are:
 - ``HOST_AUTHSMTP``: the container that is running the authenticated SMTP server for the webnmail (default: ``smtp``, port 10025)
 - ``HOST_ADMIN``: the container that is running the admin interface (default: ``admin``)
 - ``HOST_ANTISPAM``: the container that is running the antispam service (default: ``antispam:11334``)
+- ``HOST_ANTIVIRUS``: the container that is running the antivirus service (default: ``antivirus:3310``)
 - ``HOST_WEBMAIL``: the container that is running the webmail (default: ``webmail``)
 - ``HOST_WEBDAV``: the container that is running the webdav server (default: ``webdav:5232``)
 - ``HOST_REDIS``: the container that is running the redis daemon (default: ``redis``)

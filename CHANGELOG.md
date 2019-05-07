@@ -565,6 +565,16 @@ deprecated before 1.8.0, you can switch to an external database server by then.
 - Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
 - Enhancement: Automatically create admin user on container startup if given appropriate environment variables
 - Enhancement: Missing wildcard option in alias flask command ([#869](https://github.com/Mailu/Mailu/issues/869))
+<<<<<<< HEAD
+=======
+- Enhancement: Fixed hardcoded antispam and antivirus host addresses ([#978](https://github.com/Mailu/Mailu/issues/978))
+- Bug: Fix creating new fetched accounts
+- Bug: Fix poor performance if ANTIVIRUS is configured to none.
+- Bug: Implement mailustart to resolve webmail in admin ([#716](https://github.com/Mailu/Mailu/issues/716))
+- Bug: Rename cli commands and their options (replace "\_" with "-") ([#877](https://github.com/Mailu/Mailu/issues/877))
+- Bug: Fix typo in migration script ([#905](https://github.com/Mailu/Mailu/issues/905))
+- Bug: Fix redis hostname in admin
+>>>>>>> 6f973a2e (Fixed hardcoded antispam and antivirus host addresses)
 
 v1.6.0 - 2019-01-18
 -------------------

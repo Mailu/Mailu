@@ -310,6 +310,7 @@ Various environment variables ``*_ADDRESS`` can be used to run Mailu containers
 separately from a supported orchestrator. It is used by the various components
 to find the location of the other containers it depends on. Those variables are:
 
+<<<<<<< HEAD
 - ``ADMIN_ADDRESS``
 - ``ANTISPAM_ADDRESS``
 - ``ANTIVIRUS_ADDRESS``
@@ -319,6 +320,20 @@ to find the location of the other containers it depends on. Those variables are:
 - ``SMTP_ADDRESS``
 - ``WEBDAV_ADDRESS``
 - ``WEBMAIL_ADDRESS``
+=======
+- ``HOST_IMAP``: the container that is running the IMAP server (default: ``imap``, port 143)
+- ``HOST_LMTP``: the container that is running the LMTP server (default: ``imap:2525``)
+- ``HOST_HOSTIMAP``: the container that is running the IMAP server for the webmail (default: ``imap``, port 10143)
+- ``HOST_POP3``: the container that is running the POP3 server (default: ``imap``, port 110)
+- ``HOST_SMTP``: the container that is running the SMTP server (default: ``smtp``, port 25)
+- ``HOST_AUTHSMTP``: the container that is running the authenticated SMTP server for the webnmail (default: ``smtp``, port 10025)
+- ``HOST_ADMIN``: the container that is running the admin interface (default: ``admin``)
+- ``HOST_ANTISPAM``: the container that is running the antispam service (default: ``antispam:11334``)
+- ``HOST_ANTIVIRUS``: the container that is running the antivirus service (default: ``antivirus:3310``)
+- ``HOST_WEBMAIL``: the container that is running the webmail (default: ``webmail``)
+- ``HOST_WEBDAV``: the container that is running the webdav server (default: ``webdav:5232``)
+- ``HOST_REDIS``: the container that is running the redis daemon (default: ``redis``)
+>>>>>>> 6f973a2e (Fixed hardcoded antispam and antivirus host addresses)
 
 These are used for DNS based service discovery with possibly changing services IP addresses.
 ``*_ADDRESS`` values must be fully qualified domain names without port numbers.

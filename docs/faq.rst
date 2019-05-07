@@ -71,22 +71,15 @@ We thank you for your understanding and patience.
 I would like to donate (for a feature)
 ``````````````````````````````````````
 
-Donations are welcome at the `patreon`_ account of the project lead. It will be used to pay
-for infra structure and project related costs. If there are leftovers, it will be distributed
-among the developers.
-
-It is not yet possible to pay for a specific feature. We don't have
-any bounty system implemented. Feel free to come with suggestions in
-our ongoing `project management`_ discussion issue.
-
+Donations are welcome to the authors of the project directly, we do not manage any central
+donation pot. Also, check the ``AUTHORS.md`` file for Patreon link or equivalent. If you
+wish to contact a contributor specifically, please do so on `Matrix`_
 
 .. _`Matrix`: https://matrix.to/#/#mailu:tedomum.net
 .. _`open issues`: https://github.com/Mailu/Mailu/issues
 .. _`new issue`: https://github.com/Mailu/Mailu/issues/new
 .. _`Enhancement issues`: https://github.com/Mailu/Mailu/issues?q=is%3Aissue+is%3Aopen+label%3Atype%2Fenhancement
 .. _`Feature request issues`: https://github.com/Mailu/Mailu/issues?q=is%3Aopen+is%3Aissue+label%3Atype%2Ffeature
-.. _`patreon`: https://patreon.com/kaiyou
-.. _`project management`: https://github.com/Mailu/Mailu/issues/508
 
 Deployment related
 ------------------

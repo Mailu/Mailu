@@ -436,20 +436,37 @@ class Alias(Base, Email):
 
     @classmethod
     def resolve(cls, localpart, domain_name):
-        return cls.query.filter(
-            sqlalchemy.and_(cls.domain_name == domain_name,
-                sqlalchemy.or_(
-                    sqlalchemy.and_(
-                        cls.wildcard == False,
-                        cls.localpart == localpart
-                    ), sqlalchemy.and_(
-                        cls.wildcard == True,
-                        sqlalchemy.bindparam("l", localpart).like(cls.localpart)
+        alias_preserve_case = cls.query.filter(
+                sqlalchemy.and_(cls.domain_name == domain_name,
+                    sqlalchemy.or_(
+                        sqlalchemy.and_(
+                            cls.wildcard == False,
+                            cls.localpart == localpart
+                        ), sqlalchemy.and_(
+                            cls.wildcard == True,
+                            sqlalchemy.bindparam("l", localpart).like(cls.localpart)
+                        )
                     )
                 )
-            )
-        ).order_by(cls.wildcard, sqlalchemy.func.char_length(cls.localpart).desc()).first()
+            ).order_by(cls.wildcard, sqlalchemy.func.char_length(cls.localpart).desc()).first()
+        if alias_preserve_case:
+            return alias_preserve_case
 
+        if localpart:
+            localpart = localpart.lower()
+        return cls.query.filter(
+                sqlalchemy.and_(cls.domain_name == domain_name,
+                    sqlalchemy.or_(
+                        sqlalchemy.and_(
+                            cls.wildcard == False,
+                            sqlalchemy.func.lower(cls.localpart) == localpart
+                        ), sqlalchemy.and_(
+                            cls.wildcard == True,
+                            sqlalchemy.bindparam("l", localpart).like(sqlalchemy.func.lower(cls.localpart))
+                        )
+                    )
+                )
+            ).order_by(cls.wildcard, sqlalchemy.func.char_length(sqlalchemy.func.lower(cls.localpart)).desc()).first()
 
 class Token(Base):
     """ A token is an application password for a given user.

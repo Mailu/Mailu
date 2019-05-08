@@ -52,7 +52,7 @@
       </a>
     </li>
     <li>
-      <a href="{{ config["WEB_ADMIN"] }}/antispam/">
+      <a href="{{ config["WEB_ADMIN"] }}/antispam/" target="_blank">
         <i class="fa fa-trash-o"></i> <span>{% trans %}Antispam{% endtrans %}</span>
       </a>
     </li>
@@ -69,7 +69,7 @@
     <li class="header">{% trans %}Go to{% endtrans %}</li>
     {% if config["WEBMAIL"] != "none" %}
     <li>
-      <a href="{{ config["WEB_WEBMAIL"] }}">
+      <a href="{{ config["WEB_WEBMAIL"] }}" target="_blank">
         <i class="fa fa-envelope-o"></i> <span>{% trans %}Webmail{% endtrans %}</span>
       </a>
     </li>
@@ -80,12 +80,12 @@
       </a>
     </li>
     <li>
-      <a href="{{ config["WEBSITE"] }}">
+      <a href="{{ config["WEBSITE"] }}" target="_blank">
         <i class="fa fa-globe"></i> <span>{% trans %}Website{% endtrans %}</span>
       </a>
     </li>
     <li>
-      <a href="https://mailu.io">
+      <a href="https://mailu.io" target="_blank">
         <i class="fa fa-life-ring"></i> <span>{% trans %}Help{% endtrans %}</span>
       </a>
     </li>

@@ -15,6 +15,7 @@ v1.6.1 - unreleased
 - Enhancement: Missing wildcard option in alias flask command ([#869](https://github.com/Mailu/Mailu/issues/869))
 - Bug: Fix creating new fetched accounts
 - Bug: Fix poor performance if ANTIVIRUS is configured to none.
+- Bug: Implement mailustart to resolve webmail in admin ([#716](https://github.com/Mailu/Mailu/issues/716))
 - Bug: Rename cli commands and their options (replace "\_" with "-") ([#877](https://github.com/Mailu/Mailu/issues/877))
 - Bug: Fix typo in migration script ([#905](https://github.com/Mailu/Mailu/issues/905))
 

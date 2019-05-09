@@ -1,6 +1,7 @@
 from flask_limiter import RateLimitExceeded
 
 from mailu import utils
+from flask import current_app as app
 
 import socket
 import flask
@@ -23,7 +24,7 @@ def rate_limit_handler(e):
 def whitelist_webmail():
     try:
         return flask.request.headers["Client-Ip"] ==\
-            socket.gethostbyname("webmail")
+            app.config["HOST_WEBMAIL"]
     except:
         return False
 

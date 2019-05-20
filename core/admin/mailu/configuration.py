@@ -1,5 +1,5 @@
 import os
-
+from mailustart import resolve
 
 DEFAULT_CONFIG = {
     # Specific to the admin UI
@@ -46,6 +46,7 @@ DEFAULT_CONFIG = {
     'WEBSITE': 'https://mailu.io',
     'WEB_ADMIN': '/admin',
     'WEB_WEBMAIL': '/webmail',
+    'WEBMAIL': 'none',
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
     # Advanced settings
@@ -61,7 +62,6 @@ DEFAULT_CONFIG = {
     'POD_ADDRESS_RANGE': None
 }
 
-
 class ConfigManager(dict):
     """ Naive configuration manager that uses environment only
     """
@@ -74,6 +74,14 @@ class ConfigManager(dict):
 
     def __init__(self):
         self.config = dict()
+
+    def resolve_host(self):
+        self.config['HOST_IMAP'] = resolve(self.config['HOST_IMAP'])
+        self.config['HOST_POP3'] = resolve(self.config['HOST_POP3'])
+        self.config['HOST_AUTHSMTP'] = resolve(self.config['HOST_AUTHSMTP'])
+        self.config['HOST_SMTP'] = resolve(self.config['HOST_SMTP'])
+        if self.config['WEBMAIL'] != 'none':
+            self.config['HOST_WEBMAIL'] = resolve(self.config['HOST_WEBMAIL'])
 
     def __coerce_value(self, value):
         if isinstance(value, str) and value.lower() in ('true','yes'):
@@ -89,6 +97,7 @@ class ConfigManager(dict):
             key: self.__coerce_value(os.environ.get(key, value))
             for key, value in DEFAULT_CONFIG.items()
         })
+        self.resolve_host()
 
         # automatically set the sqlalchemy string
         if self.config['DB_FLAVOR']:

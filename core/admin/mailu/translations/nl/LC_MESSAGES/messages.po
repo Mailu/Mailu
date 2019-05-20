@@ -193,6 +193,34 @@ msgstr "Uw account"
 msgid "to access the administration tools"
 msgstr "om toegang te krijgen tot systeembeheer"
 
+#: mailu/ui/templates/services.html:4 mailu/ui/templates/sidebar.html:39
+msgid "Services status"
+msgstr "Status diensten"
+
+#: mailu/ui/templates/services.html:10
+msgid "Service"
+msgstr "Dienst"
+
+#: mailu/ui/templates/fetch/list.html:23 mailu/ui/templates/services.html:11
+msgid "Status"
+msgstr "Status"
+
+#: mailu/ui/templates/services.html:12
+msgid "PID"
+msgstr "PID"
+
+#: mailu/ui/templates/services.html:13
+msgid "Image"
+msgstr "Image"
+
+#: mailu/ui/templates/services.html:14
+msgid "Started"
+msgstr "Gestart"
+
+#: mailu/ui/templates/services.html:15
+msgid "Last update"
+msgstr "Laatste aanpassing"
+
 #: mailu/ui/templates/sidebar.html:8
 msgid "My account"
 msgstr "Mijn account"
@@ -600,75 +628,75 @@ msgstr "Spam filter toleratie"
 
 #: mailu/ui/forms.py:50
 msgid "Enable sign-up"
-msgstr ""
+msgstr "Schakel registreren in"
 
 #: mailu/ui/forms.py:57
 msgid "Initial admin"
-msgstr ""
+msgstr "Eerste beheerder"
 
 #: mailu/ui/forms.py:58
 msgid "Admin password"
-msgstr ""
+msgstr "Beheerder wachtwoord"
 
 #: mailu/ui/forms.py:84
 msgid "Enabled"
-msgstr ""
+msgstr "Ingeschakeld"
 
 #: mailu/ui/forms.py:89
 msgid "Email address"
-msgstr ""
+msgstr "E-mailadres"
 
 #: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
 #: mailu/ui/templates/user/signup.html:4
 #: mailu/ui/templates/user/signup_domain.html:4
 msgid "Sign up"
-msgstr ""
+msgstr "Registreren"
 
 #: mailu/ui/forms.py:119
 msgid "End of vacation"
-msgstr ""
+msgstr "Einde van vakantie"
 
 #: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:82
 msgid "Client setup"
-msgstr ""
+msgstr "Client instellingen"
 
 #: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
 msgid "Mail protocol"
-msgstr ""
+msgstr "Mail protocol"
 
 #: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
 msgid "Server name"
-msgstr ""
+msgstr "Server naam"
 
 #: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
 msgid "Register a domain"
-msgstr ""
+msgstr "Registreer een domein"
 
 #: mailu/ui/templates/domain/details.html:17
 msgid "Generate keys"
-msgstr ""
+msgstr "Genereer sleutels"
 
 #: mailu/ui/templates/domain/signup.html:13
 msgid "In order to register a new domain, you must first setup the\n"
 "    domain zone so that the domain <code>MX</code> points to this server"
-msgstr ""
+msgstr "Om een nieuw domein te kunnen registreren moet je eerst je domein zone instellen zodat het domein <code>MX</code> points to this server"
 
 #: mailu/ui/templates/domain/signup.html:18
 msgid "If you do not know how to setup an <code>MX</code> record for your DNS zone,\n"
 "    please contact your DNS provider or administrator. Also, please wait a\n"
 "    couple minutes after the <code>MX</code> is set so the local server cache\n"
 "    expires."
-msgstr ""
+msgstr "Als je niet weet hoe je een <code>MX</code> moet instellen voor je DNS zone neem dan contact op met je DNS provider of beheerder. Wacht ook een paar minuten nader de <code>MX</code> is ingesteld zodat de lokale server cache verloopt"
 
 #: mailu/ui/templates/user/signup_domain.html:8
 msgid "pick a domain for the new account"
-msgstr ""
+msgstr "kies een domein voor het nieuwe account"
 
 #: mailu/ui/templates/user/signup_domain.html:14
 msgid "Domain"
-msgstr ""
+msgstr "Domein"
 
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
-msgstr ""
+msgstr "Vrije sloten"
 

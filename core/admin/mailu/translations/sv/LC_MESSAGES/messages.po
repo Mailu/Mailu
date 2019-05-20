@@ -5,7 +5,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 "Project-Id-Version: Mailu\n"
-"Language: sv\n"
+"Language: sk\n"
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."
@@ -192,6 +192,34 @@ msgstr "Ditt konto"
 #: mailu/ui/templates/login.html:8
 msgid "to access the administration tools"
 msgstr "att komma åt administrationsverktygen"
+
+#: mailu/ui/templates/services.html:4 mailu/ui/templates/sidebar.html:39
+msgid "Services status"
+msgstr ""
+
+#: mailu/ui/templates/services.html:10
+msgid "Service"
+msgstr ""
+
+#: mailu/ui/templates/fetch/list.html:23 mailu/ui/templates/services.html:11
+msgid "Status"
+msgstr ""
+
+#: mailu/ui/templates/services.html:12
+msgid "PID"
+msgstr ""
+
+#: mailu/ui/templates/services.html:13
+msgid "Image"
+msgstr ""
+
+#: mailu/ui/templates/services.html:14
+msgid "Started"
+msgstr ""
+
+#: mailu/ui/templates/services.html:15
+msgid "Last update"
+msgstr ""
 
 #: mailu/ui/templates/sidebar.html:8
 msgid "My account"

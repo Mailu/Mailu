@@ -1,0 +1,9 @@
+[tool.towncrier]
+    #package = "mypackage"
+    package_dir = "towncrier"
+    filename = "CHANGELOG.md"
+    underlines = ["-", "", ""]
+    template = "towncrier/template.md"
+    title_format = "v{version} - {project_date}"
+    issue_format = "[#{issue}](https://github.com/Mailu/Mailu/issues/{issue})"
+    start_string = "<!-- TOWNCRIER -->"

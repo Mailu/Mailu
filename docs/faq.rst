@@ -71,22 +71,15 @@ We thank you for your understanding and patience.
 I would like to donate (for a feature)
 ``````````````````````````````````````
 
-Donations are welcome at the `patreon`_ account of the project lead. It will be used to pay
-for infra structure and project related costs. If there are leftovers, it will be distributed
-among the developers.
-
-It is not yet possible to pay for a specific feature. We don't have
-any bounty system implemented. Feel free to come with suggestions in
-our ongoing `project management`_ discussion issue.
-
+Donations are welcome to the authors of the project directly, we do not manage any central
+donation pot. Also, check the ``AUTHORS.md`` file for Patreon link or equivalent. If you
+wish to contact a contributor specifically, please do so on `Matrix`_
 
 .. _`Matrix`: https://matrix.to/#/#mailu:tedomum.net
 .. _`open issues`: https://github.com/Mailu/Mailu/issues
 .. _`new issue`: https://github.com/Mailu/Mailu/issues/new
 .. _`Enhancement issues`: https://github.com/Mailu/Mailu/issues?q=is%3Aissue+is%3Aopen+label%3Atype%2Fenhancement
 .. _`Feature request issues`: https://github.com/Mailu/Mailu/issues?q=is%3Aopen+is%3Aissue+label%3Atype%2Ffeature
-.. _`patreon`: https://patreon.com/kaiyou
-.. _`project management`: https://github.com/Mailu/Mailu/issues/508
 
 Deployment related
 ------------------
@@ -135,6 +128,49 @@ You're mail service will be reachable for IMAP, POP3, SMTP and Webmail at the ad
   It can be used as a mail domain if MX is setup to point to one of the ``HOSTNAMES``. However, it is possible to include ``example.com`` in ``HOSTNAMES``.
 
 *Issue reference:* `742`_, `747`_.
+
+How to make IPv6 work?
+``````````````````````
+
+Docker currently does not expose the IPv6 ports properly, as it does not interface with ``ip6tables``.
+Lets start with quoting everything that's wrong:
+
+  Unfortunately, initially Docker was not created with IPv6 in mind.
+  It was added later and, while it has come a long way, is still not as usable as one would want.
+  Much discussion is still going on as to how IPv6 should be used in a containerized world;
+  See the various GitHub issues linked below:
+  
+  - Giving each container a publicly routable address means all ports (even unexposed / unpublished ports) are suddenly
+    reachable by everyone, if no additional filtering is done
+    (`docker/docker#21614 <https://github.com/docker/docker/issues/21614>`_)
+  - By default, each container gets a random IPv6, making it impossible to do properly do DNS;
+    the alternative is to assign a specific IPv6 address to each container,
+    still an administrative hassle (`docker/docker#13481 <https://github.com/docker/docker/issues/13481>`_)
+  - Published ports won't work on IPv6, unless you have the userland proxy enabled
+    (which, for now, is enabled by default in Docker)
+  - The userland proxy, however, seems to be on its way out
+    (`docker/docker#14856 <https://github.com/docker/docker/issues/14856>`_) and has various issues, like:
+  
+    - It can use a lot of RAM (`docker/docker#11185 <https://github.com/docker/docker/issues/11185>`_)
+    - Source IP addresses are rewritten, making it completely unusable for many purposes, e.g. mail servers 
+      (`docker/docker#17666 <https://github.com/docker/docker/issues/17666>`_),
+      (`docker/libnetwork#1099 <https://github.com/docker/libnetwork/issues/1099>`_).
+  
+  -- `Robbert Klarenbeek <https://github.com/robbertkl>`_ (docker-ipv6nat author)
+
+So, how to make it work? Well, by using `docker-ipv6nat`_! This nifty container will set up ``ip6tables``,
+just as Docker would do for IPv4. We know that nat-ing is not advised in IPv6,
+however exposing all containers to public network neither. The choice is ultimately yous.
+
+Mailu `setup utility`_ generates a safe IPv6 ULA subnet by default. So when you run the following command,
+Mailu will start to function on IPv6:
+
+.. code-block:: bash
+
+  docker run -d --restart=always -v /var/run/docker.sock:/var/run/docker.sock:ro --privileged --net=host robbertkl/ipv6nat
+
+.. _`docker-ipv6nat`: https://github.com/robbertkl/docker-ipv6nat
+.. _`setup utility`: https://setup.mailu.io
 
 How does Mailu scale up?
 ````````````````````````
@@ -421,3 +457,7 @@ We **strongly** advice against downgrading the TLS version and ciphers!
 .. _`681`: https://github.com/Mailu/Mailu/pull/681
 .. _`698`: https://github.com/Mailu/Mailu/issues/698
 .. _`unbound`: https://nlnetlabs.nl/projects/unbound/about/
+
+A user gets ``Sender address rejected: Access denied. Please check the`` ``message recipient […] and try again`` even though the sender is legitimate?
+``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````
+First, check if you are really sure the user is a legitimate sender, i.e. the registered user is authenticated successfully and own either the account or alias he/she is trying to send from. If you are really sure this is correct, then the user might try to errornously send via port 25 insteadof the designated SMTP client-ports. Port 25 is meant for server-to-server delivery, while users should use port 587 or 465.

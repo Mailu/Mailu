@@ -1,0 +1,1 @@
+Make aliases optionally case-insensitive: After attempting to resolve an alias in its preserved case, also attempt to match it case-insensitively

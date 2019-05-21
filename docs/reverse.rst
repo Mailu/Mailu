@@ -33,7 +33,7 @@ The simplest and safest option is to modify the port forwards for Mailu Web fron
     volumes:
       - "$ROOT/certs:/certs"
 
-Then on your own frontend, point to these local ports. In practice, you only need to point to the HTTPS port (as the HTTP port simply redirects there). Here is an example Nginx configuration:
+Then on your own frontend, point to these local ports. You need to point to the HTTP and HTTPS port to ensure that letsencrypt is able to obtain certificates from the url http://your-domain/.well-known. All other requests will be automatically forwarded to https. Here is an example Nginx configuration (assuming you mapped your certs volume to /srv/docker/mailu/certs/):
 
 .. code-block:: nginx
 
@@ -42,9 +42,31 @@ Then on your own frontend, point to these local ports. In practice, you only nee
     server_name mymailhost.tld;
 
     # [...] here goes your standard configuration
+    # here you have to insert the SSL certificates obtained by letsencrypt
+    ssl_protocols TLSv1 TLSv1.2;
+    ssl_ciphers ECDH+AESGCM:ECDH+AES256:!aNULL:!MD5:!DSS:!DH:!AES128;
+    ssl_ecdh_curve secp384r1;
+    ssl_prefer_server_ciphers on;
+    ssl_certificate /srv/docker/mailu/certs/letsencrypt/live/mailu/cert.pem;
+    ssl_certificate_key /srv/docker/mailu/certs/letsencrypt/live/mailu/privkey.pem;
+    add_header Strict-Transport-Security "max-age=0";
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    ssl_trusted_certificate /srv/docker/mailu/certs/letsencrypt/live/mailu/chain.pem;
 
     location / {
       proxy_pass https://localhost:8443;
+    }
+  }
+  
+  server {
+    listen 80;
+    server_name mymailhost.tld;
+
+    # [...] here goes your standard configuration
+
+    location / {
+      proxy_pass http://localhost:8080;
     }
   }
 

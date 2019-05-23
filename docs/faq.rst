@@ -257,12 +257,31 @@ First of all you have to install dependencies required to authenticate users via
 
 Next, you have to enable External user support from Nextcloud Apps interface
 
-In the end you need to configure additional user backends in Nextcloud’s configuration config/config.php using the following syntax:
+In the end you need to configure additional user backends in Nextcloud’s configuration config/config.php using the following syntax if you use at least Nextcloud 15.
 
 .. code-block:: bash
 
   <?php
 
+  /** Use this for Nextcloud 15 and newer **/
+  'user_backends' => array(
+      array(
+          'class' => 'OC_User_IMAP',
+          'arguments' => array(
+            '127.0.0.1', 993, 'ssl', 'example.com'
+        ),
+      ),
+  ),
+  
+
+For Nextcloud 14 and below use the following syntax:
+
+
+.. code-block:: bash
+
+  <?php
+
+  /** Use this for Nextcloud 14 and older **/
   'user_backends' => array(
       array(
           'class' => 'OC_User_IMAP',

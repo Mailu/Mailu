@@ -13,7 +13,7 @@ services:
     restart: always
     volumes:
       - "{{ root }}/redis:/data"
-    
+
   # Core services
   front:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}nginx:${MAILU_VERSION:-{{ version }}}
@@ -24,7 +24,7 @@ services:
     ports:
     {% for port in (80, 443, 25, 465, 587, 110, 995, 143, 993) %}
     {% if bind4 %}
-      - "{{ bind4 }}:{{ port }}:{{ port }}"
+      - "${EXTERNAL_IP}:{{ port }}:{{ port }}"
     {% endif %}
     {% if bind6 %}
       - "{{ bind6 }}:{{ port }}:{{ port }}"

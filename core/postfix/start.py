@@ -36,7 +36,9 @@ for postfix_file in glob.glob("/conf/*.cf"):
 
 if os.path.exists("/overrides/postfix.cf"):
     for line in open("/overrides/postfix.cf").read().strip().split("\n"):
-        os.system('postconf -e "{}"'.format(line))
+        line = line.strip()
+        if line and line[0] != "#":
+            os.system('postconf -e "{}"'.format(line))
 
 if os.path.exists("/overrides/postfix.master"):
     for line in open("/overrides/postfix.master").read().strip().split("\n"):

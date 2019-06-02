@@ -1,4 +1,4 @@
-FROM alpine:3.8
+FROM alpine:3.9
 
 RUN apk --no-cache add inotify-tools jq openssl util-linux bash docker
 # while not strictly documented, this script seems to always(?) support previous acme.json versions too

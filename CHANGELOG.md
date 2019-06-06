@@ -5,13 +5,17 @@ Notable changes to this project are documented in the current file. For more
 details about individual changes, see the Git log. You should read this before
 upgrading Freposte.io as some changes will include useful notes.
 
+<!-- TOWNCRIER -->
+
 v1.6.1 - unreleased
 -------------------
+- Enhancement: Distinguish disabled user in user list view by row color
 - Enhancement: Make Unbound drop privileges after binding to port
 - Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
 - Enhancement: Missing wildcard option in alias flask command ([#869](https://github.com/Mailu/Mailu/issues/869))
 - Bug: Fix creating new fetched accounts
 - Bug: Fix poor performance if ANTIVIRUS is configured to none.
+- Bug: Implement mailustart to resolve webmail in admin ([#716](https://github.com/Mailu/Mailu/issues/716))
 - Bug: Rename cli commands and their options (replace "\_" with "-") ([#877](https://github.com/Mailu/Mailu/issues/877))
 - Bug: Fix typo in migration script ([#905](https://github.com/Mailu/Mailu/issues/905))
 

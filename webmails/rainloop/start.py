@@ -20,7 +20,7 @@ os.makedirs(base + "domains", exist_ok=True)
 os.makedirs(base + "configs", exist_ok=True)
 
 convert("/default.ini", "/data/_data_/_default_/domains/default.ini")
-convert("/config.ini", "/data/_data_/_default_/configs/config.ini")
+convert("/application.ini", "/data/_data_/_default_/configs/application.ini")
 convert("/php.ini", "/usr/local/etc/php/conf.d/rainloop.ini")
 
 os.system("chown -R www-data:www-data /data")

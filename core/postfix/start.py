@@ -30,6 +30,7 @@ os.environ["FRONT_ADDRESS"] = resolve(os.environ.get("FRONT_ADDRESS", "front"))
 os.environ["ADMIN_ADDRESS"] = resolve(os.environ.get("ADMIN_ADDRESS", "admin"))
 os.environ["HOST_ANTISPAM"] = resolve(os.environ.get("HOST_ANTISPAM", "antispam:11332"))
 os.environ["HOST_LMTP"] = resolve(os.environ.get("HOST_LMTP", "imap:2525"))
+os.environ["DOMAIN"] = resolve(os.environ.get("DOMAIN", "localhost"))
 
 for postfix_file in glob.glob("/conf/*.cf"):
     convert(postfix_file, os.path.join("/etc/postfix", os.path.basename(postfix_file)))
@@ -50,7 +51,9 @@ for map_file in glob.glob("/overrides/*.map"):
 
 convert("/conf/rsyslog.conf", "/etc/rsyslog.conf")
 
-# Run Podop and Postfix
+# Generate SRS Secret file, start SRS, run Podop and Postfix
+os.system("dd if=/dev/urandom bs=18 count=1 | base64 > /etc/postsrsd.secret")
+os.system("postsrsd -d " + os.environ["DOMAIN"] + " -s /etc/postsrsd.secret &")
 multiprocessing.Process(target=start_podop).start()
 if os.path.exists("/var/run/rsyslogd.pid"):
     os.remove("/var/run/rsyslogd.pid")

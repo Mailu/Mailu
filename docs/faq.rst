@@ -24,7 +24,7 @@ advice in the `Technical issues`_ section of this page.
 I think I found a bug!
 ``````````````````````
 
-If you did not manage to solve the issue using this FAQ and there is not any 
+If you did not manage to solve the issue using this FAQ and there is not any
 `open issues`_ describing the same problem, you can continue to open a
 `new issue`_ on GitHub.
 
@@ -64,7 +64,7 @@ We currently maintain a strict work flow:
 #. We use Travis-CI for some very basic building and testing;
 #. The pull request needs to be code-reviewed and tested by at least two members
    from the contributors team.
-  
+
 Please consider that this project is mostly developed in people their free time.
 We thank you for your understanding and patience.
 
@@ -139,7 +139,7 @@ Lets start with quoting everything that's wrong:
   It was added later and, while it has come a long way, is still not as usable as one would want.
   Much discussion is still going on as to how IPv6 should be used in a containerized world;
   See the various GitHub issues linked below:
-  
+
   - Giving each container a publicly routable address means all ports (even unexposed / unpublished ports) are suddenly
     reachable by everyone, if no additional filtering is done
     (`docker/docker#21614 <https://github.com/docker/docker/issues/21614>`_)
@@ -150,12 +150,12 @@ Lets start with quoting everything that's wrong:
     (which, for now, is enabled by default in Docker)
   - The userland proxy, however, seems to be on its way out
     (`docker/docker#14856 <https://github.com/docker/docker/issues/14856>`_) and has various issues, like:
-  
+
     - It can use a lot of RAM (`docker/docker#11185 <https://github.com/docker/docker/issues/11185>`_)
-    - Source IP addresses are rewritten, making it completely unusable for many purposes, e.g. mail servers 
+    - Source IP addresses are rewritten, making it completely unusable for many purposes, e.g. mail servers
       (`docker/docker#17666 <https://github.com/docker/docker/issues/17666>`_),
       (`docker/libnetwork#1099 <https://github.com/docker/libnetwork/issues/1099>`_).
-  
+
   -- `Robbert Klarenbeek <https://github.com/robbertkl>`_ (docker-ipv6nat author)
 
 So, how to make it work? Well, by using `docker-ipv6nat`_! This nifty container will set up ``ip6tables``,
@@ -241,6 +241,9 @@ correct syntax. The following file names will be taken as override configuration
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
 
 *Issue reference:* `206`_.
+
+ keep in mind, that commands from ``postfix.cf`` are injected via system call to ``postconf -e``
+ so symbols been used should be escaped
 
 I want to integrate Nextcloud with Mailu
 ````````````````````````````````````````

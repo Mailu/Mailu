@@ -245,9 +245,9 @@ correct syntax. The following file names will be taken as override configuration
 I want to integrate Nextcloud 15 (and newer) with Mailu
 ````````````````````````````````````````
 
-First of all you have to enable External user support from Nextcloud Apps interface
+1. Enable External user support from Nextcloud Apps interface
 
-In the end you need to configure additional user backends in Nextcloud’s configuration config/config.php using the following syntax if you use at least Nextcloud 15.
+2. Configure additional user backends in Nextcloud’s configuration config/config.php using the following syntax if you use at least Nextcloud 15.
 
 .. code-block:: bash
 
@@ -272,7 +272,7 @@ After successfull login the domain part will be striped and the rest used as use
 I want to integrate Nextcloud 14 (and older) with Mailu
 ````````````````````````````````````````
 
-First of all you have to install dependencies required to authenticate users via imap in Nextcloud
+1. Install dependencies required to authenticate users via imap in Nextcloud
 
 .. code-block:: bash
 
@@ -282,9 +282,9 @@ First of all you have to install dependencies required to authenticate users via
    && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
    && docker-php-ext-install imap
 
-Next, you have to enable External user support from Nextcloud Apps interface
+2. Enable External user support from Nextcloud Apps interface
 
-In the end you need to configure additional user backends in Nextcloud’s configuration config/config.php using the following syntax for Nextcloud 14 (and below):
+3. Configure additional user backends in Nextcloud’s configuration config/config.php using the following syntax for Nextcloud 14 (and below):
 
 .. code-block:: bash
 

@@ -242,7 +242,34 @@ correct syntax. The following file names will be taken as override configuration
 
 *Issue reference:* `206`_.
 
-I want to integrate Nextcloud with Mailu
+I want to integrate Nextcloud 15 (and newer) with Mailu
+````````````````````````````````````````
+
+First of all you have to enable External user support from Nextcloud Apps interface
+
+In the end you need to configure additional user backends in Nextcloud’s configuration config/config.php using the following syntax if you use at least Nextcloud 15.
+
+.. code-block:: bash
+
+  <?php
+
+  /** Use this for Nextcloud 15 and newer **/
+  'user_backends' => array(
+      array(
+          'class' => 'OC_User_IMAP',
+          'arguments' => array(
+            '127.0.0.1', 993, 'ssl', 'example.com', true, false
+        ),
+      ),
+  ),
+  
+
+If a domain name (e.g. example.com) is specified, then this makes sure that only users from this domain will be allowed to login.
+After successfull login the domain part will be striped and the rest used as username in NextCloud. e.g. 'username@example.com' will be 'username' in NextCloud. You can disable this behaviour by changing true (the fifth parameter) to false. 
+
+*Issue reference:* `575`_.
+
+I want to integrate Nextcloud 14 (and older) with Mailu
 ````````````````````````````````````````
 
 First of all you have to install dependencies required to authenticate users via imap in Nextcloud
@@ -257,25 +284,7 @@ First of all you have to install dependencies required to authenticate users via
 
 Next, you have to enable External user support from Nextcloud Apps interface
 
-In the end you need to configure additional user backends in Nextcloud’s configuration config/config.php using the following syntax if you use at least Nextcloud 15.
-
-.. code-block:: bash
-
-  <?php
-
-  /** Use this for Nextcloud 15 and newer **/
-  'user_backends' => array(
-      array(
-          'class' => 'OC_User_IMAP',
-          'arguments' => array(
-            '127.0.0.1', 993, 'ssl', 'example.com'
-        ),
-      ),
-  ),
-  
-
-For Nextcloud 14 and below use the following syntax:
-
+In the end you need to configure additional user backends in Nextcloud’s configuration config/config.php using the following syntax for Nextcloud 14 (and below):
 
 .. code-block:: bash
 

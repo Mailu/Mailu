@@ -265,7 +265,7 @@ I want to integrate Nextcloud 15 (and newer) with Mailu
   
 
 If a domain name (e.g. example.com) is specified, then this makes sure that only users from this domain will be allowed to login.
-After successfull login the domain part will be striped and the rest used as username in NextCloud. e.g. 'username@example.com' will be 'username' in NextCloud. Disable this behaviour by changing true (the fifth parameter) to false. 
+After successfull login the domain part will be striped and the rest used as username in Nextcloud. e.g. 'username@example.com' will be 'username' in Nextcloud. Disable this behaviour by changing true (the fifth parameter) to false. 
 
 *Issue reference:* `575`_.
 
@@ -301,7 +301,7 @@ I want to integrate Nextcloud 14 (and older) with Mailu
   ),
 
 If a domain name (e.g. example.com) is specified, then this makes sure that only users from this domain will be allowed to login.
-After successfull login the domain part will be striped and the rest used as username in NextCloud. e.g. 'username@example.com' will be 'username' in NextCloud.
+After successfull login the domain part will be striped and the rest used as username in Nextcloud. e.g. 'username@example.com' will be 'username' in Nextcloud.
 
 *Issue reference:* `575`_.
 

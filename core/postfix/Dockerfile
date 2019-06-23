@@ -9,7 +9,7 @@ RUN pip3 install git+https://github.com/usrpro/MailuStart.git#egg=mailustart
 RUN pip3 install podop
 # Image specific layers under this line
 
-RUN apk add --no-cache postfix postfix-pcre rsyslog
+RUN apk add --no-cache postfix postfix-pcre cyrus-sasl-plain rsyslog
 
 COPY conf /conf
 COPY start.py /start.py

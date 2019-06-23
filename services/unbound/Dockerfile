@@ -1,9 +1,9 @@
-FROM alpine:3.8
+FROM alpine:3.9
 # python3 shared with most images
 RUN apk add --no-cache \
     python3 py3-pip git bash \
   && pip3 install --upgrade pip
-# Shared layer between rspamd, postfix, dovecot, unbound and nginx
+# Shared layer between admin, rspamd, postfix, dovecot, unbound and nginx
 RUN pip3 install git+https://github.com/usrpro/MailuStart.git#egg=mailustart
 # Image specific layers under this line
 RUN apk add --no-cache unbound curl bind-tools \

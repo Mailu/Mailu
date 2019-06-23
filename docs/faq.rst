@@ -312,6 +312,11 @@ down and up again. A container restart is not sufficient.
 
 *Issue reference:* `615`_.
 
+Access Denied Errors
+--------------------
+
+While this may be due to several issues, check to make sure your ``DOMAIN=`` entry is the **first** entry in your ``HOSTNAMES=``.
+
 TLS certificate issues
 ``````````````````````
 

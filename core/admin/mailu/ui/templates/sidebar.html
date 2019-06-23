@@ -3,7 +3,7 @@
   <h4 class="text-center text-primary">{{ current_user }}</h4>
   {% endif %}
 
-  <ul class="sidebar-menu">
+  <ul class="sidebar-menu" data-widget="tree">
     {% if current_user.is_authenticated %}
     <li class="header">{% trans %}My account{% endtrans %}</li>
     <li>

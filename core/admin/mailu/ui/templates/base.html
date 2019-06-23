@@ -10,14 +10,14 @@
   <body class="hold-transition skin-blue sidebar-mini">
     <div class="wrapper">
       <header class="main-header">
-        <a href="{{ config["WEB_ADMIN"] }}" class="logo">
-          <span class="logo-lg">{{ config["SITENAME"] }}</span>
-        </a>
-        <a href="#" class="sidebar-toggle"  data-toggle="push-menu" role="button">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </a>
+        <div class="logo">
+          <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+            <span class="sr-only">Toggle navigation</span>
+          </a>
+          <a href="{{ config["WEB_ADMIN"] }}">
+            <span class="logo-lg">{{ config["SITENAME"] }}</span>
+          </a>
+        </div>
       </header>
       <aside class="main-sidebar">
         {% block sidebar %}

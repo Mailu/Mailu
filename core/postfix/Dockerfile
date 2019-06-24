@@ -4,7 +4,7 @@ RUN apk add --no-cache \
     python3 py3-pip git bash \
   && pip3 install --upgrade pip
 # Shared layer between admin, rspamd, postfix, dovecot, unbound and nginx
-RUN pip3 install git+https://github.com/usrpro/MailuStart.git#egg=mailustart
+RUN pip3 install git+https://github.com/Mailu/MailuStart.git#egg=mailustart
 # Shared layer between dovecot and postfix
 RUN pip3 install git+https://github.com/Nebukadneza/Podop.git@fix_py37
 # Image specific layers under this line

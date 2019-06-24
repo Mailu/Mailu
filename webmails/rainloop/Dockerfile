@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
  && apt-get purge -y unzip \
  && rm -rf /var/lib/apt/lists
  
- RUN pip3 install git+https://github.com/usrpro/MailuStart.git#egg=mailustart
+ RUN pip3 install git+https://github.com/Mailu/MailuStart.git#egg=mailustart
 
 COPY include.php /var/www/html/include.php
 COPY php.ini /php.ini

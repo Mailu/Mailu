@@ -4,7 +4,7 @@ FROM alpine:3.8 as builder
 # build dependencies
 RUN apk add --no-cache curl tar xz autoconf git gettext build-base openssl openssl-dev
 
-RUN curl -L 'https://netcologne.dl.sourceforge.net/project/fetchmail/branch_6.3/fetchmail-7.0.0-alpha6.tar.xz' | tar xJ
+RUN curl -L 'https://sourceforge.net/projects/fetchmail/files/branch_7-alpha/fetchmail-7.0.0-alpha6.tar.xz/download' | tar xJ
 RUN cd fetchmail-7.0.0-alpha6 && \
     ./configure --with-ssl --prefix /usr/local --disable-nls && \
     make

@@ -73,15 +73,17 @@ class ConfigManager(dict):
         'mysql': 'mysql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}'
     }
 
-    HOSTS = ('HOST_IMAP', 'HOST_POP3', 'HOST_AUTHSMTP', 'HOST_SMTP',
-             'HOST_WEBMAIL')
+    HOSTS = ('IMAP', 'POP3', 'AUTHSMTP', 'SMTP')
+    OPTIONAL_HOSTS = ('WEBMAIL', 'ANTISPAM')
 
     def __init__(self):
         self.config = dict()
 
     def resolve_host(self):
-        for item in self.HOSTS:
-            self.config[item] = system.resolve_address(self.config[item])
+        optional = [item for item in self.OPTIONAL_HOSTS if item in self.config]
+        for item in self.HOSTS + optional:
+            host = 'HOST_' + item
+            self.config[host] = system.resolve_address(self.config[host])
 
     def __coerce_value(self, value):
         if isinstance(value, str) and value.lower() in ('true','yes'):

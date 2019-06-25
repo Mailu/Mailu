@@ -6,7 +6,7 @@ RUN apk add --no-cache \
 # Shared layer between admin, rspamd, postfix, dovecot, unbound and nginx
 RUN pip3 install git+https://github.com/Mailu/MailuStart.git#egg=mailustart
 # Shared layer between dovecot and postfix
-RUN pip3 install git+https://github.com/Nebukadneza/Podop.git@fix_py37
+RUN pip3 install git+https://github.com/Mailu/Podop.git
 # Image specific layers under this line
 
 RUN apk add --no-cache postfix postfix-pcre cyrus-sasl-plain

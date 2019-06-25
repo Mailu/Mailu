@@ -4,7 +4,6 @@
 import asyncio
 import logging
 
-
 class NetstringProtocol(asyncio.Protocol):
     """ Netstring asyncio protocol implementation.
 
@@ -91,7 +90,7 @@ class SocketmapProtocol(NetstringProtocol):
         if space != -1:
             name = string[:space].decode('ascii')
             key = string[space+1:].decode('utf8')
-            return asyncio.async(self.process_request(name, key))
+            return asyncio.ensure_future(self.process_request(name, key))
 
     async def process_request(self, name, key):
         """ Process a request by querying the provided map.

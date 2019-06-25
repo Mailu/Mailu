@@ -50,7 +50,5 @@ for map_file in glob.glob("/overrides/*.map"):
 
 # Run Podop and Postfix
 multiprocessing.Process(target=start_podop).start()
-if os.path.exists("/var/run/rsyslogd.pid"):
-    os.remove("/var/run/rsyslogd.pid")
 os.system("/usr/libexec/postfix/post-install meta_directory=/etc/postfix create-missing")
 os.system("postfix start-fg")

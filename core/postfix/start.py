@@ -50,9 +50,7 @@ for map_file in glob.glob("/overrides/*.map"):
 
 if "RELAYUSER" in os.environ:
     path = "/etc/postfix/sasl_passwd"
-    fileContent = "{} {}:{}".format(os.environ["RELAYHOST"], os.environ["RELAYUSER"], os.environ["RELAYPASSWORD"])
-    with open(path, "w") as f:
-        f.write(fileContent)
+    convert("/conf/sasl_passwd", path)
     os.system("postmap {}".format(path))
 
 convert("/conf/rsyslog.conf", "/etc/rsyslog.conf")

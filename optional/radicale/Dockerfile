@@ -1,4 +1,5 @@
-FROM alpine:3.10
+ARG ALPINE_VERSION
+FROM alpine:$ALPINE_VERSION
 
 RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
  && apk add --no-cache radicale@testing curl bash

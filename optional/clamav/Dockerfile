@@ -1,4 +1,5 @@
-FROM alpine:3.10
+ARG ALPINE_VERSION
+FROM alpine:$ALPINE_VERSION
 # python3 shared with most images
 RUN apk add --no-cache \
     python3 py3-pip bash \

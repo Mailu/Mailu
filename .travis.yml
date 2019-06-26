@@ -15,6 +15,7 @@ addons:
 
 env:
   - MAILU_VERSION=${TRAVIS_BRANCH////-}
+  - ALPINE_VERSION=3.10
 
 language: python
 python:
@@ -26,7 +27,7 @@ install:
 
 before_script:
   - docker-compose -v
-  - docker-compose -f tests/build.yml build
+  - docker-compose -f tests/build.yml build --build-arg ALPINE_VERSION=${ALPINE_VERSION}
   - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
 
 

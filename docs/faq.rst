@@ -71,22 +71,15 @@ We thank you for your understanding and patience.
 I would like to donate (for a feature)
 ``````````````````````````````````````
 
-Donations are welcome at the `patreon`_ account of the project lead. It will be used to pay
-for infra structure and project related costs. If there are leftovers, it will be distributed
-among the developers.
-
-It is not yet possible to pay for a specific feature. We don't have
-any bounty system implemented. Feel free to come with suggestions in
-our ongoing `project management`_ discussion issue.
-
+Donations are welcome to the authors of the project directly, we do not manage any central
+donation pot. Also, check the ``AUTHORS.md`` file for Patreon link or equivalent. If you
+wish to contact a contributor specifically, please do so on `Matrix`_
 
 .. _`Matrix`: https://matrix.to/#/#mailu:tedomum.net
 .. _`open issues`: https://github.com/Mailu/Mailu/issues
 .. _`new issue`: https://github.com/Mailu/Mailu/issues/new
 .. _`Enhancement issues`: https://github.com/Mailu/Mailu/issues?q=is%3Aissue+is%3Aopen+label%3Atype%2Fenhancement
 .. _`Feature request issues`: https://github.com/Mailu/Mailu/issues?q=is%3Aopen+is%3Aissue+label%3Atype%2Ffeature
-.. _`patreon`: https://patreon.com/kaiyou
-.. _`project management`: https://github.com/Mailu/Mailu/issues/508
 
 Deployment related
 ------------------
@@ -249,10 +242,37 @@ correct syntax. The following file names will be taken as override configuration
 
 *Issue reference:* `206`_.
 
-I want to integrate Nextcloud with Mailu
+I want to integrate Nextcloud 15 (and newer) with Mailu
 ````````````````````````````````````````
 
-First of all you have to install dependencies required to authenticate users via imap in Nextcloud
+1. Enable External user support from Nextcloud Apps interface
+
+2. Configure additional user backends in Nextcloud’s configuration config/config.php using the following syntax if you use at least Nextcloud 15.
+
+.. code-block:: bash
+
+  <?php
+
+  /** Use this for Nextcloud 15 and newer **/
+  'user_backends' => array(
+      array(
+          'class' => 'OC_User_IMAP',
+          'arguments' => array(
+            '127.0.0.1', 993, 'ssl', 'example.com', true, false
+        ),
+      ),
+  ),
+  
+
+If a domain name (e.g. example.com) is specified, then this makes sure that only users from this domain will be allowed to login.
+After successfull login the domain part will be striped and the rest used as username in Nextcloud. e.g. 'username@example.com' will be 'username' in Nextcloud. Disable this behaviour by changing true (the fifth parameter) to false. 
+
+*Issue reference:* `575`_.
+
+I want to integrate Nextcloud 14 (and older) with Mailu
+````````````````````````````````````````
+
+1. Install dependencies required to authenticate users via imap in Nextcloud
 
 .. code-block:: bash
 
@@ -262,14 +282,15 @@ First of all you have to install dependencies required to authenticate users via
    && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
    && docker-php-ext-install imap
 
-Next, you have to enable External user support from Nextcloud Apps interface
+2. Enable External user support from Nextcloud Apps interface
 
-In the end you need to configure additional user backends in Nextcloud’s configuration config/config.php using the following syntax:
+3. Configure additional user backends in Nextcloud’s configuration config/config.php using the following syntax for Nextcloud 14 (and below):
 
 .. code-block:: bash
 
   <?php
 
+  /** Use this for Nextcloud 14 and older **/
   'user_backends' => array(
       array(
           'class' => 'OC_User_IMAP',
@@ -280,7 +301,7 @@ In the end you need to configure additional user backends in Nextcloud’s confi
   ),
 
 If a domain name (e.g. example.com) is specified, then this makes sure that only users from this domain will be allowed to login.
-After successfull login the domain part will be striped and the rest used as username in NextCloud. e.g. 'username@example.com' will be 'username' in NextCloud.
+After successfull login the domain part will be striped and the rest used as username in Nextcloud. e.g. 'username@example.com' will be 'username' in Nextcloud.
 
 *Issue reference:* `575`_.
 
@@ -318,6 +339,11 @@ down and up again. A container restart is not sufficient.
   docker-compose up -d
 
 *Issue reference:* `615`_.
+
+Access Denied Errors
+--------------------
+
+While this may be due to several issues, check to make sure your ``DOMAIN=`` entry is the **first** entry in your ``HOSTNAMES=``.
 
 TLS certificate issues
 ``````````````````````

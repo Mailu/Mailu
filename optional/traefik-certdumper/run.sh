@@ -2,25 +2,22 @@
 
 function dump() {
     echo "$(date) Dumping certificates"
-    bash dumpcerts.sh /traefik/acme.json /tmp/work/ || return
 
-    # private-keys are rsa, we need pem though
-    for key_file in $(ls /tmp/work/private/*); do
-        pem_file=$(echo $key_file | sed 's/private/pem/g' | sed 's/.key/-private.pem/g')
-        openssl rsa -in $key_file -text > $pem_file
-    done
+    traefik-certs-dumper dump --crt-name "cert" --crt-ext ".pem" --key-name "key" --key-ext ".pem" --domain-subdir=true --dest /tmp/work --source /traefik/acme.json > /dev/null
 
-    echo "$(date) Copying certificates"
-    cp -v /tmp/work/pem/${DOMAIN}-private.pem /output/key.pem
-    # the .crt is a chained-pem, as common for letsencrypt
-    cp -v /tmp/work/certs/${DOMAIN}.crt /output/cert.pem
+    if diff -q /tmp/work/${DOMAIN}/cert.pem /output/cert.pem >/dev/null && \
+	    diff -q /tmp/work/${DOMAIN}/key.pem /output/key.pem >/dev/null ; then
+	echo "$(date) Certificate and key still up to date, doing nothing"
+    else
+	echo "$(date) Certificate or key differ, updating"
+	mv /tmp/work/${DOMAIN}/*.pem /output/
+    fi
 }
 
-mkdir -p /tmp/work/pem /tmp/work/certs
-# run once on start to make sure we have any old certs
+mkdir -p /tmp/work
 dump
 
 while true; do
-    inotifywait -e modify /traefik/acme.json && \
-        dump
+    inotifywait -qq -e modify /traefik/acme.json
+    dump
 done

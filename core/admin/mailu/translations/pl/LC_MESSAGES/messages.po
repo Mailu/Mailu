@@ -194,6 +194,34 @@ msgstr "Twoje konto"
 msgid "to access the administration tools"
 msgstr ""
 
+#: mailu/ui/templates/services.html:4 mailu/ui/templates/sidebar.html:39
+msgid "Services status"
+msgstr "Status usług"
+
+#: mailu/ui/templates/services.html:10
+msgid "Service"
+msgstr "Usługa"
+
+#: mailu/ui/templates/fetch/list.html:23 mailu/ui/templates/services.html:11
+msgid "Status"
+msgstr "Status"
+
+#: mailu/ui/templates/services.html:12
+msgid "PID"
+msgstr "PID"
+
+#: mailu/ui/templates/services.html:13
+msgid "Image"
+msgstr ""
+
+#: mailu/ui/templates/services.html:14
+msgid "Started"
+msgstr ""
+
+#: mailu/ui/templates/services.html:15
+msgid "Last update"
+msgstr "Ostatnia aktualizacja"
+
 #: mailu/ui/templates/sidebar.html:8
 msgid "My account"
 msgstr "Moje konto"
@@ -296,7 +324,7 @@ msgstr "Dodaj alias"
 #: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:21
 #: mailu/ui/templates/user/list.html:24
 msgid "Created"
-msgstr ""
+msgstr "Utworzono"
 
 #: mailu/ui/templates/alias/list.html:23 mailu/ui/templates/domain/list.html:23
 #: mailu/ui/templates/fetch/list.html:25 mailu/ui/templates/relay/list.html:21
@@ -529,7 +557,7 @@ msgstr ""
 
 #: mailu/ui/templates/domain/list.html:39
 msgid "Alternatives"
-msgstr ""
+msgstr "Alternatywy"
 
 #: mailu/ui/templates/relay/create.html:4
 msgid "New relay domain"
@@ -577,7 +605,7 @@ msgstr ""
 
 #: mailu/ui/templates/token/list.html:12
 msgid "New token"
-msgstr ""
+msgstr "Nowy token"
 
 #: mailu/ui/templates/user/create.html:15
 msgid "General"
@@ -601,7 +629,7 @@ msgstr ""
 
 #: mailu/ui/forms.py:50
 msgid "Enable sign-up"
-msgstr ""
+msgstr "Włącz rejestrację"
 
 #: mailu/ui/forms.py:57
 msgid "Initial admin"
@@ -609,7 +637,7 @@ msgstr ""
 
 #: mailu/ui/forms.py:58
 msgid "Admin password"
-msgstr ""
+msgstr "hasło administratora"
 
 #: mailu/ui/forms.py:84
 msgid "Enabled"
@@ -635,19 +663,19 @@ msgstr ""
 
 #: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
 msgid "Mail protocol"
-msgstr ""
+msgstr "Protokół poczty"
 
 #: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
 msgid "Server name"
-msgstr ""
+msgstr "Nazwa serwera"
 
 #: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
 msgid "Register a domain"
-msgstr ""
+msgstr "Zarejestruj domenę"
 
 #: mailu/ui/templates/domain/details.html:17
 msgid "Generate keys"
-msgstr ""
+msgstr "Wygeneruj klucze"
 
 #: mailu/ui/templates/domain/signup.html:13
 msgid "In order to register a new domain, you must first setup the\n"
@@ -667,7 +695,7 @@ msgstr ""
 
 #: mailu/ui/templates/user/signup_domain.html:14
 msgid "Domain"
-msgstr ""
+msgstr "Domena"
 
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"

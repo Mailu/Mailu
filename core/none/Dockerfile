@@ -1,6 +1,5 @@
 # This is an idle image to dynamically replace any component if disabled.
 
-ARG ALPINE_VERSION
-FROM alpine:$ALPINE_VERSION
+FROM alpine:3.10
 
 CMD sleep 1000000d

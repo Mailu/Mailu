@@ -112,7 +112,7 @@ After cloning the git repository to your workstation, you can build the images:
 .. code-block:: bash
 
   cd Mailu
-  docker-compose -f tests/build.yml build --build-arg ALPINE_VERSION=3.10
+  docker-compose -f tests/build.yml build
 
 The ``build.yml`` file has two variables:
 
@@ -125,7 +125,7 @@ To re-build only specific containers at a later time.
 
 .. code-block:: bash
 
-  docker-compose -f tests/build.yml --build-arg ALPINE_VERSION=3.10 build admin webdav
+  docker-compose -f tests/build.yml build admin webdav
 
 If you have to push the images to Docker Hub for testing in Docker Swarm or a remote
 host, you have to define ``DOCKER_ORG`` (usually your Docker user-name) and login to
@@ -138,7 +138,7 @@ the hub.
   Password: Bar
   export DOCKER_ORG="Foo"
   export VERSION="feat-extra-app"
-  docker-compose -f tests/build.yml build --build-arg ALPINE_VERSION=3.10
+  docker-compose -f tests/build.yml build
   docker-compose -f tests/build.yml push
 
 Running containers

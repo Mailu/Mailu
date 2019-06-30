@@ -9,7 +9,7 @@ if [ "$TRAVIS_BRANCH" = "testing" ]; then
     # Commit message is like "Try #99".
     # This sets the version tag to "pr-99"
     export MAILU_VERSION="pr-${TRAVIS_COMMIT_MESSAGE//[!0-9]/}"
-    docker-compose -f tests/build.yml build
+    docker-compose -f tests/build.yml build --build-arg --build-arg ALPINE_VERSION=${ALPINE_VERSION}
 fi
 
 docker login -u $DOCKER_UN -p $DOCKER_PW

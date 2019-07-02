@@ -57,7 +57,8 @@ Docker services' outbound mail to be relayed, you can set this to ``172.16.0.0/1
 to include **all** Docker networks. The default is to leave this empty.
 
 The ``RELAYHOST`` is an optional address of a mail server relaying all outgoing
-mail.
+mail in following format: ``[HOST]:PORT``.
+``RELAYUSER`` and ``RELAYPASSWORD`` can be used when authentication is needed.
 
 The ``FETCHMAIL_DELAY`` is a delay (in seconds) for the fetchmail service to
 go and fetch new email if available. Do not use too short delays if you do not

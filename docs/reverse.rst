@@ -137,7 +137,7 @@ which will dump the certificates as ``PEM`` files, readable for Nginx. The ``fro
 
 To set this up, first set ``TLS_FLAVOR=mail`` in your ``.env``. This tells ``mailu/front`` not to try to request certificates using ``letsencrypt``,
 but to read provided certificates, and use them only for mail-protocols, not for ``HTTP``.
-Next, in your ``docker-compose.yml``, comment out the ``port`` lines of the ``front`` section for port ``…:80`` and ``…:440``.
+Next, in your ``docker-compose.yml``, comment out the ``port`` lines of the ``front`` section for port ``…:80`` and ``…:443``.
 Add the respective Traefik labels for your domain/configuration, like
 
 .. code-block:: yaml

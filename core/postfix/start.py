@@ -48,6 +48,11 @@ for map_file in glob.glob("/overrides/*.map"):
     os.system("postmap {}".format(destination))
     os.remove(destination)
 
+if "RELAYUSER" in os.environ:
+    path = "/etc/postfix/sasl_passwd"
+    convert("/conf/sasl_passwd", path)
+    os.system("postmap {}".format(path))
+
 convert("/conf/rsyslog.conf", "/etc/rsyslog.conf")
 
 # Run Podop and Postfix

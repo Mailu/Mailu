@@ -86,6 +86,26 @@ def user(localpart, domain_name, password, hash_scheme=None):
 
 
 @mailu.command()
+@click.argument('localpart')
+@click.argument('domain_name')
+@click.argument('password')
+@click.argument('hash_scheme', required=False)
+@flask_cli.with_appcontext
+def password(localpart, domain_name, password, hash_scheme=None):
+    """ Change the password of an user
+    """
+    email = '{0}@{1}'.format(localpart, domain_name)
+    user   = models.User.query.get(email)
+    if hash_scheme is None:
+        hash_scheme = app.config['PASSWORD_SCHEME']
+    if user:
+        user.set_password(password, hash_scheme=hash_scheme)
+    else:
+        print("User " + email + " not found.")
+    db.session.commit()
+
+
+@mailu.command()
 @click.argument('domain_name')
 @click.option('-u', '--max-users')
 @click.option('-a', '--max-aliases')

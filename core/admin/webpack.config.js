@@ -17,7 +17,6 @@ module.exports = {
             {
                 test: /\.js$/,
                 use: ['babel-loader']
-
             },
             {
                 test: /\.scss$/,
@@ -34,6 +33,17 @@ module.exports = {
             {
                 test: /\.woff($|\?)|\.woff2($|\?)|\.ttf($|\?)|\.eot($|\?)|\.svg($|\?)/,
                 use: ['url-loader']
+            },
+            {
+                // Exposes jQuery for use outside Webpack build
+                test: require.resolve('jquery'),
+                use: [{
+                    loader: 'expose-loader',
+                    options: 'jQuery'
+                }, {
+                    loader: 'expose-loader',
+                    options: '$'
+                }]
             }
         ]
     },

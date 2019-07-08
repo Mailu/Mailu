@@ -15,6 +15,7 @@
     "babel-loader": "^8.0.5",
     "bootstrap": "^3.4.1",
     "css-loader": "^2.1.1",
+    "expose-loader": "^0.7.5",
     "file-loader": "^3.0.1",
     "font-awesome": "^4.7.0",
     "font-awesome-loader": "^1.0.2",

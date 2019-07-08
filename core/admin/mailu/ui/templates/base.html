@@ -4,8 +4,7 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('.static', filename='vendor.css') }}">
-    <script src="{{ url_for('.static', filename='vendor.js') }}"></script>
-    <script src="{{ url_for('.static', filename='app.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('.static', filename='app.css') }}">
   </head>
   <body class="hold-transition skin-blue sidebar-mini">
     <div class="wrapper">
@@ -46,5 +45,7 @@
         <span class="pull-right"><i class="fa fa-code-fork"></i> on <a class="white-text" href="https://github.com/Mailu/Mailu">Github</a></a></span>
       </footer>
     </div>
+    <script src="{{ url_for('.static', filename='vendor.js') }}"></script>
+    <script src="{{ url_for('.static', filename='app.js') }}"></script>
   </body>
 </html>

@@ -6,6 +6,7 @@ Managing users and aliases can be done from CLI using commands:
 * alias
 * alias-delete
 * domain
+* password
 * user
 * user-import
 * user-delete
@@ -33,6 +34,14 @@ domain
 .. code-block:: bash
 
   docker-compose exec admin flask mailu domain example.net
+
+
+password
+--------
+
+.. code-block:: bash
+
+  docker-compose exec admin flask mailu password myuser example.net 'password123'
 
 
 user

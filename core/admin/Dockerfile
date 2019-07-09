@@ -11,13 +11,21 @@ RUN mkdir static \
 
 
 # Actual application
-FROM python:3.7
+FROM alpine:3.8
+# python3 shared with most images
+RUN apk add --no-cache \
+    python3 py3-pip git bash \
+  && pip3 install --upgrade pip
 
 RUN mkdir -p /app
 WORKDIR /app
 
 COPY requirements-prod.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN apk add --no-cache libressl curl postgresql-libs mariadb-connector-c \
+  && apk add --no-cache --virtual build-dep \
+  libressl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev \
+  && pip3 install -r requirements.txt \
+  && apk del --no-cache build-dep
 
 COPY --from=assets static ./mailu/ui/static
 COPY mailu ./mailu

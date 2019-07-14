@@ -1,72 +1,51 @@
-{% import "bootstrap/utils.html" as utils %}
 {% import "macros.html" as macros %}
-{% extends "bootstrap/base.html" %}
-
-{% block styles %}
-{{super()}}
-<link rel="stylesheet" href="{{ url_for('.static', filename='select2/css/select2.min.css') }}">
-<link rel="stylesheet" href="{{ url_for('.static', filename='fontawesome/css/font-awesome.min.css') }}">
-<link rel="stylesheet" href="{{ url_for('.static', filename='adminlte/css/AdminLTE.min.css') }}">
-<link rel="stylesheet" href="{{ url_for('.static', filename='adminlte/css/skin-blue.min.css') }}">
-<link rel="stylesheet" href="{{ url_for('.static', filename='app.css') }}">
-{% endblock %}
-
-{% block head %}
-{{super()}}
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/site.webmanifest">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-<meta name="msapplication-TileColor" content="#00aba9">
-<meta name="theme-color" content="#ffffff">
-{% block scripts %}
-{{super()}}
-<script src="{{ url_for('.static', filename='select2/js/select2.min.js') }}"></script>
-<script src="{{ url_for('.static', filename='adminlte/js/app.min.js') }}"></script>
-{% endblock %}
-{% endblock %}
-
-{% block body_attribs %}
-class="hold-transition skin-blue sidebar-mini"
-{% endblock %}
-
-{% block body %}
-  <div class="wrapper">
-    {% block navbar %}
-    <header class="main-header">
-      <a href="{{ config["WEB_ADMIN"] }}" class="logo">
-        <span class="logo-lg">{{ config["SITENAME"] }}</span>
-      </a>
-    </header>
-    <aside class="main-sidebar">
-      {% block sidebar %}
-      {% include "sidebar.html" %}
-      {% endblock %}
-    </aside>
-    {% endblock %}
-
-    <div class="content-wrapper">
-      <section class="content-header">
-        <div class="pull-right">
-          {% block main_action %}
-          {% endblock %}
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('.static', filename='vendor.css') }}">
+    <link rel="stylesheet" href="{{ url_for('.static', filename='app.css') }}">
+  </head>
+  <body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+      <header class="main-header">
+        <div class="logo">
+          <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+            <span class="sr-only">Toggle navigation</span>
+          </a>
+          <a href="{{ config["WEB_ADMIN"] }}">
+            <span class="logo-lg">{{ config["SITENAME"] }}</span>
+          </a>
         </div>
-        <h1>
-          {% block title %}{% endblock %}
-          <small>{% block subtitle %}{% endblock %}</small>
-        </h1>
-      </section>
+      </header>
+      <aside class="main-sidebar">
+        {% block sidebar %}
+        {% include "sidebar.html" %}
+        {% endblock %}
+      </aside>
+      <div class="content-wrapper">
+        <section class="content-header">
+          <div class="pull-right">
+            {% block main_action %}
+            {% endblock %}
+          </div>
+          <h1>
+            {% block title %}{% endblock %}
+            <small>{% block subtitle %}{% endblock %}</small>
+          </h1>
+        </section>
 
-      <section class="content">
-        {{ utils.flashed_messages(container=False) }}
-        {% block content %}{% endblock %}
-      </section>
+        <section class="content">
+          {% block content %}{% endblock %}
+        </section>
+      </div>
+      <footer class="main-footer">
+        Built with <i class="fa fa-heart"></i> using <a class="white-text" href="http://flask.pocoo.org/">Flask</a> and
+        <a class="white-text" href="https://almsaeedstudio.com/preview">AdminLTE</a>
+        <span class="pull-right"><i class="fa fa-code-fork"></i> on <a class="white-text" href="https://github.com/Mailu/Mailu">Github</a></a></span>
+      </footer>
     </div>
-    <footer class="main-footer">
-      Built with <i class="fa fa-heart"></i> using <a class="white-text" href="http://flask.pocoo.org/">Flask</a> and
-      <a class="white-text" href="https://almsaeedstudio.com/preview">AdminLTE</a>
-      <span class="pull-right"><i class="fa fa-code-fork"></i> on <a class="white-text" href="https://github.com/Mailu/Mailu">Github</a></a>
-    </footer>
-  </div>
-{% endblock %}
+    <script src="{{ url_for('.static', filename='vendor.js') }}"></script>
+    <script src="{{ url_for('.static', filename='app.js') }}"></script>
+  </body>
+</html>

@@ -31,14 +31,14 @@
   </div>
 {% endmacro %}
 
-{% macro form_individual_field(field, prepend='', append='', label=True) %}
+{% macro form_individual_field(field, prepend='', append='', label=True, class_="") %}
   {% if field.type == "BooleanField" %}
     {{ field(**kwargs) }}<span>&nbsp;&nbsp;</span>
     {{ field.label if label else '' }}
   {% else %}
     {{ field.label if label else '' }}{{ form_field_errors(field) }}
     {% if prepend or append %}<div class="input-group">{% endif %}
-      {{ prepend|safe }}{{ field(class_="form-control", **kwargs) }}{{ append|safe }}
+      {{ prepend|safe }}{{ field(class_="form-control " + class_, **kwargs) }}{{ append|safe }}
     {% if prepend or append %}</div>{% endif %}
   {% endif %}
 {% endmacro %}

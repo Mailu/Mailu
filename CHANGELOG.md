@@ -11,6 +11,7 @@ v1.6.1 - unreleased
 -------------------
 - Enhancement: Distinguish disabled user in user list view by row color
 - Enhancement: Make Unbound drop privileges after binding to port
+- Enhancement: Stop using static assets, but build them using Webpack
 - Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
 - Enhancement: Missing wildcard option in alias flask command ([#869](https://github.com/Mailu/Mailu/issues/869))
 - Bug: Fix creating new fetched accounts

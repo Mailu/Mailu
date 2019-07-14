@@ -10,6 +10,7 @@ Flask-debugtoolbar
 Flask-limiter
 redis
 WTForms-Components
+socrate
 passlib
 gunicorn
 tabulate
@@ -20,3 +21,4 @@ bcrypt
 tenacity
 mysqlclient
 psycopg2
+idna

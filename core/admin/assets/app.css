@@ -8,3 +8,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.sidebar-collapse .sidebar h4 {
+  display: none !important;
+}
+
+.logo a {
+  color: #fff;
+}
+
+.sidebar-toggle {
+  padding: unset !important;
+}

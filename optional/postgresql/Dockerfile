@@ -3,7 +3,7 @@ FROM alpine:3.10
 RUN apk add --no-cache \
     python3 py3-pip bash \
   && pip3 install --upgrade pip
-# Shared layer between rspamd, postfix, dovecot, unbound and nginx
+# Shared layer between rspamd, postfix, dovecot, unbound, rainloop, roundcube and nginx
 RUN pip3 install jinja2
 # Image specific layers under this line
 RUN apk add --no-cache \

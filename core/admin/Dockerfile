@@ -3,8 +3,6 @@ FROM alpine:3.10
 RUN apk add --no-cache \
     python3 py3-pip git bash \
   && pip3 install --upgrade pip
-# Shared layer between admin, rspamd, postfix, dovecot, unbound and nginx
-RUN pip3 install git+https://github.com/Mailu/MailuStart.git#egg=mailustart
 # Image specific layers under this line
 RUN mkdir -p /app
 WORKDIR /app

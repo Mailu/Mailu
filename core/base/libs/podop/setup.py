@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+from setuptools import setup
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
     name="podop",
-    version="0.2.4",
+    version="0.2.5",
     description="Postfix and Dovecot proxy",
     long_description=long_description,
     long_description_content_type="text/markdown",

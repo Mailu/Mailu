@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y \
  && chown -R www-data: logs temp \
  && rm -rf /var/lib/apt/lists
 
-# Shared layer between rspamd, postfix, dovecot, unbound, rainloop, roundcube and nginx
+# Shared layer between admin, rspamd, postfix, dovecot, unbound, rainloop, roundcube and nginx
 RUN pip3 install git+https://github.com/Mailu/MailuStart.git#egg=mailustart
 
 COPY php.ini /php.ini

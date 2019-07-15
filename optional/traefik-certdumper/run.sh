@@ -3,7 +3,7 @@
 function dump() {
     echo "$(date) Dumping certificates"
 
-    traefik-certs-dumper dump --crt-name "cert" --crt-ext ".pem" --key-name "key" --key-ext ".pem" --domain-subdir=true --dest /tmp/work --source /traefik/acme.json > /dev/null
+    traefik-certs-dumper file --crt-name "cert" --crt-ext ".pem" --key-name "key" --key-ext ".pem" --domain-subdir --dest /tmp/work --source /traefik/acme.json > /dev/null
 
     if diff -q /tmp/work/${DOMAIN}/cert.pem /output/cert.pem >/dev/null && \
 	    diff -q /tmp/work/${DOMAIN}/key.pem /output/key.pem >/dev/null ; then

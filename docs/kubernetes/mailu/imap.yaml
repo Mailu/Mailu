@@ -32,6 +32,7 @@ spec:
         ports:
           - containerPort: 2102
           - containerPort: 2525
+          - containerPort: 110
           - containerPort: 143
           - containerPort: 993
           - containerPort: 4190
@@ -68,6 +69,9 @@ spec:
     protocol: TCP
   - name: imap-transport
     port: 2525
+    protocol: TCP
+  - name: pop3
+    port: 110
     protocol: TCP
   - name: imap-default
     port: 143

@@ -44,7 +44,7 @@
 </tr>
 <tr>
   <th>{% trans %}DNS DKIM entry{% endtrans %}</th>
-  <td><pre style="white-space: pre-wrap; word-wrap: break-word;">{{ config["DKIM_SELECTOR"] }}._domainkey.{{ domain.name }}. IN 600 TXT "v=DKIM1; k=rsa; p={{ domain.dkim_publickey }}"</pre></td>
+  <td><pre style="white-space: pre-wrap; word-wrap: break-word;">{{ config["DKIM_SELECTOR"] }}._domainkey.{{ domain.name }}. 600 IN TXT "v=DKIM1; k=rsa; p={{ domain.dkim_publickey }}"</pre></td>
 </tr>
 <tr>
   <th>{% trans %}DNS DMARC entry{% endtrans %}</th>

@@ -1,11 +1,16 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: Mailu\n"
+"PO-Revision-Date: 2019-07-22 06:23+0000\n"
+"Last-Translator: kaiyou <pierre@jaury.eu>\n"
+"Language-Team: Italian <https://translate.tedomum.net/projects/mailu/admin/"
+"it/>\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: POEditor.com\n"
-"Project-Id-Version: Mailu\n"
-"Language: it\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.3\n"
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."
@@ -174,9 +179,8 @@ msgid "Confirm action"
 msgstr "Conferma azione"
 
 #: mailu/ui/templates/confirm.html:13
-#, fuzzy
 msgid "You are about to %(action)s. Please confirm your action."
-msgstr "Stai per %(action). Conferma la tua azione."
+msgstr "Stai per %(action)s. Conferma la tua azione."
 
 #: mailu/ui/templates/docker-error.html:4
 msgid "Docker error"
@@ -700,4 +704,3 @@ msgstr ""
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
 msgstr ""
-

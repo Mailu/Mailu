@@ -53,12 +53,7 @@ if "RELAYUSER" in os.environ:
     convert("/conf/sasl_passwd", path)
     os.system("postmap {}".format(path))
 
-convert("/conf/rsyslog.conf", "/etc/rsyslog.conf")
-
 # Run Podop and Postfix
 multiprocessing.Process(target=start_podop).start()
-if os.path.exists("/var/run/rsyslogd.pid"):
-    os.remove("/var/run/rsyslogd.pid")
-os.system("/usr/lib/postfix/post-install meta_directory=/etc/postfix create-missing")
-os.system("/usr/lib/postfix/master &")
-os.execv("/usr/sbin/rsyslogd", ["rsyslogd", "-n"])
+os.system("/usr/libexec/postfix/post-install meta_directory=/etc/postfix create-missing")
+os.system("postfix start-fg")

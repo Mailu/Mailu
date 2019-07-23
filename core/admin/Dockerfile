@@ -11,7 +11,7 @@ RUN mkdir static \
 
 
 # Actual application
-FROM alpine:3.8
+FROM alpine:3.10
 # python3 shared with most images
 RUN apk add --no-cache \
     python3 py3-pip git bash \
@@ -41,3 +41,4 @@ ENV FLASK_APP mailu
 CMD /start.py
 
 HEALTHCHECK CMD curl -f -L http://localhost/ui/login?next=ui.index || exit 1
+

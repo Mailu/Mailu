@@ -1,4 +1,4 @@
-FROM php:7.2-apache
+FROM php:7.3-apache
 #Shared layer between rainloop and roundcube
 RUN apt-get update && apt-get install -y \
   python3 curl python3-pip git \
@@ -22,7 +22,8 @@ RUN apt-get update && apt-get install -y \
  && apt-get purge -y unzip \
  && rm -rf /var/lib/apt/lists
 
- RUN pip3 install git+https://github.com/usrpro/MailuStart.git#egg=mailustart
+# Shared layer between rspamd, postfix, dovecot, unbound, rainloop, roundcube and nginx
+RUN pip3 install git+https://github.com/Mailu/MailuStart.git#egg=mailustart
 
 COPY include.php /var/www/html/include.php
 COPY php.ini /php.ini

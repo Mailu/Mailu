@@ -1,7 +1,7 @@
-FROM alpine:edge
+FROM alpine:3.10
 
 RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
- && apk add --no-cache radicale@testing py-dulwich@testing curl bash
+ && apk add --no-cache radicale@testing curl bash
 
 COPY radicale.conf /radicale.conf
 

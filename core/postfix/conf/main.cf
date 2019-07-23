@@ -2,6 +2,9 @@
 # General
 ###############
 
+# Logging configuration
+maillog_file = /dev/stdout
+
 # Main domain and hostname
 mydomain = {{ DOMAIN }}
 myhostname = {{ HOSTNAMES.split(",")[0] }}

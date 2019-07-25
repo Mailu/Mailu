@@ -30,9 +30,9 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}radicale:${MAILU_VERSION:-local}
     build: ../optional/radicale
 
-#  traefik-certdumper:
-#    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}traefik-certdumper:${MAILU_VERSION:-local}
-#    build: ../optional/traefik-certdumper
+  traefik-certdumper:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}traefik-certdumper:${MAILU_VERSION:-local}
+    build: ../optional/traefik-certdumper
 
   admin:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-local}

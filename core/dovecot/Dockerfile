@@ -3,10 +3,13 @@ FROM alpine:3.10
 RUN apk add --no-cache \
     python3 py3-pip git bash \
   && pip3 install --upgrade pip
-# Shared layer between rspamd, postfix, dovecot, unbound, rainloop, roundcube and nginx
-RUN pip3 install git+https://github.com/Mailu/MailuStart.git#egg=mailustart
+
+# Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
+RUN pip3 install socrate
+
 # Shared layer between dovecot and postfix
 RUN pip3 install "podop>0.2.5"
+
 # Image specific layers under this line
 RUN apk add --no-cache \
   dovecot dovecot-lmtpd dovecot-pop3d dovecot-submissiond dovecot-pigeonhole-plugin rspamd-client \

@@ -3,10 +3,10 @@
 import os
 import logging as log
 import sys
-from mailustart import convert
+from socrate import conf
 
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
-convert("/unbound.conf", "/etc/unbound/unbound.conf")
+conf.jinja("/unbound.conf", os.environ, "/etc/unbound/unbound.conf")
 
 os.execv("/usr/sbin/unbound", ["-c /etc/unbound/unbound.conf"])

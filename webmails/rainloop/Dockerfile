@@ -5,6 +5,9 @@ RUN apt-get update && apt-get install -y \
   && rm -rf /var/lib/apt/lists \
   && echo "ServerSignature Off" >> /etc/apache2/apache2.conf
 
+# Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
+RUN pip3 install socrate
+
 ENV RAINLOOP_URL https://github.com/RainLoop/rainloop-webmail/releases/download/v1.13.0/rainloop-community-1.13.0.zip
 
 RUN apt-get update && apt-get install -y \
@@ -21,9 +24,6 @@ RUN apt-get update && apt-get install -y \
  && chown -R www-data: * \
  && apt-get purge -y unzip \
  && rm -rf /var/lib/apt/lists
-
-# Shared layer between rspamd, postfix, dovecot, unbound, rainloop, roundcube and nginx
-RUN pip3 install git+https://github.com/Mailu/MailuStart.git#egg=mailustart
 
 COPY include.php /var/www/html/include.php
 COPY php.ini /php.ini

@@ -5,6 +5,9 @@ RUN apt-get update && apt-get install -y \
   && rm -rf /var/lib/apt/lists \
   && echo "ServerSignature Off" >> /etc/apache2/apache2.conf
 
+# Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
+RUN pip3 install socrate
+
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.3.9/roundcubemail-1.3.9-complete.tar.gz
 
 RUN apt-get update && apt-get install -y \
@@ -23,9 +26,6 @@ RUN apt-get update && apt-get install -y \
  && sed -i 's,mod_php5.c,mod_php7.c,g' .htaccess \
  && chown -R www-data: logs temp \
  && rm -rf /var/lib/apt/lists
-
-# Shared layer between rspamd, postfix, dovecot, unbound, rainloop, roundcube and nginx
-RUN pip3 install git+https://github.com/Mailu/MailuStart.git#egg=mailustart
 
 COPY php.ini /php.ini
 COPY config.inc.php /var/www/html/config/

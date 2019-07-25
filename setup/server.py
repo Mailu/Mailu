@@ -91,7 +91,7 @@ def build_app(path):
         data = flask.request.form.copy()
         data['uid'] = str(uuid.uuid4())
         try:
-            data['dns'] = str(ipaddress.IPv4Network(data['subnet'])[-2])
+            data['dns'] = str(ipaddress.IPv4Network(data['subnet'], strict=False)[-2])
         except ValueError as err:
             return "Error while generating files: " + str(err)
         db.set(data['uid'], json.dumps(data))

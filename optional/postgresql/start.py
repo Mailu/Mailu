@@ -6,6 +6,7 @@ import jinja2
 import glob
 import os
 import subprocess
+from socrate import conf
 
 def setup():
     conn =  psycopg2.connect(user='postgres')
@@ -47,9 +48,8 @@ os.system("mkdir -p /backup/wal_archive")
 os.system("chown -R postgres:postgres /backup")
 
 # Render config files
-convert = lambda src, dst: open(dst, "w").write(jinja2.Template(open(src).read()).render(**os.environ))
 for pg_file in glob.glob("/conf/*.conf"):
-    convert(pg_file, os.path.join("/data", os.path.basename(pg_file)))
+    conf.jinja(pg_file, os.environ, os.path.join("/data", os.path.basename(pg_file)))
 
 # (Re)start postgresql locally for DB and user creation
 os.system("sudo -u postgres pg_ctl start -D /data -o '-h \"''\" '")

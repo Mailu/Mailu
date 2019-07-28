@@ -3,13 +3,13 @@
 import os
 import logging as log
 import sys
-from mailustart import convert
+from socrate import conf
 
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
 os.environ["MAX_FILESIZE"] = str(int(int(os.environ.get("MESSAGE_SIZE_LIMIT"))*0.66/1048576))
 
-convert("/php.ini", "/usr/local/etc/php/conf.d/roundcube.ini")
+conf.jinja("/php.ini", os.environ, "/usr/local/etc/php/conf.d/roundcube.ini")
 
 # Fix some permissions
 os.system("mkdir -p /data/gpg")

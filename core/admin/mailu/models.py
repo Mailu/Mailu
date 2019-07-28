@@ -27,7 +27,10 @@ class IdnaDomain(db.TypeDecorator):
     impl = db.String(80)
 
     def process_bind_param(self, value, dialect):
-        return idna.encode(value).decode("ascii").lower()
+        try:
+            return idna.encode(value).decode("ascii").lower()
+        except ValueError:
+            pass
 
     def process_result_value(self, value, dialect):
         return idna.decode(value)

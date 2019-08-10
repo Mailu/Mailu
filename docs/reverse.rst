@@ -178,7 +178,7 @@ One such example is ``mailu/traefik-certdumper``, which has been adapted for use
     volumes:
       # Folder, which contains the acme.json
       - "/data/traefik:/traefik"
-      # Folder, where your.doma.in.crt and your.doma.in.key will be written
+      # Folder, where cert.pem and key.pem will be written
       - "/data/mailu/certs:/output"
 
 

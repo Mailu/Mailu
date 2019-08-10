@@ -179,17 +179,17 @@ One such example is ``mailu/traefik-certdumper``, which has been adapted for use
       # Folder, which contains the acme.json
       - "/data/traefik:/traefik"
       # Folder, where your.doma.in.crt and your.doma.in.key will be written
-      - "/data/traefik/certs:/output"
+      - "/data/mailu/certs:/output"
 
 
-Assuming you have ``volume-mounted`` your ``acme.json`` put to ``/data/traefik`` on your host. The dumper will then write out ``/data/traefik/certs/cert.pem`` and ``/data/traefik/certs/key.pem`` whenever ``acme.json`` is updated.
+Assuming you have ``volume-mounted`` your ``acme.json`` put to ``/data/traefik`` on your host. The dumper will then write out ``/data/mailu/certs/cert.pem`` and ``/data/mailu/certs/key.pem`` whenever ``acme.json`` is updated.
 Yay! Now let’s mount this to our ``front`` container like:
 
 .. code-block:: yaml
 
     volumes:
-      - /data/traefik/certs/$TRAEFIK_DOMAIN.crt:/certs/cert.pem
-      - /data/traefik/certs/$TRAEFIK_DOMAIN.key:/certs/key.pem
+      - /data/mailu/certs:/certs
+      - /data/mailu/certs:/certs
 
 This works, because we set ``TLS_FLAVOR=mail``, which picks up the key-certificate pair (e.g., ``cert.pem`` and ``key.pem``) from the certs folder in the root path (``/certs/``).
 

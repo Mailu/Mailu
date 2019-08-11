@@ -12,7 +12,7 @@ RUN pip3 install "podop>0.2.5"
 
 # Image specific layers under this line
 RUN apk add --no-cache \
-  dovecot dovecot-lmtpd dovecot-pop3d dovecot-submissiond dovecot-pigeonhole-plugin rspamd-client \
+  dovecot dovecot-lmtpd dovecot-pop3d dovecot-submissiond dovecot-pigeonhole-plugin dovecot-fts-solr rspamd-client \
   && mkdir /var/lib/dovecot
 
 COPY conf /conf

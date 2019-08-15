@@ -12,6 +12,7 @@ log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 os.environ["FRONT_ADDRESS"] = system.resolve_address(os.environ.get("FRONT_ADDRESS", "front"))
 
 if "HOST_REDIS" not in os.environ: os.environ["HOST_REDIS"] = "redis"
+if "HOST_ANTIVIRUS" not in os.environ: os.environ["HOST_ANTIVIRUS"] = "antivirus:3310"
 
 for rspamd_file in glob.glob("/conf/*"):
     conf.jinja(rspamd_file, os.environ, os.path.join("/etc/rspamd/local.d", os.path.basename(rspamd_file)))

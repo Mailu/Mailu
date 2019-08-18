@@ -189,7 +189,6 @@ Yay! Now let’s mount this to our ``front`` container like:
 
     volumes:
       - /data/mailu/certs:/certs
-      - /data/mailu/certs:/certs
 
 This works, because we set ``TLS_FLAVOR=mail``, which picks up the key-certificate pair (e.g., ``cert.pem`` and ``key.pem``) from the certs folder in the root path (``/certs/``).
 

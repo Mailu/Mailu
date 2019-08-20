@@ -42,7 +42,7 @@ def create_app_from_config(config):
 
     # Import views
     from mailu import ui, internal
-    app.register_blueprint(ui.ui, url_prefix='/ui')
+    app.register_blueprint(ui.ui, url_prefix=app.config.get('ADMIN_UI_PATH'))
     app.register_blueprint(internal.internal, url_prefix='/internal')
 
     return app

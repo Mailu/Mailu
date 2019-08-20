@@ -60,7 +60,8 @@ DEFAULT_CONFIG = {
     'HOST_FRONT': 'front',
     'HOST_AUTHSMTP': os.environ.get('HOST_SMTP', 'smtp'),
     'SUBNET': '192.168.203.0/24',
-    'POD_ADDRESS_RANGE': None
+    'POD_ADDRESS_RANGE': None,
+    'ADMIN_UI_PATH': os.environ.get('ADMIN_UI_PATH', '/ui'),
 }
 
 class ConfigManager(dict):

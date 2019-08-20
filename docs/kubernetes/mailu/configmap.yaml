@@ -117,9 +117,13 @@
     # Web settings
     ###################################
 
-    # Path to the admin interface if enabled
+    # Public path to the admin interface if enabled
     # Kubernetes addition: You need to change ALL the ingresses, when you want this URL to be different!!!
     WEB_ADMIN: "/admin"
+
+    # Path where the admin web interface is listening. Must be WEB_ADMIN followed by /ui to allow portable ingress definitions.
+    # Kubernetes addition: You need to change ALL the ingresses, when you want this URL to be different!!!
+    ADMIN_UI_PATH: "/admin/ui"
 
     # Path to the webmail if enabled
     # Currently, this is not used, because we intended to use a different subdomain: webmail.example.com

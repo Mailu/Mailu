@@ -40,6 +40,7 @@ html_context = {
     'versions': [
         ('1.5', '/1.5/'),
         ('1.6', '/1.6/'),
+        ('1.7', '/1.7/'),
         ('master', '/master/')
     ],
     'conf_py_path': '/docs/'

@@ -73,7 +73,7 @@ virtual_mailbox_maps = ${podop}mailbox
 # Mails are transported if required, then forwarded to Dovecot for delivery
 relay_domains = ${podop}transport
 transport_maps = ${podop}transport
-virtual_transport = lmtp:inet:{{ HOST_LMTP }}
+virtual_transport = lmtp:inet:{{ LMTP_ADDRESS }}
 
 # In order to prevent Postfix from running DNS query, enforce the use of the
 # native DNS stack, that will check /etc/hosts properly.
@@ -112,7 +112,7 @@ unverified_recipient_reject_reason = Address lookup failure
 # Milter
 ###############
 
-smtpd_milters = inet:{{ HOST_ANTISPAM }}
+smtpd_milters = inet:{{ ANTISPAM_ADDRESS }}
 milter_protocol = 6
 milter_mail_macros = i {mail_addr} {client_addr} {client_name} {auth_authen}
 milter_default_action = tempfail

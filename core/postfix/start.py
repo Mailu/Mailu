@@ -26,10 +26,10 @@ def start_podop():
     ])
 
 # Actual startup script
-os.environ["FRONT_ADDRESS"] = system.resolve_address(os.environ.get("FRONT_ADDRESS", "front"))
-os.environ["ADMIN_ADDRESS"] = system.resolve_address(os.environ.get("ADMIN_ADDRESS", "admin"))
-os.environ["HOST_ANTISPAM"] = system.resolve_address(os.environ.get("HOST_ANTISPAM", "antispam:11332"))
-os.environ["HOST_LMTP"] = system.resolve_address(os.environ.get("HOST_LMTP", "imap:2525"))
+os.environ["FRONT_ADDRESS"] = system.resolve_address(os.environ.get("HOST_FRONT", "front"))
+os.environ["ADMIN_ADDRESS"] = system.resolve_address(os.environ.get("HOST_ADMIN", "admin"))
+os.environ["ANTISPAM_ADDRESS"] = system.resolve_address(os.environ.get("HOST_ANTISPAM", "antispam:11332"))
+os.environ["LMTP_ADDRESS"] = system.resolve_address(os.environ.get("HOST_LMTP", "imap:2525"))
 
 for postfix_file in glob.glob("/conf/*.cf"):
     conf.jinja(postfix_file, os.environ, os.path.join("/etc/postfix", os.path.basename(postfix_file)))

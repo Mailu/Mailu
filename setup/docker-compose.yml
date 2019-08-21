@@ -1,13 +1,16 @@
-# This file is used to run the mailu/setup utility
+# This file is used to test the mailu/setup utility
+# Deployment files can be found on github.com/mailu/infra
 
-version: '2'
+version: '3.6'
 
 services:
   redis:
     image: redis:alpine
 
   setup:
-    image: mailu/setup
+    image: ${DOCKER_ORG:-mailu}/setup:${MAILU_VERSION:-master}
+    env_file: .env
+    depends_on:
+      - redis
     ports:
-      - "80:80"
-
+      - 127.0.0.1:8001:80

@@ -3,6 +3,8 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
 import logging
+import tenacity
+from tenacity import retry
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -20,7 +22,9 @@ logger = logging.getLogger('alembic.env')
 from flask import current_app
 config.set_main_option('sqlalchemy.url',
                        current_app.config.get('SQLALCHEMY_DATABASE_URI'))
-target_metadata = current_app.extensions['migrate'].db.metadata
+#target_metadata = current_app.extensions['migrate'].db.metadata
+from mailu import models
+target_metadata = models.Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -69,7 +73,14 @@ def run_migrations_online():
                                 prefix='sqlalchemy.',
                                 poolclass=pool.NullPool)
 
-    connection = engine.connect()
+    connection = tenacity.Retrying(
+        stop=tenacity.stop_after_attempt(100),
+        wait=tenacity.wait_random(min=2, max=5),
+        before=tenacity.before_log(logging.getLogger("tenacity.retry"), logging.DEBUG),
+        before_sleep=tenacity.before_sleep_log(logging.getLogger("tenacity.retry"), logging.INFO),
+        after=tenacity.after_log(logging.getLogger("tenacity.retry"), logging.DEBUG)
+        ).call(engine.connect)
+
     context.configure(connection=connection,
                       target_metadata=target_metadata,
                       process_revision_directives=process_revision_directives,

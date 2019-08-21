@@ -1,11 +1,13 @@
-from mailu import app, db, dkim, login_manager, quota
+from mailu import dkim
 
 from sqlalchemy.ext import declarative
 from passlib import context, hash
 from datetime import datetime, date
 from email.mime import text
+from flask import current_app as app
 
-
+import flask_sqlalchemy
+import sqlalchemy
 import re
 import time
 import os
@@ -15,6 +17,9 @@ import idna
 import dns
 
 
+db = flask_sqlalchemy.SQLAlchemy()
+
+
 class IdnaDomain(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
@@ -22,7 +27,7 @@ class IdnaDomain(db.TypeDecorator):
     impl = db.String(80)
 
     def process_bind_param(self, value, dialect):
-        return idna.encode(value).decode("ascii")
+        return idna.encode(value).decode("ascii").lower()
 
     def process_result_value(self, value, dialect):
         return idna.decode(value)
@@ -32,14 +37,17 @@ class IdnaEmail(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
 
-    impl = db.String(255, collation="NOCASE")
+    impl = db.String(255)
 
     def process_bind_param(self, value, dialect):
-        localpart, domain_name = value.split('@')
-        return "{0}@{1}".format(
-            localpart,
-            idna.encode(domain_name).decode('ascii'),
-        )
+        try:
+            localpart, domain_name = value.split('@')
+            return "{0}@{1}".format(
+                localpart,
+                idna.encode(domain_name).decode('ascii'),
+            ).lower()
+        except ValueError:
+            pass
 
     def process_result_value(self, value, dialect):
         localpart, domain_name = value.split('@')
@@ -64,14 +72,20 @@ class CommaSeparatedList(db.TypeDecorator):
         return ",".join(value)
 
     def process_result_value(self, value, dialect):
-        return filter(bool, value.split(","))
+        return list(filter(bool, value.split(","))) if value else []
 
 
-# Many-to-many association table for domain managers
-managers = db.Table('manager',
-    db.Column('domain_name', IdnaDomain, db.ForeignKey('domain.name')),
-    db.Column('user_email', IdnaEmail, db.ForeignKey('user.email'))
-)
+class JSONEncoded(db.TypeDecorator):
+    """Represents an immutable structure as a json-encoded string.
+    """
+
+    impl = db.String
+
+    def process_bind_param(self, value, dialect):
+        return json.dumps(value) if value else None
+
+    def process_result_value(self, value, dialect):
+        return json.loads(value) if value else None
 
 
 class Base(db.Model):
@@ -80,9 +94,31 @@ class Base(db.Model):
 
     __abstract__ = True
 
-    created_at = db.Column(db.Date, nullable=False, default=datetime.now)
-    updated_at = db.Column(db.Date, nullable=True, onupdate=datetime.now)
+    metadata = sqlalchemy.schema.MetaData(
+        naming_convention={
+            "fk": "%(table_name)s_%(column_0_name)s_fkey",
+            "pk": "%(table_name)s_pkey"
+        }
+    )
+
+    created_at = db.Column(db.Date, nullable=False, default=date.today)
+    updated_at = db.Column(db.Date, nullable=True, onupdate=date.today)
     comment = db.Column(db.String(255), nullable=True)
+
+
+# Many-to-many association table for domain managers
+managers = db.Table('manager', Base.metadata,
+    db.Column('domain_name', IdnaDomain, db.ForeignKey('domain.name')),
+    db.Column('user_email', IdnaEmail, db.ForeignKey('user.email'))
+)
+
+
+class Config(Base):
+    """ In-database configuration values
+    """
+
+    name = db.Column(db.String(255), primary_key=True, nullable=False)
+    value = db.Column(JSONEncoded)
 
 
 class Domain(Base):
@@ -93,9 +129,9 @@ class Domain(Base):
     name = db.Column(IdnaDomain, primary_key=True, nullable=False)
     managers = db.relationship('User', secondary=managers,
         backref=db.backref('manager_of'), lazy='dynamic')
-    max_users = db.Column(db.Integer, nullable=False, default=0)
-    max_aliases = db.Column(db.Integer, nullable=False, default=0)
-    max_quota_bytes = db.Column(db.Integer(), nullable=False, default=0)
+    max_users = db.Column(db.Integer, nullable=False, default=-1)
+    max_aliases = db.Column(db.Integer, nullable=False, default=-1)
+    max_quota_bytes = db.Column(db.BigInteger(), nullable=False, default=0)
     signup_enabled = db.Column(db.Boolean(), nullable=False, default=False)
 
     @property
@@ -172,7 +208,7 @@ class Relay(Base):
 
     __tablename__ = "relay"
 
-    name = db.Column(db.String(80), primary_key=True, nullable=False)
+    name = db.Column(IdnaDomain, primary_key=True, nullable=False)
     smtp = db.Column(db.String(80), nullable=True)
 
     def __str__(self):
@@ -221,6 +257,43 @@ class Email(object):
             msg['To'] = to_address
             smtp.sendmail(from_address, [to_address], msg.as_string())
 
+    @classmethod
+    def resolve_domain(cls, email):
+        localpart, domain_name = email.split('@', 1) if '@' in email else (None, email)
+        alternative = Alternative.query.get(domain_name)
+        if alternative:
+            domain_name = alternative.domain_name
+        return (localpart, domain_name)
+
+    @classmethod
+    def resolve_destination(cls, localpart, domain_name, ignore_forward_keep=False):
+        localpart_stripped = None
+        stripped_alias = None
+
+        if os.environ.get('RECIPIENT_DELIMITER') in localpart:
+            localpart_stripped = localpart.rsplit(os.environ.get('RECIPIENT_DELIMITER'), 1)[0]
+
+        user = User.query.get('{}@{}'.format(localpart, domain_name))
+        if not user and localpart_stripped:
+            user = User.query.get('{}@{}'.format(localpart_stripped, domain_name))
+        if user:
+            if user.forward_enabled:
+                destination = user.forward_destination
+                if user.forward_keep or ignore_forward_keep:
+                    destination.append(user.email)
+            else:
+                destination = [user.email]
+            return destination
+
+        pure_alias = Alias.resolve(localpart, domain_name)
+        stripped_alias = Alias.resolve(localpart_stripped, domain_name)
+
+        if pure_alias and not pure_alias.wildcard:
+            return pure_alias.destination
+        elif stripped_alias:
+            return stripped_alias.destination
+        elif pure_alias:
+            return pure_alias.destination
 
     def __str__(self):
         return self.email
@@ -234,7 +307,8 @@ class User(Base, Email):
     domain = db.relationship(Domain,
         backref=db.backref('users', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
-    quota_bytes = db.Column(db.Integer(), nullable=False, default=10**9)
+    quota_bytes = db.Column(db.BigInteger(), nullable=False, default=10**9)
+    quota_bytes_used = db.Column(db.BigInteger(), nullable=False, default=0)
     global_admin = db.Column(db.Boolean(), nullable=False, default=False)
     enabled = db.Column(db.Boolean(), nullable=False, default=True)
 
@@ -244,18 +318,20 @@ class User(Base, Email):
 
     # Filters
     forward_enabled = db.Column(db.Boolean(), nullable=False, default=False)
-    forward_destination = db.Column(db.String(255), nullable=True, default=None)
+    forward_destination = db.Column(CommaSeparatedList(), nullable=True, default=[])
     forward_keep = db.Column(db.Boolean(), nullable=False, default=True)
     reply_enabled = db.Column(db.Boolean(), nullable=False, default=False)
     reply_subject = db.Column(db.String(255), nullable=True, default=None)
     reply_body = db.Column(db.Text(), nullable=True, default=None)
+    reply_startdate = db.Column(db.Date, nullable=False,
+        default=date(1900, 1, 1))
     reply_enddate = db.Column(db.Date, nullable=False,
         default=date(2999, 12, 31))
 
     # Settings
     displayed_name = db.Column(db.String(160), nullable=False, default="")
     spam_enabled = db.Column(db.Boolean(), nullable=False, default=True)
-    spam_threshold = db.Column(db.Integer(), nullable=False, default=80.0)
+    spam_threshold = db.Column(db.Integer(), nullable=False, default=80)
 
     # Flask-login attributes
     is_authenticated = True
@@ -266,31 +342,58 @@ class User(Base, Email):
         return self.email
 
     @property
-    def quota_bytes_used(self):
-        return quota.get(self.email + "/quota/storage") or 0
+    def destination(self):
+        if self.forward_enabled:
+            result = self.forward_destination
+            if self.forward_keep:
+                result += ',' + self.email
+            return result
+        else:
+            return self.email
 
-    scheme_dict = {'SHA512-CRYPT': "sha512_crypt",
+    @property
+    def reply_active(self):
+        now = date.today()
+        return (
+            self.reply_enabled and
+            self.reply_startdate < now and
+            self.reply_enddate > now
+        )
+
+    scheme_dict = {'PBKDF2': "pbkdf2_sha512",
+                   'BLF-CRYPT': "bcrypt",
+                   'SHA512-CRYPT': "sha512_crypt",
                    'SHA256-CRYPT': "sha256_crypt",
                    'MD5-CRYPT': "md5_crypt",
                    'CRYPT': "des_crypt"}
-    pw_context = context.CryptContext(
-        schemes = scheme_dict.values(),
-        default=scheme_dict[app.config['PASSWORD_SCHEME']],
-    )
+
+    def get_password_context(self):
+        return context.CryptContext(
+            schemes=self.scheme_dict.values(),
+            default=self.scheme_dict[app.config['PASSWORD_SCHEME']],
+        )
 
     def check_password(self, password):
+        context = self.get_password_context()
         reference = re.match('({[^}]+})?(.*)', self.password).group(2)
-        return User.pw_context.verify(password, reference)
+        result = context.verify(password, reference)
+        if result and context.identify(reference) != context.default_scheme():
+            self.set_password(password)
+            db.session.add(self)
+            db.session.commit()
+        return result
 
-    def set_password(self, password, hash_scheme=app.config['PASSWORD_SCHEME'], raw=False):
+    def set_password(self, password, hash_scheme=None, raw=False):
         """Set password for user with specified encryption scheme
            @password: plain text password to encrypt (if raw == True the hash itself)
         """
+        if hash_scheme is None:
+            hash_scheme = app.config['PASSWORD_SCHEME']
         # for the list of hash schemes see https://wiki2.dovecot.org/Authentication/PasswordSchemes
         if raw:
             self.password = '{'+hash_scheme+'}' + password
         else:
-            self.password = '{'+hash_scheme+'}' + User.pw_context.encrypt(password, self.scheme_dict[hash_scheme])
+            self.password = '{'+hash_scheme+'}' + self.get_password_context().encrypt(password, self.scheme_dict[hash_scheme])
 
     def get_managed_domains(self):
         if self.global_admin:
@@ -307,16 +410,18 @@ class User(Base, Email):
         return emails
 
     def send_welcome(self):
-        if app.config["WELCOME"].lower() == "true":
+        if app.config["WELCOME"]:
             self.sendmail(app.config["WELCOME_SUBJECT"],
                 app.config["WELCOME_BODY"])
+
+    @classmethod
+    def get(cls, email):
+        return cls.query.get(email)
 
     @classmethod
     def login(cls, email, password):
         user = cls.query.get(email)
         return user if (user and user.enabled and user.check_password(password)) else None
-
-login_manager.user_loader(User.query.get)
 
 
 class Alias(Base, Email):
@@ -329,6 +434,39 @@ class Alias(Base, Email):
     wildcard = db.Column(db.Boolean(), nullable=False, default=False)
     destination = db.Column(CommaSeparatedList, nullable=False, default=[])
 
+    @classmethod
+    def resolve(cls, localpart, domain_name):
+        alias_preserve_case = cls.query.filter(
+                sqlalchemy.and_(cls.domain_name == domain_name,
+                    sqlalchemy.or_(
+                        sqlalchemy.and_(
+                            cls.wildcard == False,
+                            cls.localpart == localpart
+                        ), sqlalchemy.and_(
+                            cls.wildcard == True,
+                            sqlalchemy.bindparam("l", localpart).like(cls.localpart)
+                        )
+                    )
+                )
+            ).order_by(cls.wildcard, sqlalchemy.func.char_length(cls.localpart).desc()).first()
+        if alias_preserve_case:
+            return alias_preserve_case
+
+        if localpart:
+            localpart = localpart.lower()
+        return cls.query.filter(
+                sqlalchemy.and_(cls.domain_name == domain_name,
+                    sqlalchemy.or_(
+                        sqlalchemy.and_(
+                            cls.wildcard == False,
+                            sqlalchemy.func.lower(cls.localpart) == localpart
+                        ), sqlalchemy.and_(
+                            cls.wildcard == True,
+                            sqlalchemy.bindparam("l", localpart).like(sqlalchemy.func.lower(cls.localpart))
+                        )
+                    )
+                )
+            ).order_by(cls.wildcard, sqlalchemy.func.char_length(sqlalchemy.func.lower(cls.localpart)).desc()).first()
 
 class Token(Base):
     """ A token is an application password for a given user.

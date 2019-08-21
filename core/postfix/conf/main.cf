@@ -2,6 +2,9 @@
 # General
 ###############
 
+# Logging configuration
+maillog_file = /dev/stdout
+
 # Main domain and hostname
 mydomain = {{ DOMAIN }}
 myhostname = {{ HOSTNAMES.split(",")[0] }}
@@ -14,25 +17,31 @@ queue_directory = /queue
 message_size_limit = {{ MESSAGE_SIZE_LIMIT }}
 
 # Relayed networks
-mynetworks = 127.0.0.1/32 [::1]/128 {{ RELAYNETS }}
+mynetworks = 127.0.0.1/32 [::1]/128 {{ SUBNET }} {{ RELAYNETS }}
 
 # Empty alias list to override the configuration variable and disable NIS
 alias_maps =
 
-# SQLite configuration
-sql = sqlite:${config_directory}/
+# Podop configuration
+podop = socketmap:unix:/tmp/podop.socket:
 
 # Only accept virtual emails
 mydestination =
 
 # Relayhost if any is configured
 relayhost = {{ RELAYHOST }}
+{% if RELAYUSER %}
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
+{% endif %}
 
 # Recipient delimiter for extended addresses
 recipient_delimiter = {{ RECIPIENT_DELIMITER }}
 
 # Only the front server is allowed to perform xclient
-smtpd_authorized_xclient_hosts={{ FRONT_ADDRESS }}
+# In kubernetes and Docker swarm, such address cannot be determined using the hostname. Allow for the whole Mailu subnet instead.
+smtpd_authorized_xclient_hosts={{ POD_ADDRESS_RANGE or SUBNET }}
 
 ###############
 # TLS
@@ -56,13 +65,14 @@ smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
 # The alias map actually returns both aliases and local mailboxes, which is
 # required for reject_unlisted_sender to work properly
-virtual_alias_maps = ${sql}sqlite-virtual_alias_maps.cf
-virtual_mailbox_domains = ${sql}sqlite-virtual_mailbox_domains.cf
-virtual_mailbox_maps = $virtual_alias_maps
+virtual_alias_domains =
+virtual_alias_maps = ${podop}alias
+virtual_mailbox_domains = ${podop}domain
+virtual_mailbox_maps = ${podop}mailbox
 
 # Mails are transported if required, then forwarded to Dovecot for delivery
-relay_domains = ${sql}sqlite-transport.cf
-transport_maps = ${sql}sqlite-transport.cf
+relay_domains = ${podop}transport
+transport_maps = ${podop}transport
 virtual_transport = lmtp:inet:{{ HOST_LMTP }}
 
 # In order to prevent Postfix from running DNS query, enforce the use of the
@@ -77,19 +87,24 @@ lmtp_host_lookup = native
 smtpd_delay_reject = yes
 
 # Allowed senders are: the user or one of the alias destinations
-smtpd_sender_login_maps = $virtual_alias_maps
+smtpd_sender_login_maps = ${podop}senderlogin
 
 # Restrictions for incoming SMTP, other restrictions are applied in master.cf
 smtpd_helo_required = yes
 
-smtpd_recipient_restrictions =
+smtpd_client_restrictions =
   permit_mynetworks,
-  check_sender_access ${sql}sqlite-reject-spoofed.cf,
+  check_sender_access ${podop}senderaccess,
   reject_non_fqdn_sender,
   reject_unknown_sender_domain,
   reject_unknown_recipient_domain,
   reject_unverified_recipient,
   permit
+
+smtpd_relay_restrictions =
+  permit_mynetworks,
+  permit_sasl_authenticated,
+  reject_unauth_destination
 
 unverified_recipient_reject_reason = Address lookup failure
 
@@ -105,3 +120,4 @@ milter_default_action = tempfail
 ###############
 # Extra Settings
 ###############
+

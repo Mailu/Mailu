@@ -193,6 +193,34 @@ msgstr "Sua conta"
 msgid "to access the administration tools"
 msgstr "para acessar as ferramentas administrativas"
 
+#: mailu/ui/templates/services.html:4 mailu/ui/templates/sidebar.html:39
+msgid "Services status"
+msgstr "Status do serviço"
+
+#: mailu/ui/templates/services.html:10
+msgid "Service"
+msgstr "Serviço"
+
+#: mailu/ui/templates/fetch/list.html:23 mailu/ui/templates/services.html:11
+msgid "Status"
+msgstr "Status"
+
+#: mailu/ui/templates/services.html:12
+msgid "PID"
+msgstr "PID"
+
+#: mailu/ui/templates/services.html:13
+msgid "Image"
+msgstr "Imagem"
+
+#: mailu/ui/templates/services.html:14
+msgid "Started"
+msgstr "Iniciado"
+
+#: mailu/ui/templates/services.html:15
+msgid "Last update"
+msgstr "Última atualização"
+
 #: mailu/ui/templates/sidebar.html:8
 msgid "My account"
 msgstr "Minha conta"
@@ -548,127 +576,128 @@ msgstr "Novo domínio de encaminhamento"
 
 #: mailu/ui/forms.py:125
 msgid "Your token (write it down, as it will never be displayed again)"
-msgstr ""
+msgstr "Token (anote sem algum lugar pois não será mais exibido)\n"
+""
 
 #: mailu/ui/forms.py:130 mailu/ui/templates/token/list.html:20
 msgid "Authorized IP"
-msgstr ""
+msgstr "IP autorizado"
 
 #: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/token/list.html:4
 msgid "Authentication tokens"
-msgstr ""
+msgstr "Tokens de autenticação"
 
 #: mailu/ui/templates/sidebar.html:72
 msgid "Go to"
-msgstr ""
+msgstr "Ir para"
 
 #: mailu/ui/templates/sidebar.html:76
 msgid "Webmail"
-msgstr ""
+msgstr "Webmail"
 
 #: mailu/ui/templates/sidebar.html:87
 msgid "Website"
-msgstr ""
+msgstr "Website"
 
 #: mailu/ui/templates/token/create.html:4
 msgid "Create an authentication token"
-msgstr ""
+msgstr "Criar token de autenticação"
 
 #: mailu/ui/templates/token/list.html:12
 msgid "New token"
-msgstr ""
+msgstr "Novo token"
 
 #: mailu/ui/templates/user/create.html:15
 msgid "General"
-msgstr ""
+msgstr "Geral"
 
 #: mailu/ui/templates/user/create.html:22
 msgid "Features and quotas"
-msgstr ""
+msgstr "Recursos e quotas"
 
 #: mailu/ui/templates/user/settings.html:14
 msgid "General settings"
-msgstr ""
+msgstr "Configurações"
 
 #: mailu/ui/templates/sidebar.html:59 mailu/ui/templates/user/settings.html:15
 msgid "Antispam"
-msgstr ""
+msgstr "Antispam"
 
 #: mailu/ui/forms.py:99
 msgid "Spam filter tolerance"
-msgstr ""
+msgstr "Filtro de tolerância de spam"
 
 #: mailu/ui/forms.py:50
 msgid "Enable sign-up"
-msgstr ""
+msgstr "Habilitar acesso"
 
 #: mailu/ui/forms.py:57
 msgid "Initial admin"
-msgstr ""
+msgstr "Administrador"
 
 #: mailu/ui/forms.py:58
 msgid "Admin password"
-msgstr ""
+msgstr "Senha administrador"
 
 #: mailu/ui/forms.py:84
 msgid "Enabled"
-msgstr ""
+msgstr "Habilitado"
 
 #: mailu/ui/forms.py:89
 msgid "Email address"
-msgstr ""
+msgstr "Endereço de email"
 
 #: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
 #: mailu/ui/templates/user/signup.html:4
 #: mailu/ui/templates/user/signup_domain.html:4
 msgid "Sign up"
-msgstr ""
+msgstr "Acesso"
 
 #: mailu/ui/forms.py:119
 msgid "End of vacation"
-msgstr ""
+msgstr "Conclusão das férias"
 
 #: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:82
 msgid "Client setup"
-msgstr ""
+msgstr "Configuração"
 
 #: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
 msgid "Mail protocol"
-msgstr ""
+msgstr "Protocolo de e-mail"
 
 #: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
 msgid "Server name"
-msgstr ""
+msgstr "Servidor"
 
 #: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
 msgid "Register a domain"
-msgstr ""
+msgstr "Registrar domínio"
 
 #: mailu/ui/templates/domain/details.html:17
 msgid "Generate keys"
-msgstr ""
+msgstr "Gerar chaves"
 
 #: mailu/ui/templates/domain/signup.html:13
 msgid "In order to register a new domain, you must first setup the\n"
 "    domain zone so that the domain <code>MX</code> points to this server"
-msgstr ""
+msgstr "Para registar um novo domínio, e necessário configurar as entradas <code>MX</code> no DNS"
 
 #: mailu/ui/templates/domain/signup.html:18
 msgid "If you do not know how to setup an <code>MX</code> record for your DNS zone,\n"
 "    please contact your DNS provider or administrator. Also, please wait a\n"
 "    couple minutes after the <code>MX</code> is set so the local server cache\n"
 "    expires."
-msgstr ""
+msgstr "Caso não saiba configurar os registros <code>MX</code>no DNS, entre well contato com o administrador do domínio. Aos configurado, ajude alguns minutos até que o cachê local do servidor expire"
 
 #: mailu/ui/templates/user/signup_domain.html:8
 msgid "pick a domain for the new account"
-msgstr ""
+msgstr "Selecione o domínio da nova conta"
 
 #: mailu/ui/templates/user/signup_domain.html:14
 msgid "Domain"
-msgstr ""
+msgstr "Domínio"
 
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
-msgstr ""
+msgstr "Slots disponíveis"
 

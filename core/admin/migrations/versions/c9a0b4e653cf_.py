@@ -21,8 +21,8 @@ def upgrade():
     sa.Column('comment', sa.String(length=255), nullable=True),
     sa.Column('name', sa.String(length=80), nullable=False),
     sa.Column('domain_name', sa.String(length=80), nullable=True),
-    sa.ForeignKeyConstraint(['domain_name'], ['domain.name'], ),
-    sa.PrimaryKeyConstraint('name')
+    sa.ForeignKeyConstraint(['domain_name'], ['domain.name'], name=op.f('alternative_domain_name_fkey')),
+    sa.PrimaryKeyConstraint('name', name=op.f('alternative_pkey'))
     )
 
 

@@ -1,0 +1,89 @@
+{% if flavor == "stack" %}
+{% call macros.panel("danger", "Docker stack / swarm is experimental") %}
+Setup is capable of generating a somewhat decent docker-compose.yml,
+for the docker stack flavor. However its usage is for advanced users an is experimental.
+Expect many challenges is shared mail storage and fail-over scenarios! Some user experiences
+have been <a href="https://github.com/Mailu/Mailu/blob/master/docs/swarm/master/README.md">shared on GitHub.</a>
+{% endcall %}
+{% endif %}
+
+{% call macros.panel("info", "Step 2 - Initial configuration") %}
+<p>Before starting some variables must be set</p>
+
+<div class="form-group">
+  <label>Mailu storage path: </label>
+<!--   Validates path -->
+  <input class="form-control" type="text" name="root" value="/mailu" required pattern="^/[-_A-Za-z0-9]+(/[-_A-Za-z0-9]*)*">
+</div>
+
+<p>In the next sections we need to set the postmaster address. This is a combination from the <i>postmaster</i> local part and the <i>main mail domain</i>.
+The <i>main mail domain</i> is also used as </i>"server display name"</i>. This is the way the SMTP server identifies himself when connecting to others.
+The Postmaster will get an e-mail address &lt;postmaster&gt;@&lt;main_domain&gt;. This address will receive the DMARC "rua" and "ruf" reports.
+Or in plain english: if receivers start to classify your mail as spam, this postmaster will be informed.</p>
+
+<div class="form-group">
+  <label>
+    Main mail domain and server display name.
+  </label>
+<!--   Validates domain name -->
+  <input class="form-control" type="text" name="domain" placeholder="e.g. mailu.io" 
+  		required pattern="^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$">
+</div>
+
+<div class="form-group">
+  <label>Postmaster local part</label>
+  <input class="form-control" type="text" name="postmaster" value="admin" required>
+</div>
+
+<div class="form-group">
+  <label>Choose how you wish to handle security <a href="https://mailu.io/{{ version }}/compose/setup.html#tls-certificates">TLS certificates</a></label>
+  <br/>
+  <select class="btn btn-primary dropdown-toggle" name="tls_flavor">
+  	{% for tlsflavor in ["letsencrypt", "cert", "notls", "mail", "mail-letsencrypt"] %}
+  	<option value="{{ tlsflavor }}" >{{ tlsflavor }}</option>
+  	{% endfor %}
+  </select>
+</div>
+
+<div class="form-group">
+  <label>Authentication rate limit (per source IP address)</label>
+<!--   Validates number input only -->
+  <p><input class="form-control" style="width: 7%; display: inline;" type="number" name="auth_ratelimit_pm" 
+  		value="10" required >/minute;
+  <input class="form-control" style="width: 7%; display: inline;;" type="number" name="auth_ratelimit_ph"
+  		value="1000" required >/hour</p>
+</div>
+
+<div class="form-check form-check-inline">
+  <label class="form-check-label">
+    <input class="form-check-input" type="checkbox" name="disable_statistics" value="True">
+    Opt-out of statistics
+  </label>
+</div>
+
+<div class="form-group">
+  <label>Website name</label>
+  <input class="form-control" type="text" name="site_name" value="Mailu" required>
+</div>
+
+<div class="form-group">
+  <label>Linked Website URL</label>
+<!--   Validates url with or without https:// -->
+  <input class="form-control" type="url" name="website" value="https://mailu.io" required
+		pattern="^(https?://)?([a-zA-Z0-9]([a-zA-ZäöüÄÖÜ0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$">
+</div>
+
+<p>The admin interface is the main Mailu-specific bit, it provides tools to
+manage your email domains, users, etc.</p>
+
+<div class="form-group">
+    <input type="checkbox" name="admin_enabled" value="true" id="admin">
+  	<label>Enable the admin UI (and path to the admin UI)</label>
+    <input class="form-control" type="text" name="admin_path" id="admin_path" style="display: none">
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script type="text/javascript" src="{{ url_for('static', filename='render.js') }}"></script>
+
+{% endcall %}

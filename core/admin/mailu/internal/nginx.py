@@ -1,7 +1,7 @@
-from mailu import db, models, app
+from mailu import models
+from flask import current_app as app
 
 import re
-import socket
 import urllib
 
 
@@ -88,5 +88,4 @@ def get_server(protocol, authenticated=False):
             hostname, port = extract_host_port(app.config['HOST_AUTHSMTP'], 10025)
         else:
             hostname, port = extract_host_port(app.config['HOST_SMTP'], 25)
-    address = socket.gethostbyname(hostname)
-    return address, port
+    return hostname, port

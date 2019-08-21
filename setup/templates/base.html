@@ -8,9 +8,9 @@
   <h1>Mailu configuration</h1>
   <p>
     Version
-    <select onchange="window.location.href=this.value;">
-      {% for available in versions %}
-      <option value="{{ url_for('{}.wizard'.format(available)) }}" {% if available == version %}selected{% endif %}>{{ available }}</option>
+    <select onchange="window.location.href=this.value;" class="btn btn-primary dropdown-toggle">
+      {% for module in versions %}
+      <option value="/{{ module }}" {% if module == version %}selected{% endif %}>{{ module }}</option>
       {% endfor %}
     </select>
   </p>

@@ -25,7 +25,7 @@ Main features include:
 
 - **Standard email server**, IMAP and IMAP+, SMTP and Submission
 - **Advanced email features**, aliases, domain aliases, custom routing
-- **Web access**, multiple Webmails and adminitration interface
+- **Web access**, multiple Webmails and administration interface
 - **User features**, aliases, auto-reply, auto-forward, fetched accounts
 - **Admin features**, global admins, announcements, per-domain delegation, quotas
 - **Security**, enforced TLS, Letsencrypt!, outgoing DKIM, anti-virus scanner
@@ -44,6 +44,7 @@ the version of Mailu that you are running.
 
    general
    features
+   faq
    releases
    demo
 
@@ -52,12 +53,13 @@ the version of Mailu that you are running.
     :caption: Setup
 
     setup
-    configuration
     compose/requirements
     compose/setup
-    kubernetes/stable/index
+    kubernetes/mailu/index
+    configuration
     dns
     reverse
+    database
 
 .. toctree::
     :maxdepth: 2

@@ -32,7 +32,7 @@ user. Make sure you complete the requirements for the flavor you chose.
 
 You should also have at least a DNS hostname and a DNS name for receiving
 emails. Some instructions are provided on the matter in the article
-[Setup your DNS](dns).
+:ref:`dns_setup`.
 
 .. _`MFAshby's fork`: https://github.com/MFAshby/Mailu
 
@@ -41,7 +41,7 @@ Pick a Mailu version
 
 Mailu is shipped in multiple versions.
 
-- ``1.5`` features the most recent stable version for Mailu. This is the
+- ``1.6`` features the most recent stable version for Mailu. This is the
   recommended build for new setups, old setups should migrate when possible.
 
 - ``1.0``, ``1.1``, and other version branches feature old versions of Mailu
@@ -61,6 +61,10 @@ Perform the specific setup steps
 Specific setup steps are described per flavor (Compose, Kubernetes, etc.)
 and you should follow the steps after completing the requirements.
 
+After setting up your flavor, continue to the DNS setup instructions,
+additional steps in the admin dashboard will be needed to generate your
+DMARC and SPF/DKIM keys.
+
 Make sure that you test properly before going live!
 
 - Try to send an email to an external service
@@ -68,10 +72,9 @@ Make sure that you test properly before going live!
 - Try to receive an email from an external service
 - Check the logs (``docker-compose logs -f servicenamehere``) to look for
   warnings or errors
-- Use an open relay checker like `mailradar`_
+- Use an open relay checker like `mxtoolbox`_
   to ensure you're not contributing to the spam problem on the internet.
-  All tests there should result in "Relay denied".
 - If using DMARC, be sure to check the reports you get to verify that legitimate
   email is getting through and forgeries are being properly blocked.
 
-  .. _mailradar: http://www.mailradar.com/openrelay/
+  .. _mxtoolbox: https://mxtoolbox.com/diagnostic.aspx

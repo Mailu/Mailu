@@ -13,6 +13,8 @@ Docker best practices and be as generic as possible :
  - interesting settings should be available as environment variables
  - base images should be well-trusted (officiel Alpine or Debian for instance).
 
+.. _git_workflow:
+
 Git workflow
 ------------
 
@@ -50,18 +52,40 @@ master directly if you find this appropriate. Still, keep in mind that:
   that you use branch names prefixed with ``feat-`` or ``fix-`` and followed
   either by the name of the Github issue or a short and meaningful name.
 
-Workflow
-````````
+PR Workflow
+````````````
 
-All commits will be merged to the main ``master`` branch for testing. New
-images are built by Docker Hub with the ``testing`` tag for each new commit on
-the ``master`` branch.
+All pull requests have to be against the main ``master`` branch.
+The PR gets build by Travis and some primitive auto-testing is done.
+Test images get uploaded to a separate section in Docker hub.
+Reviewers will check the PR and test the resulting images.
+See the :ref:`testing` section for more info.
 
-After some brief testing, urgent fixes will be cherry-picked to the current stable
-branch and new stable builds will be released.
+Urgent fixes can be backported to the stable branch.
+For this a member of **Mailu/contributors** has to set the ``type/backport`` label.
+Upon merge of the original PR, a copy of the PR is created against the stable branch.
+After some testing on master, we will approve and merge this new PR as well.
 
 At the end of every milestone, a new stable branch will be created from ``master``
 or any previous commit that matches the completion of the milestone.
+
+CHANGELOG
+`````````
+
+Adding entries in the CHANGELOG is an automated process which requires creation of a file under
+``towncrier/newsfragments`` directory.
+
+The start of the filename is the ticket number, and the content is what will end up in the news file.
+For example, if ticket ``#850`` is about adding a new widget, the filename would be towncrier/newsfragments/850.feature
+and the content would be ``Feature that has just been added``.
+
+Supported file extensions are:
+
+- ``.feature``: Signifying a new feature.
+- ``.bugfix``: Signifying a bug fix.
+- ``.doc``: Signifying a documentation improvement.
+- ``.removal``: Signifying a deprecation or removal of public API.
+- ``.misc``: A ticket has been closed, but it is not of interest to users.
 
 Forked projects
 ---------------

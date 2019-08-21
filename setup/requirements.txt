@@ -1,5 +1,4 @@
 flask
 flask-bootstrap
 redis
-gitpython
 gunicorn

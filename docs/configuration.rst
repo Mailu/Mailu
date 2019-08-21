@@ -1,12 +1,24 @@
-Mailu configuration settings
-============================
+Configuration reference
+=======================
+
+This page explains the variables found in ``mailu.env``.
+In most cases ``mailu.env`` is setup correctly by the setup utility and can be left as-is.
+However, some advanced settings or modifications can be done by modifying this file.
+
+.. _common_cfg:
 
 Common configuration
 --------------------
 
 The ``SECRET_KEY`` **must** be changed for every setup and set to a 16 bytes
 randomly generated value. It is intended to secure authentication cookies
-among other critical uses.
+among other critical uses. This can be generated with a utility such as *pwgen*,
+which can be installed on most Linux systems:
+
+.. code-block:: bash
+
+  apt-get install pwgen
+  pwgen 16 1
 
 The ``DOMAIN`` holds the main e-mail domain for the server. This email domain
 is used for bounce emails, for generating the postmaster email and other
@@ -16,6 +28,11 @@ The ``HOSTNAMES`` are all public hostnames for the mail server. Mailu supports
 a mail server with multiple hostnames. The first declared hostname is the main
 hostname and will be exposed over SMTP, IMAP, etc.
 
+The ``SUBNET`` defines the address range of the docker network used by Mailu.
+This should not conflict with any networks to which your system is connected.
+(Internal and external!). Normally this does not need to be changed,
+unless there is a conflict with existing networks.
+
 The ``POSTMASTER`` is the local part of the postmaster email address. It is
 recommended to setup a generic value and later configure a mail alias for that
 address.
@@ -23,6 +40,9 @@ address.
 The ``AUTH_RATELIMIT`` holds a security setting for fighting attackers that
 try to guess user passwords. The value is the limit of requests that a single
 IP address can perform against IMAP, POP and SMTP authentication endpoints.
+
+The ``TLS_FLAVOR`` sets how Mailu handles TLS connections. Setting this value to
+``notls`` will cause Mailu not to server any web content! More on :ref:`tls_flavor`.
 
 Mail settings
 -------------
@@ -32,12 +52,13 @@ be too low to avoid dropping legitimate emails and should not be too high to
 avoid filling the disks with large junk emails.
 
 The ``RELAYNETS`` are network addresses for which mail is relayed for free with
-no authentication required. This should be used with great care. It is
-recommended to include your Docker internal network addresses if other Docker
-containers use Mailu as their mail relay.
+no authentication required. This should be used with great care. If you want other
+Docker services' outbound mail to be relayed, you can set this to ``172.16.0.0/12``
+to include **all** Docker networks. The default is to leave this empty.
 
 The ``RELAYHOST`` is an optional address of a mail server relaying all outgoing
-mail.
+mail in following format: ``[HOST]:PORT``.
+``RELAYUSER`` and ``RELAYPASSWORD`` can be used when authentication is needed.
 
 The ``FETCHMAIL_DELAY`` is a delay (in seconds) for the fetchmail service to
 go and fetch new email if available. Do not use too short delays if you do not
@@ -58,6 +79,14 @@ Web settings
 
 The ``WEB_ADMIN`` contains the path to the main admin interface, while
 ``WEB_WEBMAIL`` contains the path to the Web email client.
+The ``WEBROOT_REDIRECT`` redirects all non-found queries to the set path.
+An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables classic
+behavior of a 404 result when not found.
+All three options need a leading slash (``/``) to work.
+
+  .. note:: ``WEBROOT_REDIRECT`` has to point to a valid path on the webserver.
+    This means it cannot point to any services which are not enabled.
+    For example, don't point it to ``/webmail`` when ``WEBMAIL=none``
 
 Both ``SITENAME`` and ``WEBSITE`` are customization options for the panel menu
 in the admin interface, while ``SITENAME`` is a customization option for
@@ -69,6 +98,13 @@ Advanced settings
 The ``PASSWORD_SCHEME`` is the password encryption scheme. You should use the
 default value, unless you are importing password from a separate system and
 want to keep using the old password encryption scheme.
+
+The ``LOG_LEVEL`` setting is used by the python start-up scripts as a logging threshold.
+Log messages equal or higher than this priority will be printed.
+Can be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG or NOTSET.
+See the `python docs`_ for more information.
+
+.. _`python docs`: https://docs.python.org/3.6/library/logging.html#logging-levels
 
 Infrastructure settings
 -----------------------

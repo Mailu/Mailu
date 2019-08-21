@@ -1,12 +1,12 @@
 I18N and L10N
 =============
 
-Using POEditor.com
-------------------
+Using Weblate
+-------------
 
-We are using integrations with POEditor.com for translating Mailu. If you would like to contribute to the localization process, feel free to ask us to add a language then you can contribute to translations.
+We are hosting our localization effort using Weblate.If you would like to contribute to the localization process, feel free to ask us to add a language then you can contribute to translations.
 
-The project : https://poeditor.com/join/project/VszspPuEpn
+The project : https://translate.tedomum.net/projects/mailu/admin/
 
 Using Poedit
 ------------

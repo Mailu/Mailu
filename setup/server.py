@@ -7,9 +7,14 @@ import jinja2
 import uuid
 import string
 import random
+import ipaddress
+import hashlib
+import time
 
 
-app = flask.Flask(__name__)
+version = os.getenv("this_version", "master")
+static_url_path = "/" + version + "/static"
+app = flask.Flask(__name__, static_url_path=static_url_path)
 flask_bootstrap.Bootstrap(app)
 db = redis.StrictRedis(host='redis', port=6379, db=0)
 
@@ -29,64 +34,89 @@ def secret(length=16):
         for _ in range(length)
     )
 
+#Original copied from https://github.com/andrewlkho/ulagen
+def random_ipv6_subnet():
+    eui64 = uuid.getnode() >> 24 << 48 | 0xfffe000000 | uuid.getnode() & 0xffffff
+    eui64_canon = "-".join([format(eui64, "02X")[i:i+2] for i in range(0, 18, 2)])
+
+    h = hashlib.sha1()
+    h.update((eui64_canon + str(time.time() - time.mktime((1900, 1, 1, 0, 0, 0, 0, 1, -1)))).encode('utf-8'))
+    globalid = h.hexdigest()[0:10]
+
+    prefix = ":".join(("fd" + globalid[0:2], globalid[2:6], globalid[6:10]))
+    return prefix
 
 def build_app(path):
-
-    versions = [
-        version for version in os.listdir(path)
-        if os.path.isdir(os.path.join(path, version))
-    ]
 
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
 
     @app.context_processor
     def app_context():
-        return dict(versions=versions)
+        return dict(versions=os.getenv("VERSIONS","master").split(','))
 
-    @app.route("/")
-    def index():
-        return flask.redirect(flask.url_for('{}.wizard'.format(versions[-1])))
+    prefix_bp = flask.Blueprint(version, __name__)
+    prefix_bp.jinja_loader = jinja2.ChoiceLoader([
+        jinja2.FileSystemLoader(os.path.join(path, "templates")),
+        jinja2.FileSystemLoader(os.path.join(path, "flavors"))
+    ])
 
-    for version in versions:
-        bp = flask.Blueprint(version, __name__)
-        bp.jinja_loader = jinja2.ChoiceLoader([
-            jinja2.FileSystemLoader(os.path.join(path, version, "templates")),
-            jinja2.FileSystemLoader(os.path.join(path, version, "flavors"))
-        ])
+    root_bp = flask.Blueprint("root", __name__)
+    root_bp.jinja_loader = jinja2.ChoiceLoader([
+        jinja2.FileSystemLoader(os.path.join(path, "templates")),
+        jinja2.FileSystemLoader(os.path.join(path, "flavors"))
+    ])
 
-        @bp.context_processor
-        def bp_context(version=version):
-            return dict(version=version)
+    @prefix_bp.context_processor
+    @root_bp.context_processor
+    def bp_context(version=version):
+        return dict(version=version)
 
-        @bp.route("/")
-        def wizard():
-            return flask.render_template('wizard.html')
+    @prefix_bp.route("/")
+    @root_bp.route("/")
+    def wizard():
+        return flask.render_template('wizard.html')
 
-        @bp.route("/submit", methods=["POST"])
-        def submit():
-            data = flask.request.form.copy()
-            data['uid'] = str(uuid.uuid4())
-            db.set(data['uid'], json.dumps(data))
-            return flask.redirect(flask.url_for('.setup', uid=data['uid']))
+    @prefix_bp.route("/submit_flavor", methods=["POST"])
+    @root_bp.route("/submit_flavor", methods=["POST"])
+    def submit_flavor():
+        data = flask.request.form.copy()
+        subnet6 = random_ipv6_subnet()
+        steps = sorted(os.listdir(os.path.join(path, "templates", "steps", data["flavor"])))
+        return flask.render_template('wizard.html', flavor=data["flavor"], steps=steps, subnet6=subnet6)
 
-        @bp.route("/setup/<uid>", methods=["GET"])
-        def setup(uid):
-            data = json.loads(db.get(uid))
-            flavor = data.get("flavor", "compose")
-            rendered = render_flavor(flavor, "setup.html", data)
-            return flask.render_template("setup.html", contents=rendered)
+    @prefix_bp.route("/submit", methods=["POST"])
+    @root_bp.route("/submit", methods=["POST"])
+    def submit():
+        data = flask.request.form.copy()
+        data['uid'] = str(uuid.uuid4())
+        try:
+            data['dns'] = str(ipaddress.IPv4Network(data['subnet'], strict=False)[-2])
+        except ValueError as err:
+            return "Error while generating files: " + str(err)
+        db.set(data['uid'], json.dumps(data))
+        return flask.redirect(flask.url_for('.setup', uid=data['uid']))
 
-        @bp.route("/file/<uid>/<filepath>", methods=["GET"])
-        def file(uid, filepath):
-            data = json.loads(db.get(uid))
-            flavor = data.get("flavor", "compose")
-            return flask.Response(
-                render_flavor(flavor, filepath, data),
-                mimetype="application/text"
-            )
+    @prefix_bp.route("/setup/<uid>", methods=["GET"])
+    @root_bp.route("/setup/<uid>", methods=["GET"])
+    def setup(uid):
+        data = json.loads(db.get(uid))
+        flavor = data.get("flavor", "compose")
+        rendered = render_flavor(flavor, "setup.html", data)
+        return flask.render_template("setup.html", contents=rendered)
 
-        app.register_blueprint(bp, url_prefix="/{}".format(version))
+    @prefix_bp.route("/file/<uid>/<filepath>", methods=["GET"])
+    @root_bp.route("/file/<uid>/<filepath>", methods=["GET"])
+    def file(uid, filepath):
+        data = json.loads(db.get(uid))
+        flavor = data.get("flavor", "compose")
+        return flask.Response(
+            render_flavor(flavor, filepath, data),
+            mimetype="application/text"
+        )
+
+    app.register_blueprint(prefix_bp, url_prefix="/{}".format(version))
+    app.register_blueprint(root_bp)
 
 
 if __name__ == "__main__":

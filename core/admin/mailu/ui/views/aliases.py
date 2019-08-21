@@ -1,4 +1,4 @@
-from mailu import db, models
+from mailu import models
 from mailu.ui import ui, forms, access
 
 import flask
@@ -16,7 +16,7 @@ def alias_list(domain_name):
 @access.domain_admin(models.Domain, 'domain_name')
 def alias_create(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
-    if domain.max_aliases and len(domain.aliases) >= domain.max_aliases:
+    if not domain.max_aliases == -1 and len(domain.aliases) >= domain.max_aliases:
         flask.flash('Too many aliases for domain %s' % domain, 'error')
         return flask.redirect(
             flask.url_for('.alias_list', domain_name=domain.name))
@@ -27,8 +27,8 @@ def alias_create(domain_name):
         else:
             alias = models.Alias(domain=domain)
             form.populate_obj(alias)
-            db.session.add(alias)
-            db.session.commit()
+            models.db.session.add(alias)
+            models.db.session.commit()
             flask.flash('Alias %s created' % alias)
             return flask.redirect(
                 flask.url_for('.alias_list', domain_name=domain.name))
@@ -36,7 +36,7 @@ def alias_create(domain_name):
         domain=domain, form=form)
 
 
-@ui.route('/alias/edit/<alias>', methods=['GET', 'POST'])
+@ui.route('/alias/edit/<path:alias>', methods=['GET', 'POST'])
 @access.domain_admin(models.Alias, 'alias')
 def alias_edit(alias):
     alias = models.Alias.query.get(alias) or flask.abort(404)
@@ -45,7 +45,7 @@ def alias_edit(alias):
     form.localpart.validators = []
     if form.validate_on_submit():
         form.populate_obj(alias)
-        db.session.commit()
+        models.db.session.commit()
         flask.flash('Alias %s updated' % alias)
         return flask.redirect(
             flask.url_for('.alias_list', domain_name=alias.domain.name))
@@ -53,14 +53,14 @@ def alias_edit(alias):
         form=form, alias=alias, domain=alias.domain)
 
 
-@ui.route('/alias/delete/<alias>', methods=['GET', 'POST'])
+@ui.route('/alias/delete/<path:alias>', methods=['GET', 'POST'])
 @access.domain_admin(models.Alias, 'alias')
 @access.confirmation_required("delete {alias}")
 def alias_delete(alias):
     alias = models.Alias.query.get(alias) or flask.abort(404)
     domain = alias.domain
-    db.session.delete(alias)
-    db.session.commit()
+    models.db.session.delete(alias)
+    models.db.session.commit()
     flask.flash('Alias %s deleted' % alias)
     return flask.redirect(
         flask.url_for('.alias_list', domain_name=domain.name))

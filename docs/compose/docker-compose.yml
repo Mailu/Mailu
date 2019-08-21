@@ -1,3 +1,5 @@
+# WARNING: this file is being deprecated over the new setup utility, found at https://setup.mailu.io
+
 version: '2'
 
 services:
@@ -6,6 +8,8 @@ services:
     image: mailu/nginx:$VERSION
     restart: always
     env_file: .env
+    logging:
+      driver: $LOG_DRIVER
     ports:
     - "$BIND_ADDRESS4:80:80"
     - "$BIND_ADDRESS4:443:443"
@@ -27,6 +31,7 @@ services:
     - "$BIND_ADDRESS6:587:587"
     volumes:
       - "$ROOT/certs:/certs"
+      - "$ROOT/overrides/nginx:/overrides"
 
   redis:
     image: redis:alpine
@@ -39,7 +44,6 @@ services:
     restart: always
     env_file: .env
     volumes:
-      - "$ROOT/data:/data"
       - "$ROOT/mail:/mail"
       - "$ROOT/overrides:/overrides"
     depends_on:
@@ -50,7 +54,6 @@ services:
     restart: always
     env_file: .env
     volumes:
-      - "$ROOT/data:/data"
       - "$ROOT/overrides:/overrides"
     depends_on:
       - front
@@ -87,7 +90,6 @@ services:
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/dkim:/dkim"
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - redis
 
@@ -104,5 +106,11 @@ services:
     image: mailu/fetchmail:$VERSION
     restart: always
     env_file: .env
-    volumes:
-      - "$ROOT/data:/data"
+    
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: $SUBNET

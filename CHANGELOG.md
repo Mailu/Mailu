@@ -19,7 +19,6 @@ v1.6.1 - unreleased
 - Bug: Implement mailustart to resolve webmail in admin ([#716](https://github.com/Mailu/Mailu/issues/716))
 - Bug: Rename cli commands and their options (replace "\_" with "-") ([#877](https://github.com/Mailu/Mailu/issues/877))
 - Bug: Fix typo in migration script ([#905](https://github.com/Mailu/Mailu/issues/905))
-- BUG: Fix HOST_* variable usage ([#884](https://github.com/Mailu/Mailu/issues/884))
 - Bug: Fix redis hostname in admin
 
 v1.6.0 - 2019-01-18

@@ -106,7 +106,6 @@ class ConfigManager(dict):
             key: self.__coerce_value(os.environ.get(key, value))
             for key, value in DEFAULT_CONFIG.items()
         })
-        log.basicConfig(stream=sys.stderr, level=self.config["LOG_LEVEL"])
         self.resolve_host()
 
         # automatically set the sqlalchemy string

@@ -61,6 +61,10 @@ Perform the specific setup steps
 Specific setup steps are described per flavor (Compose, Kubernetes, etc.)
 and you should follow the steps after completing the requirements.
 
+After setting up your flavor, continue to the DNS setup instructions,
+additional steps in the admin dashboard will be needed to generate your
+DMARC and SPF/DKIM keys.
+
 Make sure that you test properly before going live!
 
 - Try to send an email to an external service

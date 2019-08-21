@@ -2,6 +2,9 @@
 # General
 ###############
 
+# Logging configuration
+maillog_file = /dev/stdout
+
 # Main domain and hostname
 mydomain = {{ DOMAIN }}
 myhostname = {{ HOSTNAMES.split(",")[0] }}
@@ -27,6 +30,11 @@ mydestination =
 
 # Relayhost if any is configured
 relayhost = {{ RELAYHOST }}
+{% if RELAYUSER %}
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
+{% endif %}
 
 # Recipient delimiter for extended addresses
 recipient_delimiter = {{ RECIPIENT_DELIMITER }}
@@ -112,3 +120,4 @@ milter_default_action = tempfail
 ###############
 # Extra Settings
 ###############
+

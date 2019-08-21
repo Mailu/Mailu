@@ -1,7 +1,6 @@
 import os
-from mailustart import resolve
-import logging as log
-import sys
+
+from socrate import system
 
 DEFAULT_CONFIG = {
     # Specific to the admin UI
@@ -9,8 +8,8 @@ DEFAULT_CONFIG = {
     'BABEL_DEFAULT_LOCALE': 'en',
     'BABEL_DEFAULT_TIMEZONE': 'UTC',
     'BOOTSTRAP_SERVE_LOCAL': True,
-    'RATELIMIT_STORAGE_URL': '',
-    'QUOTA_STORAGE_URL': '',
+    'RATELIMIT_STORAGE_URL': 'redis://%s/2' % (os.getenv("REDIS_ADDRESS", "redis")),
+    'QUOTA_STORAGE_URL': 'redis://%s/1' % (os.getenv("REDIS_ADDRESS", "redis")),
     'DEBUG': False,
     'DOMAIN_REGISTRATION': False,
     'TEMPLATES_AUTO_RELOAD': True,
@@ -48,6 +47,7 @@ DEFAULT_CONFIG = {
     'WEBSITE': 'https://mailu.io',
     'WEB_ADMIN': '/admin',
     'WEB_WEBMAIL': '/webmail',
+    'WEBMAIL': 'none',
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
     # Advanced settings
@@ -79,15 +79,18 @@ class ConfigManager(dict):
         'mysql': 'mysql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}'
     }
 
+    HOSTS = ('IMAP', 'POP3', 'AUTHSMTP', 'SMTP', 'REDIS')
+    OPTIONAL_HOSTS = ('WEBMAIL', 'ANTISPAM')
+
     def __init__(self):
         self.config = dict()
 
     def resolve_host(self):
-        self.config['IMAP_ADDRESS'] = resolve(self.config['HOST_IMAP'])
-        self.config['POP3_ADDRESS'] = resolve(self.config['HOST_POP3'])
-        self.config['AUTHSMTP_ADDRESS'] = resolve(self.config['HOST_AUTHSMTP'])
-        self.config['SMTP_ADDRESS'] = resolve(self.config['HOST_SMTP'])
-        self.config['REDIS_ADDRESS'] = resolve(self.config['HOST_REDIS'])
+        optional = [item for item in self.OPTIONAL_HOSTS if item in self.config and self.config[item] != "none"]
+        for item in list(self.HOSTS) + optional:
+            host = 'HOST_' + item
+            address = item + '_ADDRESS'
+            self.config[address] = system.resolve_address(self.config[host])
 
     def __coerce_value(self, value):
         if isinstance(value, str) and value.lower() in ('true','yes'):

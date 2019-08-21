@@ -158,11 +158,11 @@ msgstr "Hostname oder IP"
 #: mailu/ui/forms.py:159 mailu/ui/templates/client.html:20
 #: mailu/ui/templates/client.html:47
 msgid "TCP port"
-msgstr "Port"
+msgstr "TCP Port"
 
 #: mailu/ui/forms.py:160
 msgid "Enable TLS"
-msgstr "Verschlüsselung aktivieren"
+msgstr "Verschlüsselung aktivieren (TLS)"
 
 #: mailu/ui/forms.py:161 mailu/ui/templates/client.html:28
 #: mailu/ui/templates/client.html:55 mailu/ui/templates/fetch/list.html:20
@@ -192,6 +192,34 @@ msgstr "Konto"
 #: mailu/ui/templates/login.html:8
 msgid "to access the administration tools"
 msgstr "für administrativen Zugriff"
+
+#: mailu/ui/templates/services.html:4 mailu/ui/templates/sidebar.html:39
+msgid "Services status"
+msgstr "Dienst-Status"
+
+#: mailu/ui/templates/services.html:10
+msgid "Service"
+msgstr "Dienst"
+
+#: mailu/ui/templates/fetch/list.html:23 mailu/ui/templates/services.html:11
+msgid "Status"
+msgstr "Status"
+
+#: mailu/ui/templates/services.html:12
+msgid "PID"
+msgstr "PID"
+
+#: mailu/ui/templates/services.html:13
+msgid "Image"
+msgstr "Image"
+
+#: mailu/ui/templates/services.html:14
+msgid "Started"
+msgstr "Gestartet"
+
+#: mailu/ui/templates/services.html:15
+msgid "Last update"
+msgstr "Letztes Update"
 
 #: mailu/ui/templates/sidebar.html:8
 msgid "My account"
@@ -600,75 +628,75 @@ msgstr "Spamfilter-Grenzwert"
 
 #: mailu/ui/forms.py:50
 msgid "Enable sign-up"
-msgstr ""
+msgstr "Neuanmeldung erlauben"
 
 #: mailu/ui/forms.py:57
 msgid "Initial admin"
-msgstr ""
+msgstr "Initiale Admin-Adresse"
 
 #: mailu/ui/forms.py:58
 msgid "Admin password"
-msgstr ""
+msgstr "Administrator Passwort"
 
 #: mailu/ui/forms.py:84
 msgid "Enabled"
-msgstr ""
+msgstr "Aktiv"
 
 #: mailu/ui/forms.py:89
 msgid "Email address"
-msgstr ""
+msgstr "E-Mail-Adresse"
 
 #: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
 #: mailu/ui/templates/user/signup.html:4
 #: mailu/ui/templates/user/signup_domain.html:4
 msgid "Sign up"
-msgstr ""
+msgstr "Registrieren"
 
 #: mailu/ui/forms.py:119
 msgid "End of vacation"
-msgstr ""
+msgstr "Ende der Abwesenheit"
 
 #: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:82
 msgid "Client setup"
-msgstr ""
+msgstr "Client Einrichtung"
 
 #: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
 msgid "Mail protocol"
-msgstr ""
+msgstr "E-Mail-Protokoll"
 
 #: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
 msgid "Server name"
-msgstr ""
+msgstr "Servername"
 
 #: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
 msgid "Register a domain"
-msgstr ""
+msgstr "Regestrieren Sie eine Domain"
 
 #: mailu/ui/templates/domain/details.html:17
 msgid "Generate keys"
-msgstr ""
+msgstr "Schlüssel erzeugen"
 
 #: mailu/ui/templates/domain/signup.html:13
 msgid "In order to register a new domain, you must first setup the\n"
 "    domain zone so that the domain <code>MX</code> points to this server"
-msgstr ""
+msgstr "Um eine neue Domain registrieren zu können, müssen Sie zuerst den <code>MX Resource Record</code> der neuen Domäne konfigurieren. Dieser muss auf den aktuellen Mail-Server verweisen."
 
 #: mailu/ui/templates/domain/signup.html:18
 msgid "If you do not know how to setup an <code>MX</code> record for your DNS zone,\n"
 "    please contact your DNS provider or administrator. Also, please wait a\n"
 "    couple minutes after the <code>MX</code> is set so the local server cache\n"
 "    expires."
-msgstr ""
+msgstr "Bitte kontaktieren Sie ihren DNS-Anbieter oder -Administrator, falls Sie nicht wissen, wie ein <code>MX Resource Record</code> auf Ihrem DNS-Server eingerichtet wird. Bitte beachten Sie auch, dass aufgrund der lokalen Server Cache Einstellungen eine Änderung am <code>MX Resource Record</code> erst nach einigen Minuten aktiv wird."
 
 #: mailu/ui/templates/user/signup_domain.html:8
 msgid "pick a domain for the new account"
-msgstr ""
+msgstr "Wählen Sie eine Domain für das neue Benutzerkonto"
 
 #: mailu/ui/templates/user/signup_domain.html:14
 msgid "Domain"
-msgstr ""
+msgstr "Domain"
 
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
-msgstr ""
+msgstr "Verfügbare Plätze"
 

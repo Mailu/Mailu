@@ -1,0 +1,22 @@
+.select2-search--inline .select2-search__field:focus {
+  border: none;
+}
+
+.sidebar h4 {
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-collapse .sidebar h4 {
+  display: none !important;
+}
+
+.logo a {
+  color: #fff;
+}
+
+.sidebar-toggle {
+  padding: unset !important;
+}

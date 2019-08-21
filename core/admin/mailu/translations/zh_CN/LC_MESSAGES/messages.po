@@ -193,6 +193,34 @@ msgstr "你的帐户"
 msgid "to access the administration tools"
 msgstr "访问管理员工具"
 
+#: mailu/ui/templates/services.html:4 mailu/ui/templates/sidebar.html:39
+msgid "Services status"
+msgstr "服务状态"
+
+#: mailu/ui/templates/services.html:10
+msgid "Service"
+msgstr "服务"
+
+#: mailu/ui/templates/fetch/list.html:23 mailu/ui/templates/services.html:11
+msgid "Status"
+msgstr "状态"
+
+#: mailu/ui/templates/services.html:12
+msgid "PID"
+msgstr "进程ID"
+
+#: mailu/ui/templates/services.html:13
+msgid "Image"
+msgstr "镜像"
+
+#: mailu/ui/templates/services.html:14
+msgid "Started"
+msgstr "已开始"
+
+#: mailu/ui/templates/services.html:15
+msgid "Last update"
+msgstr "最后更新"
+
 #: mailu/ui/templates/sidebar.html:8
 msgid "My account"
 msgstr "我的帐户"
@@ -600,75 +628,75 @@ msgstr "垃圾邮件过滤器容忍度"
 
 #: mailu/ui/forms.py:50
 msgid "Enable sign-up"
-msgstr ""
+msgstr "启用用户注册"
 
 #: mailu/ui/forms.py:57
 msgid "Initial admin"
-msgstr ""
+msgstr "初始管理员"
 
 #: mailu/ui/forms.py:58
 msgid "Admin password"
-msgstr ""
+msgstr "管理员密码"
 
 #: mailu/ui/forms.py:84
 msgid "Enabled"
-msgstr ""
+msgstr "启用"
 
 #: mailu/ui/forms.py:89
 msgid "Email address"
-msgstr ""
+msgstr "邮件地址"
 
 #: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
 #: mailu/ui/templates/user/signup.html:4
 #: mailu/ui/templates/user/signup_domain.html:4
 msgid "Sign up"
-msgstr ""
+msgstr "注册"
 
 #: mailu/ui/forms.py:119
 msgid "End of vacation"
-msgstr ""
+msgstr "假期结束"
 
 #: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:82
 msgid "Client setup"
-msgstr ""
+msgstr "客户端设置"
 
 #: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
 msgid "Mail protocol"
-msgstr ""
+msgstr "邮件协议"
 
 #: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
 msgid "Server name"
-msgstr ""
+msgstr "服务器名"
 
 #: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
 msgid "Register a domain"
-msgstr ""
+msgstr "注册域名"
 
 #: mailu/ui/templates/domain/details.html:17
 msgid "Generate keys"
-msgstr ""
+msgstr "生成密钥"
 
 #: mailu/ui/templates/domain/signup.html:13
 msgid "In order to register a new domain, you must first setup the\n"
 "    domain zone so that the domain <code>MX</code> points to this server"
-msgstr ""
+msgstr "在注册一个新的域名前，您必须先为该域名设置 <code>MX</code> 记录，并使其指向本服务器"
 
 #: mailu/ui/templates/domain/signup.html:18
 msgid "If you do not know how to setup an <code>MX</code> record for your DNS zone,\n"
 "    please contact your DNS provider or administrator. Also, please wait a\n"
 "    couple minutes after the <code>MX</code> is set so the local server cache\n"
 "    expires."
-msgstr ""
+msgstr "如果您不知道如何为域名设置 <code>MX</code> 记录，请联系你的DNS提供商或者系统管理员。在设置完成 <code>MX</code> 记录后，请等待本地域名服务器的缓存过期。"
 
 #: mailu/ui/templates/user/signup_domain.html:8
 msgid "pick a domain for the new account"
-msgstr ""
+msgstr "为新用户选择一个域名"
 
 #: mailu/ui/templates/user/signup_domain.html:14
 msgid "Domain"
-msgstr ""
+msgstr "域名"
 
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
-msgstr ""
+msgstr "可用"
 

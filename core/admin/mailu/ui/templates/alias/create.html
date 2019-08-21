@@ -14,15 +14,9 @@
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.localpart, append='<span class="input-group-addon">@'+domain.name+'</span>') }}
   {{ macros.form_field(form.wildcard) }}
-  {{ macros.form_field(form.destination, id='destination') }}
+  {{ macros.form_field(form.destination, class_='mailselect') }}
   {{ macros.form_field(form.comment) }}
   {{ macros.form_field(form.submit) }}
-  <script>
-    $("#destination").select2({
-      tags: true,
-      tokenSeparators: [',', ' ']
-    })
-  </script>
 </form>
 {% endcall %}
 {% endblock %}

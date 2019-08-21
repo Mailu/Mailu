@@ -2,10 +2,13 @@ from mailu import models
 from mailu.internal import internal
 
 import flask
+import re
 
 
 @internal.route("/postfix/domain/<domain_name>")
 def postfix_mailbox_domain(domain_name):
+    if re.match("^\[.*\]$", domain_name):
+        return flask.abort(404)
     domain = models.Domain.query.get(domain_name) or \
              models.Alternative.query.get(domain_name) or \
              flask.abort(404)
@@ -29,7 +32,7 @@ def postfix_alias_map(alias):
 
 @internal.route("/postfix/transport/<path:email>")
 def postfix_transport(email):
-    if email == '*':
+    if email == '*' or re.match("(^|.*@)\[.*\]$", email):
         return flask.abort(404)
     localpart, domain_name = models.Email.resolve_domain(email)
     relay = models.Relay.query.get(domain_name) or flask.abort(404)

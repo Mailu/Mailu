@@ -1,14 +1,17 @@
-FROM alpine:3.8
+FROM alpine:3.10
 # python3 shared with most images
 RUN apk add --no-cache \
     python3 py3-pip git bash \
   && pip3 install --upgrade pip
-# Shared layer between rspamd, postfix, dovecot, unbound and nginx
-RUN pip3 install git+https://github.com/usrpro/MailuStart.git#egg=mailustart
-# Image specific layers under this line
 
-RUN apk add --no-cache postfix postfix-pcre rsyslog \
- && pip3 install podop
+# Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
+RUN pip3 install socrate
+
+# Shared layer between dovecot and postfix
+RUN pip3 install "podop>0.2.5"
+
+# Image specific layers under this line
+RUN apk add --no-cache postfix postfix-pcre cyrus-sasl-plain
 
 COPY conf /conf
 COPY start.py /start.py

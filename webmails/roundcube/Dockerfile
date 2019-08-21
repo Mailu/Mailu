@@ -1,4 +1,5 @@
-FROM php:7.3-apache
+ARG PHP_DISTRO=php:7.3-apache
+FROM PHP_DISTRO
 #Shared layer between rainloop and roundcube
 RUN apt-get update && apt-get install -y \
   python3 curl python3-pip git \

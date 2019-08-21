@@ -1,4 +1,5 @@
-FROM alpine:3.10
+ARG DISTRO=alpine:3.10
+FROM $DISTRO
 
 RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
  && apk add --no-cache radicale@testing curl bash

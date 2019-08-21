@@ -1,4 +1,5 @@
-FROM alpine:3.10
+ARG DISTRO=alpine:3.10
+FROM $DISTRO
 # python3 shared with most images
 RUN apk add --no-cache \
     python3 py3-pip git bash \

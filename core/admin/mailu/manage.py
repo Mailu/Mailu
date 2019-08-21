@@ -44,7 +44,7 @@ def advertise():
 @click.argument('password')
 @click.option('-m', '--mode')
 @flask_cli.with_appcontext
-def admin(localpart, domain_name, password, mode = 'create'):
+def admin(localpart, domain_name, password, mode='create'):
     """ Create an admin user
         'mode' can be:
             - 'create' (default) Will try to create user and will raise an exception if present

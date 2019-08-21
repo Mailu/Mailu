@@ -117,7 +117,17 @@ Create the first admin account
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When the cluster is online you need to create you master user to access https://mail.example.com/admin
-Enter the main ``admin`` pod to create the root account:
+
+You can create it now manually, or have the system create it automatically.
+
+If you want the system to create the admin user account automatically, see :ref:`admin_account`
+about the environment variables needed (``INITIAL_ADMIN_*``).
+Also, important, taking into consideration that a pod in Kubernetes can be stopped/rescheduled at
+any time, you should set ``INITIAL_ADMIN_MODE`` to either ``update`` or ``ifmissing`` - depending on what you 
+want to happen to its password.
+
+
+To create the admin user account manually, enter the main ``admin`` pod:
 
 .. code-block:: bash
 
@@ -131,12 +141,13 @@ And in the pod run the following command. The command uses following entries:
     flask mailu admin root example.com password
 
 - ``admin`` Make it an admin user
-- ``root`` The first part of the e-mail adres (ROOT@example.com)
+- ``root`` The first part of the e-mail address (ROOT@example.com)
 - ``example.com`` the domain appendix
 - ``password`` the chosen password for the user
 
 
 Now you should be able to login on the mail account: https://mail.example.com/admin
+
 
 Adaptations
 -----------

@@ -92,6 +92,31 @@ Both ``SITENAME`` and ``WEBSITE`` are customization options for the panel menu
 in the admin interface, while ``SITENAME`` is a customization option for
 every Web interface.
 
+.. _admin_account:
+
+Admin account - automatic creation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For administrative tasks, an admin user account will be needed. You can create it manually,
+after deploying the system, or automatically.
+To create it manually, follow the specific deployment method documentation.
+
+To have the account created automatically, you just need to define a few environment variables:
+
+.. code-block:: bash
+
+  INITIAL_ADMIN_ACCOUNT = ``root`` The first part of the e-mail address (ROOT@example.com)
+  INITIAL_ADMIN_DOMAIN = ``example.com`` the domain appendix. Most probably identical to the DOMAIN variable
+  INITIAL_ADMIN_PW = ``password`` the chosen password for the user
+
+Also, environment variable ``INITIAL_ADMIN_MODE`` defines how the code should behave when it will
+try to create the admin user:
+
+- ``create`` (default) Will try to create user and will raise an exception if present
+- ``ifmissing``: if user exists, nothing happens, else it will be created
+- ``update``: user is created or, if it exists, its password gets updated
+
+Depending on your particular deployment you most probably will want to change the default.
+
 Advanced settings
 -----------------
 

@@ -42,22 +42,44 @@ def advertise():
 @click.argument('localpart')
 @click.argument('domain_name')
 @click.argument('password')
+@click.option('-m', '--mode')
 @flask_cli.with_appcontext
-def admin(localpart, domain_name, password):
+def admin(localpart, domain_name, password, mode='create'):
     """ Create an admin user
+        'mode' can be:
+            - 'create' (default) Will try to create user and will raise an exception if present
+            - 'ifmissing': if user exists, nothing happens, else it will be created
+            - 'update': user is created or, if it exists, its password gets updated
     """
     domain = models.Domain.query.get(domain_name)
     if not domain:
         domain = models.Domain(name=domain_name)
         db.session.add(domain)
-    user = models.User(
-        localpart=localpart,
-        domain=domain,
-        global_admin=True
-    )
-    user.set_password(password)
-    db.session.add(user)
-    db.session.commit()
+
+    user = None
+    if mode == 'ifmissing' or mode == 'update':
+        email = '{}@{}'.format(localpart, domain_name)
+        user = models.User.query.get(email)
+
+        if user and mode == 'ifmissing':
+            print('user %s exists, not updating' % email)
+            return
+
+    if not user:
+        user = models.User(
+            localpart=localpart,
+            domain=domain,
+            global_admin=True
+        )
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        print("created admin user")
+    elif mode == 'update':
+        user.set_password(password)
+        db.session.commit()
+        print("updated admin password")
+
 
 
 @mailu.command()

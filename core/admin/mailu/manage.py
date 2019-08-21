@@ -43,7 +43,7 @@ def advertise():
 @click.argument('domain_name')
 @click.argument('password')
 @flask_cli.with_appcontext
-def admin(localpart, domain_name, password):
+def admin(localpart, domain_name, password, mode='create'):
     """ Create an admin user
     """
     domain = models.Domain.query.get(domain_name)

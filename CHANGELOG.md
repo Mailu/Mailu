@@ -566,8 +566,11 @@ deprecated before 1.8.0, you can switch to an external database server by then.
 - Enhancement: Automatically create admin user on container startup if given appropriate environment variables
 - Enhancement: Missing wildcard option in alias flask command ([#869](https://github.com/Mailu/Mailu/issues/869))
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 - Enhancement: Fixed hardcoded antispam and antivirus host addresses ([#978](https://github.com/Mailu/Mailu/issues/978))
+=======
+>>>>>>> 5b07da7f (Changelog to towncrier)
 - Bug: Fix creating new fetched accounts
 - Bug: Fix poor performance if ANTIVIRUS is configured to none.
 - Bug: Implement mailustart to resolve webmail in admin ([#716](https://github.com/Mailu/Mailu/issues/716))

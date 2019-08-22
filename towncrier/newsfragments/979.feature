@@ -1,0 +1,1 @@
+Fixed hardcoded antispam and antivirus host addresses

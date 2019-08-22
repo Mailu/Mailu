@@ -67,8 +67,19 @@ args['TLS_PERMISSIVE'] = str(args.get('TLS_PERMISSIVE')).lower() not in ('false'
 # Get the first DNS server
 with open("/etc/resolv.conf") as handle:
     content = handle.read().split()
+<<<<<<< HEAD
     resolver = content[content.index("nameserver") + 1]
     args["RESOLVER"] = f"[{resolver}]" if ":" in resolver else resolver
+=======
+    args["RESOLVER"] = content[content.index("nameserver") + 1]
+
+args["ADMIN_ADDRESS"] = system.resolve_address(args.get("HOST_ADMIN", "admin"))
+args["ANTISPAM_ADDRESS"] = system.resolve_address(args.get("HOST_ANTISPAM", "antispam:11334"))
+if args["WEBMAIL"] != "none":
+    args["WEBMAIL_ADDRESS"] = system.resolve_address(args.get("HOST_WEBMAIL", "webmail"))
+if args["WEBDAV"] != "none":
+    args["WEBDAV_ADDRESS"] = system.resolve_address(args.get("HOST_WEBDAV", "webdav:5232"))
+>>>>>>> 4afbc09d (Remove unnecessary host variable assignments)
 
 # TLS configuration
 cert_name = args.get("TLS_CERT_FILENAME", "cert.pem")

@@ -35,7 +35,7 @@ metadata:
   annotations:
     kubernetes.io/tls-acme: "true"
     certmanager.k8s.io/cluster-issuer: letsencrypt-stage
-    ingress.kubernetes.io/rewrite-target: "/ui"
+    ingress.kubernetes.io/rewrite-target: "/ui/$1"
     ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Forwarded-Prefix /admin;
   labels:
@@ -51,7 +51,7 @@ spec:
   - host: "mail.example.com"
     http:
       paths:
-      - path: "/admin/ui"
+      - path: "/admin/ui/?(.*)"
         backend:
           serviceName: admin
           servicePort: 80
@@ -64,7 +64,7 @@ metadata:
   annotations:
     kubernetes.io/tls-acme: "true"
     certmanager.k8s.io/cluster-issuer: letsencrypt-stage
-    ingress.kubernetes.io/rewrite-target: "/static"
+    ingress.kubernetes.io/rewrite-target: "/static/$1"
     ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Forwarded-Prefix /admin;
   labels:
@@ -80,7 +80,7 @@ spec:
   - host: "mail.example.com"
     http:
       paths:
-      - path: "/admin/static"
+      - path: "/admin/static/?(.*)"
         backend:
           serviceName: admin
           servicePort: 80

@@ -9,6 +9,15 @@ upgrading Mailu as some changes will include useful notes.
 v1.7.0 - 2019-08-22
 -------------------
 
+Upgrade should run fine as long as you generate a new compose or stack
+configuration and upgrade your mailu.env.
+
+If you run the PostgreSQL server, the database was upgrade, so you will need to
+dump the database before upgrading and load the dump after the upgrade is
+complete. Please not that the shipped image for PostgreSQL database will be
+deprecated before 1.8.0, you can switch to an external database server by then.
+
+- Deprecation: using the internal postgres image will be deprecated by 1.8.0
 - Features: Update Fetchmail to 7.0.0, which features more current SSL support ([#891](https://github.com/Mailu/Mailu/issues/891))
 - Features: Relays with authentication ([#958](https://github.com/Mailu/Mailu/issues/958))
 - Features: Fixed hardcoded antispam and antivirus host addresses ([#979](https://github.com/Mailu/Mailu/issues/979))

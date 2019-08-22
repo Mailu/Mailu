@@ -10,6 +10,10 @@ DEFAULT_CONFIG = {
     'BABEL_DEFAULT_TIMEZONE': 'UTC',
     'BOOTSTRAP_SERVE_LOCAL': True,
     'RATELIMIT_STORAGE_URL': '',
+<<<<<<< HEAD
+=======
+    'QUOTA_STORAGE_URL': '',
+>>>>>>> d50504fa (Only set the redis address once, fixes #1125)
     'DEBUG': False,
     'DEBUG_PROFILER': False,
     'DEBUG_TB_INTERCEPT_REDIRECTS': False,

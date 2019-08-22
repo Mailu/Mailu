@@ -21,9 +21,16 @@ def start_podop():
     ])
 
 # Actual startup script
+<<<<<<< HEAD
 os.environ["FRONT_ADDRESS"] = system.resolve_address(os.environ.get("FRONT_ADDRESS", "front"))
 os.environ["REDIS_ADDRESS"] = system.resolve_address(os.environ.get("REDIS_ADDRESS", "redis"))
 os.environ["ADMIN_ADDRESS"] = system.resolve_address(os.environ.get("ADMIN_ADDRESS", "admin"))
+=======
+os.environ["FRONT_ADDRESS"] = system.resolve_address(os.environ.get("HOST_FRONT", "front"))
+os.environ["REDIS_ADDRESS"] = system.resolve_address(os.environ.get("HOST_REDIS", "redis"))
+os.environ["ADMIN_ADDRESS"] = system.resolve_address(os.environ.get("HOST_ADMIN", "admin"))
+os.environ["ANTISPAM_ADDRESS"] = system.resolve_address(os.environ.get("HOST_ANTISPAM", "antispam:11334"))
+>>>>>>> 05ea4474... make `ANTIVIRUS_ADDRESS` consistent with #940
 if os.environ["WEBMAIL"] != "none":
     os.environ["WEBMAIL_ADDRESS"] = system.resolve_address(os.environ.get("WEBMAIL_ADDRESS", "webmail"))
 

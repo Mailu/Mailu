@@ -151,11 +151,13 @@ optional port number. Those variables are:
 - ``HOST_WEBMAIL``: the container that is running the webmail (default: ``webmail``)
 - ``HOST_WEBDAV``: the container that is running the webdav server (default: ``webdav:5232``)
 - ``HOST_REDIS``: the container that is running the redis daemon (default: ``redis``)
+- ``HOST_WEBMAIL``: the container that is running the webmail (default: ``webmail``)
 
-Additional variables are used to locate other containers without dialing a
-specific port number. It is used to either whitelist connection from these
-addresses or connect to containers on the docker network:
+The startup scripts will resolve HOST_* to their IP addresses and store the result in *_ADDRESS for further use.
 
-- ``FRONT_ADDRESS``: the nginx container address (default: ``front``)
-- ``WEBMAIL_ADDRESS``: the webmail container address (default: ``webmail``)
-- ``IMAP_ADDRESS``: the webmail container address (default: ``webmail``)
+Alternatively, *_ADDRESS can directly be set. In this case, the values of *_ADDRESS is kept and not
+resolved. This can be used to rely on DNS based service discovery with changing services IP addresses.
+When using *_ADDRESS, the hostnames must be full-qualified hostnames. Otherwise nginx will not be able to
+resolve the hostnames.
+
+

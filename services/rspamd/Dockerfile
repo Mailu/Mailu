@@ -5,7 +5,7 @@ RUN apk add --no-cache \
   && pip3 install --upgrade pip
 
 # Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
-RUN pip3 install socrate
+RUN pip3 install socrate==0.2.0
 
 # Image specific layers under this line
 RUN apk add --no-cache rspamd rspamd-controller rspamd-proxy rspamd-fuzzy ca-certificates curl

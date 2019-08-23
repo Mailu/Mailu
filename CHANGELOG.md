@@ -3,24 +3,50 @@ Changelog
 
 Notable changes to this project are documented in the current file. For more
 details about individual changes, see the Git log. You should read this before
-upgrading Freposte.io as some changes will include useful notes.
+upgrading Mailu as some changes will include useful notes.
 
 <!-- TOWNCRIER -->
-
-v1.6.1 - unreleased
+v1.7.0 - 2019-08-22
 -------------------
+
+Upgrade should run fine as long as you generate a new compose or stack
+configuration and upgrade your mailu.env.
+
+If you run the PostgreSQL server, the database was upgrade, so you will need to
+dump the database before upgrading and load the dump after the upgrade is
+complete. Please not that the shipped image for PostgreSQL database will be
+deprecated before 1.8.0, you can switch to an external database server by then.
+
+- Deprecation: using the internal postgres image will be deprecated by 1.8.0
+- Features: Update Fetchmail to 7.0.0, which features more current SSL support ([#891](https://github.com/Mailu/Mailu/issues/891))
+- Features: Relays with authentication ([#958](https://github.com/Mailu/Mailu/issues/958))
+- Features: Fixed hardcoded antispam and antivirus host addresses ([#979](https://github.com/Mailu/Mailu/issues/979))
+- Features: Add sidebar toggle ([#988](https://github.com/Mailu/Mailu/issues/988))
+- Features: Don’t use complicated rsyslogd logging in postfix anymore, instead start the daemon directly — configured to log to stdout. ([#1049](https://github.com/Mailu/Mailu/issues/1049))
+- Features: Update alpine to 3.10 and clean up the ensuing problems. ([#1051](https://github.com/Mailu/Mailu/issues/1051))
+- Features: Update user password in commandline ([#1066](https://github.com/Mailu/Mailu/issues/1066))
+- Features: use HTTP/1.1 for proxyied connections ([#1070](https://github.com/Mailu/Mailu/issues/1070))
+- Features: Update Rainloop to 1.13.0 ([#1071](https://github.com/Mailu/Mailu/issues/1071))
+- Features: Use python package socrate instead of Mailustart ([#1082](https://github.com/Mailu/Mailu/issues/1082))
+- Bugfixes: Use ldez/traefik-certs-dumper in our certificate dumper to have a more robust solution ([#820](https://github.com/Mailu/Mailu/issues/820))
+- Bugfixes: Make aliases optionally case-insensitive: After attempting to resolve an alias in its preserved case, also attempt to match it case-insensitively ([#867](https://github.com/Mailu/Mailu/issues/867))
+- Bugfixes: Fix HOST_* variable usage ([#884](https://github.com/Mailu/Mailu/issues/884))
+- Bugfixes: Fix DKIM-DNS entries in admin webinterface ([#1075](https://github.com/Mailu/Mailu/issues/1075))
+- Bugfixes: Allow subnet with host bit set in setup ([#1083](https://github.com/Mailu/Mailu/issues/1083))
+- Bugfixes: Support domain literals ([#1087](https://github.com/Mailu/Mailu/issues/1087))
+- Bugfixes: Fix creating new fetched accounts
+- Bugfixes: Fix poor performance if ANTIVIRUS is configured to none.
+- Bugfixes: Implement mailustart to resolve webmail in admin ([#716](https://github.com/Mailu/Mailu/issues/716))
+- Bugfixes: Rename cli commands and their options (replace "\_" with "-") ([#877](https://github.com/Mailu/Mailu/issues/877))
+- Bugfixes: Fix typo in migration script ([#905](https://github.com/Mailu/Mailu/issues/905))
+- Bugfixes: Fix redis hostname in admin
+- Improved Documentation: Move the localization effort to Weblate ([#916](https://github.com/Mailu/Mailu/issues/916))
 - Enhancement: Distinguish disabled user in user list view by row color
 - Enhancement: Make Unbound drop privileges after binding to port
 - Enhancement: Stop using static assets, but build them using Webpack
 - Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
 - Enhancement: Automatically create admin user on container startup if given appropriate environment variables
 - Enhancement: Missing wildcard option in alias flask command ([#869](https://github.com/Mailu/Mailu/issues/869))
-- Bug: Fix creating new fetched accounts
-- Bug: Fix poor performance if ANTIVIRUS is configured to none.
-- Bug: Implement mailustart to resolve webmail in admin ([#716](https://github.com/Mailu/Mailu/issues/716))
-- Bug: Rename cli commands and their options (replace "\_" with "-") ([#877](https://github.com/Mailu/Mailu/issues/877))
-- Bug: Fix typo in migration script ([#905](https://github.com/Mailu/Mailu/issues/905))
-- Bug: Fix redis hostname in admin
 
 v1.6.0 - 2019-01-18
 -------------------

@@ -1,5 +1,7 @@
 # First stage to build assets
-FROM node:8 as assets
+ARG ARCH=""
+FROM ${ARCH}node:8 as assets
+COPY --from=balenalib/rpi-alpine:3.10 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 
 COPY package.json ./
 RUN npm install
@@ -42,4 +44,3 @@ ENV FLASK_APP mailu
 CMD /start.py
 
 HEALTHCHECK CMD curl -f -L http://localhost/ui/login?next=ui.index || exit 1
-

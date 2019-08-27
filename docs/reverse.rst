@@ -17,6 +17,7 @@ and add a section like follows:
 
 .. code-block:: yaml
 
+<<<<<<< HEAD
   reverse-proxy:
     # The official v2 Traefik docker image
     image: traefik:v2.11
@@ -34,6 +35,75 @@ and add a section like follows:
       - "--entrypoints.sieve.address=:sieve"
       # - "--api.insecure=true"
       # - "--log.level=DEBUG"
+=======
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.frontend.rule=Host:$TRAEFIK_DOMAIN"
+
+.. note:: Please don’t forget to add ``TRAEFIK_DOMAIN=[...]`` TO YOUR ``.env``
+
+If your Traefik is configured to automatically request certificates from *letsencrypt*, then you’ll have a certificate for ``mail.your.doma.in`` now. However,
+``mail.your.doma.in`` might only be the location where you want the Mailu web-interfaces to live — your mail should be sent/received from ``your.doma.in``,
+and this is the ``DOMAIN`` in your ``.env``?
+To support that use-case, Traefik can request ``SANs`` for your domain. Lets add something like
+
+.. code-block:: yaml
+
+  [acme]
+    [[acme.domains]]
+      main = "your.doma.in" # this is the same as $TRAEFIK_DOMAIN!
+      sans = ["mail.your.doma.in", "webmail.your.doma.in", "smtp.your.doma.in"]
+
+to your ``traefik.toml``. You might need to clear your ``acme.json``, if a certificate for one of these domains already exists.
+
+You will need some solution which dumps the certificates in ``acme.json``, so you can include them in the ``mailu/front`` container.
+One such example is ``mailu/traefik-certdumper``, which has been adapted for use in Mailu. You can add it to your ``docker-compose.yml`` like:
+
+.. code-block:: yaml
+
+  certdumper:
+    restart: always
+    image: mailu/traefik-certdumper:$VERSION
+    environment:
+    # Make sure this is the same as the main=-domain in traefik.toml
+    # !!! Also don’t forget to add "TRAEFIK_DOMAIN=[...]" to your .env!
+      - DOMAIN=$TRAEFIK_DOMAIN
+    volumes:
+      # Folder, which contains the acme.json
+      - "/data/traefik:/traefik"
+      # Folder, where cert.pem and key.pem will be written
+      - "/data/mailu/certs:/output"
+
+
+Assuming you have ``volume-mounted`` your ``acme.json`` put to ``/data/traefik`` on your host. The dumper will then write out ``/data/mailu/certs/cert.pem`` and ``/data/mailu/certs/key.pem`` whenever ``acme.json`` is updated.
+Yay! Now let’s mount this to our ``front`` container like:
+
+.. code-block:: yaml
+
+    volumes:
+      - /data/mailu/certs:/certs
+
+This works, because we set ``TLS_FLAVOR=mail``, which picks up the key-certificate pair (e.g., ``cert.pem`` and ``key.pem``) from the certs folder in the root path (``/certs/``).
+
+.. _`Traefik`: https://traefik.io/
+
+Override Mailu configuration
+----------------------------
+
+If you do not have the resources for running a separate reverse proxy, you could override Mailu reverse proxy configuration by using a Docker volume.
+Simply store your configuration file (Nginx format), in ``/mailu/nginx.conf`` for instance.
+
+Then modify your ``docker-compose.yml`` file and change the ``front`` section to add a mount:
+
+.. code-block:: nginx
+
+  front:
+    build: nginx
+    image: mailu/nginx:$VERSION
+    restart: always
+    env_file: .env
+>>>>>>> a09d166d (Docs: fix some build warnings)
     ports:
       - "25:25"
       - "80:80"

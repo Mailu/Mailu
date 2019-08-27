@@ -451,6 +451,7 @@ down and up again. A container restart is not sufficient.
 
 *Issue reference:* `615`_.
 
+<<<<<<< HEAD
 SMTP Banner from overrides/postfix.cf is ignored
 ````````````````````````````````````````````````
 
@@ -494,6 +495,10 @@ The syntax and options are as described in `postfix's documentation`_. Re-starti
 
 403 - Access Denied Errors
 ``````````````````````````
+=======
+403 - Access Denied Errors
+---------------------------
+>>>>>>> a09d166d (Docs: fix some build warnings)
 
 While this may be due to several issues, check to make sure your ``DOMAIN=`` entry is the **first** entry in your ``HOSTNAMES=``.
 

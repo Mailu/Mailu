@@ -29,7 +29,7 @@ alias-delete
 
 
 domain
-----
+------
 
 .. code-block:: bash
 

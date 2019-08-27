@@ -243,7 +243,7 @@ correct syntax. The following file names will be taken as override configuration
 *Issue reference:* `206`_.
 
 I want to integrate Nextcloud 15 (and newer) with Mailu
-````````````````````````````````````````
+```````````````````````````````````````````````````````
 
 1. Enable External user support from Nextcloud Apps interface
 
@@ -270,7 +270,7 @@ After successfull login the domain part will be striped and the rest used as use
 *Issue reference:* `575`_.
 
 I want to integrate Nextcloud 14 (and older) with Mailu
-````````````````````````````````````````
+```````````````````````````````````````````````````````
 
 1. Install dependencies required to authenticate users via imap in Nextcloud
 
@@ -340,8 +340,8 @@ down and up again. A container restart is not sufficient.
 
 *Issue reference:* `615`_.
 
-Access Denied Errors
---------------------
+403 - Access Denied Errors
+---------------------------
 
 While this may be due to several issues, check to make sure your ``DOMAIN=`` entry is the **first** entry in your ``HOSTNAMES=``.
 

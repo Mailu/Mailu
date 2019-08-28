@@ -154,7 +154,7 @@ If your Traefik is configured to automatically request certificates from *letsen
 and this is the ``DOMAIN`` in your ``.env``?
 To support that use-case, Traefik can request ``SANs`` for your domain. Lets add something like
 
-.. code-block:: guess
+.. code-block:: yaml
 
   [acme]
     [[acme.domains]]

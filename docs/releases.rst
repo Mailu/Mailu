@@ -1,6 +1,55 @@
 Release notes
 =============
 
+Mailu 1.7 - 2019-08-22
+----------------------
+
+Release 1.7 has come a long way and was really expected after the project first
+saw a slowdown in contributions around january then a wave of new contributors
+and contributions.
+
+New functionality
+`````````````````
+
+Most changes are internal, main features include:
+ - the admin UI now properly displaying on mobile
+ - relays supporting authentication thanks to new settings
+ - ability to create an initial admin user using environment variables
+
+Other changes include software updates with some new features in Rainloop
+1.30.0.
+
+Back-end
+````````
+
+One of the big tasks was upgradig to latest Alpine (3.10), which is now finished.
+Also, a lot was improved about the environment variables meant to provide
+specific hosts in custom setups.
+
+Finally, among many bug fixes and discrete enhancements, we removed most static
+assets from the repository and now build the admin UI dynamically using
+Webpack.
+
+Localization
+````````````
+
+The localization effort move to a hosted Weblate, that you can access at the
+following uri: https://translate.tedomum.net/projects/mailu/admin/
+
+Please have a look and help translate Mailu into your home tongue.
+
+Upgrading
+`````````
+
+Upgrade should run fine as long as you generate a new compose or stack
+configuration and upgrade your mailu.env.
+
+If you run the PostgreSQL server, the database was upgrade, so you will need to
+dump the database before upgrading and load the dump after the upgrade is
+complete. Please not that the shipped image for PostgreSQL database will be
+deprecated before 1.8.0, you can switch to an external database server by then.
+
+
 Mailu 1.6 - 2019-01-18
 ----------------------
 

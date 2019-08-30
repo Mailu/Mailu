@@ -13,9 +13,9 @@ New functionality
 
 Most changes are internal, main features include:
 
- - the admin UI now properly displaying on mobile
- - relays supporting authentication thanks to new settings
- - ability to create an initial admin user using environment variables
+- the admin UI now properly displaying on mobile
+- relays supporting authentication thanks to new settings
+- ability to create an initial admin user using environment variables
 
 Other changes include software updates with some new features in Rainloop
 1.30.0.

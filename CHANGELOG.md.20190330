@@ -1,1 +1,0 @@
-find . -iname 'dockerfile' -exec sed -i "s/FROM.*/ARG DISTRO=alpine:3.8\nFROM \$DISTRO/" '{}' \;

@@ -14,12 +14,12 @@ with open("/etc/resolv.conf") as handle:
     content = handle.read().split()
     args["RESOLVER"] = content[content.index("nameserver") + 1]
 
-args["ADMIN_ADDRESS"] = system.resolve_address(args.get("HOST_ADMIN", "admin"))
-args["ANTISPAM_ADDRESS"] = system.resolve_address(args.get("HOST_ANTISPAM", "antispam:11334"))
+args["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
+args["ANTISPAM_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM", "antispam:11334")
 if args["WEBMAIL"] != "none":
-    args["WEBMAIL_ADDRESS"] = system.resolve_address(args.get("HOST_WEBMAIL", "webmail"))
+    args["WEBMAIL_ADDRESS"] = system.get_host_address_from_environment("WEBMAIL", "webmail")
 if args["WEBDAV"] != "none":
-    args["WEBDAV_ADDRESS"] = system.resolve_address(args.get("HOST_WEBDAV", "webdav:5232"))
+    args["WEBDAV_ADDRESS"] = system.get_host_address_from_environment("WEBDAV", "webdav:5232")
 
 # TLS configuration
 cert_name = os.getenv("TLS_CERT_FILENAME", default="cert.pem")

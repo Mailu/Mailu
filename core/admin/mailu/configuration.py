@@ -60,7 +60,9 @@ DEFAULT_CONFIG = {
     'HOST_SMTP': 'smtp',
     'HOST_AUTHSMTP': 'smtp',
     'HOST_ADMIN': 'admin',
+    'ANTISPAM': 'none',
     'HOST_ANTISPAM': 'antispam:11334',
+    'WEBMAIL': 'none',
     'HOST_WEBMAIL': 'webmail',
     'HOST_WEBDAV': 'webdav:5232',
     'HOST_REDIS': 'redis',
@@ -79,18 +81,26 @@ class ConfigManager(dict):
         'mysql': 'mysql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}'
     }
 
-    HOSTS = ('IMAP', 'POP3', 'AUTHSMTP', 'SMTP', 'REDIS')
-    OPTIONAL_HOSTS = ('WEBMAIL', 'ANTISPAM')
-
     def __init__(self):
         self.config = dict()
 
-    def resolve_host(self):
-        optional = [item for item in self.OPTIONAL_HOSTS if item in self.config and self.config[item] != "none"]
-        for item in list(self.HOSTS) + optional:
-            host = 'HOST_' + item
-            address = item + '_ADDRESS'
-            self.config[address] = system.resolve_address(self.config[host])
+    def get_host_address(self, name):
+        # if MYSERVICE_ADDRESS is defined, use this
+        if '{}_ADDRESS'.format(name) in os.environ:
+            return os.environ.get('{}_ADDRESS'.format(name))
+        # otherwise use the host name and resolve it
+        return system.resolve_address(self.config['HOST_{}'.format(name)])
+
+    def resolve_hosts(self):
+        self.config["IMAP_ADDRESS"] = self.get_host_address("IMAP")
+        self.config["POP3_ADDRESS"] = self.get_host_address("POP3")
+        self.config["AUTHSMTP_ADDRESS"] = self.get_host_address("AUTHSMTP")
+        self.config["SMTP_ADDRESS"] = self.get_host_address("SMTP")
+        self.config["REDIS_ADDRESS"] = self.get_host_address("REDIS")
+        if self.config["WEBMAIL"] != "none":
+            self.config["WEBMAIL_ADDRESS"] = self.get_host_address("WEBMAIL")
+        if self.config["ANTISPAM"] != "none":
+            self.config["ANTISPAM_ADDRESS"] = self.get_host_address("ANTISPAM")
 
     def __coerce_value(self, value):
         if isinstance(value, str) and value.lower() in ('true','yes'):
@@ -106,7 +116,7 @@ class ConfigManager(dict):
             key: self.__coerce_value(os.environ.get(key, value))
             for key, value in DEFAULT_CONFIG.items()
         })
-        self.resolve_host()
+        self.resolve_hosts()
 
         # automatically set the sqlalchemy string
         if self.config['DB_FLAVOR']:

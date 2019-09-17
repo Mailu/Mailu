@@ -1,5 +1,7 @@
 Contribution workflow
-====================
+=====================
+
+.. _git_workflow:
 
 Forking vs. committing
 ----------------------
@@ -36,7 +38,7 @@ master directly if you find this appropriate. Still, keep in mind that:
   either by the name of the Github issue or a short and meaningful name.
 
 PR Workflow
-----------
+-----------
 
 All pull requests have to be against the main ``master`` branch.
 The PR gets build by Travis and some primitive auto-testing is done.

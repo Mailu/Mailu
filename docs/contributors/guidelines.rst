@@ -10,7 +10,7 @@ constraints, some are architectural opinions.
 
 If you contribute to this project, please read through them all and read the
 architectural documentation. Reviewers will check that your contributions
-match these guidelines amont other things.
+match these guidelines among other things.
 
 If you feel one of the guidelines is wrong or incomplete, please come and
 discuss on our messaging channel, then open a pull request including the
@@ -74,7 +74,11 @@ antispam should be in a separate container.
 
 A container is developped as a singled directory under the proper category in
 the main repository, the only exception being service containers that should
-only use official Docker images.
+only use official Docker images. Categories are:
+
+- core, for mandatory components
+- optional, for optional components
+- webmail, for webmails
 
 A container image name must explicitely state the technology being used.
 Container versions are synchronized and all containers are always built at
@@ -82,7 +86,7 @@ once. The service name associated in the Compose file or Kubernetes configuratio
 should match the container image name.
 
 How configuration should be managed
-``````````````````````````````````
+```````````````````````````````````
 
 Anything that is static should be managed using environment variables.
 Configuration files should be compiled at runtime by the container `start.py`
@@ -97,7 +101,7 @@ admin API. The `podop` package binds mail specific sofware (Postfix and Dovecot
 at the moment) to the admin API, other containers should use specific API calls.
 
 What traffic should go through the nginx container
-````````````````````````````````````````````````to
+``````````````````````````````````````````````````
 
 All of it. All traffic, including HTTP(S), IMAP, SMTP, POP3, should go through
 the front container.
@@ -119,7 +123,10 @@ should be accessed at ``/<container_name>/<traffic_type_a>`` and
 ``/admin/api``.
 
 Traffic directed to ``/`` should be routed to an endpoint on the admin container
-responsible for dynamically redirecting it.
+responsible for dynamically redirecting it. That last redirect must use a
+302.
+
+Any traffic to a non existing endpoint must return a 404.
 
 
 How authentication should work
@@ -127,34 +134,34 @@ How authentication should work
 
 Authentication should be managed by the nginx container, based on the admin
 container API. The only exception is authentication to the admin container
-itself, that handled directly.
+itself, that is handled directly.
 
 Authentication API in the admin container should contain the logic for
 account management (allowed features, etc.) and rate limiting.
 
 Configuration
-------------
+-------------
 
 Where should configuration files be stored
-````````````````````````````````````````
+``````````````````````````````````````````
 
 Configuration files should ideally be stored in the most standard place for the
 tool being configured. For instance, if the tool usually accepts configuration
 files in ``/etc``, then configuration should be written there.
 
 Should we use default configuration
-``````````````````````````````````
+```````````````````````````````````
 
 Some tools ship with default configuration, that handles the standard behavior.
 Using this configuration is prone to later changes and unexpected side effects.
 We should always provide all required configuration, including the base files,
-and not rely on default configuration files form the distribution.
+and not rely on default configuration files froms the distribution.
 
 For that reason, in case the tool looks for specific files and include them
 automatically, we should overwrite them or delete them.
 
 How should configuration be overridden
-`````````````````````````````````````
+``````````````````````````````````````
 
 Some containers support configuration override. For this feature, we should
 ideally look for conditional configuration inclusion in the configuration syntax
@@ -165,7 +172,7 @@ In case the tool does not support conditional inclusion, we can add the
 override logic in the `start.py` script.
 
 How much should configuration be documented
-``````````````````````````````````````````
+```````````````````````````````````````````
 
 We should not keep default documentation included by the distribution when
 providing configuration files.
@@ -183,7 +190,7 @@ Coding standards
 All Python code should comply with PEP-8. We should review our code using
 pylint.
 
-We should comply with architectural recommendation from the Flask
+We should comply with architectural recommendations from the Flask
 documentation.
 
 Models and database

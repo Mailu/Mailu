@@ -1,6 +1,5 @@
 [tool.towncrier]
-    #package = "mypackage"
-    package_dir = "towncrier"
+    package = "towncrier"
     filename = "CHANGELOG.md"
     underlines = ["-", "", ""]
     template = "towncrier/template.md"

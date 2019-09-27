@@ -1,4 +1,0 @@
-#!/bin/bash
-
-tee >(rspamc -h ${ANTISPAM_ADDRESS} -P mailu learn_ham /dev/stdin) \
-    | rspamc -h ${ANTISPAM_ADDRESS} -P mailu -f 13 fuzzy_add /dev/stdin

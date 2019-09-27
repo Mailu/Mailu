@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import stat
 import glob
 import multiprocessing
 import logging as log
@@ -30,6 +31,15 @@ if os.environ["WEBMAIL"] != "none":
 
 for dovecot_file in glob.glob("/conf/*.conf"):
     conf.jinja(dovecot_file, os.environ, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))
+
+try:
+    os.mkdir("/conf/bin")
+except FileExistsError:
+    pass
+for script_file in glob.glob("/conf/*.script"):
+    out_file = os.path.join("/conf/bin/", os.path.basename(script_file).replace('.script',''))
+    conf.jinja(script_file, os.environ, out_file)
+    os.chmod(out_file, stat.S_IRUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
 # Run Podop, then postfix
 multiprocessing.Process(target=start_podop).start()

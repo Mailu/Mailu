@@ -81,6 +81,9 @@ spec:
           - name: auth
             containerPort: 8000
             protocol: TCP
+          - name: http
+            containerPort: 80
+            protocol: TCP
         resources:
           requests:
             memory: 100Mi
@@ -139,4 +142,7 @@ spec:
     protocol: TCP
   - name: imap-auth
     port: 10143
+    protocol: TCP
+  - name: http
+    port: 80
     protocol: TCP

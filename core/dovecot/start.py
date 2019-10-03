@@ -37,7 +37,7 @@ os.makedirs("/conf/bin", exist_ok=True)
 for script_file in glob.glob("/conf/*.script"):
     out_file = os.path.join("/conf/bin/", os.path.basename(script_file).replace('.script',''))
     conf.jinja(script_file, os.environ, out_file)
-    os.chmod(out_file, 0555)
+    os.chmod(out_file, 0o555)
 
 # Run Podop, then postfix
 multiprocessing.Process(target=start_podop).start()

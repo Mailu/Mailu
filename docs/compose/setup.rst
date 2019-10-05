@@ -45,7 +45,8 @@ values:
   Or else certificate generation will fail! See also: :ref:`dns_setup`.
   
   Also notice that when changing the ``TLS_FLAVOR`` from ``letsencrypt`` back to ``cert`` you need to 
-  delete the ``mailu/certs/letsencrypt`` folder.
+  delete the ``mailu/certs/letsencrypt`` folder. This also is necessary when changing config parameters
+  letsencrypt depends on like host or domain names.
   
 .. _issues: https://github.com/Mailu/Mailu/issues/1164
 

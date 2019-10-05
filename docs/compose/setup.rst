@@ -43,6 +43,11 @@ values:
   When using *Letsencrypt!* you have to make sure that the DNS ``A`` and ``AAAA`` records for the
   all hostnames mentioned in the ``HOSTNAMES`` variable match with the ip adresses of you server.
   Or else certificate generation will fail! See also: :ref:`dns_setup`.
+  
+  Also notice that when changing the ``TLS_FLAVOR`` from ``letsencrypt`` back to ``cert`` you need to 
+  delete the ``mailu/certs/letsencrypt`` folder.
+  
+.. _issues: https://github.com/Mailu/Mailu/issues/1164
 
 Bind address
 ````````````

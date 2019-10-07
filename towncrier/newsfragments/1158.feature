@@ -1,0 +1,1 @@
+- Use nginx as http endpoint on kubernetes to simplify ingress

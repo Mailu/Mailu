@@ -1,20 +1,15 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: mailu-antispam-ingress
+  name: mailu-ingress
   namespace: mailu-mailserver
   annotations:
     kubernetes.io/tls-acme: "true"
     certmanager.k8s.io/cluster-issuer: letsencrypt-stage
-    ingress.kubernetes.io/configuration-snippet: |
-      rewrite ^/admin/antispam/(.*) /$1 break;
-      auth_request /internal/auth/admin;
-      proxy_set_header X-Real-IP "";
-      proxy_set_header X-Forwarded-For "";
   labels:
     app: mailu
     role: mail
-    tier: frontend
+    tier: backend
 spec:
   tls:
   - hosts:
@@ -24,7 +19,7 @@ spec:
   - host: "mail.example.com"
     http:
       paths:
-      - path: "/admin/antispam"
+      - path: "/"
         backend:
-          serviceName: antispam
-          servicePort: 11334
+          serviceName: front
+          servicePort: 80

@@ -51,7 +51,7 @@ DEFAULT_CONFIG = {
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
     # Advanced settings
-    'PASSWORD_SCHEME': 'BLF-CRYPT',
+    'PASSWORD_SCHEME': 'PBKDF2',
     'LOG_LEVEL': 'WARNING',
     # Host settings
     'HOST_IMAP': 'imap',

@@ -1,12 +1,12 @@
-ARG DISTRO=alpine:3.8
+ARG DISTRO=alpine:3.10
 FROM $DISTRO
 
 RUN mkdir -p /app
 WORKDIR /app
 
 COPY requirements.txt requirements.txt
-RUN apk add --no-cache curl python3 py3-pip
-RUN pip3 install -r requirements.txt
+RUN apk add --no-cache curl python3 py3-pip \
+    && pip3 install -r requirements.txt
 
 COPY server.py ./server.py
 COPY main.py ./main.py

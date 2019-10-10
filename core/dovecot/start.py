@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import os
-import stat
 import glob
 import multiprocessing
 import logging as log

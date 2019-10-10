@@ -3,9 +3,13 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: POEditor.com\n"
+"X-Generator: Poedit 1.5.7\n"
 "Project-Id-Version: Mailu\n"
 "Language: ja\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Ichikawa Yuriko <ichikawayuriko@yahoo.co.jp>\n"
+"Language-Team: \n"
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."
@@ -13,7 +17,7 @@ msgstr "無効なメールアドレスです"
 
 #: mailu/ui/forms.py:36
 msgid "Confirm"
-msgstr ""
+msgstr "確認"
 
 #: mailu/ui/forms.py:40 mailu/ui/forms.py:77
 msgid "E-mail"
@@ -32,7 +36,8 @@ msgstr "ログイン"
 
 #: mailu/ui/forms.py:46 mailu/ui/forms.py:56
 #: mailu/ui/templates/domain/details.html:27
-#: mailu/ui/templates/domain/list.html:18 mailu/ui/templates/relay/list.html:17
+#: mailu/ui/templates/domain/list.html:18
+#: mailu/ui/templates/relay/list.html:17
 msgid "Domain name"
 msgstr "ドメイン名"
 
@@ -46,7 +51,8 @@ msgstr "最大エイリアス数"
 
 #: mailu/ui/forms.py:51 mailu/ui/forms.py:72 mailu/ui/forms.py:83
 #: mailu/ui/forms.py:128 mailu/ui/forms.py:140
-#: mailu/ui/templates/alias/list.html:21 mailu/ui/templates/domain/list.html:21
+#: mailu/ui/templates/alias/list.html:21
+#: mailu/ui/templates/domain/list.html:21
 #: mailu/ui/templates/relay/list.html:19 mailu/ui/templates/token/list.html:19
 #: mailu/ui/templates/user/list.html:23
 msgid "Comment"
@@ -88,7 +94,7 @@ msgstr "スパムフィルターを有効"
 
 #: mailu/ui/forms.py:80
 msgid "Spam filter threshold"
-msgstr ""
+msgstr "スパムフィルターの閾値"
 
 #: mailu/ui/forms.py:105
 msgid "Save settings"
@@ -133,15 +139,15 @@ msgstr "エイリアス名"
 
 #: mailu/ui/forms.py:138
 msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"
-msgstr ""
+msgstr "SQL LIKE構文を使う (例：Catch-All エイリアス)"
 
 #: mailu/ui/forms.py:145
 msgid "Admin email"
-msgstr ""
+msgstr "管理者のE-Mail"
 
 #: mailu/ui/forms.py:146 mailu/ui/forms.py:151 mailu/ui/forms.py:164
 msgid "Submit"
-msgstr ""
+msgstr "保存"
 
 #: mailu/ui/forms.py:150
 msgid "Manager email"
@@ -158,11 +164,11 @@ msgstr "ホスト名またはIPアドレス"
 #: mailu/ui/forms.py:159 mailu/ui/templates/client.html:20
 #: mailu/ui/templates/client.html:47
 msgid "TCP port"
-msgstr ""
+msgstr "TCP ポート"
 
 #: mailu/ui/forms.py:160
 msgid "Enable TLS"
-msgstr ""
+msgstr "TLSを有効にする"
 
 #: mailu/ui/forms.py:161 mailu/ui/templates/client.html:28
 #: mailu/ui/templates/client.html:55 mailu/ui/templates/fetch/list.html:20
@@ -171,11 +177,11 @@ msgstr "ユーザー名"
 
 #: mailu/ui/templates/confirm.html:4
 msgid "Confirm action"
-msgstr ""
+msgstr "操作を確認"
 
 #: mailu/ui/templates/confirm.html:13
 msgid "You are about to %(action)s. Please confirm your action."
-msgstr ""
+msgstr "%(action)s しようとしています。本当に実行しますか？"
 
 #: mailu/ui/templates/docker-error.html:4
 msgid "Docker error"
@@ -183,11 +189,11 @@ msgstr "Docker エラー"
 
 #: mailu/ui/templates/docker-error.html:12
 msgid "An error occurred while talking to the Docker server."
-msgstr ""
+msgstr "Dockerサーバーと通信中にエラーが発生しました。"
 
 #: mailu/admin/templates/login.html:6
 msgid "Your account"
-msgstr ""
+msgstr "あなたのアカウント"
 
 #: mailu/ui/templates/login.html:8
 msgid "to access the administration tools"
@@ -199,11 +205,11 @@ msgstr "サービス稼働状態"
 
 #: mailu/ui/templates/services.html:10
 msgid "Service"
-msgstr ""
+msgstr "サービス"
 
 #: mailu/ui/templates/fetch/list.html:23 mailu/ui/templates/services.html:11
 msgid "Status"
-msgstr ""
+msgstr "状態"
 
 #: mailu/ui/templates/services.html:12
 msgid "PID"
@@ -215,11 +221,11 @@ msgstr "Docker イメージ"
 
 #: mailu/ui/templates/services.html:14
 msgid "Started"
-msgstr ""
+msgstr "実行中"
 
 #: mailu/ui/templates/services.html:15
 msgid "Last update"
-msgstr ""
+msgstr "最終更新日"
 
 #: mailu/ui/templates/sidebar.html:8
 msgid "My account"
@@ -240,7 +246,7 @@ msgstr "自動返信"
 #: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:26
 #: mailu/ui/templates/user/list.html:36
 msgid "Fetched accounts"
-msgstr ""
+msgstr "外部メールアカウント"
 
 #: mailu/ui/templates/sidebar.html:105
 msgid "Sign out"
@@ -264,7 +270,7 @@ msgstr "ヘルプ"
 
 #: mailu/ui/templates/working.html:4
 msgid "We are still working on this feature!"
-msgstr ""
+msgstr "この機能は鋭意開発中です！"
 
 #: mailu/ui/templates/admin/create.html:4
 msgid "Add a global administrator"
@@ -280,21 +286,24 @@ msgstr "管理者を追加"
 
 #: mailu/ui/templates/admin/list.html:16 mailu/ui/templates/alias/list.html:18
 #: mailu/ui/templates/alternative/list.html:18
-#: mailu/ui/templates/domain/list.html:16 mailu/ui/templates/fetch/list.html:18
+#: mailu/ui/templates/domain/list.html:16
+#: mailu/ui/templates/fetch/list.html:18
 #: mailu/ui/templates/manager/list.html:18
 #: mailu/ui/templates/relay/list.html:16 mailu/ui/templates/token/list.html:18
 #: mailu/ui/templates/user/list.html:18
 msgid "Actions"
-msgstr ""
+msgstr "操作"
 
 #: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
-#: mailu/ui/templates/manager/list.html:19 mailu/ui/templates/user/list.html:20
+#: mailu/ui/templates/manager/list.html:19
+#: mailu/ui/templates/user/list.html:20
 msgid "Email"
 msgstr "メールアドレス"
 
 #: mailu/ui/templates/admin/list.html:22 mailu/ui/templates/alias/list.html:29
 #: mailu/ui/templates/alternative/list.html:25
-#: mailu/ui/templates/domain/list.html:31 mailu/ui/templates/fetch/list.html:31
+#: mailu/ui/templates/domain/list.html:31
+#: mailu/ui/templates/fetch/list.html:31
 #: mailu/ui/templates/manager/list.html:24
 #: mailu/ui/templates/relay/list.html:27 mailu/ui/templates/token/list.html:26
 #: mailu/ui/templates/user/list.html:31
@@ -307,7 +316,7 @@ msgstr "エイリアスを作成"
 
 #: mailu/ui/templates/alias/edit.html:4
 msgid "Edit alias"
-msgstr ""
+msgstr "エイリアスを編集"
 
 #: mailu/ui/templates/alias/list.html:4
 msgid "Alias list"
@@ -319,23 +328,25 @@ msgstr "エイリアスを作成"
 
 #: mailu/ui/templates/alias/list.html:22
 #: mailu/ui/templates/alternative/list.html:20
-#: mailu/ui/templates/domain/list.html:22 mailu/ui/templates/fetch/list.html:24
-#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:21
-#: mailu/ui/templates/user/list.html:24
+#: mailu/ui/templates/domain/list.html:22
+#: mailu/ui/templates/fetch/list.html:24 mailu/ui/templates/relay/list.html:20
+#: mailu/ui/templates/token/list.html:21 mailu/ui/templates/user/list.html:24
 msgid "Created"
 msgstr "作成日"
 
-#: mailu/ui/templates/alias/list.html:23 mailu/ui/templates/domain/list.html:23
+#: mailu/ui/templates/alias/list.html:23
+#: mailu/ui/templates/domain/list.html:23
 #: mailu/ui/templates/fetch/list.html:25 mailu/ui/templates/relay/list.html:21
 #: mailu/ui/templates/user/list.html:25
 msgid "Last edit"
 msgstr "最終更新日"
 
-#: mailu/ui/templates/alias/list.html:28 mailu/ui/templates/domain/list.html:30
+#: mailu/ui/templates/alias/list.html:28
+#: mailu/ui/templates/domain/list.html:30
 #: mailu/ui/templates/fetch/list.html:30 mailu/ui/templates/relay/list.html:26
 #: mailu/ui/templates/user/list.html:30
 msgid "Edit"
-msgstr ""
+msgstr "編集"
 
 #: mailu/ui/templates/domain/create.html:4
 #: mailu/ui/templates/domain/list.html:9
@@ -372,11 +383,11 @@ msgstr "DNS DMARCエントリ"
 
 #: mailu/ui/templates/domain/edit.html:4
 msgid "Edit domain"
-msgstr ""
+msgstr "ドメイン名を編集"
 
 #: mailu/ui/templates/domain/list.html:4
 msgid "Domain list"
-msgstr ""
+msgstr "ドメイン一覧"
 
 #: mailu/ui/templates/domain/list.html:17
 msgid "Manage"
@@ -396,23 +407,23 @@ msgstr "詳細"
 
 #: mailu/ui/templates/domain/list.html:35
 msgid "Users"
-msgstr ""
+msgstr "ユーザー"
 
 #: mailu/ui/templates/domain/list.html:36
 msgid "Aliases"
-msgstr ""
+msgstr "エイリアス"
 
 #: mailu/ui/templates/domain/list.html:37
 msgid "Managers"
-msgstr ""
+msgstr "管理者"
 
 #: mailu/ui/templates/fetch/create.html:4
 msgid "Add a fetched account"
-msgstr ""
+msgstr "外部メールアカウントを追加"
 
 #: mailu/ui/templates/fetch/edit.html:4
 msgid "Update a fetched account"
-msgstr ""
+msgstr "外部メールアカウントを更新"
 
 #: mailu/ui/templates/fetch/list.html:12
 msgid "Add an account"
@@ -420,15 +431,15 @@ msgstr "アカウントを追加"
 
 #: mailu/ui/templates/fetch/list.html:19
 msgid "Endpoint"
-msgstr ""
+msgstr "エンドポイント"
 
 #: mailu/ui/templates/fetch/list.html:22
 msgid "Last check"
-msgstr ""
+msgstr "最終確認"
 
 #: mailu/ui/templates/manager/create.html:4
 msgid "Add a manager"
-msgstr ""
+msgstr "管理者を追加"
 
 #: mailu/ui/templates/manager/list.html:4
 msgid "Manager list"
@@ -440,27 +451,27 @@ msgstr "管理者を追加"
 
 #: mailu/ui/forms.py:168
 msgid "Announcement subject"
-msgstr ""
+msgstr "告知タイトル"
 
 #: mailu/ui/forms.py:170
 msgid "Announcement body"
-msgstr ""
+msgstr "告知本文"
 
 #: mailu/ui/forms.py:172
 msgid "Send"
-msgstr ""
+msgstr "送信"
 
 #: mailu/ui/templates/announcement.html:4
 msgid "Public announcement"
-msgstr ""
+msgstr "一斉告知"
 
 #: mailu/ui/templates/announcement.html:8
 msgid "from"
-msgstr ""
+msgstr "差出人"
 
 #: mailu/ui/templates/sidebar.html:44
 msgid "Announcement"
-msgstr ""
+msgstr "告知"
 
 #: mailu/ui/templates/user/create.html:4
 msgid "New user"
@@ -472,17 +483,18 @@ msgstr "ユーザーを編集"
 
 #: mailu/ui/templates/user/forward.html:4
 msgid "Forward emails"
-msgstr ""
+msgstr "メール転送"
 
 #: mailu/ui/templates/user/list.html:4
 msgid "User list"
-msgstr ""
+msgstr "ユーザー一覧"
 
 #: mailu/ui/templates/user/list.html:12
 msgid "Add user"
-msgstr ""
+msgstr "ユーザーを追加"
 
-#: mailu/ui/templates/user/list.html:19 mailu/ui/templates/user/settings.html:4
+#: mailu/ui/templates/user/list.html:19
+#: mailu/ui/templates/user/settings.html:4
 msgid "User settings"
 msgstr "ユーザー設定"
 
@@ -508,23 +520,23 @@ msgstr "メールのコピーを残す"
 
 #: mailu/ui/forms.py:163
 msgid "Keep emails on the server"
-msgstr ""
+msgstr "サーバーにメールを残す"
 
 #: mailu/ui/templates/fetch/list.html:21
 msgid "Keep emails"
-msgstr ""
+msgstr "メールを残す"
 
 #: mailu/ui/templates/fetch/list.html:35
 msgid "yes"
-msgstr ""
+msgstr "はい"
 
 #: mailu/ui/templates/fetch/list.html:35
 msgid "no"
-msgstr ""
+msgstr "いいえ"
 
 #: mailu/ui/forms.py:65
 msgid "Alternative name"
-msgstr ""
+msgstr "代替ドメイン名"
 
 #: mailu/ui/forms.py:70
 msgid "Relayed domain name"
@@ -532,7 +544,7 @@ msgstr "リレードメイン名"
 
 #: mailu/ui/forms.py:71 mailu/ui/templates/relay/list.html:18
 msgid "Remote host"
-msgstr ""
+msgstr "サーバー"
 
 #: mailu/ui/templates/sidebar.html:54
 msgid "Relayed domains"
@@ -540,23 +552,23 @@ msgstr "リレードメイン"
 
 #: mailu/ui/templates/alternative/create.html:4
 msgid "Create alternative domain"
-msgstr ""
+msgstr "代替ドメイン名を作成"
 
 #: mailu/ui/templates/alternative/list.html:4
 msgid "Alternative domain list"
-msgstr ""
+msgstr "代替ドメイン名一覧"
 
 #: mailu/ui/templates/alternative/list.html:12
 msgid "Add alternative"
-msgstr ""
+msgstr "代替ドメイン名を追加"
 
 #: mailu/ui/templates/alternative/list.html:19
 msgid "Name"
-msgstr ""
+msgstr "代替ドメイン名"
 
 #: mailu/ui/templates/domain/list.html:39
 msgid "Alternatives"
-msgstr ""
+msgstr "代替ドメイン"
 
 #: mailu/ui/templates/relay/create.html:4
 msgid "New relay domain"
@@ -564,11 +576,11 @@ msgstr "リレードメイン名を追加"
 
 #: mailu/ui/templates/relay/edit.html:4
 msgid "Edit relayd domain"
-msgstr ""
+msgstr "リレードメイン名を編集"
 
 #: mailu/ui/templates/relay/list.html:4
 msgid "Relayed domain list"
-msgstr ""
+msgstr "リレードメイン名一覧"
 
 #: mailu/ui/templates/relay/list.html:9
 msgid "New relayed domain"
@@ -624,33 +636,33 @@ msgstr "スパムメール対策"
 
 #: mailu/ui/forms.py:99
 msgid "Spam filter tolerance"
-msgstr ""
+msgstr "スパムフィルターの閾値"
 
 #: mailu/ui/forms.py:50
 msgid "Enable sign-up"
-msgstr ""
+msgstr "ユーザー登録を有効にする"
 
 #: mailu/ui/forms.py:57
 msgid "Initial admin"
-msgstr ""
+msgstr "初期管理者アドレス"
 
 #: mailu/ui/forms.py:58
 msgid "Admin password"
-msgstr ""
+msgstr "管理パスワード"
 
 #: mailu/ui/forms.py:84
 msgid "Enabled"
-msgstr ""
+msgstr "有効"
 
 #: mailu/ui/forms.py:89
 msgid "Email address"
-msgstr ""
+msgstr "E-Mailアドレス"
 
 #: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
 #: mailu/ui/templates/user/signup.html:4
 #: mailu/ui/templates/user/signup_domain.html:4
 msgid "Sign up"
-msgstr ""
+msgstr "ユーザー登録"
 
 #: mailu/ui/forms.py:119
 msgid "End of vacation"
@@ -658,45 +670,54 @@ msgstr "自動返信終了日"
 
 #: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:82
 msgid "Client setup"
-msgstr ""
+msgstr "クライアント設定"
 
 #: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
 msgid "Mail protocol"
-msgstr ""
+msgstr "メールプロトコル"
 
 #: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
 msgid "Server name"
-msgstr ""
+msgstr "サーバーアドレス"
 
 #: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
 msgid "Register a domain"
-msgstr ""
+msgstr "ドメインを登録"
 
 #: mailu/ui/templates/domain/details.html:17
 msgid "Generate keys"
-msgstr ""
+msgstr "キーを生成"
 
 #: mailu/ui/templates/domain/signup.html:13
-msgid "In order to register a new domain, you must first setup the\n"
+msgid ""
+"In order to register a new domain, you must first setup the\n"
 "    domain zone so that the domain <code>MX</code> points to this server"
 msgstr ""
+"新しいドメインを登録するには、最初に<code>MX</code>レコードが\n"
+"このサーバーを指すようにDNSゾーンを設定する必要があります。"
 
 #: mailu/ui/templates/domain/signup.html:18
-msgid "If you do not know how to setup an <code>MX</code> record for your DNS zone,\n"
+msgid ""
+"If you do not know how to setup an <code>MX</code> record for your DNS "
+"zone,\n"
 "    please contact your DNS provider or administrator. Also, please wait a\n"
-"    couple minutes after the <code>MX</code> is set so the local server cache\n"
+"    couple minutes after the <code>MX</code> is set so the local server "
+"cache\n"
 "    expires."
 msgstr ""
+"もしDNSゾーンに<code>MX</code>レコードを設定する方法が分からなければ、\n"
+"お使いのDNSサーバ管理者にお問い合わせ下さい。<code>MX</code>レコード設定後"
+"は\n"
+"キャッシュ有効期限が切れるまでしばらくお待ちください。"
 
 #: mailu/ui/templates/user/signup_domain.html:8
 msgid "pick a domain for the new account"
-msgstr ""
+msgstr "新しいアカウントのドメインを選んでください"
 
 #: mailu/ui/templates/user/signup_domain.html:14
 msgid "Domain"
-msgstr ""
+msgstr "ドメイン名"
 
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
-msgstr ""
-
+msgstr "空きメールボックス数"

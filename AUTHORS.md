@@ -24,3 +24,4 @@ Other contributors:
  - [Thomas Sänger](https://github.com/HorayNarea) - German translation
  - [Tim Mohlmann](https://github.com/muhlemmer) - [Contributions](https://github.com/Mailu/Mailu/commits?author=muhlemmer)
  - [Ionut Filip](https://github.com/ionutfilip) - [Contributions](https://github.com/Mailu/Mailu/commits?author=ionutfilip)
+ - [Ichikawa Yuriko](https://github.com/IchikawaYukko) - [Contributions](https://github.com/Mailu/Mailu/commits?author=IchikawaYukko) Japanese translation

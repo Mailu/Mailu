@@ -143,6 +143,11 @@
     # Advanced settings
     ###################################
 
+    # Create an admin account if it does not exist yet. It will also create the email domain for the account.
+    # INITIAL_ADMIN_ACCOUNT: "admin"
+    # INITIAL_ADMIN_DOMAIN: "example.com"
+    # INITIAL_ADMIN_PW: "s3cr3t"
+
     # Docker-compose project name, this will prepended to containers names.
     COMPOSE_PROJECT_NAME: "mailu"
 

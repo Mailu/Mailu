@@ -1,0 +1,1 @@
+On kubernetes allow POD_ADDRESS_RANGE to relay over postfix (allows to send vacations)

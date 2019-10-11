@@ -30,6 +30,9 @@ spec:
           - mountPath: /data
             name: maildata
             subPath: maildata
+          - mountPath: /queue
+            name: maildata
+            subPath: mailqueue
           - mountPath: /overrides
             name: maildata
             subPath: overrides

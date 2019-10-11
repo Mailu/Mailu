@@ -112,7 +112,7 @@ unverified_recipient_reject_reason = Address lookup failure
 # Milter
 ###############
 
-smtpd_milters = inet:{{ ANTISPAM_ADDRESS }}
+smtpd_milters = inet:{{ ANTISPAM_MILTER_ADDRESS }}
 milter_protocol = 6
 milter_mail_macros = i {mail_addr} {client_addr} {client_name} {auth_authen}
 milter_default_action = tempfail

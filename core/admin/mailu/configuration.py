@@ -60,8 +60,6 @@ DEFAULT_CONFIG = {
     'HOST_SMTP': 'smtp',
     'HOST_AUTHSMTP': 'smtp',
     'HOST_ADMIN': 'admin',
-    'ANTISPAM': 'none',
-    'HOST_ANTISPAM': 'antispam:11334',
     'WEBMAIL': 'none',
     'HOST_WEBMAIL': 'webmail',
     'HOST_WEBDAV': 'webdav:5232',
@@ -99,8 +97,6 @@ class ConfigManager(dict):
         self.config["REDIS_ADDRESS"] = self.get_host_address("REDIS")
         if self.config["WEBMAIL"] != "none":
             self.config["WEBMAIL_ADDRESS"] = self.get_host_address("WEBMAIL")
-        if self.config["ANTISPAM"] != "none":
-            self.config["ANTISPAM_ADDRESS"] = self.get_host_address("ANTISPAM")
 
     def __coerce_value(self, value):
         if isinstance(value, str) and value.lower() in ('true','yes'):

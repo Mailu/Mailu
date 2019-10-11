@@ -15,7 +15,7 @@ with open("/etc/resolv.conf") as handle:
     args["RESOLVER"] = content[content.index("nameserver") + 1]
 
 args["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
-args["ANTISPAM_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM", "antispam:11334")
+args["ANTISPAM_WEBUI_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM_WEBUI", "antispam:11334")
 if args["WEBMAIL"] != "none":
     args["WEBMAIL_ADDRESS"] = system.get_host_address_from_environment("WEBMAIL", "webmail")
 if args["WEBDAV"] != "none":

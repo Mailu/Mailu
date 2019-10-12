@@ -6,8 +6,6 @@ msgstr ""
 "X-Generator: Poedit 1.5.7\n"
 "Project-Id-Version: Mailu\n"
 "Language: ja\n"
-"POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
 "Last-Translator: Ichikawa Yuriko <ichikawayuriko@yahoo.co.jp>\n"
 "Language-Team: \n"
 

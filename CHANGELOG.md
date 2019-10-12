@@ -47,7 +47,6 @@ deprecated before 1.8.0, you can switch to an external database server by then.
 - Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
 - Enhancement: Automatically create admin user on container startup if given appropriate environment variables
 - Enhancement: Missing wildcard option in alias flask command ([#869](https://github.com/Mailu/Mailu/issues/869))
-- L10N: japanese loca is now available
 
 v1.6.0 - 2019-01-18
 -------------------

@@ -45,6 +45,6 @@ tabulate==0.8.3
 tenacity==5.0.4
 validators==0.12.5
 visitor==0.1.3
-Werkzeug==0.15.2
+Werkzeug==0.15.3
 WTForms==2.2.1
 WTForms-Components==0.10.4

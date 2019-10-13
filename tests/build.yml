@@ -8,7 +8,7 @@ services:
 
   resolver:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-local}
-    build: ../services/unbound
+    build: ../optional/unbound
 
   imap:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-local}
@@ -20,7 +20,7 @@ services:
 
   antispam:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-local}
-    build: ../services/rspamd
+    build: ../core/rspamd
 
   antivirus:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}clamav:${MAILU_VERSION:-local}
@@ -52,7 +52,7 @@ services:
 
   fetchmail:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}fetchmail:${MAILU_VERSION:-local}
-    build: ../services/fetchmail
+    build: ../optional/fetchmail
 
   none:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}none:${MAILU_VERSION:-local}

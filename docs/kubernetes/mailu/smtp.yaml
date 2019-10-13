@@ -27,9 +27,9 @@ spec:
             memory: 2Gi
             cpu: 500m
         volumeMounts:
-          - mountPath: /data
+          - mountPath: /queue
             name: maildata
-            subPath: maildata
+            subPath: mailqueue
           - mountPath: /overrides
             name: maildata
             subPath: overrides

@@ -17,7 +17,7 @@ COPY conf /conf
 COPY start.py /start.py
 
 EXPOSE 25/tcp 10025/tcp
-VOLUME ["/data"]
+VOLUME ["/queue"]
 
 CMD /start.py
 

@@ -73,6 +73,7 @@ services:
     restart: always
     env_file: {{ env }}
     volumes:
+      - "{{ root }}/mailqueue:/queue"
       - "{{ root }}/overrides:/overrides"
     depends_on:
       - front

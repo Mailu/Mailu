@@ -57,6 +57,7 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
+      - "{{ root }}/mailqueue:/queue"
       - "{{ root }}/overrides:/overrides"
     deploy:
       replicas: {{ smtp_replicas }}

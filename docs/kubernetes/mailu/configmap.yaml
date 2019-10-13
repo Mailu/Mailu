@@ -169,6 +169,7 @@
     HOST_WEBMAIL: "webmail.mailu-mailserver.svc.cluster.local"
     HOST_ADMIN: "admin.mailu-mailserver.svc.cluster.local"
     HOST_WEBDAV: "webdav.mailu-mailserver.svc.cluster.local:5232"
-    HOST_ANTISPAM: "antispam.mailu-mailserver.svc.cluster.local:11332"
+    HOST_ANTISPAM_MILTER: "antispam.mailu-mailserver.svc.cluster.local:11332"
+    HOST_ANTISPAM_WEBUI: "antispam.mailu-mailserver.svc.cluster.local:11334"
     HOST_ANTIVIRUS: "antivirus.mailu-mailserver.svc.cluster.local:3310"
     HOST_REDIS: "redis.mailu-mailserver.svc.cluster.local"

@@ -25,7 +25,7 @@ def start_podop():
 os.environ["FRONT_ADDRESS"] = system.get_host_address_from_environment("FRONT", "front")
 os.environ["REDIS_ADDRESS"] = system.get_host_address_from_environment("REDIS", "redis")
 os.environ["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
-os.environ["ANTISPAM_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM", "antispam:11334")
+os.environ["ANTISPAM_WEBUI_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM_WEBUI", "antispam:11334")
 if os.environ["WEBMAIL"] != "none":
     os.environ["WEBMAIL_ADDRESS"] = system.get_host_address_from_environment("WEBMAIL", "webmail")
 

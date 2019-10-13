@@ -210,11 +210,11 @@ If the login problem still persists, or more specific, happens now and then and 
 - Depending on your network configuration you could still see some ``allow_nets check failed`` results in the logs. This means that the IP is not allowed a login
 - If this is happening your network plugin has troubles with the Nginx Ingress Controller using the ``hostNetwork: true`` option. Known cases: Flannel and Calico.
 - You should uncomment ``POD_ADDRESS_RANGE`` in the ``configmap.yaml`` file and add the IP range of your pod network bridge (the range that sadly has failed the ``allowed_nets`` test)
-- Delete the IMAP pod and wait for it to restart
+- Delete the Admin pod and wait for it to restart
 
 .. code:: bash
 
     kubectl -n mailu-mailserver get po
-    kubectl -n mailu-mailserver delete po/mailu-imap...
+    kubectl -n mailu-mailserver delete po/mailu-admin...
 
 Happy mailing!

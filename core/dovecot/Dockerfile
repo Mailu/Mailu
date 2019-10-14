@@ -19,7 +19,7 @@ COPY conf /conf
 COPY start.py /start.py
 
 EXPOSE 110/tcp 143/tcp 993/tcp 4190/tcp 2525/tcp
-VOLUME ["/data", "/mail"]
+VOLUME ["/mail"]
 
 CMD /start.py
 

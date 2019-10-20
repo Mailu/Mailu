@@ -31,6 +31,12 @@ if os.environ["WEBMAIL"] != "none":
 for dovecot_file in glob.glob("/conf/*.conf"):
     conf.jinja(dovecot_file, os.environ, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))
 
+os.makedirs("/conf/bin", exist_ok=True)
+for script_file in glob.glob("/conf/*.script"):
+    out_file = os.path.join("/conf/bin/", os.path.basename(script_file).replace('.script',''))
+    conf.jinja(script_file, os.environ, out_file)
+    os.chmod(out_file, 0o555)
+
 # Run Podop, then postfix
 multiprocessing.Process(target=start_podop).start()
 os.system("chown mail:mail /mail")

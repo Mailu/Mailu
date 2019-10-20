@@ -1,5 +1,6 @@
 # First stage: Build
-FROM alpine:3.10 as builder
+ARG DISTRO=alpine:3.10
+FROM $DISTRO as builder
 
 # build dependencies
 RUN apk add --no-cache curl tar xz autoconf git gettext build-base openssl openssl-dev
@@ -10,7 +11,8 @@ RUN cd fetchmail-7.0.0-alpha6 && \
     ./configure --with-ssl --prefix /usr/local --disable-nls && \
     make
 
-FROM alpine:3.10
+ARG DISTRO=alpine:3.10
+FROM $DISTRO
 
 # python3 shared with most images
 RUN apk add --no-cache \

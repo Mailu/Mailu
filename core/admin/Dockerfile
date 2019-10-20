@@ -1,5 +1,8 @@
 # First stage to build assets
-FROM node:8 as assets
+ARG DISTRO=alpine:3.10
+ARG ARCH=""
+FROM ${ARCH}node:8 as assets
+COPY --from=balenalib/rpi-alpine:3.10 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 
 COPY package.json ./
 RUN npm install
@@ -11,7 +14,7 @@ RUN mkdir static \
 
 
 # Actual application
-FROM alpine:3.10
+FROM $DISTRO
 # python3 shared with most images
 RUN apk add --no-cache \
     python3 py3-pip git bash \
@@ -41,4 +44,3 @@ ENV FLASK_APP mailu
 CMD /start.py
 
 HEALTHCHECK CMD curl -f -L http://localhost/ui/login?next=ui.index || exit 1
-

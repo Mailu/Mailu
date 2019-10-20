@@ -13,3 +13,4 @@ pip-selfcheck.json
 /docker-compose.yml
 /.idea
 /.vscode
+qemu-arm-static

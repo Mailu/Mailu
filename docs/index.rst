@@ -72,7 +72,8 @@ the version of Mailu that you are running.
     :maxdepth: 2
     :caption: Contributors
 
-    contributors/guide
+    contributors/workflow
+    contributors/guidelines
     contributors/environment
     contributors/database
     contributors/memo

@@ -71,15 +71,28 @@ We thank you for your understanding and patience.
 I would like to donate (for a feature)
 ``````````````````````````````````````
 
-Donations are welcome to the authors of the project directly, we do not manage any central
-donation pot. Also, check the ``AUTHORS.md`` file for Patreon link or equivalent. If you
-wish to contact a contributor specifically, please do so on `Matrix`_
+We maintain a `Communtity Bridge`_ project through which you can donate.
+This budget will be used to pay for development of features, mentorship and hopefully future events.
+Contributing companies or individuals can be paid from this budget to support their development efforts.
+
+We are also looking into GitHub's integrated sponorship program for individual contributors.
+Once those become available, we will add them to the project.
+
+Please click the |sponsor| button on top of our GitHub Page for current possibilities.
+
+.. |sponsor| image:: assets/sponsor-button.png
+  :height: 1.2em
+  :alt: sponsor
+  :target: `GitHub`_
+
 
 .. _`Matrix`: https://matrix.to/#/#mailu:tedomum.net
 .. _`open issues`: https://github.com/Mailu/Mailu/issues
 .. _`new issue`: https://github.com/Mailu/Mailu/issues/new
 .. _`Enhancement issues`: https://github.com/Mailu/Mailu/issues?q=is%3Aissue+is%3Aopen+label%3Atype%2Fenhancement
 .. _`Feature request issues`: https://github.com/Mailu/Mailu/issues?q=is%3Aopen+is%3Aissue+label%3Atype%2Ffeature
+.. _`GitHub`: https://github.com/Mailu/Mailu
+.. _`Communtity Bridge`: https://funding.communitybridge.org/projects/mailu
 
 Deployment related
 ------------------

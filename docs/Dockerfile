@@ -14,7 +14,7 @@ COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 COPY . /docs
 
 RUN mkdir -p /build/$VERSION \
- && sphinx-build /docs /build/$VERSION
+ && sphinx-build -W /docs /build/$VERSION
 
 EXPOSE 80/tcp
 

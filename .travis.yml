@@ -6,6 +6,10 @@ branches:
     - '1.6'
     - '1.7'
     - master
+    # version tags, e.g. 1.7.1
+    - /^1\.[567]\.\d+$/
+    # pre-releases, e.g. 1.8-pre1
+    - /^1\.8-pre\d+$/
 
 sudo: required
 services: docker

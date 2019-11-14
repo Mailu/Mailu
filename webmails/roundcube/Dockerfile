@@ -32,6 +32,8 @@ RUN apt-get update && apt-get install -y \
  && cd html \
  && rm -rf CHANGELOG INSTALL LICENSE README.md UPGRADING composer.json-dist installer \
  && sed -i 's,mod_php5.c,mod_php7.c,g' .htaccess \
+ && sed -i 's,^php_value.*post_max_size,#&,g' .htaccess \
+ && sed -i 's,^php_value.*upload_max_filesize,#&,g' .htaccess \
  && chown -R www-data: logs temp \
  && rm -rf /var/lib/apt/lists
 

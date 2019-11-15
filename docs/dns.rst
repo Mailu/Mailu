@@ -49,6 +49,23 @@ And for another domain, ``myotherdomain.com`` for example:
 
 Note that both point to the same mail server hostname, which is unique to your server.
 
+Reverse DNS entries
+-------------------
+
+For a mail system, it's higly recommended to set up reverse DNS as well. That means, if your hostname
+``mail.mydomain.com`` resolves to ``a.b.c.d``, the IP ``a.b.c.d`` should also resolve back to the same hostname.
+
+You can verify this with
+
+.. code-block:: bash
+
+  nslookup a.b.c.d
+
+Reverse DNS must be set up by the "owner" of the IP address which is usually your hosting provider. You can look it up with ``whois a.b.c.d`` in most cases.
+
+With incorrect reverse DNS setup, most mail systems will reject you emails as spam.
+
+
 DKIM/SPF & DMARC Entries
 ------------------------
 

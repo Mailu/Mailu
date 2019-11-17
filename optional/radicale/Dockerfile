@@ -1,7 +1,7 @@
 FROM alpine:3.10
 
-RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
- && apk add --no-cache radicale@testing curl bash
+RUN apk add --no-cache curl bash python3 \
+ && pip3 install radicale
 
 COPY radicale.conf /radicale.conf
 

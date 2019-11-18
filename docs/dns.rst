@@ -63,7 +63,7 @@ You can verify this with
 
 Reverse DNS must be set up by the "owner" of the IP address which is usually your hosting provider. You can look it up with ``whois a.b.c.d`` in most cases.
 
-With incorrect reverse DNS setup, most mail systems will reject you emails as spam.
+With incorrect reverse DNS setup, most mail systems will reject your emails as spam.
 
 
 DKIM/SPF & DMARC Entries

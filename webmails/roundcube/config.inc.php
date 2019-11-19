@@ -3,7 +3,7 @@
 $config = array();
 
 // Generals
-$config['db_dsnw'] = 'sqlite:////data/roundcube.db';
+$config['db_dsnw'] = getenv('DB_DSNW');;
 $config['temp_dir'] = '/tmp/';
 $config['des_key'] = getenv('SECRET_KEY');
 $config['cipher_method'] = 'AES-256-CBC';

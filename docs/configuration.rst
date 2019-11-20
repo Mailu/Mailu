@@ -131,6 +131,13 @@ See the `python docs`_ for more information.
 
 .. _`python docs`: https://docs.python.org/3.6/library/logging.html#logging-levels
 
+Antivirus settings
+------------------
+
+The ``ANTIVIRUS_ACTION`` switches behaviour if a virus is detected. It defaults to 'discard',
+so any detected virus is silently discarded. If set to 'reject', rspamd is configured to reject
+virus mails during SMTP dialogue, so the sender will receive a reject message.
+
 Infrastructure settings
 -----------------------
 

@@ -4,6 +4,7 @@ import os
 import logging as log
 import sys
 from socrate import conf
+import subprocess
 
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
@@ -35,8 +36,12 @@ else:
 conf.jinja("/php.ini", os.environ, "/usr/local/etc/php/conf.d/roundcube.ini")
 
 # Fix some permissions
-os.system("mkdir -p /data/gpg")
-os.system("chown -R www-data:www-data /data")
+os.system("mkdir -p /data/gpg /var/www/html/logs")
+os.system("touch /var/www/html/logs/errors")
+os.system("chown -R www-data:www-data /data /var/www/html/logs")
+
+# Tail roundcube logs
+subprocess.Popen(["tail","-f","-n","0","/var/www/html/logs/errors"])
 
 # Run apache
 os.execv("/usr/local/bin/apache2-foreground", ["apache2-foreground"])

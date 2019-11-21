@@ -40,6 +40,23 @@ os.system("mkdir -p /data/gpg /var/www/html/logs")
 os.system("touch /var/www/html/logs/errors")
 os.system("chown -R www-data:www-data /data /var/www/html/logs")
 
+try:
+    print("Initializing database")
+    result=subprocess.check_output(["/var/www/html/bin/initdb.sh","--dir","/var/www/html/SQL"],stderr=subprocess.STDOUT)
+    print(result.decode())
+except subprocess.CalledProcessError as e:
+    if "already exists" in e.stdout.decode():
+        print("Already initialzed")
+    else:
+        print(e.stdout.decode())
+        quit(1)
+
+try:
+    print("Upgrading database")
+    subprocess.check_call(["/var/www/html/bin/update.sh","--version=?","-y"],stderr=subprocess.STDOUT)
+except subprocess.CalledProcessError as e:
+    quit(1)
+
 # Tail roundcube logs
 subprocess.Popen(["tail","-f","-n","0","/var/www/html/logs/errors"])
 

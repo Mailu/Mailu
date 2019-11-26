@@ -8,43 +8,47 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-04-22 12:10+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2019-11-27 22:20+0000\n"
+"Last-Translator: Mordi Sacks <mordisacks@gmail.com>\n"
+"Language-Team: Hebrew <https://translate.tedomum.net/projects/mailu/admin/he/"
+">\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n == 1) ? 0 : ((n == 2) ? 1 : ((n > 10 && "
+"n % 10 == 0) ? 2 : 3));\n"
+"X-Generator: Weblate 3.3\n"
 "Generated-By: Babel 2.5.3\n"
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."
-msgstr ""
+msgstr "כתובת דוא\"ל לא חוקית."
 
 #: mailu/ui/forms.py:36
 msgid "Confirm"
-msgstr ""
+msgstr "אישור"
 
 #: mailu/ui/forms.py:40 mailu/ui/forms.py:77
 msgid "E-mail"
-msgstr ""
+msgstr "דוא\"ל"
 
 #: mailu/ui/forms.py:41 mailu/ui/forms.py:78 mailu/ui/forms.py:90
 #: mailu/ui/forms.py:109 mailu/ui/forms.py:162
 #: mailu/ui/templates/client.html:32 mailu/ui/templates/client.html:59
 msgid "Password"
-msgstr ""
+msgstr "סיסמה"
 
 #: mailu/ui/forms.py:42 mailu/ui/templates/login.html:4
 #: mailu/ui/templates/sidebar.html:111
 msgid "Sign in"
-msgstr ""
+msgstr "כניסה"
 
 #: mailu/ui/forms.py:46 mailu/ui/forms.py:56
 #: mailu/ui/templates/domain/details.html:27
 #: mailu/ui/templates/domain/list.html:18 mailu/ui/templates/relay/list.html:17
 msgid "Domain name"
-msgstr ""
+msgstr "שם דומיין"
 
 #: mailu/ui/forms.py:47
 msgid "Maximum user count"
@@ -118,17 +122,17 @@ msgstr ""
 
 #: mailu/ui/forms.py:85
 msgid "Save"
-msgstr ""
+msgstr "שמירה"
 
 #: mailu/ui/forms.py:89
 msgid "Email address"
-msgstr ""
+msgstr "דואר אלקטרוני"
 
 #: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
 #: mailu/ui/templates/user/signup.html:4
 #: mailu/ui/templates/user/signup_domain.html:4
 msgid "Sign up"
-msgstr ""
+msgstr "הרשמה"
 
 #: mailu/ui/forms.py:97
 msgid "Displayed name"

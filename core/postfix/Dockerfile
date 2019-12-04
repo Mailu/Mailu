@@ -5,7 +5,7 @@ ARG DISTRO=alpine:3.10
 FROM $DISTRO
 # python3 shared with most images
 RUN apk add --no-cache \
-    python3 py3-pip git bash py3-multidict \
+    python3 py3-pip git bash py3-multidict py3-yarl \
   && pip3 install --upgrade pip
 >>>>>>> 09ee3ce9 (Install py3-multidict from repository before installing socrate to avoid the need of gcc during build)
 

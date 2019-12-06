@@ -1,11 +1,10 @@
-from mailu import models
+from mailu import models, limiter
 
 import flask
 import flask_login
 import flask_script
 import flask_migrate
 import flask_babel
-import flask_limiter
 
 from werkzeug.contrib import fixers
 
@@ -20,10 +19,8 @@ def handle_needs_login():
         flask.url_for('ui.login', next=flask.request.endpoint)
     )
 
-
-# Request rate limitation
-limiter = flask_limiter.Limiter(key_func=lambda: current_user.username)
-
+# Rate limiter
+limiter = limiter.Limiter()
 
 # Application translation
 babel = flask_babel.Babel()

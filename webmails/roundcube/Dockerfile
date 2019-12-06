@@ -9,7 +9,7 @@ FROM ${ARCH}php:7.3-apache as build_other
 FROM build_${QEMU}
 #Shared layer between rainloop and roundcube
 RUN apt-get update && apt-get install -y \
-  python3 curl python3-pip git \
+  python3 curl python3-pip git python3-multidict \
   && rm -rf /var/lib/apt/lists \
   && echo "ServerSignature Off" >> /etc/apache2/apache2.conf
 

@@ -17,9 +17,7 @@ def nginx_authentication():
     response = flask.Response()
     for key, value in headers.items():
         response.headers[key] = str(value)
-    if ("Auth-Status" in headers) and (headers["Auth-Status"]=="OK"):
-        utils.limiter.reset(flask.request.headers["Client-Ip"])
-    else:
+    if ("Auth-Status" not in headers) or (headers["Auth-Status"]!="OK"):
         utils.limiter.hit(flask.request.headers["Client-Ip"])
 
     return response

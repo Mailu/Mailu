@@ -35,11 +35,3 @@ class Limiter:
         #    return
         if not self.limiter.hit(self.rate,"client-ip",clientip):
             raise RateLimitExceeded()
-
-    def reset(self,clientip):
-        # TODO: activate this code if we have limits at webmail level
-        #if ipaddress.ip_address(clientip) in self.subnet:
-        #    # no limits for internal requests (e.g. from webmail)
-        #    return
-        # limit reset is not supported by the rate limit library
-        pass

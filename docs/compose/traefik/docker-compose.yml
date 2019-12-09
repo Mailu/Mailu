@@ -25,6 +25,8 @@ services:
     # Make sure this is the same as the main=-domain in traefik.toml
     # !!! Also don’t forget to add "TRAEFIK_DOMAIN=[...]" to your .env!
       - DOMAIN=$TRAEFIK_DOMAIN
+      # Set TRAEFIK_VERSION to v2 in your .env if you're using Traefik v2
+      - TRAEFIK_VERSION=${TRAEFIK_VERSION:-v1}
     volumes:
       - "/data/traefik:/traefik"
       - "$ROOT/certs:/output"

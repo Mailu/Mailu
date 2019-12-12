@@ -10,21 +10,21 @@ log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
 os.environ["MAX_FILESIZE"] = str(int(int(os.environ.get("MESSAGE_SIZE_LIMIT"))*0.66/1048576))
 
-db_flavor=os.environ.get("ROUNDCUBE_DB_FLAVOR","sqlite")
+db_flavor=os.environ.get("ROUNDCUBE_DB_FLAVOR",os.environ.get("DB_FLAVOR","sqlite"))
 if db_flavor=="sqlite":
     os.environ["DB_DSNW"]="sqlite:////data/roundcube.db"
 elif db_flavor=="mysql":
     os.environ["DB_DSNW"]="mysql://%s:%s@%s/%s" % (
         os.environ.get("ROUNDCUBE_DB_USER","roundcube"),
         os.environ.get("ROUNDCUBE_DB_PW"),
-        os.environ.get("ROUNDCUBE_DB_HOST","database"),
+        os.environ.get("ROUNDCUBE_DB_HOST",os.environ.get("DB_HOST","database")),
         os.environ.get("ROUNDCUBE_DB_NAME","roundcube")
         )
 elif db_flavor=="postgresql":
     os.environ["DB_DSNW"]="pgsql://%s:%s@%s/%s" % (
         os.environ.get("ROUNDCUBE_DB_USER","roundcube"),
         os.environ.get("ROUNDCUBE_DB_PW"),
-        os.environ.get("ROUNDCUBE_DB_HOST","database"),
+        os.environ.get("ROUNDCUBE_DB_HOST",os.environ.get("DB_HOST","database")),
         os.environ.get("ROUNDCUBE_DB_NAME","roundcube")
         )
 else:

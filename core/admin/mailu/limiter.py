@@ -33,5 +33,4 @@ class Limiter:
         # disable limits for internal requests (e.g. from webmail)?
         if rate_limit_subnet==False and ipaddress.ip_address(clientip) in self.subnet:
             return
-        if not self.limiter.hit(self.rate,"client-ip",clientip):
-            raise RateLimitExceeded()
+        self.limiter.hit(self.rate,"client-ip",clientip)

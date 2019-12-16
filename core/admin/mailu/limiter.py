@@ -13,25 +13,25 @@ class Limiter:
         self.limiter = None
         self.rate = None
         self.subnet = None
+        self.rate_limit_subnet = True
 
     def init_app(self, app):
         self.storage = limits.storage.storage_from_string(app.config["RATELIMIT_STORAGE_URL"])
         self.limiter = limits.strategies.MovingWindowRateLimiter(self.storage)
         self.rate = limits.parse(app.config["AUTH_RATELIMIT"])
+        self.rate_limit_subnet = str(app.config["AUTH_RATELIMIT_SUBNET"])!='False'
         self.subnet = ipaddress.ip_network(app.config["SUBNET"])
 
     def check(self,clientip):
-        # TODO: activate this code if we have limits at webmail level
-        #if ipaddress.ip_address(clientip) in self.subnet:
-        #    # no limits for internal requests (e.g. from webmail)
-        #    return
+        # disable limits for internal requests (e.g. from webmail)?
+        if rate_limit_subnet==False and ipaddress.ip_address(clientip) in self.subnet:
+            return
         if not self.limiter.test(self.rate,"client-ip",clientip):
             raise RateLimitExceeded()
 
     def hit(self,clientip):
-        # TODO: activate this code if we have limits at webmail level
-        #if ipaddress.ip_address(clientip) in self.subnet:
-        #    # no limits for internal requests (e.g. from webmail)
-        #    return
+        # disable limits for internal requests (e.g. from webmail)?
+        if rate_limit_subnet==False and ipaddress.ip_address(clientip) in self.subnet:
+            return
         if not self.limiter.hit(self.rate,"client-ip",clientip):
             raise RateLimitExceeded()

@@ -37,8 +37,14 @@ def handle_authentication(headers):
     # Authenticated user
     elif method == "plain":
         server, port = get_server(headers["Auth-Protocol"], True)
-        user_email = urllib.parse.unquote(headers["Auth-User"])
-        password = urllib.parse.unquote(headers["Auth-Pass"])
+        # According to RFC2616 section 3.7.1 and PEP 3333, HTTP headers should
+        # be ASCII and are generally considered ISO8859-1. However when passing
+        # the password, nginx does not transcode the input UTF string, thus
+        # we need to manually decode.
+        raw_user_email = urllib.parse.unquote(headers["Auth-User"])
+        user_email = raw_user_email.encode("iso8859-1").decode("utf8")
+        raw_password = urllib.parse.unquote(headers["Auth-Pass"])
+        password = raw_password.encode("iso8859-1").decode("utf8")
         ip = urllib.parse.unquote(headers["Client-Ip"])
         user = models.User.query.get(user_email)
         status = False

@@ -18,6 +18,8 @@ RUN pip3 install socrate
 
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.4.1/roundcubemail-1.4.1-complete.tar.gz
 
+ENV CARDDAV_URL https://github.com/blind-coder/rcmcarddav/releases/download/v3.0.3/carddav-3.0.3.tar.bz2
+
 RUN apt-get update && apt-get install -y \
       zlib1g-dev libzip4 libzip-dev \
       python3-jinja2 \
@@ -26,9 +28,13 @@ RUN apt-get update && apt-get install -y \
  && rm -rf /var/www/html/ \
  && cd /var/www \
  && curl -L -O ${ROUNDCUBE_URL} \
+ && curl -L -O ${CARDDAV_URL} \
  && tar -xf *.tar.gz \
+ && tar -xf *.tar.bz2 \
  && rm -f *.tar.gz \
+ && rm -f *.tar.bz2 \
  && mv roundcubemail-* html \
+ && mv carddav html/plugins/ \
  && cd html \
  && rm -rf CHANGELOG INSTALL LICENSE README.md UPGRADING composer.json-dist installer \
  && sed -i 's,mod_php5.c,mod_php7.c,g' .htaccess \

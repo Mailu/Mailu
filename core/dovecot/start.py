@@ -26,6 +26,8 @@ os.environ["FRONT_ADDRESS"] = system.get_host_address_from_environment("FRONT", 
 os.environ["REDIS_ADDRESS"] = system.get_host_address_from_environment("REDIS", "redis")
 os.environ["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
 os.environ["ANTISPAM_WEBUI_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM_WEBUI", "antispam:11334")
+if os.environ["SEARCH"] != "none":
+    os.environ["SEARCH_ADDRESS"] = system.get_host_address_from_environment("SEARCH", "search:8983")
 if os.environ["WEBMAIL"] != "none":
     os.environ["WEBMAIL_ADDRESS"] = system.get_host_address_from_environment("WEBMAIL", "webmail")
 

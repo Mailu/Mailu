@@ -83,6 +83,17 @@ services:
       replicas: 1
   {% endif %}
 
+  {% if search_enabled %}
+  search:
+    image: ${DOCKER_ORD:-mailu}/${DOCKER_PREFIX:-}solr:${MAILU_VERSION:-{{ version }}}
+    restart: always
+    env_file: {{ env }}
+    volumes:
+      - "{{ root }}/search:/opt/solr/server/solr/mycores/dovecot/data"
+    deploy:
+      replicas: 1
+  {% endif %}
+
   {% if webdav_enabled %}
   webdav:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}radicale:${MAILU_VERSION:-{{ version }}}

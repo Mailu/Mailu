@@ -117,6 +117,7 @@ Main software versions
 - Rainloop 1.12.1
 - Roundcube 1.3.8
 - Fetchmail 6.3.26
+- Solr 7.7.2
 - Unbound 1.7.3
 - Postgresql 10.5
 

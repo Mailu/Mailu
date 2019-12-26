@@ -157,6 +157,7 @@ optional port number. Those variables are:
 - ``HOST_ANTISPAM_WEBUI``: the container that is running the antispam webui service (default: ``antispam:11334``)
 - ``HOST_ANTIVIRUS``: the container that is running the antivirus service (default: ``antivirus:3310``)
 - ``HOST_WEBMAIL``: the container that is running the webmail (default: ``webmail``)
+- ``HOST_SEARCH``: the container that is running the search server (default: ``search:8983``)
 - ``HOST_WEBDAV``: the container that is running the webdav server (default: ``webdav:5232``)
 - ``HOST_REDIS``: the container that is running the redis daemon (default: ``redis``)
 - ``HOST_WEBMAIL``: the container that is running the webmail (default: ``webmail``)

@@ -76,6 +76,9 @@
     # Antivirus solution (value: clamav, none)
     ANTIVIRUS: "clamav"
 
+    # Search solution (value: solr, none)
+    SEARCH: "solr"
+
     ###################################
     # Mail settings
     ###################################
@@ -168,6 +171,7 @@
     HOST_AUTHSMTP: "smtp.mailu-mailserver.svc.cluster.local"
     HOST_WEBMAIL: "webmail.mailu-mailserver.svc.cluster.local"
     HOST_ADMIN: "admin.mailu-mailserver.svc.cluster.local"
+    HOST_SEARCH: "search.mailu-mailserver.svc.cluster.local:8983"
     HOST_WEBDAV: "webdav.mailu-mailserver.svc.cluster.local:5232"
     HOST_ANTISPAM_MILTER: "antispam.mailu-mailserver.svc.cluster.local:11332"
     HOST_ANTISPAM_WEBUI: "antispam.mailu-mailserver.svc.cluster.local:11334"

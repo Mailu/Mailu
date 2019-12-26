@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailu-search
+  namespace: mailu-mailserver
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mailu-search
+        role: mail
+        tier: backend
+    spec:
+      containers:
+      - name: solr
+        image: mailu/solr:master
+        imagePullPolicy: Always
+        envFrom:
+          - configMapRef:
+              name: mailu-config
+        volumeMounts:
+          - mountPath: /opt/solr/server/solr/mycores/dovecot/data
+            name: maildata
+            subPath: search
+        ports:
+          - containerPort: 8983
+        resources:
+          requests:
+            memory: 1024Mi
+            cpu: 100m
+          limits:
+            memory: 1024Mi
+            cpu: 100m
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: search
+  namespace: mailu-mailserver
+  labels:
+    app: mailu-search
+    role: mail
+    tier: backend
+spec:
+  selector:
+    app: mailu-search
+    role: mail
+    tier: backend
+  ports:
+  - name: solr
+    port: 8983
+    protocol: TCP
+

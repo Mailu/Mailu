@@ -62,6 +62,8 @@ DEFAULT_CONFIG = {
     'HOST_ADMIN': 'admin',
     'WEBMAIL': 'none',
     'HOST_WEBMAIL': 'webmail',
+    'SEARCH': 'none',
+    'HOST_SEARCH': 'search:8983',
     'HOST_WEBDAV': 'webdav:5232',
     'HOST_REDIS': 'redis',
     'HOST_FRONT': 'front',

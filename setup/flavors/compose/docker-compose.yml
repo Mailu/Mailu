@@ -13,7 +13,7 @@ services:
     restart: always
     volumes:
       - "{{ root }}/redis:/data"
-    
+
   # Core services
   front:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}nginx:${MAILU_VERSION:-{{ version }}}
@@ -113,6 +113,15 @@ services:
     dns:
       - {{ dns }}
     {% endif %}
+  {% endif %}
+
+  {% if search_enabled %}
+  search:
+    image: ${DOCKER_ORD:-mailu}/${DOCKER_PREFIX:-}solr:${MAILU_VERSION:-{{ version }}}
+    restart: always
+    env_file: {{ env }}
+    volumes:
+      - "{{ root }}/search:/opt/solr/server/solr/mycores/dovecot/data"
   {% endif %}
 
   {% if webdav_enabled %}

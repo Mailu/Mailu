@@ -30,6 +30,10 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}radicale:${MAILU_VERSION:-local}
     build: ../optional/radicale
 
+  search:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}solr:${MAILU_VERSION:-local}
+    build: ../optional/solr
+
   traefik-certdumper:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}traefik-certdumper:${MAILU_VERSION:-local}
     build: ../optional/traefik-certdumper

@@ -277,12 +277,14 @@ class Email(object):
         if not user and localpart_stripped:
             user = User.query.get('{}@{}'.format(localpart_stripped, domain_name))
         if user:
+            email = '{}@{}'.format(localpart, domain_name)
+
             if user.forward_enabled:
                 destination = user.forward_destination
                 if user.forward_keep or ignore_forward_keep:
-                    destination.append(user.email)
+                    destination.append(email)
             else:
-                destination = [user.email]
+                destination = [email]
             return destination
 
         pure_alias = Alias.resolve(localpart, domain_name)

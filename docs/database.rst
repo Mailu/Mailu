@@ -20,7 +20,7 @@ This images has the following features:
   Useful in swarm environments, since the /data directory should not be on any network 
   filesystem (performance).
 
-To make use of this functionality, just select *Postgresql* as database flavor.
+To make use of this functionality, just select `postgresql` as database flavor.
 Don't select the usage of an external database. The ``docker-compose.yml`` and ``mailu.env``
 will pull in ``mailu/postgresql``. This image and ``mailu/admin`` contain all the scripts
 to automatically setup the database.

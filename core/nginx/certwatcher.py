@@ -8,7 +8,7 @@ of TLS_FLAVOR=[mail, cert]
 from os.path import exists, split as path_split
 from os import system
 import time
-from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler, FileDeletedEvent, \
     FileCreatedEvent, FileModifiedEvent, FileMovedEvent
 
@@ -49,7 +49,7 @@ class ChangeHandler(FileSystemEventHandler):
 
 
 if __name__ == '__main__':
-    observer = Observer()
+    observer = PollingObserver()
     handler = ChangeHandler()
     observer.schedule(handler, "/certs", recursive=False)
     observer.start()

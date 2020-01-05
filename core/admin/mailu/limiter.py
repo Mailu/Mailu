@@ -24,13 +24,13 @@ class Limiter:
 
     def check(self,clientip):
         # disable limits for internal requests (e.g. from webmail)?
-        if rate_limit_subnet==False and ipaddress.ip_address(clientip) in self.subnet:
+        if self.rate_limit_subnet==False and ipaddress.ip_address(clientip) in self.subnet:
             return
         if not self.limiter.test(self.rate,"client-ip",clientip):
             raise RateLimitExceeded()
 
     def hit(self,clientip):
         # disable limits for internal requests (e.g. from webmail)?
-        if rate_limit_subnet==False and ipaddress.ip_address(clientip) in self.subnet:
+        if self.rate_limit_subnet==False and ipaddress.ip_address(clientip) in self.subnet:
             return
         self.limiter.hit(self.rate,"client-ip",clientip)

@@ -40,7 +40,7 @@ Adding domains
 --------------
 
 If you wish to add new domains to the server for test purposes, you could
-either direct the MX for one of you domains to ``test.mailu.io`` or have your
+either direct the MX for one of your domains to ``test.mailu.io`` or have your
 MX  point to the server's IP address.
 
 Also, all subdomains of ``test.mailu.io`` point to this server. Thus, you can

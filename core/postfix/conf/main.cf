@@ -75,6 +75,12 @@ relay_domains = ${podop}transport
 transport_maps = ${podop}transport
 virtual_transport = lmtp:inet:{{ LMTP_ADDRESS }}
 
+# Sender and recipient canonical maps, mostly for SRS
+sender_canonical_maps = ${podop}sendermap
+sender_canonical_classes = envelope_sender
+recipient_canonical_maps = ${podop}recipientmap
+recipient_canonical_classes= envelope_recipient,header_recipient
+
 # In order to prevent Postfix from running DNS query, enforce the use of the
 # native DNS stack, that will check /etc/hosts properly.
 lmtp_host_lookup = native
@@ -120,4 +126,3 @@ milter_default_action = tempfail
 ###############
 # Extra Settings
 ###############
-

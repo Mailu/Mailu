@@ -22,3 +22,4 @@ tenacity
 mysqlclient
 psycopg2
 idna
+srslib

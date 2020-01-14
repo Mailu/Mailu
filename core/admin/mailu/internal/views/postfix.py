@@ -3,6 +3,7 @@ from mailu.internal import internal
 
 import flask
 import re
+import srslib
 
 
 @internal.route("/postfix/domain/<domain_name>")
@@ -37,6 +38,38 @@ def postfix_transport(email):
     localpart, domain_name = models.Email.resolve_domain(email)
     relay = models.Relay.query.get(domain_name) or flask.abort(404)
     return flask.jsonify("smtp:[{}]".format(relay.smtp))
+
+
+@internal.route("/postfix/recipient/map/<path:recipient>")
+def postfix_recipient_map(recipient):
+    """ Rewrite the envelope recipient if it is a valid SRS address.
+
+    This is meant for bounces to go back to the original sender.
+    """
+    srs = srslib.SRS(flask.current_app.config["SECRET_KEY"])
+    if srslib.SRS.is_srs_address(recipient):
+        try:
+            return flask.jsonify(srs.reverse(recipient))
+        except srslib.Error as error:
+            return flask.abort(404)
+    return flask.abort(404)
+
+
+@internal.route("/postfix/sender/map/<path:sender>")
+def postfix_sender_map(sender):
+    """ Rewrite the envelope sender in case the mail was not emitted by us.
+
+    This is for bounces to come back the reverse path properly.
+    """
+    srs = srslib.SRS(flask.current_app.config["SECRET_KEY"])
+    domain = flask.current_app.config["DOMAIN"]
+    try:
+        localpart, domain_name = models.Email.resolve_domain(sender)
+    except Exception as error:
+        return flask.abort(404)
+    if models.Domain.query.get(domain_name):
+        return flask.abort(404)
+    return flask.jsonify(srs.forward(sender, domain))
 
 
 @internal.route("/postfix/sender/login/<path:sender>")

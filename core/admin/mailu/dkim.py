@@ -5,7 +5,7 @@ They are thus represented as ASCII armored PEM.
 from OpenSSL import crypto
 
 
-def gen_key(key_type=crypto.TYPE_RSA, bits=1024):
+def gen_key(key_type=crypto.TYPE_RSA, bits=2048):
     """ Generate and return a new RSA key.
     """
     key = crypto.PKey()

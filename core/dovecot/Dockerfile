@@ -4,7 +4,7 @@ WORKDIR /tmp
 RUN apk add git build-base automake autoconf libtool dovecot-dev xapian-core-dev icu-dev
 RUN git clone https://github.com/grosjo/fts-xapian.git \
   && cd fts-xapian \
-  # && git checkout 1.2.7 \ # TODO: when upstream releases 1.2.7, use that
+  && git checkout 1.2.7 \
   && autoreconf -vi \
   && PANDOC=false ./configure --with-dovecot=/usr/lib/dovecot \
   && make \

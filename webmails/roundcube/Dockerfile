@@ -45,7 +45,7 @@ COPY rc-entrypoint.sh /rc-entrypoint.sh
 EXPOSE 80/tcp
 VOLUME ["/data"]
 
-ENTRYPOINT /rc-entrypoint.sh
+ENTRYPOINT ["/rc-entrypoint.sh"]
 
 CMD /start.py
 

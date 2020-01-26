@@ -40,9 +40,12 @@ RUN apt-get update && apt-get install -y \
 COPY php.ini /php.ini
 COPY config.inc.php /var/www/html/config/
 COPY start.py /start.py
+COPY rc-entrypoint.sh /rc-entrypoint.sh
 
 EXPOSE 80/tcp
 VOLUME ["/data"]
+
+ENTRYPOINT /rc-entrypoint.sh
 
 CMD /start.py
 

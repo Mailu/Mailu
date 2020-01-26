@@ -41,6 +41,7 @@ COPY php.ini /php.ini
 COPY config.inc.php /var/www/html/config/
 COPY start.py /start.py
 COPY rc-entrypoint.sh /rc-entrypoint.sh
+RUN chmod a+x /rc-entrypoint.sh
 
 EXPOSE 80/tcp
 VOLUME ["/data"]

@@ -2,13 +2,16 @@
 
 #Switch to roundcube directory 
 cd /var/www/html
- 
-# Check if composer is installed and install if missing
-if [[ ! -x "$(command -v composer)" ]]; then
-  echo "Composer not found. Installing.."
-  curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
-else
-  echo "Composer Installed."
+
+# Skip installation if not required
+if [[ ! -z "${INSTALL_RC_PLUGINS}" ]] || [[ ! -z "${REMOVE_RC_PLUGINS}" ]]; then
+  # Check if composer is installed and install if missing
+  if [[ ! -x "$(command -v composer)" ]]; then
+    echo "Composer not found. Installing.."
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
+  else
+    echo "Composer Installed."
+  fi
 fi
 
 # Create composer.json if it does not exist

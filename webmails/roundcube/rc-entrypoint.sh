@@ -40,6 +40,8 @@ fi
 
 # Update plugins based on composer.json This installs/copies the plugins into the plugin directory
 if [[ ! -z "${INSTALL_RC_PLUGINS}" ]] || [[ ! -z "${REMOVE_RC_PLUGINS}" ]]; then
+  # Ensure composer.lock is updated
+  php -d "disable_functions=" /usr/bin/composer update --lock --prefer-dist --no-dev --no-interaction
   echo "Installing/Updating roundcube plugins"
   php -d "disable_functions=" /usr/bin/composer --prefer-dist --no-dev \
   --no-interaction --optimize-autoloader --apcu-autoloader install
@@ -59,8 +61,9 @@ if [[ ! -z "${ACTIVATE_RC_PLUGINS}" ]]; then
   # Convert ACTIVATE_RC_PLUGINS to comma separated list
   RC_PLUGINS_LIST="'${ACTIVATE_RC_PLUGINS//[[:space:]]/', '}'"
   
-  
-  sed "s/\$config\['plugins'\].*;/\$config['plugins'] = array(${RC_PLUGINS_LIST}, ${DEFAULT_RC_PLUGINS_LIST});/" config/config.inc.php > config/updated.config.inc.php
+  echo "##[USER_PLUGINS_START]##" >> config/updated.config.inc.php
+  echo "\$config['plugins'] = array(${RC_PLUGINS_LIST}, ${DEFAULT_RC_PLUGINS_LIST});" >> config/updated.config.inc.php
+  echo "##[USER_PLUGINS_END]##" >> config/updated.config.inc.php
   # Abort activation of new plugins if updated config has an error
   if php -l config/updated.config.inc.php; then
     echo "Config OK :-)"
@@ -74,7 +77,7 @@ else
   # This is a convenient reset if ACTIVATE_RC_PLUGINS is not defined.
   # Roundcube will revert back to default plugins.
   # This also means the user has to explicitly state additional plugins in use.
-  sed -i "s/\$config\['plugins'\].*;/\$config['plugins'] = array($DEFAULT_RC_PLUGINS_LIST);/" config/config.inc.php
+  sed -i '/##\[USER/{:a;N;/END\]##/!ba};//d' config/config.inc.php
 fi
 
 # Proceed with command defined in CMD

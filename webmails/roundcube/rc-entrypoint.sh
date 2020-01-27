@@ -54,23 +54,23 @@ if [[ ! -z "${ACTIVATE_RC_PLUGINS}" ]]; then
 
   # Define default plugins shipped with this Roundcube Installation
   DEFAULT_RC_PLUGINS="archive zipdownload markasjunk managesieve enigma"
-  DEFAULT_RC_PLUGINS_LIST="'${DEFAULT_RC_PLUGINS//[[:space:]]/', '}'"
+  DEFAULT_RC_PLUGINS_LIST="'${DEFAULT_RC_PLUGINS//[[:space:]]/''\', \'}'"
   
   echo "Activating Roundcube plugins ${ACTIVATE_RC_PLUGINS}"
   
   # Convert ACTIVATE_RC_PLUGINS to comma separated list
-  RC_PLUGINS_LIST="'${ACTIVATE_RC_PLUGINS//[[:space:]]/', '}'"
+  RC_PLUGINS_LIST="'${ACTIVATE_RC_PLUGINS//[[:space:]]/''\', \'}'"
   
   # List of user defined plugins may be updated. We need to remove any existing entries and add them later.
-  sed '/##\[USER/{:a;N;/END\]##/!ba};//d' config/config.inc.php > config/updated.config.inc.php
+  sed '/##\[USER/{:a;N;/END\]##/!ba};//d' config/config.inc.php > config/config.inc.php.updated
 
-  echo "##[USER_PLUGINS_START]##" >> config/updated.config.inc.php
-  echo "\$config['plugins'] = array(${RC_PLUGINS_LIST}, ${DEFAULT_RC_PLUGINS_LIST});" >> config/updated.config.inc.php
-  echo "##[USER_PLUGINS_END]##" >> config/updated.config.inc.php
+  echo "##[USER_PLUGINS_START]##" >> config/config.inc.php.updated
+  echo "\$config['plugins'] = array(${RC_PLUGINS_LIST}, ${DEFAULT_RC_PLUGINS_LIST});" >> config/config.inc.php.updated
+  echo "##[USER_PLUGINS_END]##" >> config/config.inc.php.updated
   # Abort activation of new plugins if updated config has an error
-  if php -l config/updated.config.inc.php; then
+  if php -l config/config.inc.php.updated; then
     echo "Config OK :-)"
-    \cp config/updated.config.inc.php config/config.inc.php
+    \cp config/config.inc.php.updated config/config.inc.php
   else
     echo "Config error. Aborting activation.."
     echo "Please check ACTIVATE_RC_PLUGINS env variable is in the format ACTIVATE_RC_PLUGINS=plugin1 plugin2"

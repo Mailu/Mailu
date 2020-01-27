@@ -61,6 +61,9 @@ if [[ ! -z "${ACTIVATE_RC_PLUGINS}" ]]; then
   # Convert ACTIVATE_RC_PLUGINS to comma separated list
   RC_PLUGINS_LIST="'${ACTIVATE_RC_PLUGINS//[[:space:]]/', '}'"
   
+  # List of user defined plugins may be updated. We need to remove any existing entries and add them later.
+  sed '/##\[USER/{:a;N;/END\]##/!ba};//d' config/config.inc.php > config/updated.config.inc.php
+
   echo "##[USER_PLUGINS_START]##" >> config/updated.config.inc.php
   echo "\$config['plugins'] = array(${RC_PLUGINS_LIST}, ${DEFAULT_RC_PLUGINS_LIST});" >> config/updated.config.inc.php
   echo "##[USER_PLUGINS_END]##" >> config/updated.config.inc.php

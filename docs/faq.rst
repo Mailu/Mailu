@@ -443,8 +443,68 @@ down brute force attacks.
 We *do* provide a possibility to export the logs from the ``front`` service to the host.
 For this you need to set ``LOG_DRIVER=journald`` or ``syslog``, depending on the log
 manager of the host. You will need to setup the proper Regex in the Fail2Ban configuration.
-Be aware that webmail authentication appears to come from the Docker network,
-so don't ban those addresses!
+Below an example how to do so. Be aware that webmail authentication appears to come from the
+Docker network, so don't ban those addresses!
+
+Assuming you have a working Fail2Ban installation on the host running your Docker containers,
+follow these steps:
+
+1. In the mailu docker-compose set the logging driver of the front container to journald
+
+.. code-block:: bash
+
+  logging:
+    driver: journald
+
+2. Add the /etc/fail2ban/jail.d/bad-auth.conf
+
+.. code-block:: bash
+
+  # Fail2Ban configuration file
+  [Definition]
+  failregex = .* client login failed: .+ client:\ <HOST>
+  ignoreregex =
+
+3. Add the /etc/fail2ban/jail.d/bad-auth.conf
+
+.. code-block:: bash
+
+  [bad-auth]
+  enabled = true
+  filter = bad-auth
+  logpath = /var/log/messages
+  bantime = 604800
+  findtime = 300
+  maxretry = 10
+  action = docker-action
+
+The above will block flagged IPs for a week, you can of course change it to you needs.
+
+4. Add the /etc/fail2ban/action.d/docker-action.conf
+
+.. code-block:: bash
+
+  [Definition]
+  
+  actionstart = iptables -N f2b-bad-auth
+                iptables -A f2b-bad-auth -j RETURN
+                iptables -I FORWARD -p tcp -m multiport --dports 1:1024 -j f2b-bad-auth
+  
+  actionstop = iptables -D FORWARD -p tcp -m multiport --dports 1:1024 -j f2b-bad-auth
+               iptables -F f2b-bad-auth
+               iptables -X f2b-bad-auth
+  
+  actioncheck = iptables -n -L FORWARD | grep -q 'f2b-bad-auth[ \t]'
+  
+  actionban = iptables -I f2b-bad-auth 1 -s <ip> -j DROP
+  
+  actionunban = iptables -D f2b-bad-auth -s <ip> -j DROP
+
+5. Restart Fail2Ban
+
+.. code-block:: bash
+
+  sudo systemctl restart fail2ban
 
 *Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_.
 

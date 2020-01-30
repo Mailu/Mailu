@@ -1,4 +1,4 @@
-from flask_limiter import RateLimitExceeded
+from mailu.limiter import RateLimitExceeded
 
 from mailu import utils
 from flask import current_app as app
@@ -18,15 +18,6 @@ def rate_limit_handler(e):
     if int(flask.request.headers['Auth-Login-Attempt']) < 10:
         response.headers['Auth-Wait'] = '3'
     return response
-
-
-@utils.limiter.request_filter
-def whitelist_webmail():
-    try:
-        return flask.request.headers["Client-Ip"] ==\
-            app.config["HOST_WEBMAIL"]
-    except:
-        return False
 
 
 from mailu.internal.views import *

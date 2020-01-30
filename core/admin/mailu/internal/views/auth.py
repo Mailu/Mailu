@@ -7,18 +7,19 @@ import flask_login
 import base64
 
 
+
 @internal.route("/auth/email")
-@utils.limiter.limit(
-    lambda: app.config["AUTH_RATELIMIT"],
-    lambda: flask.request.headers["Client-Ip"]
-)
 def nginx_authentication():
     """ Main authentication endpoint for Nginx email server
     """
+    utils.limiter.check(flask.request.headers["Client-Ip"])
     headers = nginx.handle_authentication(flask.request.headers)
     response = flask.Response()
     for key, value in headers.items():
         response.headers[key] = str(value)
+    if ("Auth-Status" not in headers) or (headers["Auth-Status"]!="OK"):
+        utils.limiter.hit(flask.request.headers["Client-Ip"])
+
     return response
 
 

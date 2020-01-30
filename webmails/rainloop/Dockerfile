@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
 # Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
 RUN pip3 install socrate
 
-ENV RAINLOOP_URL https://github.com/RainLoop/rainloop-webmail/releases/download/v1.13.0/rainloop-community-1.13.0.zip
+ENV RAINLOOP_URL https://github.com/RainLoop/rainloop-webmail/releases/download/v1.14.0/rainloop-community-1.14.0.zip
 
 RUN apt-get update && apt-get install -y \
       unzip python3-jinja2 \

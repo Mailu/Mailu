@@ -456,7 +456,7 @@ follow these steps:
   logging:
     driver: journald
 
-2. Add the /etc/fail2ban/jail.d/bad-auth.conf
+2. Add the /etc/fail2ban/filter.d/bad-auth.conf
 
 .. code-block:: bash
 

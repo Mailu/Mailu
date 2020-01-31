@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mailu\n"
-"PO-Revision-Date: 2019-07-22 06:23+0000\n"
-"Last-Translator: kaiyou <pierre@jaury.eu>\n"
+"PO-Revision-Date: 2020-01-31 01:22+0000\n"
+"Last-Translator: Andrási István <isiandrasi@gmail.com>\n"
 "Language-Team: Hungarian <https://translate.tedomum.net/projects/mailu/admin/"
 "hu/>\n"
 "Language: hu\n"
@@ -14,7 +14,7 @@ msgstr ""
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."
-msgstr "Érvénytelen levelezési cím"
+msgstr "Érvénytelen levelezési cím."
 
 #: mailu/ui/forms.py:36
 msgid "Confirm"
@@ -269,7 +269,7 @@ msgstr "Súgó"
 
 #: mailu/ui/templates/working.html:4
 msgid "We are still working on this feature!"
-msgstr "Ezen a funkción még dolgozunk"
+msgstr "Ezen a funkción még dolgozunk!"
 
 #: mailu/ui/templates/admin/create.html:4
 msgid "Add a global administrator"

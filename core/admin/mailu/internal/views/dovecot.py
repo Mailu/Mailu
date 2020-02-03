@@ -11,6 +11,8 @@ def dovecot_passdb_dict(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     allow_nets = []
     allow_nets.append(app.config["SUBNET"])
+    if app.config["SUBNET6"]:
+        allow_nets.append(app.config["SUBNET6"])
     if app.config["POD_ADDRESS_RANGE"]:
         allow_nets.append(app.config["POD_ADDRESS_RANGE"])
     return flask.jsonify({

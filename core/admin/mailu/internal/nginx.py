@@ -46,6 +46,10 @@ def handle_authentication(headers):
         raw_password = urllib.parse.unquote(headers["Auth-Pass"])
         password = raw_password.encode("iso8859-1").decode("utf8")
         ip = urllib.parse.unquote(headers["Client-Ip"])
+
+        if not ('@' in user_email ) and app.config["DEFAULT_DOMAIN"]:
+            user_email = user_email + "@" + app.config["DEFAULT_DOMAIN"]
+
         user = models.User.query.get(user_email)
         status = False
         if user:

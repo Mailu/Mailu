@@ -9,7 +9,9 @@ maillog_file = /dev/stdout
 mydomain = {{ DOMAIN }}
 myhostname = {{ HOSTNAMES.split(",")[0] }}
 myorigin = $mydomain
-
+{% if DEFAULT_DOMAIN %}
+smtpd_sasl_local_domain = {{ DEFAULT_DOMAIN }}
+{% endif %}
 # Queue location
 queue_directory = /queue
 

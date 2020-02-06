@@ -113,6 +113,9 @@
     WELCOME_SUBJECT: "Welcome to your new email account"
     WELCOME_BODY: "Welcome to your new email account, if you can read this, then it is configured properly!"
 
+    # Default domain for username whithout domain part
+    # DEFAULT_DOMAIN=
+
     ###################################
     # Web settings
     ###################################

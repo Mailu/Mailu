@@ -80,6 +80,14 @@ later classify incoming mail based on the custom part.
 The ``DMARC_RUA`` and ``DMARC_RUF`` are DMARC protocol specific values. They hold
 the localpart for DMARC rua and ruf email addresses.
 
+The ``DEFAULT_DOMAIN`` is a default domain name which is used when username contains no
+domain part. Some old mail systems do not use format ``username@domain.com`` but use
+only ``username``. To help with migration from such system to Mailu variable
+``DEFAULT_DOMAIN`` can be used. It allows to avoid client side reconfiguration but
+``DEFAULT_DOMAIN`` can be only one. ``username`` and ``username@domain.com`` work
+in the same way and connect user to the same mailbox if ``DEFAULT_DOMAIN="domain.com"``.
+Variable is optional and used only when defined and only for domainless usernames.
+
 Web settings
 ------------
 

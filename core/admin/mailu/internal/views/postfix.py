@@ -45,6 +45,11 @@ def postfix_sender_login(sender):
     if localpart is None:
         return flask.abort(404)
     destination = models.Email.resolve_destination(localpart, domain_name, True)
+    # postfix has "smtpd_sasl_local_domain = my.defaultdomain.com" it allows to auth
+    # domainless users but it does not work in 'check_sender_access ${podop}senderaccess'.
+    # Have no idea how to do workaround. Only this dirty hack (simply add local part to
+    # the allowed senders list):
+    destination.append(localpart)
     return flask.jsonify(",".join(destination)) if destination else flask.abort(404)
 
 

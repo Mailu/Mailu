@@ -43,6 +43,7 @@ DEFAULT_CONFIG = {
     'DKIM_SELECTOR': 'dkim',
     'DKIM_PATH': '/dkim/{domain}.{selector}.key',
     'DEFAULT_QUOTA': 1000000000,
+    'DEFAULT_DOMAIN': None,
     # Web settings
     'SITENAME': 'Mailu',
     'WEBSITE': 'https://mailu.io',

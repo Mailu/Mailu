@@ -535,15 +535,18 @@ In any case, using a dedicated DNS server will improve the performance of your m
 Is there a way to support more (older) ciphers?
 ```````````````````````````````````````````````
 
-See `How can I override settings?`_ .
-You will need to add the protocols you wish to support in an override for the ``front`` container (Nginx).
+You will need to rewrite the `tls.conf` template of the `front` container in `core/nginx`.
+
+You can set the protocols as follow:
 
 .. code-block:: bash
 
   ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
   ssl_ciphers <list of ciphers>;
 
-We **strongly** advice against downgrading the TLS version and ciphers!
+After applying the change, you will need to rebuild the image and use it in your deployment.
+
+We **strongly** advice against downgrading the TLS version and ciphers, please upgrade your client instead! We will not support a more standard way of setting this up.
 
 *Issue reference:* `363`_, `698`_.
 

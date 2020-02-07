@@ -7,6 +7,7 @@ import shlex
 import subprocess
 import re
 import requests
+import sys
 
 
 FETCHMAIL = """
@@ -31,7 +32,7 @@ def extract_host_port(host_and_port, default_port):
 
 
 def escape_rc_string(arg):
-    return arg.replace("\\", "\\\\").replace('"', '\\"')
+    return "".join("\\x%2x" % ord(char) for char in arg)
 
 
 def fetchmail(fetchmailrc):
@@ -91,4 +92,4 @@ if __name__ == "__main__":
     while True:
         time.sleep(int(os.environ.get("FETCHMAIL_DELAY", 60)))
         run(os.environ.get("DEBUG", None) == "True")
-
+        sys.stdout.flush()

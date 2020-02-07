@@ -487,6 +487,45 @@ We **strongly** advice against downgrading the TLS version and ciphers!
 
 *Issue reference:* `363`_, `698`_.
 
+Why does Compose complain about the yaml syntax
+```````````````````````````````````````````````
+
+In many cases, Docker Compose will complain about the yaml syntax because it is too old. It is especially true if you installed Docker Compose as part of your GNU/Linux distirbution package system.
+
+Unless your distribution has proper up-to-date packages for Compose, we strongly advise that you install it either:
+
+ - from the Docker-CE repositories along with Docker CE itself;
+ - from Github by downloading it directly.
+
+Detailed instructions can be found at https://docs.docker.com/compose/install/
+
+*Issue reference:* `853`_.
+
+Why are still spam mails being discarded?
+`````````````````````````````````````````
+
+Disabling antispam in the user settings actually disables automatic classification of messages as spam and stops moving them to the `junk` folder. It does not stop spam scanning and filtering.
+
+Therefore, messages still get discarded if their spam score is so high that the antispam finds them unfit for distribution. Also, the antispam headers are still present in the message, so that mail clients can display it and classify based on it.
+
+*Issue reference:* `897`_.
+
+Why is SPF failing while properly setup?
+````````````````````````````````````````
+
+Very often, SPF failure is related to Mailu sending emails with a different IP address than the one configured in the env file.
+
+This is mostly due to using a separate IP address for Mailu and still having masquerading nat setup for Docker, which results in a different outbound IP address. You can simply check the email headers on the receiving side to confirm this.
+
+If you wish to explicitely nat Mailu outbound traffic, it is usually easy to source-nat outgoing SMTP traffic using iptables :
+
+```
+iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 25 -j SNAT --to <your mx ip>
+```
+
+*Issue reference:* `1090`_.
+
+
 .. _`troubleshooting tag`: https://github.com/Mailu/Mailu/issues?utf8=%E2%9C%93&q=label%3Afaq%2Ftroubleshooting
 .. _`85`: https://github.com/Mailu/Mailu/issues/85
 .. _`102`: https://github.com/Mailu/Mailu/issues/102
@@ -502,6 +541,9 @@ We **strongly** advice against downgrading the TLS version and ciphers!
 .. _`615`: https://github.com/Mailu/Mailu/issues/615
 .. _`681`: https://github.com/Mailu/Mailu/pull/681
 .. _`698`: https://github.com/Mailu/Mailu/issues/698
+.. _`853`: https://github.com/Mailu/Mailu/issues/853
+.. _`897`: https://github.com/Mailu/Mailu/issues/897
+.. _`1090`: https://github.com/Mailu/Mailu/issues/1090
 .. _`unbound`: https://nlnetlabs.nl/projects/unbound/about/
 
 A user gets ``Sender address rejected: Access denied. Please check the`` ``message recipient […] and try again`` even though the sender is legitimate?

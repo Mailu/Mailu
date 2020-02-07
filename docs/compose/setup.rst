@@ -106,7 +106,7 @@ Else, if you don't go with the automatic way, you need to manually create the ad
 
 .. code-block:: bash
 
-  docker-compose exec admin flask mailu admin me example.net password
+  docker-compose exec admin flask mailu admin me example.net 'password'
 
 This will create a user named ``me@example.net`` with password ``password`` and administration privileges. Connect to the Web admin interface and change the password to a strong one.
 

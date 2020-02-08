@@ -553,7 +553,7 @@ We **strongly** advice against downgrading the TLS version and ciphers, please u
 Why does Compose complain about the yaml syntax
 ```````````````````````````````````````````````
 
-In many cases, Docker Compose will complain about the yaml syntax because it is too old. It is especially true if you installed Docker Compose as part of your GNU/Linux distirbution package system.
+In many cases, Docker Compose will complain about the yaml syntax because it is too old. It is especially true if you installed Docker Compose as part of your GNU/Linux distribution package system.
 
 Unless your distribution has proper up-to-date packages for Compose, we strongly advise that you install it either:
 

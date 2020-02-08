@@ -494,7 +494,8 @@ In many cases, Docker Compose will complain about the yaml syntax because it is 
 
 Unless your distribution has proper up-to-date packages for Compose, we strongly advise that you install it either:
 
- - from the Docker-CE repositories along with Docker CE itself;
+ - from the Docker-CE repositories along with Docker CE itself,
+ - from PyPI using `pip install docker-compose` or
  - from Github by downloading it directly.
 
 Detailed instructions can be found at https://docs.docker.com/compose/install/

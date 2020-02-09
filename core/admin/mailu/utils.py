@@ -20,7 +20,7 @@ def handle_needs_login():
     )
 
 # Rate limiter
-limiter = limiter.Limiter()
+limiter = limiter.LimitWraperFactory()
 
 # Application translation
 babel = flask_babel.Babel()

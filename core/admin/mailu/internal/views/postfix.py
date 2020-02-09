@@ -1,5 +1,6 @@
-from mailu import models
+from mailu import models, utils
 from mailu.internal import internal
+from flask import current_app as app
 
 import flask
 import re
@@ -57,6 +58,14 @@ def postfix_sender_access(sender):
         return flask.jsonify("REJECT") if models.Domain.query.get(domain_name) else flask.abort(404)
     else:
         return flask.abort(404)
+
+
+@internal.route("/postfix/sender/rate/<path:sender>")
+def postfix_sender_rate(sender):
+    """ Rate limit outbound emails per sender login
+    """
+    user = models.User.get(sender) or flask.abort(404)
+    return flask.abort(404) if user.sender_limiter.hit() else flask.jsonify("REJECT")
 
 
 def is_void_address(email):

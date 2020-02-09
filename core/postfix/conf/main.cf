@@ -102,7 +102,7 @@ smtpd_client_restrictions =
   permit
 
 smtpd_relay_restrictions =
-  permit_mynetworks,
+  check_sasl_access ${podop}senderrate,
   permit_sasl_authenticated,
   reject_unauth_destination
 

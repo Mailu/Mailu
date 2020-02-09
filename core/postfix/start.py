@@ -22,7 +22,8 @@ def start_podop():
 		("domain", "url", url + "domain/§"),
         ("mailbox", "url", url + "mailbox/§"),
         ("senderaccess", "url", url + "sender/access/§"),
-        ("senderlogin", "url", url + "sender/login/§")
+        ("senderlogin", "url", url + "sender/login/§"),
+        ("senderrate", "url", url + "sender/rate/§")
     ])
 
 # Actual startup script

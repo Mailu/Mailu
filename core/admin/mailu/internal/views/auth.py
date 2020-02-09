@@ -5,21 +5,31 @@ from flask import current_app as app
 import flask
 import flask_login
 import base64
-
+import ipaddress
 
 
 @internal.route("/auth/email")
 def nginx_authentication():
     """ Main authentication endpoint for Nginx email server
     """
-    utils.limiter.check(flask.request.headers["Client-Ip"])
+    limiter = utils.limiter.get_limiter(app.config["AUTH_RATELIMIT"], "auth-ip")
+    client_ip = flask.request.headers["Client-Ip"]
+    if not limiter.test(client_ip):
+        response = flask.Response()
+        response.headers['Auth-Status'] = 'Authentication rate limit from one source exceeded'
+        response.headers['Auth-Error-Code'] = '451 4.3.2'
+        if int(flask.request.headers['Auth-Login-Attempt']) < 10:
+            response.headers['Auth-Wait'] = '3'
+        return response
     headers = nginx.handle_authentication(flask.request.headers)
     response = flask.Response()
     for key, value in headers.items():
         response.headers[key] = str(value)
-    if ("Auth-Status" not in headers) or (headers["Auth-Status"]!="OK"):
-        utils.limiter.hit(flask.request.headers["Client-Ip"])
-
+    if ("Auth-Status" not in headers) or (headers["Auth-Status"] != "OK"):
+        limit_subnet = str(app.config["AUTH_RATELIMIT_SUBNET"]) != 'False'
+        subnet = ipaddress.ip_network(app.config["SUBNET"])
+        if limit_subnet or ipaddress.ip_address(client_ip) not in subnet:
+            limiter.hit(flask.request.headers["Client-Ip"])
     return response
 
 

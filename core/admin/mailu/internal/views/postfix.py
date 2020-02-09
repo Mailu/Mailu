@@ -37,7 +37,11 @@ def postfix_transport(email):
         return flask.abort(404)
     localpart, domain_name = models.Email.resolve_domain(email)
     relay = models.Relay.query.get(domain_name) or flask.abort(404)
-    return flask.jsonify("smtp:[{}]".format(relay.smtp))
+    ret = "smtp:[{0}]".format(relay.smtp)
+    if ":" in relay.smtp:
+        split = relay.smtp.split(':')
+        ret = "smtp:[{0}]:{1}".format(split[0], split[1])
+    return flask.jsonify(ret)
 
 
 @internal.route("/postfix/recipient/map/<path:recipient>")

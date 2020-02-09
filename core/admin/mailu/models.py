@@ -1,4 +1,4 @@
-from mailu import dkim
+from mailu import dkim, utils
 
 from sqlalchemy.ext import declarative
 from passlib import context, hash
@@ -360,6 +360,12 @@ class User(Base, Email):
             self.reply_enabled and
             self.reply_startdate < now and
             self.reply_enddate > now
+        )
+
+    @property
+    def sender_limiter(self):
+        return utils.limiter.get_limiter(
+            app.config["MESSAGE_RATELIMIT"], "sender", self.email
         )
 
     scheme_dict = {'PBKDF2': "pbkdf2_sha512",

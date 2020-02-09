@@ -19,7 +19,8 @@
   <th>{% trans %}User settings{% endtrans %}</th>
   <th>{% trans %}Email{% endtrans %}</th>
   <th>{% trans %}Features{% endtrans %}</th>
-  <th>{% trans %}Quota{% endtrans %}</th>
+  <th>{% trans %}Storage quota{% endtrans %}</th>
+  <th>{% trans %}Sending quota{% endtrans %}</th>
   <th>{% trans %}Comment{% endtrans %}</th>
   <th>{% trans %}Created{% endtrans %}</th>
   <th>{% trans %}Last edit{% endtrans %}</th>
@@ -41,6 +42,8 @@
     {% if user.enable_pop %}<span class="label label-info">pop3</span>{% endif %}
   </td>
   <td>{{ user.quota_bytes_used | filesizeformat }} / {{ (user.quota_bytes | filesizeformat) if user.quota_bytes else '∞' }}</td>
+  {% set limiter = user.sender_limiter %}
+  <td>{{ limiter.get_window_stats()[1] }} / {{ limiter.limit }}</td>
   <td>{{ user.comment or '-' }}</td>
   <td>{{ user.created_at }}</td>
   <td>{{ user.updated_at or '' }}</td>

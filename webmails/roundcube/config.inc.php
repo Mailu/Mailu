@@ -56,3 +56,6 @@ $config['skin'] = 'elastic';
 
 // Enigma gpg plugin
 $config['enigma_pgp_homedir'] = '/data/gpg';
+
+// Set From header for DKIM signed message delivery reports
+$config['mdn_use_from'] = true;

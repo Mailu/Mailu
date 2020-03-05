@@ -71,7 +71,7 @@ go and fetch new email if available. Do not use too short delays if you do not
 want to be blacklisted by external services, but not too long delays if you
 want to receive your email in time.
 
-The ``RECIPIENT_DELIMITED`` is a character used to delimit localpart from a
+The ``RECIPIENT_DELIMITER`` is a character used to delimit localpart from a
 custom address part. For instance, if set to ``+``, users can use addresses
 like ``localpart+custom@domain.tld`` to deliver mail to ``localpart@domain.tld``.
 This is useful to provide external parties with different email addresses and

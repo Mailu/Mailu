@@ -21,6 +21,8 @@ def start_podop():
 		("alias", "url", url + "alias/§"),
 		("domain", "url", url + "domain/§"),
         ("mailbox", "url", url + "mailbox/§"),
+        ("recipientmap", "url", url + "recipient/map/§"),
+        ("sendermap", "url", url + "sender/map/§"),
         ("senderaccess", "url", url + "sender/access/§"),
         ("senderlogin", "url", url + "sender/login/§")
     ])

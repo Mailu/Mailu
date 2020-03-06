@@ -1,4 +1,4 @@
-ARG DISTRO=alpine:3.10
+ARG DISTRO=alpine:3.10 as builder
 FROM $DISTRO
 WORKDIR /tmp
 RUN apk add git build-base automake autoconf libtool dovecot-dev xapian-core-dev icu-dev
@@ -27,7 +27,7 @@ RUN apk add --no-cache \
   dovecot dovecot-lmtpd dovecot-pop3d dovecot-submissiond dovecot-pigeonhole-plugin rspamd-client xapian-core \
   && mkdir /var/lib/dovecot
 
-COPY --from=0 /usr/lib/dovecot/lib21_fts_xapian_plugin.* /usr/lib/dovecot/
+COPY --from=builder /usr/lib/dovecot/lib21_fts_xapian_plugin.* /usr/lib/dovecot/
 
 COPY conf /conf
 COPY start.py /start.py

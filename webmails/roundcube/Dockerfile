@@ -19,9 +19,9 @@ RUN pip3 install socrate
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.3.10/roundcubemail-1.3.10-complete.tar.gz
 
 RUN apt-get update && apt-get install -y \
-      zlib1g-dev libzip4 libzip-dev \
+      zlib1g-dev libzip4 libzip-dev postgresql-dev \
       python3-jinja2 \
- && docker-php-ext-install zip pdo_mysql \
+ && docker-php-ext-install zip pdo_mysql pdo_pgsql \
  && echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini \
  && rm -rf /var/www/html/ \
  && cd /var/www \

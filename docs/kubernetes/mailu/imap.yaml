@@ -72,7 +72,6 @@ spec:
     role: mail
     tier: backend
   ports:
-  ports:
   - name: imap-auth
     port: 2102
     protocol: TCP

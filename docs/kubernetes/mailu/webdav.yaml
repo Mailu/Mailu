@@ -59,7 +59,6 @@ spec:
     role: mail
     tier: backend
   ports:
-  ports:
   - name: http
     port: 80
     protocol: TCP

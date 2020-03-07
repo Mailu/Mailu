@@ -8,7 +8,7 @@ have been <a href="https://github.com/Mailu/Mailu/blob/master/docs/swarm/master/
 {% endif %}
 
 {% call macros.panel("info", "Step 2 - Initial configuration") %}
-<p>Before starting some variables must be set</p>
+<p>Before starting, some variables must be set.</p>
 
 <div class="form-group">
   <label>Mailu storage path: </label>
@@ -16,8 +16,8 @@ have been <a href="https://github.com/Mailu/Mailu/blob/master/docs/swarm/master/
   <input class="form-control" type="text" name="root" value="/mailu" required pattern="^/[-_A-Za-z0-9]+(/[-_A-Za-z0-9]*)*">
 </div>
 
-<p>In the next sections we need to set the postmaster address. This is a combination from the <i>postmaster</i> local part and the <i>main mail domain</i>.
-The <i>main mail domain</i> is also used as </i>"server display name"</i>. This is the way the SMTP server identifies himself when connecting to others.
+<p>In the following sections we need to set the postmaster address. This is a combination of the <i>postmaster</i> local part and the <i>main mail domain</i>.
+The <i>main mail domain</i> is also used as </i>"server display name"</i>. This is the way the SMTP server identifies itself when connecting to others.
 The Postmaster will get an e-mail address &lt;postmaster&gt;@&lt;main_domain&gt;. This address will receive the DMARC "rua" and "ruf" reports.
 Or in plain english: if receivers start to classify your mail as spam, this postmaster will be informed.</p>
 
@@ -26,7 +26,7 @@ Or in plain english: if receivers start to classify your mail as spam, this post
     Main mail domain and server display name.
   </label>
 <!--   Validates domain name -->
-  <input class="form-control" type="text" name="domain" placeholder="e.g. mailu.io" 
+  <input class="form-control" type="text" name="domain" placeholder="e.g. mailu.io"
   		required pattern="^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$">
 </div>
 
@@ -48,7 +48,7 @@ Or in plain english: if receivers start to classify your mail as spam, this post
 <div class="form-group">
   <label>Authentication rate limit (per source IP address)</label>
   <!--   Validates number input only -->
-  <p><input class="form-control" style="width: 7%; display: inline;" type="number" name="auth_ratelimit_pm" 
+  <p><input class="form-control" style="width: 7%; display: inline;" type="number" name="auth_ratelimit_pm"
   		value="10" required > / minute
   </p>
 </div>

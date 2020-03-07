@@ -21,7 +21,7 @@ ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1
 ENV CARDDAV_URL https://github.com/blind-coder/rcmcarddav/releases/download/v3.0.3/carddav-3.0.3.tar.bz2
 
 RUN apt-get update && apt-get install -y \
-      zlib1g-dev libzip4 libzip-dev postgresql-dev \
+      zlib1g-dev libzip4 libzip-dev libpq-dev \
       python3-jinja2 \
       gpg \
  && docker-php-ext-install zip pdo_mysql pdo_pgsql \

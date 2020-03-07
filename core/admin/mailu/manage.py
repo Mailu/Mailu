@@ -177,7 +177,7 @@ def config_update(verbose=False, delete_objects=False):
     """sync configuration with data from YAML-formatted stdin"""
     import yaml
     import sys
-    new_config = yaml.load(sys.stdin)
+    new_config = yaml.safe_load(sys.stdin)
     # print new_config
     domains = new_config.get('domains', [])
     tracked_domains = set()

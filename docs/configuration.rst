@@ -46,7 +46,6 @@ rules does also apply to auth requests coming from ``SUBNET``, especially for th
 If you disable this, ensure that the rate limit on the webmail is enforced in a different
 way (e.g. roundcube plug-in), otherwise an attacker can simply bypass the limit using webmail.
 
-
 The ``TLS_FLAVOR`` sets how Mailu handles TLS connections. Setting this value to
 ``notls`` will cause Mailu not to server any web content! More on :ref:`tls_flavor`.
 
@@ -56,6 +55,10 @@ Mail settings
 The ``MESSAGE_SIZE_LIMIT`` is the maximum size of a single email. It should not
 be too low to avoid dropping legitimate emails and should not be too high to
 avoid filling the disks with large junk emails.
+
+The ``MESSAGE_RATELIMIT`` is the limit of messages a single user can send. This is
+meant to fight outbound spam in case of compromised or malicious account on the
+server.
 
 The ``RELAYNETS`` are network addresses for which mail is relayed for free with
 no authentication required. This should be used with great care. If you want other

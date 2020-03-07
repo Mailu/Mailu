@@ -1,5 +1,5 @@
-ARG DISTRO=alpine:3.10 as builder
-FROM $DISTRO
+ARG DISTRO=alpine:3.10
+FROM $DISTRO as builder
 WORKDIR /tmp
 RUN apk add git build-base automake autoconf libtool dovecot-dev xapian-core-dev icu-dev
 RUN git clone https://github.com/grosjo/fts-xapian.git \

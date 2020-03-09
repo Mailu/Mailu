@@ -34,8 +34,7 @@
 <tr>
   <th>{% trans %}DNS SPF entries{% endtrans %}</th>
   <td><pre>
-{{ domain.name }}. 600 IN TXT "v=spf1 mx a:{{ hostname }} -all"
-{{ domain.name }}. 600 IN SPF "v=spf1 mx a:{{ hostname }} -all"</pre></td>
+{{ domain.name }}. 600 IN TXT "v=spf1 mx a:{{ hostname }} -all"</pre></td>
 </tr>
 {% if domain.dkim_publickey %}
 <tr>

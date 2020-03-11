@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mailu\n"
-"PO-Revision-Date: 2019-07-22 06:23+0000\n"
-"Last-Translator: kaiyou <pierre@jaury.eu>\n"
+"PO-Revision-Date: 2020-03-11 23:03+0000\n"
+"Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
 "Language-Team: Italian <https://translate.tedomum.net/projects/mailu/admin/"
 "it/>\n"
 "Language: it\n"
@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.3\n"
+"X-Generator: Weblate 3.11.2\n"
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."
@@ -43,11 +43,11 @@ msgstr "Nome dominio"
 
 #: mailu/ui/forms.py:47
 msgid "Maximum user count"
-msgstr ""
+msgstr "Numero massimo utenti"
 
 #: mailu/ui/forms.py:48
 msgid "Maximum alias count"
-msgstr ""
+msgstr "Numero massimo alias"
 
 #: mailu/ui/forms.py:51 mailu/ui/forms.py:72 mailu/ui/forms.py:83
 #: mailu/ui/forms.py:128 mailu/ui/forms.py:140
@@ -55,7 +55,7 @@ msgstr ""
 #: mailu/ui/templates/relay/list.html:19 mailu/ui/templates/token/list.html:19
 #: mailu/ui/templates/user/list.html:23
 msgid "Comment"
-msgstr ""
+msgstr "Commento"
 
 #: mailu/ui/forms.py:52 mailu/ui/forms.py:61 mailu/ui/forms.py:66
 #: mailu/ui/forms.py:73 mailu/ui/forms.py:132 mailu/ui/forms.py:141
@@ -101,7 +101,7 @@ msgstr "Salva impostazioni"
 
 #: mailu/ui/forms.py:110
 msgid "Password check"
-msgstr ""
+msgstr "Verifica la password"
 
 #: mailu/ui/forms.py:111 mailu/ui/templates/sidebar.html:16
 msgid "Update password"
@@ -172,7 +172,7 @@ msgstr "Abilita TLS"
 #: mailu/ui/forms.py:161 mailu/ui/templates/client.html:28
 #: mailu/ui/templates/client.html:55 mailu/ui/templates/fetch/list.html:20
 msgid "Username"
-msgstr "Username"
+msgstr "Nome utente"
 
 #: mailu/ui/templates/confirm.html:4
 msgid "Confirm action"
@@ -188,7 +188,7 @@ msgstr "Errore Docker"
 
 #: mailu/ui/templates/docker-error.html:12
 msgid "An error occurred while talking to the Docker server."
-msgstr ""
+msgstr "C'è stato un errore nel tentativo di connessione con il Docker server."
 
 #: mailu/admin/templates/login.html:6
 msgid "Your account"
@@ -196,15 +196,15 @@ msgstr "Il tuo account"
 
 #: mailu/ui/templates/login.html:8
 msgid "to access the administration tools"
-msgstr ""
+msgstr "per accedere le impostazioni d'admin"
 
 #: mailu/ui/templates/services.html:4 mailu/ui/templates/sidebar.html:39
 msgid "Services status"
-msgstr ""
+msgstr "Status dei servizi"
 
 #: mailu/ui/templates/services.html:10
 msgid "Service"
-msgstr ""
+msgstr "Servizio"
 
 #: mailu/ui/templates/fetch/list.html:23 mailu/ui/templates/services.html:11
 msgid "Status"
@@ -245,7 +245,7 @@ msgstr "Auto-risponditore"
 #: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:26
 #: mailu/ui/templates/user/list.html:36
 msgid "Fetched accounts"
-msgstr ""
+msgstr "Conti ricuperati"
 
 #: mailu/ui/templates/sidebar.html:105
 msgid "Sign out"
@@ -357,23 +357,23 @@ msgstr "Rigenera chiavi"
 
 #: mailu/ui/templates/domain/details.html:31
 msgid "DNS MX entry"
-msgstr ""
+msgstr "Entrate DNS MX"
 
 #: mailu/ui/templates/domain/details.html:35
 msgid "DNS SPF entries"
-msgstr ""
+msgstr "Entrate DNS SPF"
 
 #: mailu/ui/templates/domain/details.html:42
 msgid "DKIM public key"
-msgstr ""
+msgstr "Chiave pubblica DKIM"
 
 #: mailu/ui/templates/domain/details.html:46
 msgid "DNS DKIM entry"
-msgstr ""
+msgstr "Entrata DNS DKIM"
 
 #: mailu/ui/templates/domain/details.html:50
 msgid "DNS DMARC entry"
-msgstr ""
+msgstr "Entrata DNS DMARC"
 
 #: mailu/ui/templates/domain/edit.html:4
 msgid "Edit domain"
@@ -413,11 +413,11 @@ msgstr "Manager"
 
 #: mailu/ui/templates/fetch/create.html:4
 msgid "Add a fetched account"
-msgstr ""
+msgstr "Aggiungere un conto ricuperato"
 
 #: mailu/ui/templates/fetch/edit.html:4
 msgid "Update a fetched account"
-msgstr ""
+msgstr "Aggiornare un conto ricuperato"
 
 #: mailu/ui/templates/fetch/list.html:12
 msgid "Add an account"
@@ -425,7 +425,7 @@ msgstr "Aggiungi un account"
 
 #: mailu/ui/templates/fetch/list.html:19
 msgid "Endpoint"
-msgstr ""
+msgstr "Endpoint"
 
 #: mailu/ui/templates/fetch/list.html:22
 msgid "Last check"
@@ -437,7 +437,7 @@ msgstr "Aggiungi un manager"
 
 #: mailu/ui/templates/manager/list.html:4
 msgid "Manager list"
-msgstr ""
+msgstr "Elenco di Manager"
 
 #: mailu/ui/templates/manager/list.html:12
 msgid "Add manager"
@@ -445,7 +445,7 @@ msgstr "Aggiungi manager"
 
 #: mailu/ui/forms.py:168
 msgid "Announcement subject"
-msgstr ""
+msgstr "Oggetto dell'avviso"
 
 #: mailu/ui/forms.py:170
 msgid "Announcement body"
@@ -505,7 +505,7 @@ msgstr "Risposta automatica"
 
 #: mailu/ui/forms.py:49
 msgid "Maximum user quota"
-msgstr ""
+msgstr "Spazio massimo per utente"
 
 #: mailu/ui/forms.py:101
 msgid "Keep a copy of the emails"
@@ -533,7 +533,7 @@ msgstr "Nome alternativo"
 
 #: mailu/ui/forms.py:70
 msgid "Relayed domain name"
-msgstr ""
+msgstr "Nome di dominio affidato"
 
 #: mailu/ui/forms.py:71 mailu/ui/templates/relay/list.html:18
 msgid "Remote host"
@@ -541,15 +541,15 @@ msgstr "Host remoto"
 
 #: mailu/ui/templates/sidebar.html:54
 msgid "Relayed domains"
-msgstr ""
+msgstr "Domini affidati"
 
 #: mailu/ui/templates/alternative/create.html:4
 msgid "Create alternative domain"
-msgstr ""
+msgstr "Creare un dominio alternativo"
 
 #: mailu/ui/templates/alternative/list.html:4
 msgid "Alternative domain list"
-msgstr ""
+msgstr "Elenco di domini alternativi"
 
 #: mailu/ui/templates/alternative/list.html:12
 msgid "Add alternative"
@@ -565,23 +565,23 @@ msgstr "Alternative"
 
 #: mailu/ui/templates/relay/create.html:4
 msgid "New relay domain"
-msgstr ""
+msgstr "Nuovo dominio affidato"
 
 #: mailu/ui/templates/relay/edit.html:4
 msgid "Edit relayd domain"
-msgstr ""
+msgstr "Editare dominio affidato"
 
 #: mailu/ui/templates/relay/list.html:4
 msgid "Relayed domain list"
-msgstr ""
+msgstr "Elenco di domini affidati"
 
 #: mailu/ui/templates/relay/list.html:9
 msgid "New relayed domain"
-msgstr ""
+msgstr "Nuovo dominio affidato"
 
 #: mailu/ui/forms.py:125
 msgid "Your token (write it down, as it will never be displayed again)"
-msgstr ""
+msgstr "Il suo token (dovrà annotarlo, dato che non verrà più mostrato)"
 
 #: mailu/ui/forms.py:130 mailu/ui/templates/token/list.html:20
 msgid "Authorized IP"
@@ -633,58 +633,61 @@ msgstr "Tolleranza filtro spam"
 
 #: mailu/ui/forms.py:50
 msgid "Enable sign-up"
-msgstr ""
+msgstr "Avviare l'iscrizione"
 
 #: mailu/ui/forms.py:57
 msgid "Initial admin"
-msgstr ""
+msgstr "Admin iniziale"
 
 #: mailu/ui/forms.py:58
 msgid "Admin password"
-msgstr ""
+msgstr "Admin password"
 
 #: mailu/ui/forms.py:84
 msgid "Enabled"
-msgstr ""
+msgstr "Attivo"
 
 #: mailu/ui/forms.py:89
 msgid "Email address"
-msgstr ""
+msgstr "Indirizzo email"
 
 #: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
 #: mailu/ui/templates/user/signup.html:4
 #: mailu/ui/templates/user/signup_domain.html:4
 msgid "Sign up"
-msgstr ""
+msgstr "Iscriversi"
 
 #: mailu/ui/forms.py:119
 msgid "End of vacation"
-msgstr ""
+msgstr "Rientro delle vacanze"
 
 #: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:82
 msgid "Client setup"
-msgstr ""
+msgstr "Impostazioni del cliente"
 
 #: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
 msgid "Mail protocol"
-msgstr ""
+msgstr "Protocolo mail"
 
 #: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
 msgid "Server name"
-msgstr ""
+msgstr "Nome del server"
 
 #: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
 msgid "Register a domain"
-msgstr ""
+msgstr "Registrare un dominio"
 
 #: mailu/ui/templates/domain/details.html:17
 msgid "Generate keys"
-msgstr ""
+msgstr "Generare chiavi"
 
 #: mailu/ui/templates/domain/signup.html:13
 msgid "In order to register a new domain, you must first setup the\n"
 "    domain zone so that the domain <code>MX</code> points to this server"
 msgstr ""
+"Per registrare un nuovo dominio, dovrà aggiustare prima la \n"
+"domain zone affinché  il vostro dominio <code>MX</code> punti contro il "
+"server"
 
 #: mailu/ui/templates/domain/signup.html:18
 msgid "If you do not know how to setup an <code>MX</code> record for your DNS zone,\n"
@@ -692,15 +695,22 @@ msgid "If you do not know how to setup an <code>MX</code> record for your DNS zo
 "    couple minutes after the <code>MX</code> is set so the local server cache\n"
 "    expires."
 msgstr ""
+"Se non sa come aggiungere un registro <code>MX</code> alla vostra zona DNS, "
+"\n"
+"dovrà contattare il suo provider o amministratore DNS. Prego, attenda "
+"qualche\n"
+"minuto  tra l'impostazione del registro <code>MX</code> finché la cache "
+"locale \n"
+"del server scaderà."
 
 #: mailu/ui/templates/user/signup_domain.html:8
 msgid "pick a domain for the new account"
-msgstr ""
+msgstr "scelga un dominio per il nuovo conto"
 
 #: mailu/ui/templates/user/signup_domain.html:14
 msgid "Domain"
-msgstr ""
+msgstr "Dominio"
 
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
-msgstr ""
+msgstr "Slot disponibili"

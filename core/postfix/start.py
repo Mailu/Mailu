@@ -27,6 +27,10 @@ def start_podop():
         ("senderlogin", "url", url + "sender/login/§")
     ])
 
+def is_valid_postconf_line(line):
+    return not line.startswith("#") \
+            and not line == ''
+
 # Actual startup script
 os.environ["FRONT_ADDRESS"] = system.get_host_address_from_environment("FRONT", "front")
 os.environ["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
@@ -38,11 +42,13 @@ for postfix_file in glob.glob("/conf/*.cf"):
 
 if os.path.exists("/overrides/postfix.cf"):
     for line in open("/overrides/postfix.cf").read().strip().split("\n"):
-        os.system('postconf -e "{}"'.format(line))
+        if is_valid_postconf_line(line):
+            os.system('postconf -e "{}"'.format(line))
 
 if os.path.exists("/overrides/postfix.master"):
     for line in open("/overrides/postfix.master").read().strip().split("\n"):
-        os.system('postconf -Me "{}"'.format(line))
+        if is_valid_postconf_line(line):
+            os.system('postconf -Me "{}"'.format(line))
 
 for map_file in glob.glob("/overrides/*.map"):
     destination = os.path.join("/etc/postfix", os.path.basename(map_file))

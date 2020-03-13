@@ -1,11 +1,16 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: Mailu\n"
+"PO-Revision-Date: 2020-03-11 23:03+0000\n"
+"Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
+"Language-Team: Spanish <https://translate.tedomum.net/projects/mailu/admin/"
+"es/>\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: POEditor.com\n"
-"Project-Id-Version: Mailu\n"
-"Language: es\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.11.2\n"
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."
@@ -17,7 +22,7 @@ msgstr "Confirmar"
 
 #: mailu/ui/forms.py:40 mailu/ui/forms.py:77
 msgid "E-mail"
-msgstr "Dirección de Correo"
+msgstr "Dirección de correo"
 
 #: mailu/ui/forms.py:41 mailu/ui/forms.py:78 mailu/ui/forms.py:90
 #: mailu/ui/forms.py:109 mailu/ui/forms.py:162
@@ -34,7 +39,7 @@ msgstr "Entrar"
 #: mailu/ui/templates/domain/details.html:27
 #: mailu/ui/templates/domain/list.html:18 mailu/ui/templates/relay/list.html:17
 msgid "Domain name"
-msgstr "Nmbre de dominio"
+msgstr "Nombre de dominio"
 
 #: mailu/ui/forms.py:47
 msgid "Maximum user count"
@@ -42,7 +47,7 @@ msgstr "Máximo número de usuarios"
 
 #: mailu/ui/forms.py:48
 msgid "Maximum alias count"
-msgstr "Máximo número de aliases"
+msgstr "Máximo número de alias"
 
 #: mailu/ui/forms.py:51 mailu/ui/forms.py:72 mailu/ui/forms.py:83
 #: mailu/ui/forms.py:128 mailu/ui/forms.py:140
@@ -64,7 +69,7 @@ msgstr "Confirmar contraseña"
 #: mailu/ui/forms.py:80 mailu/ui/templates/user/list.html:22
 #: mailu/ui/templates/user/signup_domain.html:16
 msgid "Quota"
-msgstr "Cuota"
+msgstr "Espacio"
 
 #: mailu/ui/forms.py:81
 msgid "Allow IMAP access"
@@ -137,7 +142,7 @@ msgstr "Usar sintaxis SQL (p.ej. para abarcar todos los alias)"
 
 #: mailu/ui/forms.py:145
 msgid "Admin email"
-msgstr "Correo-e del administrador"
+msgstr "Correo del administrador"
 
 #: mailu/ui/forms.py:146 mailu/ui/forms.py:151 mailu/ui/forms.py:164
 msgid "Submit"
@@ -145,7 +150,7 @@ msgstr "Enviar"
 
 #: mailu/ui/forms.py:150
 msgid "Manager email"
-msgstr "Gestor de correo"
+msgstr "Correo del gestor"
 
 #: mailu/ui/forms.py:155
 msgid "Protocol"
@@ -175,7 +180,7 @@ msgstr "Confirmar acción"
 
 #: mailu/ui/templates/confirm.html:13
 msgid "You are about to %(action)s. Please confirm your action."
-msgstr "Está a punto de  %(action)s. Por favor, confirme su acción. "
+msgstr "Está a punto de %(action)s. Por favor, confirme su acción."
 
 #: mailu/ui/templates/docker-error.html:4
 msgid "Docker error"
@@ -264,7 +269,7 @@ msgstr "Ayuda"
 
 #: mailu/ui/templates/working.html:4
 msgid "We are still working on this feature!"
-msgstr "Aún trabajamos en esta característica!"
+msgstr "Aún estamos trabajando en esta funcionalidad!"
 
 #: mailu/ui/templates/admin/create.html:4
 msgid "Add a global administrator"
@@ -276,7 +281,7 @@ msgstr "Administradores globales"
 
 #: mailu/ui/templates/admin/list.html:9
 msgid "Add administrator"
-msgstr "Añadr administrador"
+msgstr "Añadir administrador"
 
 #: mailu/ui/templates/admin/list.html:16 mailu/ui/templates/alias/list.html:18
 #: mailu/ui/templates/alternative/list.html:18
@@ -424,7 +429,7 @@ msgstr "Punto final"
 
 #: mailu/ui/templates/fetch/list.html:22
 msgid "Last check"
-msgstr "Último checkeo"
+msgstr "Última comprobación"
 
 #: mailu/ui/templates/manager/create.html:4
 msgid "Add a manager"
@@ -516,7 +521,7 @@ msgstr "Mantener los correos"
 
 #: mailu/ui/templates/fetch/list.html:35
 msgid "yes"
-msgstr "si"
+msgstr "sí"
 
 #: mailu/ui/templates/fetch/list.html:35
 msgid "no"
@@ -529,7 +534,7 @@ msgstr "Nombre alternativo"
 #. I assume relayed domain means the server is a relay server (hoy receive it from another machine), and relay domain means hoy silla send it todo another machine. Is it right, or opossite?
 #: mailu/ui/forms.py:70
 msgid "Relayed domain name"
-msgstr "Nombre de.dominio a recepcionar"
+msgstr "Nombre de dominio a recepcionar"
 
 #: mailu/ui/forms.py:71 mailu/ui/templates/relay/list.html:18
 msgid "Remote host"
@@ -577,7 +582,7 @@ msgstr "Nuevo dominio externo (relayed)"
 
 #: mailu/ui/forms.py:125
 msgid "Your token (write it down, as it will never be displayed again)"
-msgstr "Sus llaves (token) (anótelas, ya que no se mostrarán nunca más)."
+msgstr "Su token (anótelo, ya que no se mostrará nunca más)"
 
 #: mailu/ui/forms.py:130 mailu/ui/templates/token/list.html:20
 msgid "Authorized IP"
@@ -585,7 +590,7 @@ msgstr "IP autorizada"
 
 #: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/token/list.html:4
 msgid "Authentication tokens"
-msgstr "Tokens (llaves) autorizados"
+msgstr "Tokens de autenticación"
 
 #: mailu/ui/templates/sidebar.html:72
 msgid "Go to"
@@ -593,15 +598,15 @@ msgstr "Ir a"
 
 #: mailu/ui/templates/sidebar.html:76
 msgid "Webmail"
-msgstr "Webmail"
+msgstr "Correo web"
 
 #: mailu/ui/templates/sidebar.html:87
 msgid "Website"
-msgstr "Web"
+msgstr "Correo web"
 
 #: mailu/ui/templates/token/create.html:4
 msgid "Create an authentication token"
-msgstr "Crear un token (llave) de autenticación."
+msgstr "Crear un token de autenticación"
 
 #: mailu/ui/templates/token/list.html:12
 msgid "New token"
@@ -700,4 +705,3 @@ msgstr "Dominio"
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
 msgstr "Slots disponibles"
-

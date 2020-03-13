@@ -1,36 +1,34 @@
 import limits
 import limits.storage
 import limits.strategies
-import ipaddress
 
-class RateLimitExceeded(Exception):
-    pass
 
-class Limiter:
+class LimitWrapper(object):
+    """ Wraps a limit by providing the storage, item and identifiers
+    """
 
-    def __init__(self):
-        self.storage = None
-        self.limiter = None
-        self.rate = None
-        self.subnet = None
-        self.rate_limit_subnet = True
+    def __init__(self, limiter, limit, *identifiers):
+        self.limiter = limiter
+        self.limit = limit
+        self.base_identifiers = identifiers
+
+    def test(self, *args):
+        return self.limiter.test(self.limit, *(self.base_identifiers + args))
+
+    def hit(self, *args):
+        return self.limiter.hit(self.limit, *(self.base_identifiers + args))
+
+    def get_window_stats(self, *args):
+        return self.limiter.get_window_stats(self.limit, *(self.base_identifiers + args))
+
+
+class LimitWraperFactory(object):
+    """ Global limiter, to be used as a factory
+    """
 
     def init_app(self, app):
         self.storage = limits.storage.storage_from_string(app.config["RATELIMIT_STORAGE_URL"])
         self.limiter = limits.strategies.MovingWindowRateLimiter(self.storage)
-        self.rate = limits.parse(app.config["AUTH_RATELIMIT"])
-        self.rate_limit_subnet = str(app.config["AUTH_RATELIMIT_SUBNET"])!='False'
-        self.subnet = ipaddress.ip_network(app.config["SUBNET"])
 
-    def check(self,clientip):
-        # disable limits for internal requests (e.g. from webmail)?
-        if self.rate_limit_subnet==False and ipaddress.ip_address(clientip) in self.subnet:
-            return
-        if not self.limiter.test(self.rate,"client-ip",clientip):
-            raise RateLimitExceeded()
-
-    def hit(self,clientip):
-        # disable limits for internal requests (e.g. from webmail)?
-        if self.rate_limit_subnet==False and ipaddress.ip_address(clientip) in self.subnet:
-            return
-        self.limiter.hit(self.rate,"client-ip",clientip)
+    def get_limiter(self, limit, *args):
+        return LimitWrapper(self.limiter, limits.parse(limit), *args)

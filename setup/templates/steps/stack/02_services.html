@@ -1,4 +1,4 @@
-{% call macros.panel("info", "Step 3 - pick some features") %}
+{% call macros.panel("info", "Step 3 - Pick some features") %}
 <p>Mailu comes with multiple base features, including a specific admin
 interface, Web email clients, antispam, antivirus, etc.
 In this section you can enable the services to you liking.</p>
@@ -22,34 +22,37 @@ the security implications caused by such an increase of attack surface.<p>
   </div>
 </div>
 
-<p>An antivirus server helps fighting large scale virus spreading campaigns that leverage
-e-mail for initial infection. Make sure that you have at least 1GB of memory for ClamAV to
-load its signature database.</p>
 
 <div class="form-check form-check-inline">
   <label class="form-check-label">
     <input class="form-check-input" type="checkbox" name="antivirus_enabled" value="clamav">
     Enable the antivirus service
   </label>
+
+  <i>An antivirus server helps fighting large scale virus spreading campaigns that leverage
+    e-mail for initial infection. Make sure that you have at least 1GB of memory for ClamAV to
+    load its signature database.</i>
 </div>
 
-<p>A Webdav server exposes a Dav interface over HTTP so that clients can store
-contacts or calendars using the mail account.</p>
 
 <div class="form-check form-check-inline">
   <label class="form-check-label">
     <input class="form-check-input" type="checkbox" name="webdav_enabled" value="radicale">
     Enable the webdav service
   </label>
+
+  <i>A Webdav server exposes a Dav interface over HTTP so that clients can store
+    contacts or calendars using the mail account.</i>
 </div>
 
-<p>Fetchmail allows to download mails over IMAP/POP3 and uploads it your Mailu mailbox.</p>
 
 <div class="form-check form-check-inline">
   <label class="form-check-label">
     <input class="form-check-input" type="checkbox" name="fetchmail_enabled" value="true">
     Enable fetchmail
   </label>
+
+  <i>Fetchmail allows users to retrieve mail from an external mail-server via IMAP/POP3 and puts it in their inbox.</i>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

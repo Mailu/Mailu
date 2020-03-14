@@ -35,10 +35,10 @@ else:
 
 conf.jinja("/php.ini", os.environ, "/usr/local/etc/php/conf.d/roundcube.ini")
 
-# Fix some permissions
+# Create dirs, setup permissions
 os.system("mkdir -p /data/gpg /var/www/html/logs")
-os.system("touch /var/www/html/logs/errors")
-os.system("chown -R www-data:www-data /data /var/www/html/logs")
+os.system("touch /var/www/html/logs/errors.log")
+os.system("chown -R www-data:www-data /var/www/html/logs")
 
 try:
     print("Initializing database")
@@ -57,8 +57,11 @@ try:
 except subprocess.CalledProcessError as e:
     quit(1)
 
+# Setup database permissions
+os.system("chown -R www-data:www-data /data")
+
 # Tail roundcube logs
-subprocess.Popen(["tail","-f","-n","0","/var/www/html/logs/errors"])
+subprocess.Popen(["tail","-f","-n","0","/var/www/html/logs/errors.log"])
 
 # Run apache
 os.execv("/usr/local/bin/apache2-foreground", ["apache2-foreground"])

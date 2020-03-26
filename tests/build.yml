@@ -3,69 +3,69 @@ version: '3'
 services:
 
   front:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}nginx:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}nginx${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../core/nginx
 
   resolver:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../optional/unbound
 
   imap:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../core/dovecot
 
   smtp:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../core/postfix
 
   antispam:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../core/rspamd
 
   antivirus:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}clamav:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}clamav${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../optional/clamav
 
   webdav:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}radicale:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}radicale${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../optional/radicale
 
   traefik-certdumper:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}traefik-certdumper:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}traefik-certdumper${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../optional/traefik-certdumper
 
   admin:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../core/admin
 
   postgresql:
-    image: ${DOCKER_ORG:-mailu}/postgresql:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/postgresql${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../optional/postgresql
 
   roundcube:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}roundcube:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}roundcube${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../webmails/roundcube
 
   rainloop:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rainloop:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rainloop${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../webmails/rainloop
 
   fetchmail:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}fetchmail:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}fetchmail${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../optional/fetchmail
 
   none:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}none:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}none${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../core/none
 
   docs:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}docs:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}docs${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build:
       context: ../docs
       args:
         version: ${MAILU_VERSION:-local}
 
   setup:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}setup:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}setup${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-local}
     build: ../setup
 

@@ -15,7 +15,7 @@ services:
 
   # Core services
   front:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}nginx:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}nginx${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-master}
     restart: always
     env_file: mailu.env
     logging:
@@ -34,7 +34,7 @@ services:
       - "/mailu/certs:/certs"
 
   admin:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-master}
     restart: always
     env_file: mailu.env
     volumes:
@@ -44,7 +44,7 @@ services:
       - redis
 
   imap:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-master}
     restart: always
     env_file: mailu.env
     volumes:
@@ -54,7 +54,7 @@ services:
       - front
 
   smtp:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-master}
     restart: always
     env_file: mailu.env
     volumes:
@@ -63,7 +63,7 @@ services:
       - front
 
   antispam:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-master}
     restart: always
     env_file: mailu.env
     volumes:
@@ -75,7 +75,7 @@ services:
 
   # Optional services
   antivirus:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}clamav:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}clamav${MAILU_CI:-}:${MAILU_PLTFRM:-}${MAILU_VERSION:-master}
     restart: always
     env_file: mailu.env
     volumes:

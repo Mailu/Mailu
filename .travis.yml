@@ -14,42 +14,108 @@ branches:
     # test branches, e.g. test-debian
     - /^test-[\w\-\.]+$/
 
-sudo: required
+stages:
+  - install
+  - test
+  - deploy
+
 services: docker
-addons:
-  apt:
-    packages:
-      - docker-ce
 
 env:
-  - MAILU_VERSION=${TRAVIS_BRANCH////-}
+  - MAILU_VERSION=${TRAVIS_BRANCH////-} MAILU_PLTFRM="${TRAVIS_CPU_ARCH}-" MAILU_CI="-ci"
 
 language: python
 python:
   - "3.6"
-install:
-  - pip install -r tests/requirements.txt
-  - sudo curl -L https://github.com/docker/compose/releases/download/1.23.0-rc3/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
-  - sudo chmod +x /usr/local/bin/docker-compose
 
-before_script:
-  - docker-compose -v
-  - docker-compose -f tests/build.yml build
-  - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
-
-
-script:
+jobs:
+  include:
+# install stage will build and pull 
+# all images (names will get the suffix defined bu MAIL_CI)
+# install stage for amd architecture:
+    - stage: install
+      script:
+      - pip install -r tests/requirements.txt
+      - docker-compose -v
+      - source tests/define_MAILU_VERSION.sh
+      - docker-compose -f tests/build.yml build
+      - docker login -u $DOCKER_UN -p $DOCKER_PW
+      - docker-compose -f tests/build.yml pull
+      arch: amd64
+# install stage for arm64 architecture:
+# "admin" images take long time to build
+# we build it a seperate job
+# install stage for arm, all images except admin:
+    - stage: install
+      script:
+      - pip install -r tests/requirements.txt
+      - docker-compose -v
+      - source tests/define_MAILU_VERSION.sh
+      - docker-compose -f tests/build.yml build front resolver imap smtp antispam antivirus webdav traefik-certdumper postgresql roundcube rainloop fetchmail none docs setup 
+      - docker login -u $DOCKER_UN -p $DOCKER_PW
+      - docker-compose -f tests/build.yml pull  front resolver imap smtp antispam antivirus webdav traefik-certdumper postgresql roundcube rainloop fetchmail none docs setup
+      arch: arm64
+# install stage for arm, dedicated to admin:
+    - stage: install
+      script:
+      - pip install -r tests/requirements.txt
+      - docker-compose -v
+      - source tests/define_MAILU_VERSION.sh
+      - docker-compose -f tests/build.yml build admin
+      - docker login -u $DOCKER_UN -p $DOCKER_PW
+      - docker-compose -f tests/build.yml pull admin
+      arch: arm64
+# test stages
+# amd64 test job all images except filter
+    - stage: test
+      script:
+      - pip install -r tests/requirements.txt
+      - source tests/define_MAILU_VERSION.sh
+      - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
 # test.py, test name and timeout between start and tests.
-  - python tests/compose/test.py core 1
-  - python tests/compose/test.py fetchmail 1
-  - travis_wait python tests/compose/test.py filters 10
-  - python tests/compose/test.py rainloop 1
-  - python tests/compose/test.py roundcube 1
-  - python tests/compose/test.py webdav 1
-
-deploy:
-  provider: script
-  script: bash tests/deploy.sh
-  on:
-    all_branches: true
-    condition: -n $DOCKER_UN
+      - python tests/compose/test.py core 1
+      - python tests/compose/test.py fetchmail 1
+      - python tests/compose/test.py rainloop 1
+      - python tests/compose/test.py roundcube 1
+      - python tests/compose/test.py webdav 1
+      arch: amd64
+# arm64 test job all images except filter
+    - stage: test
+      script:
+      - pip install -r tests/requirements.txt
+      - source tests/define_MAILU_VERSION.sh
+      - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
+# test.py, test name and timeout between start and tests.
+      - python tests/compose/test.py core 1
+      - python tests/compose/test.py fetchmail 1
+      - python tests/compose/test.py rainloop 1
+      - python tests/compose/test.py roundcube 1
+      - python tests/compose/test.py webdav 1
+      arch: arm64
+# amd64 test job for filter
+    - stage: test
+      script:
+      - pip install -r tests/requirements.txt
+      - source tests/define_MAILU_VERSION.sh
+      - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
+# test.py, test name and timeout between start and tests.
+      - python tests/compose/test.py core 1
+      - python tests/compose/test.py filters 9
+      arch: amd64
+# arm64 test job for filter
+    - stage: test
+      script:
+      - pip install -r tests/requirements.txt
+      - source tests/define_MAILU_VERSION.sh
+      - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
+# test.py, test name and timeout between start and tests.
+      - python tests/compose/test.py core 1
+      - python tests/compose/test.py filters 9 
+      arch: arm64
+# deploy stage
+# retag and push the images (removing suffix defined bu MAILU_CI)
+# create the multi-architecture amanifests for each image
+    - stage: deploy
+      script:
+      - bash tests/deploy_manifest.sh
+      arch: amd64

@@ -30,7 +30,7 @@ python:
 
 jobs:
   include:
-# install stage will build and pull 
+# install stage will build and push 
 # all images (names will get the suffix defined bu MAIL_CI)
 # install stage for amd architecture:
     - stage: install
@@ -40,7 +40,7 @@ jobs:
       - source tests/define_MAILU_VERSION.sh
       - docker-compose -f tests/build.yml build
       - docker login -u $DOCKER_UN -p $DOCKER_PW
-      - docker-compose -f tests/build.yml pull
+      - docker-compose -f tests/build.yml push
       arch: amd64
 # install stage for arm64 architecture:
 # "admin" images take long time to build
@@ -53,7 +53,7 @@ jobs:
       - source tests/define_MAILU_VERSION.sh
       - docker-compose -f tests/build.yml build front resolver imap smtp antispam antivirus webdav traefik-certdumper postgresql roundcube rainloop fetchmail none docs setup 
       - docker login -u $DOCKER_UN -p $DOCKER_PW
-      - docker-compose -f tests/build.yml pull  front resolver imap smtp antispam antivirus webdav traefik-certdumper postgresql roundcube rainloop fetchmail none docs setup
+      - docker-compose -f tests/build.yml push  front resolver imap smtp antispam antivirus webdav traefik-certdumper postgresql roundcube rainloop fetchmail none docs setup
       arch: arm64
 # install stage for arm, dedicated to admin:
     - stage: install
@@ -63,7 +63,7 @@ jobs:
       - source tests/define_MAILU_VERSION.sh
       - docker-compose -f tests/build.yml build admin
       - docker login -u $DOCKER_UN -p $DOCKER_PW
-      - docker-compose -f tests/build.yml pull admin
+      - docker-compose -f tests/build.yml push admin
       arch: arm64
 # test stages
 # amd64 test job all images except filter

@@ -451,24 +451,33 @@ class Alias(Base, Email):
                     )
                 )
             ).order_by(cls.wildcard, sqlalchemy.func.char_length(cls.localpart).desc()).first()
-        if alias_preserve_case:
-            return alias_preserve_case
 
-        if localpart:
-            localpart = localpart.lower()
-        return cls.query.filter(
+        localpart_lower = localpart.lower() if localpart else None
+        alias_lower_case = cls.query.filter(
                 sqlalchemy.and_(cls.domain_name == domain_name,
                     sqlalchemy.or_(
                         sqlalchemy.and_(
                             cls.wildcard == False,
-                            sqlalchemy.func.lower(cls.localpart) == localpart
+                            sqlalchemy.func.lower(cls.localpart) == localpart_lower
                         ), sqlalchemy.and_(
                             cls.wildcard == True,
-                            sqlalchemy.bindparam("l", localpart).like(sqlalchemy.func.lower(cls.localpart))
+                            sqlalchemy.bindparam("l", localpart_lower).like(sqlalchemy.func.lower(cls.localpart))
                         )
                     )
                 )
             ).order_by(cls.wildcard, sqlalchemy.func.char_length(sqlalchemy.func.lower(cls.localpart)).desc()).first()
+
+        if alias_preserve_case and alias_lower_case:
+            if alias_preserve_case.wildcard:
+                return alias_lower_case
+            else:
+                return alias_preserve_case
+        elif alias_preserve_case and not alias_lower_case:
+            return alias_preserve_case
+        elif alias_lower_case and not alias_preserve_case:
+            return alias_lower_case
+        else:
+            return None
 
 class Token(Base):
     """ A token is an application password for a given user.

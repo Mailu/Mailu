@@ -5,6 +5,11 @@ metadata:
   namespace: mailu-mailserver
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: mailu-admin
+      role: mail
+      tier: backend
   template:
     metadata:
       labels:

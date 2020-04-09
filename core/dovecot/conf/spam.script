@@ -1,4 +1,5 @@
 #!/bin/bash
 
 tee >(rspamc -h {{ ANTISPAM_WEBUI_ADDRESS }} -P mailu learn_spam /dev/stdin) \
-    >(rspamc -h {{ ANTISPAM_WEBUI_ADDRESS }} -P mailu -f 11 fuzzy_add /dev/stdin)
+    >(rspamc -h {{ ANTISPAM_WEBUI_ADDRESS }} -P mailu -f 13 fuzzy_del /dev/stdin) \
+    | rspamc -h {{ ANTISPAM_WEBUI_ADDRESS }} -P mailu -f 11 fuzzy_add /dev/stdin

@@ -37,6 +37,9 @@ os.environ["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", 
 os.environ["ANTISPAM_MILTER_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM_MILTER", "antispam:11332")
 os.environ["LMTP_ADDRESS"] = system.get_host_address_from_environment("LMTP", "imap:2525")
 
+conf.jinja("/conf/rsyslog.conf", os.environ, "/etc/rsyslog.conf")
+
+
 for postfix_file in glob.glob("/conf/*.cf"):
     conf.jinja(postfix_file, os.environ, os.path.join("/etc/postfix", os.path.basename(postfix_file)))
 
@@ -60,6 +63,9 @@ if "RELAYUSER" in os.environ:
     path = "/etc/postfix/sasl_passwd"
     conf.jinja("/conf/sasl_passwd", os.environ, path)
     os.system("postmap {}".format(path))
+
+# Start rsyslog
+os.system("/usr/sbin/rsyslogd -n &")
 
 # Run Podop and Postfix
 multiprocessing.Process(target=start_podop).start()

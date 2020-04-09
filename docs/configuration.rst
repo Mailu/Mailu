@@ -147,6 +147,9 @@ Log messages equal or higher than this priority will be printed.
 Can be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG or NOTSET.
 See the `python docs`_ for more information.
 
+``POSTFIX_LOG_FILE`` enables postfix logging to the given file (in addition to log to stdout).
+Log rotation should be done externally.
+
 .. _`python docs`: https://docs.python.org/3.6/library/logging.html#logging-levels
 
 Antivirus settings

@@ -32,7 +32,7 @@ services:
     {% endfor %}
     volumes:
       - "{{ root }}/certs:/certs"
-      - "{{ root }}/overrides/nginx:/overrides"
+      - "{{ root }}/overrides/nginx:/overrides:ro"
 
   {% if resolver_enabled %}
   resolver:
@@ -64,7 +64,7 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/mail:/mail"
-      - "{{ root }}/overrides:/overrides"
+      - "{{ root }}/overrides/dovecot:/overrides:ro"
     depends_on:
       - front
 
@@ -74,7 +74,7 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/mailqueue:/queue"
-      - "{{ root }}/overrides:/overrides"
+      - "{{ root }}/overrides/postfix:/overrides:ro"
     depends_on:
       - front
     {% if resolver_enabled %}
@@ -89,8 +89,8 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/filter:/var/lib/rspamd"
-      - "{{ root }}/dkim:/dkim"
-      - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d"
+      - "{{ root }}/dkim:/dkim:ro"
+      - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d:ro"
     depends_on:
       - front
     {% if resolver_enabled %}

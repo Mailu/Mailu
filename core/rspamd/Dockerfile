@@ -9,7 +9,9 @@ RUN apk add --no-cache \
 RUN pip3 install socrate==0.2.0
 
 # Image specific layers under this line
-RUN apk add --no-cache rspamd rspamd-controller rspamd-proxy rspamd-fuzzy ca-certificates curl
+RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories
+RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
+RUN apk add --no-cache rspamd@testing rspamd-controller@testing rspamd-proxy@testing rspamd-fuzzy@testing ca-certificates curl
 
 RUN mkdir /run/rspamd
 

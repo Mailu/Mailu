@@ -33,6 +33,7 @@ args["TLS"] = {
         "/certs/letsencrypt/live/mailu/privkey.pem"),
     "notls": None
 }[args["TLS_FLAVOR"]]
+args["PROXY_PROTOCOL"] = system.get_host_address_from_environment("PROXY_PROTOCOL", "")
 
 if args["TLS"] and not all(os.path.exists(file_path) for file_path in args["TLS"]):
     print("Missing cert or key file, disabling TLS")

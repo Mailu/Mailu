@@ -140,6 +140,11 @@ See the `python docs`_ for more information.
 
 .. _`python docs`: https://docs.python.org/3.6/library/logging.html#logging-levels
 
+The ``USE_SERVER_OUTCLEAN`` setting is used to set the server hostname and IP
+in outbound mail headers rather than the anonymized 'PUBLIC_HOSTNAME [PUBLIC_IP]'
+used by default.  May be helpful in preventing messages being marked as spam.
+Disabled by default -- set to ``True`` to enable.
+
 Antivirus settings
 ------------------
 

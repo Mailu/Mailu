@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-04-22 12:10+0200\n"
-"PO-Revision-Date: 2020-03-11 23:03+0000\n"
+"PO-Revision-Date: 2020-04-26 13:09+0000\n"
 "Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
 "Language-Team: Catalan <https://translate.tedomum.net/projects/mailu/admin/"
 "ca/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.11.2\n"
+"X-Generator: Weblate 4.0.1\n"
 "Generated-By: Babel 2.5.3\n"
 
 #: mailu/ui/forms.py:32
@@ -25,7 +25,6 @@ msgid "Invalid email address."
 msgstr ""
 
 #: mailu/ui/forms.py:36
-#, fuzzy
 msgid "Confirm"
 msgstr "Confirmeu"
 
@@ -97,7 +96,7 @@ msgstr "Nom alternatiu"
 
 #: mailu/ui/forms.py:70
 msgid "Relayed domain name"
-msgstr "Nom de domini traspassat (relayed)"
+msgstr "Nom de domini llegat (relayed)"
 
 #: mailu/ui/forms.py:71 mailu/ui/templates/relay/list.html:18
 msgid "Remote host"
@@ -144,7 +143,7 @@ msgstr "Activeu filtre d'spam"
 
 #: mailu/ui/forms.py:99
 msgid "Spam filter tolerance"
-msgstr "Tolerància del filtre spam"
+msgstr "Tolerància del filtre d'spam"
 
 #: mailu/ui/forms.py:100
 msgid "Enable forwarding"
@@ -598,19 +597,19 @@ msgstr "Afegiu un gestor"
 
 #: mailu/ui/templates/relay/create.html:4
 msgid "New relay domain"
-msgstr "Nou domini traspassat (relayed)"
+msgstr "Nou domini llegat (relayed)"
 
 #: mailu/ui/templates/relay/edit.html:4
 msgid "Edit relayd domain"
-msgstr "Editeu domini traspassat (relayed)"
+msgstr "Editeu domini llegat (relayed)"
 
 #: mailu/ui/templates/relay/list.html:4
 msgid "Relayed domain list"
-msgstr "Llista de dominis traspassats (relayed)"
+msgstr "Llista de dominis llegats (relayed)"
 
 #: mailu/ui/templates/relay/list.html:9
 msgid "New relayed domain"
-msgstr "Nou domini traspassat (relayed)"
+msgstr "Nou domini llegat (relayed)"
 
 #: mailu/ui/templates/token/create.html:4
 msgid "Create an authentication token"

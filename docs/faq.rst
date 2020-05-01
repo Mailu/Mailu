@@ -532,6 +532,26 @@ In any case, using a dedicated DNS server will improve the performance of your m
 
 *Issue reference:* `206`_, `554`_, `681`_.
 
+Can I learn ham/spam messages from an already existing mailbox?
+```````````````````````````````````````````````````````````````
+Mailu is supporting automatic spam learning for messages moved to the Junk mailbox. Any email moved from the Junk Folder will learnt as ham. 
+
+If you already have an existing mailbox and want Mailu to learn them all as ham messages, you might run rspamc from within the dovecot container:
+
+.. code-block:: bash
+
+  rspamc -h antispam:11334 -P mailu -f 13 fuzzy_add /mail/user\@example.com/.Ham_Learn/cur/  `
+
+This should learn every file located in the Ham_Learn mailbox from user@example.com 
+
+Likewise, to lean all messages within the folder Spam_Learn as spam messages :
+
+.. code-block:: bash
+
+  rspamc -h antispam:11334 -P mailu -f 11 fuzzy_add /mail/user\@example.com/.Spam_Learn/cur/
+
+*Issue reference:* `1438`_.
+
 Is there a way to support more (older) ciphers?
 ```````````````````````````````````````````````
 
@@ -609,6 +629,8 @@ iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 25 -j SNAT --to <your mx i
 .. _`897`: https://github.com/Mailu/Mailu/issues/897
 .. _`1090`: https://github.com/Mailu/Mailu/issues/1090
 .. _`unbound`: https://nlnetlabs.nl/projects/unbound/about/
+.. _`1438`: https://github.com/Mailu/Mailu/issues/1438
+
 
 A user gets ``Sender address rejected: Access denied. Please check the`` ``message recipient […] and try again`` even though the sender is legitimate?
 ``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````

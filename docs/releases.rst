@@ -1,6 +1,15 @@
 Release notes
 =============
 
+Mailu 1.8 - tbd
+----------------------
+
+Override location changes
+`````````````````````````
+
+If you have regenerated the Docker compose and environment files, there are some changes to the configuration overrides.
+Override files are now mounted read-only into the containers. The Dovecot and Postfix overrides are moved in their own sub-directory. If there are local override files, they will need to be moved from ``overrides/`` to ``overrides/dovecot`` and ``overrides/postfix/``.
+
 Mailu 1.7 - 2019-08-22
 ----------------------
 

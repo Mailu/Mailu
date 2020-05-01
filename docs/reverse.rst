@@ -61,6 +61,7 @@ Because the admin interface is served as ``/admin`` and the Webmail as ``/webmai
 
     location /admin {
       proxy_pass https://localhost:8443/admin;
+      proxy_set_header Host $http_host;
     }
 
     location /main_app {
@@ -103,6 +104,7 @@ Here is an example configuration :
 
     location /admin {
       proxy_pass https://localhost:8443/admin;
+      proxy_set_header Host $http_host;
     }
 
   }

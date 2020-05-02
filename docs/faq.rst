@@ -248,9 +248,9 @@ Postfix, Dovecot, Nginx and Rspamd support overriding configuration files. Overr
 ``$ROOT/overrides``. Please refer to the official documentation of those programs for the
 correct syntax. The following file names will be taken as override configuration:
 
-- `Postfix`_ - ``postfix.cf``;
-- `Dovecot`_ - ``dovecot.conf``;
-- `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory.
+- `Postfix`_ - ``postfix.cf`` in postfix sub-directory;
+- `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory;
+- `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory;
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
 
 *Issue reference:* `206`_.
@@ -319,7 +319,7 @@ After successfull login the domain part will be striped and the rest used as use
 *Issue reference:* `575`_.
 
 .. _`Postfix`: http://www.postfix.org/postconf.5.html
-.. _`Dovecot`: https://wiki.dovecot.org/ConfigFile
+.. _`Dovecot`: https://doc.dovecot.org/configuration_manual/config_file/config_file_syntax/
 .. _`NGINX`:   https://nginx.org/en/docs/
 .. _`Rspamd`:  https://www.rspamd.com/doc/configuration/index.html
 

@@ -1,11 +1,9 @@
-ARG DISTRO=alpine:3.11
+ARG DISTRO=debian:buster-slim
 FROM $DISTRO
-# python3 shared with most images
-RUN apk add --no-cache \
-    python3 py3-pip bash \
-  && pip3 install --upgrade pip
-# Image specific layers under this line
-RUN apk add --no-cache clamav rsyslog wget clamav-libunrar
+
+RUN apt-get update && apt-get install -y \
+  python3 clamav-daemon rsyslog netcat \
+  && rm -rf /var/lib/apt/lists
 
 COPY conf /etc/clamav
 COPY start.py /start.py

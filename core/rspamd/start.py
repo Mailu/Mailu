@@ -20,4 +20,4 @@ for rspamd_file in glob.glob("/conf/*"):
     conf.jinja(rspamd_file, os.environ, os.path.join("/etc/rspamd/local.d", os.path.basename(rspamd_file)))
 
 # Run rspamd
-os.execv("/usr/sbin/rspamd", ["rspamd", "-i", "-f"])
+os.execv("/usr/bin/rspamd", ["rspamd", "-i", "-f"])

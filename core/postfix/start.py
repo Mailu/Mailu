@@ -13,7 +13,7 @@ from socrate import system, conf
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
 def start_podop():
-    os.setuid(100)
+    os.setuid(101)
     url = "http://" + os.environ["ADMIN_ADDRESS"] + "/internal/postfix/"
     # TODO: Remove verbosity setting from Podop?
     run_server(0, "postfix", "/tmp/podop.socket", [
@@ -63,5 +63,5 @@ if "RELAYUSER" in os.environ:
 
 # Run Podop and Postfix
 multiprocessing.Process(target=start_podop).start()
-os.system("/usr/libexec/postfix/post-install meta_directory=/etc/postfix create-missing")
+os.system("/etc/postfix/post-install meta_directory=/etc/postfix create-missing")
 os.system("postfix start-fg")

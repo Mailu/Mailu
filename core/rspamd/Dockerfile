@@ -1,4 +1,4 @@
-ARG DISTRO=debian:stable-slim
+ARG DISTRO=debian:buster-slim
 FROM $DISTRO
 # python3 shared with most images
 RUN apt-get update && apt-get install -y --no-install-recommends\

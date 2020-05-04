@@ -66,6 +66,5 @@ multiprocessing.Process(target=start_podop).start()
 os.system("/usr/libexec/postfix/post-install meta_directory=/etc/postfix create-missing")
 # Before starting postfix, we need to check permissions on /queue
 # in the event that postfix,postdrop id have changed
-os.system("chown -R postfix /queue/{active,bounce,corrupt,defer,deferred,flush,hold,incoming,maildrop,pid,private,public,saved,trace}")
-os.system("chgrp -R postdrop /queue/{maildrop,public}")
+os.system("postfix set-permissions")
 os.system("postfix start-fg")

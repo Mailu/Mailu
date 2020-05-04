@@ -544,7 +544,7 @@ If you already have an existing mailbox and want Mailu to learn them all as ham 
 
 This should learn every file located in the ``Ham_Learn`` folder from user@example.com 
 
-Likewise, to lean all messages within the folder Spam_Learn as spam messages :
+Likewise, to lean all messages within the folder ``Spam_Learn`` as spam messages :
 
 .. code-block:: bash
 

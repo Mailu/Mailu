@@ -15,7 +15,7 @@ RUN pip3 install "podop>0.2.5"
 
 # Image specific layers under this line
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends\
-  postfix postfix-pcre sasl2-bin libsasl2-modules\
+  postfix postfix-pcre sasl2-bin libsasl2-modules netcat\
   && rm -rf /var/lib/apt/lists  
 
 COPY conf /conf

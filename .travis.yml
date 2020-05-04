@@ -10,6 +10,8 @@ branches:
     - /^1\.[567]\.\d+$/
     # pre-releases, e.g. 1.8-pre1
     - /^1\.8-pre\d+$/
+    # test branches, e.g. test-debian
+    - /^test-[\w\-]+$/
 
 sudo: required
 services: docker

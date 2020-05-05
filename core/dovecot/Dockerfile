@@ -60,4 +60,4 @@ VOLUME ["/mail"]
 
 CMD /start.py
 
-HEALTHCHECK --start-period=350s CMD echo QUIT|nc localhost 110|grep "Dovecot ready."
+HEALTHCHECK --start-period=350s CMD echo QUIT|nc localhost 110|grep "ready."

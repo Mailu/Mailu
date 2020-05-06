@@ -64,4 +64,7 @@ if "RELAYUSER" in os.environ:
 # Run Podop and Postfix
 multiprocessing.Process(target=start_podop).start()
 os.system("/usr/libexec/postfix/post-install meta_directory=/etc/postfix create-missing")
+# Before starting postfix, we need to check permissions on /queue
+# in the event that postfix,postdrop id have changed
+os.system("postfix set-permissions")
 os.system("postfix start-fg")

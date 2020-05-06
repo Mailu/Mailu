@@ -1,20 +1,24 @@
-ARG DISTRO=alpine:3.10
+ARG DISTRO=debian:buster-slim
 FROM $DISTRO
 # python3 shared with most images
-RUN apk add --no-cache \
-    python3 py3-pip git bash py3-multidict \
+RUN apt-get update && apt-get install -y --no-install-recommends\
+  python3 curl python3-pip git python3-multidict python3-yarl\
+  python3-wheel python3-setuptools\
+  && rm -rf /var/lib/apt/lists \
   && pip3 install --upgrade pip
 
 # Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
-RUN pip3 install socrate
+RUN pip3 install socrate==0.2.0
 
 # Image specific layers under this line
-RUN apk add --no-cache unbound curl bind-tools \
-  && curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache \
-  && chown root:unbound /etc/unbound \
-  && chmod 775 /etc/unbound \
-  && apk del --no-cache curl \
-  && /usr/sbin/unbound-anchor -a /etc/unbound/trusted-key.key | true
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends\
+  unbound curl dnsutils\
+  && curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache\
+  && chown root:unbound /etc/unbound\
+  && chmod 775 /etc/unbound\
+  && apt-get autoremove --purge -y curl\
+  && /usr/sbin/unbound-anchor -a /etc/unbound/trusted-key.key | true\
+  && rm -rf /var/lib/apt/lists
 
 COPY start.py /start.py
 COPY unbound.conf /unbound.conf

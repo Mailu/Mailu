@@ -1,21 +1,22 @@
+ARG DEBIAN_FRONTEND=noninteractive
 ARG DISTRO=debian:buster-slim
 FROM $DISTRO as builder
 WORKDIR /tmp
-RUN echo "deb-src http://deb.debian.org/debian stable main" >> /etc/apt/sources.list
-RUN apt-get update && apt-get -y build-dep dovecot-core\
+RUN echo "deb-src http://deb.debian.org/debian buster main" >> /etc/apt/sources.list
+RUN apt-get update && apt-get -y build-dep dovecot-core \
   && rm -rf /var/lib/apt/lists
 ### Below is needed as buster provides libicu63, and fts-xapian requires >=64
-RUN echo "deb-src http://deb.debian.org/debian experimental main" >> /etc/apt/sources.list\
-  && apt-get update\
-  && apt-get install -y --no-install-recommends build-essential fakeroot devscripts\
-  && apt-get build-dep -y libicu-dev\
-  && apt-get source -y libicu-dev\
-  && cd icu-67.1\
-  && debuild -b -uc\
+RUN echo "deb-src http://deb.debian.org/debian experimental main" >> /etc/apt/sources.list \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends build-essential fakeroot devscripts \
+  && apt-get build-dep -y libicu-dev \
+  && apt-get source -y libicu-dev \
+  && cd icu-67.1 \
+  && debuild -b -uc \
   && cd .. 
 RUN dpkg -i --force-all libicu67_67.1*.deb icu-devtools_67.1*.deb libicu-dev_67.1*.deb
 ###
-RUN apt-get update && apt-get install -y dovecot-dev git libxapian-dev libicu-dev libsqlite3-dev\
+RUN apt-get update && apt-get install -y dovecot-dev git libxapian-dev libicu-dev libsqlite3-dev \
   && rm -rf /var/lib/apt/lists
 RUN git clone https://github.com/grosjo/fts-xapian.git \
   && cd fts-xapian \
@@ -27,9 +28,8 @@ RUN git clone https://github.com/grosjo/fts-xapian.git \
 
 FROM $DISTRO
 # python3 shared with most images
-RUN apt-get update && apt-get install -y --no-install-recommends\
-  python3 curl python3-pip git python3-multidict python3-yarl\
-  python3-wheel python3-setuptools\
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  python3 python3-pip python3-setuptools curl \
   && rm -rf /var/lib/apt/lists \
   && pip3 install --upgrade pip
 
@@ -37,12 +37,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends\
 RUN pip3 install socrate==0.2.0
 
 # Shared layer between dovecot and postfix
-RUN pip3 install "podop>0.2.5"
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  python3-multidict python3-yarl \
+  && rm -rf /var/lib/apt/lists \  
+  && pip3 install "podop>0.2.5"
 
 # Image specific layers under this line
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends\
-  dovecot-core dovecot-imapd dovecot-lmtpd dovecot-pop3d dovecot-submissiond\
-  dovecot-sieve dovecot-managesieved rspamd xapian-tools netcat\
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  dovecot-core dovecot-imapd dovecot-lmtpd dovecot-pop3d dovecot-submissiond \
+  dovecot-sieve dovecot-managesieved rspamd xapian-tools netcat \
   && rm -rf /var/lib/apt/lists
 
 ### Below is needed as buster provides libicu63, and fts-xapian requires >=64

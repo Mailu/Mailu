@@ -1,5 +1,5 @@
-# First stage to build assets
 ARG DISTRO=debian:buster-slim
+# First stage to build assets
 ARG ARCH=""
 FROM ${ARCH}node:8 as assets
 #COPY --from=balenalib/rpi-alpine:3.10 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
@@ -15,22 +15,24 @@ RUN mkdir static \
 
 # Actual application
 FROM $DISTRO
-# python3 shared with most images
-RUN apt-get update && apt-get install -y --no-install-recommends\
-  python3 curl python3-pip git python3-multidict python3-yarl\
-  python3-wheel python3-setuptools\
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Minimum python3 shared with most images
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  python3 python3-pip python3-setuptools curl \
   && rm -rf /var/lib/apt/lists \
   && pip3 install --upgrade pip
 
+# Image specific layers under this line
 RUN mkdir -p /app
 WORKDIR /app
 
 COPY requirements-prod.txt requirements.txt
-RUN apt-get update && apt-get install -y --no-install-recommends\
-  libssl-dev libmariadb-dev-compat libpq-dev gcc libffi-dev python3-dev\
-  && pip3 install -r requirements.txt\
-  && apt-get remove -y --purge libssl-dev libmariadb-dev-compat libpq-dev gcc libffi-dev python3-dev\
-  && apt-get autoremove -y\
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  libssl-dev libmariadb-dev-compat libpq-dev gcc libffi-dev python3-dev \
+  && pip3 install -r requirements.txt \
+  && apt-get autoremove -y --purge libssl-dev libmariadb-dev-compat libpq-dev gcc libffi-dev python3-dev \
   && rm -rf /var/lib/apt/lists
 
 COPY --from=assets static ./mailu/ui/static

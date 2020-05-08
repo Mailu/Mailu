@@ -41,7 +41,7 @@ if not os.listdir("/data"):
             #os.system("sudo -u postgres pg_ctl start -D /data -o '-h \"''\" '")
     else:
         # Bootstrap the database
-        os.system("sudo -u postgres initdb -D /data")
+        os.system("sudo -u postgres /usr/lib/postgresql/11/bin/initdb -D /data")
 
 # Create backup directory structure, if it does not yet exist
 os.system("mkdir -p /backup/wal_archive")
@@ -52,16 +52,16 @@ for pg_file in glob.glob("/conf/*.conf"):
     conf.jinja(pg_file, os.environ, os.path.join("/data", os.path.basename(pg_file)))
 
 # (Re)start postgresql locally for DB and user creation
-os.system("sudo -u postgres pg_ctl start -D /data -o '-h \"''\" '")
+os.system("sudo -u postgres /usr/lib/postgresql/11/bin/pg_ctl start -D /data -o '-h \"''\" '")
 while os.path.isfile("recovery.conf"):
     pass
-os.system("sudo -u postgres pg_ctl -D /data promote")
+os.system("sudo -u postgres /usr/lib/postgresql/11/bin/pg_ctl -D /data promote")
 setup()
-os.system("sudo -u postgres pg_ctl stop -m smart -w -D /data")
+os.system("sudo -u postgres /usr/lib/postgresql/11/bin/pg_ctl stop -m smart -w -D /data")
 
 out=open("/proc/1/fd/1", "w")
 err=open("/proc/1/fd/2", "w")
 # Run the cron deamon
-subprocess.Popen(["crond", "-f"], stdout=out, stderr=err)
+subprocess.Popen(["cron", "-f"], stdout=out, stderr=err)
 # Run postgresql service
-os.system("sudo -u postgres postgres -D /data -h \*")
+os.system("sudo -u postgres /usr/lib/postgresql/11/bin/postgres -D /data -h \*")

@@ -1,12 +1,20 @@
-ARG DISTRO=alpine:3.10
+ARG DISTRO=debian:buster-slim
 FROM $DISTRO
 
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Minimum python3 shared with most images
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  python3 python3-pip python3-setuptools curl \
+  && rm -rf /var/lib/apt/lists \
+  && pip3 install --upgrade pip
+
+# Image specific layers under this line
 RUN mkdir -p /app
 WORKDIR /app
 
 COPY requirements.txt requirements.txt
-RUN apk add --no-cache curl python3 py3-pip \
-    && pip3 install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 COPY server.py ./server.py
 COPY main.py ./main.py

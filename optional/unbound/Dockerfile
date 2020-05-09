@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip3 install socrate==0.2.0
 
 # Image specific layers under this line
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
   unbound dnsutils \
   && curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache \
   && chown root:unbound /etc/unbound \

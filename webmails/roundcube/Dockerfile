@@ -23,6 +23,7 @@ ENV CARDDAV_URL https://github.com/blind-coder/rcmcarddav/releases/download/v3.0
 RUN apt-get update && apt-get install -y \
       zlib1g-dev libzip4 libzip-dev libpq-dev \
       python3-jinja2 \
+      gpg \
  && docker-php-ext-install zip pdo_mysql pdo_pgsql \
  && echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini \
  && rm -rf /var/www/html/ \

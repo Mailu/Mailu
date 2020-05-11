@@ -4,7 +4,7 @@
 <p>Docker Stack expects a project file, named <code>docker-compose.yml</code>
 in a project directory. First create your project directory.</p>
 
-<pre><code>mkdir -p /{{ root }}/{redis,certs,data,dkim,mail,overrides/rspamd,overrides/nginx,filter,dav,webmail}
+<pre><code>mkdir -p {{ root }}/{redis,certs,data,dkim,mail,mailqueue,overrides/rspamd,overrides/postfix,overrides/dovecot,overrides/nginx,filter,dav,webmail}
 </pre></code>
 
 <p>Then download the project file. A side configuration file makes it easier

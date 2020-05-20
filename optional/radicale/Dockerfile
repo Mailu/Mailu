@@ -1,7 +1,12 @@
 # syntax=docker/dockerfile-upstream:1.4.3
 
+<<<<<<< HEAD
 # webdav image
 FROM base
+=======
+RUN apk add --no-cache curl bash python3 \
+ && pip3 install radicale=2.1.12
+>>>>>>> 45f3772c (Stick radicale to 2.1.12 version)
 
 ARG VERSION=local
 LABEL version=$VERSION

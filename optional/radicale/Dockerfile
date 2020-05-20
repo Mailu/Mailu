@@ -5,8 +5,12 @@
 FROM base
 =======
 RUN apk add --no-cache curl bash python3 \
+<<<<<<< HEAD
  && pip3 install radicale=2.1.12
 >>>>>>> 45f3772c (Stick radicale to 2.1.12 version)
+=======
+ && pip3 install radicale==2.1.12
+>>>>>>> 6647c96b (Fixed typo in Dockerfile)
 
 ARG VERSION=local
 LABEL version=$VERSION

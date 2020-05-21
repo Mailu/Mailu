@@ -2,7 +2,7 @@ ARG DISTRO=alpine:3.10
 FROM $DISTRO
 
 RUN apk add --no-cache curl bash python3 \
- && pip3 install radicale
+ && pip3 install radicale==2.1.12
 
 COPY radicale.conf /radicale.conf
 

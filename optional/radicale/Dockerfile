@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && pip3 install --upgrade pip
 
 # Image specific layers under this line
-RUN pip3 install radicale
+RUN pip3 install radicale==2.1.12
 
 COPY radicale.conf /radicale.conf
 

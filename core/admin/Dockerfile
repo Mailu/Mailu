@@ -1,3 +1,4 @@
+ARG DEBIAN_FRONTEND=noninteractive
 ARG DISTRO=debian:buster-slim
 # First stage to build assets
 ARG ARCH=""
@@ -15,8 +16,6 @@ RUN mkdir static \
 
 # Actual application
 FROM $DISTRO
-
-ARG DEBIAN_FRONTEND=noninteractive
 
 # Minimum python3 shared with most images
 RUN apt-get update && apt-get install -y --no-install-recommends \

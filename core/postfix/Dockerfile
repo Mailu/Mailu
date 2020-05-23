@@ -1,7 +1,6 @@
+ARG DEBIAN_FRONTEND=noninteractive
 ARG DISTRO=debian:buster-slim
 FROM $DISTRO
-
-ARG DEBIAN_FRONTEND=noninteractive
 
 # python3 shared with most images
 RUN apt-get update && apt-get install -y --no-install-recommends \

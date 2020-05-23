@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 dest="/backup/base-$(date +%F-%H%M)"
 last=$(ls -d /backup/base* | tail -n1)

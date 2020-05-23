@@ -56,7 +56,7 @@ def run(debug):
         for fetch in fetches:
             fetchmailrc = ""
             options = "options antispam 501, 504, 550, 553, 554"
-            options += " sslmode wrapped" if fetch["tls"] else ""
+            options += " ssl" if fetch["tls"] else ""
             options += " keep" if fetch["keep"] else " fetchall"
             fetchmailrc += RC_LINE.format(
                 user_email=escape_rc_string(fetch["user_email"]),

@@ -1,0 +1,32 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: security-updater
+  namespace: mailu-mailserver
+spec:
+  schedule: "*/10 * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: antivirus
+            image: lsflk/mailu-clamav:latest
+            imagePullPolicy: IfNotPresent
+            args:
+                - /bin/sh
+                - -c
+                - /usr/bin/freshclam
+            envFrom:
+              - configMapRef:
+                  name: mailu-config
+            volumeMounts:
+              - name: filter
+                subPath: filter
+                mountPath: /data
+          volumes:
+            - name: filter
+              persistentVolumeClaim:
+                claimName: mail-storage
+          restartPolicy: Never

@@ -6,13 +6,13 @@ RUN echo "deb-src http://deb.debian.org/debian buster main" >> /etc/apt/sources.
 RUN apt-get update && apt-get -y build-dep dovecot-core \
   && rm -rf /var/lib/apt/lists
 ### Below is needed as buster provides libicu63, and fts-xapian requires >=64
-RUN echo "deb-src http://deb.debian.org/debian experimental main" >> /etc/apt/sources.list \
+RUN echo "deb-src http://deb.debian.org/debian bullseye main" >> /etc/apt/sources.list \
   && apt-get update \
   && apt-get install -y --no-install-recommends build-essential fakeroot devscripts \
   && apt-get build-dep -y libicu-dev \
   && apt-get source -y libicu-dev \
   && cd icu-67.1 \
-  && debuild -b -uc \
+  && debuild -i -b -uc \
   && cd .. 
 RUN dpkg -i --force-all libicu67_67.1*.deb icu-devtools_67.1*.deb libicu-dev_67.1*.deb
 ###

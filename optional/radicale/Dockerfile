@@ -1,4 +1,4 @@
-ARG DISTRO=alpine:3.10
+ARG DISTRO=alpine:3.12
 FROM $DISTRO
 
 RUN apk add --no-cache curl bash python3 \

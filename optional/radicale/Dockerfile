@@ -1,7 +1,13 @@
 ARG DISTRO=alpine:3.12
 FROM $DISTRO
 
-RUN apk add --no-cache curl bash python3 \
+# python3 shared with most images
+RUN apk add --no-cache \
+    python3 py3-pip bash \
+  && pip3 install --upgrade pip
+
+# Image specific layers under this line
+RUN apk add --no-cache curl \
  && pip3 install radicale==2.1.12
 
 COPY radicale.conf /radicale.conf

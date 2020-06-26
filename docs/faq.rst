@@ -253,7 +253,7 @@ correct syntax. The following file names will be taken as override configuration
 - `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory;
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
 
-*Issue reference:* `206`_.
+*Issue reference:* `206`_, `1368`_.
 
 I want to integrate Nextcloud 15 (and newer) with Mailu
 ```````````````````````````````````````````````````````
@@ -352,6 +352,15 @@ down and up again. A container restart is not sufficient.
   docker-compose up -d
 
 *Issue reference:* `615`_.
+
+SMTP Banner from overrides/postfix.cf is ignored
+````````````````````````````````````````````````
+
+Any mail related connection is proxied by nginx. Therefore the SMTP Banner is also set by nginx. Overwriting in overrides/postfix.cf does not apply. If you want to change the hostname in the SMTP Banner greeting, you must change the first entry of HOSTNAMES in mailu.env.
+
+*Issue reference:* `1368`_.
+
+.. _`1368`: https://github.com/Mailu/Mailu/issues/1368
 
 403 - Access Denied Errors
 ---------------------------

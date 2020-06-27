@@ -22,7 +22,7 @@ if header :index 2 :matches "Received" "from * by * for <*>; *"
 if spamtest :percent :value "gt" :comparator "i;ascii-numeric"  "{{ user.spam_threshold }}"
 {
   setflag "\\seen";
-  fileinto :create "Junk";
+  fileinto :create "{{ user.junk_folder }}";
   stop;
 }
 {% endif %}

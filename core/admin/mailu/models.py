@@ -334,6 +334,7 @@ class User(Base, Email):
     displayed_name = db.Column(db.String(160), nullable=False, default="")
     spam_enabled = db.Column(db.Boolean(), nullable=False, default=True)
     spam_threshold = db.Column(db.Integer(), nullable=False, default=80)
+    spam_folder = os.environ.get('JUNK_FOLDER', 'Junk')
 
     # Flask-login attributes
     is_authenticated = True

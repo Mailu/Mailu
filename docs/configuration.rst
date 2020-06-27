@@ -83,6 +83,10 @@ later classify incoming mail based on the custom part.
 The ``DMARC_RUA`` and ``DMARC_RUF`` are DMARC protocol specific values. They hold
 the localpart for DMARC rua and ruf email addresses.
 
+The ``TRASH_FOLDER``, ``DRAFTS_FOLDER``, ``SENT_FOLDER``, and ``JUNK_FOLDER`` are used to
+override the names given to the IMAP special folders. If left blank, the defaults of ``Trash``,
+``Drafts``, ``Sent`` and ``Junk`` will be used.
+
 Web settings
 ------------
 
@@ -176,5 +180,3 @@ Alternatively, ``*_ADDRESS`` can directly be set. In this case, the values of ``
 resolved. This can be used to rely on DNS based service discovery with changing services IP addresses.
 When using ``*_ADDRESS``, the hostnames must be full-qualified hostnames. Otherwise nginx will not be able to
 resolve the hostnames.
-
-

@@ -49,6 +49,18 @@ way (e.g. roundcube plug-in), otherwise an attacker can simply bypass the limit 
 The ``TLS_FLAVOR`` sets how Mailu handles TLS connections. Setting this value to
 ``notls`` will cause Mailu not to server any web content! More on :ref:`tls_flavor`.
 
+The ``SMTP_TLS_SECURITY_LEVEL`` sets how Mailu handles outgoing TLS connections
+to SMTP RELAY host. Default value is ``may`` and it can be set to ``encrypt``
+More on `Postfix Configuration Parameters`.
+
+.. _`Postfix Configuration Parameters`: http://www.postfix.org/postconf.5.html#smtp_tls_security_level
+
+The ``SMTP_TLS_WRAPPERMODE`` sets how Mailu handles handshake with SMTP RELAY server. 
+Default value is ``no`` and it can be set to ``yes``
+More on `Postfix Configuration Parameters.`
+
+.. _`Postfix Configuration Parameters.`: http://www.postfix.org/postconf.5.html#smtp_tls_wrappermode
+
 Mail settings
 -------------
 

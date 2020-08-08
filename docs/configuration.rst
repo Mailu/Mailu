@@ -69,6 +69,10 @@ The ``RELAYHOST`` is an optional address of a mail server relaying all outgoing
 mail in following format: ``[HOST]:PORT``.
 ``RELAYUSER`` and ``RELAYPASSWORD`` can be used when authentication is needed.
 
+By default postfix uses "opportunistic TLS" for outbound mail. This can be changed
+by setting ``OUTBOUND_TLS_LEVEL`` to ``encrypt``. This setting is highly recommended
+if you are a relayhost that supports TLS.
+
 The ``FETCHMAIL_DELAY`` is a delay (in seconds) for the fetchmail service to
 go and fetch new email if available. Do not use too short delays if you do not
 want to be blacklisted by external services, but not too long delays if you

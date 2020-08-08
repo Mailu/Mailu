@@ -27,7 +27,7 @@ services:
     {% endfor %}
     volumes:
       - "{{ root }}/certs:/certs"
-      - "{{ root }}/overrides/nginx:/overrides"
+      - "{{ root }}/overrides/nginx:/overrides:ro"
     deploy:
       replicas: {{ front_replicas }}
 
@@ -51,7 +51,7 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/mail:/mail"
-      - "{{ root }}/overrides:/overrides"
+      - "{{ root }}/overrides/dovecot:/overrides:ro"
     deploy:
       replicas: {{ imap_replicas }}
     healthcheck:
@@ -62,7 +62,7 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/mailqueue:/queue"
-      - "{{ root }}/overrides:/overrides"
+      - "{{ root }}/overrides/postfix:/overrides:ro"
     deploy:
       replicas: {{ smtp_replicas }}
     healthcheck:
@@ -73,8 +73,8 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/filter:/var/lib/rspamd"
-      - "{{ root }}/dkim:/dkim"
-      - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d"
+      - "{{ root }}/dkim:/dkim:ro"
+      - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d:ro"
     deploy:
       replicas: 1
     healthcheck:

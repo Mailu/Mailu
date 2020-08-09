@@ -8,13 +8,14 @@ RUN apk add --no-cache \
 
 # Image specific layers under this line
 RUN apk add --no-cache curl \
- && pip3 install radicale==2.1.12
+ && pip3 install radicale~=3.0
+
 
 COPY radicale.conf /radicale.conf
 
 EXPOSE 5232/tcp
 VOLUME ["/data"]
 
-CMD radicale -f -S -C /radicale.conf
+CMD radicale -S -C /radicale.conf
 
 HEALTHCHECK CMD curl -f -L http://localhost:5232/ || exit 1

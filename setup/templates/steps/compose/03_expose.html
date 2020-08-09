@@ -52,7 +52,9 @@ avoid generic all-interfaces addresses like <code>0.0.0.0</code> or <code>::</co
 hostnames. Every e-mail domain that points to this server must have one of the
 hostnames in its <code>MX</code> record. Hostnames must be comma-separated. If you're having
 trouble accessing your admin interface, make sure it is the first entry here (and possibly the
-same as your <code>DOMAIN</code> entry from earlier.</p>
+same as your <code>DOMAIN</code> entry from earlier). Also make sure that the first entry in
+this list resolves to the IP address of your server, and that the reverse DNS entry for
+the IP address of your server resolves to this first entry in this list.</p>
 
 <div class="form-group">
   <label>Public hostnames</label>

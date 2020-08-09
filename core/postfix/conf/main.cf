@@ -52,9 +52,10 @@ tls_high_cipherlist = EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA256:
 tls_preempt_cipherlist = yes
 tls_ssl_options = NO_COMPRESSION
 
-# Outgoing TLS is more flexible because 1. not all receiving servers will
-# support TLS, 2. not all will have and up-to-date TLS stack.
-smtp_tls_security_level = may
+# By default, outgoing TLS is more flexible because
+# 1. not all receiving servers will support TLS,
+# 2. not all will have and up-to-date TLS stack.
+smtp_tls_security_level = {{ OUTBOUND_TLS_LEVEL|default('may') }}
 smtp_tls_mandatory_protocols = !SSLv2, !SSLv3
 smtp_tls_protocols =!SSLv2,!SSLv3
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache

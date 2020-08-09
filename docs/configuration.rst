@@ -69,6 +69,10 @@ The ``RELAYHOST`` is an optional address of a mail server relaying all outgoing
 mail in following format: ``[HOST]:PORT``.
 ``RELAYUSER`` and ``RELAYPASSWORD`` can be used when authentication is needed.
 
+By default postfix uses "opportunistic TLS" for outbound mail. This can be changed
+by setting ``OUTBOUND_TLS_LEVEL`` to ``encrypt``. This setting is highly recommended
+if you are a relayhost that supports TLS.
+
 The ``FETCHMAIL_DELAY`` is a delay (in seconds) for the fetchmail service to
 go and fetch new email if available. Do not use too short delays if you do not
 want to be blacklisted by external services, but not too long delays if you
@@ -82,6 +86,9 @@ later classify incoming mail based on the custom part.
 
 The ``DMARC_RUA`` and ``DMARC_RUF`` are DMARC protocol specific values. They hold
 the localpart for DMARC rua and ruf email addresses.
+
+Full-text search is enabled for IMAP is enabled by default. This feature can be disabled
+(e.g. for performance reasons) by setting the optional variable ``FULL_TEXT_SEARCH`` to ``off``.
 
 Web settings
 ------------

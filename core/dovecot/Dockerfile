@@ -1,4 +1,4 @@
-ARG DISTRO=alpine:3.10
+ARG DISTRO=alpine:3.12
 FROM $DISTRO as builder
 WORKDIR /tmp
 RUN apk add git build-base automake autoconf libtool dovecot-dev xapian-core-dev icu-dev

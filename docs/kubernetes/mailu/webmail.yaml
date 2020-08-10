@@ -52,7 +52,6 @@ spec:
     role: mail
     tier: frontend
   ports:
-  ports:
   - name: http
     port: 80
     protocol: TCP

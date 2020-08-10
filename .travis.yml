@@ -31,7 +31,7 @@ python:
 jobs:
   include:
 # install stage will build and push 
-# all images (names will get the suffix defined bu MAIL_CI)
+# all images (names will get the suffix defined bu MAILU_CI)
 # install stage for amd architecture:
     - stage: install
       script:

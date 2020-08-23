@@ -356,7 +356,7 @@ down and up again. A container restart is not sufficient.
 SMTP Banner from overrides/postfix.cf is ignored
 ````````````````````````````````````````````````
 
-Any mail related connection is proxied by nginx. Therefore the SMTP Banner is also set by nginx. Overwriting in overrides/postfix.cf does not apply. If you want to change the hostname in the SMTP Banner greeting, you must change the first entry of HOSTNAMES in mailu.env.
+Any mail related connection is proxied by nginx. Therefore the SMTP Banner is also set by nginx. Overwriting in overrides/postfix.cf does not apply.
 
 *Issue reference:* `1368`_.
 

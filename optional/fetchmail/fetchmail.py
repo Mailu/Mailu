@@ -47,7 +47,7 @@ def fetchmail(fetchmailrc):
 
 def run(debug):
     try:
-        fetches = requests.get("http://admin/internal/fetch").json()
+        fetches = requests.get("http://" + os.environ.get("HOST_ADMIN", "admin") + "/internal/fetch").json()
         smtphost, smtpport = extract_host_port(os.environ.get("HOST_SMTP", "smtp"), None)
         if smtpport is None:
             smtphostport = smtphost
@@ -85,7 +85,7 @@ def run(debug):
                         user_info in error_message):
                     print(error_message)
             finally:
-                requests.post("http://admin/internal/fetch/{}".format(fetch["id"]),
+                requests.post("http://" + os.environ.get("HOST_ADMIN", "admin") + "/internal/fetch/{}".format(fetch["id"]),
                     json=error_message.split("\n")[0]
                 )
     except Exception:

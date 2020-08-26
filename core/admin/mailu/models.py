@@ -346,10 +346,10 @@ class User(Base, Email):
     @property
     def destination(self):
         if self.forward_enabled:
-            result = self.forward_destination
+            result = list(self.forward_destination)
             if self.forward_keep:
-                result += ',' + self.email
-            return result
+                result.append(self.email)
+            return ','.join(result)
         else:
             return self.email
 

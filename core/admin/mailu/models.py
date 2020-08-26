@@ -65,10 +65,10 @@ class CommaSeparatedList(db.TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         if type(value) is not list:
-            raise TypeError("Shoud be a list")
+            raise TypeError("Should be a list")
         for item in value:
             if "," in item:
-                raise ValueError("No item should contain a comma")
+                raise ValueError("Item must not contain a comma")
         return ",".join(value)
 
     def process_result_value(self, value, dialect):
@@ -76,7 +76,7 @@ class CommaSeparatedList(db.TypeDecorator):
 
 
 class JSONEncoded(db.TypeDecorator):
-    """Represents an immutable structure as a json-encoded string.
+    """ Represents an immutable structure as a json-encoded string.
     """
 
     impl = db.String
@@ -172,7 +172,7 @@ class Domain(Base):
                 str(rset).split()[-1][:-1] in hostnames
                 for rset in dns.resolver.query(self.name, 'MX')
             )
-        except Exception as e:
+        except Exception:
             return False
 
     def __str__(self):
@@ -503,7 +503,7 @@ class Token(Base):
 
 
 class Fetch(Base):
-    """ A fetched account is a repote POP/IMAP account fetched into a local
+    """ A fetched account is a remote POP/IMAP account fetched into a local
     account.
     """
     __tablename__ = "fetch"

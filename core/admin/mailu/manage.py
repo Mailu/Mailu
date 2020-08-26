@@ -299,15 +299,15 @@ def config_update(verbose=False, delete_objects=False, dry_run=False, file=None)
 
 
 @mailu.command()
-@click.option('-v', '--verbose', is_flag=True)
+@click.option('-f', '--full', is_flag=True)
 @click.option('-s', '--secrets', is_flag=True)
 @flask_cli.with_appcontext
-def config_dump(verbose=False, secrets=False):
+def config_dump(full=False, secrets=False):
     """dump configuration as YAML-formatted data to stdout"""
 
     config = {}
     for section, model in yaml_sections:
-        dump = [item.to_dict(verbose, secrets) for item in model.query.all()]
+        dump = [item.to_dict(full, secrets) for item in model.query.all()]
         if len(dump):
             config[section] = dump
 

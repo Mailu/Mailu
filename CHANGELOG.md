@@ -28,7 +28,6 @@ deprecated before 1.8.0, you can switch to an external database server by then.
 - Features: use HTTP/1.1 for proxyied connections ([#1070](https://github.com/Mailu/Mailu/issues/1070))
 - Features: Update Rainloop to 1.13.0 ([#1071](https://github.com/Mailu/Mailu/issues/1071))
 - Features: Use python package socrate instead of Mailustart ([#1082](https://github.com/Mailu/Mailu/issues/1082))
-- Features: Added cli command config-dump ([#1377](https://github.com/Mailu/Mailu/issues/1377))
 - Bugfixes: Use ldez/traefik-certs-dumper in our certificate dumper to have a more robust solution ([#820](https://github.com/Mailu/Mailu/issues/820))
 - Bugfixes: Make aliases optionally case-insensitive: After attempting to resolve an alias in its preserved case, also attempt to match it case-insensitively ([#867](https://github.com/Mailu/Mailu/issues/867))
 - Bugfixes: Fix HOST_* variable usage ([#884](https://github.com/Mailu/Mailu/issues/884))
@@ -48,7 +47,6 @@ deprecated before 1.8.0, you can switch to an external database server by then.
 - Enhancement: Create an Authentication Token with IPv6 address restriction ([#829](https://github.com/Mailu/Mailu/issues/829))
 - Enhancement: Automatically create admin user on container startup if given appropriate environment variables
 - Enhancement: Missing wildcard option in alias flask command ([#869](https://github.com/Mailu/Mailu/issues/869))
-- Enhancement: Cli command config-update now updates all objects and parameters ([#1377](https://github.com/Mailu/Mailu/issues/1377))
 
 v1.6.0 - 2019-01-18
 -------------------

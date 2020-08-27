@@ -114,7 +114,7 @@ mail-config.yml looks like:
       comment: test
       smtp: mx.example.com
 
-You can use ``--dry-run`` to test your YAML without omitting any changes to the database.
+You can use ``--dry-run`` to test your YAML without comitting any changes to the database.
 With ``--verbose`` config-update will show exactly what it changes in the database.
 Without ``--delete-object`` option config-update will only add/update new values but will *not* remove any entries missing in provided YAML input.
 

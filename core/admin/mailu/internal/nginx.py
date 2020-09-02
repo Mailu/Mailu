@@ -33,7 +33,7 @@ def handle_authentication(headers):
     if method == "none" and protocol == "smtp":
         server, port = get_server(protocol, False)
         if app.config["INBOUND_TLS_ENFORCE"]:
-            if "Auth-SSl" in headers and headers["Auth-SSL"] == "on":
+            if "Auth-SSL" in headers and headers["Auth-SSL"] == "on":
                 return {
                     "Auth-Status": "OK",
                     "Auth-Server": server,

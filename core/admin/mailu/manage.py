@@ -305,13 +305,23 @@ def config_update(verbose=False, delete_objects=False, dry_run=False, file=None)
 def config_dump(full=False, secrets=False):
     """dump configuration as YAML-formatted data to stdout"""
 
+    class spacedDumper(yaml.Dumper):
+
+        def write_line_break(self, data=None):
+            super().write_line_break(data)
+            if len(self.indents) == 1:
+                super().write_line_break()
+
+        def increase_indent(self, flow=False, indentless=False):
+            return super().increase_indent(flow, False)
+
     config = {}
     for section, model in yaml_sections:
         dump = [item.to_dict(full, secrets) for item in model.query.all()]
         if len(dump):
             config[section] = dump
 
-    yaml.dump(config, sys.stdout, default_flow_style=False, allow_unicode=True)
+    yaml.dump(config, sys.stdout, Dumper=spacedDumper, default_flow_style=False, allow_unicode=True)
 
 
 @mailu.command()

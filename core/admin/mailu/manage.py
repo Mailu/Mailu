@@ -180,9 +180,9 @@ yaml_sections = [
 ]
 
 @mailu.command()
-@click.option('-v', '--verbose', is_flag=True)
-@click.option('-d', '--delete-objects', is_flag=True)
-@click.option('-n', '--dry-run', is_flag=True)
+@click.option('-v', '--verbose', is_flag=True, help='Increase verbosity')
+@click.option('-d', '--delete-objects', is_flag=True, help='Remove objects not included in yaml')
+@click.option('-n', '--dry-run', is_flag=True, help='Perform a trial run with no changes made')
 @flask_cli.with_appcontext
 def config_update(verbose=False, delete_objects=False, dry_run=False, file=None):
     """sync configuration with data from YAML-formatted stdin"""
@@ -299,8 +299,8 @@ def config_update(verbose=False, delete_objects=False, dry_run=False, file=None)
 
 
 @mailu.command()
-@click.option('-f', '--full', is_flag=True)
-@click.option('-s', '--secrets', is_flag=True)
+@click.option('-f', '--full', is_flag=True, help='Include default attributes')
+@click.option('-s', '--secrets', is_flag=True, help='Include secrets (plain-text / not hashed)')
 @flask_cli.with_appcontext
 def config_dump(full=False, secrets=False):
     """dump configuration as YAML-formatted data to stdout"""

@@ -73,8 +73,22 @@ config-dump
 -----------
 
 The purpose of this command is to dump domain-, relay-, alias- and user-configuration to a YAML template.
-If you want to export non-hashed secrets you have to add the ``--secrets`` option.
-Only non-default options are dumped. If you want to dump all options use ``--full``.
+
+.. code-block:: bash
+
+  # docker-compose exec admin flask mailu config-dump --help
+
+  Usage: flask mailu config-dump [OPTIONS]
+
+    dump configuration as YAML-formatted data to stdout
+
+  Options:
+    -f, --full     Include default attributes
+    -s, --secrets  Include secrets (plain-text / not hashed)
+    --help         Show this message and exit.
+
+If you want to export secrets (plain-text / not hashed) you have to add the ``--secrets`` option.
+Only non-default attributes are dumped. If you want to dump all attributes use ``--full``.
 
 .. code-block:: bash
 
@@ -87,11 +101,27 @@ The purpose of this command is for importing domain-, relay-, alias- and user-co
 
 .. code-block:: bash
 
+  # docker-compose exec admin flask mailu config-update --help
+
+  Usage: flask mailu config-update [OPTIONS]
+
+    sync configuration with data from YAML-formatted stdin
+
+  Options:
+    -v, --verbose         Increase verbosity
+    -d, --delete-objects  Remove objects not included in yaml
+    -n, --dry-run         Perform a trial run with no changes made
+    --help                Show this message and exit.
+
+
+The current version of docker-compose exec does not pass stdin correctly, so you have to user docker exec instead:
+
+.. code-block:: bash
+
   docker exec -i $(docker-compose ps -q admin) flask mailu config-update -nvd < mail-config.yml
 
-*(The current version of docker-compose exec does not pass stdin correctly, so you have to user docker exec)*
 
-mail-config.yml looks like:
+mail-config.yml looks like this:
 
 .. code-block:: yaml
  
@@ -116,7 +146,7 @@ mail-config.yml looks like:
 
 You can use ``--dry-run`` to test your YAML without comitting any changes to the database.
 With ``--verbose`` config-update will show exactly what it changes in the database.
-Without ``--delete-object`` option config-update will only add/update new values but will *not* remove any entries missing in provided YAML input.
+Without ``--delete-object`` option config-update will only add/update changed values but will *not* remove any entries missing in provided YAML input.
 
 This is a complete YAML template with all additional parameters that could be defined:
 

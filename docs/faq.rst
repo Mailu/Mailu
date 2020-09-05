@@ -170,6 +170,13 @@ Lets start with quoting everything that's wrong:
       (`docker/libnetwork#1099 <https://github.com/docker/libnetwork/issues/1099>`_).
   
   -- `Robbert Klarenbeek <https://github.com/robbertkl>`_ (docker-ipv6nat author)
+  
+Okay, but I still want to use IPv6! Can I just use the installers IPv6 checkbox? **NO, YOU SHOULD NOT DO THAT!** Why you ask?
+Mailu has its own trusted IPv4 network, every container inside this network can use e.g. the SMTP container without further
+authentication. If you enabled IPv6 inside the setup assistant (and fixed the ports to also be exposed on IPv6) Docker will
+still rewrite any incoming IPv6 requests to an IPv4 address, *which is located inside the trusted network*. Therefore any
+incoming connection to the SMTP container will bypass the authentication stage by the front container regardless of your
+settings and causes an Open Relay. And you really don't want this!
 
 So, how to make it work? Well, by using `docker-ipv6nat`_! This nifty container will set up ``ip6tables``,
 just as Docker would do for IPv4. We know that nat-ing is not advised in IPv6,

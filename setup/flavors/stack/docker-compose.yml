@@ -27,7 +27,7 @@ services:
     {% endfor %}
     volumes:
       - "{{ root }}/certs:/certs"
-      - "{{ root }}/overrides/nginx:/overrides"
+      - "{{ root }}/overrides/nginx:/overrides:ro"
     deploy:
       replicas: {{ front_replicas }}
 
@@ -43,34 +43,42 @@ services:
       - "{{ root }}/dkim:/dkim"
     deploy:
       replicas: {{ admin_replicas }}
+    healthcheck:
+      disable: true
 
   imap:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
       - "{{ root }}/mail:/mail"
-      - "{{ root }}/overrides:/overrides"
+      - "{{ root }}/overrides/dovecot:/overrides:ro"
     deploy:
       replicas: {{ imap_replicas }}
+    healthcheck:
+      disable: true
 
   smtp:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
       - "{{ root }}/mailqueue:/queue"
-      - "{{ root }}/overrides:/overrides"
+      - "{{ root }}/overrides/postfix:/overrides:ro"
     deploy:
       replicas: {{ smtp_replicas }}
+    healthcheck:
+      disable: true
 
   antispam:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
       - "{{ root }}/filter:/var/lib/rspamd"
-      - "{{ root }}/dkim:/dkim"
-      - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d"
+      - "{{ root }}/dkim:/dkim:ro"
+      - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d:ro"
     deploy:
       replicas: 1
+    healthcheck:
+      disable: true
 
   # Optional services
   {% if antivirus_enabled %}
@@ -81,6 +89,8 @@ services:
       - "{{ root }}/filter:/data"
     deploy:
       replicas: 1
+    healthcheck:
+      disable: true
   {% endif %}
 
   {% if webdav_enabled %}
@@ -91,6 +101,8 @@ services:
       - "{{ root }}/dav:/data"
     deploy:
       replicas: 1
+    healthcheck:
+      disable: true
   {% endif %}
 
   {% if fetchmail_enabled %}
@@ -101,6 +113,8 @@ services:
       - "{{ root }}/data:/data"
     deploy:
       replicas: 1
+    healthcheck:
+      disable: true
   {% endif %}
 
   {% if webmail_type != 'none' %}
@@ -111,6 +125,8 @@ services:
       - "{{ root }}/webmail:/data"
     deploy:
       replicas: 1
+    healthcheck:
+      disable: true
   {% endif %}
 
   {% if db_flavor == 'postgresql' and postgresql == 'internal' %}
@@ -119,6 +135,8 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/data/psql_backup:/backup"
+    healthcheck:
+      disable: true
   {% endif %}
 
 networks:

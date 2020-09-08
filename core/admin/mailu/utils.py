@@ -40,7 +40,7 @@ class PrefixMiddleware(object):
         return self.app(environ, start_response)
 
     def init_app(self, app):
-        self.app = fixers.ProxyFix(app.wsgi_app)
+        self.app = fixers.ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
         app.wsgi_app = self
 
 proxy = PrefixMiddleware()

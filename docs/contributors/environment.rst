@@ -29,7 +29,7 @@ Short work flow example
 
   git clone https://github.com/<YOUR_USERNAME>/Mailu.git
   cd Mailu
-  git add remote upstream https://github.com/Mailu/Mailu.git
+  git remote add upstream https://github.com/Mailu/Mailu.git
   git checkout -b fix-something master
 
 Work on the code as desired. Before doing a commit, you should at least build

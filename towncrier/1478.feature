@@ -1,0 +1,1 @@
+Allow to enforce TLS for outbound mail by setting OUTBOUND_TLS_LEVEL=encrypt for postfix.

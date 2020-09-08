@@ -21,13 +21,9 @@ def start_podop():
     ])
 
 # Actual startup script
-
 os.environ["FRONT_ADDRESS"] = system.get_host_address_from_environment("FRONT", "front")
-os.environ["REDIS_ADDRESS"] = system.get_host_address_from_environment("REDIS", "redis")
 os.environ["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
 os.environ["ANTISPAM_WEBUI_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM_WEBUI", "antispam:11334")
-if os.environ["WEBMAIL"] != "none":
-    os.environ["WEBMAIL_ADDRESS"] = system.get_host_address_from_environment("WEBMAIL", "webmail")
 
 for dovecot_file in glob.glob("/conf/*.conf"):
     conf.jinja(dovecot_file, os.environ, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))

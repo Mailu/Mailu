@@ -1,14 +1,21 @@
-ARG DISTRO=alpine:3.10
+ARG DISTRO=alpine:3.12
 FROM $DISTRO
 
-RUN apk add --no-cache curl bash python3 \
- && pip3 install radicale==2.1.12
+# python3 shared with most images
+RUN apk add --no-cache \
+    python3 py3-pip bash \
+  && pip3 install --upgrade pip
+
+# Image specific layers under this line
+RUN apk add --no-cache curl \
+ && pip3 install radicale~=3.0
+
 
 COPY radicale.conf /radicale.conf
 
 EXPOSE 5232/tcp
 VOLUME ["/data"]
 
-CMD radicale -f -S -C /radicale.conf
+CMD radicale -S -C /radicale.conf
 
 HEALTHCHECK CMD curl -f -L http://localhost:5232/ || exit 1

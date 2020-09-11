@@ -102,7 +102,7 @@ As a side effect of this ingress mode "feature", make sure that the ingress subn
 
 ### Ratelimits
 
-Because all requests originate from the same ip address you probably also want to disable ratelimits. Otherwise automatic login attempts can easily DoS the legitimate users.
+When using ingress mode you probably want to disable ratlimits, because all requests originate from the same ip address. Otherwise automatic login attempts can easily DoS the legitimate users.
 
 
 ## Scalability

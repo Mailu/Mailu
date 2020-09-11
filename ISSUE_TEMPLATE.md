@@ -10,12 +10,12 @@ To be able to help you best, we need some more information.
 - [ ] The title of the issue should be short and simple. It should contain specific terms related to the actual issue. Be specific while writing the title.
 
 ## Environment & Versions
-Environment:
+### Environment
  - [ ] docker-compose
  - [ ] kubernetes
  - [ ] docker swarm
 
-Versions:
+### Versions
 To find your version, get the image name of a mailu container and read  the version from the tag (example for version 1.7).
 ```
 $> docker ps -a | grep mailu
@@ -24,13 +24,13 @@ $> grep MAILU_VERSION docker-compose.yml mailu.env
 ```
 
 ## Description
-<Further explain the bug in a few words. It should be clear what the unexpected behaviour is.  Share it in an easy-to-understand language.>
+Further explain the bug in a few words. It should be clear what the unexpected behaviour is.  Share it in an easy-to-understand language.
 
 ## Replication Steps
-<Steps for replicating your issue>
+Steps for replicating your issue
 
 ## Expected behaviour
-<Explain what results you expected - be as specific as possible. Just saying "it doesn’t work as expected" is not useful. It's also helpful to describe what you actually experienced.>
+Explain what results you expected - be as specific as possible. Just saying "it doesn’t work as expected" is not useful. It's also helpful to describe what you actually experienced.
 
 ## Logs
 Often it is very useful to include log fragments of the involved component. You can get the logs via `docker logs <container name> --tail 1000`. For example for the admin container:

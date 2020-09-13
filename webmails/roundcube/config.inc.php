@@ -17,7 +17,8 @@ $config['plugins'] = array(
     'markasjunk',
     'managesieve',
     'enigma',
-    'carddav'
+    'carddav',
+    'password'
 );
 
 $front = getenv('FRONT_ADDRESS') ? getenv('FRONT_ADDRESS') : 'front';

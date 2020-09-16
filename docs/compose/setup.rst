@@ -31,7 +31,7 @@ Sets the ``TLS_FLAVOR`` to one of the following
 values:
 
 - ``cert`` is the default and requires certificates to be setup manually;
-- ``letsencrypt`` will use the *Letsencrypt!* CA to generate automatic ceriticates;
+- ``letsencrypt`` will use the *Letsencrypt!* CA to generate automatic certificates;
 - ``mail`` is similar to ``cert`` except that TLS will only be served for
   emails (IMAP and SMTP), not HTTP (use it behind reverse proxies);
 - ``mail-letsencrypt`` is similar to ``letsencrypt`` except that TLS will only be served for

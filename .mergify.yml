@@ -11,9 +11,9 @@ pull_request_rules:
         message: |
           Thanks for submitting this pull request.
           Bors-ng will now build test images. When it succeeds, we will continue to review and test your PR.
-
+          
           bors try
-
+          
           Note: if this build fails, [read this](http://mailu.io/master/contributors/environment.html#when-bors-try-fails).
 
   - name: 2 approved reviews; trigger bors r+

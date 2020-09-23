@@ -27,7 +27,7 @@ pull_request_rules:
 
   - name: Trusted author and 1 approved review; trigger bors r+
     conditions:
-      - author~=^(kaiyou|muhlemmer|mildred|HorayNarea|adi90x|hoellen|ofthesun9|Nebukadneza|micw)$
+      - author~=^(kaiyou|muhlemmer|mildred|HorayNarea|adi90x|hoellen|ofthesun9|Nebukadneza|micw|lub|Diman0)$
       - -title~=(WIP|wip)
       - -label~=^(status/wip|status/blocked|review/need2)$
       - "#approved-reviews-by>=1"

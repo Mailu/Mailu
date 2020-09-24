@@ -261,7 +261,7 @@ The following settings are persistent and will survive container recreation:
 Mail domains
 ------------
 
-On the `Mail domains` page all the domains served by Mailu are configured. Via the new domain button (top right) a new mail domain can be added. For existing domains you can access settings via the icons in the Actions column and Manage column. From left to right you have the following options within the Action column and Manage column.
+On the `Mail domains` page all the domains served by Mailu are configured. Via the new domain button (top right) a new mail domain can be added. Please note that you may have to add the new domain to `HOSTNAMES` in your :ref:`mailu.env file <common_cfg>`. For existing domains you can access settings via the icons in the Actions column and Manage column. From left to right you have the following options within the Action column and Manage column.
 
 Details
 ```````

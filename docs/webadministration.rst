@@ -276,7 +276,7 @@ This page is only accessible for global administrators. On the edit page, the gl
 
 * Maximum user count. The maximum amount of users that can be created under this domain. Once this limit is reached it is not possible anymore to add users to the domain; and it is also not possible for users to self-register.
     
-* Maximum alias count. The maximum amount of aliases that can be made for an email account.
+* Maximum alias count. The maximum amount of aliases that can be created for an email account.
     
 * Maximum user quota. The maximum amount of quota that can be assigned to a user. When creating or editing a user, this sets the limit on the maximum amount of quota that can be assigned to the user.
     

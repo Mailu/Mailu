@@ -324,7 +324,7 @@ For adding a new user the following options can be configured.
 
 * Comment. A description for the user. This description is shown on the Users page.
 
-* Enabled. Tick this checkbox to enable the user account. When an user is disabled. The user is unable to login the Admin GUI or webmail or access his email via IMAP/POP3. 
+* Enabled. Tick this checkbox to enable the user account. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail.
   The email inbox of the user is still retained. This option can be used to temporarily suspend an user account.
   
 * Quota. The maximum quota for the user's email box.

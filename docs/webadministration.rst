@@ -15,7 +15,7 @@ It offers the following configuration options:
 
 * configure automatic email replies (out of office replies).
 
-* configure fetchmail for automatic email retrieval.
+* configure fetchmail for automatic email retrieval (from 3rd-party servers).
 
 * configure application passwords.
 
@@ -433,5 +433,4 @@ Sign out
 --------
 
 The menu item `Sign out` signs out the currently logged in user.
-
 

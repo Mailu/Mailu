@@ -340,6 +340,7 @@ Aliases
 This page is also accessible for domain managers. On the aliases page, aliases can be added for email addresses. An alias is a way to disguise another email address. 
 Everything sent to an alias email address is actually received in the primary email account's inbox of the destination email address.
 Aliases can diversify a single email account without having to create multiple email addresses (users).
+It is also possible to add multiple email addresses to the destination field. All incoming mails will be sent to each users inbox in this case.
 
 The following options are available when adding an alias:
 

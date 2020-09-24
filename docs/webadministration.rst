@@ -149,7 +149,7 @@ You can add a fetched account by clicking on the `Add an account` button on the 
 
 * Enable TLS. Tick this setting if the email server requires TLS/SSL.
 
-* Username. The user name for logging in the email server. Normally this is the email address or the email address prefix (part before @). 
+* Username. The user name for logging in the email server. Normally this is the email address or the email address local-part (the part before @). 
 
 * Password. The password for logging in the email server.
 

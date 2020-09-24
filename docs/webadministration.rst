@@ -357,7 +357,7 @@ The following options are available when adding an alias:
     * %a - Finds any values that end with "a"
     * %or% - Finds any values that have "or" in any position
     * _r% - Finds any values that have "r" in the second position
-    * a_% -' Finds any values that start with "a" and are at least 2 characters in length
+    * a_% - Finds any values that start with "a" and are at least 2 characters in length
     * a__% - Finds any values that start with "a" and are at least 3 characters in length
     * a%o - Finds any values that start with "a" and ends with "o"
 

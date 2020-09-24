@@ -133,7 +133,7 @@ Fetched accounts
 This page is only available when the Fetchmail container is part of your Mailu deployment. 
 Fetchmail can be enabled when creating the docker-compose.yml file with the setup utility (https://setup.mailu.io).
 
-On the `fetched accounts` page you can configure email accounts from which email messages must be retrieved.
+On the `fetched accounts` page you can configure email accounts from which email messages will be retrieved.
 Only unread email messages are retrieved from the specified email account. 
 By default Fetchmail will retrieve email messages every 10 minutes. This can be changed in the Mailu.env file. 
 For more information on changing the polling interval see :ref:`the configuration reference <fetchmail>`.

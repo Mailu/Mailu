@@ -97,7 +97,7 @@ For more information see the :ref:`antispam documentation <antispam_howto>`.
 
 Auto-forward
 `````````````
-Under the section `Auto-forward`, the automatically forwarding of received email messages can be enabled. When enabled, all received email messages are forwarded to the specified email address. 
+Under the section `Auto-forward`, the automatic forwarding of received email messages can be enabled. When enabled, all received email messages are forwarded to the specified email address. 
 
 The option "Keep a copy of the emails" can be ticked, to keep a copy of the received email message in the inbox folder.
 
@@ -433,4 +433,3 @@ Sign out
 --------
 
 The menu item `Sign out` signs out the currently logged in user.
-

@@ -331,8 +331,13 @@ After successfull login the domain part will be striped and the rest used as use
 How do I use webdav (radicale)?
 ```````````````````````````````
 
-| To use webdav (radicale) you can configure your carddav/caldav client to use the following url:
-| `https://example.com/webdav/user@example.com`
+| For first time set up, the user must access radicale via the url `https://mail.example.com/webdav/.web` and then
+| 1. Log in using the  user's full email address and password.
+| 2. Click 'Create new addressbook or calendar'
+| 3. Follow instructions for creating an addressbook (for contact management) and calendar.
+|
+| Subsequently to use webdav (radicale), you can configure your carddav/caldav client to use the following url:
+| `https://mail.example.com/webdav/user@example.com`
 | As username you must provide the complete email address (user@example.com).  
 | As password you must provide the password of the email address.
 | The user must be an existing Mailu user.

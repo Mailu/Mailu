@@ -147,7 +147,7 @@ You can add a fetched account by clicking on the `Add an account` button on the 
 
 * TCP port. The TCP port the email server listens on. Common ports are 993 (TLS) or 143 (STARTTLS/unsecure) for IMAP. 
 
-* Enable TLS. Tick this setting if the email server requires TLS/SSL.
+* Enable TLS. Tick this setting if the email server requires TLS/SSL instead of STARTTLS.
 
 * Username. The user name for logging in the email server. Normally this is the email address or the email address local-part (the part before @). 
 

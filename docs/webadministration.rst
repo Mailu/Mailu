@@ -162,7 +162,7 @@ Authentication tokens
 ---------------------
 
 On the `authentication tokens` page, authentication tokens can be created. Authentications tokens are also known as application passwords.
-The purpose of an authentication token is to create an unique strong password that can be used by a single application to authenticate as the logged in user's email account.
+The purpose of an authentication token is to create a unique and strong password that can be used by a single application to authenticate as the logged in user's email account.
 The application will use this authentication token instead of the logged in user's password for sending/receiving email.
 This allows safe access to the logged in user's email account. At any moment, the authentication token can be deleted so that the application has no access to the logged in user's email account anymore.
 

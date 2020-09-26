@@ -16,6 +16,7 @@ exemptLabels:
   - priority/p1
   - priority/p2
   - backlog
+  - status/wip
 
 # Set to true to ignore issues in a project (defaults to false)
 exemptProjects: false

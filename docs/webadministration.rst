@@ -151,7 +151,7 @@ You can add a fetched account by clicking on the `Add an account` button on the 
 
 * Username. The user name for logging in to the email server. Normally this is the email address or the email address' local-part (the part before @). 
 
-* Password. The password for logging in the email server.
+* Password. The password for logging in to the email server.
 
 * Keep emails on the server. When ticked, retains the email message in the email account after retrieving it.
 

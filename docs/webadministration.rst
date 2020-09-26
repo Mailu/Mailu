@@ -145,7 +145,7 @@ You can add a fetched account by clicking on the `Add an account` button on the 
 
 * Hostname or IP. The hostname or IP address of the email server.
 
-* TCP port. The TCP port the email server listens on. Common ports are 993 (TLS) or 143 (STARTTLS/unsecure) for IMAP. 
+* TCP port. The TCP port the email server listens on. Common ports are 993 (IMAPS with TLS), 143 (IMAP with STARTTLS), 995 (POP3S with TLS) or 110 (POP3 with STARTTLS).
 
 * Enable TLS. Tick this setting if the email server requires TLS/SSL instead of STARTTLS.
 

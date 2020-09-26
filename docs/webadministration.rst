@@ -115,7 +115,7 @@ On the `update password` page, the password of the logged in user can be changed
 Auto-reply
 ----------
 
-On the `auto-reply` page, automatic replies can be configured. This is also known as out of office replies.
+On the `auto-reply` page, automatic replies can be configured. This is also known as out of office (ooo) or out of facility (oof) replies.
 
 To enable automatic replies tick the checkbox 'Enable automatic reply'. 
 

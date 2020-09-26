@@ -327,6 +327,24 @@ After successfull login the domain part will be striped and the rest used as use
 
 *Issue reference:* `575`_.
 
+
+How do I use webdav (radicale)?
+```````````````````````````````
+
+| For first time set up, the user must access radicale via the url `https://mail.example.com/webdav/.web` and then
+| 1. Log in using the  user's full email address and password.
+| 2. Click 'Create new addressbook or calendar'
+| 3. Follow instructions for creating an addressbook (for contact management) and calendar.
+|
+| Subsequently to use webdav (radicale), you can configure your carddav/caldav client to use the following url:
+| `https://mail.example.com/webdav/user@example.com`
+| As username you must provide the complete email address (user@example.com).  
+| As password you must provide the password of the email address.
+| The user must be an existing Mailu user.
+
+*issue reference:* `1591`_.
+
+
 .. _`Postfix`: http://www.postfix.org/postconf.5.html
 .. _`Dovecot`: https://doc.dovecot.org/configuration_manual/config_file/config_file_syntax/
 .. _`NGINX`:   https://nginx.org/en/docs/
@@ -342,6 +360,7 @@ After successfull login the domain part will be striped and the rest used as use
 .. _`520`: https://github.com/Mailu/Mailu/issues/520
 .. _`591`: https://github.com/Mailu/Mailu/issues/591
 .. _`575`: https://github.com/Mailu/Mailu/issues/575
+.. _`1591`: https://github.com/Mailu/Mailu/issues/1591
 
 Technical issues
 ----------------

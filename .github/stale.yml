@@ -5,7 +5,7 @@ daysUntilStale: 21
 
 # Number of days of inactivity before an Issue or Pull Request with the stale label is closed.
 # Set to false to disable. If disabled, issues still need to be closed manually, but will remain marked as stale.
-daysUntilClose: 7
+daysUntilClose: 14
 
 # Only issues or pull requests with all of these labels are check if stale. Defaults to `[]` (disabled)
 onlyLabels: []
@@ -17,6 +17,11 @@ exemptLabels:
   - priority/p2
   - backlog
   - status/wip
+  - type/bug
+  - type/discussion
+  - type/enhancement
+  - type/feature
+  - type/security
 
 # Set to true to ignore issues in a project (defaults to false)
 exemptProjects: false

@@ -1,6 +1,8 @@
 Spam filtering
 ==============
 
+.. _antispam_howto:
+
 How does spam filtering work in Mailu?
 --------------------------------------
 
@@ -67,6 +69,8 @@ Likewise, to learn all messages within the folder ``Spam_Learn`` as spam message
   rspamc -h antispam:11334 -P mailu -f 11 fuzzy_add /mail/user\@example.com/.Spam_Learn/cur/
 
 *Issue reference:* `1438`_.
+
+.. _antispam_howto_block:
 
 How can I block emails from a domain?
 -------------------------------------

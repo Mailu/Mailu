@@ -73,6 +73,8 @@ By default postfix uses "opportunistic TLS" for outbound mail. This can be chang
 by setting ``OUTBOUND_TLS_LEVEL`` to ``encrypt``. This setting is highly recommended
 if you are a relayhost that supports TLS.
 
+.. _fetchmail:
+
 The ``FETCHMAIL_DELAY`` is a delay (in seconds) for the fetchmail service to
 go and fetch new email if available. Do not use too short delays if you do not
 want to be blacklisted by external services, but not too long delays if you

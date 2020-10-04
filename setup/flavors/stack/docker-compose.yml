@@ -29,7 +29,7 @@ services:
       - "{{ root }}/certs:/certs"
       - "{{ root }}/overrides/nginx:/overrides:ro"
     deploy:
-      replicas: {{ front_replicas }}
+      replicas: 1
 
   admin:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-{{ version }}}
@@ -42,7 +42,7 @@ services:
       - "{{ root }}/data:/data"
       - "{{ root }}/dkim:/dkim"
     deploy:
-      replicas: {{ admin_replicas }}
+      replicas: 1
     healthcheck:
       disable: true
 
@@ -53,7 +53,7 @@ services:
       - "{{ root }}/mail:/mail"
       - "{{ root }}/overrides/dovecot:/overrides:ro"
     deploy:
-      replicas: {{ imap_replicas }}
+      replicas: 1
     healthcheck:
       disable: true
 
@@ -64,7 +64,7 @@ services:
       - "{{ root }}/mailqueue:/queue"
       - "{{ root }}/overrides/postfix:/overrides:ro"
     deploy:
-      replicas: {{ smtp_replicas }}
+      replicas: 1
     healthcheck:
       disable: true
 

@@ -92,14 +92,19 @@ the localpart for DMARC rua and ruf email addresses.
 Full-text search is enabled for IMAP is enabled by default. This feature can be disabled
 (e.g. for performance reasons) by setting the optional variable ``FULL_TEXT_SEARCH`` to ``off``.
 
+.. _web_settings:
+
 Web settings
 ------------
 
-The ``WEB_ADMIN`` contains the path to the main admin interface, while
-``WEB_WEBMAIL`` contains the path to the Web email client.
-The ``WEBROOT_REDIRECT`` redirects all non-found queries to the set path.
-An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables classic
-behavior of a 404 result when not found.
+- ``WEB_ADMIN`` contains the path to the main admin interface 
+
+- ``WEB_WEBMAIL`` contains the path to the Web email client.
+
+- ``WEBROOT_REDIRECT`` redirects all non-found queries to the set path.
+  An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables classic behavior of a 404 result when not found. 
+  Alternatively, ``WEBROOT_REDIRECT`` can be set to ``none`` if you are using an Nginx override for ``location /``.
+
 All three options need a leading slash (``/``) to work.
 
   .. note:: ``WEBROOT_REDIRECT`` has to point to a valid path on the webserver.

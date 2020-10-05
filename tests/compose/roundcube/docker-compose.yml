@@ -79,11 +79,23 @@ services:
 
   # Webmail
   webmail:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}roundcube:${MAILU_VERSION:-master}
-    restart: always
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}roundcube:rc
+    build: .
+    # restart: always
     env_file: mailu.env
+    environment:
+      - INSTALL_RC_PLUGINS=sblaisot/automatic_addressbook roundcube/carddav johndoh/contextmenu
+      # Plugins that generate errors: endroid/qr-code
+      # Plugins that require mysql: texxasrulez/calendar
+      # Optional env_variable to remove undesired plugins
+      # - REMOVE_RC_PLUGINS=texxasrulez/calendar
+      - IMAP_ADDRESS=imap
+      - SMTP_ADDRESS=smtp
+    ports:
+      - "811:80"
     volumes:
       - "/mailu/webmail:/data"
+      - "./plugins.py:/var/www/html/plugins.py"
     depends_on:
       - imap
 

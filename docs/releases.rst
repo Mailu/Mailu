@@ -5,29 +5,22 @@ Mailu 1.8 - 2020-10-02
 ----------------------
 
 Release 1.8 has come a long way again. Due to corona the project slowed down to a crawl. Fortunately new contributors have joined the team what enabled us to still release Mailu 1.8 this year.
-For a list of all changes refer to CHANGELOG.md in the root folder of the Mailu github project. Please read the 'Override location changes' section. It contains important information for the people who use the overrides folder.
 
-New functionality
-`````````````````
+Please note that the current 1.8 is what we call a "soft release": It’s there for everyone to see and use, but to limit possible user-impact of this very big release, it’s not yet the default in the setup-utility for new users. When upgrading, please treat it with some care, and be sure to always have backups!
 
-short summary of new features
+For a list of all changes refer to `CHANGELOG.md` in the root folder of the Mailu github project. Please read the 'Override location changes' section. It contains important information for the people who use the overrides folder.
 
-- placeholder1
-- placeholder2
+New Functionality & Improvements
+````````````````````````````````
 
-mention alpine is updated in .... containers.
+Here’s a short summary of new features:
 
-other interesting section
-`````````````````````````
-
-bla bla bla.
-more bla bla bla.
-
-Override location changes
-`````````````````````````
-
-If you have regenerated the Docker compose and environment files, there are some changes to the configuration overrides.
-Override files are now mounted read-only into the containers. The Dovecot and Postfix overrides are moved in their own sub-directory. If there are local override files, they will need to be moved from ``overrides/`` to ``overrides/dovecot`` and ``overrides/postfix/``.
+- Full-text-search is back after having been disabled for a while due to nasty bugs.
+- Tons of documentation improvements, especially geared towards new users.
+- (Experimental) support for different architectures, such as ARM.
+- Improvements around webmails, such as CardDAV and a new skin for an updated roundcube, and support for MySQL for it.
+- Improvements around relaying, such as AUTH LOGIN and non-standard port support.
+- Update to alpine:3.12 as baseimage for most containers.
 
 Upgrading
 `````````
@@ -36,8 +29,15 @@ Upgrade should run fine as long as you generate a new compose or stack
 configuration and upgrade your mailu.env.
 
 Please not that the shipped image for PostgreSQL database is deprecated.
-The shipped image for PostgreSQL is not maintained anymore from release 1.8. 
+The shipped image for PostgreSQL is not maintained anymore from release 1.8.
 We recommend switching to an external database as soon as possible.
+
+Override location changes
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you have regenerated the Docker compose and environment files, there are some changes to the configuration overrides.
+Override files are now mounted read-only into the containers. The Dovecot and Postfix overrides are moved in their own sub-directory. If there are local override files, they will need to be moved from ``overrides/`` to ``overrides/dovecot`` and ``overrides/postfix/``.
+
 
 
 Mailu 1.7 - 2019-08-22

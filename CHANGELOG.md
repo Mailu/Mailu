@@ -4,8 +4,10 @@ Changelog
 Upgrade should run fine as long as you generate a new compose or stack
 configuration and upgrade your mailu.env.
 
-There are some changes to the configuration overrides. Override files are now mounted read-only into the containers. 
-The Dovecot and Postfix overrides are moved in their own sub-directory. 
+Please note that the current 1.8 is what we call a "soft release": It’s there for everyone to see and use, but to limit possible user-impact of this very big release, it’s not yet the default in the setup-utility for new users. When upgrading, please treat it with some care, and be sure to always have backups!
+
+There are some changes to the configuration overrides. Override files are now mounted read-only into the containers.
+The Dovecot and Postfix overrides are moved in their own sub-directory.
 If there are local override files, they will need to be moved from overrides/ to overrides/dovecot and overrides/postfix/.
 See https://mailu.io/1.8/faq.html#how-can-i-override-settings for all the mappings.
 

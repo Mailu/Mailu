@@ -15,7 +15,7 @@ New Functionality & Improvements
 
 Here’s a short summary of new features:
 
-- Full-text-search is back after having been disabled for a while due to nasty bugs.
+- Full-text-search is back after having been disabled for a while due to nasty bugs. It can still be disabled via the mailu.env file.
 - Tons of documentation improvements, especially geared towards new users.
 - (Experimental) support for different architectures, such as ARM.
 - Improvements around webmails, such as CardDAV, GPG and a new skin for an updated roundcube, and support for MySQL for it. Updated Rainloop, too.
@@ -24,7 +24,8 @@ Here’s a short summary of new features:
 - Setup warns users about compose-IPv6 deployments which have caused open relays in the past.
 - Improved handling of upper-vs-lowercase aliases and user-addresses.
 - Improved rate-limiting system.
-- Support for SRS
+- Support for SRS.
+- Japanese localisation is now available.
 
 Upgrading
 `````````

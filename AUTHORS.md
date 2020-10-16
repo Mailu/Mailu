@@ -25,3 +25,6 @@ Other contributors:
  - [Tim Mohlmann](https://github.com/muhlemmer) - [Contributions](https://github.com/Mailu/Mailu/commits?author=muhlemmer)
  - [Ionut Filip](https://github.com/ionutfilip) - [Contributions](https://github.com/Mailu/Mailu/commits?author=ionutfilip)
  - [Ichikawa Yuriko](https://github.com/IchikawaYukko) - [Contributions](https://github.com/Mailu/Mailu/commits?author=IchikawaYukko) Japanese translation
+ - [Dimitri Huisman](https://github.com/Diman0) - [Contributions](https://github.com/Mailu/Mailu/commits?author=Diman0)
+ - [lub](https://github.com/lub) - [Contributions](https://github.com/Mailu/Mailu/commits?author=lub)
+ - [Dario Ernst](https://github.com/Nebukadneza) - [Contributions](https://github.com/Mailu/Mailu/commits?author=Nebukadneza)

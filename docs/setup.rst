@@ -38,7 +38,7 @@ Pick a Mailu version
 
 Mailu is shipped in multiple versions.
 
-- ``1.7`` features the most recent stable version for Mailu. This is the
+- ``1.8`` features the most recent stable version for Mailu. This is the
   recommended build for new setups, old setups should migrate when possible.
 
 - ``1.0``, ``1.1``, and other version branches feature old versions of Mailu

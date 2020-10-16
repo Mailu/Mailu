@@ -11,13 +11,16 @@
 	<p></p>
 	<div id="postgres_db" style="display: none">
 		<div class="form-check">
-			<input class="form-check-input" type="radio" name="postgresql" id="internal_psql" value="internal" checked>
+			<input class="form-check-input" type="radio" name="postgresql" id="internal_psql" value="internal">
 			<label class="form-check-label" for="internal_psql">
-				Use the Postgresql from Mailu
+				Use the PostgreSQL image from Mailu. Warning, this image is deprecated.
+                                It will be removed from Mailu 1.9. Existing users can still upgrade to Mailu 1.8 using this image.
+                                With the release of Mailu 1.9,
+                                we will offer a mechanism for migrating your data to another database management system.
 			</label>
 		</div>
 		<div class="form-check">
-			<input class="form-check-input" type="radio" name="postgresql" value="external" id="external_psql" >
+			<input class="form-check-input" type="radio" name="postgresql" value="external" id="external_psql">
 			<label class="form-check-label" for="external_psql">
 				I want to connect to an external database
 			</label>

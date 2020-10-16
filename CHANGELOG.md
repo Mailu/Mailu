@@ -1,11 +1,53 @@
 Changelog
 =========
 
-Notable changes to this project are documented in the current file. For more
-details about individual changes, see the Git log. You should read this before
-upgrading Mailu as some changes will include useful notes.
+Upgrade should run fine as long as you generate a new compose or stack
+configuration and upgrade your mailu.env.
+
+Please note that the current 1.8 is what we call a "soft release": It’s there for everyone to see and use, but to limit possible user-impact of this very big release, it’s not yet the default in the setup-utility for new users. When upgrading, please treat it with some care, and be sure to always have backups!
+
+There are some changes to the configuration overrides. Override files are now mounted read-only into the containers.
+The Dovecot and Postfix overrides are moved in their own sub-directory.
+If there are local override files, they will need to be moved from overrides/ to overrides/dovecot and overrides/postfix/.
+See https://mailu.io/1.8/faq.html#how-can-i-override-settings for all the mappings.
+
+Please not that the shipped image for PostgreSQL database is deprecated.
+We advise to switch to an external database server.
 
 <!-- TOWNCRIER -->
+v1.8.0 - 2020-09-28
+--------------------
+
+- Features: Add support for backward-forwarding using SRS ([#328](https://github.com/Mailu/Mailu/issues/328))
+- Features: Add options to support different architectures builds ([#985](https://github.com/Mailu/Mailu/issues/985))
+- Features: Add support for Traefik v2 certificate dumping ([#1011](https://github.com/Mailu/Mailu/issues/1011))
+- Features: Resolve hosts to IPs if only HOST_* is set. If *_ADDRESS is set, leave it unresolved. ([#1113](https://github.com/Mailu/Mailu/issues/1113))
+- Features: - Use nginx as http endpoint on kubernetes to simplify ingress ([#1158](https://github.com/Mailu/Mailu/issues/1158))
+- Features: Advertise correct mail capabilities through the front-container, this also enables support for PIPELINING in mail-protocols and IMAP IDLE which is a (potential) performance gain. ([#1160](https://github.com/Mailu/Mailu/issues/1160))
+- Features: Change default password scheme to PBKDF2 ([#1194](https://github.com/Mailu/Mailu/issues/1194))
+- Features: Enable access log of admin service only for log levels of INFO and finer ([#1197](https://github.com/Mailu/Mailu/issues/1197))
+- Features: japanese loca is now available ([#1207](https://github.com/Mailu/Mailu/issues/1207))
+- Features: Allow to reject virus mails by setting ANTIVITUS_ACTION=reject ([#1259](https://github.com/Mailu/Mailu/issues/1259))
+- Features: Update roundcube to 1.4.0 and enable the new elastic skin ([#1267](https://github.com/Mailu/Mailu/issues/1267))
+- Features: The roundcube container does support mysql now (no setup integration yet) ([#1268](https://github.com/Mailu/Mailu/issues/1268))
+- Features: Added CardDAV-Plugin for webmail roundcube. ([#1298](https://github.com/Mailu/Mailu/issues/1298))
+- Features: Allow users to use server-sided full-text-search again by adding the dovecot fts-xapian plugin ([#1320](https://github.com/Mailu/Mailu/issues/1320))
+- Features: Relay a domain to a nonstandard SMTP port by adding ":<port_num>" to the remote hostname or IP address. ([#1357](https://github.com/Mailu/Mailu/issues/1357))
+- Features: Introduce option to disable dovecot full-text-search by an enviroment variable. ([#1538](https://github.com/Mailu/Mailu/issues/1538))
+- Features: Add support for AUTH LOGIN authentication mechanism for relaying email via smart hosts. ([#1635](https://github.com/Mailu/Mailu/issues/1635))
+- Bugfixes: Use pip package for radicale to fix failing builds caused by [alpine]upstream package rebuild against different python version ([#1255](https://github.com/Mailu/Mailu/issues/1255))
+- Bugfixes: Disable Health checks on swarm mode ([#1289](https://github.com/Mailu/Mailu/issues/1289))
+- Bugfixes: Show SPF records in accordance with RFC 7208: Previously we instructed admins to create SPF and TXT records, where only TXT records are correct now. !! Attention !! You need to manually remove the SPF-typed records and keep only TXT in your DNS. ([#1394](https://github.com/Mailu/Mailu/issues/1394))
+- Bugfixes: Cover relearning messages when moving bewteen Ham and Spam status ([#1438](https://github.com/Mailu/Mailu/issues/1438))
+- Bugfixes: Defining POSTMASTER through setup tool apply also to DMARC_RUA and DMARC_RUF settings ([#1463](https://github.com/Mailu/Mailu/issues/1463))
+- Bugfixes: Check postfix mailqueue permissions before start-up ([#1486](https://github.com/Mailu/Mailu/issues/1486))
+- Bugfixes: Fixes certbot renewal ([#1564](https://github.com/Mailu/Mailu/issues/1564))
+- Improved Documentation: Added documentation that describes how spam filtering works in Mailu. ([#1167](https://github.com/Mailu/Mailu/issues/1167))
+- Improved Documentation: Add documentation for the web administration interface. ([#1590](https://github.com/Mailu/Mailu/issues/1590))
+- Deprecations and Removals: Dovecot: Delete obsolete data volume ([#1221](https://github.com/Mailu/Mailu/issues/1221))
+- Misc:  ([#508](https://github.com/Mailu/Mailu/issues/508), [#1098](https://github.com/Mailu/Mailu/issues/1098), [#1214](https://github.com/Mailu/Mailu/issues/1214), [#1308](https://github.com/Mailu/Mailu/issues/1308), [#1444](https://github.com/Mailu/Mailu/issues/1444), [#1512](https://github.com/Mailu/Mailu/issues/1512))
+
+
 v1.7.0 - 2019-08-22
 -------------------
 

@@ -38,7 +38,6 @@ html_context = {
     'github_version': version,
     'stable_version': '1.7',
     'versions': [
-        ('1.5', '/1.5/'),
         ('1.6', '/1.6/'),
         ('1.7', '/1.7/'),
         ('1.8', '/1.8/'),

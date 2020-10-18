@@ -1,0 +1,148 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: mailu-front
+  namespace: mailu-mailserver
+  labels:
+    k8s-app: mail-loadbalancer
+    component: ingress-controller
+    type: nginx
+spec:
+  selector:
+    matchLabels:
+      k8s-app: mail-loadbalancer
+      component: ingress-controller
+      type: nginx
+  template:
+    metadata:
+      labels:
+        k8s-app: mail-loadbalancer
+        component: ingress-controller
+        type: nginx
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/node
+                operator: Exists
+      nodeSelector:
+        node-role.kubernetes.io/node: ""
+      dnsPolicy: ClusterFirstWithHostNet
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: front
+        image: mailu/nginx:master
+        imagePullPolicy: Always
+        envFrom:
+          - configMapRef:
+              name: mailu-config
+        volumeMounts:
+          - name: certs
+            mountPath: /certs
+        ports:
+          - name: pop3
+            containerPort: 110
+            hostPort: 110
+            protocol: TCP
+          - name: pop3s
+            containerPort: 995
+            hostPort: 995
+            protocol: TCP
+          - name: imap
+            containerPort: 143
+            hostPort: 143
+            protocol: TCP
+          - name: imaps
+            containerPort: 993
+            hostPort: 993
+            protocol: TCP
+          - name: smtp
+            containerPort: 25
+            hostPort: 25
+            protocol: TCP
+          - name: smtps
+            containerPort: 465
+            hostPort: 465
+            protocol: TCP
+          - name: smtpd
+            containerPort: 587
+            hostPort: 587
+            protocol: TCP
+          # internal services (not exposed externally)
+          - name: smtp-auth
+            containerPort: 10025
+            protocol: TCP
+          - name: imap-auth
+            containerPort: 10143
+            protocol: TCP
+          - name: auth
+            containerPort: 8000
+            protocol: TCP
+          - name: http
+            containerPort: 80
+            protocol: TCP
+        resources:
+          requests:
+            memory: 100Mi
+            cpu: 100m
+          limits:
+            memory: 200Mi
+            cpu: 200m
+      volumes:
+        - name: certs
+          secret:
+            items:
+              - key: tls.crt
+                path: cert.pem
+              - key: tls.key
+                path: key.pem
+            secretName: letsencrypt-certs-all
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: front
+  namespace: mailu-mailserver
+  labels:
+    k8s-app: mail-loadbalancer
+    component: ingress-controller
+    type: nginx
+spec:
+  selector:
+    k8s-app: mail-loadbalancer
+    component: ingress-controller
+    type: nginx
+  ports:
+  - name: pop3
+    port: 110
+    protocol: TCP
+  - name: pop3s
+    port: 995
+    protocol: TCP
+  - name: imap
+    port: 143
+    protocol: TCP
+  - name: imaps
+    port: 993
+    protocol: TCP
+  - name: smtp
+    port: 25
+    protocol: TCP
+  - name: smtps
+    port: 465
+    protocol: TCP
+  - name: smtpd
+    port: 587
+    protocol: TCP
+  - name: smtp-auth
+    port: 10025
+    protocol: TCP
+  - name: imap-auth
+    port: 10143
+    protocol: TCP
+  - name: http
+    port: 80
+    protocol: TCP

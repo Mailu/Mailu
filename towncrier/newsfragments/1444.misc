@@ -1,1 +1,0 @@
-Harden security by making certain configuration files read-only. Moves Postfix and Dovecot overrides an independed sub-directories.

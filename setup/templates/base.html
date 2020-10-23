@@ -8,12 +8,20 @@
   <h1>Mailu configuration</h1>
   <p>
     Version
-    <select onchange="window.location.href=this.value;" class="btn btn-primary dropdown-toggle">
+    <select id=version_select onchange="window.location.href=this.value;" class="btn btn-primary dropdown-toggle">
       {% for module in versions %}
-      <option value="/{{ module }}" {% if module == version %}selected{% endif %}>{{ module }}</option>
+      <option value="/{{ module }}" {% if module == version %}selected {% endif %}>{{ module }}</option>
       {% endfor %}
     </select>
   </p>
+
+  {% if version != stable_version %}
+  {% call macros.panel("danger", "You have not selected the stable version") %}
+You have not selected the stable version. The stable version is {{ stable_version }}.
+The selected version can be used for testing and reporting bugs.
+For production scenarios we recommend to use the stable version.
+  {% endcall %}
+  {% endif %}
 
   {% block page %}{% endblock %}
 

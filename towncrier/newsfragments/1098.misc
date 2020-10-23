@@ -1,1 +1,0 @@
-Ignore newlines and comment-lines in postfix overrides - this means you can now make your override configfiles much more readable.

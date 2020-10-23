@@ -35,18 +35,18 @@ pull_request_rules:
       comment:
         message: bors r+
 
-  - name: Backport to 1.7 branch
+  - name: Backport to 1.8  branch
     conditions:
       - base=master
       - label=type/backport
     actions:
       backport:
         branches:
-          - '1.7'
+          - '1.8'
 
   - name: remove outdated reviews
     conditions:
-      - base~=^(master|1.7)$
+      - base~=^(master|1.8)$
     actions:
       dismiss_reviews:
         approved: True

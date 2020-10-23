@@ -1,1 +1,0 @@
-Allow to reject virus mails by setting ANTIVITUS_ACTION=reject

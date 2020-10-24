@@ -202,13 +202,14 @@ class Base(db.Model):
                 raise KeyError(f'primary key {model.__table__}.{pkey} is missing', model, pkey, data)
 
         # check data keys and values
-        for key, value in data.items():
+        for key in list(data.keys()):
 
             # check key
             if not hasattr(model, key) and not key in model.__mapper__.relationships:
                 raise KeyError(f'unknown key {model.__table__}.{key}', model, key, data)
 
             # check value type
+            value = data[key]
             col = model.__mapper__.columns.get(key)
             if col is not None:
                 if not ((value is None and col.nullable) or (type(value) is col.type.python_type)):
@@ -218,7 +219,10 @@ class Base(db.Model):
                 if rel is None:
                     itype = getattr(model, '_dict_types', {}).get(key)
                     if itype is not None:
-                        if not isinstance(value, itype):
+                        if not itype: # empty tuple => ignore value
+                            del data[key]
+                            continue
+                        elif not isinstance(value, itype):
                             raise TypeError(f'{model.__table__}.{key} {value!r} has invalid type {type(value).__name__!r}', model, key, data)
                     else:
                         raise NotImplementedError(f'type not defined for {model.__table__}.{key}')
@@ -365,7 +369,7 @@ class Domain(Base):
     _dict_hide = {'users', 'managers', 'aliases'}
     _dict_show = {'dkim_key', 'dkim_publickey'}
     _dict_secret = {'dkim_key'}
-    _dict_types = {'dkim_key': (bytes, type(None))}
+    _dict_types = {'dkim_key': (bytes, type(None)), 'dkim_publickey': tuple()}
     _dict_output = {'dkim_key': lambda v: v.decode('utf-8').strip().split('\n')[1:-1]}
     @staticmethod
     def _dict_input(data):

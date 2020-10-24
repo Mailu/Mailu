@@ -218,7 +218,7 @@ class Base(db.Model):
                 if rel is None:
                     itype = getattr(model, '_dict_types', {}).get(key)
                     if itype is not None:
-                        if type(value) is not itype:
+                        if not isinstance(value, itype):
                             raise TypeError(f'{model.__table__}.{key} {value!r} has invalid type {type(value).__name__!r}', model, key, data)
                     else:
                         raise NotImplementedError(f'type not defined for {model.__table__}.{key}')
@@ -365,25 +365,34 @@ class Domain(Base):
     _dict_hide = {'users', 'managers', 'aliases'}
     _dict_show = {'dkim_key'}
     _dict_secret = {'dkim_key'}
-    _dict_types = {'dkim_key': bytes}
+    _dict_types = {'dkim_key': (bytes, type(None))}
     _dict_output = {'dkim_key': lambda v: v.decode('utf-8').strip().split('\n')[1:-1]}
     @staticmethod
     def _dict_input(data):
         if 'dkim_key' in data:
             key = data['dkim_key']
-            if key is None:
-                del data['dkim_key']
-            else:
+            if key is not None:
                 if type(key) is list:
                     key = ''.join(key)
                 if type(key) is str:
-                    key = ''.join(key.strip().split())
-                    if key.startswith('-----BEGIN PRIVATE KEY-----'):
-                        key = key[25:]
-                    if key.endswith('-----END PRIVATE KEY-----'):
-                        key = key[:-23]
-                    key = '\n'.join(wrap(key, 64))
-                    data['dkim_key'] = f'-----BEGIN PRIVATE KEY-----\n{key}\n-----END PRIVATE KEY-----\n'.encode('ascii')
+                    key = ''.join(key.strip().split()) # removes all whitespace
+                    if key:
+                        m = re.match('^-----BEGIN (RSA )?PRIVATE KEY-----', key)
+                        if m is not None:
+                            key = key[m.end():]
+                        m = re.search('-----END (RSA )?PRIVATE KEY-----$', key)
+                        if m is not None:
+                            key = key[:m.start()]
+                        key = '\n'.join(wrap(key, 64))
+                        key = f'-----BEGIN PRIVATE KEY-----\n{key}\n-----END PRIVATE KEY-----\n'.encode('ascii')
+                        try:
+                            dkim.strip_key(key)
+                        except:
+                            raise ValueError('invalid dkim key')
+                        else:
+                            data['dkim_key'] = key
+                    else:
+                        data['dkim_key'] = None
 
     name = db.Column(IdnaDomain, primary_key=True, nullable=False)
     managers = db.relationship('User', secondary=managers,
@@ -405,8 +414,12 @@ class Domain(Base):
     def dkim_key(self, value):
         file_path = app.config["DKIM_PATH"].format(
             domain=self.name, selector=app.config["DKIM_SELECTOR"])
-        with open(file_path, "wb") as handle:
-            handle.write(value)
+        if value is None:
+            if os.path.exists(file_path):
+                os.unlink(file_path)
+        else:
+            with open(file_path, "wb") as handle:
+                handle.write(value)
 
     @property
     def dkim_publickey(self):

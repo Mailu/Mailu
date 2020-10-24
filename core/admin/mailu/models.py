@@ -119,7 +119,7 @@ class Base(db.Model):
     def _dict_pval(self):
         return getattr(self, self._dict_pkey())
 
-    def to_dict(self, full=False, include_secrets=False, recursed=False, hide=None):
+    def to_dict(self, full=False, include_secrets=False, include_extra=None, recursed=False, hide=None):
         """ Return a dictionary representation of this model.
         """
 
@@ -136,9 +136,17 @@ class Base(db.Model):
 
         convert = getattr(self, '_dict_output', {})
 
+        extra_keys = getattr(self, '_dict_extra', {})
+        if include_extra is None:
+            include_extra = []
+
         res = {}
 
-        for key in itertools.chain(self.__table__.columns.keys(), getattr(self, '_dict_show', [])):
+        for key in itertools.chain(
+            self.__table__.columns.keys(),
+            getattr(self, '_dict_show', []),
+            *[extra_keys.get(extra, []) for extra in include_extra]
+        ):
             if key in hide:
                 continue
             if key in self.__table__.columns:
@@ -167,14 +175,14 @@ class Base(db.Model):
                     if key in secret:
                         res[key] = '<hidden>'
                     else:
-                        res[key] = [item.to_dict(full, include_secrets, True) for item in items]
+                        res[key] = [item.to_dict(full, include_secrets, include_extra, True) for item in items]
             else:
                 value = getattr(self, key)
                 if full or value is not None:
                     if key in secret:
                         res[key] = '<hidden>'
                     else:
-                        res[key] = value.to_dict(full, include_secrets, True)
+                        res[key] = value.to_dict(full, include_secrets, include_extra, True)
 
         return res
 
@@ -219,7 +227,7 @@ class Base(db.Model):
                 if rel is None:
                     itype = getattr(model, '_dict_types', {}).get(key)
                     if itype is not None:
-                        if not itype: # empty tuple => ignore value
+                        if itype is False: # ignore value
                             del data[key]
                             continue
                         elif not isinstance(value, itype):
@@ -291,11 +299,11 @@ class Base(db.Model):
 
                     # delete referenced items missing in yaml
                     rel_pkey = rel_model._dict_pkey()
-                    new_data = list([i.to_dict(True, True, True, [rel_pkey]) for i in new])
+                    new_data = list([i.to_dict(True, True, None, True, [rel_pkey]) for i in new])
                     for rel_item in old:
                         if rel_item not in new:
                             # check if item with same data exists to stabilze import without primary key
-                            rel_data = rel_item.to_dict(True, True, True, [rel_pkey])
+                            rel_data = rel_item.to_dict(True, True, None, True, [rel_pkey])
                             try:
                                 same_idx = new_data.index(rel_data)
                             except ValueError:
@@ -367,10 +375,18 @@ class Domain(Base):
     __tablename__ = "domain"
 
     _dict_hide = {'users', 'managers', 'aliases'}
-    _dict_show = {'dkim_key', 'dkim_publickey'}
+    _dict_show = {'dkim_key'}
+    _dict_extra = {'dns':{'dkim_publickey', 'dns_mx', 'dns_spf', 'dns_dkim', 'dns_dmarc'}}
     _dict_secret = {'dkim_key'}
-    _dict_types = {'dkim_key': (bytes, type(None)), 'dkim_publickey': tuple()}
-    _dict_output = {'dkim_key': lambda v: v.decode('utf-8').strip().split('\n')[1:-1]}
+    _dict_types = {
+        'dkim_key': (bytes, type(None)),
+        'dkim_publickey': False,
+        'dns_mx': False,
+        'dns_spf': False,
+        'dns_dkim': False,
+        'dns_dmarc': False,
+    }
+    _dict_output = {'dkim_key': lambda key: key.decode('utf-8').strip().split('\n')[1:-1]}
     @staticmethod
     def _dict_input(data):
         if 'dkim_key' in data:
@@ -408,18 +424,46 @@ class Domain(Base):
     max_quota_bytes = db.Column(db.BigInteger(), nullable=False, default=0)
     signup_enabled = db.Column(db.Boolean(), nullable=False, default=False)
 
+    def _dkim_file(self):
+        return app.config["DKIM_PATH"].format(
+            domain=self.name, selector=app.config["DKIM_SELECTOR"])
+
+    @property
+    def dns_mx(self):
+        hostname = app.config['HOSTNAMES'].split(',')[0]
+        return f'{self.name}. 600 IN MX 10 {hostname}.'
+    
+    @property
+    def dns_spf(self):
+        hostname = app.config['HOSTNAMES'].split(',')[0]
+        return f'{self.name}. 600 IN TXT "v=spf1 mx a:{hostname} ~all"'
+    
+    @property
+    def dns_dkim(self):
+        if os.path.exists(self._dkim_file()):
+            selector = app.config['DKIM_SELECTOR']
+            return f'{selector}._domainkey.{self.name}. 600 IN TXT "v=DKIM1; k=rsa; p={self.dkim_publickey}"'
+
+    @property
+    def dns_dmarc(self):
+        if os.path.exists(self._dkim_file()):
+            domain = app.config['DOMAIN']
+            rua = app.config['DMARC_RUA']
+            rua = f' rua=mailto:{rua}@{domain};' if rua else ''
+            ruf = app.config['DMARC_RUF']
+            ruf = f' ruf=mailto:{ruf}@{domain};' if ruf else ''
+            return f'_dmarc.{self.name}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
+    
     @property
     def dkim_key(self):
-        file_path = app.config["DKIM_PATH"].format(
-            domain=self.name, selector=app.config["DKIM_SELECTOR"])
+        file_path = self._dkim_file()
         if os.path.exists(file_path):
             with open(file_path, "rb") as handle:
                 return handle.read()
 
     @dkim_key.setter
     def dkim_key(self, value):
-        file_path = app.config["DKIM_PATH"].format(
-            domain=self.name, selector=app.config["DKIM_SELECTOR"])
+        file_path = self._dkim_file()
         if value is None:
             if os.path.exists(file_path):
                 os.unlink(file_path)

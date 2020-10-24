@@ -78,21 +78,28 @@ The purpose of this command is to dump domain-, relay-, alias- and user-configur
 
   # docker-compose exec admin flask mailu config-dump --help
 
-  Usage: flask mailu config-dump [OPTIONS]
+  Usage: flask mailu config-dump [OPTIONS] [SECTIONS]...
 
     dump configuration as YAML-formatted data to stdout
 
+    SECTIONS can be: domains, relays, users, aliases
+
   Options:
     -f, --full     Include default attributes
-    -s, --secrets  Include secrets (plain-text / not hashed)
+    -s, --secrets  Include secrets (dkim-key, plain-text / not hashed)
+    -d, --dns      Include dns records
     --help         Show this message and exit.
 
-If you want to export secrets (plain-text / not hashed) you have to add the ``--secrets`` option.
+If you want to export secrets (dkim-keys, plain-text / not hashed) you have to add the ``--secrets`` option.
 Only non-default attributes are dumped. If you want to dump all attributes use ``--full``.
+To include dns records (mx, spf, dkim and dmarc) add the ``--dns`` option.
+Unless you specify some sections all sections are dumped by default.
 
 .. code-block:: bash
 
   docker-compose exec admin flask mailu config-dump > mail-config.yml
+
+  docker-compose exec admin flask mailu config-dump --dns domains
 
 config-update
 -------------

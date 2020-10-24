@@ -300,10 +300,13 @@ def config_update(verbose=False, delete_objects=False, dry_run=False, file=None)
 
 @mailu.command()
 @click.option('-f', '--full', is_flag=True, help='Include default attributes')
-@click.option('-s', '--secrets', is_flag=True, help='Include secrets (plain-text / not hashed)')
+@click.option('-s', '--secrets', is_flag=True, help='Include secrets (dkim-key, plain-text / not hashed)')
+@click.argument('sections', nargs=-1)
 @flask_cli.with_appcontext
-def config_dump(full=False, secrets=False):
-    """dump configuration as YAML-formatted data to stdout"""
+def config_dump(full=False, secrets=False, sections=None):
+    """dump configuration as YAML-formatted data to stdout  
+    valid SECTIONS are: domains, relays, users, aliases
+    """
 
     class spacedDumper(yaml.Dumper):
 
@@ -315,11 +318,19 @@ def config_dump(full=False, secrets=False):
         def increase_indent(self, flow=False, indentless=False):
             return super().increase_indent(flow, False)
 
+    if sections:
+        check = dict(yaml_sections)
+        for section in sections:
+            if section not in check:
+                print(f'[ERROR] Invalid section: {section}')
+                return 1
+
     config = {}
     for section, model in yaml_sections:
-        dump = [item.to_dict(full, secrets) for item in model.query.all()]
-        if len(dump):
-            config[section] = dump
+        if not sections or section in sections:
+            dump = [item.to_dict(full, secrets) for item in model.query.all()]
+            if len(dump):
+                config[section] = dump
 
     yaml.dump(config, sys.stdout, Dumper=spacedDumper, default_flow_style=False, allow_unicode=True)
 

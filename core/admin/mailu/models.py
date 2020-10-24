@@ -363,7 +363,7 @@ class Domain(Base):
     __tablename__ = "domain"
 
     _dict_hide = {'users', 'managers', 'aliases'}
-    _dict_show = {'dkim_key'}
+    _dict_show = {'dkim_key', 'dkim_publickey'}
     _dict_secret = {'dkim_key'}
     _dict_types = {'dkim_key': (bytes, type(None))}
     _dict_output = {'dkim_key': lambda v: v.decode('utf-8').strip().split('\n')[1:-1]}
@@ -376,7 +376,9 @@ class Domain(Base):
                     key = ''.join(key)
                 if type(key) is str:
                     key = ''.join(key.strip().split()) # removes all whitespace
-                    if key:
+                    if key == 'generate':
+                        data['dkim_key'] = dkim.gen_key()
+                    elif key:
                         m = re.match('^-----BEGIN (RSA )?PRIVATE KEY-----', key)
                         if m is not None:
                             key = key[m.end():]
@@ -390,7 +392,7 @@ class Domain(Base):
                         except:
                             raise ValueError('invalid dkim key')
                         else:
-                            data['dkim_key'] = key
+                          data['dkim_key'] = key
                     else:
                         data['dkim_key'] = None
 

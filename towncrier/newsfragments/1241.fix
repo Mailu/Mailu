@@ -1,1 +1,0 @@
-Kubernetes manifests updated to be compatible with Kubernetes 1.16 (breaks compatibility with older k8s versions)

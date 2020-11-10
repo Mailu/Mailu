@@ -3,6 +3,10 @@ kind: Deployment
 metadata:
   name: mailu-redis
   namespace: mailu-mailserver
+  labels:
+    app: mailu-redis
+    role: mail
+    tier: backend
 spec:
   replicas: 1
   selector:

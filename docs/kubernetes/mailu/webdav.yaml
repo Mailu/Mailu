@@ -3,8 +3,17 @@ kind: Deployment
 metadata:
   name: mailu-webdav
   namespace: mailu-mailserver
+  labels:
+    app: mailu-webdav
+    role: mail
+    tier: backend
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: mailu-webdav
+      role: mail
+      tier: backend
   template:
     metadata:
       labels:

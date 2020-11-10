@@ -3,8 +3,17 @@ kind: Deployment
 metadata:
   name: mailu-roundcube
   namespace: mailu-mailserver
+  labels:
+    app: mailu-roundcube
+    role: mail
+    tier: frontend
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: mailu-roundcube
+      role: mail
+      tier: frontend
   template:
     metadata:
       labels:

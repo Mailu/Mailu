@@ -3,8 +3,17 @@ kind: Deployment
 metadata:
   name: mailu-admin
   namespace: mailu-mailserver
+  labels:
+    app: mailu-admin
+    role: mail
+    tier: backend
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: mailu-admin
+      role: mail
+      tier: backend
   template:
     metadata:
       labels:

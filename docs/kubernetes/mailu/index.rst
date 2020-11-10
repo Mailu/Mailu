@@ -178,7 +178,9 @@ And enter following contents:
     mail_nfs_storage = yes
     mail_fsync = always
     mmap_disable = yes
-    mail_max_userip_connections=100
+    mail_max_userip_connections = 100
+    # Uncomment the next line if you are using NFSv2.
+    #dotlock_use_excl = no # only needed with NFSv2, NFSv3+ supports O_EXCL and it's faster
 
 Save and close the file and delete the imap pod to get it recreated.
 
@@ -216,5 +218,28 @@ If the login problem still persists, or more specific, happens now and then and 
 
     kubectl -n mailu-mailserver get po
     kubectl -n mailu-mailserver delete po/mailu-admin...
+
+Postfix PID fix
+~~~~~~~~~~~~~~~
+
+On NFS, there might be errors creating the ``master.pid`` lock file.
+
+To fix this, create the file ``overrides/postfix.cf``
+
+.. code:: bash
+
+    vi /overrides/postfix.cf
+
+And enter following contents:
+
+.. code:: bash
+
+    process_id_directory = /var/run
+
+Save and close the file and delete the smtp pod to get it recreated.
+
+.. code:: bash
+
+    kubectl -n mailu-mailserver delete po/mailu-smtp-....
 
 Happy mailing!

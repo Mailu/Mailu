@@ -55,6 +55,7 @@ and then add the following to the front section:
   labels:
       - "traefik.enable=true"
 
+<<<<<<< HEAD
       # the second part is important to ensure Mailu can get certificates from letsencrypt for all hostnames
       - "traefik.http.routers.web.rule=Host(`mail.example.com`) || PathPrefix(`/.well-known/acme-challenge/`)"
       - "traefik.http.routers.web.entrypoints=web"
@@ -111,3 +112,8 @@ in mailu.env:
   WEBROOT_REDIRECT=/sso/login
 
 Using the above configuration, Traefik will proxy all the traffic related to Mailu's FQDNs without requiring duplicate certificates.
+=======
+You must not disable Mailu reverse proxy by removing the ``front`` section from the ``docker-compose.yml``.
+
+``front`` is handling authentication and is also proxying e.g. SMTP and IMAP. A basic HTTP reverse proxy as described in this document is not sufficient for this.
+>>>>>>> 900b2817 (add warning about removing front)

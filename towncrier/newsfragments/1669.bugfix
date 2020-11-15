@@ -1,0 +1,1 @@
+Fix "extract_host_port" function to support containers with custom / dynamic ports

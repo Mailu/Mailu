@@ -1,1 +1,0 @@
-Show SPF records in accordance with RFC 7208: Previously we instructed admins to create SPF and TXT records, where only TXT records are correct now. !! Attention !! You need to manually remove the SPF-typed records and keep only TXT in your DNS.

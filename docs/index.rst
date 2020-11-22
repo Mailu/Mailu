@@ -67,6 +67,8 @@ the version of Mailu that you are running.
     :caption: Administration
 
     maintain
+    webadministration
+    antispam
     cli
 
 .. toctree::

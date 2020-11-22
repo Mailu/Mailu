@@ -1,1 +1,0 @@
-Use pip package for radicale to fix failing builds caused by [alpine]upstream package rebuild against different python version

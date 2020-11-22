@@ -31,7 +31,7 @@ services:
     - "$BIND_ADDRESS6:587:587"
     volumes:
       - "$ROOT/certs:/certs"
-      - "$ROOT/overrides/nginx:/overrides"
+      - "$ROOT/overrides/nginx:/overrides:ro"
 
   redis:
     image: redis:alpine
@@ -45,7 +45,7 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/mail:/mail"
-      - "$ROOT/overrides:/overrides"
+      - "$ROOT/overrides/dovecot:/overrides:ro"
     depends_on:
       - front
 
@@ -54,7 +54,8 @@ services:
     restart: always
     env_file: .env
     volumes:
-      - "$ROOT/overrides:/overrides"
+      - "$ROOT/mailqueue:/queue"
+      - "$ROOT/overrides/postfix:/overrides:ro"
     depends_on:
       - front
 
@@ -64,8 +65,8 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/filter:/var/lib/rspamd"
-      - "$ROOT/dkim:/dkim"
-      - "$ROOT/overrides/rspamd:/etc/rspamd/override.d"
+      - "$ROOT/dkim:/dkim:ro"
+      - "$ROOT/overrides/rspamd:/etc/rspamd/override.d:ro"
     depends_on:
       - front
 

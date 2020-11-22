@@ -1,9 +1,11 @@
 {% if flavor == "stack" %}
 {% call macros.panel("danger", "Docker stack / swarm is experimental") %}
 Setup is capable of generating a somewhat decent docker-compose.yml,
-for the docker stack flavor. However its usage is for advanced users an is experimental.
-Expect many challenges is shared mail storage and fail-over scenarios! Some user experiences
+for the docker stack flavor. However its usage is for advanced users only and is experimental.
+Expect many challenges such as shared mail storage and fail-over scenarios! Some user experiences
 have been <a href="https://github.com/Mailu/Mailu/blob/master/docs/swarm/master/README.md">shared on GitHub.</a>
+For this reason also think very hard about using a replica count higher than 1. This cannot be used with the default config.
+Manual post-configuration is required for using a replica count higher than 1.
 {% endcall %}
 {% endif %}
 

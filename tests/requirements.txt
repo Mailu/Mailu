@@ -1,2 +1,2 @@
-docker
-colorama
+docker==4.2.2
+colorama==0.4.3

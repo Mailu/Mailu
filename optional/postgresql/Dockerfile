@@ -1,4 +1,4 @@
-ARG DISTRO=alpine:3.10
+ARG DISTRO=alpine:3.12
 FROM $DISTRO
 # python3 shared with most images
 RUN apk add --no-cache \
@@ -6,7 +6,7 @@ RUN apk add --no-cache \
   && pip3 install --upgrade pip
 
 # Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
-RUN pip3 install socrate
+RUN pip3 install socrate==0.2.0
 
 # Image specific layers under this line
 RUN apk add --no-cache \

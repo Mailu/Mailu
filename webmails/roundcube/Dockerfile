@@ -16,9 +16,9 @@ RUN apt-get update && apt-get install -y \
 # Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
 RUN pip3 install socrate
 
-ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.4.6/roundcubemail-1.4.6-complete.tar.gz
+ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.4.9/roundcubemail-1.4.9-complete.tar.gz
 
-ENV CARDDAV_URL https://github.com/blind-coder/rcmcarddav/releases/download/v3.0.3/carddav-3.0.3.tar.bz2
+ENV CARDDAV_URL https://github.com/blind-coder/rcmcarddav/releases/download/v4.0.3/carddav-v4.0.3.tgz
 
 RUN apt-get update && apt-get install -y \
       zlib1g-dev libzip4 libzip-dev libpq-dev \

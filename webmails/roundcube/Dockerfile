@@ -20,6 +20,8 @@ ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1
 
 ENV CARDDAV_URL https://github.com/blind-coder/rcmcarddav/releases/download/v4.0.3/carddav-v4.0.3.tgz
 
+ENV PHAR_URL https://getcomposer.org/download/2.0.7/composer.phar
+
 RUN apt-get update && apt-get install -y \
       zlib1g-dev libzip4 libzip-dev libpq-dev \
       python3-jinja2 \
@@ -42,6 +44,11 @@ RUN apt-get update && apt-get install -y \
  && sed -i 's,^php_value.*post_max_size,#&,g' .htaccess \
  && sed -i 's,^php_value.*upload_max_filesize,#&,g' .htaccess \
  && chown -R www-data: logs temp \
+ && cd plugins/carddav \
+ && curl -L -O ${PHAR_URL} \
+ && php composer.phar install --no-dev \
+ && php composer.phar update --no-dev \
+ && rm -rf composer.phar \
  && rm -rf /var/lib/apt/lists
 
 COPY php.ini /php.ini

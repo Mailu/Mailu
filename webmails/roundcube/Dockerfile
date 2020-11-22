@@ -31,9 +31,9 @@ RUN apt-get update && apt-get install -y \
  && curl -L -O ${ROUNDCUBE_URL} \
  && curl -L -O ${CARDDAV_URL} \
  && tar -xf *.tar.gz \
- && tar -xf *.tar.bz2 \
+ && tar -xf *.tgz \
  && rm -f *.tar.gz \
- && rm -f *.tar.bz2 \
+ && rm -f *.tgz \
  && mv roundcubemail-* html \
  && mv carddav html/plugins/ \
  && cd html \

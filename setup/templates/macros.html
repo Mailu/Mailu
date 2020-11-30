@@ -12,7 +12,7 @@
 {% macro radio(name, value, emph, text, current) %}
   <div class="radio">
     <label>
-      <input type="radio" name="{{ name }}" value="{{ value }}"{% if current == value %} checked="checked"{% endif %}>
+      <input type="radio" name="{{ name }}" value="{{ value }}"{% if current == value %} checked="checked"{% endif %} required="required">
       {% if emph %}
       <strong>{{ emph }}</strong>,
       {% endif %}

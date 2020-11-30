@@ -1,1 +1,0 @@
-Fix alias resolution in regard to case: A specifically matching alias of wrong case is now preferred over a wildcard alias that might have »eaten« it previously.

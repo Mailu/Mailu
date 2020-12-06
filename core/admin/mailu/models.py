@@ -367,7 +367,10 @@ class User(Base, Email):
                    'SHA512-CRYPT': "sha512_crypt",
                    'SHA256-CRYPT': "sha256_crypt",
                    'MD5-CRYPT': "md5_crypt",
+                   'SSHA256': "ldap_salted_sha256",
+                   'SSHA512': "ldap_salted_sha512",
                    'CRYPT': "des_crypt"}
+    pre_tagged_schemes = ('SSHA256', 'SSHA512')
 
     def get_password_context(self):
         return context.CryptContext(
@@ -377,7 +380,13 @@ class User(Base, Email):
 
     def check_password(self, password):
         context = self.get_password_context()
-        reference = re.match('({[^}]+})?(.*)', self.password).group(2)
+        match = re.match('({([^}]+)})?(.*)', self.password)
+
+        if match.group(2) in self.pre_tagged_schemes:
+            reference = self.password
+        else:
+            reference = match.group(3)
+
         result = context.verify(password, reference)
         if result and context.identify(reference) != context.default_scheme():
             self.set_password(password)
@@ -395,7 +404,10 @@ class User(Base, Email):
         if raw:
             self.password = '{'+hash_scheme+'}' + password
         else:
-            self.password = '{'+hash_scheme+'}' + self.get_password_context().encrypt(password, self.scheme_dict[hash_scheme])
+            tmp = self.get_password_context().encrypt(password, self.scheme_dict[hash_scheme])
+            if hash_scheme not in self.pre_tagged_schemes:
+                tmp = '{'+hash_scheme+'}' + tmp
+            self.password = tmp
 
     def get_managed_domains(self):
         if self.global_admin:

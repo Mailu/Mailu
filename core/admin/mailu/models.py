@@ -323,7 +323,7 @@ class Base(db.Model):
                                 new_data.append(rel_data)
                                 new.remove(same)
                                 del new_data[same_idx]
-                                for i, (ch_item, ch_update) in enumerate(changed):
+                                for i, (ch_item, _) in enumerate(changed):
                                     if ch_item is same:
                                         changed[i] = (rel_item, [])
                                         db.session.flush()

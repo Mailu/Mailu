@@ -369,6 +369,21 @@ class Config(Base):
     value = db.Column(JSONEncoded)
 
 
+@sqlalchemy.event.listens_for(db.session, 'after_commit')
+def store_dkim_key(session):
+    """ Store DKIM key on commit
+    """
+
+    for obj in session.identity_map.values():
+        if isinstance(obj, Domain):
+            if obj._dkim_key_changed:
+                file_path = obj._dkim_file()
+                if obj._dkim_key:
+                    with open(file_path, 'wb') as handle:
+                        handle.write(obj._dkim_key)
+                elif os.path.exists(file_path):
+                    os.unlink(file_path)
+
 class Domain(Base):
     """ A DNS domain that has mail addresses associated to it.
     """
@@ -424,6 +439,9 @@ class Domain(Base):
     max_aliases = db.Column(db.Integer, nullable=False, default=-1)
     max_quota_bytes = db.Column(db.BigInteger(), nullable=False, default=0)
     signup_enabled = db.Column(db.Boolean(), nullable=False, default=False)
+    
+    _dkim_key = None
+    _dkim_key_changed = False
 
     def _dkim_file(self):
         return app.config['DKIM_PATH'].format(
@@ -457,26 +475,28 @@ class Domain(Base):
     
     @property
     def dkim_key(self):
-        file_path = self._dkim_file()
-        if os.path.exists(file_path):
-            with open(file_path, 'rb') as handle:
-                return handle.read()
+        if self._dkim_key is None:
+            file_path = self._dkim_file()
+            if os.path.exists(file_path):
+                with open(file_path, 'rb') as handle:
+                    self._dkim_key = handle.read()
+            else:
+                self._dkim_key = b''
+        return self._dkim_key if self._dkim_key else None
 
     @dkim_key.setter
     def dkim_key(self, value):
-        file_path = self._dkim_file()
+        old_key = self.dkim_key
         if value is None:
-            if os.path.exists(file_path):
-                os.unlink(file_path)
-        else:
-            with open(file_path, 'wb') as handle:
-                handle.write(value)
+            value = b''
+        self._dkim_key_changed = value != old_key
+        self._dkim_key = value
 
     @property
     def dkim_publickey(self):
         dkim_key = self.dkim_key
         if dkim_key:
-            return dkim.strip_key(self.dkim_key).decode('utf8')
+            return dkim.strip_key(dkim_key).decode('utf8')
 
     def generate_dkim_key(self):
         self.dkim_key = dkim.gen_key()

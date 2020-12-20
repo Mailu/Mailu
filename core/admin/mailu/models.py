@@ -30,7 +30,7 @@ class IdnaDomain(db.TypeDecorator):
     impl = db.String(80)
 
     def process_bind_param(self, value, dialect):
-        return idna.encode(value).decode("ascii").lower()
+        return idna.encode(value).decode('ascii').lower()
 
     def process_result_value(self, value, dialect):
         return idna.decode(value)
@@ -46,7 +46,7 @@ class IdnaEmail(db.TypeDecorator):
     def process_bind_param(self, value, dialect):
         try:
             localpart, domain_name = value.split('@')
-            return "{0}@{1}".format(
+            return '{0}@{1}'.format(
                 localpart,
                 idna.encode(domain_name).decode('ascii'),
             ).lower()
@@ -55,7 +55,7 @@ class IdnaEmail(db.TypeDecorator):
 
     def process_result_value(self, value, dialect):
         localpart, domain_name = value.split('@')
-        return "{0}@{1}".format(
+        return '{0}@{1}'.format(
             localpart,
             idna.decode(domain_name),
         )
@@ -70,14 +70,14 @@ class CommaSeparatedList(db.TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         if not isinstance(value, (list, set)):
-            raise TypeError("Should be a list")
+            raise TypeError('Should be a list')
         for item in value:
-            if "," in item:
-                raise ValueError("Item must not contain a comma")
-        return ",".join(sorted(value))
+            if ',' in item:
+                raise ValueError('Item must not contain a comma')
+        return ','.join(sorted(value))
 
     def process_result_value(self, value, dialect):
-        return list(filter(bool, value.split(","))) if value else []
+        return list(filter(bool, value.split(','))) if value else []
 
     python_type = list
 
@@ -103,8 +103,8 @@ class Base(db.Model):
 
     metadata = sqlalchemy.schema.MetaData(
         naming_convention={
-            "fk": "%(table_name)s_%(column_0_name)s_fkey",
-            "pk": "%(table_name)s_pkey"
+            'fk': '%(table_name)s_%(column_0_name)s_fkey',
+            'pk': '%(table_name)s_pkey'
         }
     )
 
@@ -227,7 +227,7 @@ class Base(db.Model):
                 if rel is None:
                     itype = getattr(model, '_dict_types', {}).get(key)
                     if itype is not None:
-                        if itype is False: # ignore value
+                        if itype is False: # ignore value. TODO: emit warning?
                             del data[key]
                             continue
                         elif not isinstance(value, itype):
@@ -372,7 +372,8 @@ class Config(Base):
 class Domain(Base):
     """ A DNS domain that has mail addresses associated to it.
     """
-    __tablename__ = "domain"
+
+    __tablename__ = 'domain'
 
     _dict_hide = {'users', 'managers', 'aliases'}
     _dict_show = {'dkim_key'}
@@ -425,8 +426,8 @@ class Domain(Base):
     signup_enabled = db.Column(db.Boolean(), nullable=False, default=False)
 
     def _dkim_file(self):
-        return app.config["DKIM_PATH"].format(
-            domain=self.name, selector=app.config["DKIM_SELECTOR"])
+        return app.config['DKIM_PATH'].format(
+            domain=self.name, selector=app.config['DKIM_SELECTOR'])
 
     @property
     def dns_mx(self):
@@ -458,7 +459,7 @@ class Domain(Base):
     def dkim_key(self):
         file_path = self._dkim_file()
         if os.path.exists(file_path):
-            with open(file_path, "rb") as handle:
+            with open(file_path, 'rb') as handle:
                 return handle.read()
 
     @dkim_key.setter
@@ -468,14 +469,14 @@ class Domain(Base):
             if os.path.exists(file_path):
                 os.unlink(file_path)
         else:
-            with open(file_path, "wb") as handle:
+            with open(file_path, 'wb') as handle:
                 handle.write(value)
 
     @property
     def dkim_publickey(self):
         dkim_key = self.dkim_key
         if dkim_key:
-            return dkim.strip_key(self.dkim_key).decode("utf8")
+            return dkim.strip_key(self.dkim_key).decode('utf8')
 
     def generate_dkim_key(self):
         self.dkim_key = dkim.gen_key()
@@ -512,7 +513,7 @@ class Alternative(Base):
     The name "domain alias" was avoided to prevent some confusion.
     """
 
-    __tablename__ = "alternative"
+    __tablename__ = 'alternative'
 
     name = db.Column(IdnaDomain, primary_key=True, nullable=False)
     domain_name = db.Column(IdnaDomain, db.ForeignKey(Domain.name))
@@ -528,7 +529,7 @@ class Relay(Base):
     The domain is either relayed publicly or through a specified SMTP host.
     """
 
-    __tablename__ = "relay"
+    __tablename__ = 'relay'
 
     _dict_mandatory = {'smtp'}
 
@@ -553,7 +554,7 @@ class Email(object):
             elif type(data['email']) is str:
                 data['localpart'], data['domain'] = data['email'].rsplit('@', 1)
         else:
-            data['email'] = f"{data['localpart']}@{data['domain']}"
+            data['email'] = f'{data["localpart"]}@{data["domain"]}'
 
     @declarative.declared_attr
     def domain_name(cls):
@@ -565,9 +566,9 @@ class Email(object):
     # especially when the mail server is reading the database.
     @declarative.declared_attr
     def email(cls):
-        updater = lambda context: "{0}@{1}".format(
-            context.current_parameters["localpart"],
-            context.current_parameters["domain_name"],
+        updater = lambda context: '{0}@{1}'.format(
+            context.current_parameters['localpart'],
+            context.current_parameters['domain_name'],
         )
         return db.Column(IdnaEmail,
             primary_key=True, nullable=False,
@@ -576,12 +577,12 @@ class Email(object):
     def sendmail(self, subject, body):
         """ Send an email to the address.
         """
-        from_address = "{0}@{1}".format(
+        from_address = '{0}@{1}'.format(
             app.config['POSTMASTER'],
             idna.encode(app.config['DOMAIN']).decode('ascii'),
         )
         with smtplib.SMTP(app.config['HOST_AUTHSMTP'], port=10025) as smtp:
-            to_address = "{0}@{1}".format(
+            to_address = '{0}@{1}'.format(
                 self.localpart,
                 idna.encode(self.domain_name).decode('ascii'),
             )
@@ -638,7 +639,8 @@ class Email(object):
 class User(Base, Email):
     """ A user is an email address that has a password to access a mailbox.
     """
-    __tablename__ = "user"
+
+    __tablename__ = 'user'
 
     _dict_hide = {'domain_name', 'domain', 'localpart', 'quota_bytes_used'}
     _dict_mandatory = {'localpart', 'domain', 'password'}
@@ -689,7 +691,7 @@ class User(Base, Email):
         default=date(2999, 12, 31))
 
     # Settings
-    displayed_name = db.Column(db.String(160), nullable=False, default="")
+    displayed_name = db.Column(db.String(160), nullable=False, default='')
     spam_enabled = db.Column(db.Boolean(), nullable=False, default=True)
     spam_threshold = db.Column(db.Integer(), nullable=False, default=80)
 
@@ -720,12 +722,12 @@ class User(Base, Email):
             self.reply_enddate > now
         )
 
-    scheme_dict = {'PBKDF2': "pbkdf2_sha512",
-                   'BLF-CRYPT': "bcrypt",
-                   'SHA512-CRYPT': "sha512_crypt",
-                   'SHA256-CRYPT': "sha256_crypt",
-                   'MD5-CRYPT': "md5_crypt",
-                   'CRYPT': "des_crypt"}
+    scheme_dict = {'PBKDF2': 'pbkdf2_sha512',
+                   'BLF-CRYPT': 'bcrypt',
+                   'SHA512-CRYPT': 'sha512_crypt',
+                   'SHA256-CRYPT': 'sha256_crypt',
+                   'MD5-CRYPT': 'md5_crypt',
+                   'CRYPT': 'des_crypt'}
 
     def get_password_context(self):
         return context.CryptContext(
@@ -745,7 +747,7 @@ class User(Base, Email):
 
     def set_password(self, password, hash_scheme=None, raw=False):
         """Set password for user with specified encryption scheme
-           @password: plain text password to encrypt (if raw == True the hash itself)
+        @password: plain text password to encrypt (if raw == True the hash itself)
         """
         if hash_scheme is None:
             hash_scheme = app.config['PASSWORD_SCHEME']
@@ -787,7 +789,8 @@ class User(Base, Email):
 class Alias(Base, Email):
     """ An alias is an email address that redirects to some destination.
     """
-    __tablename__ = "alias"
+
+    __tablename__ = 'alias'
 
     _dict_hide = {'domain_name', 'domain', 'localpart'}
     @staticmethod
@@ -813,7 +816,7 @@ class Alias(Base, Email):
                             cls.localpart == localpart
                         ), sqlalchemy.and_(
                             cls.wildcard == True,
-                            sqlalchemy.bindparam("l", localpart).like(cls.localpart)
+                            sqlalchemy.bindparam('l', localpart).like(cls.localpart)
                         )
                     )
                 )
@@ -828,7 +831,7 @@ class Alias(Base, Email):
                             sqlalchemy.func.lower(cls.localpart) == localpart_lower
                         ), sqlalchemy.and_(
                             cls.wildcard == True,
-                            sqlalchemy.bindparam("l", localpart_lower).like(sqlalchemy.func.lower(cls.localpart))
+                            sqlalchemy.bindparam('l', localpart_lower).like(sqlalchemy.func.lower(cls.localpart))
                         )
                     )
                 )
@@ -849,7 +852,8 @@ class Alias(Base, Email):
 class Token(Base):
     """ A token is an application password for a given user.
     """
-    __tablename__ = "token"
+
+    __tablename__ = 'token'
 
     _dict_recurse = True
     _dict_hide = {'user', 'user_email'}
@@ -877,7 +881,8 @@ class Fetch(Base):
     """ A fetched account is a remote POP/IMAP account fetched into a local
     account.
     """
-    __tablename__ = "fetch"
+
+    __tablename__ = 'fetch'
 
     _dict_recurse = True
     _dict_hide = {'user_email', 'user', 'last_check', 'error'}

@@ -129,7 +129,7 @@ So when you have something like this:
 - The admin interface generates ``MX`` and ``SPF`` examples which point to the first entry of ``HOSTNAMES`` but these are only examples.
   You can modify them to use any other ``HOSTNAMES`` entry.
 
-You're mail service will be reachable for IMAP, POP3, SMTP and Webmail at the addresses:
+Your mail service will be reachable for IMAP, POP3, SMTP and Webmail at the addresses:
 
 - mail.example.com
 - mail.foo.com

@@ -70,7 +70,7 @@ class CommaSeparatedList(db.TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         if not isinstance(value, (list, set)):
-            raise TypeError('Should be a list')
+            raise TypeError('Must be a list')
         for item in value:
             if ',' in item:
                 raise ValueError('Item must not contain a comma')
@@ -792,9 +792,9 @@ class User(Base, Email):
         return emails
 
     def send_welcome(self):
-        if app.config["WELCOME"]:
-            self.sendmail(app.config["WELCOME_SUBJECT"],
-                app.config["WELCOME_BODY"])
+        if app.config['WELCOME']:
+            self.sendmail(app.config['WELCOME_SUBJECT'],
+                app.config['WELCOME_BODY'])
 
     @classmethod
     def get(cls, email):

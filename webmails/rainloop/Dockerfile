@@ -47,4 +47,7 @@ VOLUME ["/data"]
 
 CMD /start.py
 
+ENV HOST_FRONT="front" \
+    HOST_IMAP="imap"
+
 HEALTHCHECK CMD curl -f -L http://localhost/ || exit 1

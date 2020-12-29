@@ -22,4 +22,9 @@ VOLUME ["/queue"]
 
 CMD /start.py
 
+ENV HOST_FRONT="front" \
+    HOST_ADMIN="admin" \
+    HOST_ANTISPAM_MILTER="antispam:11332" \
+    HOST_LMTP="imap:2525"
+
 HEALTHCHECK --start-period=350s CMD echo QUIT|nc localhost 25|grep "220 .* ESMTP Postfix"

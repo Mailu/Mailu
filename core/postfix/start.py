@@ -14,7 +14,7 @@ log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
 def start_podop():
     os.setuid(100)
-    url = "http://" + os.environ["ADMIN_ADDRESS"] + "/internal/postfix/"
+    url = "http://" + os.environ["HOST_ADMIN"] + "/internal/postfix/"
     # TODO: Remove verbosity setting from Podop?
     run_server(0, "postfix", "/tmp/podop.socket", [
 		("transport", "url", url + "transport/§"),

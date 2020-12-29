@@ -22,4 +22,8 @@ VOLUME ["/var/lib/rspamd"]
 
 CMD /start.py
 
+ENV HOST_FRONT="front" \
+    HOST_REDIS="redis" \
+    HOST_ANTIVIRUS="antivirus:3310"
+
 HEALTHCHECK --start-period=350s CMD curl -f -L http://localhost:11334/ || exit 1

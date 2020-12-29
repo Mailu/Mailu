@@ -37,4 +37,8 @@ VOLUME ["/mail"]
 
 CMD /start.py
 
+ENV HOST_FRONT="front" \
+    HOST_ADMIN="admin" \
+    HOST_ANTISPAM_WEBUI="antispam:11334"
+
 HEALTHCHECK --start-period=350s CMD echo QUIT|nc localhost 110|grep "Dovecot ready."

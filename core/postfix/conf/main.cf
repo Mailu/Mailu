@@ -74,7 +74,7 @@ virtual_mailbox_maps = ${podop}mailbox
 # Mails are transported if required, then forwarded to Dovecot for delivery
 relay_domains = ${podop}transport
 transport_maps = ${podop}transport
-virtual_transport = lmtp:inet:{{ LMTP_ADDRESS }}
+virtual_transport = lmtp:inet:{{ HOST_LMTP }}
 
 # Sender and recipient canonical maps, mostly for SRS
 sender_canonical_maps = ${podop}sendermap
@@ -118,7 +118,7 @@ unverified_recipient_reject_reason = Address lookup failure
 # Milter
 ###############
 
-smtpd_milters = inet:{{ ANTISPAM_MILTER_ADDRESS }}
+smtpd_milters = inet:{{ HOST_ANTISPAM_MILTER }}
 milter_protocol = 6
 milter_mail_macros = i {mail_addr} {client_addr} {client_name} {auth_authen}
 milter_default_action = tempfail

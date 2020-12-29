@@ -121,8 +121,8 @@ class ConfigManager(dict):
             template = self.DB_TEMPLATES[self.config['DB_FLAVOR']]
             self.config['SQLALCHEMY_DATABASE_URI'] = template.format(**self.config)
 
-        self.config['RATELIMIT_STORAGE_URL'] = 'redis://{0}/2'.format(self.config['REDIS_ADDRESS'])
-        self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['REDIS_ADDRESS'])
+        self.config['RATELIMIT_STORAGE_URL'] = 'redis://{0}/2'.format(self.config['HOST_REDIS'])
+        self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['HOST_REDIS'])
         # update the app config itself
         app.config = self
 

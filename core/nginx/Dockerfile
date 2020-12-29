@@ -22,4 +22,9 @@ VOLUME ["/overrides"]
 
 CMD /start.py
 
+ENV HOST_ADMIN="admin" \
+    HOST_ANTISPAM_WEBUI="antispam:11334" \
+    HOST_WEBMAIL="webmail" \
+    HOST_WEBDAV="webdav:5232"
+
 HEALTHCHECK CMD curl -k -f -L http://localhost/health || exit 1

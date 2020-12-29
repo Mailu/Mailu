@@ -32,11 +32,6 @@ def is_valid_postconf_line(line):
             and not line == ''
 
 # Actual startup script
-os.environ["FRONT_ADDRESS"] = system.get_host_address_from_environment("FRONT", "front")
-os.environ["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
-os.environ["ANTISPAM_MILTER_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM_MILTER", "antispam:11332")
-os.environ["LMTP_ADDRESS"] = system.get_host_address_from_environment("LMTP", "imap:2525")
-
 for postfix_file in glob.glob("/conf/*.cf"):
     conf.jinja(postfix_file, os.environ, os.path.join("/etc/postfix", os.path.basename(postfix_file)))
 

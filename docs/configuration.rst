@@ -164,9 +164,9 @@ separately from a supported orchestrator. It is used by the various components
 to find the location of the other containers it depends on. They can contain an
 optional port number. Those variables are:
 
+- ``HOST_FRONT``: the container that is running the frontend for Mailu (default: ``front``)
 - ``HOST_IMAP``: the container that is running the IMAP server (default: ``imap``, port 143)
 - ``HOST_LMTP``: the container that is running the LMTP server (default: ``imap:2525``)
-- ``HOST_HOSTIMAP``: the container that is running the IMAP server for the webmail (default: ``imap``, port 10143)
 - ``HOST_POP3``: the container that is running the POP3 server (default: ``imap``, port 110)
 - ``HOST_SMTP``: the container that is running the SMTP server (default: ``smtp``, port 25)
 - ``HOST_AUTHSMTP``: the container that is running the authenticated SMTP server for the webnmail (default: ``smtp``, port 10025)

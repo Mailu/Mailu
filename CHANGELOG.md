@@ -11,6 +11,9 @@ The Dovecot and Postfix overrides are moved in their own sub-directory.
 If there are local override files, they will need to be moved from overrides/ to overrides/dovecot and overrides/postfix/.
 See https://mailu.io/1.8/faq.html#how-can-i-override-settings for all the mappings.
 
+Resolution of HOST_* environment variables at startup, and the corresponding *_ADDRESS variables have been removed.
+Use the HOST_* variables directly instead.
+
 Please not that the shipped image for PostgreSQL database is deprecated.
 We advise to switch to an external database server.
 

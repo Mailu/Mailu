@@ -37,6 +37,12 @@ Please not that the shipped image for PostgreSQL database is deprecated.
 The shipped image for PostgreSQL is not maintained anymore from release 1.8.
 We recommend switching to an external database as soon as possible.
 
+Removal of HOST_* address resolution
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The startup scripts will no longer resolve ``HOST_*`` to their IP addresses.
+
+Previously, ``*_ADDRESS`` variables could directly be set by the user to override the startup address resolution. Since container addresses are not resolved at startup anymore, this override has been removed and ``HOST_*`` variables can be used directly.
+
 Override location changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -1,0 +1,1 @@
+Remove startup resolution of HOST_* variables to *_ADDRESS

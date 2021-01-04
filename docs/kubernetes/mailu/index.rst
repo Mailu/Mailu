@@ -3,6 +3,10 @@
 Kubernetes setup
 ================
 
+> Hold up!
+> These instructions are not recommended for setting up Mailu in a production Kubernetes environment.
+> Please see [the Helm Chart documentation](https://github.com/Mailu/helm-charts/blob/master/mailu/README.md).
+
 Prequisites
 -----------
 

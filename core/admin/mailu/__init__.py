@@ -41,15 +41,17 @@ def create_app_from_config(config):
         )
 
     # Import views
-    from mailu import ui, internal
+    from mailu import ui, internal, api
     app.register_blueprint(ui.ui, url_prefix='/ui')
     app.register_blueprint(internal.internal, url_prefix='/internal')
+    if app.config.get('API'):
+        api.register(app)
 
     return app
 
 
 def create_app():
-    """ Create a new application based on the config module 
+    """ Create a new application based on the config module
     """
     config = configuration.ConfigManager()
     return create_app_from_config(config)

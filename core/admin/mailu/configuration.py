@@ -51,6 +51,7 @@ DEFAULT_CONFIG = {
     'WEBMAIL': 'none',
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
+    'API': False,
     # Advanced settings
     'PASSWORD_SCHEME': 'PBKDF2',
     'LOG_LEVEL': 'WARNING',
@@ -71,7 +72,7 @@ DEFAULT_CONFIG = {
     'POD_ADDRESS_RANGE': None
 }
 
-class ConfigManager(dict):
+class ConfigManager:
     """ Naive configuration manager that uses environment only
     """
 
@@ -86,19 +87,16 @@ class ConfigManager(dict):
 
     def get_host_address(self, name):
         # if MYSERVICE_ADDRESS is defined, use this
-        if '{}_ADDRESS'.format(name) in os.environ:
-            return os.environ.get('{}_ADDRESS'.format(name))
+        if f'{name}_ADDRESS' in os.environ:
+            return os.environ.get(f'{name}_ADDRESS')
         # otherwise use the host name and resolve it
-        return system.resolve_address(self.config['HOST_{}'.format(name)])
+        return system.resolve_address(self.config[f'HOST_{name}'])
 
     def resolve_hosts(self):
-        self.config["IMAP_ADDRESS"] = self.get_host_address("IMAP")
-        self.config["POP3_ADDRESS"] = self.get_host_address("POP3")
-        self.config["AUTHSMTP_ADDRESS"] = self.get_host_address("AUTHSMTP")
-        self.config["SMTP_ADDRESS"] = self.get_host_address("SMTP")
-        self.config["REDIS_ADDRESS"] = self.get_host_address("REDIS")
-        if self.config["WEBMAIL"] != "none":
-            self.config["WEBMAIL_ADDRESS"] = self.get_host_address("WEBMAIL")
+        for key in ['IMAP', 'POP3', 'AUTHSMTP', 'SMTP', 'REDIS']:
+            self.config[f'{key}_ADDRESS'] = self.get_host_address(key)
+        if self.config['WEBMAIL'] != 'none':
+            self.config['WEBMAIL_ADDRESS'] = self.get_host_address('WEBMAIL')
 
     def __coerce_value(self, value):
         if isinstance(value, str) and value.lower() in ('true','yes'):
@@ -108,6 +106,7 @@ class ConfigManager(dict):
         return value
 
     def init_app(self, app):
+        # get current app config
         self.config.update(app.config)
         # get environment variables
         self.config.update({
@@ -121,27 +120,8 @@ class ConfigManager(dict):
             template = self.DB_TEMPLATES[self.config['DB_FLAVOR']]
             self.config['SQLALCHEMY_DATABASE_URI'] = template.format(**self.config)
 
-        self.config['RATELIMIT_STORAGE_URL'] = 'redis://{0}/2'.format(self.config['REDIS_ADDRESS'])
-        self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['REDIS_ADDRESS'])
-        # update the app config itself
-        app.config = self
+        self.config['RATELIMIT_STORAGE_URL'] = f'redis://{self.config["REDIS_ADDRESS"]}/2'
+        self.config['QUOTA_STORAGE_URL'] = f'redis://{self.config["REDIS_ADDRESS"]}/1'
 
-    def setdefault(self, key, value):
-        if key not in self.config:
-            self.config[key] = value
-        return self.config[key]
-
-    def get(self, *args):
-        return self.config.get(*args)
-
-    def keys(self):
-        return self.config.keys()
-
-    def __getitem__(self, key):
-        return self.config.get(key)
-
-    def __setitem__(self, key, value):
-        self.config[key] = value
-
-    def __contains__(self, key):
-        return key in self.config
+        # update the app config
+        app.config.update(self.config)

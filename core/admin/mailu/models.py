@@ -1,7 +1,6 @@
 from mailu import dkim
 
 from sqlalchemy.ext import declarative
-from passlib import context, hash
 from datetime import datetime, date
 from email.mime import text
 from flask import current_app as app
@@ -12,6 +11,7 @@ import sqlalchemy
 import re
 import time
 import os
+import passlib
 import glob
 import smtplib
 import idna
@@ -113,8 +113,8 @@ class Base(db.Model):
     comment = db.Column(db.String(255), nullable=True)
 
     @classmethod
-    def _dict_pkey(model):
-        return model.__mapper__.primary_key[0].name
+    def _dict_pkey(cls):
+        return cls.__mapper__.primary_key[0].name
 
     def _dict_pval(self):
         return getattr(self, self._dict_pkey())
@@ -187,57 +187,57 @@ class Base(db.Model):
         return res
 
     @classmethod
-    def from_dict(model, data, delete=False):
+    def from_dict(cls, data, delete=False):
 
         changed = []
 
-        pkey = model._dict_pkey()
+        pkey = cls._dict_pkey()
 
         # handle "primary key" only
-        if type(data) is not dict:
+        if isinstance(data, dict):
             data = {pkey: data}
 
         # modify input data
-        if hasattr(model, '_dict_input'):
+        if hasattr(cls, '_dict_input'):
             try:
-                model._dict_input(data)
+                cls._dict_input(data)
             except Exception as reason:
-                raise ValueError(f'{reason}', model, None, data)
+                raise ValueError(f'{reason}', cls, None, data)
 
         # check for primary key (if not recursed)
-        if not getattr(model, '_dict_recurse', False):
+        if not getattr(cls, '_dict_recurse', False):
             if not pkey in data:
-                raise KeyError(f'primary key {model.__table__}.{pkey} is missing', model, pkey, data)
+                raise KeyError(f'primary key {cls.__table__}.{pkey} is missing', cls, pkey, data)
 
         # check data keys and values
         for key in list(data.keys()):
 
             # check key
-            if not hasattr(model, key) and not key in model.__mapper__.relationships:
-                raise KeyError(f'unknown key {model.__table__}.{key}', model, key, data)
+            if not hasattr(cls, key) and not key in cls.__mapper__.relationships:
+                raise KeyError(f'unknown key {cls.__table__}.{key}', cls, key, data)
 
             # check value type
             value = data[key]
-            col = model.__mapper__.columns.get(key)
+            col = cls.__mapper__.columns.get(key)
             if col is not None:
-                if not ((value is None and col.nullable) or (type(value) is col.type.python_type)):
-                    raise TypeError(f'{model.__table__}.{key} {value!r} has invalid type {type(value).__name__!r}', model, key, data)
+                if not ((value is None and col.nullable) or (isinstance(value, col.type.python_type))):
+                    raise TypeError(f'{cls.__table__}.{key} {value!r} has invalid type {type(value).__name__!r}', cls, key, data)
             else:
-                rel = model.__mapper__.relationships.get(key)
+                rel = cls.__mapper__.relationships.get(key)
                 if rel is None:
-                    itype = getattr(model, '_dict_types', {}).get(key)
+                    itype = getattr(cls, '_dict_types', {}).get(key)
                     if itype is not None:
                         if itype is False: # ignore value. TODO: emit warning?
                             del data[key]
                             continue
                         elif not isinstance(value, itype):
-                            raise TypeError(f'{model.__table__}.{key} {value!r} has invalid type {type(value).__name__!r}', model, key, data)
+                            raise TypeError(f'{cls.__table__}.{key} {value!r} has invalid type {type(value).__name__!r}', cls, key, data)
                     else:
-                        raise NotImplementedError(f'type not defined for {model.__table__}.{key}')
+                        raise NotImplementedError(f'type not defined for {cls.__table__}.{key}')
 
             # handle relationships
-            if key in model.__mapper__.relationships:
-                rel_model = model.__mapper__.relationships[key].argument
+            if key in cls.__mapper__.relationships:
+                rel_model = cls.__mapper__.relationships[key].argument
                 if not isinstance(rel_model, sqlalchemy.orm.Mapper):
                     add = rel_model.from_dict(value, delete)
                     assert len(add) == 1
@@ -247,24 +247,24 @@ class Base(db.Model):
 
         # create item if necessary
         created = False
-        item = model.query.get(data[pkey]) if pkey in data else None
+        item = cls.query.get(data[pkey]) if pkey in data else None
         if item is None:
 
             # check for mandatory keys
-            missing = getattr(model, '_dict_mandatory', set()) - set(data.keys())
+            missing = getattr(cls, '_dict_mandatory', set()) - set(data.keys())
             if missing:
-                raise ValueError(f'mandatory key(s) {", ".join(sorted(missing))} for {model.__table__} missing', model, missing, data)
+                raise ValueError(f'mandatory key(s) {", ".join(sorted(missing))} for {cls.__table__} missing', cls, missing, data)
 
             # remove mapped relationships from data
             mapped = {}
             for key in list(data.keys()):
-                if key in model.__mapper__.relationships:
-                    if isinstance(model.__mapper__.relationships[key].argument, sqlalchemy.orm.Mapper):
+                if key in cls.__mapper__.relationships:
+                    if isinstance(cls.__mapper__.relationships[key].argument, sqlalchemy.orm.Mapper):
                         mapped[key] = data[key]
                         del data[key]
 
             # create new item
-            item = model(**data)
+            item = cls(**data)
             created = True
 
             # and update mapped relationships (below)
@@ -278,14 +278,14 @@ class Base(db.Model):
             if key == pkey:
                 continue
 
-            if key in model.__mapper__.relationships:
+            if key in cls.__mapper__.relationships:
                 # update relationship
-                rel_model = model.__mapper__.relationships[key].argument
+                rel_model = cls.__mapper__.relationships[key].argument
                 if isinstance(rel_model, sqlalchemy.orm.Mapper):
                     rel_model = rel_model.class_
                     # add (and create) referenced items
                     cur = getattr(item, key)
-                    old = sorted(cur, key=lambda i:id(i))
+                    old = sorted(cur, key=id)
                     new = []
                     for rel_data in value:
                         # get or create related item
@@ -331,16 +331,16 @@ class Base(db.Model):
                                         break
 
                     # remember changes
-                    new = sorted(new, key=lambda i:id(i))
+                    new = sorted(new, key=id)
                     if new != old:
                         updated.append((key, old, new))
 
             else:
                 # update key
                 old = getattr(item, key)
-                if type(old) is list:
+                if isinstance(old, list):
                     # deduplicate list value
-                    assert type(value) is list
+                    assert isinstance(value, list)
                     value = set(value)
                     old = set(old)
                     if not delete:
@@ -408,19 +408,19 @@ class Domain(Base):
         if 'dkim_key' in data:
             key = data['dkim_key']
             if key is not None:
-                if type(key) is list:
+                if isinstance(key, list):
                     key = ''.join(key)
-                if type(key) is str:
+                if isinstance(key, str):
                     key = ''.join(key.strip().split()) # removes all whitespace
                     if key == 'generate':
                         data['dkim_key'] = dkim.gen_key()
                     elif key:
-                        m = re.match('^-----BEGIN (RSA )?PRIVATE KEY-----', key)
-                        if m is not None:
-                            key = key[m.end():]
-                        m = re.search('-----END (RSA )?PRIVATE KEY-----$', key)
-                        if m is not None:
-                            key = key[:m.start()]
+                        match = re.match('^-----BEGIN (RSA )?PRIVATE KEY-----', key)
+                        if match is not None:
+                            key = key[match.end():]
+                        match = re.search('-----END (RSA )?PRIVATE KEY-----$', key)
+                        if match is not None:
+                            key = key[:match.start()]
                         key = '\n'.join(wrap(key, 64))
                         key = f'-----BEGIN PRIVATE KEY-----\n{key}\n-----END PRIVATE KEY-----\n'.encode('ascii')
                         try:
@@ -428,7 +428,7 @@ class Domain(Base):
                         except:
                             raise ValueError('invalid dkim key')
                         else:
-                          data['dkim_key'] = key
+                            data['dkim_key'] = key
                     else:
                         data['dkim_key'] = None
 
@@ -505,8 +505,7 @@ class Domain(Base):
         for email in self.users + self.aliases:
             if email.localpart == localpart:
                 return True
-        else:
-            return False
+        return False
 
     def check_mx(self):
         try:
@@ -519,7 +518,7 @@ class Domain(Base):
             return False
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def __eq__(self, other):
         try:
@@ -541,7 +540,7 @@ class Alternative(Base):
         backref=db.backref('alternatives', cascade='all, delete-orphan'))
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Relay(Base):
@@ -557,7 +556,7 @@ class Relay(Base):
     smtp = db.Column(db.String(80), nullable=True)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Email(object):
@@ -571,7 +570,7 @@ class Email(object):
         if 'email' in data:
             if 'localpart' in data or 'domain' in data:
                 raise ValueError('ambigous key email and localpart/domain')
-            elif type(data['email']) is str:
+            elif isinstance(data['email'], str):
                 data['localpart'], data['domain'] = data['email'].rsplit('@', 1)
         else:
             data['email'] = f'{data["localpart"]}@{data["domain"]}'
@@ -653,7 +652,7 @@ class Email(object):
             return pure_alias.destination
 
     def __str__(self):
-        return self.email
+        return str(self.email)
 
 
 class User(Base, Email):
@@ -750,7 +749,7 @@ class User(Base, Email):
                    'CRYPT': 'des_crypt'}
 
     def get_password_context(self):
-        return context.CryptContext(
+        return passlib.context.CryptContext(
             schemes=self.scheme_dict.values(),
             default=self.scheme_dict[app.config['PASSWORD_SCHEME']],
         )
@@ -818,7 +817,7 @@ class Alias(Base, Email):
         Email._dict_input(data)
         # handle comma delimited string for backwards compability
         dst = data.get('destination')
-        if type(dst) is str:
+        if isinstance(dst, str):
             data['destination'] = list([adr.strip() for adr in dst.split(',')])
 
     domain = db.relationship(Domain,
@@ -888,10 +887,10 @@ class Token(Base):
     ip = db.Column(db.String(255))
 
     def check_password(self, password):
-        return hash.sha256_crypt.verify(password, self.password)
+        return passlib.hash.sha256_crypt.verify(password, self.password)
 
     def set_password(self, password):
-        self.password = hash.sha256_crypt.using(rounds=1000).hash(password)
+        self.password = passlib.hash.sha256_crypt.using(rounds=1000).hash(password)
 
     def __str__(self):
         return self.comment or self.ip

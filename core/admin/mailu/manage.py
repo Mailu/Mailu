@@ -1,9 +1,8 @@
 from mailu import models
 
 from flask import current_app as app
-from flask import cli as flask_cli
+from flask.cli import FlaskGroup, with_appcontext
 
-import flask
 import os
 import socket
 import uuid
@@ -15,14 +14,14 @@ import sys
 db = models.db
 
 
-@click.group()
-def mailu(cls=flask_cli.FlaskGroup):
+@click.group(cls=FlaskGroup)
+def mailu():
     """ Mailu command line
     """
 
 
 @mailu.command()
-@flask_cli.with_appcontext
+@with_appcontext
 def advertise():
     """ Advertise this server against statistic services.
     """
@@ -45,7 +44,7 @@ def advertise():
 @click.argument('domain_name')
 @click.argument('password')
 @click.option('-m', '--mode')
-@flask_cli.with_appcontext
+@with_appcontext
 def admin(localpart, domain_name, password, mode='create'):
     """ Create an admin user
         'mode' can be:
@@ -89,7 +88,7 @@ def admin(localpart, domain_name, password, mode='create'):
 @click.argument('domain_name')
 @click.argument('password')
 @click.argument('hash_scheme', required=False)
-@flask_cli.with_appcontext
+@with_appcontext
 def user(localpart, domain_name, password, hash_scheme=None):
     """ Create a user
     """
@@ -114,7 +113,7 @@ def user(localpart, domain_name, password, hash_scheme=None):
 @click.argument('domain_name')
 @click.argument('password')
 @click.argument('hash_scheme', required=False)
-@flask_cli.with_appcontext
+@with_appcontext
 def password(localpart, domain_name, password, hash_scheme=None):
     """ Change the password of an user
     """
@@ -134,7 +133,7 @@ def password(localpart, domain_name, password, hash_scheme=None):
 @click.option('-u', '--max-users')
 @click.option('-a', '--max-aliases')
 @click.option('-q', '--max-quota-bytes')
-@flask_cli.with_appcontext
+@with_appcontext
 def domain(domain_name, max_users=-1, max_aliases=-1, max_quota_bytes=0):
     """ Create a domain
     """
@@ -151,7 +150,7 @@ def domain(domain_name, max_users=-1, max_aliases=-1, max_quota_bytes=0):
 @click.argument('domain_name')
 @click.argument('password_hash')
 @click.argument('hash_scheme')
-@flask_cli.with_appcontext
+@with_appcontext
 def user_import(localpart, domain_name, password_hash, hash_scheme = None):
     """ Import a user along with password hash.
     """
@@ -183,7 +182,7 @@ yaml_sections = [
 @click.option('-v', '--verbose', is_flag=True, help='Increase verbosity')
 @click.option('-d', '--delete-objects', is_flag=True, help='Remove objects not included in yaml')
 @click.option('-n', '--dry-run', is_flag=True, help='Perform a trial run with no changes made')
-@flask_cli.with_appcontext
+@with_appcontext
 def config_update(verbose=False, delete_objects=False, dry_run=False, file=None):
     """sync configuration with data from YAML-formatted stdin"""
 
@@ -303,7 +302,7 @@ def config_update(verbose=False, delete_objects=False, dry_run=False, file=None)
 @click.option('-s', '--secrets', is_flag=True, help='Include secrets (dkim-key, plain-text / not hashed)')
 @click.option('-d', '--dns', is_flag=True, help='Include dns records')
 @click.argument('sections', nargs=-1)
-@flask_cli.with_appcontext
+@with_appcontext
 def config_dump(full=False, secrets=False, dns=False, sections=None):
     """dump configuration as YAML-formatted data to stdout
 
@@ -343,7 +342,7 @@ def config_dump(full=False, secrets=False, dns=False, sections=None):
 
 @mailu.command()
 @click.argument('email')
-@flask_cli.with_appcontext
+@with_appcontext
 def user_delete(email):
     """delete user"""
     user = models.User.query.get(email)
@@ -354,7 +353,7 @@ def user_delete(email):
 
 @mailu.command()
 @click.argument('email')
-@flask_cli.with_appcontext
+@with_appcontext
 def alias_delete(email):
     """delete alias"""
     alias = models.Alias.query.get(email)
@@ -368,7 +367,7 @@ def alias_delete(email):
 @click.argument('domain_name')
 @click.argument('destination')
 @click.option('-w', '--wildcard', is_flag=True)
-@flask_cli.with_appcontext
+@with_appcontext
 def alias(localpart, domain_name, destination, wildcard=False):
     """ Create an alias
     """
@@ -392,7 +391,7 @@ def alias(localpart, domain_name, destination, wildcard=False):
 @click.argument('max_users')
 @click.argument('max_aliases')
 @click.argument('max_quota_bytes')
-@flask_cli.with_appcontext
+@with_appcontext
 def setlimits(domain_name, max_users, max_aliases, max_quota_bytes):
     """ Set domain limits
     """
@@ -407,7 +406,7 @@ def setlimits(domain_name, max_users, max_aliases, max_quota_bytes):
 @mailu.command()
 @click.argument('domain_name')
 @click.argument('user_name')
-@flask_cli.with_appcontext
+@with_appcontext
 def setmanager(domain_name, user_name='manager'):
     """ Make a user manager of a domain
     """

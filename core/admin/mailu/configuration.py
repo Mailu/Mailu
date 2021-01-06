@@ -69,6 +69,7 @@ DEFAULT_CONFIG = {
     'RECAPTCHA_PRIVATE_KEY': '',
     'LOGO_URL': None,
     'LOGO_BACKGROUND': None,
+    'API': False,
     # Advanced settings
     'LOG_LEVEL': 'WARNING',
     'SESSION_KEY_BITS': 128,
@@ -157,4 +158,3 @@ class ConfigManager:
 
         # update the app config
         app.config.update(self.config)
-

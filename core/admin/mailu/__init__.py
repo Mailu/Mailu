@@ -70,10 +70,12 @@ def create_app_from_config(config):
         return utils.flask_babel.format_datetime(value) if value else ''
 
     # Import views
-    from mailu import ui, internal, sso
+    from mailu import ui, internal, sso, api
     app.register_blueprint(ui.ui, url_prefix=app.config['WEB_ADMIN'])
     app.register_blueprint(internal.internal, url_prefix='/internal')
     app.register_blueprint(sso.sso, url_prefix='/sso')
+    if app.config.get('API'):
+        api.register(app)
     return app
 
 

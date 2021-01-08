@@ -1,3 +1,7 @@
+"""
+API: domain
+"""
+
 from flask_restx import Resource, fields, abort
 
 from . import api, response_fields, error_fields
@@ -9,6 +13,7 @@ db = models.db
 dom = api.namespace('domain', description='Domain operations')
 alt = api.namespace('alternative', description='Alternative operations')
 
+# TODO: use marshmallow
 domain_fields = api.model('Domain', {
     'name': fields.String(description='FQDN', example='example.com', required=True),
     'comment': fields.String(description='a comment'),
@@ -19,12 +24,12 @@ domain_fields = api.model('Domain', {
 #    'dkim_key': fields.String,
     'alternatives': fields.List(fields.String(attribute='name', description='FQDN', example='example.com')),
 })
-# TODO - name ist required on creation but immutable on change
-# TODO - name and alteranatives need to be checked to be a fqdn (regex)
+# TODO: name ist required on creation but immutable on change
+# TODO: name and alteranatives need to be checked to be a fqdn (regex)
 
 domain_parser = api.parser()
 domain_parser.add_argument('max_users', type=int, help='maximum number of users')
-# TODO ... add more (or use marshmallow)
+# TODO: ... add more (or use marshmallow)
 
 alternative_fields = api.model('Domain', {
     'name': fields.String(description='alternative FQDN', example='example.com', required=True),
@@ -65,7 +70,7 @@ class Domains(Resource):
 
 @dom.route('/<name>')
 class Domain(Resource):
-    
+
     @dom.doc('get_domain')
     @dom.response(200, 'Success', domain_fields)
     @dom.response(404, 'Domain not found')
@@ -76,7 +81,7 @@ class Domain(Resource):
         if not domain:
             abort(404)
         return domain
-           
+
     @dom.doc('update_domain')
     @dom.expect(domain_fields)
     @dom.response(200, 'Success', response_fields)
@@ -109,7 +114,7 @@ class Domain(Resource):
         for item, created in models.Domain.from_dict(data):
             if created is True:
                 db.session.add(item)
-                # TODO: flush? 
+                # TODO: flush?
         db.session.commit()
 
     @dom.doc('delete_domain')
@@ -123,11 +128,11 @@ class Domain(Resource):
         db.session.delete(domain)
         db.session.commit()
 
-                               
+
 # @dom.route('/<name>/alternative')
 # @alt.route('')
 # class Alternatives(Resource):
-    
+
 #     @alt.doc('alternatives_list')
 #     @alt.marshal_with(alternative_fields, as_list=True, skip_none=True, mask=['dkim_key'])
 #     def get(self, name=None):
@@ -136,7 +141,7 @@ class Domain(Resource):
 #             return models.Alternative.query.all()
 #         else:
 #             return models.Alternative.query.filter_by(domain_name = name).all()
-        
+
 #     @alt.doc('alternative_create')
 #     @alt.expect(alternative_fields)
 #     @alt.response(200, 'Success', response_fields)
@@ -180,4 +185,3 @@ class Domain(Resource):
 #     def delete(self, name, alt=None):
 #         """ Delete alternative (for domain) """
 #         abort(501)
-

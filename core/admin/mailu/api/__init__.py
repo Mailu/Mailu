@@ -1,4 +1,11 @@
+"""
+Mailu API
+"""
+
+import os
+
 from flask import redirect, url_for
+from flask_restx.apidoc import apidoc
 
 # import api version(s)
 from . import v1
@@ -8,10 +15,11 @@ ROOT='/api'
 ACTIVE=v1
 
 # patch url for swaggerui static assets
-from flask_restx.apidoc import apidoc
 apidoc.static_url_path = f'{ROOT}/swaggerui'
 
 def register(app):
+    """ Register api blueprint in flask app
+    """
 
     # register api bluprint(s)
     app.register_blueprint(v1.blueprint, url_prefix=f'{ROOT}/v{int(v1.VERSION)}')
@@ -26,8 +34,7 @@ def register(app):
     app.config.SWAGGER_UI_OPERATION_ID = True
     app.config.SWAGGER_UI_REQUEST_DURATION = True
 
-    # TODO: remove patch of static assets for debugging
-    import os
+    # TODO: remove patch of static asset location
     if 'STATIC_ASSETS' in os.environ:
         app.blueprints['ui'].static_folder = os.environ['STATIC_ASSETS']
 

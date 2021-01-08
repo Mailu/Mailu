@@ -1,3 +1,7 @@
+"""
+API Blueprint
+"""
+
 from flask import Blueprint
 from flask_restx import Api, fields
 
@@ -24,4 +28,5 @@ error_fields = api.model('Error', {
     'message': fields.String,
 })
 
+# import api namespaces (below field defs to avoid circular reference)
 from . import domains

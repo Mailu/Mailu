@@ -1,4 +1,5 @@
 import marshmallow
+import sqlalchemy
 import flask_marshmallow
 
 from . import models
@@ -6,27 +7,51 @@ from . import models
 
 ma = flask_marshmallow.Marshmallow()
 
-
+import collections
 class BaseSchema(ma.SQLAlchemyAutoSchema):
 
-    SKIP_IF = {
-        'comment': {'', None}
-    }
+    class Meta:
+        base_hide_always  = {'created_at', 'updated_at'}
+        base_hide_secrets = set()
+        base_hide_by_value = {
+#            'comment': {'', None}
+        }
 
     @marshmallow.post_dump
     def remove_skip_values(self, data, many, **kwargs):
-        print(repr(data), self.context)
+#        print(repr(data), self.context)
+
+        # always hide
+        hide_by_key = self.Meta.base_hide_always | set(getattr(self.Meta, 'hide_always', ()))
+
+        # hide secrets
+        if not self.context.get('secrets'):
+            hide_by_key |= self.Meta.base_hide_secrets
+            hide_by_key |= set(getattr(self.Meta, 'hide_secrets', ()))
+
+        # hide by value
+        hide_by_value = self.Meta.base_hide_by_value | getattr(self.Meta, 'hide_by_value', {})
+
+        # hide defaults
+        if not self.context.get('full'):
+            for column in self.Meta.model.__table__.columns:
+#                print(column.name, column.default.arg if isinstance(column.default, sqlalchemy.sql.schema.ColumnDefault) else column.default)
+# alias.destiantion has default [] - is this okay. how to check it?
+                if column.name not in hide_by_key:
+                    hide_by_value.setdefault(column.name, set()).add(None if column.default is None else column.default.arg)
+
         return {
             key: value for key, value in data.items()
-            if key not in self.SKIP_IF or value not in self.SKIP_IF[key]
+            if
+                not isinstance(value, collections.Hashable)
+            or(
+                key not in hide_by_key
+            and
+                (key not in hide_by_value or value not in hide_by_value[key]))
         }
 
-class BaseMeta:
-    exclude = ['created_at', 'updated_at']
-
-
-class DomainSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
+class DomainSchema(BaseSchema):
+    class Meta(BaseSchema.Meta):
         model = models.Domain
 
     # _dict_hide = {'users', 'managers', 'aliases'}
@@ -80,8 +105,8 @@ class DomainSchema(ma.SQLAlchemyAutoSchema):
     # signup_enabled = db.Column(db.Boolean(), nullable=False, default=False)
 
 
-class UserSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
+class UserSchema(BaseSchema):
+    class Meta(BaseSchema.Meta):
         model = models.User
 
     # _dict_hide = {'domain_name', 'domain', 'localpart', 'quota_bytes_used'}
@@ -138,12 +163,14 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     # spam_threshold = db.Column(db.Integer(), nullable=False, default=80)
 
 class AliasSchema(BaseSchema):
-    class Meta(BaseMeta):
+    class Meta(BaseSchema.Meta):
         model = models.Alias
-        exclude = BaseMeta.exclude + ['localpart']
-        # TODO look for good way to exclude secrets, unverbose and defaults
+        hide_always  = {'localpart'}
+        hide_secrets = {'wildcard'}
+        hide_by_value = {
+            'destination': set([]) # always hide empty lists?!
+        }
 
-    # _dict_hide = {'domain_name', 'domain', 'localpart'}
     # @staticmethod
     # def _dict_input(data):
     #     Email._dict_input(data)
@@ -153,8 +180,8 @@ class AliasSchema(BaseSchema):
     #         data['destination'] = list([adr.strip() for adr in dst.split(',')])
 
 
-class TokenSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
+class TokenSchema(BaseSchema):
+    class Meta(BaseSchema.Meta):
         model = models.Token
 
     # _dict_recurse = True
@@ -170,8 +197,8 @@ class TokenSchema(ma.SQLAlchemyAutoSchema):
     # ip = db.Column(db.String(255))
 
 
-class FetchSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
+class FetchSchema(BaseSchema):
+    class Meta(BaseSchema.Meta):
         model = models.Fetch
 
     # _dict_recurse = True
@@ -195,23 +222,18 @@ class FetchSchema(ma.SQLAlchemyAutoSchema):
     # error = db.Column(db.String(1023), nullable=True)
 
 
-class ConfigSchema(ma.SQLAlchemySchema):
-    class Meta:
+class ConfigSchema(BaseSchema):
+    class Meta(BaseSchema.Meta):
         model = models.Config
-#    created_at = ma.auto_field(dump_only=True)
-#    updated_at = ma.auto_field(dump_only=True)
-    comment = ma.auto_field()
+# TODO: how to mark keys as "required" while unserializing (in certain use cases/API)
     name = ma.auto_field(required=True)
     value = ma.auto_field(required=True)
 
+
 class RelaySchema(BaseSchema):
-    class Meta(BaseMeta):
+    class Meta(BaseSchema.Meta):
         model = models.Relay
-#    created_at = ma.auto_field(dump_only=True)
-#    updated_at = ma.auto_field(dump_only=True)
-#    comment = ma.auto_field()
-#    name = ma.auto_field(required=True)
-#    smtp = ma.auto_field(required=True)
+
 
 schemas = {
     'domains': DomainSchema,

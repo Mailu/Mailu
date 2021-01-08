@@ -369,6 +369,7 @@ class Config(Base):
     value = db.Column(JSONEncoded)
 
 
+# TODO: use sqlalchemy.event.listen() on a store method of object?
 @sqlalchemy.event.listens_for(db.session, 'after_commit')
 def store_dkim_key(session):
     """ Store DKIM key on commit
@@ -437,8 +438,8 @@ class Domain(Base):
         backref=db.backref('manager_of'), lazy='dynamic')
     max_users = db.Column(db.Integer, nullable=False, default=-1)
     max_aliases = db.Column(db.Integer, nullable=False, default=-1)
-    max_quota_bytes = db.Column(db.BigInteger(), nullable=False, default=0)
-    signup_enabled = db.Column(db.Boolean(), nullable=False, default=False)
+    max_quota_bytes = db.Column(db.BigInteger, nullable=False, default=0)
+    signup_enabled = db.Column(db.Boolean, nullable=False, default=False)
     
     _dkim_key = None
     _dkim_key_changed = False
@@ -688,22 +689,22 @@ class User(Base, Email):
     domain = db.relationship(Domain,
         backref=db.backref('users', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
-    quota_bytes = db.Column(db.BigInteger(), nullable=False, default=10**9)
-    quota_bytes_used = db.Column(db.BigInteger(), nullable=False, default=0)
-    global_admin = db.Column(db.Boolean(), nullable=False, default=False)
-    enabled = db.Column(db.Boolean(), nullable=False, default=True)
+    quota_bytes = db.Column(db.BigInteger, nullable=False, default=10**9)
+    quota_bytes_used = db.Column(db.BigInteger, nullable=False, default=0)
+    global_admin = db.Column(db.Boolean, nullable=False, default=False)
+    enabled = db.Column(db.Boolean, nullable=False, default=True)
 
     # Features
-    enable_imap = db.Column(db.Boolean(), nullable=False, default=True)
-    enable_pop = db.Column(db.Boolean(), nullable=False, default=True)
+    enable_imap = db.Column(db.Boolean, nullable=False, default=True)
+    enable_pop = db.Column(db.Boolean, nullable=False, default=True)
 
     # Filters
-    forward_enabled = db.Column(db.Boolean(), nullable=False, default=False)
-    forward_destination = db.Column(CommaSeparatedList(), nullable=True, default=[])
-    forward_keep = db.Column(db.Boolean(), nullable=False, default=True)
-    reply_enabled = db.Column(db.Boolean(), nullable=False, default=False)
+    forward_enabled = db.Column(db.Boolean, nullable=False, default=False)
+    forward_destination = db.Column(CommaSeparatedList, nullable=True, default=list)
+    forward_keep = db.Column(db.Boolean, nullable=False, default=True)
+    reply_enabled = db.Column(db.Boolean, nullable=False, default=False)
     reply_subject = db.Column(db.String(255), nullable=True, default=None)
-    reply_body = db.Column(db.Text(), nullable=True, default=None)
+    reply_body = db.Column(db.Text, nullable=True, default=None)
     reply_startdate = db.Column(db.Date, nullable=False,
         default=date(1900, 1, 1))
     reply_enddate = db.Column(db.Date, nullable=False,
@@ -711,8 +712,8 @@ class User(Base, Email):
 
     # Settings
     displayed_name = db.Column(db.String(160), nullable=False, default='')
-    spam_enabled = db.Column(db.Boolean(), nullable=False, default=True)
-    spam_threshold = db.Column(db.Integer(), nullable=False, default=80)
+    spam_enabled = db.Column(db.Boolean, nullable=False, default=True)
+    spam_threshold = db.Column(db.Integer, nullable=False, default=80)
 
     # Flask-login attributes
     is_authenticated = True
@@ -822,8 +823,8 @@ class Alias(Base, Email):
 
     domain = db.relationship(Domain,
         backref=db.backref('aliases', cascade='all, delete-orphan'))
-    wildcard = db.Column(db.Boolean(), nullable=False, default=False)
-    destination = db.Column(CommaSeparatedList, nullable=False, default=[])
+    wildcard = db.Column(db.Boolean, nullable=False, default=False)
+    destination = db.Column(CommaSeparatedList, nullable=False, default=list)
 
     @classmethod
     def resolve(cls, localpart, domain_name):
@@ -878,7 +879,7 @@ class Token(Base):
     _dict_hide = {'user', 'user_email'}
     _dict_mandatory = {'password'}
 
-    id = db.Column(db.Integer(), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     user_email = db.Column(db.String(255), db.ForeignKey(User.email),
         nullable=False)
     user = db.relationship(User,
@@ -908,18 +909,18 @@ class Fetch(Base):
     _dict_mandatory = {'protocol', 'host', 'port', 'username', 'password'}
     _dict_secret = {'password'}
 
-    id = db.Column(db.Integer(), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     user_email = db.Column(db.String(255), db.ForeignKey(User.email),
         nullable=False)
     user = db.relationship(User,
         backref=db.backref('fetches', cascade='all, delete-orphan'))
     protocol = db.Column(db.Enum('imap', 'pop3'), nullable=False)
     host = db.Column(db.String(255), nullable=False)
-    port = db.Column(db.Integer(), nullable=False)
-    tls = db.Column(db.Boolean(), nullable=False, default=False)
+    port = db.Column(db.Integer, nullable=False)
+    tls = db.Column(db.Boolean, nullable=False, default=False)
     username = db.Column(db.String(255), nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    keep = db.Column(db.Boolean(), nullable=False, default=False)
+    keep = db.Column(db.Boolean, nullable=False, default=False)
     last_check = db.Column(db.DateTime, nullable=True)
     error = db.Column(db.String(1023), nullable=True)
 

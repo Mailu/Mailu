@@ -1,5 +1,5 @@
 from mailu import models
-from .schemas import schemas
+from .schemas import MailuConfig, MailuSchema
 
 from flask import current_app as app
 from flask.cli import FlaskGroup, with_appcontext
@@ -310,41 +310,17 @@ def config_dump(full=False, secrets=False, dns=False, sections=None):
     SECTIONS can be: domains, relays, users, aliases
     """
 
-    class spacedDumper(yaml.Dumper):
+    try:
+        config = MailuConfig(sections)
+    except ValueError as reason:
+        print(f'[ERROR] {reason}')
+        return 1
 
-        def write_line_break(self, data=None):
-            super().write_line_break(data)
-            if len(self.indents) == 1:
-                super().write_line_break()
-
-        def increase_indent(self, flow=False, indentless=False):
-            return super().increase_indent(flow, False)
-
-    if sections:
-        for section in sections:
-            if section not in schemas:
-                print(f'[ERROR] Invalid section: {section}')
-                return 1
-    else:
-        sections = sorted(schemas.keys())
-
-# TODO: create World Schema and dump only this with Word.dumps ?
-
-    for section in sections:
-        schema = schemas[section](many=True)
-        schema.context.update({
-            'full': full,
-            'secrets': secrets,
-            'dns': dns,
-        })
-        yaml.dump(
-            {section: schema.dump(schema.Meta.model.query.all())},
-            sys.stdout,
-            Dumper=spacedDumper,
-            default_flow_style=False,
-            allow_unicode=True
-        )
-        sys.stdout.write('\n')
+    MailuSchema(context={
+        'full': full,
+        'secrets': secrets,
+        'dns': dns,
+    }).dumps(config, sys.stdout)
 
 
 @mailu.command()

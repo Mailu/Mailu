@@ -110,7 +110,7 @@ class Base(db.Model):
 
     created_at = db.Column(db.Date, nullable=False, default=date.today)
     updated_at = db.Column(db.Date, nullable=True, onupdate=date.today)
-    comment = db.Column(db.String(255), nullable=True)
+    comment = db.Column(db.String(255), nullable=True, default='')
 
     @classmethod
     def _dict_pkey(cls):
@@ -171,7 +171,7 @@ class Base(db.Model):
                 if self.__mapper__.relationships[key].query_class is not None:
                     if hasattr(items, 'all'):
                         items = items.all()
-                if full or len(items):
+                if full or items:
                     if key in secret:
                         res[key] = '<hidden>'
                     else:

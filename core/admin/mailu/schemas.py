@@ -1,13 +1,15 @@
+""" Mailu marshmallow fields and schema
 """
-Mailu marshmallow schema
-"""
+
+import re
 
 from textwrap import wrap
 
-import re
 import yaml
 
-from marshmallow import post_dump, fields, Schema
+from marshmallow import pre_load, post_dump, fields, Schema
+from marshmallow.exceptions import ValidationError
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchemaOpts
 from flask_marshmallow import Marshmallow
 from OpenSSL import crypto
 
@@ -15,9 +17,9 @@ from . import models, dkim
 
 
 ma = Marshmallow()
-# TODO:
-# how to mark keys as "required" while unserializing (in certain use cases/API)?
-# - fields withoud default => required
+
+# TODO: how and where to mark keys as "required" while unserializing (on commandline, in api)?
+# - fields without default => required
 # - fields which are the primary key => unchangeable when updating
 
 
@@ -41,7 +43,7 @@ class RenderYAML:
             return super().increase_indent(flow, False)
 
     @staticmethod
-    def _update_dict(dict1, dict2):
+    def _update_items(dict1, dict2):
         """ sets missing keys in dict1 to values of dict2
         """
         for key, value in dict2.items():
@@ -53,8 +55,8 @@ class RenderYAML:
     def loads(cls, *args, **kwargs):
         """ load yaml data from string
         """
-        cls._update_dict(kwargs, cls._load_defaults)
-        return yaml.load(*args, **kwargs)
+        cls._update_items(kwargs, cls._load_defaults)
+        return yaml.safe_load(*args, **kwargs)
 
     _dump_defaults = {
         'Dumper': SpacedDumper,
@@ -65,13 +67,33 @@ class RenderYAML:
     def dumps(cls, *args, **kwargs):
         """ dump yaml data to string
         """
-        cls._update_dict(kwargs, cls._dump_defaults)
+        cls._update_items(kwargs, cls._dump_defaults)
         return yaml.dump(*args, **kwargs)
+
+
+### functions ###
+
+def handle_email(data):
+    """ merge separate localpart and domain to email
+    """
+
+    localpart = 'localpart' in data
+    domain = 'domain' in data
+
+    if 'email' in data:
+        if localpart or domain:
+            raise ValidationError('duplicate email and localpart/domain')
+    elif localpart and domain:
+        data['email'] = f'{data["localpart"]}@{data["domain"]}'
+    elif localpart or domain:
+        raise ValidationError('incomplete localpart/domain')
+
+    return data
 
 
 ### field definitions ###
 
-class LazyString(fields.String):
+class LazyStringField(fields.String):
     """ Field that serializes a "false" value to the empty string
     """
 
@@ -81,14 +103,27 @@ class LazyString(fields.String):
         return value if value else ''
 
 
-class CommaSeparatedList(fields.Raw):
+class CommaSeparatedListField(fields.Raw):
     """ Field that deserializes a string containing comma-separated values to
         a list of strings
     """
-    # TODO: implement this
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        """ deserialize comma separated string to list of strings
+        """
+
+        # empty
+        if not value:
+            return []
+
+        # split string
+        if isinstance(value, str):
+            return list([item.strip() for item in value.split(',') if item.strip()])
+        else:
+            return value
 
 
-class DkimKey(fields.String):
+class DkimKeyField(fields.String):
     """ Field that serializes a dkim key to a list of strings (lines) and
         deserializes a string or list of strings.
     """
@@ -120,7 +155,7 @@ class DkimKey(fields.String):
 
         # only strings are allowed
         if not isinstance(value, str):
-            raise TypeError(f'invalid type: {type(value).__name__!r}')
+            raise ValidationError(f'invalid type {type(value).__name__!r}')
 
         # clean value (remove whitespace and header/footer)
         value = self._clean_re.sub('', value.strip())
@@ -133,6 +168,11 @@ class DkimKey(fields.String):
         elif value == 'generate':
             return dkim.gen_key()
 
+        # remember some keydata for error message
+        keydata = value
+        if len(keydata) > 40:
+            keydata = keydata[:25] + '...' + keydata[-10:]
+
         # wrap value into valid pem layout and check validity
         value = (
             '-----BEGIN PRIVATE KEY-----\n' +
@@ -142,17 +182,27 @@ class DkimKey(fields.String):
         try:
             crypto.load_privatekey(crypto.FILETYPE_PEM, value)
         except crypto.Error as exc:
-            raise ValueError('invalid dkim key') from exc
+            raise ValidationError(f'invalid dkim key {keydata!r}') from exc
         else:
             return value
 
 
-### schema definitions ###
+### base definitions ###
+
+class BaseOpts(SQLAlchemyAutoSchemaOpts):
+    """ Option class with sqla session
+    """
+    def __init__(self, meta, ordered=False):
+        if not hasattr(meta, 'sqla_session'):
+            meta.sqla_session = models.db.session
+        super(BaseOpts, self).__init__(meta, ordered=ordered)
 
 class BaseSchema(ma.SQLAlchemyAutoSchema):
     """ Marshmallow base schema with custom exclude logic
         and option to hide sqla defaults
     """
+
+    OPTIONS_CLASS = BaseOpts
 
     class Meta:
         """ Schema config """
@@ -160,8 +210,9 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
 
     def __init__(self, *args, **kwargs):
 
-        # get and remove config from kwargs
+        # context?
         context = kwargs.get('context', {})
+        flags = set([key for key, value in context.items() if value is True])
 
         # compile excludes
         exclude = set(kwargs.get('exclude', []))
@@ -171,8 +222,8 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
 
         # add include_by_context
         if context is not None:
-            for ctx, what in getattr(self.Meta, 'include_by_context', {}).items():
-                if not context.get(ctx):
+            for need, what in getattr(self.Meta, 'include_by_context', {}).items():
+                if not flags & set(need):
                     exclude |= set(what)
 
         # update excludes
@@ -192,8 +243,8 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
         # hide by context
         self._hide_by_context = set()
         if context is not None:
-            for ctx, what in getattr(self.Meta, 'hide_by_context', {}).items():
-                if not context.get(ctx):
+            for need, what in getattr(self.Meta, 'hide_by_context', {}).items():
+                if not flags & set(need):
                     self._hide_by_context |= set(what)
 
         # init SQLAlchemyAutoSchema
@@ -212,23 +263,26 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
             if full or key not in self._exclude_by_value or value not in self._exclude_by_value[key]
         }
 
-    # TODO: remove LazyString and fix model definition (comment should not be nullable)
-    comment = LazyString()
+    # TODO: remove LazyString and change model (IMHO comment should not be nullable)
+    comment = LazyStringField()
+
+
+### schema definitions ###
 
 class DomainSchema(BaseSchema):
     """ Marshmallow schema for Domain model """
     class Meta:
         """ Schema config """
         model = models.Domain
+        load_instance = True
         include_relationships = True
-        #include_fk = True
         exclude = ['users', 'managers', 'aliases']
 
         include_by_context = {
-            'dns': {'dkim_publickey', 'dns_mx', 'dns_spf', 'dns_dkim', 'dns_dmarc'},
+            ('dns',): {'dkim_publickey', 'dns_mx', 'dns_spf', 'dns_dkim', 'dns_dmarc'},
         }
         hide_by_context = {
-            'secrets': {'dkim_key'},
+            ('secrets',): {'dkim_key'},
         }
         exclude_by_value = {
             'alternatives': [[]],
@@ -240,21 +294,12 @@ class DomainSchema(BaseSchema):
             'dns_dmarc': [None],
         }
 
-    dkim_key = DkimKey()
+    dkim_key = DkimKeyField(allow_none=True)
     dkim_publickey = fields.String(dump_only=True)
     dns_mx = fields.String(dump_only=True)
     dns_spf = fields.String(dump_only=True)
     dns_dkim = fields.String(dump_only=True)
     dns_dmarc = fields.String(dump_only=True)
-
-    # _dict_types = {
-    #     'dkim_key': (bytes, type(None)),
-    #     'dkim_publickey': False,
-    #     'dns_mx': False,
-    #     'dns_spf': False,
-    #     'dns_dkim': False,
-    #     'dns_dmarc': False,
-    # }
 
 
 class TokenSchema(BaseSchema):
@@ -262,18 +307,7 @@ class TokenSchema(BaseSchema):
     class Meta:
         """ Schema config """
         model = models.Token
-
-    # _dict_recurse = True
-    # _dict_hide = {'user', 'user_email'}
-    # _dict_mandatory = {'password'}
-
-    # id = db.Column(db.Integer(), primary_key=True)
-    # user_email = db.Column(db.String(255), db.ForeignKey(User.email),
-    #     nullable=False)
-    # user = db.relationship(User,
-    #     backref=db.backref('tokens', cascade='all, delete-orphan'))
-    # password = db.Column(db.String(255), nullable=False)
-    # ip = db.Column(db.String(255))
+        load_instance = True
 
 
 class FetchSchema(BaseSchema):
@@ -281,15 +315,13 @@ class FetchSchema(BaseSchema):
     class Meta:
         """ Schema config """
         model = models.Fetch
+        load_instance = True
         include_by_context = {
-            'full': {'last_check', 'error'},
+            ('full', 'import'): {'last_check', 'error'},
         }
         hide_by_context = {
-            'secrets': {'password'},
+            ('secrets',): {'password'},
         }
-
-# TODO: What about mandatory keys?
-    # _dict_mandatory = {'protocol', 'host', 'port', 'username', 'password'}
 
 
 class UserSchema(BaseSchema):
@@ -297,42 +329,43 @@ class UserSchema(BaseSchema):
     class Meta:
         """ Schema config """
         model = models.User
+        load_instance = True
         include_relationships = True
         exclude = ['localpart', 'domain', 'quota_bytes_used']
 
         exclude_by_value = {
             'forward_destination': [[]],
             'tokens': [[]],
+            'manager_of': [[]],
             'reply_enddate': ['2999-12-31'],
             'reply_startdate': ['1900-01-01'],
         }
 
+    @pre_load
+    def _handle_password(self, data, many, **kwargs): # pylint: disable=unused-argument
+        data = handle_email(data)
+        if 'password' in data:
+            if 'password_hash' in data or 'hash_scheme' in data:
+                raise ValidationError('ambigous key password and password_hash/hash_scheme')
+            # check (hashed) password
+            password = data['password']
+            if password.startswith('{') and '}' in password:
+                scheme = password[1:password.index('}')]
+                if scheme not in self.Meta.model.scheme_dict:
+                    raise ValidationError(f'invalid password scheme {scheme!r}')
+            else:
+                raise ValidationError(f'invalid hashed password {password!r}')
+        elif 'password_hash' in data and 'hash_scheme' in data:
+            if data['hash_scheme'] not in self.Meta.model.scheme_dict:
+                raise ValidationError(f'invalid password scheme {scheme!r}')
+            data['password'] = '{'+data['hash_scheme']+'}'+ data['password_hash']
+            del data['hash_scheme']
+            del data['password_hash']
+        return data
+
     tokens = fields.Nested(TokenSchema, many=True)
     fetches = fields.Nested(FetchSchema, many=True)
 
-# TODO: deserialize password/password_hash! What about mandatory keys?
-    # _dict_mandatory = {'localpart', 'domain', 'password'}
-    # @classmethod
-    # def _dict_input(cls, data):
-    #     Email._dict_input(data)
-    #     # handle password
-    #     if 'password' in data:
-    #         if 'password_hash' in data or 'hash_scheme' in data:
-    #             raise ValueError('ambigous key password and password_hash/hash_scheme')
-    #         # check (hashed) password
-    #         password = data['password']
-    #         if password.startswith('{') and '}' in password:
-    #             scheme = password[1:password.index('}')]
-    #             if scheme not in cls.scheme_dict:
-    #                 raise ValueError(f'invalid password scheme {scheme!r}')
-    #         else:
-    #             raise ValueError(f'invalid hashed password {password!r}')
-    #     elif 'password_hash' in data and 'hash_scheme' in data:
-    #         if data['hash_scheme'] not in cls.scheme_dict:
-    #             raise ValueError(f'invalid password scheme {scheme!r}')
-    #         data['password'] = '{'+data['hash_scheme']+'}'+ data['password_hash']
-    #         del data['hash_scheme']
-    #         del data['password_hash']
 
 
 class AliasSchema(BaseSchema):
@@ -340,20 +373,18 @@ class AliasSchema(BaseSchema):
     class Meta:
         """ Schema config """
         model = models.Alias
+        load_instance = True
         exclude  = ['localpart']
 
         exclude_by_value = {
             'destination': [[]],
         }
 
-# TODO: deserialize destination!
-    # @staticmethod
-    # def _dict_input(data):
-    #     Email._dict_input(data)
-    #     # handle comma delimited string for backwards compability
-    #     dst = data.get('destination')
-    #     if type(dst) is str:
-    #         data['destination'] = list([adr.strip() for adr in dst.split(',')])
+    @pre_load
+    def _handle_password(self, data, many, **kwargs): # pylint: disable=unused-argument
+        return handle_email(data)
+
+    destination = CommaSeparatedListField()
 
 
 class ConfigSchema(BaseSchema):
@@ -361,6 +392,7 @@ class ConfigSchema(BaseSchema):
     class Meta:
         """ Schema config """
         model = models.Config
+        load_instance = True
 
 
 class RelaySchema(BaseSchema):
@@ -368,45 +400,17 @@ class RelaySchema(BaseSchema):
     class Meta:
         """ Schema config """
         model = models.Relay
+        load_instance = True
 
 
 class MailuSchema(Schema):
-    """ Marshmallow schema for Mailu config """
+    """ Marshmallow schema for complete Mailu config """
     class Meta:
         """ Schema config """
         render_module = RenderYAML
+
     domains = fields.Nested(DomainSchema, many=True)
     relays = fields.Nested(RelaySchema, many=True)
     users = fields.Nested(UserSchema, many=True)
     aliases = fields.Nested(AliasSchema, many=True)
     config = fields.Nested(ConfigSchema, many=True)
-
-
-### config class ###
-
-class MailuConfig:
-    """ Class which joins whole Mailu config for dumping
-    """
-
-    _models = {
-        'domains': models.Domain,
-        'relays': models.Relay,
-        'users': models.User,
-        'aliases': models.Alias,
-#       'config': models.Config,
-    }
-
-    def __init__(self, sections):
-        if sections:
-            for section in sections:
-                if section not in self._models:
-                    raise ValueError(f'Unknown section: {section!r}')
-            self._sections = set(sections)
-        else:
-            self._sections = set(self._models.keys())
-
-    def __getattr__(self, section):
-        if section in self._sections:
-            return self._models[section].query.all()
-        else:
-            raise AttributeError

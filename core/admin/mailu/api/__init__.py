@@ -26,7 +26,7 @@ def register(app):
 
     # add redirect to current api version
     @app.route(f'{ROOT}/')
-    def redir():
+    def _redirect_to_active_api():
         return redirect(url_for(f'{ACTIVE.blueprint.name}.root'))
 
     # swagger ui config

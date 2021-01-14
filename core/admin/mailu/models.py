@@ -1,23 +1,26 @@
-from mailu import dkim
+""" Mailu config storage model
+"""
 
-from sqlalchemy.ext import declarative
-from datetime import datetime, date
+import re
+import os
+import smtplib
+import json
+
+from datetime import date
 from email.mime import text
-from flask import current_app as app
-from textwrap import wrap
 
 import flask_sqlalchemy
 import sqlalchemy
-import re
-import time
-import os
 import passlib
-import glob
-import smtplib
 import idna
 import dns
-import json
-import itertools
+
+from flask import current_app as app
+from sqlalchemy.ext import declarative
+from sqlalchemy.inspection import inspect
+from werkzeug.utils import cached_property
+
+from . import dkim
 
 
 db = flask_sqlalchemy.SQLAlchemy()
@@ -30,9 +33,11 @@ class IdnaDomain(db.TypeDecorator):
     impl = db.String(80)
 
     def process_bind_param(self, value, dialect):
+        """ encode unicode domain name to punycode """
         return idna.encode(value).decode('ascii').lower()
 
     def process_result_value(self, value, dialect):
+        """ decode punycode domain name to unicode """
         return idna.decode(value)
 
     python_type = str
@@ -44,6 +49,7 @@ class IdnaEmail(db.TypeDecorator):
     impl = db.String(255)
 
     def process_bind_param(self, value, dialect):
+        """ encode unicode domain part of email address to punycode """
         try:
             localpart, domain_name = value.split('@')
             return '{0}@{1}'.format(
@@ -54,6 +60,7 @@ class IdnaEmail(db.TypeDecorator):
             pass
 
     def process_result_value(self, value, dialect):
+        """ decode punycode domain part of email to unicode """
         localpart, domain_name = value.split('@')
         return '{0}@{1}'.format(
             localpart,
@@ -69,14 +76,16 @@ class CommaSeparatedList(db.TypeDecorator):
     impl = db.String
 
     def process_bind_param(self, value, dialect):
-        if not isinstance(value, (list, set)):
-            raise TypeError('Must be a list')
+        """ join list of items to comma separated string """
+        if not isinstance(value, (list, tuple, set)):
+            raise TypeError('Must be a list of strings')
         for item in value:
             if ',' in item:
                 raise ValueError('Item must not contain a comma')
         return ','.join(sorted(value))
 
     def process_result_value(self, value, dialect):
+        """ split comma separated string to list """
         return list(filter(bool, value.split(','))) if value else []
 
     python_type = list
@@ -88,9 +97,11 @@ class JSONEncoded(db.TypeDecorator):
     impl = db.String
 
     def process_bind_param(self, value, dialect):
+        """ encode data as json """
         return json.dumps(value) if value else None
 
     def process_result_value(self, value, dialect):
+        """ decode json to data """
         return json.loads(value) if value else None
 
     python_type = str
@@ -112,246 +123,172 @@ class Base(db.Model):
     updated_at = db.Column(db.Date, nullable=True, onupdate=date.today)
     comment = db.Column(db.String(255), nullable=True, default='')
 
-    @classmethod
-    def _dict_pkey(cls):
-        return cls.__mapper__.primary_key[0].name
+    # @classmethod
+    # def from_dict(cls, data, delete=False):
 
-    def _dict_pval(self):
-        return getattr(self, self._dict_pkey())
+    #     changed = []
 
-    def to_dict(self, full=False, include_secrets=False, include_extra=None, recursed=False, hide=None):
-        """ Return a dictionary representation of this model.
-        """
+    #     pkey = cls._dict_pkey()
 
-        if recursed and not getattr(self, '_dict_recurse', False):
-            return str(self)
+    #     # handle "primary key" only
+    #     if not isinstance(data, dict):
+    #         data = {pkey: data}
 
-        hide = set(hide or []) | {'created_at', 'updated_at'}
-        if hasattr(self, '_dict_hide'):
-            hide |= self._dict_hide
+    #     # modify input data
+    #     if hasattr(cls, '_dict_input'):
+    #         try:
+    #             cls._dict_input(data)
+    #         except Exception as exc:
+    #             raise ValueError(f'{exc}', cls, None, data) from exc
 
-        secret = set()
-        if not include_secrets and hasattr(self, '_dict_secret'):
-            secret |= self._dict_secret
+    #     # check for primary key (if not recursed)
+    #     if not getattr(cls, '_dict_recurse', False):
+    #         if not pkey in data:
+    #             raise KeyError(f'primary key {cls.__table__}.{pkey} is missing', cls, pkey, data)
 
-        convert = getattr(self, '_dict_output', {})
+    #     # check data keys and values
+    #     for key in list(data.keys()):
 
-        extra_keys = getattr(self, '_dict_extra', {})
-        if include_extra is None:
-            include_extra = []
+    #         # check key
+    #         if not hasattr(cls, key) and not key in cls.__mapper__.relationships:
+    #             raise KeyError(f'unknown key {cls.__table__}.{key}', cls, key, data)
 
-        res = {}
+    #         # check value type
+    #         value = data[key]
+    #         col = cls.__mapper__.columns.get(key)
+    #         if col is not None:
+    #             if not ((value is None and col.nullable) or (isinstance(value, col.type.python_type))):
+    #                 raise TypeError(f'{cls.__table__}.{key} {value!r} has invalid type {type(value).__name__!r}', cls, key, data)
+    #         else:
+    #             rel = cls.__mapper__.relationships.get(key)
+    #             if rel is None:
+    #                 itype = getattr(cls, '_dict_types', {}).get(key)
+    #                 if itype is not None:
+    #                     if itype is False: # ignore value. TODO: emit warning?
+    #                         del data[key]
+    #                         continue
+    #                     elif not isinstance(value, itype):
+    #                         raise TypeError(f'{cls.__table__}.{key} {value!r} has invalid type {type(value).__name__!r}', cls, key, data)
+    #                 else:
+    #                     raise NotImplementedError(f'type not defined for {cls.__table__}.{key}')
 
-        for key in itertools.chain(
-            self.__table__.columns.keys(),
-            getattr(self, '_dict_show', []),
-            *[extra_keys.get(extra, []) for extra in include_extra]
-        ):
-            if key in hide:
-                continue
-            if key in self.__table__.columns:
-                default = self.__table__.columns[key].default
-                if isinstance(default, sqlalchemy.sql.schema.ColumnDefault):
-                    default = default.arg
-            else:
-                default = None
-            value = getattr(self, key)
-            if full or ((default or value) and value != default):
-                if key in secret:
-                    value = '<hidden>'
-                elif value is not None and key in convert:
-                    value = convert[key](value)
-                res[key] = value
+    #         # handle relationships
+    #         if key in cls.__mapper__.relationships:
+    #             rel_model = cls.__mapper__.relationships[key].argument
+    #             if not isinstance(rel_model, sqlalchemy.orm.Mapper):
+    #                 add = rel_model.from_dict(value, delete)
+    #                 assert len(add) == 1
+    #                 rel_item, updated = add[0]
+    #                 changed.append((rel_item, updated))
+    #                 data[key] = rel_item
 
-        for key in self.__mapper__.relationships.keys():
-            if key in hide:
-                continue
-            if self.__mapper__.relationships[key].uselist:
-                items = getattr(self, key)
-                if self.__mapper__.relationships[key].query_class is not None:
-                    if hasattr(items, 'all'):
-                        items = items.all()
-                if full or items:
-                    if key in secret:
-                        res[key] = '<hidden>'
-                    else:
-                        res[key] = [item.to_dict(full, include_secrets, include_extra, True) for item in items]
-            else:
-                value = getattr(self, key)
-                if full or value is not None:
-                    if key in secret:
-                        res[key] = '<hidden>'
-                    else:
-                        res[key] = value.to_dict(full, include_secrets, include_extra, True)
+    #     # create item if necessary
+    #     created = False
+    #     item = cls.query.get(data[pkey]) if pkey in data else None
+    #     if item is None:
 
-        return res
+    #         # check for mandatory keys
+    #         missing = getattr(cls, '_dict_mandatory', set()) - set(data.keys())
+    #         if missing:
+    #             raise ValueError(f'mandatory key(s) {", ".join(sorted(missing))} for {cls.__table__} missing', cls, missing, data)
 
-    @classmethod
-    def from_dict(cls, data, delete=False):
+    #         # remove mapped relationships from data
+    #         mapped = {}
+    #         for key in list(data.keys()):
+    #             if key in cls.__mapper__.relationships:
+    #                 if isinstance(cls.__mapper__.relationships[key].argument, sqlalchemy.orm.Mapper):
+    #                     mapped[key] = data[key]
+    #                     del data[key]
 
-        changed = []
+    #         # create new item
+    #         item = cls(**data)
+    #         created = True
 
-        pkey = cls._dict_pkey()
+    #         # and update mapped relationships (below)
+    #         data = mapped
 
-        # handle "primary key" only
-        if isinstance(data, dict):
-            data = {pkey: data}
+    #     # update item
+    #     updated = []
+    #     for key, value in data.items():
 
-        # modify input data
-        if hasattr(cls, '_dict_input'):
-            try:
-                cls._dict_input(data)
-            except Exception as reason:
-                raise ValueError(f'{reason}', cls, None, data)
+    #         # skip primary key
+    #         if key == pkey:
+    #             continue
 
-        # check for primary key (if not recursed)
-        if not getattr(cls, '_dict_recurse', False):
-            if not pkey in data:
-                raise KeyError(f'primary key {cls.__table__}.{pkey} is missing', cls, pkey, data)
+    #         if key in cls.__mapper__.relationships:
+    #             # update relationship
+    #             rel_model = cls.__mapper__.relationships[key].argument
+    #             if isinstance(rel_model, sqlalchemy.orm.Mapper):
+    #                 rel_model = rel_model.class_
+    #                 # add (and create) referenced items
+    #                 cur = getattr(item, key)
+    #                 old = sorted(cur, key=id)
+    #                 new = []
+    #                 for rel_data in value:
+    #                     # get or create related item
+    #                     add = rel_model.from_dict(rel_data, delete)
+    #                     assert len(add) == 1
+    #                     rel_item, rel_updated = add[0]
+    #                     changed.append((rel_item, rel_updated))
+    #                     if rel_item not in cur:
+    #                         cur.append(rel_item)
+    #                     new.append(rel_item)
 
-        # check data keys and values
-        for key in list(data.keys()):
+    #                 # delete referenced items missing in yaml
+    #                 rel_pkey = rel_model._dict_pkey()
+    #                 new_data = list([i.to_dict(True, True, None, True, [rel_pkey]) for i in new])
+    #                 for rel_item in old:
+    #                     if rel_item not in new:
+    #                         # check if item with same data exists to stabilze import without primary key
+    #                         rel_data = rel_item.to_dict(True, True, None, True, [rel_pkey])
+    #                         try:
+    #                             same_idx = new_data.index(rel_data)
+    #                         except ValueError:
+    #                             same = None
+    #                         else:
+    #                             same = new[same_idx]
 
-            # check key
-            if not hasattr(cls, key) and not key in cls.__mapper__.relationships:
-                raise KeyError(f'unknown key {cls.__table__}.{key}', cls, key, data)
+    #                         if same is None:
+    #                             # delete items missing in new
+    #                             if delete:
+    #                                 cur.remove(rel_item)
+    #                             else:
+    #                                 new.append(rel_item)
+    #                         else:
+    #                             # swap found item with same data with newly created item
+    #                             new.append(rel_item)
+    #                             new_data.append(rel_data)
+    #                             new.remove(same)
+    #                             del new_data[same_idx]
+    #                             for i, (ch_item, _) in enumerate(changed):
+    #                                 if ch_item is same:
+    #                                     changed[i] = (rel_item, [])
+    #                                     db.session.flush()
+    #                                     db.session.delete(ch_item)
+    #                                     break
 
-            # check value type
-            value = data[key]
-            col = cls.__mapper__.columns.get(key)
-            if col is not None:
-                if not ((value is None and col.nullable) or (isinstance(value, col.type.python_type))):
-                    raise TypeError(f'{cls.__table__}.{key} {value!r} has invalid type {type(value).__name__!r}', cls, key, data)
-            else:
-                rel = cls.__mapper__.relationships.get(key)
-                if rel is None:
-                    itype = getattr(cls, '_dict_types', {}).get(key)
-                    if itype is not None:
-                        if itype is False: # ignore value. TODO: emit warning?
-                            del data[key]
-                            continue
-                        elif not isinstance(value, itype):
-                            raise TypeError(f'{cls.__table__}.{key} {value!r} has invalid type {type(value).__name__!r}', cls, key, data)
-                    else:
-                        raise NotImplementedError(f'type not defined for {cls.__table__}.{key}')
+    #                 # remember changes
+    #                 new = sorted(new, key=id)
+    #                 if new != old:
+    #                     updated.append((key, old, new))
 
-            # handle relationships
-            if key in cls.__mapper__.relationships:
-                rel_model = cls.__mapper__.relationships[key].argument
-                if not isinstance(rel_model, sqlalchemy.orm.Mapper):
-                    add = rel_model.from_dict(value, delete)
-                    assert len(add) == 1
-                    rel_item, updated = add[0]
-                    changed.append((rel_item, updated))
-                    data[key] = rel_item
+    #         else:
+    #             # update key
+    #             old = getattr(item, key)
+    #             if isinstance(old, list):
+    #                 # deduplicate list value
+    #                 assert isinstance(value, list)
+    #                 value = set(value)
+    #                 old = set(old)
+    #                 if not delete:
+    #                     value = old | value
+    #             if value != old:
+    #                 updated.append((key, old, value))
+    #                 setattr(item, key, value)
 
-        # create item if necessary
-        created = False
-        item = cls.query.get(data[pkey]) if pkey in data else None
-        if item is None:
+    #     changed.append((item, created if created else updated))
 
-            # check for mandatory keys
-            missing = getattr(cls, '_dict_mandatory', set()) - set(data.keys())
-            if missing:
-                raise ValueError(f'mandatory key(s) {", ".join(sorted(missing))} for {cls.__table__} missing', cls, missing, data)
-
-            # remove mapped relationships from data
-            mapped = {}
-            for key in list(data.keys()):
-                if key in cls.__mapper__.relationships:
-                    if isinstance(cls.__mapper__.relationships[key].argument, sqlalchemy.orm.Mapper):
-                        mapped[key] = data[key]
-                        del data[key]
-
-            # create new item
-            item = cls(**data)
-            created = True
-
-            # and update mapped relationships (below)
-            data = mapped
-
-        # update item
-        updated = []
-        for key, value in data.items():
-
-            # skip primary key
-            if key == pkey:
-                continue
-
-            if key in cls.__mapper__.relationships:
-                # update relationship
-                rel_model = cls.__mapper__.relationships[key].argument
-                if isinstance(rel_model, sqlalchemy.orm.Mapper):
-                    rel_model = rel_model.class_
-                    # add (and create) referenced items
-                    cur = getattr(item, key)
-                    old = sorted(cur, key=id)
-                    new = []
-                    for rel_data in value:
-                        # get or create related item
-                        add = rel_model.from_dict(rel_data, delete)
-                        assert len(add) == 1
-                        rel_item, rel_updated = add[0]
-                        changed.append((rel_item, rel_updated))
-                        if rel_item not in cur:
-                            cur.append(rel_item)
-                        new.append(rel_item)
-
-                    # delete referenced items missing in yaml
-                    rel_pkey = rel_model._dict_pkey()
-                    new_data = list([i.to_dict(True, True, None, True, [rel_pkey]) for i in new])
-                    for rel_item in old:
-                        if rel_item not in new:
-                            # check if item with same data exists to stabilze import without primary key
-                            rel_data = rel_item.to_dict(True, True, None, True, [rel_pkey])
-                            try:
-                                same_idx = new_data.index(rel_data)
-                            except ValueError:
-                                same = None
-                            else:
-                                same = new[same_idx]
-
-                            if same is None:
-                                # delete items missing in new
-                                if delete:
-                                    cur.remove(rel_item)
-                                else:
-                                    new.append(rel_item)
-                            else:
-                                # swap found item with same data with newly created item
-                                new.append(rel_item)
-                                new_data.append(rel_data)
-                                new.remove(same)
-                                del new_data[same_idx]
-                                for i, (ch_item, _) in enumerate(changed):
-                                    if ch_item is same:
-                                        changed[i] = (rel_item, [])
-                                        db.session.flush()
-                                        db.session.delete(ch_item)
-                                        break
-
-                    # remember changes
-                    new = sorted(new, key=id)
-                    if new != old:
-                        updated.append((key, old, new))
-
-            else:
-                # update key
-                old = getattr(item, key)
-                if isinstance(old, list):
-                    # deduplicate list value
-                    assert isinstance(value, list)
-                    value = set(value)
-                    old = set(old)
-                    if not delete:
-                        value = old | value
-                if value != old:
-                    updated.append((key, old, value))
-                    setattr(item, key, value)
-
-        changed.append((item, created if created else updated))
-
-        return changed
+    #     return changed
 
 
 # Many-to-many association table for domain managers
@@ -391,48 +328,6 @@ class Domain(Base):
 
     __tablename__ = 'domain'
 
-    _dict_hide = {'users', 'managers', 'aliases'}
-    _dict_show = {'dkim_key'}
-    _dict_extra = {'dns':{'dkim_publickey', 'dns_mx', 'dns_spf', 'dns_dkim', 'dns_dmarc'}}
-    _dict_secret = {'dkim_key'}
-    _dict_types = {
-        'dkim_key': (bytes, type(None)),
-        'dkim_publickey': False,
-        'dns_mx': False,
-        'dns_spf': False,
-        'dns_dkim': False,
-        'dns_dmarc': False,
-    }
-    _dict_output = {'dkim_key': lambda key: key.decode('utf-8').strip().split('\n')[1:-1]}
-    @staticmethod
-    def _dict_input(data):
-        if 'dkim_key' in data:
-            key = data['dkim_key']
-            if key is not None:
-                if isinstance(key, list):
-                    key = ''.join(key)
-                if isinstance(key, str):
-                    key = ''.join(key.strip().split()) # removes all whitespace
-                    if key == 'generate':
-                        data['dkim_key'] = dkim.gen_key()
-                    elif key:
-                        match = re.match('^-----BEGIN (RSA )?PRIVATE KEY-----', key)
-                        if match is not None:
-                            key = key[match.end():]
-                        match = re.search('-----END (RSA )?PRIVATE KEY-----$', key)
-                        if match is not None:
-                            key = key[:match.start()]
-                        key = '\n'.join(wrap(key, 64))
-                        key = f'-----BEGIN PRIVATE KEY-----\n{key}\n-----END PRIVATE KEY-----\n'.encode('ascii')
-                        try:
-                            dkim.strip_key(key)
-                        except:
-                            raise ValueError('invalid dkim key')
-                        else:
-                            data['dkim_key'] = key
-                    else:
-                        data['dkim_key'] = None
-
     name = db.Column(IdnaDomain, primary_key=True, nullable=False)
     managers = db.relationship('User', secondary=managers,
         backref=db.backref('manager_of'), lazy='dynamic')
@@ -440,7 +335,7 @@ class Domain(Base):
     max_aliases = db.Column(db.Integer, nullable=False, default=-1)
     max_quota_bytes = db.Column(db.BigInteger, nullable=False, default=0)
     signup_enabled = db.Column(db.Boolean, nullable=False, default=False)
-    
+
     _dkim_key = None
     _dkim_key_changed = False
 
@@ -452,17 +347,20 @@ class Domain(Base):
     def dns_mx(self):
         hostname = app.config['HOSTNAMES'].split(',')[0]
         return f'{self.name}. 600 IN MX 10 {hostname}.'
-    
+
     @property
     def dns_spf(self):
         hostname = app.config['HOSTNAMES'].split(',')[0]
         return f'{self.name}. 600 IN TXT "v=spf1 mx a:{hostname} ~all"'
-    
+
     @property
     def dns_dkim(self):
         if os.path.exists(self._dkim_file()):
             selector = app.config['DKIM_SELECTOR']
-            return f'{selector}._domainkey.{self.name}. 600 IN TXT "v=DKIM1; k=rsa; p={self.dkim_publickey}"'
+            return (
+                f'{selector}._domainkey.{self.name}. 600 IN TXT'
+                f'"v=DKIM1; k=rsa; p={self.dkim_publickey}"'
+            )
 
     @property
     def dns_dmarc(self):
@@ -473,7 +371,7 @@ class Domain(Base):
             ruf = app.config['DMARC_RUF']
             ruf = f' ruf=mailto:{ruf}@{domain};' if ruf else ''
             return f'_dmarc.{self.name}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
-    
+
     @property
     def dkim_key(self):
         if self._dkim_key is None:
@@ -525,7 +423,11 @@ class Domain(Base):
         try:
             return self.name == other.name
         except AttributeError:
-            return False
+            return NotImplemented
+
+    def __hash__(self):
+        return hash(str(self.name))
+
 
 
 class Alternative(Base):
@@ -551,8 +453,6 @@ class Relay(Base):
 
     __tablename__ = 'relay'
 
-    _dict_mandatory = {'smtp'}
-
     name = db.Column(IdnaDomain, primary_key=True, nullable=False)
     smtp = db.Column(db.String(80), nullable=True)
 
@@ -566,18 +466,8 @@ class Email(object):
 
     localpart = db.Column(db.String(80), nullable=False)
 
-    @staticmethod
-    def _dict_input(data):
-        if 'email' in data:
-            if 'localpart' in data or 'domain' in data:
-                raise ValueError('ambigous key email and localpart/domain')
-            elif isinstance(data['email'], str):
-                data['localpart'], data['domain'] = data['email'].rsplit('@', 1)
-        else:
-            data['email'] = f'{data["localpart"]}@{data["domain"]}'
-
     @declarative.declared_attr
-    def domain_name(cls):
+    def domain_name(self):
         return db.Column(IdnaDomain, db.ForeignKey(Domain.name),
             nullable=False, default=IdnaDomain)
 
@@ -585,7 +475,7 @@ class Email(object):
     # It is however very useful for quick lookups without joining tables,
     # especially when the mail server is reading the database.
     @declarative.declared_attr
-    def email(cls):
+    def email(self):
         updater = lambda context: '{0}@{1}'.format(
             context.current_parameters['localpart'],
             context.current_parameters['domain_name'],
@@ -661,30 +551,6 @@ class User(Base, Email):
     """
 
     __tablename__ = 'user'
-
-    _dict_hide = {'domain_name', 'domain', 'localpart', 'quota_bytes_used'}
-    _dict_mandatory = {'localpart', 'domain', 'password'}
-    @classmethod
-    def _dict_input(cls, data):
-        Email._dict_input(data)
-        # handle password
-        if 'password' in data:
-            if 'password_hash' in data or 'hash_scheme' in data:
-                raise ValueError('ambigous key password and password_hash/hash_scheme')
-            # check (hashed) password
-            password = data['password']
-            if password.startswith('{') and '}' in password:
-                scheme = password[1:password.index('}')]
-                if scheme not in cls.scheme_dict:
-                    raise ValueError(f'invalid password scheme {scheme!r}')
-            else:
-                raise ValueError(f'invalid hashed password {password!r}')
-        elif 'password_hash' in data and 'hash_scheme' in data:
-            if data['hash_scheme'] not in cls.scheme_dict:
-                raise ValueError(f'invalid password scheme {scheme!r}')
-            data['password'] = '{'+data['hash_scheme']+'}'+ data['password_hash']
-            del data['hash_scheme']
-            del data['password_hash']
 
     domain = db.relationship(Domain,
         backref=db.backref('users', cascade='all, delete-orphan'))
@@ -775,7 +641,8 @@ class User(Base, Email):
         if raw:
             self.password = '{'+hash_scheme+'}' + password
         else:
-            self.password = '{'+hash_scheme+'}' + self.get_password_context().encrypt(password, self.scheme_dict[hash_scheme])
+            self.password = '{'+hash_scheme+'}' + \
+                self.get_password_context().encrypt(password, self.scheme_dict[hash_scheme])
 
     def get_managed_domains(self):
         if self.global_admin:
@@ -812,15 +679,6 @@ class Alias(Base, Email):
 
     __tablename__ = 'alias'
 
-    _dict_hide = {'domain_name', 'domain', 'localpart'}
-    @staticmethod
-    def _dict_input(data):
-        Email._dict_input(data)
-        # handle comma delimited string for backwards compability
-        dst = data.get('destination')
-        if isinstance(dst, str):
-            data['destination'] = list([adr.strip() for adr in dst.split(',')])
-
     domain = db.relationship(Domain,
         backref=db.backref('aliases', cascade='all, delete-orphan'))
     wildcard = db.Column(db.Boolean, nullable=False, default=False)
@@ -832,10 +690,10 @@ class Alias(Base, Email):
                 sqlalchemy.and_(cls.domain_name == domain_name,
                     sqlalchemy.or_(
                         sqlalchemy.and_(
-                            cls.wildcard == False,
+                            cls.wildcard is False,
                             cls.localpart == localpart
                         ), sqlalchemy.and_(
-                            cls.wildcard == True,
+                            cls.wildcard is True,
                             sqlalchemy.bindparam('l', localpart).like(cls.localpart)
                         )
                     )
@@ -847,10 +705,10 @@ class Alias(Base, Email):
                 sqlalchemy.and_(cls.domain_name == domain_name,
                     sqlalchemy.or_(
                         sqlalchemy.and_(
-                            cls.wildcard == False,
+                            cls.wildcard is False,
                             sqlalchemy.func.lower(cls.localpart) == localpart_lower
                         ), sqlalchemy.and_(
-                            cls.wildcard == True,
+                            cls.wildcard is True,
                             sqlalchemy.bindparam('l', localpart_lower).like(sqlalchemy.func.lower(cls.localpart))
                         )
                     )
@@ -874,10 +732,6 @@ class Token(Base):
     """
 
     __tablename__ = 'token'
-
-    _dict_recurse = True
-    _dict_hide = {'user', 'user_email'}
-    _dict_mandatory = {'password'}
 
     id = db.Column(db.Integer, primary_key=True)
     user_email = db.Column(db.String(255), db.ForeignKey(User.email),
@@ -904,11 +758,6 @@ class Fetch(Base):
 
     __tablename__ = 'fetch'
 
-    _dict_recurse = True
-    _dict_hide = {'user_email', 'user', 'last_check', 'error'}
-    _dict_mandatory = {'protocol', 'host', 'port', 'username', 'password'}
-    _dict_secret = {'password'}
-
     id = db.Column(db.Integer, primary_key=True)
     user_email = db.Column(db.String(255), db.ForeignKey(User.email),
         nullable=False)
@@ -926,3 +775,124 @@ class Fetch(Base):
 
     def __str__(self):
         return f'{self.protocol}{"s" if self.tls else ""}://{self.username}@{self.host}:{self.port}'
+
+
+class MailuConfig:
+    """ Class which joins whole Mailu config for dumping
+        and loading
+    """
+
+    # TODO: add sqlalchemy session updating (.add & .del)
+    class MailuCollection:
+        """ Provides dict- and list-like access to all instances
+            of a sqlalchemy model
+        """
+
+        def __init__(self, model : db.Model):
+            self._model = model
+
+        @cached_property
+        def _items(self):
+            return {
+                inspect(item).identity: item
+                for item in self._model.query.all()
+            }
+
+        def __len__(self):
+            return len(self._items)
+
+        def __iter__(self):
+            return iter(self._items.values())
+
+        def __getitem__(self, key):
+            return self._items[key]
+
+        def __setitem__(self, key, item):
+            if not isinstance(item, self._model):
+                raise TypeError(f'expected {self._model.name}')
+            if key != inspect(item).identity:
+                raise ValueError(f'item identity != key {key!r}')
+            self._items[key] = item
+
+        def __delitem__(self, key):
+            del self._items[key]
+
+        def append(self, item):
+            """ list-like append """
+            if not isinstance(item, self._model):
+                raise TypeError(f'expected {self._model.name}')
+            key = inspect(item).identity
+            if key in self._items:
+                raise ValueError(f'item {key!r} already present in collection')
+            self._items[key] = item
+
+        def extend(self, items):
+            """ list-like extend """
+            add = {}
+            for item in items:
+                if not isinstance(item, self._model):
+                    raise TypeError(f'expected {self._model.name}')
+                key = inspect(item).identity
+                if key in self._items:
+                    raise ValueError(f'item {key!r} already present in collection')
+                add[key] = item
+            self._items.update(add)
+
+        def pop(self, *args):
+            """ list-like (no args) and dict-like (1 or 2 args) pop """
+            if args:
+                if len(args) > 2:
+                    raise TypeError(f'pop expected at most 2 arguments, got {len(args)}')
+                return self._items.pop(*args)
+            else:
+                return self._items.popitem()[1]
+
+        def popitem(self):
+            """ dict-like popitem """
+            return self._items.popitem()
+
+        def remove(self, item):
+            """ list-like remove """
+            if not isinstance(item, self._model):
+                raise TypeError(f'expected {self._model.name}')
+            key = inspect(item).identity
+            if not key in self._items:
+                raise ValueError(f'item {key!r} not found in collection')
+            del self._items[key]
+
+        def clear(self):
+            """ dict-like clear """
+            while True:
+                try:
+                    self.pop()
+                except IndexError:
+                    break
+
+        def update(self, items):
+            """ dict-like update """
+            for key, item in items:
+                if not isinstance(item, self._model):
+                    raise TypeError(f'expected {self._model.name}')
+                if key != inspect(item).identity:
+                    raise ValueError(f'item identity != key {key!r}')
+                if key in self._items:
+                    raise ValueError(f'item {key!r} already present in collection')
+
+        def setdefault(self, key, item=None):
+            """ dict-like setdefault """
+            if key in self._items:
+                return self._items[key]
+            if item is None:
+                return None
+            if not isinstance(item, self._model):
+                raise TypeError(f'expected {self._model.name}')
+            if key != inspect(item).identity:
+                raise ValueError(f'item identity != key {key!r}')
+            self._items[key] = item
+            return item
+
+    domains = MailuCollection(Domain)
+    relays = MailuCollection(Relay)
+    users = MailuCollection(User)
+    aliases = MailuCollection(Alias)
+    config = MailuCollection(Config)

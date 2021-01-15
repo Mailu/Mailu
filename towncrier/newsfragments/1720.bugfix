@@ -1,0 +1,2 @@
+Fix CVE-2020-25275 and CVE-2020-24386 by using alpine 3.13 for
+dovecot which contains a fixed dovecot version.

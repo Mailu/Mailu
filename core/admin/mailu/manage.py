@@ -7,6 +7,7 @@ import socket
 import uuid
 
 import click
+import yaml
 
 from flask import current_app as app
 from flask.cli import FlaskGroup, with_appcontext
@@ -64,7 +65,7 @@ def admin(localpart, domain_name, password, mode='create'):
 
     user = None
     if mode == 'ifmissing' or mode == 'update':
-        email = '{}@{}'.format(localpart, domain_name)
+        email = f'{localpart}@{domain_name}'
         user = models.User.query.get(email)
 
         if user and mode == 'ifmissing':
@@ -122,14 +123,14 @@ def user(localpart, domain_name, password, hash_scheme=None):
 def password(localpart, domain_name, password, hash_scheme=None):
     """ Change the password of an user
     """
-    email = '{0}@{1}'.format(localpart, domain_name)
-    user   = models.User.query.get(email)
+    email = f'{localpart}@{domain_name}'
+    user = models.User.query.get(email)
     if hash_scheme is None:
         hash_scheme = app.config['PASSWORD_SCHEME']
     if user:
         user.set_password(password, hash_scheme=hash_scheme)
     else:
-        print("User " + email + " not found.")
+        print(f'User {email} not found.')
     db.session.commit()
 
 
@@ -157,7 +158,7 @@ def domain(domain_name, max_users=-1, max_aliases=-1, max_quota_bytes=0):
 @click.argument('hash_scheme')
 @with_appcontext
 def user_import(localpart, domain_name, password_hash, hash_scheme = None):
-    """ Import a user along with password hash.
+    """ Import a user along with password hash
     """
     if hash_scheme is None:
         hash_scheme = app.config['PASSWORD_SCHEME']
@@ -175,124 +176,146 @@ def user_import(localpart, domain_name, password_hash, hash_scheme = None):
     db.session.commit()
 
 
-# @mailu.command()
-# @click.option('-v', '--verbose', is_flag=True, help='Increase verbosity')
-# @click.option('-d', '--delete-objects', is_flag=True, help='Remove objects not included in yaml')
-# @click.option('-n', '--dry-run', is_flag=True, help='Perform a trial run with no changes made')
-# @click.argument('source', metavar='[FILENAME|-]', type=click.File(mode='r'), default=sys.stdin)
-# @with_appcontext
-# def config_update(verbose=False, delete_objects=False, dry_run=False, source=None):
-#     """ Update configuration with data from YAML-formatted input
-#     """
+# TODO: remove this deprecated function
+@mailu.command()
+@click.option('-v', '--verbose')
+@click.option('-d', '--delete-objects')
+@with_appcontext
+def config_update(verbose=False, delete_objects=False):
+    """ Sync configuration with data from YAML (deprecated)
+    """
+    new_config = yaml.safe_load(sys.stdin)
+    # print new_config
+    domains = new_config.get('domains', [])
+    tracked_domains = set()
+    for domain_config in domains:
+        if verbose:
+            print(str(domain_config))
+        domain_name = domain_config['name']
+        max_users = domain_config.get('max_users', -1)
+        max_aliases = domain_config.get('max_aliases', -1)
+        max_quota_bytes = domain_config.get('max_quota_bytes', 0)
+        tracked_domains.add(domain_name)
+        domain = models.Domain.query.get(domain_name)
+        if not domain:
+            domain = models.Domain(name=domain_name,
+                                   max_users=max_users,
+                                   max_aliases=max_aliases,
+                                   max_quota_bytes=max_quota_bytes)
+            db.session.add(domain)
+            print(f'Added {domain_config}')
+        else:
+            domain.max_users = max_users
+            domain.max_aliases = max_aliases
+            domain.max_quota_bytes = max_quota_bytes
+            db.session.add(domain)
+            print(f'Updated {domain_config}')
 
-    # try:
-    #     new_config = yaml.safe_load(source)
-    # except (yaml.scanner.ScannerError, yaml.parser.ParserError) as exc:
-    #     print(f'[ERROR] Invalid yaml: {exc}')
-    #     sys.exit(1)
-    # else:
-    #     if isinstance(new_config, str):
-    #         print(f'[ERROR] Invalid yaml: {new_config!r}')
-    #         sys.exit(1)
-    #     elif new_config is None or not new_config:
-    #         print('[ERROR] Empty yaml: Please pipe yaml into stdin')
-    #         sys.exit(1)
+    users = new_config.get('users', [])
+    tracked_users = set()
+    user_optional_params = ('comment', 'quota_bytes', 'global_admin',
+                            'enable_imap', 'enable_pop', 'forward_enabled',
+                            'forward_destination', 'reply_enabled',
+                            'reply_subject', 'reply_body', 'displayed_name',
+                            'spam_enabled', 'email', 'spam_threshold')
+    for user_config in users:
+        if verbose:
+            print(str(user_config))
+        localpart = user_config['localpart']
+        domain_name = user_config['domain']
+        password_hash = user_config.get('password_hash', None)
+        hash_scheme = user_config.get('hash_scheme', None)
+        domain = models.Domain.query.get(domain_name)
+        email = f'{localpart}@{domain_name}'
+        optional_params = {}
+        for k in user_optional_params:
+            if k in user_config:
+                optional_params[k] = user_config[k]
+        if not domain:
+            domain = models.Domain(name=domain_name)
+            db.session.add(domain)
+        user = models.User.query.get(email)
+        tracked_users.add(email)
+        tracked_domains.add(domain_name)
+        if not user:
+            user = models.User(
+                localpart=localpart,
+                domain=domain,
+                **optional_params
+            )
+        else:
+            for k in optional_params:
+                setattr(user, k, optional_params[k])
+        user.set_password(password_hash, hash_scheme=hash_scheme, raw=True)
+        db.session.add(user)
 
-    # error = False
-    # tracked = {}
-    # for section, model in yaml_sections:
+    aliases = new_config.get('aliases', [])
+    tracked_aliases = set()
+    for alias_config in aliases:
+        if verbose:
+            print(str(alias_config))
+        localpart = alias_config['localpart']
+        domain_name = alias_config['domain']
+        if isinstance(alias_config['destination'], str):
+            destination = alias_config['destination'].split(',')
+        else:
+            destination = alias_config['destination']
+        wildcard = alias_config.get('wildcard', False)
+        domain = models.Domain.query.get(domain_name)
+        email = f'{localpart}@{domain_name}'
+        if not domain:
+            domain = models.Domain(name=domain_name)
+            db.session.add(domain)
+        alias = models.Alias.query.get(email)
+        tracked_aliases.add(email)
+        tracked_domains.add(domain_name)
+        if not alias:
+            alias = models.Alias(
+                localpart=localpart,
+                domain=domain,
+                wildcard=wildcard,
+                destination=destination,
+                email=email
+            )
+        else:
+            alias.destination = destination
+            alias.wildcard = wildcard
+        db.session.add(alias)
 
-    #     items = new_config.get(section)
-    #     if items is None:
-    #         if delete_objects:
-    #             print(f'[ERROR] Invalid yaml: Section "{section}" is missing')
-    #             error = True
-    #             break
-    #         else:
-    #             continue
+    db.session.commit()
 
-    #     del new_config[section]
+    managers = new_config.get('managers', [])
+    # tracked_managers=set()
+    for manager_config in managers:
+        if verbose:
+            print(str(manager_config))
+        domain_name = manager_config['domain']
+        user_name = manager_config['user']
+        domain = models.Domain.query.get(domain_name)
+        manageruser = models.User.query.get(f'{user_name}@{domain_name}')
+        if manageruser not in domain.managers:
+            domain.managers.append(manageruser)
+        db.session.add(domain)
 
-    #     if not isinstance(items, list):
-    #         print(f'[ERROR] Section "{section}" must be a list, not {items.__class__.__name__}')
-    #         error = True
-    #         break
-    #     elif not items:
-    #         continue
+    db.session.commit()
 
-    #     # create items
-    #     for data in items:
-
-    #         if verbose:
-    #             print(f'Handling {model.__table__} data: {data!r}')
-
-    #         try:
-    #             changed = model.from_dict(data, delete_objects)
-    #         except Exception as exc:
-    #             print(f'[ERROR] {exc.args[0]} in data: {data}')
-    #             error = True
-    #             break
-
-    #         for item, created in changed:
-
-    #             if created is True:
-    #                 # flush newly created item
-    #                 db.session.add(item)
-    #                 db.session.flush()
-    #                 if verbose:
-    #                     print(f'Added {item!r}: {item.to_dict()}')
-    #                 else:
-    #                     print(f'Added {item!r}')
-
-    #             elif created:
-    #                 # modified instance
-    #                 if verbose:
-    #                     for key, old, new in created:
-    #                         print(f'Updated {key!r} of {item!r}: {old!r} -> {new!r}')
-    #                 else:
-    #                   print(f'Updated {item!r}: {", ".join(sorted([kon[0] for kon in created]))}')
-
-    #             # track primary key of all items
-    #             tracked.setdefault(item.__class__, set()).update(set([item._dict_pval()]))
-
-    #     if error:
-    #         break
-
-    # # on error: stop early
-    # if error:
-    #     print('[ERROR] An error occured. Not committing changes.')
-    #     db.session.rollback()
-    #     sys.exit(1)
-
-    # # are there sections left in new_config?
-    # if new_config:
-    #     print(f'[ERROR] Unknown section(s) in yaml: {", ".join(sorted(new_config.keys()))}')
-    #     error = True
-
-    # # test for conflicting domains
-    # domains = set()
-    # for model, items in tracked.items():
-    #     if model in (models.Domain, models.Alternative, models.Relay):
-    #         if domains & items:
-    #             for fqdn in domains & items:
-    #                 print(f'[ERROR] Duplicate domain name used: {fqdn}')
-    #             error = True
-    #         domains.update(items)
-
-    # # delete items not tracked
-    # if delete_objects:
-    #     for model, items in tracked.items():
-    #         for item in model.query.all():
-    #             if not item._dict_pval() in items:
-    #                 print(f'Deleted {item!r} {item}')
-    #                 db.session.delete(item)
-
-    # # don't commit when running dry
-    # if dry_run:
-    #     print('Dry run. Not commiting changes.')
-    #     db.session.rollback()
-    # else:
-    #     db.session.commit()
+    if delete_objects:
+        for user in db.session.query(models.User).all():
+            if not user.email in tracked_users:
+                if verbose:
+                    print(f'Deleting user: {user.email}')
+                db.session.delete(user)
+        for alias in db.session.query(models.Alias).all():
+            if not alias.email in tracked_aliases:
+                if verbose:
+                    print(f'Deleting alias: {alias.email}')
+                db.session.delete(alias)
+        for domain in db.session.query(models.Domain).all():
+            if not domain.name in tracked_domains:
+                if verbose:
+                    print(f'Deleting domain: {domain.name}')
+                db.session.delete(domain)
+    db.session.commit()
 
 
 SECTIONS = {'domains', 'relays', 'users', 'aliases'}
@@ -304,30 +327,51 @@ SECTIONS = {'domains', 'relays', 'users', 'aliases'}
 @click.argument('source', metavar='[FILENAME|-]', type=click.File(mode='r'), default=sys.stdin)
 @with_appcontext
 def config_import(verbose=False, dry_run=False, source=None):
-    """ Import configuration YAML
+    """ Import configuration from YAML
     """
 
+    def log(**data):
+        caller = sys._getframe(1).f_code.co_name # pylint: disable=protected-access
+        if caller == '_track_import':
+            print(f'Handling {data["self"].opts.model.__table__} data: {data["data"]!r}')
+
+    def format_errors(store, path=None):
+        if path is None:
+            path = []
+        for key in sorted(store):
+            location = path + [str(key)]
+            value = store[key]
+            if isinstance(value, dict):
+                format_errors(value, location)
+            else:
+                for message in value:
+                    print(f'[ERROR] {".".join(location)}: {message}')
+
     context = {
-        'verbose': verbose, # TODO: use callback function to be verbose?
+        'callback': log if verbose else None,
         'import': True,
     }
 
+    error = False
     try:
         config = MailuSchema(context=context).loads(source)
     except ValidationError as exc:
-        print(f'[ERROR] {exc}')
-        # TODO: show nice errors
-        from pprint import pprint
-        pprint(exc.messages)
-        sys.exit(1)
+        error = True
+        format_errors(exc.messages)
     else:
         print(config)
         print(MailuSchema().dumps(config))
-        # TODO: does not commit yet.
-        # TODO: delete other entries?
+        # TODO: need to delete other entries
 
-    # don't commit when running dry
-    if True: #dry_run:
+    # TODO: enable commit
+    error = True
+
+    # don't commit when running dry or validation errors occured
+    if error:
+        print('An error occured. Not committing changes.')
+        db.session.rollback()
+        sys.exit(2)
+    elif dry_run:
         print('Dry run. Not commiting changes.')
         db.session.rollback()
     else:
@@ -343,10 +387,8 @@ def config_import(verbose=False, dry_run=False, source=None):
               help='save yaml to file')
 @click.argument('sections', nargs=-1)
 @with_appcontext
-def config_dump(full=False, secrets=False, dns=False, output=None, sections=None):
-    """ Dump configuration as YAML to stdout or file
-
-    SECTIONS can be: domains, relays, users, aliases
+def config_export(full=False, secrets=False, dns=False, output=None, sections=None):
+    """ Export configuration as YAML to stdout or file
     """
 
     if sections:
@@ -407,7 +449,7 @@ def alias(localpart, domain_name, destination, wildcard=False):
         domain=domain,
         wildcard=wildcard,
         destination=destination.split(','),
-        email="%s@%s" % (localpart, domain_name)
+        email=f'{localpart}@{domain_name}'
     )
     db.session.add(alias)
     db.session.commit()
@@ -438,7 +480,7 @@ def setmanager(domain_name, user_name='manager'):
     """ Make a user manager of a domain
     """
     domain = models.Domain.query.get(domain_name)
-    manageruser = models.User.query.get(user_name + '@' + domain_name)
+    manageruser = models.User.query.get(f'{user_name}@{domain_name}')
     domain.managers.append(manageruser)
     db.session.add(domain)
     db.session.commit()

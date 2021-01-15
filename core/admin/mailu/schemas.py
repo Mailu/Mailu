@@ -3,11 +3,12 @@
 
 import re
 
+from collections import OrderedDict
 from textwrap import wrap
 
 import yaml
 
-from marshmallow import pre_load, post_dump, fields, Schema
+from marshmallow import pre_load, post_load, post_dump, fields, Schema
 from marshmallow.exceptions import ValidationError
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchemaOpts
 from flask_marshmallow import Marshmallow
@@ -24,6 +25,12 @@ ma = Marshmallow()
 
 
 ### yaml render module ###
+
+# allow yaml module to dump OrderedDict
+yaml.add_representer(
+    OrderedDict,
+    lambda cls, data: cls.represent_mapping('tag:yaml.org,2002:map', data.items())
+)
 
 class RenderYAML:
     """ Marshmallow YAML Render Module
@@ -62,6 +69,7 @@ class RenderYAML:
         'Dumper': SpacedDumper,
         'default_flow_style': False,
         'allow_unicode': True,
+        'sort_keys': False,
     }
     @classmethod
     def dumps(cls, *args, **kwargs):
@@ -195,6 +203,8 @@ class BaseOpts(SQLAlchemyAutoSchemaOpts):
     def __init__(self, meta, ordered=False):
         if not hasattr(meta, 'sqla_session'):
             meta.sqla_session = models.db.session
+        if not hasattr(meta, 'ordered'):
+            meta.ordered = True
         super(BaseOpts, self).__init__(meta, ordered=ordered)
 
 class BaseSchema(ma.SQLAlchemyAutoSchema):
@@ -206,13 +216,12 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
 
     class Meta:
         """ Schema config """
-        model = None
 
     def __init__(self, *args, **kwargs):
 
         # context?
         context = kwargs.get('context', {})
-        flags = set([key for key, value in context.items() if value is True])
+        flags = {key for key, value in context.items() if value is True}
 
         # compile excludes
         exclude = set(kwargs.get('exclude', []))
@@ -234,7 +243,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
 
         # exclude default values
         if not context.get('full'):
-            for column in self.Meta.model.__table__.columns:
+            for column in getattr(self.Meta, 'model').__table__.columns:
                 if column.name not in exclude:
                     self._exclude_by_value.setdefault(column.name, []).append(
                         None if column.default is None else column.default.arg
@@ -250,20 +259,48 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
         # init SQLAlchemyAutoSchema
         super().__init__(*args, **kwargs)
 
-    @post_dump
-    def _remove_skip_values(self, data, many, **kwargs): # pylint: disable=unused-argument
+        # init order
+        if hasattr(self.Meta, 'order'):
+            # use user-defined order
+            self._order = list(reversed(getattr(self.Meta, 'order')))
+        else:
+            # default order is: primary_key + other keys alphabetically
+            self._order = list(sorted(self.fields.keys()))
+            primary = self.opts.model.__table__.primary_key.columns.values()[0].name
+            self._order.remove(primary)
+            self._order.reverse()
+            self._order.append(primary)
 
+    @pre_load
+    def _track_import(self, data, many, **kwargs): # pylint: disable=unused-argument
+        call = self.context.get('callback')
+        if call is not None:
+            call(self=self, data=data, many=many, **kwargs)
+        return data
+
+    @post_dump
+    def _hide_and_order(self, data, many, **kwargs): # pylint: disable=unused-argument
+
+        # order output
+        for key in self._order:
+            try:
+                data.move_to_end(key, False)
+            except KeyError:
+                pass
+
+        # stop early when not excluding/hiding
         if not self._exclude_by_value and not self._hide_by_context:
             return data
 
+        # exclude items or hide values
         full = self.context.get('full')
-        return {
-            key: '<hidden>' if key in self._hide_by_context else value
+        return type(data)([
+            (key, '<hidden>' if key in self._hide_by_context else value)
             for key, value in data.items()
             if full or key not in self._exclude_by_value or value not in self._exclude_by_value[key]
-        }
+        ])
 
-    # TODO: remove LazyString and change model (IMHO comment should not be nullable)
+    # TODO: remove LazyStringField and change model (IMHO comment should not be nullable)
     comment = LazyStringField()
 
 
@@ -336,13 +373,14 @@ class UserSchema(BaseSchema):
         exclude_by_value = {
             'forward_destination': [[]],
             'tokens': [[]],
+            'fetches': [[]],
             'manager_of': [[]],
             'reply_enddate': ['2999-12-31'],
             'reply_startdate': ['1900-01-01'],
         }
 
     @pre_load
-    def _handle_password(self, data, many, **kwargs): # pylint: disable=unused-argument
+    def _handle_email_and_password(self, data, many, **kwargs): # pylint: disable=unused-argument
         data = handle_email(data)
         if 'password' in data:
             if 'password_hash' in data or 'hash_scheme' in data:
@@ -358,14 +396,21 @@ class UserSchema(BaseSchema):
         elif 'password_hash' in data and 'hash_scheme' in data:
             if data['hash_scheme'] not in self.Meta.model.scheme_dict:
                 raise ValidationError(f'invalid password scheme {scheme!r}')
-            data['password'] = '{'+data['hash_scheme']+'}'+ data['password_hash']
+            data['password'] = f'{{{data["hash_scheme"]}}}{data["password_hash"]}'
             del data['hash_scheme']
             del data['password_hash']
         return data
 
+    # TODO: verify password (should this be done in model?)
+    # scheme, hashed = re.match('^(?:{([^}]+)})?(.*)$', self.password).groups()
+    # if not scheme...
+    # ctx = passlib.context.CryptContext(schemes=[scheme], default=scheme)
+    # try:
+    # ctx.verify('', hashed)
+    # =>? ValueError: hash could not be identified
+
     tokens = fields.Nested(TokenSchema, many=True)
     fetches = fields.Nested(FetchSchema, many=True)
-
 
 
 class AliasSchema(BaseSchema):
@@ -381,7 +426,7 @@ class AliasSchema(BaseSchema):
         }
 
     @pre_load
-    def _handle_password(self, data, many, **kwargs): # pylint: disable=unused-argument
+    def _handle_email(self, data, many, **kwargs): # pylint: disable=unused-argument
         return handle_email(data)
 
     destination = CommaSeparatedListField()
@@ -408,9 +453,20 @@ class MailuSchema(Schema):
     class Meta:
         """ Schema config """
         render_module = RenderYAML
+        ordered = True
+        order = ['config', 'domains', 'users', 'aliases', 'relays']
 
+    @post_dump(pass_many=True)
+    def _order(self, data : OrderedDict, many : bool, **kwargs): # pylint: disable=unused-argument
+        for key in reversed(self.Meta.order):
+            try:
+                data.move_to_end(key, False)
+            except KeyError:
+                pass
+        return data
+
+    config = fields.Nested(ConfigSchema, many=True)
     domains = fields.Nested(DomainSchema, many=True)
-    relays = fields.Nested(RelaySchema, many=True)
     users = fields.Nested(UserSchema, many=True)
     aliases = fields.Nested(AliasSchema, many=True)
-    config = fields.Nested(ConfigSchema, many=True)
+    relays = fields.Nested(RelaySchema, many=True)

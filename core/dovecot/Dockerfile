@@ -1,4 +1,4 @@
-FROM alpine:3.10
+FROM alpine:3.13
 # python3 shared with most images
 RUN apk add --no-cache \
     python3 py3-pip git bash py3-multidict py3-yarl \

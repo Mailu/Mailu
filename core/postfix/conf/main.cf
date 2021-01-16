@@ -100,7 +100,6 @@ smtpd_sender_login_maps = ${podop}senderlogin
 smtpd_helo_required = yes
 
 smtpd_client_restrictions =
-  permit_mynetworks,
   check_sender_access ${podop}senderaccess,
   reject_non_fqdn_sender,
   reject_unknown_sender_domain,
@@ -108,7 +107,6 @@ smtpd_client_restrictions =
   permit
 
 smtpd_relay_restrictions =
-  permit_mynetworks,
   permit_sasl_authenticated,
   reject_unauth_destination
 

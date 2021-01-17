@@ -38,8 +38,8 @@ jobs:
       - pip install -r tests/requirements.txt
       - docker-compose -v
       - source tests/define_MAILU_VERSION.sh
-      - docker-compose -f tests/build.yml build
       - docker login -u $DOCKER_UN -p $DOCKER_PW
+      - docker-compose -f tests/build.yml build
       - docker-compose -f tests/build.yml push
       arch: amd64
 # install stage for arm64 architecture:
@@ -51,8 +51,8 @@ jobs:
       - pip install -r tests/requirements.txt
       - docker-compose -v
       - source tests/define_MAILU_VERSION.sh
-      - docker-compose -f tests/build.yml build front resolver imap smtp antispam antivirus webdav traefik-certdumper postgresql roundcube rainloop fetchmail none docs setup 
       - docker login -u $DOCKER_UN -p $DOCKER_PW
+      - docker-compose -f tests/build.yml build front resolver imap smtp antispam antivirus webdav traefik-certdumper postgresql roundcube rainloop fetchmail none docs setup 
       - docker-compose -f tests/build.yml push  front resolver imap smtp antispam antivirus webdav traefik-certdumper postgresql roundcube rainloop fetchmail none docs setup
       arch: arm64
 # install stage for arm, dedicated to admin:
@@ -61,8 +61,8 @@ jobs:
       - pip install -r tests/requirements.txt
       - docker-compose -v
       - source tests/define_MAILU_VERSION.sh
-      - docker-compose -f tests/build.yml build admin
       - docker login -u $DOCKER_UN -p $DOCKER_PW
+      - docker-compose -f tests/build.yml build admin
       - docker-compose -f tests/build.yml push admin
       arch: arm64
 # test stages
@@ -73,6 +73,7 @@ jobs:
       - source tests/define_MAILU_VERSION.sh
       - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
 # test.py, test name and timeout between start and tests.
+      - docker login -u $DOCKER_UN -p $DOCKER_PW
       - python tests/compose/test.py core 1
       - python tests/compose/test.py fetchmail 1
       - python tests/compose/test.py rainloop 1
@@ -86,6 +87,7 @@ jobs:
       - source tests/define_MAILU_VERSION.sh
       - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
 # test.py, test name and timeout between start and tests.
+      - docker login -u $DOCKER_UN -p $DOCKER_PW
       - python tests/compose/test.py core 1
       - python tests/compose/test.py fetchmail 1
       - python tests/compose/test.py rainloop 1
@@ -99,6 +101,7 @@ jobs:
       - source tests/define_MAILU_VERSION.sh
       - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
 # test.py, test name and timeout between start and tests.
+      - docker login -u $DOCKER_UN -p $DOCKER_PW
       - python tests/compose/test.py core 1
       - python tests/compose/test.py filters 9
       arch: amd64
@@ -109,6 +112,7 @@ jobs:
       - source tests/define_MAILU_VERSION.sh
       - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
 # test.py, test name and timeout between start and tests.
+      - docker login -u $DOCKER_UN -p $DOCKER_PW
       - python tests/compose/test.py core 1
       - python tests/compose/test.py filters 9 
       arch: arm64

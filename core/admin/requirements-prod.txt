@@ -5,7 +5,7 @@ bcrypt==3.1.6
 blinker==1.4
 cffi==1.12.3
 Click==7.0
-cryptography==2.6.1
+cryptography==3.2
 decorator==4.4.0
 dnspython==1.16.0
 dominate==2.3.5

@@ -33,7 +33,7 @@ Upgrading
 Upgrade should run fine as long as you generate a new compose or stack
 configuration and upgrade your mailu.env.
 
-Please not that the shipped image for PostgreSQL database is deprecated.
+Please note that the shipped image for PostgreSQL database is deprecated.
 The shipped image for PostgreSQL is not maintained anymore from release 1.8.
 We recommend switching to an external database as soon as possible.
 
@@ -95,7 +95,7 @@ configuration and upgrade your mailu.env.
 
 If you run the PostgreSQL server, the database was upgrade, so you will need to
 dump the database before upgrading and load the dump after the upgrade is
-complete. Please not that the shipped image for PostgreSQL database will be
+complete. Please note that the shipped image for PostgreSQL database will be
 deprecated before 1.8.0, you can switch to an external database server by then.
 
 

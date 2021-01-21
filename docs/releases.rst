@@ -35,7 +35,7 @@ configuration and upgrade your mailu.env.
 
 Please note that the shipped image for PostgreSQL database is deprecated.
 The shipped image for PostgreSQL is not maintained anymore from release 1.8.
-We recommend switching to an external database as soon as possible.
+We recommend switching to another database as soon as possible (SQLite or MySQL).
 
 Override location changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^

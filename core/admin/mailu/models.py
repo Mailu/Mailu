@@ -493,10 +493,18 @@ class Token(Base):
     ip = db.Column(db.String(255))
 
     def check_password(self, password):
-        return hash.sha256_crypt.verify(password, self.password)
+        if self.password.startswith("$5$"):
+            if hash.sha256_crypt.verify(password, self.password):
+                self.set_password(password)
+                db.session.add(self)
+                db.session.commit()
+                return True
+            return False
+        return hash.pbkdf2_sha256.verify(password, self.password)
 
     def set_password(self, password):
-        self.password = hash.sha256_crypt.using(rounds=1000).hash(password)
+        # tokens have 128bits of entropy, they are not bruteforceable
+        self.password = hash.pbkdf2_sha256.using(rounds=1).hash(password)
 
     def __str__(self):
         return self.comment

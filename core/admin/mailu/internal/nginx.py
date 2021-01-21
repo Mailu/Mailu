@@ -49,11 +49,14 @@ def handle_authentication(headers):
         user = models.User.query.get(user_email)
         status = False
         if user:
-            for token in user.tokens:
-                if (token.check_password(password) and
-                    (not token.ip or token.ip == ip)):
-                        status = True
-            if user.check_password(password):
+            # All tokens are 32 characters hex lowercase
+            if len(password) == 32:
+                for token in user.tokens:
+                    if (token.check_password(password) and
+                        (not token.ip or token.ip == ip)):
+                            status = True
+                            break
+            if not status and user.check_password(password):
                 status = True
             if status:
                 if protocol == "imap" and not user.enable_imap:

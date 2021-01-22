@@ -19,7 +19,6 @@ import dns
 
 db = flask_sqlalchemy.SQLAlchemy()
 
-
 class IdnaDomain(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
@@ -376,6 +375,10 @@ class User(Base, Email):
         )
 
     def check_password(self, password):
+        cache_result = app.cache.get(self.get_id())
+        if cache_result:
+            return hash.pbkdf2_sha256.verify(password, cache_result)
+
         context = self.get_password_context()
         reference = re.match('({[^}]+})?(.*)', self.password).group(2)
         result = context.verify(password, reference)
@@ -383,6 +386,13 @@ class User(Base, Email):
             self.set_password(password)
             db.session.add(self)
             db.session.commit()
+
+        if result:
+            # The credential cache uses a low number of rounds to be fast
+            # While it's not meant to be persisted to cold-storage, no
+            # additional measures are taken to ensure it isn't
+            # (mlock(), encrypted swap, memory scrubbing, ...)
+            app.cache.set(self.get_id(), hash.pbkdf2_sha256.using(rounds=1).hash(password))
         return result
 
     def set_password(self, password, hash_scheme=None, raw=False):

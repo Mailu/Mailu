@@ -1,5 +1,6 @@
 import flask
 import flask_bootstrap
+from flask_caching import Cache
 
 from mailu import utils, debug, models, manage, configuration
 
@@ -23,6 +24,14 @@ def create_app_from_config(config):
     utils.login.user_loader(models.User.get)
     utils.proxy.init_app(app)
     utils.migrate.init_app(app, models.db)
+
+    app.cache = Cache(config={
+        'CACHE_TYPE': 'simple',
+        'CACHE_IGNORE_ERRORS': True,
+        'CACHE_DEFAULT_TIMEOUT': app.config['CREDENTIAL_CACHE_TTL'],
+        'CACHE_THRESHOLD': app.config['CREDENTIAL_CACHE_SIZE'],
+        })
+    app.cache.init_app(app)
 
     # Initialize debugging tools
     if app.config.get("DEBUG"):

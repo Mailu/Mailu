@@ -33,6 +33,8 @@ DEFAULT_CONFIG = {
     'TLS_FLAVOR': 'cert',
     'AUTH_RATELIMIT': '10/minute;1000/hour',
     'AUTH_RATELIMIT_SUBNET': True,
+    'CREDENTIAL_CACHE_TTL': 3600,
+    'CREDENTIAL_CACHE_SIZE': 1000,
     'DISABLE_STATISTICS': False,
     # Mail settings
     'DMARC_RUA': None,

@@ -23,3 +23,4 @@ mysqlclient
 psycopg2
 idna
 srslib
+Flask-Caching

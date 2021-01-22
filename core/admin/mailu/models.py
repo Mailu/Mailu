@@ -19,7 +19,6 @@ import dns
 
 db = flask_sqlalchemy.SQLAlchemy()
 
-
 class IdnaDomain(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
@@ -376,6 +375,17 @@ class User(Base, Email):
         )
 
     def check_password(self, password):
+        cache_result = app.cache.get(self.get_id())
+        current_salt = self.password.split('$')[3] if len(self.password.split('$')) == 5 else None
+        if cache_result and current_salt:
+            cache_salt, cache_hash = cache_result.split('|')
+            if cache_salt == current_salt:
+                return hash.pbkdf2_sha256.verify(password, cache_hash)
+            else:
+                # the cache is local per gunicorn; the password has changed
+                # so the local cache can be invalidated
+                app.cache.delete(self.get_id())
+
         context = self.get_password_context()
         reference = re.match('({[^}]+})?(.*)', self.password).group(2)
         result = context.verify(password, reference)
@@ -383,6 +393,13 @@ class User(Base, Email):
             self.set_password(password)
             db.session.add(self)
             db.session.commit()
+
+        if result:
+            # The credential cache uses a low number of rounds to be fast
+            # While it's not meant to be persisted to cold-storage, no
+            # additional measures are taken to ensure it isn't
+            # (mlock(), encrypted swap, memory scrubbing, ...)
+            app.cache.set(self.get_id(), "{}|{}".format(self.password.split('$')[3], hash.pbkdf2_sha256.using(rounds=1).hash(password)), app.config['CREDENTIAL_CACHE_TTL'])
         return result
 
     def set_password(self, password, hash_scheme=None, raw=False):

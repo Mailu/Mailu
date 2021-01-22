@@ -138,9 +138,15 @@ Depending on your particular deployment you most probably will want to change th
 Advanced settings
 -----------------
 
-The ``PASSWORD_SCHEME`` is the password encryption scheme. You should use the
+The ``PASSWORD_SCHEME`` is the password hashing scheme. You should use the
 default value, unless you are importing password from a separate system and
-want to keep using the old password encryption scheme.
+want to keep using the old password hashing scheme.
+
+The ``CREDENTIAL_CACHE_SIZE`` (default: 1000) and ``CREDENTIAL_CACHE_TTL``
+(in seconds: default: 3600) allow for customization of the credential cache.
+The credential cache speeds up the login process by using a representation
+of the passwords that is faster (a non-iterated salted hash), regardless of
+what is in cold-storage (see ``PASSWORD_SCHEME`` above).
 
 The ``LOG_LEVEL`` setting is used by the python start-up scripts as a logging threshold.
 Log messages equal or higher than this priority will be printed.

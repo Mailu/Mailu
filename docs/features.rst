@@ -16,10 +16,6 @@ Admin interface screenshots
 
    Managing email domains
 
-.. figure:: assets/screenshots/status.png
-
-   Displaying service status
-
 .. figure:: assets/screenshots/token.png
 
    Creating an authentication token

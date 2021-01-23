@@ -37,8 +37,9 @@ os.environ["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", 
 os.environ["ANTISPAM_MILTER_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM_MILTER", "antispam:11332")
 os.environ["LMTP_ADDRESS"] = system.get_host_address_from_environment("LMTP", "imap:2525")
 
-conf.jinja("/conf/rsyslog.conf", os.environ, "/etc/rsyslog.conf")
+os.environ["LMTP_ADDRESS"] = system.get_host_address_from_environment("LMTP", "imap:2525")
 
+os.environ["POSTFIX_LOG_SYSLOG"] = os.environ.get("POSTFIX_LOG_SYSLOG","disabled")
 
 for postfix_file in glob.glob("/conf/*.cf"):
     conf.jinja(postfix_file, os.environ, os.path.join("/etc/postfix", os.path.basename(postfix_file)))
@@ -64,8 +65,10 @@ if "RELAYUSER" in os.environ:
     conf.jinja("/conf/sasl_passwd", os.environ, path)
     os.system("postmap {}".format(path))
 
-# Start rsyslog
-os.system("/usr/sbin/rsyslogd -n &")
+if os.environ["POSTFIX_LOG_SYSLOG"]=="local":
+    # Configure and start local rsyslog server
+    conf.jinja("/conf/rsyslog.conf", os.environ, "/etc/rsyslog.conf")
+    os.system("/usr/sbin/rsyslogd -n &")
 
 # Run Podop and Postfix
 multiprocessing.Process(target=start_podop).start()

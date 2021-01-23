@@ -190,3 +190,15 @@ When using ``*_ADDRESS``, the hostnames must be full-qualified hostnames. Otherw
 resolve the hostnames.
 
 
+Maillog setitngs
+----------------
+
+By default, all services log directly to stdout/stderr. Logs can be collected by any docker log processing solution.
+
+In some situations, a separate mail log is required (e.g. for legal reasons). Postfix can be configured to write the logs to a
+syslog server that stores the log files to a volume. It can be configured by the following options:
+
+- ``POSTFIX_LOG_SYSLOG``: (default: ``disabled``) set to ``local`` to enable a local syslog server for postfix
+- ``POSTFIX_LOG_FILE``: The file to log the maillog to
+
+

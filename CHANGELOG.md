@@ -11,7 +11,7 @@ The Dovecot and Postfix overrides are moved in their own sub-directory.
 If there are local override files, they will need to be moved from overrides/ to overrides/dovecot and overrides/postfix/.
 See https://mailu.io/1.8/faq.html#how-can-i-override-settings for all the mappings.
 
-Please not that the shipped image for PostgreSQL database is deprecated.
+Please note that the shipped image for PostgreSQL database is deprecated.
 We advise to switch to an external database server.
 
 <!-- TOWNCRIER -->
@@ -66,7 +66,7 @@ configuration and upgrade your mailu.env.
 
 If you run the PostgreSQL server, the database was upgrade, so you will need to
 dump the database before upgrading and load the dump after the upgrade is
-complete. Please not that the shipped image for PostgreSQL database will be
+complete. Please note that the shipped image for PostgreSQL database will be
 deprecated before 1.8.0, you can switch to an external database server by then.
 
 - Deprecation: using the internal postgres image will be deprecated by 1.8.0

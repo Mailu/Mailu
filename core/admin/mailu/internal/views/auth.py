@@ -48,15 +48,37 @@ def admin_authentication():
 def basic_authentication():
     """ Tries to authenticate using the Authorization header.
     """
+    limiter = utils.limiter.get_limiter(app.config["AUTH_RATELIMIT"], "auth-ip")
+    client_ip = flask.request.headers["X-Real-IP"] if 'X-Real-IP' in flask.request.headers else request.remote_addr
+    if not limiter.test(client_ip):
+        response = flask.Response(status=401)
+        response.headers["WWW-Authenticate"] = 'Basic realm="Authentication rate limit from one source exceeded"'
+        response.headers['Retry-After'] = '60'
+        return response
     authorization = flask.request.headers.get("Authorization")
     if authorization and authorization.startswith("Basic "):
         encoded = authorization.replace("Basic ", "")
         user_email, password = base64.b64decode(encoded).split(b":")
         user = models.User.query.get(user_email.decode("utf8"))
-        if user and user.enabled and user.check_password(password.decode("utf8")):
-            response = flask.Response()
-            response.headers["X-User"] = user.email
-            return response
+        if user and user.enabled:
+            password = password.decode("utf8")
+            status = False
+            if len(password) == 32:
+                for token in user.tokens:
+                    if (token.check_password(password) and
+                        (not token.ip or token.ip == ip)):
+                            status = True
+                            break
+            if not status and user.check_password(password):
+                status = True
+            if status:
+                response = flask.Response()
+                response.headers["X-User"] = user.email
+                return response
+            limit_subnet = str(app.config["AUTH_RATELIMIT_SUBNET"]) != 'False'
+            subnet = ipaddress.ip_network(app.config["SUBNET"])
+            if limit_subnet or ipaddress.ip_address(client_ip) not in subnet:
+                limiter.hit(client_ip)
     response = flask.Response(status=401)
     response.headers["WWW-Authenticate"] = 'Basic realm="Login Required"'
     return response

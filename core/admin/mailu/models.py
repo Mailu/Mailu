@@ -12,7 +12,8 @@ from itertools import chain
 
 import flask_sqlalchemy
 import sqlalchemy
-import passlib
+import passlib.context
+import passlib.hash
 import idna
 import dns
 
@@ -79,11 +80,11 @@ class CommaSeparatedList(db.TypeDecorator):
         for item in value:
             if ',' in item:
                 raise ValueError('list item must not contain ","')
-        return ','.join(sorted(value))
+        return ','.join(sorted(set(value)))
 
     def process_result_value(self, value, dialect):
         """ split comma separated string to list """
-        return list(filter(bool, value.split(','))) if value else []
+        return list(filter(bool, [item.strip() for item in value.split(',')])) if value else []
 
     python_type = list
 
@@ -136,19 +137,11 @@ class Config(Base):
     value = db.Column(JSONEncoded)
 
 
-# TODO: use sqlalchemy.event.listen() on a store method of object?
-@sqlalchemy.event.listens_for(db.session, 'after_commit')
-def store_dkim_key(session):
-    """ Store DKIM key on commit """
+def _save_dkim_keys(session):
+    """ store DKIM keys after commit """
     for obj in session.identity_map.values():
         if isinstance(obj, Domain):
-            if obj._dkim_key_changed:
-                file_path = obj._dkim_file()
-                if obj._dkim_key:
-                    with open(file_path, 'wb') as handle:
-                        handle.write(obj._dkim_key)
-                elif os.path.exists(file_path):
-                    os.unlink(file_path)
+            obj.save_dkim_key()
 
 class Domain(Base):
     """ A DNS domain that has mail addresses associated to it.
@@ -165,7 +158,7 @@ class Domain(Base):
     signup_enabled = db.Column(db.Boolean, nullable=False, default=False)
 
     _dkim_key = None
-    _dkim_key_changed = False
+    _dkim_key_on_disk = None
 
     def _dkim_file(self):
         """ return filename for active DKIM key """
@@ -173,6 +166,17 @@ class Domain(Base):
             domain=self.name,
             selector=app.config['DKIM_SELECTOR']
         )
+
+    def save_dkim_key(self):
+        """ save changed DKIM key to disk """
+        if self._dkim_key != self._dkim_key_on_disk:
+            file_path = self._dkim_file()
+            if self._dkim_key:
+                with open(file_path, 'wb') as handle:
+                    handle.write(self._dkim_key)
+            elif os.path.exists(file_path):
+                os.unlink(file_path)
+            self._dkim_key_on_disk = self._dkim_key
 
     @property
     def dns_mx(self):
@@ -189,7 +193,7 @@ class Domain(Base):
     @property
     def dns_dkim(self):
         """ return DKIM record for domain """
-        if os.path.exists(self._dkim_file()):
+        if self.dkim_key:
             selector = app.config['DKIM_SELECTOR']
             return (
                 f'{selector}._domainkey.{self.name}. 600 IN TXT'
@@ -199,7 +203,7 @@ class Domain(Base):
     @property
     def dns_dmarc(self):
         """ return DMARC record for domain """
-        if os.path.exists(self._dkim_file()):
+        if self.dkim_key:
             domain = app.config['DOMAIN']
             rua = app.config['DMARC_RUA']
             rua = f' rua=mailto:{rua}@{domain};' if rua else ''
@@ -214,19 +218,19 @@ class Domain(Base):
             file_path = self._dkim_file()
             if os.path.exists(file_path):
                 with open(file_path, 'rb') as handle:
-                    self._dkim_key = handle.read()
+                    self._dkim_key = self._dkim_key_on_disk = handle.read()
             else:
-                self._dkim_key = b''
+                self._dkim_key = self._dkim_key_on_disk = b''
         return self._dkim_key if self._dkim_key else None
 
     @dkim_key.setter
     def dkim_key(self, value):
         """ set private DKIM key """
         old_key = self.dkim_key
-        if value is None:
-            value = b''
-        self._dkim_key_changed = value != old_key
-        self._dkim_key = value
+        self._dkim_key = value if value is not None else b''
+        if self._dkim_key != old_key:
+            if not sqlalchemy.event.contains(db.session, 'after_commit', _save_dkim_keys):
+                sqlalchemy.event.listen(db.session, 'after_commit', _save_dkim_keys)
 
     @property
     def dkim_publickey(self):
@@ -331,14 +335,14 @@ class Email(object):
 
     def sendmail(self, subject, body):
         """ send an email to the address """
-        from_address = f'{app.config["POSTMASTER"]}@{idna.encode(app.config["DOMAIN"]).decode("ascii")}'
+        f_addr = f'{app.config["POSTMASTER"]}@{idna.encode(app.config["DOMAIN"]).decode("ascii")}'
         with smtplib.SMTP(app.config['HOST_AUTHSMTP'], port=10025) as smtp:
             to_address = f'{self.localpart}@{idna.encode(self.domain_name).decode("ascii")}'
             msg = text.MIMEText(body)
             msg['Subject'] = subject
-            msg['From'] = from_address
+            msg['From'] = f_addr
             msg['To'] = to_address
-            smtp.sendmail(from_address, [to_address], msg.as_string())
+            smtp.sendmail(f_addr, [to_address], msg.as_string())
 
     @classmethod
     def resolve_domain(cls, email):
@@ -589,7 +593,6 @@ class Alias(Base, Email):
 
         return None
 
-# TODO: where are Tokens used / validated?
 # TODO: what about API tokens?
 class Token(Base):
     """ A token is an application password for a given user.
@@ -650,20 +653,22 @@ class MailuConfig:
         and loading
     """
 
-    # TODO: add sqlalchemy session updating (.add & .del)
     class MailuCollection:
-        """ Provides dict- and list-like access to all instances
+        """ Provides dict- and list-like access to instances
             of a sqlalchemy model
         """
 
         def __init__(self, model : db.Model):
-            self._model = model
+            self.model = model
+
+        def __str__(self):
+            return f'<{self.model.__name__}-Collection>'
 
         @cached_property
         def _items(self):
             return {
                 inspect(item).identity: item
-                for item in self._model.query.all()
+                for item in self.model.query.all()
             }
 
         def __len__(self):
@@ -676,8 +681,8 @@ class MailuConfig:
             return self._items[key]
 
         def __setitem__(self, key, item):
-            if not isinstance(item, self._model):
-                raise TypeError(f'expected {self._model.name}')
+            if not isinstance(item, self.model):
+                raise TypeError(f'expected {self.model.name}')
             if key != inspect(item).identity:
                 raise ValueError(f'item identity != key {key!r}')
             self._items[key] = item
@@ -685,23 +690,24 @@ class MailuConfig:
         def __delitem__(self, key):
             del self._items[key]
 
-        def append(self, item):
+        def append(self, item, update=False):
             """ list-like append """
-            if not isinstance(item, self._model):
-                raise TypeError(f'expected {self._model.name}')
+            if not isinstance(item, self.model):
+                raise TypeError(f'expected {self.model.name}')
             key = inspect(item).identity
             if key in self._items:
-                raise ValueError(f'item {key!r} already present in collection')
+                if not update:
+                    raise ValueError(f'item {key!r} already present in collection')
             self._items[key] = item
 
-        def extend(self, items):
+        def extend(self, items, update=False):
             """ list-like extend """
             add = {}
             for item in items:
-                if not isinstance(item, self._model):
-                    raise TypeError(f'expected {self._model.name}')
+                if not isinstance(item, self.model):
+                    raise TypeError(f'expected {self.model.name}')
                 key = inspect(item).identity
-                if key in self._items:
+                if not update and key in self._items:
                     raise ValueError(f'item {key!r} already present in collection')
                 add[key] = item
             self._items.update(add)
@@ -721,8 +727,8 @@ class MailuConfig:
 
         def remove(self, item):
             """ list-like remove """
-            if not isinstance(item, self._model):
-                raise TypeError(f'expected {self._model.name}')
+            if not isinstance(item, self.model):
+                raise TypeError(f'expected {self.model.name}')
             key = inspect(item).identity
             if not key in self._items:
                 raise ValueError(f'item {key!r} not found in collection')
@@ -739,12 +745,11 @@ class MailuConfig:
         def update(self, items):
             """ dict-like update """
             for key, item in items:
-                if not isinstance(item, self._model):
-                    raise TypeError(f'expected {self._model.name}')
+                if not isinstance(item, self.model):
+                    raise TypeError(f'expected {self.model.name}')
                 if key != inspect(item).identity:
                     raise ValueError(f'item identity != key {key!r}')
-                if key in self._items:
-                    raise ValueError(f'item {key!r} already present in collection')
+            self._items.update(items)
 
         def setdefault(self, key, item=None):
             """ dict-like setdefault """
@@ -752,12 +757,85 @@ class MailuConfig:
                 return self._items[key]
             if item is None:
                 return None
-            if not isinstance(item, self._model):
-                raise TypeError(f'expected {self._model.name}')
+            if not isinstance(item, self.model):
+                raise TypeError(f'expected {self.model.name}')
             if key != inspect(item).identity:
                 raise ValueError(f'item identity != key {key!r}')
             self._items[key] = item
             return item
+
+    def __init__(self):
+
+        # section-name -> attr
+        self._sections = {
+            name: getattr(self, name)
+            for name in dir(self)
+            if isinstance(getattr(self, name), self.MailuCollection)
+        }
+
+        # known models
+        self._models = tuple(section.model for section in self._sections.values())
+
+        # model -> attr
+        self._sections.update({
+            section.model: section for section in self._sections.values()
+        })
+
+    def _get_model(self, section):
+        if section is None:
+            return None
+        model = self._sections.get(section)
+        if model is None:
+            raise ValueError(f'Invalid section: {section!r}')
+        if isinstance(model, self.MailuCollection):
+            return model.model
+        return model
+
+    def _add(self, items, section, update):
+
+        model = self._get_model(section)
+        if isinstance(items, self._models):
+            items = [items]
+        elif not hasattr(items, '__iter__'):
+            raise ValueError(f'{items!r} is not iterable')
+
+        for item in items:
+            if model is not None and not isinstance(item, model):
+                what = item.__class__.__name__.capitalize()
+                raise ValueError(f'{what} can not be added to section {section!r}')
+            self._sections[type(item)].append(item, update=update)
+
+    def add(self, items, section=None):
+        """ add item to config """
+        self._add(items, section, update=False)
+
+    def update(self, items, section=None):
+        """ add or replace item in config """
+        self._add(items, section, update=True)
+
+    def remove(self, items, section=None):
+        """ remove item from config """
+        model = self._get_model(section)
+        if isinstance(items, self._models):
+            items = [items]
+        elif not hasattr(items, '__iter__'):
+            raise ValueError(f'{items!r} is not iterable')
+
+        for item in items:
+            if isinstance(item, str):
+                if section is None:
+                    raise ValueError(f'Cannot remove key {item!r} without section')
+                del self._sections[model][item]
+            elif model is not None and not isinstance(item, model):
+                what = item.__class__.__name__.capitalize()
+                raise ValueError(f'{what} can not be removed from section {section!r}')
+            self._sections[type(item)].remove(item,)
+
+    def clear(self, models=None):
+        """ remove complete configuration """
+        for model in self._models:
+            if models is None or model in models:
+                db.session.query(model).delete()
 
     domains = MailuCollection(Domain)
     relays = MailuCollection(Relay)

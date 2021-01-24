@@ -24,6 +24,23 @@ ma = Marshmallow()
 # - fields which are the primary key => unchangeable when updating
 
 
+### map model to schema ###
+
+_model2schema = {}
+
+def get_schema(model=None):
+    """ return schema class for model or instance of model """
+    if model is None:
+        return _model2schema.values()
+    else:
+        return _model2schema.get(model) or _model2schema.get(model.__class__)
+
+def mapped(cls):
+    """ register schema in model2schema map """
+    _model2schema[cls.Meta.model] = cls
+    return cls
+
+
 ### yaml render module ###
 
 # allow yaml module to dump OrderedDict
@@ -77,26 +94,6 @@ class RenderYAML:
         """
         cls._update_items(kwargs, cls._dump_defaults)
         return yaml.dump(*args, **kwargs)
-
-
-### functions ###
-
-def handle_email(data):
-    """ merge separate localpart and domain to email
-    """
-
-    localpart = 'localpart' in data
-    domain = 'domain' in data
-
-    if 'email' in data:
-        if localpart or domain:
-            raise ValidationError('duplicate email and localpart/domain')
-    elif localpart and domain:
-        data['email'] = f'{data["localpart"]}@{data["domain"]}'
-    elif localpart or domain:
-        raise ValidationError('incomplete localpart/domain')
-
-    return data
 
 
 ### field definitions ###
@@ -177,9 +174,7 @@ class DkimKeyField(fields.String):
             return dkim.gen_key()
 
         # remember some keydata for error message
-        keydata = value
-        if len(keydata) > 40:
-            keydata = keydata[:25] + '...' + keydata[-10:]
+        keydata = f'{value[:25]}...{value[-10:]}' if len(value) > 40 else value
 
         # wrap value into valid pem layout and check validity
         value = (
@@ -196,6 +191,26 @@ class DkimKeyField(fields.String):
 
 
 ### base definitions ###
+
+def handle_email(data):
+    """ merge separate localpart and domain to email
+    """
+
+    localpart = 'localpart' in data
+    domain = 'domain' in data
+
+    if 'email' in data:
+        if localpart or domain:
+            raise ValidationError('duplicate email and localpart/domain')
+        data['localpart'], data['domain_name'] = data['email'].rsplit('@', 1)
+    elif localpart and domain:
+        data['domain_name'] = data['domain']
+        del data['domain']
+        data['email'] = f'{data["localpart"]}@{data["domain_name"]}'
+    elif localpart or domain:
+        raise ValidationError('incomplete localpart/domain')
+
+    return data
 
 class BaseOpts(SQLAlchemyAutoSchemaOpts):
     """ Option class with sqla session
@@ -238,12 +253,15 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
         # update excludes
         kwargs['exclude'] = exclude
 
+        # init SQLAlchemyAutoSchema
+        super().__init__(*args, **kwargs)
+
         # exclude_by_value
         self._exclude_by_value = getattr(self.Meta, 'exclude_by_value', {})
 
         # exclude default values
         if not context.get('full'):
-            for column in getattr(self.Meta, 'model').__table__.columns:
+            for column in getattr(self.opts, 'model').__table__.columns:
                 if column.name not in exclude:
                     self._exclude_by_value.setdefault(column.name, []).append(
                         None if column.default is None else column.default.arg
@@ -256,10 +274,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
                 if not flags & set(need):
                     self._hide_by_context |= set(what)
 
-        # init SQLAlchemyAutoSchema
-        super().__init__(*args, **kwargs)
-
-        # init order
+        # initialize attribute order
         if hasattr(self.Meta, 'order'):
             # use user-defined order
             self._order = list(reversed(getattr(self.Meta, 'order')))
@@ -267,16 +282,34 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
             # default order is: primary_key + other keys alphabetically
             self._order = list(sorted(self.fields.keys()))
             primary = self.opts.model.__table__.primary_key.columns.values()[0].name
-            self._order.remove(primary)
-            self._order.reverse()
-            self._order.append(primary)
+            if primary in self._order:
+                self._order.remove(primary)
+                self._order.reverse()
+                self._order.append(primary)
+
+        # move pre_load hook "_track_import" to the front
+        hooks = self._hooks[('pre_load', False)]
+        if '_track_import' in hooks:
+            hooks.remove('_track_import')
+            hooks.insert(0, '_track_import')
+        # and post_load hook "_fooo" to the end
+        hooks = self._hooks[('post_load', False)]
+        if '_add_instance' in hooks:
+            hooks.remove('_add_instance')
+            hooks.append('_add_instance')
 
     @pre_load
     def _track_import(self, data, many, **kwargs): # pylint: disable=unused-argument
-        call = self.context.get('callback')
-        if call is not None:
-            call(self=self, data=data, many=many, **kwargs)
+# TODO: also handle reset, prune and delete in pre_load / post_load hooks!
+#        print('!!!', repr(data))
+        if callback := self.context.get('callback'):
+            callback(self, data)
         return data
+
+    @post_load
+    def _add_instance(self, item, many, **kwargs): # pylint: disable=unused-argument
+        self.opts.sqla_session.add(item)
+        return item
 
     @post_dump
     def _hide_and_order(self, data, many, **kwargs): # pylint: disable=unused-argument
@@ -306,6 +339,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
 
 ### schema definitions ###
 
+@mapped
 class DomainSchema(BaseSchema):
     """ Marshmallow schema for Domain model """
     class Meta:
@@ -339,6 +373,7 @@ class DomainSchema(BaseSchema):
     dns_dmarc = fields.String(dump_only=True)
 
 
+@mapped
 class TokenSchema(BaseSchema):
     """ Marshmallow schema for Token model """
     class Meta:
@@ -347,6 +382,7 @@ class TokenSchema(BaseSchema):
         load_instance = True
 
 
+@mapped
 class FetchSchema(BaseSchema):
     """ Marshmallow schema for Fetch model """
     class Meta:
@@ -361,6 +397,7 @@ class FetchSchema(BaseSchema):
         }
 
 
+@mapped
 class UserSchema(BaseSchema):
     """ Marshmallow schema for User model """
     class Meta:
@@ -368,7 +405,7 @@ class UserSchema(BaseSchema):
         model = models.User
         load_instance = True
         include_relationships = True
-        exclude = ['localpart', 'domain', 'quota_bytes_used']
+        exclude = ['domain', 'quota_bytes_used']
 
         exclude_by_value = {
             'forward_destination': [[]],
@@ -395,7 +432,7 @@ class UserSchema(BaseSchema):
                 raise ValidationError(f'invalid hashed password {password!r}')
         elif 'password_hash' in data and 'hash_scheme' in data:
             if data['hash_scheme'] not in self.Meta.model.scheme_dict:
-                raise ValidationError(f'invalid password scheme {scheme!r}')
+                raise ValidationError(f'invalid password scheme {data["hash_scheme"]!r}')
             data['password'] = f'{{{data["hash_scheme"]}}}{data["password_hash"]}'
             del data['hash_scheme']
             del data['password_hash']
@@ -409,17 +446,20 @@ class UserSchema(BaseSchema):
     # ctx.verify('', hashed)
     # =>? ValueError: hash could not be identified
 
+    localpart = fields.Str(load_only=True)
+    domain_name = fields.Str(load_only=True)
     tokens = fields.Nested(TokenSchema, many=True)
     fetches = fields.Nested(FetchSchema, many=True)
 
 
+@mapped
 class AliasSchema(BaseSchema):
     """ Marshmallow schema for Alias model """
     class Meta:
         """ Schema config """
         model = models.Alias
         load_instance = True
-        exclude  = ['localpart']
+        exclude = ['domain']
 
         exclude_by_value = {
             'destination': [[]],
@@ -429,9 +469,12 @@ class AliasSchema(BaseSchema):
     def _handle_email(self, data, many, **kwargs): # pylint: disable=unused-argument
         return handle_email(data)
 
+    localpart = fields.Str(load_only=True)
+    domain_name = fields.Str(load_only=True)
     destination = CommaSeparatedListField()
 
 
+@mapped
 class ConfigSchema(BaseSchema):
     """ Marshmallow schema for Config model """
     class Meta:
@@ -440,6 +483,7 @@ class ConfigSchema(BaseSchema):
         load_instance = True
 
 
+@mapped
 class RelaySchema(BaseSchema):
     """ Marshmallow schema for Relay model """
     class Meta:
@@ -453,17 +497,42 @@ class MailuSchema(Schema):
     class Meta:
         """ Schema config """
         render_module = RenderYAML
+
         ordered = True
         order = ['config', 'domains', 'users', 'aliases', 'relays']
 
-    @post_dump(pass_many=True)
-    def _order(self, data : OrderedDict, many : bool, **kwargs): # pylint: disable=unused-argument
-        for key in reversed(self.Meta.order):
-            try:
-                data.move_to_end(key, False)
-            except KeyError:
-                pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # order fields
+        for field_list in self.load_fields, self.dump_fields, self.fields:
+            for section in reversed(self.Meta.order):
+                try:
+                    field_list.move_to_end(section, False)
+                except KeyError:
+                    pass
+
+    @pre_load
+    def _clear_config(self, data, many, **kwargs): # pylint: disable=unused-argument
+        """ create config object in context if missing
+            and clear it if requested
+        """
+        if 'config' not in self.context:
+            self.context['config'] = models.MailuConfig()
+        if self.context.get('clear'):
+            self.context['config'].clear(
+                models = {field.nested.opts.model for field in self.fields.values()}
+            )
         return data
+
+    @post_load
+    def _make_config(self, data, many, **kwargs): # pylint: disable=unused-argument
+        """ update and return config object """
+        config = self.context['config']
+        for section in self.Meta.order:
+            if section in data:
+                config.update(data[section], section)
+
+        return config
 
     config = fields.Nested(ConfigSchema, many=True)
     domains = fields.Nested(DomainSchema, many=True)

@@ -4,9 +4,15 @@
 import sys
 import os
 import socket
+import json
+import logging
 import uuid
 
+from collections import Counter
+from itertools import chain
+
 import click
+import sqlalchemy
 import yaml
 
 from flask import current_app as app
@@ -14,7 +20,7 @@ from flask.cli import FlaskGroup, with_appcontext
 from marshmallow.exceptions import ValidationError
 
 from . import models
-from .schemas import MailuSchema
+from .schemas import MailuSchema, get_schema
 
 
 db = models.db
@@ -322,60 +328,211 @@ SECTIONS = {'domains', 'relays', 'users', 'aliases'}
 
 
 @mailu.command()
-@click.option('-v', '--verbose', is_flag=True, help='Increase verbosity')
+@click.option('-v', '--verbose', count=True, help='Increase verbosity')
+@click.option('-q', '--quiet', is_flag=True, help='Quiet mode - only show errors')
+@click.option('-u', '--update', is_flag=True, help='Update mode - merge input with existing config')
 @click.option('-n', '--dry-run', is_flag=True, help='Perform a trial run with no changes made')
 @click.argument('source', metavar='[FILENAME|-]', type=click.File(mode='r'), default=sys.stdin)
 @with_appcontext
-def config_import(verbose=False, dry_run=False, source=None):
-    """ Import configuration from YAML
+def config_import(verbose=0, quiet=False, update=False, dry_run=False, source=None):
+    """ Import configuration as YAML or JSON from stdin or file
     """
 
-    def log(**data):
-        caller = sys._getframe(1).f_code.co_name # pylint: disable=protected-access
-        if caller == '_track_import':
-            print(f'Handling {data["self"].opts.model.__table__} data: {data["data"]!r}')
+    # verbose
+    # 0 : show number of changes
+    # 1 : also show changes
+    # 2 : also show secrets
+    # 3 : also show input data
+    # 4 : also show sql queries
+
+    if quiet:
+        verbose = -1
+
+    counter = Counter()
+    dumper = {}
 
     def format_errors(store, path=None):
+
+        res = []
         if path is None:
             path = []
         for key in sorted(store):
             location = path + [str(key)]
             value = store[key]
             if isinstance(value, dict):
-                format_errors(value, location)
+                res.extend(format_errors(value, location))
             else:
                 for message in value:
-                    print(f'[ERROR] {".".join(location)}: {message}')
+                    res.append((".".join(location), message))
 
-    context = {
-        'callback': log if verbose else None,
+        if path:
+            return res
+
+        fmt = f'     - {{:<{max([len(loc) for loc, msg in res])}}} : {{}}'
+        res = [fmt.format(loc, msg) for loc, msg in res]
+        num = f'error{["s",""][len(res)==1]}'
+        res.insert(0, f'[ValidationError] {len(res)} {num} occured during input validation')
+
+        return '\n'.join(res)
+
+    def format_changes(*message):
+        if counter:
+            changes = []
+            last = None
+            for (action, what), count in sorted(counter.items()):
+                if action != last:
+                    if last:
+                        changes.append('/')
+                    changes.append(f'{action}:')
+                    last = action
+                changes.append(f'{what}({count})')
+        else:
+            changes = 'no changes.'
+        return chain(message, changes)
+
+    def log(action, target, message=None):
+        if message is None:
+            message = json.dumps(dumper[target.__class__].dump(target), ensure_ascii=False)
+        print(f'{action} {target.__table__}: {message}')
+
+    def listen_insert(mapper, connection, target): # pylint: disable=unused-argument
+        """ callback function to track import """
+        counter.update([('Added', target.__table__.name)])
+        if verbose >= 1:
+            log('Added', target)
+
+    def listen_update(mapper, connection, target): # pylint: disable=unused-argument
+        """ callback function to track import """
+
+        changed = {}
+        inspection = sqlalchemy.inspect(target)
+        for attr in sqlalchemy.orm.class_mapper(target.__class__).column_attrs:
+            if getattr(inspection.attrs, attr.key).history.has_changes():
+                if sqlalchemy.orm.attributes.get_history(target, attr.key)[2]:
+                    before = sqlalchemy.orm.attributes.get_history(target, attr.key)[2].pop()
+                    after = getattr(target, attr.key)
+                    # only remember changed keys
+                    if before != after and (before or after):
+                        if verbose >= 1:
+                            changed[str(attr.key)] = (before, after)
+                        else:
+                            break
+
+        if verbose >= 1:
+            # use schema with dump_context to hide secrets and sort keys
+            primary = json.dumps(str(target), ensure_ascii=False)
+            dumped = get_schema(target)(only=changed.keys(), context=dump_context).dump(target)
+            for key, value in dumped.items():
+                before, after = changed[key]
+                if value == '<hidden>':
+                    before = '<hidden>' if before else before
+                    after = '<hidden>' if after else after
+                else:
+                    # TODO: use schema to "convert" before value?
+                    after = value
+                before = json.dumps(before, ensure_ascii=False)
+                after = json.dumps(after, ensure_ascii=False)
+                log('Modified', target, f'{primary} {key}: {before} -> {after}')
+
+        if changed:
+            counter.update([('Modified', target.__table__.name)])
+
+    def listen_delete(mapper, connection, target): # pylint: disable=unused-argument
+        """ callback function to track import """
+        counter.update([('Deleted', target.__table__.name)])
+        if verbose >= 1:
+            log('Deleted', target)
+
+    # this listener should not be necessary, when:
+    # dkim keys should be stored in database and it should be possible to store multiple
+    # keys per domain. the active key would be also stored on disk on commit.
+    def listen_dkim(session, flush_context): # pylint: disable=unused-argument
+        """ callback function to track import """
+        for target in session.identity_map.values():
+            if not isinstance(target, models.Domain):
+                continue
+            primary = json.dumps(str(target), ensure_ascii=False)
+            before = target._dkim_key_on_disk
+            after = target._dkim_key
+            if before != after and (before or after):
+                if verbose >= 2:
+                    before = before.decode('ascii', 'ignore')
+                    after = after.decode('ascii', 'ignore')
+                else:
+                    before = '<hidden>' if before else ''
+                    after = '<hidden>' if after else ''
+                before = json.dumps(before, ensure_ascii=False)
+                after = json.dumps(after, ensure_ascii=False)
+                log('Modified', target, f'{primary} dkim_key: {before} -> {after}')
+                counter.update([('Modified', target.__table__.name)])
+
+    def track_serialize(self, item):
+        """ callback function to track import """
+        log('Handling', self.opts.model, item)
+
+    # configure contexts
+    dump_context = {
+        'secrets': verbose >= 2,
+    }
+    load_context = {
+        'callback': track_serialize if verbose >= 3 else None,
+        'clear': not update,
         'import': True,
     }
 
-    error = False
+    # register listeners
+    for schema in get_schema():
+        model = schema.Meta.model
+        dumper[model] = schema(context=dump_context)
+        sqlalchemy.event.listen(model, 'after_insert', listen_insert)
+        sqlalchemy.event.listen(model, 'after_update', listen_update)
+        sqlalchemy.event.listen(model, 'after_delete', listen_delete)
+
+    # special listener for dkim_key changes
+    sqlalchemy.event.listen(db.session, 'after_flush', listen_dkim)
+
+    if verbose >= 4:
+        logging.basicConfig()
+        logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
     try:
-        config = MailuSchema(context=context).loads(source)
+        with models.db.session.no_autoflush:
+            config = MailuSchema(only=SECTIONS, context=load_context).loads(source)
     except ValidationError as exc:
-        error = True
-        format_errors(exc.messages)
-    else:
-        print(config)
+        raise click.ClickException(format_errors(exc.messages)) from exc
+    except Exception as exc:
+        # (yaml.scanner.ScannerError, UnicodeDecodeError, ...)
+        raise click.ClickException(f'[{exc.__class__.__name__}] {" ".join(str(exc).split())}') from exc
+
+    # flush session to show/count all changes
+    if dry_run or verbose >= 1:
+        db.session.flush()
+
+    # check for duplicate domain names
+    dup = set()
+    for fqdn in chain(db.session.query(models.Domain.name),
+                      db.session.query(models.Alternative.name),
+                      db.session.query(models.Relay.name)):
+        if fqdn in dup:
+            raise click.ClickException(f'[ValidationError] Duplicate domain name: {fqdn}')
+        dup.add(fqdn)
+
+    # TODO: implement special update "items"
+    # -pkey: which             - remove item "which"
+    # -key: null or [] or {}   - set key to default
+    # -pkey: null or [] or {}  - remove all existing items in this list
+
+    # don't commit when running dry
+    if dry_run:
+        db.session.rollback()
+        if not quiet:
+            print(*format_changes('Dry run. Not commiting changes.'))
+        # TODO: remove debug
         print(MailuSchema().dumps(config))
-        # TODO: need to delete other entries
-
-    # TODO: enable commit
-    error = True
-
-    # don't commit when running dry or validation errors occured
-    if error:
-        print('An error occured. Not committing changes.')
-        db.session.rollback()
-        sys.exit(2)
-    elif dry_run:
-        print('Dry run. Not commiting changes.')
-        db.session.rollback()
     else:
         db.session.commit()
+        if not quiet:
+            print(*format_changes('Commited changes.'))
 
 
 @mailu.command()
@@ -385,28 +542,35 @@ def config_import(verbose=False, dry_run=False, source=None):
 @click.option('-d', '--dns', is_flag=True, help='Include dns records')
 @click.option('-o', '--output-file', 'output', default=sys.stdout, type=click.File(mode='w'),
               help='save yaml to file')
+@click.option('-j', '--json', 'as_json', is_flag=True, help='Dump in josn format')
 @click.argument('sections', nargs=-1)
 @with_appcontext
-def config_export(full=False, secrets=False, dns=False, output=None, sections=None):
-    """ Export configuration as YAML to stdout or file
+def config_export(full=False, secrets=False, dns=False, output=None, as_json=False, sections=None):
+    """ Export configuration as YAML or JSON to stdout or file
     """
 
     if sections:
         for section in sections:
             if section not in SECTIONS:
-                print(f'[ERROR] Unknown section: {section!r}')
-                sys.exit(1)
+                print(f'[ERROR] Unknown section: {section}')
+                raise click.exceptions.Exit(1)
         sections = set(sections)
     else:
         sections = SECTIONS
 
-    context={
+    context = {
         'full': full,
         'secrets': secrets,
         'dns': dns,
     }
 
-    MailuSchema(only=sections, context=context).dumps(models.MailuConfig(), output)
+    if as_json:
+        schema = MailuSchema(only=sections, context=context)
+        schema.opts.render_module = json
+        print(schema.dumps(models.MailuConfig(), separators=(',',':')), file=output)
+
+    else:
+        MailuSchema(only=sections, context=context).dumps(models.MailuConfig(), output)
 
 
 @mailu.command()

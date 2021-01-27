@@ -39,7 +39,7 @@ address.
 
 The ``AUTH_RATELIMIT`` holds a security setting for fighting attackers that
 try to guess user passwords. The value is the limit of failed authentication attempts
-that a single IP address can perform against IMAP, POP and SMTP authentication endpoints.
+that a network of IP addresses (/24 for ipv4 and /56 for ipv6) can perform against IMAP, POP and SMTP authentication endpoints. Setting this this to ``False`` disables all rate limiting.
 
 If ``AUTH_RATELIMIT_SUBNET`` is ``True`` (which is the default), the ``AUTH_RATELIMIT``
 rules does also apply to auth requests coming from ``SUBNET``, especially for the webmail.

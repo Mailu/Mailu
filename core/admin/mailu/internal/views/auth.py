@@ -7,14 +7,26 @@ import flask_login
 import base64
 import ipaddress
 
+def extract_network_from_ip(ip):
+    n = ipaddress.ip_network(ip)
+    if isinstance(n, ipaddress.IPv4Network):
+        # /24
+        return str(n.supernet(prefixlen_diff=8).network_address)
+    elif isinstance(n, ipaddress.IPv6Network):
+        # /56
+        return str(n.supernet(prefixlen_diff=72).network_address)
+    else: # not sure what to do with it
+        return ip
 
 @internal.route("/auth/email")
 def nginx_authentication():
     """ Main authentication endpoint for Nginx email server
     """
+    ratelimit = app.config["AUTH_RATELIMIT"]
     limiter = utils.limiter.get_limiter(app.config["AUTH_RATELIMIT"], "auth-ip")
     client_ip = flask.request.headers["Client-Ip"]
-    if not limiter.test(client_ip):
+    client_network = extract_network_from_ip(client_ip)
+    if ratelimit and not limiter.test(client_network):
         response = flask.Response()
         response.headers['Auth-Status'] = 'Authentication rate limit from one source exceeded'
         response.headers['Auth-Error-Code'] = '451 4.3.2'
@@ -25,11 +37,12 @@ def nginx_authentication():
     response = flask.Response()
     for key, value in headers.items():
         response.headers[key] = str(value)
-    if ("Auth-Status" not in headers) or (headers["Auth-Status"] != "OK"):
-        limit_subnet = str(app.config["AUTH_RATELIMIT_SUBNET"]) != 'False'
-        subnet = ipaddress.ip_network(app.config["SUBNET"])
-        if limit_subnet or ipaddress.ip_address(client_ip) not in subnet:
-            limiter.hit(flask.request.headers["Client-Ip"])
+
+    limit_subnet = str(app.config["AUTH_RATELIMIT_SUBNET"]) != 'False'
+    subnet = ipaddress.ip_network(app.config["SUBNET"])
+    if limit_subnet or ipaddress.ip_address(client_ip) not in subnet:
+        if ("Auth-Status" not in headers) or (headers["Auth-Status"] != "OK"):
+            limiter.hit(client_network)
     return response
 
 
@@ -48,9 +61,11 @@ def admin_authentication():
 def basic_authentication():
     """ Tries to authenticate using the Authorization header.
     """
+    ratelimit = app.config["AUTH_RATELIMIT"]
     limiter = utils.limiter.get_limiter(app.config["AUTH_RATELIMIT"], "auth-ip")
-    client_ip = flask.request.headers["X-Real-IP"] if 'X-Real-IP' in flask.request.headers else request.remote_addr
-    if not limiter.test(client_ip):
+    client_ip = flask.request.headers["X-Real-IP"] if 'X-Real-IP' in flask.request.headers else flask.request.remote_addr
+    client_network = extract_network_from_ip(client_ip)
+    if ratelimit and not limiter.test(client_network):
         response = flask.Response(status=401)
         response.headers["WWW-Authenticate"] = 'Basic realm="Authentication rate limit from one source exceeded"'
         response.headers['Retry-After'] = '60'
@@ -78,7 +93,7 @@ def basic_authentication():
             limit_subnet = str(app.config["AUTH_RATELIMIT_SUBNET"]) != 'False'
             subnet = ipaddress.ip_network(app.config["SUBNET"])
             if limit_subnet or ipaddress.ip_address(client_ip) not in subnet:
-                limiter.hit(client_ip)
+                limiter.hit(client_network)
     response = flask.Response(status=401)
     response.headers["WWW-Authenticate"] = 'Basic realm="Login Required"'
     return response

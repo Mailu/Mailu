@@ -392,7 +392,7 @@ class User(Base, Email):
             # While it's not meant to be persisted to cold-storage, no
             # additional measures are taken to ensure it isn't
             # (mlock(), encrypted swap, memory scrubbing, ...)
-            app.cache.set(self.get_id(), hash.pbkdf2_sha256.using(rounds=1).hash(password))
+            app.cache.set(self.get_id(), hash.pbkdf2_sha256.using(rounds=1).hash(password), app.config['CREDENTIAL_CACHE_TTL'])
         return result
 
     def set_password(self, password, hash_scheme=None, raw=False):

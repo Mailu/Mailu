@@ -37,9 +37,21 @@ The ``POSTMASTER`` is the local part of the postmaster email address. It is
 recommended to setup a generic value and later configure a mail alias for that
 address.
 
-The ``AUTH_RATELIMIT`` holds a security setting for fighting attackers that
-try to guess user passwords. The value is the limit of failed authentication attempts
-that a network of IP addresses (/24 for ipv4 and /56 for ipv6) can perform against IMAP, POP and SMTP authentication endpoints. Setting this this to ``False`` disables all rate limiting.
+The ``AUTH_RATELIMIT_IP`` (default: 10/hour) holds a security setting for fighting
+attackers that waste server ressources by trying to guess user passwords (typically
+using a password spraying attack). The value defines the limit of authentication
+attempts that will be processed on non-existing accounts for a specific IP subnet
+(as defined in ``AUTH_RATELIMIT_IP_V4_MASK`` and ``AUTH_RATELIMIT_IP_V6_MASK`` below).
+
+The ``AUTH_RATELIMIT_USER`` (default: 100/day) holds a security setting for fighting
+attackers that attempt to guess a user's password (typically using a password
+bruteforce attack). The value defines the limit of authentication attempts allowed
+for any given account within a specific timeframe.
+
+The ``AUTH_RATELIMIT_EXEMPTION_LENGTH`` (default: 86400) is the number of seconds
+after a successful login for which a specific IP address is exempted from rate limits.
+This ensures that users behind a NAT don't get locked out when a single client is
+misconfigured... but also potentially allow for users to attack each-other.
 
 If ``AUTH_RATELIMIT_SUBNET`` is ``True`` (which is the default), the ``AUTH_RATELIMIT``
 rules does also apply to auth requests coming from ``SUBNET``, especially for the webmail.
@@ -146,6 +158,10 @@ The ``AUTH_CACHE_SIZE`` (default: 1000) and ``AUTH_CACHE_TTL`` (in seconds: defa
 allow for customization of the credential cache. The credential cache speeds up the login
 process by using a representation of the passwords that is faster (a non-iterated salted
 hash), regardless of what is in cold-storage (see ``PASSWORD_SCHEME`` above).
+
+The ``AUTH_RATELIMIT_IP_V4_MASK`` (default: 24) and ``AUTH_RATELIMIT_IP_V6_MASK``
+(default: 56) settings define the mask that will be applied on IP addresses in the rate
+limiting code. This allows for subnets to be blocked instead of individual IP addresses.
 
 The ``LOG_LEVEL`` setting is used by the python start-up scripts as a logging threshold.
 Log messages equal or higher than this priority will be printed.

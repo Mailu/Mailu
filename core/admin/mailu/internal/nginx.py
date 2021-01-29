@@ -67,14 +67,18 @@ def handle_authentication(headers):
             return {
                 "Auth-Status": "OK",
                 "Auth-Server": server,
-                "Auth-Port": port
+                "Auth-Port": port,
+                "Auth-User": user_email,
+                "Auth-User-Exists": user != None
             }
         else:
             status, code = get_status(protocol, "authentication")
             return {
                 "Auth-Status": status,
                 "Auth-Error-Code": code,
-                "Auth-Wait": 0
+                "Auth-Wait": 0,
+                "Auth-User": user_email,
+                "Auth-User-Exists": user != None
             }
     # Unexpected
     return {}

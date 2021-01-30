@@ -53,9 +53,10 @@ def nginx_authentication():
     """
     client_ip = flask.request.headers["Client-Ip"]
     if should_rate_limit_ip(client_ip):
+        status, code = nginx.get_status(flask.request.headers['Auth-Protocol'], 'ratelimit')
         response = flask.Response()
-        response.headers['Auth-Status'] = 'Authentication rate limit from one source exceeded'
-        response.headers['Auth-Error-Code'] = '451 4.3.2'
+        response.headers['Auth-Status'] = status
+        response.headers['Auth-Error-Code'] = code
         if int(flask.request.headers['Auth-Login-Attempt']) < 10:
             response.headers['Auth-Wait'] = '3'
         return response
@@ -69,9 +70,10 @@ def nginx_authentication():
         username = response.headers["Auth-User"]
         if should_rate_limit_user(username, client_ip):
             # FIXME could be done before handle_authentication()
+            status, code = nginx.get_status(flask.request.headers['Auth-Protocol'], 'ratelimit')
             response = flask.Response()
-            response.headers['Auth-Status'] = 'Authentication rate limit for this username exceeded'
-            response.headers['Auth-Error-Code'] = '451 4.3.2'
+            response.headers['Auth-Status'] = status
+            response.headers['Auth-Error-Code'] = code
             if int(flask.request.headers['Auth-Login-Attempt']) < 10:
                 response.headers['Auth-Wait'] = '3'
             return response

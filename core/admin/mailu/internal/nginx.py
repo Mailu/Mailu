@@ -17,6 +17,11 @@ STATUSES = {
         "smtp": "535 5.7.8",
         "pop3": "-ERR Authentication failed"
     }),
+    "ratelimit": ("Temporary authentication failure (rate-limit)", {
+        "imap": "LIMIT",
+        "smtp": "454 4.7.0",
+        "pop3": "-ERR [LOGIN-DELAY] Retry later"
+    }),
 }
 
 

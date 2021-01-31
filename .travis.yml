@@ -34,7 +34,7 @@ install:
 
 before_script:
   - docker-compose -v
-  - docker login -u $DOCKER_UN -p $DOCKER_PW
+  - echo "$DOCKER_PW" | docker login --username $DOCKER_UN --password-stdin 
   - docker-compose -f tests/build.yml build
   - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
 

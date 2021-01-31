@@ -1,0 +1,56 @@
+branches:
+  only:
+    - staging
+    - testing
+    - '1.5'
+    - '1.6'
+    - '1.7'
+    - '1.8'
+    - master
+    # version tags, e.g. 1.7.1
+    - /^1\.[5678]\.\d+$/
+    # pre-releases, e.g. 1.8-pre1
+    - /^1\.8-pre\d+$/
+    # test branches, e.g. test-debian
+    - /^test-[\w\-\.]+$/
+
+sudo: required
+services: docker
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+env:
+  - MAILU_VERSION=${TRAVIS_BRANCH////-}
+
+language: python
+python:
+  - "3.6"
+install:
+  - pip install -r tests/requirements.txt
+  - sudo curl -L https://github.com/docker/compose/releases/download/1.23.0-rc3/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+  - sudo chmod +x /usr/local/bin/docker-compose
+
+before_script:
+  - docker-compose -v
+  - docker login -u $DOCKER_UN -p $DOCKER_PW
+  - docker-compose -f tests/build.yml build
+  - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
+
+
+script:
+# test.py, test name and timeout between start and tests.
+  - python tests/compose/test.py core 1
+  - python tests/compose/test.py fetchmail 1
+  - travis_wait python tests/compose/test.py filters 10
+  - python tests/compose/test.py rainloop 1
+  - python tests/compose/test.py roundcube 1
+  - python tests/compose/test.py webdav 1
+
+deploy:
+  provider: script
+  script: bash tests/deploy.sh
+  on:
+    all_branches: true
+    condition: -n $DOCKER_UN

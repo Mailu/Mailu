@@ -150,9 +150,8 @@ Depending on your particular deployment you most probably will want to change th
 Advanced settings
 -----------------
 
-The ``PASSWORD_SCHEME`` is the password hashing scheme. You should use the
-default value, unless you are importing password from a separate system and
-want to keep using the old password hashing scheme.
+The ``CREDENTIAL_ROUNDS`` (default: 12) is the number of rounds used by the password
+hashing scheme. You should use the default value.
 
 The ``AUTH_CACHE_SIZE`` (default: 1000) and ``AUTH_CACHE_TTL`` (in seconds: default: 3600)
 allow for customization of the credential cache. The credential cache speeds up the login

@@ -1,7 +1,7 @@
 from mailu import dkim
 
 from sqlalchemy.ext import declarative
-from passlib import context, hash
+from passlib import context, hash, registry
 from datetime import datetime, date
 from email.mime import text
 from flask import current_app as app
@@ -370,17 +370,30 @@ class User(Base, Email):
                    'CRYPT': "des_crypt"}
 
     def get_password_context(self):
+        schemes = registry.list_crypt_handlers()
+        # scrypt throws a warning if the native wheels aren't found
+        schemes.remove('scrypt')
+        # we can't leave plaintext schemes as they will be misidentified
+        for scheme in schemes:
+            if scheme.endswith('plaintext'):
+                schemes.remove(scheme)
         return context.CryptContext(
-            schemes=self.scheme_dict.values(),
-            default=self.scheme_dict[app.config['PASSWORD_SCHEME']],
+            schemes=schemes,
+            default='bcrypt_sha256',
+            bcrypt_sha256__rounds=app.config['CREDENTIAL_ROUNDS'],
+            deprecated='auto'
         )
 
     def check_password(self, password):
         context = self.get_password_context()
-        reference = re.match('({[^}]+})?(.*)', self.password).group(2)
-        result = context.verify(password, reference)
-        if result and context.identify(reference) != context.default_scheme():
-            self.set_password(password)
+        # {scheme} will most likely be migrated on first use
+        reference = self.password
+        if self.password.startswith("{"):
+            reference = re.match('({[^}]+})?(.*)', reference).group(2)
+
+        result, new_hash = context.verify_and_update(password, reference)
+        if new_hash:
+            self.password = new_hash
             db.session.add(self)
             db.session.commit()
         return result
@@ -389,13 +402,11 @@ class User(Base, Email):
         """Set password for user with specified encryption scheme
            @password: plain text password to encrypt (if raw == True the hash itself)
         """
-        if hash_scheme is None:
-            hash_scheme = app.config['PASSWORD_SCHEME']
-        # for the list of hash schemes see https://wiki2.dovecot.org/Authentication/PasswordSchemes
         if raw:
-            self.password = '{'+hash_scheme+'}' + password
+            self.password = password
         else:
-            self.password = '{'+hash_scheme+'}' + self.get_password_context().encrypt(password, self.scheme_dict[hash_scheme])
+            self.password = self.get_password_context().hash(password)
+        app.cache.delete(self.get_id())
 
     def get_managed_domains(self):
         if self.global_admin:

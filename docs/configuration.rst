@@ -138,9 +138,7 @@ Depending on your particular deployment you most probably will want to change th
 Advanced settings
 -----------------
 
-The ``PASSWORD_SCHEME`` is the password encryption scheme. You should use the
-default value, unless you are importing password from a separate system and
-want to keep using the old password encryption scheme.
+The ``CREDENTIAL_ROUNDS`` (default: 12) is the number of rounds used by the password hashing scheme. You should use the default value.
 
 The ``SESSION_COOKIE_SECURE`` (default: True) setting controls the secure flag on the cookies of the administrative interface. It should only be turned off if you intend to access it over plain HTTP.
 

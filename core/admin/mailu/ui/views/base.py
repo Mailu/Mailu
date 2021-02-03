@@ -3,7 +3,7 @@ from mailu.ui import ui, forms, access
 
 import flask
 import flask_login
-
+from flask import current_app as app
 
 @ui.route('/', methods=["GET"])
 @access.authenticated
@@ -14,6 +14,8 @@ def index():
 @ui.route('/login', methods=['GET', 'POST'])
 def login():
     form = forms.LoginForm()
+    if app.config['RECAPTCHA_PUBLIC_KEY'] != "" and app.config['RECAPTCHA_PRIVATE_KEY'] != "":
+        form = forms.LoginFormCaptcha()
     if form.validate_on_submit():
         user = models.User.login(form.email.data, form.pw.data)
         if user:

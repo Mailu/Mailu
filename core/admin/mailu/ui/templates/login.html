@@ -7,3 +7,16 @@
 {% block subtitle %}
 {% trans %}to access the administration tools{% endtrans %}
 {% endblock %}
+
+{% block content %}
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {% call macros.box() %}
+  {{ macros.form_fields((form.email, form.pw)) }}
+  {% if form.captcha %}
+    {{ macros.form_field(form.captcha) }}
+  {% endif %}
+  {{ macros.form_field(form.submit) }}
+  {% endcall %}
+</form>
+{% endblock %}

@@ -50,6 +50,8 @@ class LoginForm(flask_wtf.FlaskForm):
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
     submit = fields.SubmitField(_('Sign in'))
 
+class LoginFormCaptcha(LoginForm):
+    captcha = flask_wtf.RecaptchaField()
 
 class DomainForm(flask_wtf.FlaskForm):
     name = fields.StringField(_('Domain name'), [validators.DataRequired()])

@@ -39,6 +39,8 @@ conf.jinja("/php.ini", os.environ, "/usr/local/etc/php/conf.d/roundcube.ini")
 os.system("mkdir -p /data/gpg /var/www/html/logs")
 os.system("touch /var/www/html/logs/errors.log")
 os.system("chown -R www-data:www-data /var/www/html/logs")
+os.system("chmod -R a+rX /var/www/html/")
+os.system("ln -s /var/www/html/index.php /var/www/html/sso.php")
 
 try:
     print("Initializing database")

@@ -35,6 +35,7 @@ RUN apt-get update && apt-get install -y \
  && rm -rf /var/lib/apt/lists
 
 COPY include.php /var/www/html/include.php
+COPY sso.php /var/www/html/sso.php
 COPY php.ini /php.ini
 
 COPY application.ini /application.ini

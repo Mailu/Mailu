@@ -7,7 +7,6 @@ import ipaddress
 import socket
 import tenacity
 
-
 SUPPORTED_AUTH_METHODS = ["none", "plain"]
 
 
@@ -54,6 +53,11 @@ def handle_authentication(headers):
         user = models.User.query.get(user_email)
         status = False
         if user:
+            # webmails
+            if len(password) == 64 and ip == app.config['WEBMAIL_ADDRESS']:
+                if user.verify_temp_token(password):
+                    status = True
+
             # All tokens are 32 characters hex lowercase
             if len(password) == 32:
                 for token in user.tokens:

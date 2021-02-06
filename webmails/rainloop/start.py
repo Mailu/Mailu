@@ -24,6 +24,7 @@ conf.jinja("/application.ini", os.environ, "/data/_data_/_default_/configs/appli
 conf.jinja("/php.ini", os.environ, "/usr/local/etc/php/conf.d/rainloop.ini")
 
 os.system("chown -R www-data:www-data /data")
+os.system("chmod -R a+rX /var/www/html/")
 
 os.execv("/usr/local/bin/apache2-foreground", ["apache2-foreground"])
 

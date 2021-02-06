@@ -12,6 +12,7 @@ import re
 import time
 import os
 import glob
+import hmac
 import smtplib
 import idna
 import dns
@@ -424,6 +425,15 @@ class User(Base, Email):
     def login(cls, email, password):
         user = cls.query.get(email)
         return user if (user and user.enabled and user.check_password(password)) else None
+
+    @classmethod
+    def get_temp_token(cls, email):
+        user = cls.query.get(email)
+        return hmac.new(bytearray(app.secret_key,'utf-8'), bytearray("{}|{}".format(datetime.utcnow().strftime("%Y%m%d"), email), 'utf-8'), 'sha256').hexdigest() if (user and user.enabled) else None
+
+    def verify_temp_token(self, token):
+        return hmac.compare_digest(b''.fromhex(self.get_temp_token(self.email)), b''.fromhex(token))
+
 
 
 class Alias(Base, Email):

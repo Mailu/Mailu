@@ -47,6 +47,9 @@ def announcement():
         flask.flash('Your announcement was sent', 'success')
     return flask.render_template('announcement.html', form=form)
 
+@ui.route('/webmail', methods=['GET'])
+def webmail():
+    return flask.redirect(app.config['WEB_WEBMAIL'])
 
 @ui.route('/client', methods=['GET'])
 def client():

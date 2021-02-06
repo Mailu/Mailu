@@ -17,7 +17,8 @@ $config['plugins'] = array(
     'markasjunk',
     'managesieve',
     'enigma',
-    'carddav'
+    'carddav',
+    'mailu'
 );
 
 $front = getenv('FRONT_ADDRESS') ? getenv('FRONT_ADDRESS') : 'front';
@@ -37,6 +38,7 @@ $config['managesieve_usetls'] = false;
 
 // Customization settings
 $config['support_url'] = getenv('WEB_ADMIN') ? '../..' . getenv('WEB_ADMIN') : '';
+$config['sso_logout_url'] = getenv('WEB_ADMIN').'/ui/logout';
 $config['product_name'] = 'Mailu Webmail';
 
 // We access the IMAP and SMTP servers locally with internal names, SSL

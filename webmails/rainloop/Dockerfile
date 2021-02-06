@@ -18,7 +18,6 @@ RUN apt-get update && apt-get install -y \
 RUN pip3 install socrate
 
 ENV RAINLOOP_URL https://github.com/RainLoop/rainloop-webmail/releases/download/v1.14.0/rainloop-community-1.14.0.zip
-ENV RECAPTCHA_URL http://repository.rainloop.net/v1/plugins/recaptcha-2.1.zip
 
 RUN apt-get update && apt-get install -y \
       unzip python3-jinja2 \
@@ -28,7 +27,6 @@ RUN apt-get update && apt-get install -y \
  && curl -L -O ${RAINLOOP_URL} \
  && unzip -q *.zip \
  && rm -f *.zip \
- && curl -L -o /var/www/recaptcha.zip -O ${RECAPTCHA_URL} \
  && rm -rf data/ \
  && find . -type d -exec chmod 755 {} \; \
  && find . -type f -exec chmod 644 {} \; \
@@ -40,7 +38,6 @@ COPY include.php /var/www/html/include.php
 COPY php.ini /php.ini
 
 COPY application.ini /application.ini
-COPY plugin-recaptcha.ini /plugin-recaptcha.ini
 COPY default.ini /default.ini
 
 COPY start.py /start.py

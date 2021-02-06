@@ -53,11 +53,6 @@ after a successful login for which a specific IP address is exempted from rate l
 This ensures that users behind a NAT don't get locked out when a single client is
 misconfigured... but also potentially allow for users to attack each-other.
 
-If ``AUTH_RATELIMIT_SUBNET`` is ``True`` (which is the default), the ``AUTH_RATELIMIT``
-rules does also apply to auth requests coming from ``SUBNET``, especially for the webmail.
-If you disable this, ensure that the rate limit on the webmail is enforced in a different
-way (e.g. roundcube plug-in), otherwise an attacker can simply bypass the limit using webmail.
-
 The ``TLS_FLAVOR`` sets how Mailu handles TLS connections. Setting this value to
 ``notls`` will cause Mailu not to server any web content! More on :ref:`tls_flavor`.
 

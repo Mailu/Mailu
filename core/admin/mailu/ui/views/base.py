@@ -1,4 +1,4 @@
-from mailu import models
+from mailu import models, utils
 from mailu.ui import ui, forms, access
 
 import flask
@@ -13,17 +13,26 @@ def index():
 
 @ui.route('/login', methods=['GET', 'POST'])
 def login():
+    client_ip = flask.request.headers["X-Real-IP"] if 'X-Real-IP' in flask.request.headers else flask.request.remote_addr
     form = forms.LoginForm()
     if app.config['RECAPTCHA_PUBLIC_KEY'] != "" and app.config['RECAPTCHA_PRIVATE_KEY'] != "":
         form = forms.LoginFormCaptcha()
+    if utils.limiter.should_rate_limit_ip(client_ip):
+        flask.flash('Too many attempts from your IP (rate-limit)', 'error')
+        return flask.render_template('login.html', form=form)
     if form.validate_on_submit():
-        user = models.User.login(form.email.data, form.pw.data)
+        username = form.email.data
+        if utils.limiter.should_rate_limit_user(username, client_ip):
+            flask.flash('Too many attempts for this user (rate-limit)', 'error')
+            return flask.render_template('login.html', form=form)
+        user = models.User.login(username, form.pw.data)
         if user:
             flask_login.login_user(user)
             endpoint = flask.request.args.get('next', '.index')
             return flask.redirect(flask.url_for(endpoint)
                 or flask.url_for('.index'))
         else:
+            utils.limiter.rate_limit_user(username, client_ip) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)
             flask.flash('Wrong e-mail or password', 'error')
     return flask.render_template('login.html', form=form)
 

@@ -48,9 +48,7 @@ class LimitWraperFactory(object):
         return self.is_subject_to_rate_limits(ip) and not limiter.test(client_network)
     
     def rate_limit_ip(self, ip):
-        limit_subnet = str(app.config["AUTH_RATELIMIT_SUBNET"]) != 'False'
-        subnet = ipaddress.ip_network(app.config["SUBNET"])
-        if limit_subnet or ipaddress.ip_address(ip) not in subnet:
+        if ip != app.config['WEBMAIL_ADDRESS']:
             limiter = self.get_limiter(app.config["AUTH_RATELIMIT_IP"], "auth-ip")
             client_network = utils.extract_network_from_ip(ip)
             if self.is_subject_to_rate_limits(ip):

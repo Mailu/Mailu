@@ -4,6 +4,8 @@ from flask_caching import Cache
 
 from mailu import utils, debug, models, manage, configuration
 
+import hmac
+
 
 def create_app_from_config(config):
     """ Create a new application based on the given configuration
@@ -32,6 +34,9 @@ def create_app_from_config(config):
         'CACHE_THRESHOLD': app.config['CREDENTIAL_CACHE_SIZE'],
         })
     app.cache.init_app(app)
+
+    app.device_cookie_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('DEVICE_COOKIE_KEY', 'utf-8'), 'sha256').digest()
+    app.temp_token_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('WEBMAIL_TEMP_TOKEN_KEY', 'utf-8'), 'sha256').digest()
 
     # Initialize debugging tools
     if app.config.get("DEBUG"):

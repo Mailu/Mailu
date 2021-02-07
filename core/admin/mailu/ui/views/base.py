@@ -1,15 +1,14 @@
 from mailu import models, utils
 from mailu.ui import ui, forms, access
 
+from flask import current_app as app
 import flask
 import flask_login
-from flask import current_app as app
 
 @ui.route('/', methods=["GET"])
 @access.authenticated
 def index():
     return flask.redirect(flask.url_for('.user_settings'))
-
 
 @ui.route('/login', methods=['GET', 'POST'])
 def login():
@@ -17,23 +16,27 @@ def login():
     form = forms.LoginForm()
     if app.config['RECAPTCHA_PUBLIC_KEY'] != "" and app.config['RECAPTCHA_PRIVATE_KEY'] != "":
         form = forms.LoginFormCaptcha()
-    if utils.limiter.should_rate_limit_ip(client_ip):
-        flask.flash('Too many attempts from your IP (rate-limit)', 'error')
-        return flask.render_template('login.html', form=form)
+
     if form.validate_on_submit():
+        device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
         username = form.email.data
-        if utils.limiter.should_rate_limit_user(username, client_ip):
+        if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
+            flask.flash('Too many attempts from your IP (rate-limit)', 'error')
+            return flask.render_template('login.html', form=form)
+        if utils.limiter.should_rate_limit_user(username, client_ip, device_cookie, device_cookie_username):
             flask.flash('Too many attempts for this user (rate-limit)', 'error')
             return flask.render_template('login.html', form=form)
         user = models.User.login(username, form.pw.data)
         if user:
             flask_login.login_user(user)
-            utils.limiter.exempt_ip_from_ratelimits(client_ip)
             endpoint = flask.request.args.get('next', '.index')
-            return flask.redirect(flask.url_for(endpoint)
+            response= flask.redirect(flask.url_for(endpoint)
                 or flask.url_for('.index'))
+            # hand a fresh device token out
+            response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('ui.login'))
+            return response
         else:
-            utils.limiter.rate_limit_user(username, client_ip) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)
+            utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)
             flask.flash('Wrong e-mail or password', 'error')
     return flask.render_template('login.html', form=form)
 

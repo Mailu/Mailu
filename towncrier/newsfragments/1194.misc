@@ -1,0 +1,1 @@
+Switch to bcrypt_sha256, remove PASSWORD_SCHEME and replace it with CREDENTIAL_ROUNDS

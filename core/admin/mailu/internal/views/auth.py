@@ -53,10 +53,22 @@ def basic_authentication():
         encoded = authorization.replace("Basic ", "")
         user_email, password = base64.b64decode(encoded).split(b":")
         user = models.User.query.get(user_email.decode("utf8"))
-        if user and user.enabled and user.check_password(password.decode("utf8")):
-            response = flask.Response()
-            response.headers["X-User"] = user.email
-            return response
+        if user and user.enabled:
+            password = password.decode('utf-8')
+            status = False
+            # All tokens are 32 characters hex lowercase
+            if len(password) == 32:
+                for token in user.tokens:
+                    if (token.check_password(password) and
+                        (not token.ip or token.ip == ip)):
+                            status = True
+                            break
+            if not status and user.check_password(password):
+                status = True
+            if status:
+                response = flask.Response()
+                response.headers["X-User"] = user.email
+                return response
     response = flask.Response(status=401)
     response.headers["WWW-Authenticate"] = 'Basic realm="Login Required"'
     return response

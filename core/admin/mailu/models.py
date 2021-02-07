@@ -392,7 +392,7 @@ class User(Base, Email):
         # on its own
         if self.password.startswith("{"):
             scheme = self.password.split('}')[0][1:]
-            if scheme in scheme_dict:
+            if scheme in self.scheme_dict:
                 reference = reference[len(scheme)+2:]
 
         result, new_hash = context.verify_and_update(password, reference)
@@ -410,7 +410,6 @@ class User(Base, Email):
             self.password = password
         else:
             self.password = self.get_password_context().hash(password)
-        app.cache.delete(self.get_id())
 
     def get_managed_domains(self):
         if self.global_admin:

@@ -54,7 +54,7 @@ def handle_authentication(headers):
                     status = True
 
             # All tokens are 32 characters hex lowercase
-            if len(password) == 32:
+            if not status and len(password) == 32:
                 for token in user.tokens:
                     if (token.check_password(password) and
                         (not token.ip or token.ip == ip)):

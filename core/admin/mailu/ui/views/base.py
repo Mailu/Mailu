@@ -1,6 +1,7 @@
 from mailu import models
 from mailu.ui import ui, forms, access
 
+from flask import current_app as app
 import flask
 import flask_login
 

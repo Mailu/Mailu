@@ -429,10 +429,10 @@ class User(Base, Email):
     @classmethod
     def get_temp_token(cls, email):
         user = cls.query.get(email)
-        return hmac.new(bytearray(app.secret_key,'utf-8'), bytearray("{}|{}".format(datetime.utcnow().strftime("%Y%m%d"), email), 'utf-8'), 'sha256').hexdigest() if (user and user.enabled) else None
+        return hmac.new(app.temp_token_key, bytearray("{}|{}".format(datetime.utcnow().strftime("%Y%m%d"), email), 'utf-8'), 'sha256').hexdigest() if (user and user.enabled) else None
 
     def verify_temp_token(self, token):
-        return hmac.compare_digest(b''.fromhex(self.get_temp_token(self.email)), b''.fromhex(token))
+        return hmac.compare_digest(self.get_temp_token(self.email), token)
 
 
 

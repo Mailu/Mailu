@@ -386,10 +386,14 @@ class User(Base, Email):
 
     def check_password(self, password):
         context = self.get_password_context()
-        # {scheme} will most likely be migrated on first use
         reference = self.password
+        # strip {scheme} if that's something mailu has added
+        # passlib will identify *crypt based hashes just fine
+        # on its own
         if self.password.startswith("{"):
-            reference = re.match('({[^}]+})?(.*)', reference).group(2)
+            scheme = self.password.split('}')[0][1:]
+            if scheme in scheme_dict:
+                reference = reference[len(scheme)+2:]
 
         result, new_hash = context.verify_and_update(password, reference)
         if new_hash:

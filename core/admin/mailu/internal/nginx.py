@@ -18,7 +18,7 @@ STATUSES = {
     }),
     "ratelimit": ("Temporary authentication failure (rate-limit)", {
         "imap": "LIMIT",
-        "smtp": "454 4.7.0",
+        "smtp": "451 4.3.2",
         "pop3": "-ERR [LOGIN-DELAY] Retry later"
     }),
 }

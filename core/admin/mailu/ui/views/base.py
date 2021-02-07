@@ -28,6 +28,7 @@ def login():
         user = models.User.login(username, form.pw.data)
         if user:
             flask_login.login_user(user)
+            utils.limiter.exempt_ip_from_ratelimits(client_ip)
             endpoint = flask.request.args.get('next', '.index')
             return flask.redirect(flask.url_for(endpoint)
                 or flask.url_for('.index'))

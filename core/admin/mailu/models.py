@@ -8,7 +8,6 @@ from flask import current_app as app
 
 import flask_sqlalchemy
 import sqlalchemy
-import re
 import time
 import os
 import glob

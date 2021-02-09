@@ -362,13 +362,6 @@ class User(Base, Email):
             self.reply_enddate > now
         )
 
-    scheme_dict = {'PBKDF2': "pbkdf2_sha512",
-                   'BLF-CRYPT': "bcrypt",
-                   'SHA512-CRYPT': "sha512_crypt",
-                   'SHA256-CRYPT': "sha256_crypt",
-                   'MD5-CRYPT': "md5_crypt",
-                   'CRYPT': "des_crypt"}
-
     def get_password_context(self):
         schemes = registry.list_crypt_handlers()
         # scrypt throws a warning if the native wheels aren't found
@@ -392,7 +385,7 @@ class User(Base, Email):
         # on its own
         if self.password.startswith("{"):
             scheme = self.password.split('}')[0][1:]
-            if scheme in self.scheme_dict:
+            if scheme in ['PBKDF2', 'BLF-CRYPT', 'SHA512-CRYPT', 'SHA256-CRYPT', 'MD5-CRYPT', 'CRYPT']:
                 reference = reference[len(scheme)+2:]
 
         result, new_hash = context.verify_and_update(password, reference)

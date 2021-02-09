@@ -33,7 +33,6 @@ DEFAULT_CONFIG = {
     'TLS_FLAVOR': 'cert',
     'AUTH_RATELIMIT': '10/minute;1000/hour',
     'AUTH_RATELIMIT_SUBNET': True,
-    'CREDENTIAL_ROUNDS': 12,
     'DISABLE_STATISTICS': False,
     # Mail settings
     'DMARC_RUA': None,
@@ -55,6 +54,7 @@ DEFAULT_CONFIG = {
     # Advanced settings
     'LOG_LEVEL': 'WARNING',
     'SESSION_COOKIE_SECURE': True,
+    'CREDENTIAL_ROUNDS': 12,
     # Host settings
     'HOST_IMAP': 'imap',
     'HOST_LMTP': 'imap:2525',

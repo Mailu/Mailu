@@ -17,7 +17,7 @@ import dns
 
 
 db = flask_sqlalchemy.SQLAlchemy()
-
+_credential_cache = {}
 
 class IdnaDomain(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
@@ -383,7 +383,7 @@ class User(Base, Email):
         return User._ctx
 
     def check_password(self, password):
-        cache_result = self._credential_cache.get(self.get_id())
+        cache_result = _credential_cache.get(self.get_id())
         current_salt = self.password.split('$')[3] if len(self.password.split('$')) == 5 else None
         if cache_result and current_salt:
             cache_salt, cache_hash = cache_result
@@ -392,7 +392,7 @@ class User(Base, Email):
             else:
                 # the cache is local per gunicorn; the password has changed
                 # so the local cache can be invalidated
-                del self._credential_cache[self.get_id()]
+                del _credential_cache[self.get_id()]
 
         reference = self.password
         # strip {scheme} if that's something mailu has added
@@ -418,7 +418,7 @@ we have little control over GC and string interning anyways.
  An attacker that can dump the process' memory is likely to find credentials
 in clear-text regardless of the presence of the cache.
             """
-            self._credential_cache[self.get_id()] = (self.password.split('$')[3], hash.pbkdf2_sha256.using(rounds=1).hash(password))
+            _credential_cache[self.get_id()] = (self.password.split('$')[3], hash.pbkdf2_sha256.using(rounds=1).hash(password))
         return result
 
     def set_password(self, password, hash_scheme=None, raw=False):

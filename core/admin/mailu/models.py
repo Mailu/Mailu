@@ -304,6 +304,7 @@ class User(Base, Email):
     """ A user is an email address that has a password to access a mailbox.
     """
     __tablename__ = "user"
+    _ctx = None
 
     domain = db.relationship(Domain,
         backref=db.backref('users', cascade='all, delete-orphan'))
@@ -361,7 +362,10 @@ class User(Base, Email):
             self.reply_enddate > now
         )
 
-    def get_password_context(self):
+    def get_password_context():
+        if User._ctx:
+            return User._ctx
+
         schemes = registry.list_crypt_handlers()
         # scrypt throws a warning if the native wheels aren't found
         schemes.remove('scrypt')
@@ -369,15 +373,15 @@ class User(Base, Email):
         for scheme in schemes:
             if scheme.endswith('plaintext'):
                 schemes.remove(scheme)
-        return context.CryptContext(
+        User._ctx = context.CryptContext(
             schemes=schemes,
             default='bcrypt_sha256',
             bcrypt_sha256__rounds=app.config['CREDENTIAL_ROUNDS'],
             deprecated='auto'
         )
+        return User._ctx
 
     def check_password(self, password):
-        context = self.get_password_context()
         reference = self.password
         # strip {scheme} if that's something mailu has added
         # passlib will identify *crypt based hashes just fine
@@ -387,7 +391,7 @@ class User(Base, Email):
             if scheme in ['PBKDF2', 'BLF-CRYPT', 'SHA512-CRYPT', 'SHA256-CRYPT', 'MD5-CRYPT', 'CRYPT']:
                 reference = reference[len(scheme)+2:]
 
-        result, new_hash = context.verify_and_update(password, reference)
+        result, new_hash = User.get_password_context().verify_and_update(password, reference)
         if new_hash:
             self.password = new_hash
             db.session.add(self)
@@ -401,7 +405,7 @@ class User(Base, Email):
         if raw:
             self.password = password
         else:
-            self.password = self.get_password_context().hash(password)
+            self.password = User.get_password_context().hash(password)
 
     def get_managed_domains(self):
         if self.global_admin:

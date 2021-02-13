@@ -258,9 +258,9 @@ Postfix, Dovecot, Nginx and Rspamd support overriding configuration files. Overr
 correct syntax. The following file names will be taken as override configuration:
 
 - `Postfix`_ :
-   - ``postfix.cf`` as ``/overrides/postfix.cf``
-   - ``master.cf`` as ``/overrides/postfix.master``
-   - All ``/overrides/*.map`` files
+   - ``main.cf`` as ``$ROOT/overrides/postfix/postfix.cf``
+   - ``master.cf`` as ``$ROOT/overrides/postfix/postfix.master``
+   - All ``$ROOT/overrides/postfix/*.map`` files
 - `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory;
 - `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory;
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.

@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 {%- import "macros.html" as macros %}
 {%- import "bootstrap/utils.html" as utils %}
+=======
+{% import "macros.html" as macros %}
+{% import "bootstrap/utils.html" as utils %}
+>>>>>>> 88f992de (show flash messages again)
 <!doctype html>
 <html lang="{{ get_locale() }}" data-static="/static/">
   <head>
@@ -64,6 +69,18 @@
               </div>
             </div>
           </div>
+<<<<<<< HEAD
+=======
+          <h1>
+            {% block title %}{% endblock %}
+            <small>{% block subtitle %}{% endblock %}</small>
+          </h1>
+        </section>
+
+        <section class="content">
+          {{ utils.flashed_messages(container=False) }}
+          {% block content %}{% endblock %}
+>>>>>>> 88f992de (show flash messages again)
         </section>
         <div class="content">
           {{ utils.flashed_messages(container=False, default_category='success') }}

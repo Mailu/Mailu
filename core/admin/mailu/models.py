@@ -19,6 +19,7 @@ import dns
 
 from flask import current_app as app
 from sqlalchemy.ext import declarative
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
 from werkzeug.utils import cached_property
 
@@ -120,6 +121,36 @@ class Base(db.Model):
     created_at = db.Column(db.Date, nullable=False, default=date.today)
     updated_at = db.Column(db.Date, nullable=True, onupdate=date.today)
     comment = db.Column(db.String(255), nullable=True, default='')
+
+    def __str__(self):
+        pkey = self.__table__.primary_key.columns.values()[0].name
+        if pkey == 'email':
+            # ugly hack for email declared attr. _email is not always up2date
+            return str(f'{self.localpart}@{self.domain_name}')
+        elif pkey in {'name', 'email'}:
+            return str(getattr(self, pkey, None))
+        else:
+            return self.__repr__()
+        return str(getattr(self, self.__table__.primary_key.columns.values()[0].name))
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} {str(self)!r}>'
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            pkey = self.__table__.primary_key.columns.values()[0].name
+            this = getattr(self, pkey, None)
+            other = getattr(other, pkey, None)
+            return this is not None and other is not None and str(this) == str(other)
+        else:
+            return NotImplemented
+
+    def __hash__(self):
+        primary = getattr(self, self.__table__.primary_key.columns.values()[0].name)
+        if primary is None:
+            return NotImplemented
+        else:
+            return hash(primary)
 
 
 # Many-to-many association table for domain managers
@@ -261,19 +292,6 @@ class Domain(Base):
         except dns.exception.DNSException:
             return False
 
-    def __str__(self):
-        return str(self.name)
-
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return str(self.name) == str(other.name)
-        else:
-            return NotImplemented
-
-    def __hash__(self):
-        return hash(str(self.name))
-
-
 
 class Alternative(Base):
     """ Alternative name for a served domain.
@@ -287,9 +305,6 @@ class Alternative(Base):
     domain = db.relationship(Domain,
         backref=db.backref('alternatives', cascade='all, delete-orphan'))
 
-    def __str__(self):
-        return str(self.name)
-
 
 class Relay(Base):
     """ Relayed mail domain.
@@ -302,9 +317,6 @@ class Relay(Base):
     # TODO: String(80) is too small?
     smtp = db.Column(db.String(80), nullable=True)
 
-    def __str__(self):
-        return str(self.name)
-
 
 class Email(object):
     """ Abstraction for an email address (localpart and domain).
@@ -312,11 +324,11 @@ class Email(object):
 
     # TODO: validate max. total length of address (<=254)
 
-    # TODO: String(80) is too large (>64)?
+    # TODO: String(80) is too large (64)?
     localpart = db.Column(db.String(80), nullable=False)
 
     @declarative.declared_attr
-    def domain_name(self):
+    def domain_name(cls):
         """ the domain part of the email address """
         return db.Column(IdnaDomain, db.ForeignKey(Domain.name),
             nullable=False, default=IdnaDomain)
@@ -325,13 +337,33 @@ class Email(object):
     # It is however very useful for quick lookups without joining tables,
     # especially when the mail server is reading the database.
     @declarative.declared_attr
-    def email(self):
+    def _email(cls):
         """ the complete email address (localpart@domain) """
-        updater = lambda ctx: '{localpart}@{domain_name}'.format(**ctx.current_parameters)
-        return db.Column(IdnaEmail,
-            primary_key=True, nullable=False,
-            default=updater
-        )
+
+        def updater(ctx):
+            key = f'{cls.__tablename__}_email'
+            if key in ctx.current_parameters:
+                return ctx.current_parameters[key]
+            return '{localpart}@{domain_name}'.format(**ctx.current_parameters)
+
+        return db.Column('email', IdnaEmail, primary_key=True, nullable=False, onupdate=updater)
+
+    # We need to keep email, localpart and domain_name in sync.
+    # But IMHO using email as primary key was not a good idea in the first place.
+    @hybrid_property
+    def email(self):
+        """ getter for email - gets _email """
+        return self._email
+
+    @email.setter
+    def email(self, value):
+        """ setter for email - sets _email, localpart and domain_name at once """
+        self.localpart, self.domain_name = value.rsplit('@', 1)
+        self._email = value
+
+    # hack for email declared attr - when _email is not updated yet
+    def __str__(self):
+        return str(f'{self.localpart}@{self.domain_name}')
 
     def sendmail(self, subject, body):
         """ send an email to the address """
@@ -391,9 +423,6 @@ class Email(object):
 
         return None
 
-    def __str__(self):
-        return str(self.email)
-
 
 class User(Base, Email):
     """ A user is an email address that has a password to access a mailbox.
@@ -435,12 +464,10 @@ class User(Base, Email):
     is_active = True
     is_anonymous = False
 
-    # TODO: remove unused user.get_id()
     def get_id(self):
         """ return users email address """
         return self.email
 
-    # TODO: remove unused user.destination
     @property
     def destination(self):
         """ returns comma separated string of destinations """
@@ -471,17 +498,20 @@ class User(Base, Email):
         'CRYPT': 'des_crypt',
     }
 
-    def _get_password_context(self):
+    @classmethod
+    def get_password_context(cls):
+        """ Create password context for hashing and verification
+        """
         return passlib.context.CryptContext(
-            schemes=self.scheme_dict.values(),
-            default=self.scheme_dict[app.config['PASSWORD_SCHEME']],
+            schemes=cls.scheme_dict.values(),
+            default=cls.scheme_dict[app.config['PASSWORD_SCHEME']],
         )
 
     def check_password(self, plain):
         """ Check password against stored hash
             Update hash when default scheme has changed
         """
-        context = self._get_password_context()
+        context = self.get_password_context()
         hashed = re.match('^({[^}]+})?(.*)$', self.password).group(2)
         result = context.verify(plain, hashed)
         if result and context.identify(hashed) != context.default_scheme():
@@ -490,8 +520,6 @@ class User(Base, Email):
             db.session.commit()
         return result
 
-    # TODO: remove kwarg hash_scheme - there is no point in setting a scheme,
-    # when the next check updates the password to the default scheme.
     def set_password(self, new, hash_scheme=None, raw=False):
         """ Set password for user with specified encryption scheme
             @new: plain text password to encrypt (or, if raw is True: the hash itself)
@@ -500,7 +528,7 @@ class User(Base, Email):
         if hash_scheme is None:
             hash_scheme = app.config['PASSWORD_SCHEME']
         if not raw:
-            new = self._get_password_context().encrypt(new, self.scheme_dict[hash_scheme])
+            new = self.get_password_context().encrypt(new, self.scheme_dict[hash_scheme])
         self.password = f'{{{hash_scheme}}}{new}'
 
     def get_managed_domains(self):
@@ -593,7 +621,7 @@ class Alias(Base, Email):
 
         return None
 
-# TODO: what about API tokens?
+
 class Token(Base):
     """ A token is an application password for a given user.
     """
@@ -606,20 +634,19 @@ class Token(Base):
     user = db.relationship(User,
         backref=db.backref('tokens', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
-    # TODO: String(80) is too large?
+    # TODO: String(255) is too large? (43 should be sufficient)
     ip = db.Column(db.String(255))
 
     def check_password(self, password):
         """ verifies password against stored hash """
         return passlib.hash.sha256_crypt.verify(password, self.password)
 
-    # TODO: use crypt context and default scheme from config?
     def set_password(self, password):
         """ sets password using sha256_crypt(rounds=1000) """
         self.password = passlib.hash.sha256_crypt.using(rounds=1000).hash(password)
 
-    def __str__(self):
-        return str(self.comment or self.ip)
+    def __repr__(self):
+        return f'<Token #{self.id}: {self.comment or self.ip or self.password}>'
 
 
 class Fetch(Base):
@@ -644,8 +671,11 @@ class Fetch(Base):
     last_check = db.Column(db.DateTime, nullable=True)
     error = db.Column(db.String(1023), nullable=True)
 
-    def __str__(self):
-        return f'{self.protocol}{"s" if self.tls else ""}://{self.username}@{self.host}:{self.port}'
+    def __repr__(self):
+        return (
+            f'<Fetch #{self.id}: {self.protocol}{"s" if self.tls else ""}:'
+            f'//{self.username}@{self.host}:{self.port}>'
+        )
 
 
 class MailuConfig:
@@ -661,7 +691,7 @@ class MailuConfig:
         def __init__(self, model : db.Model):
             self.model = model
 
-        def __str__(self):
+        def __repr__(self):
             return f'<{self.model.__name__}-Collection>'
 
         @cached_property
@@ -837,8 +867,8 @@ class MailuConfig:
             if models is None or model in models:
                 db.session.query(model).delete()
 
-    domains = MailuCollection(Domain)
-    relays = MailuCollection(Relay)
-    users = MailuCollection(User)
-    aliases = MailuCollection(Alias)
+    domain = MailuCollection(Domain)
+    user = MailuCollection(User)
+    alias = MailuCollection(Alias)
+    relay = MailuCollection(Relay)
     config = MailuCollection(Config)

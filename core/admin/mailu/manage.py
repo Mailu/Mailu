@@ -4,7 +4,6 @@
 import sys
 import os
 import socket
-import json
 import logging
 import uuid
 
@@ -20,7 +19,7 @@ from flask.cli import FlaskGroup, with_appcontext
 from marshmallow.exceptions import ValidationError
 
 from . import models
-from .schemas import MailuSchema, get_schema
+from .schemas import MailuSchema, get_schema, get_fieldspec, colorize, RenderJSON, HIDDEN
 
 
 db = models.db
@@ -182,7 +181,7 @@ def user_import(localpart, domain_name, password_hash, hash_scheme = None):
     db.session.commit()
 
 
-# TODO: remove this deprecated function
+# TODO: remove deprecated config_update function?
 @mailu.command()
 @click.option('-v', '--verbose')
 @click.option('-d', '--delete-objects')
@@ -324,17 +323,16 @@ def config_update(verbose=False, delete_objects=False):
     db.session.commit()
 
 
-SECTIONS = {'domains', 'relays', 'users', 'aliases'}
-
-
 @mailu.command()
-@click.option('-v', '--verbose', count=True, help='Increase verbosity')
-@click.option('-q', '--quiet', is_flag=True, help='Quiet mode - only show errors')
-@click.option('-u', '--update', is_flag=True, help='Update mode - merge input with existing config')
-@click.option('-n', '--dry-run', is_flag=True, help='Perform a trial run with no changes made')
+@click.option('-v', '--verbose', count=True, help='Increase verbosity.')
+@click.option('-s', '--secrets', is_flag=True, help='Show secret attributes in messages.')
+@click.option('-q', '--quiet', is_flag=True, help='Quiet mode - only show errors.')
+@click.option('-c', '--color', is_flag=True, help='Force colorized output.')
+@click.option('-u', '--update', is_flag=True, help='Update mode - merge input with existing config.')
+@click.option('-n', '--dry-run', is_flag=True, help='Perform a trial run with no changes made.')
 @click.argument('source', metavar='[FILENAME|-]', type=click.File(mode='r'), default=sys.stdin)
 @with_appcontext
-def config_import(verbose=0, quiet=False, update=False, dry_run=False, source=None):
+def config_import(verbose=0, secrets=False, quiet=False, color=False, update=False, dry_run=False, source=None):
     """ Import configuration as YAML or JSON from stdin or file
     """
 
@@ -344,12 +342,19 @@ def config_import(verbose=0, quiet=False, update=False, dry_run=False, source=No
     # 2 : also show secrets
     # 3 : also show input data
     # 4 : also show sql queries
+    # 5 : also show tracebacks
 
     if quiet:
         verbose = -1
 
+    color_cfg = {
+        'color': color or sys.stdout.isatty(),
+        'lexer': 'python',
+        'strip': True,
+    }
+
     counter = Counter()
-    dumper = {}
+    logger = {}
 
     def format_errors(store, path=None):
 
@@ -387,19 +392,26 @@ def config_import(verbose=0, quiet=False, update=False, dry_run=False, source=No
                     last = action
                 changes.append(f'{what}({count})')
         else:
-            changes = 'no changes.'
+            changes = ['No changes.']
         return chain(message, changes)
 
     def log(action, target, message=None):
         if message is None:
-            message = json.dumps(dumper[target.__class__].dump(target), ensure_ascii=False)
-        print(f'{action} {target.__table__}: {message}')
+            # TODO: convert nested OrderedDict to dict
+            # see: flask mailu config-import -nvv yaml/dump4.yaml
+            try:
+                message = dict(logger[target.__class__].dump(target))
+            except KeyError:
+                message = target
+        if not isinstance(message, str):
+            message = repr(message)
+        print(f'{action} {target.__table__}: {colorize(message, **color_cfg)}')
 
     def listen_insert(mapper, connection, target): # pylint: disable=unused-argument
         """ callback function to track import """
-        counter.update([('Added', target.__table__.name)])
+        counter.update([('Created', target.__table__.name)])
         if verbose >= 1:
-            log('Added', target)
+            log('Created', target)
 
     def listen_update(mapper, connection, target): # pylint: disable=unused-argument
         """ callback function to track import """
@@ -407,32 +419,32 @@ def config_import(verbose=0, quiet=False, update=False, dry_run=False, source=No
         changed = {}
         inspection = sqlalchemy.inspect(target)
         for attr in sqlalchemy.orm.class_mapper(target.__class__).column_attrs:
-            if getattr(inspection.attrs, attr.key).history.has_changes():
-                if sqlalchemy.orm.attributes.get_history(target, attr.key)[2]:
-                    before = sqlalchemy.orm.attributes.get_history(target, attr.key)[2].pop()
-                    after = getattr(target, attr.key)
-                    # only remember changed keys
-                    if before != after and (before or after):
-                        if verbose >= 1:
-                            changed[str(attr.key)] = (before, after)
-                        else:
-                            break
+            history = getattr(inspection.attrs, attr.key).history
+            if history.has_changes() and history.deleted:
+                before = history.deleted[-1]
+                after = getattr(target, attr.key)
+                # TODO: remove special handling of "comment" after modifying model
+                if attr.key == 'comment' and not before and not after:
+                    pass
+                # only remember changed keys
+                elif before != after:
+                    if verbose >= 1:
+                        changed[str(attr.key)] = (before, after)
+                    else:
+                        break
 
         if verbose >= 1:
             # use schema with dump_context to hide secrets and sort keys
-            primary = json.dumps(str(target), ensure_ascii=False)
-            dumped = get_schema(target)(only=changed.keys(), context=dump_context).dump(target)
+            dumped = get_schema(target)(only=changed.keys(), context=diff_context).dump(target)
             for key, value in dumped.items():
                 before, after = changed[key]
-                if value == '<hidden>':
-                    before = '<hidden>' if before else before
-                    after = '<hidden>' if after else after
+                if value == HIDDEN:
+                    before = HIDDEN if before else before
+                    after = HIDDEN if after else after
                 else:
-                    # TODO: use schema to "convert" before value?
+                    # TODO: need to use schema to "convert" before value?
                     after = value
-                before = json.dumps(before, ensure_ascii=False)
-                after = json.dumps(after, ensure_ascii=False)
-                log('Modified', target, f'{primary} {key}: {before} -> {after}')
+                log('Modified', target, f'{str(target)!r} {key}: {before!r} -> {after!r}')
 
         if changed:
             counter.update([('Modified', target.__table__.name)])
@@ -443,47 +455,60 @@ def config_import(verbose=0, quiet=False, update=False, dry_run=False, source=No
         if verbose >= 1:
             log('Deleted', target)
 
-    # this listener should not be necessary, when:
-    # dkim keys should be stored in database and it should be possible to store multiple
-    # keys per domain. the active key would be also stored on disk on commit.
+    # TODO: this listener will not be necessary, if dkim keys would be stored in database
+    _dedupe_dkim = set()
     def listen_dkim(session, flush_context): # pylint: disable=unused-argument
         """ callback function to track import """
         for target in session.identity_map.values():
-            if not isinstance(target, models.Domain):
+            # look at Domains originally loaded from db
+            if not isinstance(target, models.Domain) or not target._sa_instance_state.load_path:
                 continue
-            primary = json.dumps(str(target), ensure_ascii=False)
             before = target._dkim_key_on_disk
             after = target._dkim_key
-            if before != after and (before or after):
-                if verbose >= 2:
+            if before != after:
+                if secrets:
                     before = before.decode('ascii', 'ignore')
                     after = after.decode('ascii', 'ignore')
                 else:
-                    before = '<hidden>' if before else ''
-                    after = '<hidden>' if after else ''
-                before = json.dumps(before, ensure_ascii=False)
-                after = json.dumps(after, ensure_ascii=False)
-                log('Modified', target, f'{primary} dkim_key: {before} -> {after}')
-                counter.update([('Modified', target.__table__.name)])
+                    before = HIDDEN if before else ''
+                    after = HIDDEN if after else ''
+                # "de-dupe" messages; this event is fired at every flush
+                if not (target, before, after) in _dedupe_dkim:
+                    _dedupe_dkim.add((target, before, after))
+                    counter.update([('Modified', target.__table__.name)])
+                    if verbose >= 1:
+                        log('Modified', target, f'{str(target)!r} dkim_key: {before!r} -> {after!r}')
 
-    def track_serialize(self, item):
+    def track_serialize(obj, item):
         """ callback function to track import """
-        log('Handling', self.opts.model, item)
+        # hide secrets
+        data = logger[obj.opts.model].hide(item)
+        if 'hash_password' in data:
+            data['password'] = HIDDEN
+        if 'fetches' in data:
+            for fetch in data['fetches']:
+                fetch['password'] = HIDDEN
+        log('Handling', obj.opts.model, data)
 
     # configure contexts
-    dump_context = {
-        'secrets': verbose >= 2,
+    diff_context = {
+        'full': True,
+        'secrets': secrets,
+    }
+    log_context = {
+        'secrets': secrets,
     }
     load_context = {
-        'callback': track_serialize if verbose >= 3 else None,
-        'clear': not update,
         'import': True,
+        'update': update,
+        'clear': not update,
+        'callback': track_serialize if verbose >= 2 else None,
     }
 
     # register listeners
     for schema in get_schema():
         model = schema.Meta.model
-        dumper[model] = schema(context=dump_context)
+        logger[model] = schema(context=log_context)
         sqlalchemy.event.listen(model, 'after_insert', listen_insert)
         sqlalchemy.event.listen(model, 'after_update', listen_update)
         sqlalchemy.event.listen(model, 'after_delete', listen_delete)
@@ -491,18 +516,24 @@ def config_import(verbose=0, quiet=False, update=False, dry_run=False, source=No
     # special listener for dkim_key changes
     sqlalchemy.event.listen(db.session, 'after_flush', listen_dkim)
 
-    if verbose >= 4:
+    if verbose >= 3:
         logging.basicConfig()
         logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
     try:
         with models.db.session.no_autoflush:
-            config = MailuSchema(only=SECTIONS, context=load_context).loads(source)
+            config = MailuSchema(only=MailuSchema.Meta.order, context=load_context).loads(source)
     except ValidationError as exc:
         raise click.ClickException(format_errors(exc.messages)) from exc
     except Exception as exc:
-        # (yaml.scanner.ScannerError, UnicodeDecodeError, ...)
-        raise click.ClickException(f'[{exc.__class__.__name__}] {" ".join(str(exc).split())}') from exc
+        if verbose >= 5:
+            raise
+        else:
+            # (yaml.scanner.ScannerError, UnicodeDecodeError, ...)
+            raise click.ClickException(
+                f'[{exc.__class__.__name__}] '
+                f'{" ".join(str(exc).split())}'
+            ) from exc
 
     # flush session to show/count all changes
     if dry_run or verbose >= 1:
@@ -510,53 +541,47 @@ def config_import(verbose=0, quiet=False, update=False, dry_run=False, source=No
 
     # check for duplicate domain names
     dup = set()
-    for fqdn in chain(db.session.query(models.Domain.name),
-                      db.session.query(models.Alternative.name),
-                      db.session.query(models.Relay.name)):
+    for fqdn in chain(
+        db.session.query(models.Domain.name),
+        db.session.query(models.Alternative.name),
+        db.session.query(models.Relay.name)
+    ):
         if fqdn in dup:
             raise click.ClickException(f'[ValidationError] Duplicate domain name: {fqdn}')
         dup.add(fqdn)
 
-    # TODO: implement special update "items"
-    # -pkey: which             - remove item "which"
-    # -key: null or [] or {}   - set key to default
-    # -pkey: null or [] or {}  - remove all existing items in this list
-
     # don't commit when running dry
     if dry_run:
-        db.session.rollback()
         if not quiet:
             print(*format_changes('Dry run. Not commiting changes.'))
-        # TODO: remove debug
-        print(MailuSchema().dumps(config))
+        db.session.rollback()
     else:
-        db.session.commit()
         if not quiet:
-            print(*format_changes('Commited changes.'))
+            print(*format_changes('Committing changes.'))
+        db.session.commit()
 
 
 @mailu.command()
-@click.option('-f', '--full', is_flag=True, help='Include attributes with default value')
+@click.option('-f', '--full', is_flag=True, help='Include attributes with default value.')
 @click.option('-s', '--secrets', is_flag=True,
-              help='Include secret attributes (dkim-key, passwords)')
-@click.option('-d', '--dns', is_flag=True, help='Include dns records')
+              help='Include secret attributes (dkim-key, passwords).')
+@click.option('-c', '--color', is_flag=True, help='Force colorized output.')
+@click.option('-d', '--dns', is_flag=True, help='Include dns records.')
 @click.option('-o', '--output-file', 'output', default=sys.stdout, type=click.File(mode='w'),
-              help='save yaml to file')
-@click.option('-j', '--json', 'as_json', is_flag=True, help='Dump in josn format')
-@click.argument('sections', nargs=-1)
+              help='Save configuration to file.')
+@click.option('-j', '--json', 'as_json', is_flag=True, help='Export configuration in json format.')
+@click.argument('only', metavar='[FILTER]...', nargs=-1)
 @with_appcontext
-def config_export(full=False, secrets=False, dns=False, output=None, as_json=False, sections=None):
+def config_export(full=False, secrets=False, color=False, dns=False, output=None, as_json=False, only=None):
     """ Export configuration as YAML or JSON to stdout or file
     """
 
-    if sections:
-        for section in sections:
-            if section not in SECTIONS:
-                print(f'[ERROR] Unknown section: {section}')
-                raise click.exceptions.Exit(1)
-        sections = set(sections)
+    if only:
+        for spec in only:
+            if spec.split('.', 1)[0] not in MailuSchema.Meta.order:
+                raise click.ClickException(f'[ERROR] Unknown section: {spec}')
     else:
-        sections = SECTIONS
+        only = MailuSchema.Meta.order
 
     context = {
         'full': full,
@@ -564,13 +589,20 @@ def config_export(full=False, secrets=False, dns=False, output=None, as_json=Fal
         'dns': dns,
     }
 
-    if as_json:
-        schema = MailuSchema(only=sections, context=context)
-        schema.opts.render_module = json
-        print(schema.dumps(models.MailuConfig(), separators=(',',':')), file=output)
+    schema = MailuSchema(only=only, context=context)
+    color_cfg = {'color': color or output.isatty()}
 
-    else:
-        MailuSchema(only=sections, context=context).dumps(models.MailuConfig(), output)
+    if as_json:
+        schema.opts.render_module = RenderJSON
+        color_cfg['lexer'] = 'json'
+        color_cfg['strip'] = True
+
+    try:
+        print(colorize(schema.dumps(models.MailuConfig()), **color_cfg), file=output)
+    except ValueError as exc:
+        if spec := get_fieldspec(exc):
+            raise click.ClickException(f'[ERROR] Invalid filter: {spec}') from exc
+        raise
 
 
 @mailu.command()

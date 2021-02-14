@@ -10,8 +10,9 @@ Managing users and aliases can be done from CLI using commands:
 * user
 * user-import
 * user-delete
-* config-dump
 * config-update
+* config-export
+* config-import
 
 alias
 -----
@@ -69,104 +70,160 @@ user-delete
 
   docker-compose exec admin flask mailu user-delete foo@example.net
 
-config-dump
------------
-
-The purpose of this command is to dump domain-, relay-, alias- and user-configuration to a YAML template.
-
-.. code-block:: bash
-
-  # docker-compose exec admin flask mailu config-dump --help
-
-  Usage: flask mailu config-dump [OPTIONS] [SECTIONS]...
-
-    dump configuration as YAML-formatted data to stdout
-
-    SECTIONS can be: domains, relays, users, aliases
-
-  Options:
-    -f, --full     Include default attributes
-    -s, --secrets  Include secrets (dkim-key, plain-text / not hashed)
-    -d, --dns      Include dns records
-    --help         Show this message and exit.
-
-If you want to export secrets (dkim-keys, plain-text / not hashed) you have to add the ``--secrets`` option.
-Only non-default attributes are dumped. If you want to dump all attributes use ``--full``.
-To include dns records (mx, spf, dkim and dmarc) add the ``--dns`` option.
-Unless you specify some sections all sections are dumped by default.
-
-.. code-block:: bash
-
-  docker-compose exec admin flask mailu config-dump > mail-config.yml
-
-  docker-compose exec admin flask mailu config-dump --dns domains
-
 config-update
 -------------
 
-The purpose of this command is for importing domain-, relay-, alias- and user-configuration in bulk and synchronizing DB entries with an external YAML template.
+The sole purpose of this command is for importing users/aliases in bulk and synchronizing DB entries with external YAML template:
 
 .. code-block:: bash
 
-  # docker-compose exec admin flask mailu config-update --help
+  cat mail-config.yml | docker-compose exec -T admin flask mailu config-update --delete-objects
 
-  Usage: flask mailu config-update [OPTIONS]
+where mail-config.yml looks like:
 
-    sync configuration with data from YAML-formatted stdin
+.. code-block:: bash
 
-  Options:
-    -v, --verbose         Increase verbosity
-    -d, --delete-objects  Remove objects not included in yaml
-    -n, --dry-run         Perform a trial run with no changes made
-    --help                Show this message and exit.
+  users:
+    - localpart: foo
+      domain: example.com
+      password_hash: klkjhumnzxcjkajahsdqweqqwr
+      hash_scheme: MD5-CRYPT
 
+  aliases:
+    - localpart: alias1
+      domain: example.com
+      destination: "user1@example.com,user2@example.com"
+
+without ``--delete-object`` option config-update will only add/update new values but will *not* remove any entries missing in provided YAML input.
+
+Users
+-----
+
+following are additional parameters that could be defined for users:
+
+* comment
+* quota_bytes
+* global_admin
+* enable_imap
+* enable_pop
+* forward_enabled
+* forward_destination
+* reply_enabled
+* reply_subject
+* reply_body
+* displayed_name
+* spam_enabled
+* spam_threshold
+
+Alias
+-----
+
+additional fields:
+
+* wildcard
+
+config-export
+-------------
+
+The purpose of this command is to export domain-, relay-, alias- and user-configuration in YAML or JSON format.
+
+.. code-block:: bash
+
+  # docker-compose exec admin flask mailu config-export --help
+
+ Usage: flask mailu config-export [OPTIONS] [FILTER]...
+
+   Export configuration as YAML or JSON to stdout or file
+
+ Options:
+   -f, --full                  Include attributes with default value.
+   -s, --secrets               Include secret attributes (dkim-key, passwords).
+   -c, --color                 Force colorized output.
+   -d, --dns                   Include dns records.
+   -o, --output-file FILENAME  Save configuration to file.
+   -j, --json                  Export configuration in json format.
+   -?, -h, --help              Show this message and exit.
+
+Only non-default attributes are exported. If you want to export all attributes use ``--full``.
+If you want to export plain-text secrets (dkim-keys, passwords) you have to add the ``--secrets`` option.
+To include dns records (mx, spf, dkim and dmarc) add the ``--dns`` option.
+By default all configuration objects are exported (domain, user, alias, relay). You can specify
+filters to export only some objects or attributes (try: ``user`` or ``domain.name``).
+
+.. code-block:: bash
+
+  docker-compose exec admin flask mailu config-export -o mail-config.yml
+
+  docker-compose exec admin flask mailu config-export --dns domain.dns_mx domain.dns_spf
+
+config-import
+-------------
+
+The purpose of this command is for importing domain-, relay-, alias- and user-configuration in bulk and synchronizing DB entries with an external YAML/JOSN source.
+
+.. code-block:: bash
+
+  # docker-compose exec admin flask mailu config-import --help
+
+ Usage: flask mailu config-import [OPTIONS] [FILENAME|-]
+
+   Import configuration as YAML or JSON from stdin or file
+
+ Options:
+   -v, --verbose   Increase verbosity.
+   -s, --secrets   Show secret attributes in messages.
+   -q, --quiet     Quiet mode - only show errors.
+   -c, --color     Force colorized output.
+   -u, --update    Update mode - merge input with existing config.
+   -n, --dry-run   Perform a trial run with no changes made.
+   -?, -h, --help  Show this message and exit.
 
 The current version of docker-compose exec does not pass stdin correctly, so you have to user docker exec instead:
 
 .. code-block:: bash
 
-  docker exec -i $(docker-compose ps -q admin) flask mailu config-update -nvd < mail-config.yml
+  docker exec -i $(docker-compose ps -q admin) flask mailu config-import -nv < mail-config.yml
 
-
-mail-config.yml looks like this:
+mail-config.yml contains the configuration and looks like this:
 
 .. code-block:: yaml
- 
-  domains:
+
+  domain:
     - name: example.com
       alternatives:
         - alternative.example.com
 
-  users:
+  user:
     - email: foo@example.com
-      password_hash: klkjhumnzxcjkajahsdqweqqwr
+      password_hash: '$2b$12$...'
       hash_scheme: MD5-CRYPT
 
-  aliases:
+  alias:
     - email: alias1@example.com
-      destination: "user1@example.com,user2@example.com"
+      destination:
+        - user1@example.com
+        - user2@example.com
 
-  relays:
+  relay:
     - name: relay.example.com
       comment: test
       smtp: mx.example.com
 
-You can use ``--dry-run`` to test your YAML without comitting any changes to the database.
-With ``--verbose`` config-update will show exactly what it changes in the database.
-Without ``--delete-object`` option config-update will only add/update changed values but will *not* remove any entries missing in provided YAML input.
+config-update shows the number of created/modified/deleted objects after import.
+To suppress all messages except error messages use ``--quiet``.
+By adding the ``--verbose`` switch (one or more times) the import gets more detailed and shows exactyl what attributes changed.
+In all messages plain-text secrets (dkim-keys, passwords) are hidden by default. Use ``--secrets`` to show secrets.
+If you want to test what would be done when importing use ``--dry-run``.
+By default config-update replaces the whole configuration. You can use ``--update`` to change the existing configuration instead.
+When updating you can add new and change existing objects.
+To delete an object use ``-key: value`` (To delete the domain example.com ``-name: example.com`` for example).
+To reset an attribute to default use ``-key: null`` (To reset enable_imap ``-enable_imap: null`` for example).
 
-This is a complete YAML template with all additional parameters that could be defined:
+This is a complete YAML template with all additional parameters that can be defined:
 
 .. code-block:: yaml
 
-  aliases:
-    - email: email@example.com
-      comment: ''
-      destination:
-        - address@example.com
-      wildcard: false
-  
-  domains:
+  domain:
     - name: example.com
       alternatives:
         - alternative.tld
@@ -176,13 +233,8 @@ This is a complete YAML template with all additional parameters that could be de
       max_quota_bytes: 0
       max_users: -1
       signup_enabled: false
-  
-  relays:
-    - name: relay.example.com
-      comment: ''
-      smtp: mx.example.com
-  
-  users:
+
+  user:
     - email: postmaster@example.com
       comment: ''
       displayed_name: 'Postmaster'
@@ -192,13 +244,16 @@ This is a complete YAML template with all additional parameters that could be de
       fetches:
         - id: 1
           comment: 'test fetch'
-          username: fetch-user
+          error: null
           host: other.example.com
+          keep: true
+          last_check: '2020-12-29T17:09:48.200179'
           password: 'secret'
+          hash_password: true
           port: 993
           protocol: imap
           tls: true
-          keep: true
+          username: fetch-user
       forward_destination:
         - address@remote.example.com
       forward_enabled: true
@@ -206,12 +261,13 @@ This is a complete YAML template with all additional parameters that could be de
       global_admin: true
       manager_of:
         - example.com
-      password: '{BLF-CRYPT}$2b$12$...'
+      password: '$2b$12$...'
+      hash_password: true
       quota_bytes: 1000000000
       reply_body: ''
       reply_enabled: false
-      reply_enddate: 2999-12-31
-      reply_startdate: 1900-01-01
+      reply_enddate: '2999-12-31'
+      reply_startdate: '1900-01-01'
       reply_subject: ''
       spam_enabled: true
       spam_threshold: 80
@@ -219,5 +275,16 @@ This is a complete YAML template with all additional parameters that could be de
         - id: 1
           comment: email-client
           ip: 192.168.1.1
-          password: '$5$rounds=1000$...'
+          password: '$5$rounds=1$...'
 
+  aliases:
+    - email: email@example.com
+      comment: ''
+      destination:
+        - address@example.com
+      wildcard: false
+
+  relay:
+    - name: relay.example.com
+      comment: ''
+      smtp: mx.example.com

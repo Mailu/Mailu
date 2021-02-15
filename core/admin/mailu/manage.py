@@ -478,9 +478,16 @@ def config_import(verbose=0, secrets=False, quiet=False, color=False, update=Fal
                     if verbose >= 1:
                         log('Modified', target, f'{str(target)!r} dkim_key: {before!r} -> {after!r}')
 
-    def track_serialize(obj, item):
+    def track_serialize(obj, item, backref=None):
         """ callback function to track import """
-        # hide secrets
+        # called for backref modification?
+        if backref is not None:
+            log('Modified', item, '{target!r} {key}: {before!r} -> {after!r}'.format(**backref))
+            return
+        # verbose?
+        if not verbose >= 2:
+            return
+        # hide secrets in data
         data = logger[obj.opts.model].hide(item)
         if 'hash_password' in data:
             data['password'] = HIDDEN
@@ -501,7 +508,7 @@ def config_import(verbose=0, secrets=False, quiet=False, color=False, update=Fal
         'import': True,
         'update': update,
         'clear': not update,
-        'callback': track_serialize if verbose >= 2 else None,
+        'callback': track_serialize,
     }
 
     # register listeners

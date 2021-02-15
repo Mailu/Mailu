@@ -14,6 +14,7 @@ from marshmallow import pre_load, post_load, post_dump, fields, Schema
 from marshmallow.utils import ensure_text_type
 from marshmallow.exceptions import ValidationError
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchemaOpts
+from marshmallow_sqlalchemy.fields import RelatedList
 
 from flask_marshmallow import Marshmallow
 
@@ -39,8 +40,6 @@ ma = Marshmallow()
 # - when modifying, nothing is required (only the primary key, but this key is in the uri)
 #   - the primary key from post data must not differ from the key in the uri
 # - when creating all fields without default or auto-increment are required
-# TODO: what about deleting list items and prung lists?
-# - domain.alternatives, user.forward_destination, user.manager_of, aliases.destination
 # TODO: validate everything!
 
 
@@ -652,7 +651,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
             if '__delete__' in data:
                 # deletion of non-existent item requested
                 raise ValidationError(
-                    f'item not found: {data[self._primary]!r}',
+                    f'item to delete not found: {data[self._primary]!r}',
                     field_name=f'?.{self._primary}',
                 )
 
@@ -665,6 +664,44 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
                 # delete instance when marked
                 if '__delete__' in data:
                     self.opts.sqla_session.delete(instance)
+                # delete item from lists or prune lists
+                # currently: domain.alternatives, user.forward_destination,
+                # user.manager_of, aliases.destination
+                for key, value in data.items():
+                    if isinstance(value, list):
+                        new_value = set(value)
+                        # handle list pruning
+                        if '-prune-' in value:
+                            value.remove('-prune-')
+                            new_value.remove('-prune-')
+                        else:
+                            for old in getattr(instance, key):
+                                # using str() is okay for now (see above)
+                                new_value.add(str(old))
+                        # handle item deletion
+                        for item in value:
+                            if item.startswith('-'):
+                                new_value.remove(item)
+                                try:
+                                    new_value.remove(item[1:])
+                                except KeyError as exc:
+                                    raise ValidationError(
+                                        f'item to delete not found: {item[1:]!r}',
+                                        field_name=f'?.{key}',
+                                    ) from exc
+                        # deduplicate and sort list
+                        data[key] = sorted(new_value)
+                        # log backref modification not catched by hook
+                        if isinstance(self.fields[key], RelatedList):
+                            if callback := self.context.get('callback'):
+                                callback(self, instance, {
+                                    'key': key,
+                                    'target': str(instance),
+                                    'before': [str(v) for v in getattr(instance, key)],
+                                    'after': data[key],
+                                })
+
+
 
             # add attributes required for validation from db
             # TODO: this will cause validation errors if value from database does not validate

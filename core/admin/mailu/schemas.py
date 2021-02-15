@@ -2,7 +2,6 @@
 """
 
 from copy import deepcopy
-from collections import OrderedDict
 from textwrap import wrap
 
 import re
@@ -155,11 +154,7 @@ def colorize(data, lexer='yaml', formatter='terminal', color=None, strip=False):
 
 ### render modules ###
 
-# allow yaml module to dump OrderedDict
-yaml.add_representer(
-    OrderedDict,
-    lambda cls, data: cls.represent_mapping('tag:yaml.org,2002:map', data.items())
-)
+# allow yaml to represent hidden attributes
 yaml.add_representer(
     _Hidden,
     lambda cls, data: cls.represent_data(str(data))
@@ -410,8 +405,6 @@ class BaseOpts(SQLAlchemyAutoSchemaOpts):
     def __init__(self, meta, ordered=False):
         if not hasattr(meta, 'sqla_session'):
             meta.sqla_session = models.db.session
-        if not hasattr(meta, 'ordered'):
-            meta.ordered = True
         if not hasattr(meta, 'sibling'):
             meta.sibling = False
         super(BaseOpts, self).__init__(meta, ordered=ordered)
@@ -474,19 +467,23 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
                     self._hide_by_context |= set(what)
 
         # remember primary keys
-        self._primary = self.opts.model.__table__.primary_key.columns.values()[0].name
+        self._primary = str(self.opts.model.__table__.primary_key.columns.values()[0].name)
 
-        # initialize attribute order
+        # determine attribute order
         if hasattr(self.Meta, 'order'):
             # use user-defined order
-            self._order = list(reversed(self.Meta.order))
+            order = self.Meta.order
         else:
             # default order is: primary_key + other keys alphabetically
-            self._order = list(sorted(self.fields.keys()))
-            if self._primary in self._order:
-                self._order.remove(self._primary)
-                self._order.reverse()
-                self._order.append(self._primary)
+            order = list(sorted(self.fields.keys()))
+            if self._primary in order:
+                order.remove(self._primary)
+                order.insert(0, self._primary)
+
+        # order dump_fields
+        for field in order:
+            if field in self.dump_fields:
+                self.dump_fields[field] = self.dump_fields.pop(field)
 
         # move pre_load hook "_track_import" to the front
         hooks = self._hooks[('pre_load', False)]
@@ -704,15 +701,8 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
         return item
 
     @post_dump
-    def _hide_and_order(self, data, many, **kwargs): # pylint: disable=unused-argument
+    def _hide_values(self, data, many, **kwargs): # pylint: disable=unused-argument
         """ hide secrets and order output """
-
-        # order output
-        for key in self._order:
-            try:
-                data.move_to_end(key, False)
-            except KeyError:
-                pass
 
         # stop early when not excluding/hiding
         if not self._exclude_by_value and not self._hide_by_context:
@@ -870,18 +860,14 @@ class MailuSchema(Schema):
         """ Schema config """
         render_module = RenderYAML
 
-        ordered = True
         order = ['domain', 'user', 'alias', 'relay'] # 'config'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # order fields
-        for field_list in self.load_fields, self.dump_fields, self.fields:
-            for section in reversed(self.Meta.order):
-                try:
-                    field_list.move_to_end(section, False)
-                except KeyError:
-                    pass
+        # order dump_fields
+        for field in self.Meta.order:
+            if field in self.dump_fields:
+                self.dump_fields[field] = self.dump_fields.pop(field)
 
     def _call_and_store(self, *args, **kwargs):
         """ track current parent and field for pruning """

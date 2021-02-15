@@ -7,7 +7,7 @@ import socket
 import logging
 import uuid
 
-from collections import Counter, OrderedDict
+from collections import Counter
 from itertools import chain
 
 import click
@@ -397,18 +397,9 @@ def config_import(verbose=0, secrets=False, quiet=False, color=False, update=Fal
 
     def log(action, target, message=None):
 
-        def od2d(val):
-            """ converts OrderedDicts to Dict for logging purposes """
-            if isinstance(val, OrderedDict):
-                return {k: od2d(v) for k, v in val.items()}
-            elif isinstance(val, list):
-                return [od2d(v) for v in val]
-            else:
-                return val
-
         if message is None:
             try:
-                message = od2d(logger[target.__class__].dump(target))
+                message = logger[target.__class__].dump(target)
             except KeyError:
                 message = target
         if not isinstance(message, str):
@@ -536,12 +527,11 @@ def config_import(verbose=0, secrets=False, quiet=False, color=False, update=Fal
     except Exception as exc:
         if verbose >= 5:
             raise
-        else:
-            # (yaml.scanner.ScannerError, UnicodeDecodeError, ...)
-            raise click.ClickException(
-                f'[{exc.__class__.__name__}] '
-                f'{" ".join(str(exc).split())}'
-            ) from exc
+        # (yaml.scanner.ScannerError, UnicodeDecodeError, ...)
+        raise click.ClickException(
+            f'[{exc.__class__.__name__}] '
+            f'{" ".join(str(exc).split())}'
+        ) from exc
 
     # flush session to show/count all changes
     if dry_run or verbose >= 1:

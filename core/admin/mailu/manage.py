@@ -7,7 +7,7 @@ import socket
 import logging
 import uuid
 
-from collections import Counter
+from collections import Counter, OrderedDict
 from itertools import chain
 
 import click
@@ -396,11 +396,19 @@ def config_import(verbose=0, secrets=False, quiet=False, color=False, update=Fal
         return chain(message, changes)
 
     def log(action, target, message=None):
+
+        def od2d(val):
+            """ converts OrderedDicts to Dict for logging purposes """
+            if isinstance(val, OrderedDict):
+                return {k: od2d(v) for k, v in val.items()}
+            elif isinstance(val, list):
+                return [od2d(v) for v in val]
+            else:
+                return val
+
         if message is None:
-            # TODO: convert nested OrderedDict to dict
-            # see: flask mailu config-import -nvv yaml/dump4.yaml
             try:
-                message = dict(logger[target.__class__].dump(target))
+                message = od2d(logger[target.__class__].dump(target))
             except KeyError:
                 message = target
         if not isinstance(message, str):

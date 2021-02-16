@@ -19,7 +19,7 @@ from flask.cli import FlaskGroup, with_appcontext
 from marshmallow.exceptions import ValidationError
 
 from . import models
-from .schemas import MailuSchema, get_schema, get_fieldspec, colorize, RenderJSON, HIDDEN
+from .schemas import MailuSchema, get_schema, get_fieldspec, colorize, canColorize, RenderJSON, HIDDEN
 
 
 db = models.db
@@ -351,7 +351,7 @@ def config_import(verbose=0, secrets=False, quiet=False, color=False, update=Fal
         verbose = 2
 
     color_cfg = {
-        'color': color or sys.stdout.isatty(),
+        'color': color or (canColorize and sys.stdout.isatty()),
         'lexer': 'python',
         'strip': True,
     }
@@ -598,7 +598,7 @@ def config_export(full=False, secrets=False, color=False, dns=False, output=None
     }
 
     schema = MailuSchema(only=only, context=context)
-    color_cfg = {'color': color or output.isatty()}
+    color_cfg = {'color': color or (canColorize and output.isatty())}
 
     if as_json:
         schema.opts.render_module = RenderJSON

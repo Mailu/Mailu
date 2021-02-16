@@ -27,9 +27,9 @@ try:
     from pygments.lexers.data import YamlLexer
     from pygments.formatters import get_formatter_by_name
 except ModuleNotFoundError:
-    COLOR_SUPPORTED = False
+    canColorize = False
 else:
-    COLOR_SUPPORTED = True
+    canColorize = True
 
 from . import models, dkim
 
@@ -99,11 +99,11 @@ def colorize(data, lexer='yaml', formatter='terminal', color=None, strip=False):
     """ add ANSI color to data """
     if color is None:
         # autodetect colorize
-        color = COLOR_SUPPORTED
+        color = canColorize
     if not color:
         # no color wanted
         return data
-    if not COLOR_SUPPORTED:
+    if not canColorize:
         # want color, but not supported
         raise ValueError('Please install pygments to colorize output')
 

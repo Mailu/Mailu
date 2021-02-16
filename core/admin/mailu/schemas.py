@@ -668,7 +668,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
                 # currently: domain.alternatives, user.forward_destination,
                 # user.manager_of, aliases.destination
                 for key, value in data.items():
-                    if isinstance(value, list):
+                    if not isinstance(self.fields[key], fields.Nested) and isinstance(value, list):
                         new_value = set(value)
                         # handle list pruning
                         if '-prune-' in value:

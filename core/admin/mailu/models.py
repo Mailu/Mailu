@@ -33,7 +33,7 @@ class IdnaDomain(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
 
-    # TODO: String(80) is too small?
+    # TODO: use db.String(255)?
     impl = db.String(80)
 
     def process_bind_param(self, value, dialect):
@@ -50,7 +50,7 @@ class IdnaEmail(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
 
-    # TODO: String(255) is too small?
+    # TODO: use db.String(254)?
     impl = db.String(255)
 
     def process_bind_param(self, value, dialect):
@@ -314,7 +314,7 @@ class Relay(Base):
     __tablename__ = 'relay'
 
     name = db.Column(IdnaDomain, primary_key=True, nullable=False)
-    # TODO: String(80) is too small?
+    # TODO: use db.String(266)? transport(8):(1)[nexthop(255)](2)
     smtp = db.Column(db.String(80), nullable=True)
 
 
@@ -322,9 +322,7 @@ class Email(object):
     """ Abstraction for an email address (localpart and domain).
     """
 
-    # TODO: validate max. total length of address (<=254)
-
-    # TODO: String(80) is too large (64)?
+    # TODO: use db.String(64)?
     localpart = db.Column(db.String(80), nullable=False)
 
     @declarative.declared_attr
@@ -634,7 +632,7 @@ class Token(Base):
     user = db.relationship(User,
         backref=db.backref('tokens', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
-    # TODO: String(255) is too large? (43 should be sufficient)
+    # TODO: use db.String(32)?
     ip = db.Column(db.String(255))
 
     def check_password(self, password):

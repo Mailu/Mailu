@@ -36,7 +36,7 @@ from . import models, dkim
 
 ma = Marshmallow()
 
-# TODO: how and where to mark keys as "required" while unserializing in api?
+# TODO: how and where to mark keys as "required" while deserializing in api?
 # - when modifying, nothing is required (only the primary key, but this key is in the uri)
 #   - the primary key from post data must not differ from the key in the uri
 # - when creating all fields without default or auto-increment are required
@@ -705,6 +705,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):
 
             # add attributes required for validation from db
             # TODO: this will cause validation errors if value from database does not validate
+            # but there should not be an invalid value in the database
             for attr_name, field_obj in self.load_fields.items():
                 if field_obj.required and attr_name not in data:
                     data[attr_name] = getattr(instance, attr_name)

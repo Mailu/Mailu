@@ -97,7 +97,7 @@ where mail-config.yml looks like:
 without ``--delete-object`` option config-update will only add/update new values but will *not* remove any entries missing in provided YAML input.
 
 Users
------
+^^^^^
 
 following are additional parameters that could be defined for users:
 
@@ -116,7 +116,7 @@ following are additional parameters that could be defined for users:
 * spam_threshold
 
 Alias
------
+^^^^^
 
 additional fields:
 
@@ -125,11 +125,11 @@ additional fields:
 config-export
 -------------
 
-The purpose of this command is to export domain-, relay-, alias- and user-configuration in YAML or JSON format.
+The purpose of this command is to export the complete configuration in YAML or JSON format.
 
 .. code-block:: bash
 
-  # docker-compose exec admin flask mailu config-export --help
+  $ docker-compose exec admin flask mailu config-export --help
 
  Usage: flask mailu config-export [OPTIONS] [FILTER]...
 
@@ -152,18 +152,18 @@ filters to export only some objects or attributes (try: ``user`` or ``domain.nam
 
 .. code-block:: bash
 
-  docker-compose exec admin flask mailu config-export -o mail-config.yml
+  $ docker-compose exec admin flask mailu config-export -o mail-config.yml
 
-  docker-compose exec admin flask mailu config-export --dns domain.dns_mx domain.dns_spf
+  $ docker-compose exec admin flask mailu config-export --dns domain.dns_mx domain.dns_spf
 
 config-import
 -------------
 
-The purpose of this command is for importing domain-, relay-, alias- and user-configuration in bulk and synchronizing DB entries with an external YAML/JOSN source.
+This command imports configuration data from an external YAML or JSON source.
 
 .. code-block:: bash
 
-  # docker-compose exec admin flask mailu config-import --help
+  $ docker-compose exec admin flask mailu config-import --help
 
  Usage: flask mailu config-import [OPTIONS] [FILENAME|-]
 
@@ -211,13 +211,28 @@ mail-config.yml contains the configuration and looks like this:
 
 config-update shows the number of created/modified/deleted objects after import.
 To suppress all messages except error messages use ``--quiet``.
-By adding the ``--verbose`` switch (one or more times) the import gets more detailed and shows exactyl what attributes changed.
-In all messages plain-text secrets (dkim-keys, passwords) are hidden by default. Use ``--secrets`` to show secrets.
-If you want to test what would be done when importing use ``--dry-run``.
-By default config-update replaces the whole configuration. You can use ``--update`` to change the existing configuration instead.
-When updating you can add new and change existing objects.
-To delete an object use ``-key: value`` (To delete the domain example.com ``-name: example.com`` for example).
-To reset an attribute to default use ``-key: null`` (To reset enable_imap ``-enable_imap: null`` for example).
+By adding the ``--verbose`` switch (up to two times) the import gets more detailed and shows exactly what attributes changed.
+In all log messages plain-text secrets (dkim-keys, passwords) are hidden by default. Use ``--secrets`` to log secrets.
+If you want to test what would be done when importing without committing any changes, use ``--dry-run``.
+
+By default config-update replaces the whole configuration. ``--update`` allows to modify the existing configuration instead.
+New elements will be added and existing elements will be modified.
+It is possible to delete a single element or prune all elements from lists and associative arrays using a special notation:
+
++-----------------------------+------------------+--------------------------+
+| Delete what?                | notation         | example                  |
++=============================+==================+==========================+
+| specific array object       | ``- -key: id``   | ``- -name: example.com`` |
++-----------------------------+------------------+--------------------------+
+| specific list item          | ``- -id``        | ``- -user1@example.com`` |
++-----------------------------+------------------+--------------------------+
+| all remaining array objects | ``- -key: null`` | ``- -email: null``       |
++-----------------------------+------------------+--------------------------+
+| all remaining list items    | ``- -prune-``    | ``- -prune-``            |
++-----------------------------+------------------+--------------------------+
+
+The ``-key: null`` notation can also be used to reset an attribute to its default.
+To reset *spam_threshold* to it's default *80* use ``-spam_threshold: null``.
 
 This is a complete YAML template with all additional parameters that can be defined:
 

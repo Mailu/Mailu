@@ -337,15 +337,18 @@ def config_import(verbose=0, secrets=False, quiet=False, color=False, update=Fal
     """
 
     # verbose
-    # 0 : show number of changes
-    # 1 : also show changes
-    # 2 : also show secrets
-    # 3 : also show input data
-    # 4 : also show sql queries
-    # 5 : also show tracebacks
+    # 0 : only show number of changes
+    # 1 : also show detailed changes
+    # 2 : also show input data
+    # 3 : also show sql queries (also needs -s, as sql may contain secrets)
+    # 4 : also show tracebacks (also needs -s, as tracebacks may contain secrets)
 
     if quiet:
         verbose = -1
+
+    if verbose > 2 and not secrets:
+        print('[Warning] Verbosity level capped to 2. Specify --secrets to log sql and tracebacks.')
+        verbose = 2
 
     color_cfg = {
         'color': color or sys.stdout.isatty(),
@@ -376,7 +379,7 @@ def config_import(verbose=0, secrets=False, quiet=False, color=False, update=Fal
         fmt = f'     - {{:<{max([len(loc) for loc, msg in res])}}} : {{}}'
         res = [fmt.format(loc, msg) for loc, msg in res]
         num = f'error{["s",""][len(res)==1]}'
-        res.insert(0, f'[ValidationError] {len(res)} {num} occured during input validation')
+        res.insert(0, f'[ValidationError] {len(res)} {num} occurred during input validation')
 
         return '\n'.join(res)
 
@@ -484,7 +487,7 @@ def config_import(verbose=0, secrets=False, quiet=False, color=False, update=Fal
         if backref is not None:
             log('Modified', item, '{target!r} {key}: {before!r} -> {after!r}'.format(**backref))
             return
-        # verbose?
+        # show input data?
         if not verbose >= 2:
             return
         # hide secrets in data
@@ -532,7 +535,7 @@ def config_import(verbose=0, secrets=False, quiet=False, color=False, update=Fal
     except ValidationError as exc:
         raise click.ClickException(format_errors(exc.messages)) from exc
     except Exception as exc:
-        if verbose >= 5:
+        if verbose >= 3:
             raise
         # (yaml.scanner.ScannerError, UnicodeDecodeError, ...)
         raise click.ClickException(
@@ -584,7 +587,7 @@ def config_export(full=False, secrets=False, color=False, dns=False, output=None
     if only:
         for spec in only:
             if spec.split('.', 1)[0] not in MailuSchema.Meta.order:
-                raise click.ClickException(f'[ERROR] Unknown section: {spec}')
+                raise click.ClickException(f'[ValidationError] Unknown section: {spec}')
     else:
         only = MailuSchema.Meta.order
 
@@ -606,7 +609,7 @@ def config_export(full=False, secrets=False, color=False, dns=False, output=None
         print(colorize(schema.dumps(models.MailuConfig()), **color_cfg), file=output)
     except ValueError as exc:
         if spec := get_fieldspec(exc):
-            raise click.ClickException(f'[ERROR] Invalid filter: {spec}') from exc
+            raise click.ClickException(f'[ValidationError] Invalid filter: {spec}') from exc
         raise
 
 

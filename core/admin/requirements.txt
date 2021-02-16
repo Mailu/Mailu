@@ -23,3 +23,6 @@ mysqlclient
 psycopg2
 idna
 srslib
+marshmallow
+flask-marshmallow
+marshmallow-sqlalchemy

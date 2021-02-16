@@ -1,23 +1,29 @@
-from mailu import dkim
+""" Mailu config storage model
+"""
 
-from sqlalchemy.ext import declarative
-from passlib import context, hash
-from datetime import datetime, date
+import re
+import os
+import smtplib
+import json
+
+from datetime import date
 from email.mime import text
-from flask import current_app as app
-from textwrap import wrap
+from itertools import chain
 
 import flask_sqlalchemy
 import sqlalchemy
-import re
-import time
-import os
-import glob
-import smtplib
+import passlib.context
+import passlib.hash
 import idna
 import dns
-import json
-import itertools
+
+from flask import current_app as app
+from sqlalchemy.ext import declarative
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.inspection import inspect
+from werkzeug.utils import cached_property
+
+from . import dkim
 
 
 db = flask_sqlalchemy.SQLAlchemy()
@@ -27,12 +33,15 @@ class IdnaDomain(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
 
+    # TODO: use db.String(255)?
     impl = db.String(80)
 
     def process_bind_param(self, value, dialect):
-        return idna.encode(value).decode('ascii').lower()
+        """ encode unicode domain name to punycode """
+        return idna.encode(value.lower()).decode('ascii')
 
     def process_result_value(self, value, dialect):
+        """ decode punycode domain name to unicode """
         return idna.decode(value)
 
     python_type = str
@@ -41,24 +50,21 @@ class IdnaEmail(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
 
+    # TODO: use db.String(254)?
     impl = db.String(255)
 
     def process_bind_param(self, value, dialect):
-        try:
-            localpart, domain_name = value.split('@')
-            return '{0}@{1}'.format(
-                localpart,
-                idna.encode(domain_name).decode('ascii'),
-            ).lower()
-        except ValueError:
-            pass
+        """ encode unicode domain part of email address to punycode """
+        localpart, domain_name = value.rsplit('@', 1)
+        if '@' in localpart:
+            raise ValueError('email local part must not contain "@"')
+        domain_name = domain_name.lower()
+        return f'{localpart}@{idna.encode(domain_name).decode("ascii")}'
 
     def process_result_value(self, value, dialect):
-        localpart, domain_name = value.split('@')
-        return '{0}@{1}'.format(
-            localpart,
-            idna.decode(domain_name),
-        )
+        """ decode punycode domain part of email to unicode """
+        localpart, domain_name = value.rsplit('@', 1)
+        return f'{localpart}@{idna.decode(domain_name)}'
 
     python_type = str
 
@@ -69,15 +75,17 @@ class CommaSeparatedList(db.TypeDecorator):
     impl = db.String
 
     def process_bind_param(self, value, dialect):
-        if not isinstance(value, (list, set)):
-            raise TypeError('Must be a list')
+        """ join list of items to comma separated string """
+        if not isinstance(value, (list, tuple, set)):
+            raise TypeError('Must be a list of strings')
         for item in value:
             if ',' in item:
-                raise ValueError('Item must not contain a comma')
-        return ','.join(sorted(value))
+                raise ValueError('list item must not contain ","')
+        return ','.join(sorted(set(value)))
 
     def process_result_value(self, value, dialect):
-        return list(filter(bool, value.split(','))) if value else []
+        """ split comma separated string to list """
+        return list(filter(bool, [item.strip() for item in value.split(',')])) if value else []
 
     python_type = list
 
@@ -88,9 +96,11 @@ class JSONEncoded(db.TypeDecorator):
     impl = db.String
 
     def process_bind_param(self, value, dialect):
+        """ encode data as json """
         return json.dumps(value) if value else None
 
     def process_result_value(self, value, dialect):
+        """ decode json to data """
         return json.loads(value) if value else None
 
     python_type = str
@@ -110,248 +120,37 @@ class Base(db.Model):
 
     created_at = db.Column(db.Date, nullable=False, default=date.today)
     updated_at = db.Column(db.Date, nullable=True, onupdate=date.today)
-    comment = db.Column(db.String(255), nullable=True)
+    comment = db.Column(db.String(255), nullable=True, default='')
 
-    @classmethod
-    def _dict_pkey(model):
-        return model.__mapper__.primary_key[0].name
+    def __str__(self):
+        pkey = self.__table__.primary_key.columns.values()[0].name
+        if pkey == 'email':
+            # ugly hack for email declared attr. _email is not always up2date
+            return str(f'{self.localpart}@{self.domain_name}')
+        elif pkey in {'name', 'email'}:
+            return str(getattr(self, pkey, None))
+        else:
+            return self.__repr__()
+        return str(getattr(self, self.__table__.primary_key.columns.values()[0].name))
 
-    def _dict_pval(self):
-        return getattr(self, self._dict_pkey())
+    def __repr__(self):
+        return f'<{self.__class__.__name__} {str(self)!r}>'
 
-    def to_dict(self, full=False, include_secrets=False, include_extra=None, recursed=False, hide=None):
-        """ Return a dictionary representation of this model.
-        """
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            pkey = self.__table__.primary_key.columns.values()[0].name
+            this = getattr(self, pkey, None)
+            other = getattr(other, pkey, None)
+            return this is not None and other is not None and str(this) == str(other)
+        else:
+            return NotImplemented
 
-        if recursed and not getattr(self, '_dict_recurse', False):
-            return str(self)
-
-        hide = set(hide or []) | {'created_at', 'updated_at'}
-        if hasattr(self, '_dict_hide'):
-            hide |= self._dict_hide
-
-        secret = set()
-        if not include_secrets and hasattr(self, '_dict_secret'):
-            secret |= self._dict_secret
-
-        convert = getattr(self, '_dict_output', {})
-
-        extra_keys = getattr(self, '_dict_extra', {})
-        if include_extra is None:
-            include_extra = []
-
-        res = {}
-
-        for key in itertools.chain(
-            self.__table__.columns.keys(),
-            getattr(self, '_dict_show', []),
-            *[extra_keys.get(extra, []) for extra in include_extra]
-        ):
-            if key in hide:
-                continue
-            if key in self.__table__.columns:
-                default = self.__table__.columns[key].default
-                if isinstance(default, sqlalchemy.sql.schema.ColumnDefault):
-                    default = default.arg
-            else:
-                default = None
-            value = getattr(self, key)
-            if full or ((default or value) and value != default):
-                if key in secret:
-                    value = '<hidden>'
-                elif value is not None and key in convert:
-                    value = convert[key](value)
-                res[key] = value
-
-        for key in self.__mapper__.relationships.keys():
-            if key in hide:
-                continue
-            if self.__mapper__.relationships[key].uselist:
-                items = getattr(self, key)
-                if self.__mapper__.relationships[key].query_class is not None:
-                    if hasattr(items, 'all'):
-                        items = items.all()
-                if full or len(items):
-                    if key in secret:
-                        res[key] = '<hidden>'
-                    else:
-                        res[key] = [item.to_dict(full, include_secrets, include_extra, True) for item in items]
-            else:
-                value = getattr(self, key)
-                if full or value is not None:
-                    if key in secret:
-                        res[key] = '<hidden>'
-                    else:
-                        res[key] = value.to_dict(full, include_secrets, include_extra, True)
-
-        return res
-
-    @classmethod
-    def from_dict(model, data, delete=False):
-
-        changed = []
-
-        pkey = model._dict_pkey()
-
-        # handle "primary key" only
-        if type(data) is not dict:
-            data = {pkey: data}
-
-        # modify input data
-        if hasattr(model, '_dict_input'):
-            try:
-                model._dict_input(data)
-            except Exception as reason:
-                raise ValueError(f'{reason}', model, None, data)
-
-        # check for primary key (if not recursed)
-        if not getattr(model, '_dict_recurse', False):
-            if not pkey in data:
-                raise KeyError(f'primary key {model.__table__}.{pkey} is missing', model, pkey, data)
-
-        # check data keys and values
-        for key in list(data.keys()):
-
-            # check key
-            if not hasattr(model, key) and not key in model.__mapper__.relationships:
-                raise KeyError(f'unknown key {model.__table__}.{key}', model, key, data)
-
-            # check value type
-            value = data[key]
-            col = model.__mapper__.columns.get(key)
-            if col is not None:
-                if not ((value is None and col.nullable) or (type(value) is col.type.python_type)):
-                    raise TypeError(f'{model.__table__}.{key} {value!r} has invalid type {type(value).__name__!r}', model, key, data)
-            else:
-                rel = model.__mapper__.relationships.get(key)
-                if rel is None:
-                    itype = getattr(model, '_dict_types', {}).get(key)
-                    if itype is not None:
-                        if itype is False: # ignore value. TODO: emit warning?
-                            del data[key]
-                            continue
-                        elif not isinstance(value, itype):
-                            raise TypeError(f'{model.__table__}.{key} {value!r} has invalid type {type(value).__name__!r}', model, key, data)
-                    else:
-                        raise NotImplementedError(f'type not defined for {model.__table__}.{key}')
-
-            # handle relationships
-            if key in model.__mapper__.relationships:
-                rel_model = model.__mapper__.relationships[key].argument
-                if not isinstance(rel_model, sqlalchemy.orm.Mapper):
-                    add = rel_model.from_dict(value, delete)
-                    assert len(add) == 1
-                    rel_item, updated = add[0]
-                    changed.append((rel_item, updated))
-                    data[key] = rel_item
-
-        # create item if necessary
-        created = False
-        item = model.query.get(data[pkey]) if pkey in data else None
-        if item is None:
-
-            # check for mandatory keys
-            missing = getattr(model, '_dict_mandatory', set()) - set(data.keys())
-            if missing:
-                raise ValueError(f'mandatory key(s) {", ".join(sorted(missing))} for {model.__table__} missing', model, missing, data)
-
-            # remove mapped relationships from data
-            mapped = {}
-            for key in list(data.keys()):
-                if key in model.__mapper__.relationships:
-                    if isinstance(model.__mapper__.relationships[key].argument, sqlalchemy.orm.Mapper):
-                        mapped[key] = data[key]
-                        del data[key]
-
-            # create new item
-            item = model(**data)
-            created = True
-
-            # and update mapped relationships (below)
-            data = mapped
-
-        # update item
-        updated = []
-        for key, value in data.items():
-
-            # skip primary key
-            if key == pkey:
-                continue
-
-            if key in model.__mapper__.relationships:
-                # update relationship
-                rel_model = model.__mapper__.relationships[key].argument
-                if isinstance(rel_model, sqlalchemy.orm.Mapper):
-                    rel_model = rel_model.class_
-                    # add (and create) referenced items
-                    cur = getattr(item, key)
-                    old = sorted(cur, key=lambda i:id(i))
-                    new = []
-                    for rel_data in value:
-                        # get or create related item
-                        add = rel_model.from_dict(rel_data, delete)
-                        assert len(add) == 1
-                        rel_item, rel_updated = add[0]
-                        changed.append((rel_item, rel_updated))
-                        if rel_item not in cur:
-                            cur.append(rel_item)
-                        new.append(rel_item)
-
-                    # delete referenced items missing in yaml
-                    rel_pkey = rel_model._dict_pkey()
-                    new_data = list([i.to_dict(True, True, None, True, [rel_pkey]) for i in new])
-                    for rel_item in old:
-                        if rel_item not in new:
-                            # check if item with same data exists to stabilze import without primary key
-                            rel_data = rel_item.to_dict(True, True, None, True, [rel_pkey])
-                            try:
-                                same_idx = new_data.index(rel_data)
-                            except ValueError:
-                                same = None
-                            else:
-                                same = new[same_idx]
-
-                            if same is None:
-                                # delete items missing in new
-                                if delete:
-                                    cur.remove(rel_item)
-                                else:
-                                    new.append(rel_item)
-                            else:
-                                # swap found item with same data with newly created item
-                                new.append(rel_item)
-                                new_data.append(rel_data)
-                                new.remove(same)
-                                del new_data[same_idx]
-                                for i, (ch_item, _) in enumerate(changed):
-                                    if ch_item is same:
-                                        changed[i] = (rel_item, [])
-                                        db.session.flush()
-                                        db.session.delete(ch_item)
-                                        break
-
-                    # remember changes
-                    new = sorted(new, key=lambda i:id(i))
-                    if new != old:
-                        updated.append((key, old, new))
-
-            else:
-                # update key
-                old = getattr(item, key)
-                if type(old) is list:
-                    # deduplicate list value
-                    assert type(value) is list
-                    value = set(value)
-                    old = set(old)
-                    if not delete:
-                        value = old | value
-                if value != old:
-                    updated.append((key, old, value))
-                    setattr(item, key, value)
-
-        changed.append((item, created if created else updated))
-
-        return changed
+    def __hash__(self):
+        primary = getattr(self, self.__table__.primary_key.columns.values()[0].name)
+        if primary is None:
+            return NotImplemented
+        else:
+            return hash(primary)
 
 
 # Many-to-many association table for domain managers
@@ -369,20 +168,11 @@ class Config(Base):
     value = db.Column(JSONEncoded)
 
 
-@sqlalchemy.event.listens_for(db.session, 'after_commit')
-def store_dkim_key(session):
-    """ Store DKIM key on commit
-    """
-
+def _save_dkim_keys(session):
+    """ store DKIM keys after commit """
     for obj in session.identity_map.values():
         if isinstance(obj, Domain):
-            if obj._dkim_key_changed:
-                file_path = obj._dkim_file()
-                if obj._dkim_key:
-                    with open(file_path, 'wb') as handle:
-                        handle.write(obj._dkim_key)
-                elif os.path.exists(file_path):
-                    os.unlink(file_path)
+            obj.save_dkim_key()
 
 class Domain(Base):
     """ A DNS domain that has mail addresses associated to it.
@@ -390,147 +180,122 @@ class Domain(Base):
 
     __tablename__ = 'domain'
 
-    _dict_hide = {'users', 'managers', 'aliases'}
-    _dict_show = {'dkim_key'}
-    _dict_extra = {'dns':{'dkim_publickey', 'dns_mx', 'dns_spf', 'dns_dkim', 'dns_dmarc'}}
-    _dict_secret = {'dkim_key'}
-    _dict_types = {
-        'dkim_key': (bytes, type(None)),
-        'dkim_publickey': False,
-        'dns_mx': False,
-        'dns_spf': False,
-        'dns_dkim': False,
-        'dns_dmarc': False,
-    }
-    _dict_output = {'dkim_key': lambda key: key.decode('utf-8').strip().split('\n')[1:-1]}
-    @staticmethod
-    def _dict_input(data):
-        if 'dkim_key' in data:
-            key = data['dkim_key']
-            if key is not None:
-                if type(key) is list:
-                    key = ''.join(key)
-                if type(key) is str:
-                    key = ''.join(key.strip().split()) # removes all whitespace
-                    if key == 'generate':
-                        data['dkim_key'] = dkim.gen_key()
-                    elif key:
-                        m = re.match('^-----BEGIN (RSA )?PRIVATE KEY-----', key)
-                        if m is not None:
-                            key = key[m.end():]
-                        m = re.search('-----END (RSA )?PRIVATE KEY-----$', key)
-                        if m is not None:
-                            key = key[:m.start()]
-                        key = '\n'.join(wrap(key, 64))
-                        key = f'-----BEGIN PRIVATE KEY-----\n{key}\n-----END PRIVATE KEY-----\n'.encode('ascii')
-                        try:
-                            dkim.strip_key(key)
-                        except:
-                            raise ValueError('invalid dkim key')
-                        else:
-                          data['dkim_key'] = key
-                    else:
-                        data['dkim_key'] = None
-
     name = db.Column(IdnaDomain, primary_key=True, nullable=False)
     managers = db.relationship('User', secondary=managers,
         backref=db.backref('manager_of'), lazy='dynamic')
     max_users = db.Column(db.Integer, nullable=False, default=-1)
     max_aliases = db.Column(db.Integer, nullable=False, default=-1)
-    max_quota_bytes = db.Column(db.BigInteger(), nullable=False, default=0)
-    signup_enabled = db.Column(db.Boolean(), nullable=False, default=False)
-    
+    max_quota_bytes = db.Column(db.BigInteger, nullable=False, default=0)
+    signup_enabled = db.Column(db.Boolean, nullable=False, default=False)
+
     _dkim_key = None
-    _dkim_key_changed = False
+    _dkim_key_on_disk = None
 
     def _dkim_file(self):
+        """ return filename for active DKIM key """
         return app.config['DKIM_PATH'].format(
-            domain=self.name, selector=app.config['DKIM_SELECTOR'])
+            domain=self.name,
+            selector=app.config['DKIM_SELECTOR']
+        )
+
+    def save_dkim_key(self):
+        """ save changed DKIM key to disk """
+        if self._dkim_key != self._dkim_key_on_disk:
+            file_path = self._dkim_file()
+            if self._dkim_key:
+                with open(file_path, 'wb') as handle:
+                    handle.write(self._dkim_key)
+            elif os.path.exists(file_path):
+                os.unlink(file_path)
+            self._dkim_key_on_disk = self._dkim_key
 
     @property
     def dns_mx(self):
-        hostname = app.config['HOSTNAMES'].split(',')[0]
+        """ return MX record for domain """
+        hostname = app.config['HOSTNAMES'].split(',', 1)[0]
         return f'{self.name}. 600 IN MX 10 {hostname}.'
-    
+
     @property
     def dns_spf(self):
-        hostname = app.config['HOSTNAMES'].split(',')[0]
+        """ return SPF record for domain """
+        hostname = app.config['HOSTNAMES'].split(',', 1)[0]
         return f'{self.name}. 600 IN TXT "v=spf1 mx a:{hostname} ~all"'
-    
+
     @property
     def dns_dkim(self):
-        if os.path.exists(self._dkim_file()):
+        """ return DKIM record for domain """
+        if self.dkim_key:
             selector = app.config['DKIM_SELECTOR']
-            return f'{selector}._domainkey.{self.name}. 600 IN TXT "v=DKIM1; k=rsa; p={self.dkim_publickey}"'
+            return (
+                f'{selector}._domainkey.{self.name}. 600 IN TXT'
+                f'"v=DKIM1; k=rsa; p={self.dkim_publickey}"'
+            )
 
     @property
     def dns_dmarc(self):
-        if os.path.exists(self._dkim_file()):
+        """ return DMARC record for domain """
+        if self.dkim_key:
             domain = app.config['DOMAIN']
             rua = app.config['DMARC_RUA']
             rua = f' rua=mailto:{rua}@{domain};' if rua else ''
             ruf = app.config['DMARC_RUF']
             ruf = f' ruf=mailto:{ruf}@{domain};' if ruf else ''
             return f'_dmarc.{self.name}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
-    
+
     @property
     def dkim_key(self):
+        """ return private DKIM key """
         if self._dkim_key is None:
             file_path = self._dkim_file()
             if os.path.exists(file_path):
                 with open(file_path, 'rb') as handle:
-                    self._dkim_key = handle.read()
+                    self._dkim_key = self._dkim_key_on_disk = handle.read()
             else:
-                self._dkim_key = b''
+                self._dkim_key = self._dkim_key_on_disk = b''
         return self._dkim_key if self._dkim_key else None
 
     @dkim_key.setter
     def dkim_key(self, value):
+        """ set private DKIM key """
         old_key = self.dkim_key
-        if value is None:
-            value = b''
-        self._dkim_key_changed = value != old_key
-        self._dkim_key = value
+        self._dkim_key = value if value is not None else b''
+        if self._dkim_key != old_key:
+            if not sqlalchemy.event.contains(db.session, 'after_commit', _save_dkim_keys):
+                sqlalchemy.event.listen(db.session, 'after_commit', _save_dkim_keys)
 
     @property
     def dkim_publickey(self):
+        """ return public part of DKIM key """
         dkim_key = self.dkim_key
         if dkim_key:
             return dkim.strip_key(dkim_key).decode('utf8')
 
     def generate_dkim_key(self):
+        """ generate and activate new DKIM key """
         self.dkim_key = dkim.gen_key()
 
     def has_email(self, localpart):
-        for email in self.users + self.aliases:
+        """ checks if localpart is configured for domain """
+        for email in chain(self.users, self.aliases):
             if email.localpart == localpart:
                 return True
-        else:
-            return False
+        return False
 
     def check_mx(self):
+        """ checks if MX record for domain points to mailu host """
         try:
-            hostnames = app.config['HOSTNAMES'].split(',')
+            hostnames = set(app.config['HOSTNAMES'].split(','))
             return any(
-                str(rset).split()[-1][:-1] in hostnames
+                rset.exchange.to_text().rstrip('.') in hostnames
                 for rset in dns.resolver.query(self.name, 'MX')
             )
-        except Exception:
-            return False
-
-    def __str__(self):
-        return self.name
-
-    def __eq__(self, other):
-        try:
-            return self.name == other.name
-        except AttributeError:
+        except dns.exception.DNSException:
             return False
 
 
 class Alternative(Base):
     """ Alternative name for a served domain.
-    The name "domain alias" was avoided to prevent some confusion.
+        The name "domain alias" was avoided to prevent some confusion.
     """
 
     __tablename__ = 'alternative'
@@ -540,9 +305,6 @@ class Alternative(Base):
     domain = db.relationship(Domain,
         backref=db.backref('alternatives', cascade='all, delete-orphan'))
 
-    def __str__(self):
-        return self.name
-
 
 class Relay(Base):
     """ Relayed mail domain.
@@ -551,33 +313,21 @@ class Relay(Base):
 
     __tablename__ = 'relay'
 
-    _dict_mandatory = {'smtp'}
-
     name = db.Column(IdnaDomain, primary_key=True, nullable=False)
+    # TODO: use db.String(266)? transport(8):(1)[nexthop(255)](2)
     smtp = db.Column(db.String(80), nullable=True)
-
-    def __str__(self):
-        return self.name
 
 
 class Email(object):
     """ Abstraction for an email address (localpart and domain).
     """
 
+    # TODO: use db.String(64)?
     localpart = db.Column(db.String(80), nullable=False)
-
-    @staticmethod
-    def _dict_input(data):
-        if 'email' in data:
-            if 'localpart' in data or 'domain' in data:
-                raise ValueError('ambigous key email and localpart/domain')
-            elif type(data['email']) is str:
-                data['localpart'], data['domain'] = data['email'].rsplit('@', 1)
-        else:
-            data['email'] = f'{data["localpart"]}@{data["domain"]}'
 
     @declarative.declared_attr
     def domain_name(cls):
+        """ the domain part of the email address """
         return db.Column(IdnaDomain, db.ForeignKey(Domain.name),
             nullable=False, default=IdnaDomain)
 
@@ -585,36 +335,49 @@ class Email(object):
     # It is however very useful for quick lookups without joining tables,
     # especially when the mail server is reading the database.
     @declarative.declared_attr
-    def email(cls):
-        updater = lambda context: '{0}@{1}'.format(
-            context.current_parameters['localpart'],
-            context.current_parameters['domain_name'],
-        )
-        return db.Column(IdnaEmail,
-            primary_key=True, nullable=False,
-            default=updater)
+    def _email(cls):
+        """ the complete email address (localpart@domain) """
+
+        def updater(ctx):
+            key = f'{cls.__tablename__}_email'
+            if key in ctx.current_parameters:
+                return ctx.current_parameters[key]
+            return '{localpart}@{domain_name}'.format(**ctx.current_parameters)
+
+        return db.Column('email', IdnaEmail, primary_key=True, nullable=False, onupdate=updater)
+
+    # We need to keep email, localpart and domain_name in sync.
+    # But IMHO using email as primary key was not a good idea in the first place.
+    @hybrid_property
+    def email(self):
+        """ getter for email - gets _email """
+        return self._email
+
+    @email.setter
+    def email(self, value):
+        """ setter for email - sets _email, localpart and domain_name at once """
+        self.localpart, self.domain_name = value.rsplit('@', 1)
+        self._email = value
+
+    # hack for email declared attr - when _email is not updated yet
+    def __str__(self):
+        return str(f'{self.localpart}@{self.domain_name}')
 
     def sendmail(self, subject, body):
-        """ Send an email to the address.
-        """
-        from_address = '{0}@{1}'.format(
-            app.config['POSTMASTER'],
-            idna.encode(app.config['DOMAIN']).decode('ascii'),
-        )
+        """ send an email to the address """
+        f_addr = f'{app.config["POSTMASTER"]}@{idna.encode(app.config["DOMAIN"]).decode("ascii")}'
         with smtplib.SMTP(app.config['HOST_AUTHSMTP'], port=10025) as smtp:
-            to_address = '{0}@{1}'.format(
-                self.localpart,
-                idna.encode(self.domain_name).decode('ascii'),
-            )
+            to_address = f'{self.localpart}@{idna.encode(self.domain_name).decode("ascii")}'
             msg = text.MIMEText(body)
             msg['Subject'] = subject
-            msg['From'] = from_address
+            msg['From'] = f_addr
             msg['To'] = to_address
-            smtp.sendmail(from_address, [to_address], msg.as_string())
+            smtp.sendmail(f_addr, [to_address], msg.as_string())
 
     @classmethod
     def resolve_domain(cls, email):
-        localpart, domain_name = email.split('@', 1) if '@' in email else (None, email)
+        """ resolves domain alternative to real domain """
+        localpart, domain_name = email.rsplit('@', 1) if '@' in email else (None, email)
         alternative = Alternative.query.get(domain_name)
         if alternative:
             domain_name = alternative.domain_name
@@ -622,17 +385,19 @@ class Email(object):
 
     @classmethod
     def resolve_destination(cls, localpart, domain_name, ignore_forward_keep=False):
+        """ return destination for email address localpart@domain_name """
+
         localpart_stripped = None
         stripped_alias = None
 
         if os.environ.get('RECIPIENT_DELIMITER') in localpart:
             localpart_stripped = localpart.rsplit(os.environ.get('RECIPIENT_DELIMITER'), 1)[0]
 
-        user = User.query.get('{}@{}'.format(localpart, domain_name))
+        user = User.query.get(f'{localpart}@{domain_name}')
         if not user and localpart_stripped:
-            user = User.query.get('{}@{}'.format(localpart_stripped, domain_name))
+            user = User.query.get(f'{localpart_stripped}@{domain_name}')
         if user:
-            email = '{}@{}'.format(localpart, domain_name)
+            email = f'{localpart}@{domain_name}'
 
             if user.forward_enabled:
                 destination = user.forward_destination
@@ -647,13 +412,14 @@ class Email(object):
 
         if pure_alias and not pure_alias.wildcard:
             return pure_alias.destination
-        elif stripped_alias:
+
+        if stripped_alias:
             return stripped_alias.destination
-        elif pure_alias:
+
+        if pure_alias:
             return pure_alias.destination
 
-    def __str__(self):
-        return self.email
+        return None
 
 
 class User(Base, Email):
@@ -662,49 +428,25 @@ class User(Base, Email):
 
     __tablename__ = 'user'
 
-    _dict_hide = {'domain_name', 'domain', 'localpart', 'quota_bytes_used'}
-    _dict_mandatory = {'localpart', 'domain', 'password'}
-    @classmethod
-    def _dict_input(cls, data):
-        Email._dict_input(data)
-        # handle password
-        if 'password' in data:
-            if 'password_hash' in data or 'hash_scheme' in data:
-                raise ValueError('ambigous key password and password_hash/hash_scheme')
-            # check (hashed) password
-            password = data['password']
-            if password.startswith('{') and '}' in password:
-                scheme = password[1:password.index('}')]
-                if scheme not in cls.scheme_dict:
-                    raise ValueError(f'invalid password scheme {scheme!r}')
-            else:
-                raise ValueError(f'invalid hashed password {password!r}')
-        elif 'password_hash' in data and 'hash_scheme' in data:
-            if data['hash_scheme'] not in cls.scheme_dict:
-                raise ValueError(f'invalid password scheme {scheme!r}')
-            data['password'] = '{'+data['hash_scheme']+'}'+ data['password_hash']
-            del data['hash_scheme']
-            del data['password_hash']
-
     domain = db.relationship(Domain,
         backref=db.backref('users', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
-    quota_bytes = db.Column(db.BigInteger(), nullable=False, default=10**9)
-    quota_bytes_used = db.Column(db.BigInteger(), nullable=False, default=0)
-    global_admin = db.Column(db.Boolean(), nullable=False, default=False)
-    enabled = db.Column(db.Boolean(), nullable=False, default=True)
+    quota_bytes = db.Column(db.BigInteger, nullable=False, default=10**9)
+    quota_bytes_used = db.Column(db.BigInteger, nullable=False, default=0)
+    global_admin = db.Column(db.Boolean, nullable=False, default=False)
+    enabled = db.Column(db.Boolean, nullable=False, default=True)
 
     # Features
-    enable_imap = db.Column(db.Boolean(), nullable=False, default=True)
-    enable_pop = db.Column(db.Boolean(), nullable=False, default=True)
+    enable_imap = db.Column(db.Boolean, nullable=False, default=True)
+    enable_pop = db.Column(db.Boolean, nullable=False, default=True)
 
     # Filters
-    forward_enabled = db.Column(db.Boolean(), nullable=False, default=False)
-    forward_destination = db.Column(CommaSeparatedList(), nullable=True, default=[])
-    forward_keep = db.Column(db.Boolean(), nullable=False, default=True)
-    reply_enabled = db.Column(db.Boolean(), nullable=False, default=False)
+    forward_enabled = db.Column(db.Boolean, nullable=False, default=False)
+    forward_destination = db.Column(CommaSeparatedList, nullable=True, default=list)
+    forward_keep = db.Column(db.Boolean, nullable=False, default=True)
+    reply_enabled = db.Column(db.Boolean, nullable=False, default=False)
     reply_subject = db.Column(db.String(255), nullable=True, default=None)
-    reply_body = db.Column(db.Text(), nullable=True, default=None)
+    reply_body = db.Column(db.Text, nullable=True, default=None)
     reply_startdate = db.Column(db.Date, nullable=False,
         default=date(1900, 1, 1))
     reply_enddate = db.Column(db.Date, nullable=False,
@@ -712,8 +454,8 @@ class User(Base, Email):
 
     # Settings
     displayed_name = db.Column(db.String(160), nullable=False, default='')
-    spam_enabled = db.Column(db.Boolean(), nullable=False, default=True)
-    spam_threshold = db.Column(db.Integer(), nullable=False, default=80)
+    spam_enabled = db.Column(db.Boolean, nullable=False, default=True)
+    spam_threshold = db.Column(db.Integer, nullable=False, default=80)
 
     # Flask-login attributes
     is_authenticated = True
@@ -721,10 +463,12 @@ class User(Base, Email):
     is_anonymous = False
 
     def get_id(self):
+        """ return users email address """
         return self.email
 
     @property
     def destination(self):
+        """ returns comma separated string of destinations """
         if self.forward_enabled:
             result = list(self.forward_destination)
             if self.forward_keep:
@@ -735,6 +479,7 @@ class User(Base, Email):
 
     @property
     def reply_active(self):
+        """ returns status of autoreply function """
         now = date.today()
         return (
             self.reply_enabled and
@@ -742,48 +487,57 @@ class User(Base, Email):
             self.reply_enddate > now
         )
 
-    scheme_dict = {'PBKDF2': 'pbkdf2_sha512',
-                   'BLF-CRYPT': 'bcrypt',
-                   'SHA512-CRYPT': 'sha512_crypt',
-                   'SHA256-CRYPT': 'sha256_crypt',
-                   'MD5-CRYPT': 'md5_crypt',
-                   'CRYPT': 'des_crypt'}
+    scheme_dict = {
+        'PBKDF2': 'pbkdf2_sha512',
+        'BLF-CRYPT': 'bcrypt',
+        'SHA512-CRYPT': 'sha512_crypt',
+        'SHA256-CRYPT': 'sha256_crypt',
+        'MD5-CRYPT': 'md5_crypt',
+        'CRYPT': 'des_crypt',
+    }
 
-    def get_password_context(self):
-        return context.CryptContext(
-            schemes=self.scheme_dict.values(),
-            default=self.scheme_dict[app.config['PASSWORD_SCHEME']],
+    @classmethod
+    def get_password_context(cls):
+        """ Create password context for hashing and verification
+        """
+        return passlib.context.CryptContext(
+            schemes=cls.scheme_dict.values(),
+            default=cls.scheme_dict[app.config['PASSWORD_SCHEME']],
         )
 
-    def check_password(self, password):
+    def check_password(self, plain):
+        """ Check password against stored hash
+            Update hash when default scheme has changed
+        """
         context = self.get_password_context()
-        reference = re.match('({[^}]+})?(.*)', self.password).group(2)
-        result = context.verify(password, reference)
-        if result and context.identify(reference) != context.default_scheme():
-            self.set_password(password)
+        hashed = re.match('^({[^}]+})?(.*)$', self.password).group(2)
+        result = context.verify(plain, hashed)
+        if result and context.identify(hashed) != context.default_scheme():
+            self.set_password(plain)
             db.session.add(self)
             db.session.commit()
         return result
 
-    def set_password(self, password, hash_scheme=None, raw=False):
-        """Set password for user with specified encryption scheme
-        @password: plain text password to encrypt (if raw == True the hash itself)
+    def set_password(self, new, hash_scheme=None, raw=False):
+        """ Set password for user with specified encryption scheme
+            @new: plain text password to encrypt (or, if raw is True: the hash itself)
         """
+        # for the list of hash schemes see https://wiki2.dovecot.org/Authentication/PasswordSchemes
         if hash_scheme is None:
             hash_scheme = app.config['PASSWORD_SCHEME']
-        # for the list of hash schemes see https://wiki2.dovecot.org/Authentication/PasswordSchemes
-        if raw:
-            self.password = '{'+hash_scheme+'}' + password
-        else:
-            self.password = '{'+hash_scheme+'}' + self.get_password_context().encrypt(password, self.scheme_dict[hash_scheme])
+        if not raw:
+            new = self.get_password_context().encrypt(new, self.scheme_dict[hash_scheme])
+        self.password = f'{{{hash_scheme}}}{new}'
 
     def get_managed_domains(self):
+        """ return list of domains this user can manage """
         if self.global_admin:
             return Domain.query.all()
         else:
             return self.manager_of
 
     def get_managed_emails(self, include_aliases=True):
+        """ returns list of email addresses this user can manage """
         emails = []
         for domain in self.get_managed_domains():
             emails.extend(domain.users)
@@ -792,16 +546,18 @@ class User(Base, Email):
         return emails
 
     def send_welcome(self):
+        """ send welcome email to user """
         if app.config['WELCOME']:
-            self.sendmail(app.config['WELCOME_SUBJECT'],
-                app.config['WELCOME_BODY'])
+            self.sendmail(app.config['WELCOME_SUBJECT'], app.config['WELCOME_BODY'])
 
     @classmethod
     def get(cls, email):
+        """ find user object for email address """
         return cls.query.get(email)
 
     @classmethod
     def login(cls, email, password):
+        """ login user when enabled and password is valid """
         user = cls.query.get(email)
         return user if (user and user.enabled and user.check_password(password)) else None
 
@@ -812,30 +568,23 @@ class Alias(Base, Email):
 
     __tablename__ = 'alias'
 
-    _dict_hide = {'domain_name', 'domain', 'localpart'}
-    @staticmethod
-    def _dict_input(data):
-        Email._dict_input(data)
-        # handle comma delimited string for backwards compability
-        dst = data.get('destination')
-        if type(dst) is str:
-            data['destination'] = list([adr.strip() for adr in dst.split(',')])
-
     domain = db.relationship(Domain,
         backref=db.backref('aliases', cascade='all, delete-orphan'))
-    wildcard = db.Column(db.Boolean(), nullable=False, default=False)
-    destination = db.Column(CommaSeparatedList, nullable=False, default=[])
+    wildcard = db.Column(db.Boolean, nullable=False, default=False)
+    destination = db.Column(CommaSeparatedList, nullable=False, default=list)
 
     @classmethod
     def resolve(cls, localpart, domain_name):
+        """ find aliases matching email address localpart@domain_name """
+
         alias_preserve_case = cls.query.filter(
                 sqlalchemy.and_(cls.domain_name == domain_name,
                     sqlalchemy.or_(
                         sqlalchemy.and_(
-                            cls.wildcard == False,
+                            cls.wildcard is False,
                             cls.localpart == localpart
                         ), sqlalchemy.and_(
-                            cls.wildcard == True,
+                            cls.wildcard is True,
                             sqlalchemy.bindparam('l', localpart).like(cls.localpart)
                         )
                     )
@@ -847,27 +596,29 @@ class Alias(Base, Email):
                 sqlalchemy.and_(cls.domain_name == domain_name,
                     sqlalchemy.or_(
                         sqlalchemy.and_(
-                            cls.wildcard == False,
+                            cls.wildcard is False,
                             sqlalchemy.func.lower(cls.localpart) == localpart_lower
                         ), sqlalchemy.and_(
-                            cls.wildcard == True,
-                            sqlalchemy.bindparam('l', localpart_lower).like(sqlalchemy.func.lower(cls.localpart))
+                            cls.wildcard is True,
+                            sqlalchemy.bindparam('l', localpart_lower).like(
+                                sqlalchemy.func.lower(cls.localpart))
                         )
                     )
                 )
-            ).order_by(cls.wildcard, sqlalchemy.func.char_length(sqlalchemy.func.lower(cls.localpart)).desc()).first()
+            ).order_by(cls.wildcard, sqlalchemy.func.char_length(
+                sqlalchemy.func.lower(cls.localpart)).desc()).first()
 
         if alias_preserve_case and alias_lower_case:
-            if alias_preserve_case.wildcard:
-                return alias_lower_case
-            else:
-                return alias_preserve_case
-        elif alias_preserve_case and not alias_lower_case:
+            return alias_lower_case if alias_preserve_case.wildcard else alias_preserve_case
+
+        if alias_preserve_case and not alias_lower_case:
             return alias_preserve_case
-        elif alias_lower_case and not alias_preserve_case:
+
+        if alias_lower_case and not alias_preserve_case:
             return alias_lower_case
-        else:
-            return None
+
+        return None
+
 
 class Token(Base):
     """ A token is an application password for a given user.
@@ -875,26 +626,25 @@ class Token(Base):
 
     __tablename__ = 'token'
 
-    _dict_recurse = True
-    _dict_hide = {'user', 'user_email'}
-    _dict_mandatory = {'password'}
-
-    id = db.Column(db.Integer(), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     user_email = db.Column(db.String(255), db.ForeignKey(User.email),
         nullable=False)
     user = db.relationship(User,
         backref=db.backref('tokens', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
+    # TODO: use db.String(32)?
     ip = db.Column(db.String(255))
 
     def check_password(self, password):
-        return hash.sha256_crypt.verify(password, self.password)
+        """ verifies password against stored hash """
+        return passlib.hash.sha256_crypt.verify(password, self.password)
 
     def set_password(self, password):
-        self.password = hash.sha256_crypt.using(rounds=1000).hash(password)
+        """ sets password using sha256_crypt(rounds=1000) """
+        self.password = passlib.hash.sha256_crypt.using(rounds=1000).hash(password)
 
-    def __str__(self):
-        return self.comment or self.ip
+    def __repr__(self):
+        return f'<Token #{self.id}: {self.comment or self.ip or self.password}>'
 
 
 class Fetch(Base):
@@ -904,25 +654,219 @@ class Fetch(Base):
 
     __tablename__ = 'fetch'
 
-    _dict_recurse = True
-    _dict_hide = {'user_email', 'user', 'last_check', 'error'}
-    _dict_mandatory = {'protocol', 'host', 'port', 'username', 'password'}
-    _dict_secret = {'password'}
-
-    id = db.Column(db.Integer(), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     user_email = db.Column(db.String(255), db.ForeignKey(User.email),
         nullable=False)
     user = db.relationship(User,
         backref=db.backref('fetches', cascade='all, delete-orphan'))
     protocol = db.Column(db.Enum('imap', 'pop3'), nullable=False)
     host = db.Column(db.String(255), nullable=False)
-    port = db.Column(db.Integer(), nullable=False)
-    tls = db.Column(db.Boolean(), nullable=False, default=False)
+    port = db.Column(db.Integer, nullable=False)
+    tls = db.Column(db.Boolean, nullable=False, default=False)
     username = db.Column(db.String(255), nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    keep = db.Column(db.Boolean(), nullable=False, default=False)
+    keep = db.Column(db.Boolean, nullable=False, default=False)
     last_check = db.Column(db.DateTime, nullable=True)
     error = db.Column(db.String(1023), nullable=True)
 
-    def __str__(self):
-        return f'{self.protocol}{"s" if self.tls else ""}://{self.username}@{self.host}:{self.port}'
+    def __repr__(self):
+        return (
+            f'<Fetch #{self.id}: {self.protocol}{"s" if self.tls else ""}:'
+            f'//{self.username}@{self.host}:{self.port}>'
+        )
+
+
+class MailuConfig:
+    """ Class which joins whole Mailu config for dumping
+        and loading
+    """
+
+    class MailuCollection:
+        """ Provides dict- and list-like access to instances
+            of a sqlalchemy model
+        """
+
+        def __init__(self, model : db.Model):
+            self.model = model
+
+        def __repr__(self):
+            return f'<{self.model.__name__}-Collection>'
+
+        @cached_property
+        def _items(self):
+            return {
+                inspect(item).identity: item
+                for item in self.model.query.all()
+            }
+
+        def __len__(self):
+            return len(self._items)
+
+        def __iter__(self):
+            return iter(self._items.values())
+
+        def __getitem__(self, key):
+            return self._items[key]
+
+        def __setitem__(self, key, item):
+            if not isinstance(item, self.model):
+                raise TypeError(f'expected {self.model.name}')
+            if key != inspect(item).identity:
+                raise ValueError(f'item identity != key {key!r}')
+            self._items[key] = item
+
+        def __delitem__(self, key):
+            del self._items[key]
+
+        def append(self, item, update=False):
+            """ list-like append """
+            if not isinstance(item, self.model):
+                raise TypeError(f'expected {self.model.name}')
+            key = inspect(item).identity
+            if key in self._items:
+                if not update:
+                    raise ValueError(f'item {key!r} already present in collection')
+            self._items[key] = item
+
+        def extend(self, items, update=False):
+            """ list-like extend """
+            add = {}
+            for item in items:
+                if not isinstance(item, self.model):
+                    raise TypeError(f'expected {self.model.name}')
+                key = inspect(item).identity
+                if not update and key in self._items:
+                    raise ValueError(f'item {key!r} already present in collection')
+                add[key] = item
+            self._items.update(add)
+
+        def pop(self, *args):
+            """ list-like (no args) and dict-like (1 or 2 args) pop """
+            if args:
+                if len(args) > 2:
+                    raise TypeError(f'pop expected at most 2 arguments, got {len(args)}')
+                return self._items.pop(*args)
+            else:
+                return self._items.popitem()[1]
+
+        def popitem(self):
+            """ dict-like popitem """
+            return self._items.popitem()
+
+        def remove(self, item):
+            """ list-like remove """
+            if not isinstance(item, self.model):
+                raise TypeError(f'expected {self.model.name}')
+            key = inspect(item).identity
+            if not key in self._items:
+                raise ValueError(f'item {key!r} not found in collection')
+            del self._items[key]
+
+        def clear(self):
+            """ dict-like clear """
+            while True:
+                try:
+                    self.pop()
+                except IndexError:
+                    break
+
+        def update(self, items):
+            """ dict-like update """
+            for key, item in items:
+                if not isinstance(item, self.model):
+                    raise TypeError(f'expected {self.model.name}')
+                if key != inspect(item).identity:
+                    raise ValueError(f'item identity != key {key!r}')
+            self._items.update(items)
+
+        def setdefault(self, key, item=None):
+            """ dict-like setdefault """
+            if key in self._items:
+                return self._items[key]
+            if item is None:
+                return None
+            if not isinstance(item, self.model):
+                raise TypeError(f'expected {self.model.name}')
+            if key != inspect(item).identity:
+                raise ValueError(f'item identity != key {key!r}')
+            self._items[key] = item
+            return item
+
+    def __init__(self):
+
+        # section-name -> attr
+        self._sections = {
+            name: getattr(self, name)
+            for name in dir(self)
+            if isinstance(getattr(self, name), self.MailuCollection)
+        }
+
+        # known models
+        self._models = tuple(section.model for section in self._sections.values())
+
+        # model -> attr
+        self._sections.update({
+            section.model: section for section in self._sections.values()
+        })
+
+    def _get_model(self, section):
+        if section is None:
+            return None
+        model = self._sections.get(section)
+        if model is None:
+            raise ValueError(f'Invalid section: {section!r}')
+        if isinstance(model, self.MailuCollection):
+            return model.model
+        return model
+
+    def _add(self, items, section, update):
+
+        model = self._get_model(section)
+        if isinstance(items, self._models):
+            items = [items]
+        elif not hasattr(items, '__iter__'):
+            raise ValueError(f'{items!r} is not iterable')
+
+        for item in items:
+            if model is not None and not isinstance(item, model):
+                what = item.__class__.__name__.capitalize()
+                raise ValueError(f'{what} can not be added to section {section!r}')
+            self._sections[type(item)].append(item, update=update)
+
+    def add(self, items, section=None):
+        """ add item to config """
+        self._add(items, section, update=False)
+
+    def update(self, items, section=None):
+        """ add or replace item in config """
+        self._add(items, section, update=True)
+
+    def remove(self, items, section=None):
+        """ remove item from config """
+        model = self._get_model(section)
+        if isinstance(items, self._models):
+            items = [items]
+        elif not hasattr(items, '__iter__'):
+            raise ValueError(f'{items!r} is not iterable')
+
+        for item in items:
+            if isinstance(item, str):
+                if section is None:
+                    raise ValueError(f'Cannot remove key {item!r} without section')
+                del self._sections[model][item]
+            elif model is not None and not isinstance(item, model):
+                what = item.__class__.__name__.capitalize()
+                raise ValueError(f'{what} can not be removed from section {section!r}')
+            self._sections[type(item)].remove(item,)
+
+    def clear(self, models=None):
+        """ remove complete configuration """
+        for model in self._models:
+            if models is None or model in models:
+                db.session.query(model).delete()
+
+    domain = MailuCollection(Domain)
+    user = MailuCollection(User)
+    alias = MailuCollection(Alias)
+    relay = MailuCollection(Relay)
+    config = MailuCollection(Config)

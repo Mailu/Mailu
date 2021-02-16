@@ -1,1 +1,1 @@
-Added cli command config-dump and enhanced config-update
+Add cli commands config-import and config-export

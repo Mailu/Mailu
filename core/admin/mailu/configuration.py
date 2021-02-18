@@ -143,8 +143,18 @@ class ConfigManager:
             template = self.DB_TEMPLATES[self.config['DB_FLAVOR']]
             self.config['SQLALCHEMY_DATABASE_URI'] = template.format(**self.config)
 
+<<<<<<< HEAD
         if not self.config.get('RATELIMIT_STORAGE_URL'):
             self.config['RATELIMIT_STORAGE_URL'] = f'redis://{self.config["REDIS_ADDRESS"]}/2'
+=======
+        self.config['RATELIMIT_STORAGE_URL'] = 'redis://{0}/2'.format(self.config['REDIS_ADDRESS'])
+        self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['REDIS_ADDRESS'])
+        self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
+        self.config['SESSION_COOKIE_HTTPONLY'] = True
+        self.config['SESSION_COOKIE_SECURE'] = self.config['TLS_FLAVOR'] != 'notls'
+        # update the app config itself
+        app.config = self
+>>>>>>> aa8cb989 (Set sensible cookie options)
 
         self.config['SESSION_STORAGE_URL'] = f'redis://{self.config["REDIS_ADDRESS"]}/3'
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'

@@ -123,6 +123,9 @@ class ConfigManager(dict):
 
         self.config['RATELIMIT_STORAGE_URL'] = 'redis://{0}/2'.format(self.config['REDIS_ADDRESS'])
         self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['REDIS_ADDRESS'])
+        self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
+        self.config['SESSION_COOKIE_HTTPONLY'] = True
+        self.config['SESSION_COOKIE_SECURE'] = self.config['TLS_FLAVOR'] != 'notls'
         # update the app config itself
         app.config = self
 

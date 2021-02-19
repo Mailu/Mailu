@@ -23,7 +23,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
 from werkzeug.utils import cached_property
 
-from . import dkim
+from mailu import dkim
 
 
 db = flask_sqlalchemy.SQLAlchemy()
@@ -33,7 +33,6 @@ class IdnaDomain(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
 
-    # TODO: use db.String(255)?
     impl = db.String(80)
 
     def process_bind_param(self, value, dialect):
@@ -50,7 +49,6 @@ class IdnaEmail(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
 
-    # TODO: use db.String(254)?
     impl = db.String(255)
 
     def process_bind_param(self, value, dialect):
@@ -127,11 +125,7 @@ class Base(db.Model):
         if pkey == 'email':
             # ugly hack for email declared attr. _email is not always up2date
             return str(f'{self.localpart}@{self.domain_name}')
-        elif pkey in {'name', 'email'}:
-            return str(getattr(self, pkey, None))
-        else:
-            return self.__repr__()
-        return str(getattr(self, self.__table__.primary_key.columns.values()[0].name))
+        return str(getattr(self, pkey))
 
     def __repr__(self):
         return f'<{self.__class__.__name__} {str(self)!r}>'
@@ -145,12 +139,15 @@ class Base(db.Model):
         else:
             return NotImplemented
 
+    # we need hashable instances here for sqlalchemy to update collections
+    # in collections.bulk_replace, but auto-incrementing don't always have
+    # a valid primary key, in this case we use the object's id
+    __hashed = None
     def __hash__(self):
-        primary = getattr(self, self.__table__.primary_key.columns.values()[0].name)
-        if primary is None:
-            return NotImplemented
-        else:
-            return hash(primary)
+        if self.__hashed is None:
+            primary = getattr(self, self.__table__.primary_key.columns.values()[0].name)
+            self.__hashed = id(self) if primary is None else hash(primary)
+        return self.__hashed
 
 
 # Many-to-many association table for domain managers
@@ -314,7 +311,6 @@ class Relay(Base):
     __tablename__ = 'relay'
 
     name = db.Column(IdnaDomain, primary_key=True, nullable=False)
-    # TODO: use db.String(266)? transport(8):(1)[nexthop(255)](2)
     smtp = db.Column(db.String(80), nullable=True)
 
 
@@ -322,7 +318,6 @@ class Email(object):
     """ Abstraction for an email address (localpart and domain).
     """
 
-    # TODO: use db.String(64)?
     localpart = db.Column(db.String(80), nullable=False)
 
     @declarative.declared_attr
@@ -342,7 +337,7 @@ class Email(object):
             key = f'{cls.__tablename__}_email'
             if key in ctx.current_parameters:
                 return ctx.current_parameters[key]
-            return '{localpart}@{domain_name}'.format(**ctx.current_parameters)
+            return '{localpart}@{domain_name}'.format_map(ctx.current_parameters)
 
         return db.Column('email', IdnaEmail, primary_key=True, nullable=False, onupdate=updater)
 
@@ -632,7 +627,6 @@ class Token(Base):
     user = db.relationship(User,
         backref=db.backref('tokens', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
-    # TODO: use db.String(32)?
     ip = db.Column(db.String(255))
 
     def check_password(self, password):
@@ -864,6 +858,18 @@ class MailuConfig:
         for model in self._models:
             if models is None or model in models:
                 db.session.query(model).delete()
+
+    def check(self):
+        """ check for duplicate domain names """
+        dup = set()
+        for fqdn in chain(
+            db.session.query(Domain.name),
+            db.session.query(Alternative.name),
+            db.session.query(Relay.name)
+        ):
+            if fqdn in dup:
+                raise ValueError(f'Duplicate domain name: {fqdn}')
+            dup.add(fqdn)
 
     domain = MailuCollection(Domain)
     user = MailuCollection(User)

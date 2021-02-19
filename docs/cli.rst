@@ -138,8 +138,8 @@ The purpose of this command is to export the complete configuration in YAML or J
  Options:
    -f, --full                  Include attributes with default value.
    -s, --secrets               Include secret attributes (dkim-key, passwords).
-   -c, --color                 Force colorized output.
    -d, --dns                   Include dns records.
+   -c, --color                 Force colorized output.
    -o, --output-file FILENAME  Save configuration to file.
    -j, --json                  Export configuration in json format.
    -?, -h, --help              Show this message and exit.
@@ -147,14 +147,18 @@ The purpose of this command is to export the complete configuration in YAML or J
 Only non-default attributes are exported. If you want to export all attributes use ``--full``.
 If you want to export plain-text secrets (dkim-keys, passwords) you have to add the ``--secrets`` option.
 To include dns records (mx, spf, dkim and dmarc) add the ``--dns`` option.
+
 By default all configuration objects are exported (domain, user, alias, relay). You can specify
 filters to export only some objects or attributes (try: ``user`` or ``domain.name``).
+Attributes explicitly specified in filters are automatically exported: there is no need to add ``--secrets`` or ``--full``.
 
 .. code-block:: bash
 
-  $ docker-compose exec admin flask mailu config-export -o mail-config.yml
+  $ docker-compose exec admin flask mailu config-export --output mail-config.yml
 
-  $ docker-compose exec admin flask mailu config-export --dns domain.dns_mx domain.dns_spf
+  $ docker-compose exec admin flask mailu config-export domain.dns_mx domain.dns_spf
+
+  $ docker-compose exec admin flask mailu config-export user.spam_threshold
 
 config-import
 -------------
@@ -211,7 +215,7 @@ mail-config.yml contains the configuration and looks like this:
 
 config-update shows the number of created/modified/deleted objects after import.
 To suppress all messages except error messages use ``--quiet``.
-By adding the ``--verbose`` switch (up to two times) the import gets more detailed and shows exactly what attributes changed.
+By adding the ``--verbose`` switch the import gets more detailed and shows exactly what attributes changed.
 In all log messages plain-text secrets (dkim-keys, passwords) are hidden by default. Use ``--secrets`` to log secrets.
 If you want to test what would be done when importing without committing any changes, use ``--dry-run``.
 
@@ -233,6 +237,9 @@ It is possible to delete a single element or prune all elements from lists and a
 
 The ``-key: null`` notation can also be used to reset an attribute to its default.
 To reset *spam_threshold* to it's default *80* use ``-spam_threshold: null``.
+
+A new dkim key can be generated when adding or modifying a domain, by using the special value
+``dkim_key: -generate-``.
 
 This is a complete YAML template with all additional parameters that can be defined:
 

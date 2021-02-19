@@ -4,22 +4,16 @@
 import sys
 import os
 import socket
-import logging
 import uuid
 
-from collections import Counter
-from itertools import chain
-
 import click
-import sqlalchemy
 import yaml
 
 from flask import current_app as app
 from flask.cli import FlaskGroup, with_appcontext
-from marshmallow.exceptions import ValidationError
 
-from . import models
-from .schemas import MailuSchema, get_schema, get_fieldspec, colorize, canColorize, RenderJSON, HIDDEN
+from mailu import models
+from mailu.schemas import MailuSchema, Logger, RenderJSON
 
 
 db = models.db
@@ -326,246 +320,53 @@ def config_update(verbose=False, delete_objects=False):
 @mailu.command()
 @click.option('-v', '--verbose', count=True, help='Increase verbosity.')
 @click.option('-s', '--secrets', is_flag=True, help='Show secret attributes in messages.')
+@click.option('-d', '--debug', is_flag=True, help='Enable debug output.')
 @click.option('-q', '--quiet', is_flag=True, help='Quiet mode - only show errors.')
 @click.option('-c', '--color', is_flag=True, help='Force colorized output.')
 @click.option('-u', '--update', is_flag=True, help='Update mode - merge input with existing config.')
 @click.option('-n', '--dry-run', is_flag=True, help='Perform a trial run with no changes made.')
 @click.argument('source', metavar='[FILENAME|-]', type=click.File(mode='r'), default=sys.stdin)
 @with_appcontext
-def config_import(verbose=0, secrets=False, quiet=False, color=False, update=False, dry_run=False, source=None):
+def config_import(verbose=0, secrets=False, debug=False, quiet=False, color=False,
+                  update=False, dry_run=False, source=None):
     """ Import configuration as YAML or JSON from stdin or file
     """
 
-    # verbose
-    # 0 : only show number of changes
-    # 1 : also show detailed changes
-    # 2 : also show input data
-    # 3 : also show sql queries (also needs -s, as sql may contain secrets)
-    # 4 : also show tracebacks (also needs -s, as tracebacks may contain secrets)
+    log = Logger(want_color=color or None, can_color=sys.stdout.isatty(), secrets=secrets, debug=debug)
+    log.lexer = 'python'
+    log.strip = True
+    log.verbose = 0 if quiet else verbose
+    log.quiet = quiet
 
-    if quiet:
-        verbose = -1
-
-    if verbose > 2 and not secrets:
-        print('[Warning] Verbosity level capped to 2. Specify --secrets to log sql and tracebacks.')
-        verbose = 2
-
-    color_cfg = {
-        'color': color or (canColorize and sys.stdout.isatty()),
-        'lexer': 'python',
-        'strip': True,
-    }
-
-    counter = Counter()
-    logger = {}
-
-    def format_errors(store, path=None):
-
-        res = []
-        if path is None:
-            path = []
-        for key in sorted(store):
-            location = path + [str(key)]
-            value = store[key]
-            if isinstance(value, dict):
-                res.extend(format_errors(value, location))
-            else:
-                for message in value:
-                    res.append((".".join(location), message))
-
-        if path:
-            return res
-
-        fmt = f'     - {{:<{max([len(loc) for loc, msg in res])}}} : {{}}'
-        res = [fmt.format(loc, msg) for loc, msg in res]
-        num = f'error{["s",""][len(res)==1]}'
-        res.insert(0, f'[ValidationError] {len(res)} {num} occurred during input validation')
-
-        return '\n'.join(res)
-
-    def format_changes(*message):
-        if counter:
-            changes = []
-            last = None
-            for (action, what), count in sorted(counter.items()):
-                if action != last:
-                    if last:
-                        changes.append('/')
-                    changes.append(f'{action}:')
-                    last = action
-                changes.append(f'{what}({count})')
-        else:
-            changes = ['No changes.']
-        return chain(message, changes)
-
-    def log(action, target, message=None):
-
-        if message is None:
-            try:
-                message = logger[target.__class__].dump(target)
-            except KeyError:
-                message = target
-        if not isinstance(message, str):
-            message = repr(message)
-        print(f'{action} {target.__table__}: {colorize(message, **color_cfg)}')
-
-    def listen_insert(mapper, connection, target): # pylint: disable=unused-argument
-        """ callback function to track import """
-        counter.update([('Created', target.__table__.name)])
-        if verbose >= 1:
-            log('Created', target)
-
-    def listen_update(mapper, connection, target): # pylint: disable=unused-argument
-        """ callback function to track import """
-
-        changed = {}
-        inspection = sqlalchemy.inspect(target)
-        for attr in sqlalchemy.orm.class_mapper(target.__class__).column_attrs:
-            history = getattr(inspection.attrs, attr.key).history
-            if history.has_changes() and history.deleted:
-                before = history.deleted[-1]
-                after = getattr(target, attr.key)
-                # TODO: remove special handling of "comment" after modifying model
-                if attr.key == 'comment' and not before and not after:
-                    pass
-                # only remember changed keys
-                elif before != after:
-                    if verbose >= 1:
-                        changed[str(attr.key)] = (before, after)
-                    else:
-                        break
-
-        if verbose >= 1:
-            # use schema with dump_context to hide secrets and sort keys
-            dumped = get_schema(target)(only=changed.keys(), context=diff_context).dump(target)
-            for key, value in dumped.items():
-                before, after = changed[key]
-                if value == HIDDEN:
-                    before = HIDDEN if before else before
-                    after = HIDDEN if after else after
-                else:
-                    # TODO: need to use schema to "convert" before value?
-                    after = value
-                log('Modified', target, f'{str(target)!r} {key}: {before!r} -> {after!r}')
-
-        if changed:
-            counter.update([('Modified', target.__table__.name)])
-
-    def listen_delete(mapper, connection, target): # pylint: disable=unused-argument
-        """ callback function to track import """
-        counter.update([('Deleted', target.__table__.name)])
-        if verbose >= 1:
-            log('Deleted', target)
-
-    # TODO: this listener will not be necessary, if dkim keys would be stored in database
-    _dedupe_dkim = set()
-    def listen_dkim(session, flush_context): # pylint: disable=unused-argument
-        """ callback function to track import """
-        for target in session.identity_map.values():
-            # look at Domains originally loaded from db
-            if not isinstance(target, models.Domain) or not target._sa_instance_state.load_path:
-                continue
-            before = target._dkim_key_on_disk
-            after = target._dkim_key
-            if before != after:
-                if secrets:
-                    before = before.decode('ascii', 'ignore')
-                    after = after.decode('ascii', 'ignore')
-                else:
-                    before = HIDDEN if before else ''
-                    after = HIDDEN if after else ''
-                # "de-dupe" messages; this event is fired at every flush
-                if not (target, before, after) in _dedupe_dkim:
-                    _dedupe_dkim.add((target, before, after))
-                    counter.update([('Modified', target.__table__.name)])
-                    if verbose >= 1:
-                        log('Modified', target, f'{str(target)!r} dkim_key: {before!r} -> {after!r}')
-
-    def track_serialize(obj, item, backref=None):
-        """ callback function to track import """
-        # called for backref modification?
-        if backref is not None:
-            log('Modified', item, '{target!r} {key}: {before!r} -> {after!r}'.format(**backref))
-            return
-        # show input data?
-        if not verbose >= 2:
-            return
-        # hide secrets in data
-        data = logger[obj.opts.model].hide(item)
-        if 'hash_password' in data:
-            data['password'] = HIDDEN
-        if 'fetches' in data:
-            for fetch in data['fetches']:
-                fetch['password'] = HIDDEN
-        log('Handling', obj.opts.model, data)
-
-    # configure contexts
-    diff_context = {
-        'full': True,
-        'secrets': secrets,
-    }
-    log_context = {
-        'secrets': secrets,
-    }
-    load_context = {
+    context = {
         'import': True,
         'update': update,
         'clear': not update,
-        'callback': track_serialize,
+        'callback': log.track_serialize,
     }
 
-    # register listeners
-    for schema in get_schema():
-        model = schema.Meta.model
-        logger[model] = schema(context=log_context)
-        sqlalchemy.event.listen(model, 'after_insert', listen_insert)
-        sqlalchemy.event.listen(model, 'after_update', listen_update)
-        sqlalchemy.event.listen(model, 'after_delete', listen_delete)
-
-    # special listener for dkim_key changes
-    sqlalchemy.event.listen(db.session, 'after_flush', listen_dkim)
-
-    if verbose >= 3:
-        logging.basicConfig()
-        logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+    schema = MailuSchema(only=MailuSchema.Meta.order, context=context)
 
     try:
+        # import source
         with models.db.session.no_autoflush:
-            config = MailuSchema(only=MailuSchema.Meta.order, context=load_context).loads(source)
-    except ValidationError as exc:
-        raise click.ClickException(format_errors(exc.messages)) from exc
+            config = schema.loads(source)
+        # flush session to show/count all changes
+        if not quiet and (dry_run or verbose):
+            db.session.flush()
+        # check for duplicate domain names
+        config.check()
     except Exception as exc:
-        if verbose >= 3:
-            raise
-        # (yaml.scanner.ScannerError, UnicodeDecodeError, ...)
-        raise click.ClickException(
-            f'[{exc.__class__.__name__}] '
-            f'{" ".join(str(exc).split())}'
-        ) from exc
-
-    # flush session to show/count all changes
-    if dry_run or verbose >= 1:
-        db.session.flush()
-
-    # check for duplicate domain names
-    dup = set()
-    for fqdn in chain(
-        db.session.query(models.Domain.name),
-        db.session.query(models.Alternative.name),
-        db.session.query(models.Relay.name)
-    ):
-        if fqdn in dup:
-            raise click.ClickException(f'[ValidationError] Duplicate domain name: {fqdn}')
-        dup.add(fqdn)
+        if msg := log.format_exception(exc):
+            raise click.ClickException(msg) from exc
+        raise
 
     # don't commit when running dry
     if dry_run:
-        if not quiet:
-            print(*format_changes('Dry run. Not commiting changes.'))
+        log.changes('Dry run. Not committing changes.')
         db.session.rollback()
     else:
-        if not quiet:
-            print(*format_changes('Committing changes.'))
+        log.changes('Committing changes.')
         db.session.commit()
 
 
@@ -573,8 +374,8 @@ def config_import(verbose=0, secrets=False, quiet=False, color=False, update=Fal
 @click.option('-f', '--full', is_flag=True, help='Include attributes with default value.')
 @click.option('-s', '--secrets', is_flag=True,
               help='Include secret attributes (dkim-key, passwords).')
-@click.option('-c', '--color', is_flag=True, help='Force colorized output.')
 @click.option('-d', '--dns', is_flag=True, help='Include dns records.')
+@click.option('-c', '--color', is_flag=True, help='Force colorized output.')
 @click.option('-o', '--output-file', 'output', default=sys.stdout, type=click.File(mode='w'),
               help='Save configuration to file.')
 @click.option('-j', '--json', 'as_json', is_flag=True, help='Export configuration in json format.')
@@ -584,32 +385,25 @@ def config_export(full=False, secrets=False, color=False, dns=False, output=None
     """ Export configuration as YAML or JSON to stdout or file
     """
 
-    if only:
-        for spec in only:
-            if spec.split('.', 1)[0] not in MailuSchema.Meta.order:
-                raise click.ClickException(f'[ValidationError] Unknown section: {spec}')
-    else:
-        only = MailuSchema.Meta.order
+    only = only or MailuSchema.Meta.order
 
     context = {
         'full': full,
         'secrets': secrets,
         'dns': dns,
     }
-
-    schema = MailuSchema(only=only, context=context)
-    color_cfg = {'color': color or (canColorize and output.isatty())}
-
-    if as_json:
-        schema.opts.render_module = RenderJSON
-        color_cfg['lexer'] = 'json'
-        color_cfg['strip'] = True
+    log = Logger(want_color=color or None, can_color=output.isatty())
 
     try:
-        print(colorize(schema.dumps(models.MailuConfig()), **color_cfg), file=output)
-    except ValueError as exc:
-        if spec := get_fieldspec(exc):
-            raise click.ClickException(f'[ValidationError] Invalid filter: {spec}') from exc
+        schema = MailuSchema(only=only, context=context)
+        if as_json:
+            schema.opts.render_module = RenderJSON
+            log.lexer = 'json'
+            log.strip = True
+        print(log.colorize(schema.dumps(models.MailuConfig())), file=output)
+    except Exception as exc:
+        if msg := log.format_exception(exc):
+            raise click.ClickException(msg) from exc
         raise
 
 

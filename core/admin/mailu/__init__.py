@@ -3,6 +3,9 @@
 
 import flask
 import flask_bootstrap
+import redis
+from flask_kvsession import KVSessionExtension
+from simplekv.memory.redisstore import RedisStore
 
 from mailu import utils, debug, models, manage, configuration
 from gunicorn import glogging
@@ -45,7 +48,11 @@ def create_app_from_config(config):
     # Initialize application extensions
     config.init_app(app)
     models.db.init_app(app)
+<<<<<<< HEAD
     utils.session.init_app(app)
+=======
+    KVSessionExtension(RedisStore(redis.StrictRedis().from_url('redis://{0}/3'.format(config['REDIS_ADDRESS']))), app)
+>>>>>>> 22af5b84 (Switch to server-side sessions in redis)
     utils.limiter.init_app(app)
     utils.babel.init_app(app, locale_selector=utils.get_locale)
     utils.login.init_app(app)

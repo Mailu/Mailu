@@ -55,6 +55,18 @@ class MultipleFoldersVerify(object):
 class ConfirmationForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Confirm'))
 
+<<<<<<< HEAD
+=======
+
+class LoginForm(flask_wtf.FlaskForm):
+    class Meta:
+        csrf = False
+    email = fields.StringField(_('E-mail'), [validators.Email()])
+    pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
+    submit = fields.SubmitField(_('Sign in'))
+
+
+>>>>>>> 64d75758 (Disable anti-csrf on the login form)
 class DomainForm(flask_wtf.FlaskForm):
     name = fields.StringField(_('Domain name'), [validators.DataRequired()])
     max_users = fields_.IntegerField(_('Maximum user count'), [validators.NumberRange(min=-1)], default=10)

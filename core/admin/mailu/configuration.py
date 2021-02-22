@@ -1,7 +1,11 @@
 import os
 
 from datetime import timedelta
+<<<<<<< HEAD
 import ipaddress
+=======
+from socrate import system
+>>>>>>> b9becd86 (make sessions expire)
 
 DEFAULT_CONFIG = {
     # Specific to the admin UI
@@ -72,6 +76,7 @@ DEFAULT_CONFIG = {
     'LOGO_URL': None,
     'LOGO_BACKGROUND': None,
     # Advanced settings
+<<<<<<< HEAD
     'AUTH_REQUIRE_TOKENS': False,
     'API': False,
     'WEB_API': '/api',
@@ -83,6 +88,11 @@ DEFAULT_CONFIG = {
     'SESSION_TIMEOUT': 3600,
     'PERMANENT_SESSION_LIFETIME': 30*24*3600,
     'SESSION_COOKIE_SECURE': None,
+=======
+    'LOG_LEVEL': 'WARNING',
+    'SESSION_LIFETIME': 24,
+    'SESSION_COOKIE_SECURE': True,
+>>>>>>> b9becd86 (make sessions expire)
     'CREDENTIAL_ROUNDS': 12,
     'TLS_PERMISSIVE': True,
     'TZ': 'Etc/UTC',
@@ -171,6 +181,7 @@ class ConfigManager:
             pass
 =======
         self.config['SESSION_KEY_BITS'] = 128
+        self.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=int(self.config['SESSION_LIFETIME']))
         # update the app config itself
         app.config = self
 >>>>>>> d459c374 (make session IDs 128bits)

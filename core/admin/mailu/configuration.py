@@ -149,6 +149,7 @@ class ConfigManager:
         self.config['SESSION_STORAGE_URL'] = f'redis://{self.config["REDIS_ADDRESS"]}/3'
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
+<<<<<<< HEAD
         if self.config['SESSION_COOKIE_SECURE'] is None:
             self.config['SESSION_COOKIE_SECURE'] = self.config['TLS_FLAVOR'] != 'notls'
         self.config['SESSION_PERMANENT'] = True
@@ -168,6 +169,11 @@ class ConfigManager:
             self.config['MAILU_VERSION'] = open('/version', 'r').read()
         except FileNotFoundError:
             pass
+=======
+        self.config['SESSION_KEY_BITS'] = 128
+        # update the app config itself
+        app.config = self
+>>>>>>> d459c374 (make session IDs 128bits)
 
         # update the app config
         app.config.update(self.config)

@@ -135,6 +135,7 @@ class ConfigManager(dict):
         self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['REDIS_ADDRESS'])
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
+        self.config['SESSION_KEY_BITS'] = 128
         # update the app config itself
         app.config = self
 

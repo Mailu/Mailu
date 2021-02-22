@@ -1,5 +1,6 @@
 import os
 
+from datetime import timedelta
 from socrate import system
 
 DEFAULT_CONFIG = {
@@ -53,6 +54,7 @@ DEFAULT_CONFIG = {
     'RECAPTCHA_PRIVATE_KEY': '',
     # Advanced settings
     'LOG_LEVEL': 'WARNING',
+    'SESSION_LIFETIME': 24,
     'SESSION_COOKIE_SECURE': True,
     'CREDENTIAL_ROUNDS': 12,
     # Host settings
@@ -136,6 +138,7 @@ class ConfigManager(dict):
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
         self.config['SESSION_KEY_BITS'] = 128
+        self.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=int(self.config['SESSION_LIFETIME']))
         # update the app config itself
         app.config = self
 

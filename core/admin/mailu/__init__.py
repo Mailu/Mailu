@@ -20,7 +20,7 @@ def create_app_from_config(config):
     # Initialize application extensions
     config.init_app(app)
     models.db.init_app(app)
-    KVSessionExtension(RedisStore(redis.StrictRedis().from_url('redis://{0}/3'.format(config['REDIS_ADDRESS']))), app)
+    KVSessionExtension(RedisStore(redis.StrictRedis().from_url('redis://{0}/3'.format(config['REDIS_ADDRESS']))), app).cleanup_sessions(app)
     utils.limiter.init_app(app)
     utils.babel.init_app(app)
     utils.login.init_app(app)

@@ -49,10 +49,14 @@ def create_app_from_config(config):
     config.init_app(app)
     models.db.init_app(app)
 <<<<<<< HEAD
+<<<<<<< HEAD
     utils.session.init_app(app)
 =======
     KVSessionExtension(RedisStore(redis.StrictRedis().from_url('redis://{0}/3'.format(config['REDIS_ADDRESS']))), app)
 >>>>>>> 22af5b84 (Switch to server-side sessions in redis)
+=======
+    KVSessionExtension(RedisStore(redis.StrictRedis().from_url('redis://{0}/3'.format(config['REDIS_ADDRESS']))), app).cleanup_sessions(app)
+>>>>>>> 481cb673 (cleanup old sessions on startup)
     utils.limiter.init_app(app)
     utils.babel.init_app(app, locale_selector=utils.get_locale)
     utils.login.init_app(app)

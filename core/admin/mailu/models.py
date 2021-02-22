@@ -83,7 +83,7 @@ class CommaSeparatedList(db.TypeDecorator):
 
     def process_result_value(self, value, dialect):
         """ split comma separated string to list """
-        return list(filter(bool, [item.strip() for item in value.split(',')])) if value else []
+        return list(filter(bool, (item.strip() for item in value.split(',')))) if value else []
 
     python_type = list
 

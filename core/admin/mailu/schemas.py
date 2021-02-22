@@ -76,6 +76,9 @@ class MyYamlLexer(YamlLexer):
             yield typ, value
 
 class Logger:
+    """ helps with counting and colorizing
+        imported and exported data
+    """
 
     def __init__(self, want_color=None, can_color=False, debug=False, secrets=False):
 
@@ -195,25 +198,26 @@ class Logger:
                 continue
             before = target._dkim_key_on_disk
             after = target._dkim_key
-            if before != after:
-                # "de-dupe" messages; this event is fired at every flush
-                if not (target, before, after) in self._dedupe_dkim:
-                    self._dedupe_dkim.add((target, before, after))
-                    self._counter.update([('Modified', target.__table__.name)])
-                    if self.verbose:
-                        if self.secrets:
-                            before = before.decode('ascii', 'ignore')
-                            after = after.decode('ascii', 'ignore')
-                        else:
-                            before = HIDDEN if before else ''
-                            after = HIDDEN if after else ''
-                        self._log('Modified', target, f'{str(target)!r} dkim_key: {before!r} -> {after!r}')
+            # "de-dupe" messages; this event is fired at every flush
+            if before == after or (target, before, after) in self._dedupe_dkim:
+                continue
+            self._dedupe_dkim.add((target, before, after))
+            self._counter.update([('Modified', target.__table__.name)])
+            if self.verbose:
+                if self.secrets:
+                    before = before.decode('ascii', 'ignore')
+                    after = after.decode('ascii', 'ignore')
+                else:
+                    before = HIDDEN if before else ''
+                    after = HIDDEN if after else ''
+                self._log('Modified', target, f'{str(target)!r} dkim_key: {before!r} -> {after!r}')
 
     def track_serialize(self, obj, item, backref=None):
         """ callback method to track import """
         # called for backref modification?
         if backref is not None:
-            self._log('Modified', item, '{target!r} {key}: {before!r} -> {after!r}'.format_map(backref))
+            self._log(
+                'Modified', item, '{target!r} {key}: {before!r} -> {after!r}'.format_map(backref))
             return
         # show input data?
         if self.verbose < 2:
@@ -263,7 +267,7 @@ class Logger:
         if path:
             return res
 
-        maxlen = max([len(loc) for loc, msg in res])
+        maxlen = max(len(loc) for loc, msg in res)
         res = [f'     - {loc.ljust(maxlen)} : {msg}' for loc, msg in res]
         errors = f'{len(res)} error{["s",""][len(res)==1]}'
         res.insert(0, f'[ValidationError] {errors} occurred during input validation')
@@ -279,7 +283,9 @@ class Logger:
                 if 'attr' in trace.tb_frame.f_locals:
                     path.append(trace.tb_frame.f_locals['attr'])
             elif trace.tb_frame.f_code.co_name == '_init_fields':
-                spec = ', '.join(['.'.join(path + [key]) for key in trace.tb_frame.f_locals['invalid_fields']])
+                spec = ', '.join(
+                    '.'.join(path + [key])
+                    for key in trace.tb_frame.f_locals['invalid_fields'])
                 return f'Invalid filter: {spec}'
             trace = trace.tb_next
         return None
@@ -494,7 +500,7 @@ class CommaSeparatedListField(fields.Raw):
             except UnicodeDecodeError as exc:
                 raise self.make_error("invalid_utf8") from exc
             else:
-                value = filter(None, [item.strip() for item in value.split(',')])
+                value = filter(bool, (item.strip() for item in value.split(',')))
 
         return list(value)
 
@@ -539,7 +545,7 @@ class DkimKeyField(fields.String):
         # convert list to str
         if isinstance(value, list):
             try:
-                value = ''.join([ensure_text_type(item) for item in value]).strip()
+                value = ''.join(ensure_text_type(item) for item in value).strip()
             except UnicodeDecodeError as exc:
                 raise self.make_error("invalid_utf8") from exc
 
@@ -855,7 +861,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
                     )
                 return (key, value.arg)
 
-            return dict([set_default(key, value) for key, value in data.items()])
+            return dict(set_default(key, value) for key, value in data.items())
 
         # convert items to "delete" and filter "prune" item
         items = [
@@ -1059,11 +1065,11 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
 
         # exclude or hide values
         full = self.context.get('full')
-        return type(data)([
+        return type(data)(
             (key, HIDDEN if key in self._hide_by_context else value)
             for key, value in data.items()
             if full or key not in self._exclude_by_value or value not in self._exclude_by_value[key]
-        ])
+        )
 
     # this field is used to mark items for deletion
     mark_delete = fields.Boolean(data_key='__delete__', load_only=True)

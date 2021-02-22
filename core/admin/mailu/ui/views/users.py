@@ -118,12 +118,18 @@ def _process_password_change(form, user_email):
     if form.validate_on_submit():
         if form.pw.data != form.pw2.data:
             flask.flash('Passwords do not match', 'error')
+<<<<<<< HEAD
         elif user_email or models.User.login(user_email_or_current, form.current_pw.data):
             if msg := utils.isBadOrPwned(form):
                 flask.flash(msg, "error")
                 return flask.render_template('user/password.html', form=form, user=user)
             flask.session.regenerate()
             user.set_password(form.pw.data, keep_sessions=set(flask.session))
+=======
+        else:
+            flask.session.regenerate()
+            user.set_password(form.pw.data)
+>>>>>>> a1d32568 (Regenerate session-ids to prevent session fixation)
             models.db.session.commit()
             flask.flash('Password updated for %s' % user)
             if user_email:
@@ -184,9 +190,12 @@ def user_signup(domain_name=None):
         if domain.has_email(form.localpart.data) or models.Alias.resolve(form.localpart.data, domain_name):
             flask.flash('Email is already used', 'error')
         else:
+<<<<<<< HEAD
             if msg := utils.isBadOrPwned(form):
                 flask.flash(msg, "error")
                 return flask.render_template('user/signup.html', domain=domain, form=form)
+=======
+>>>>>>> a1d32568 (Regenerate session-ids to prevent session fixation)
             flask.session.regenerate()
             user = models.User(domain=domain)
             form.populate_obj(user)

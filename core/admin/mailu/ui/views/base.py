@@ -11,9 +11,36 @@ import flask_login
 def index():
     return flask.redirect(flask.url_for('.user_settings'))
 
+<<<<<<< HEAD
 @ui.route('/ui/')
 def redirect_old_path():
     return flask.redirect(flask.url_for('.index'), code=301)
+=======
+
+@ui.route('/login', methods=['GET', 'POST'])
+def login():
+    form = forms.LoginForm()
+    if form.validate_on_submit():
+        user = models.User.login(form.email.data, form.pw.data)
+        if user:
+            flask.session.regenerate()
+            flask_login.login_user(user)
+            endpoint = flask.request.args.get('next', '.index')
+            return flask.redirect(flask.url_for(endpoint)
+                or flask.url_for('.index'))
+        else:
+            flask.flash('Wrong e-mail or password', 'error')
+    return flask.render_template('login.html', form=form)
+
+
+@ui.route('/logout', methods=['GET'])
+@access.authenticated
+def logout():
+    flask_login.logout_user()
+    flask.session.destroy()
+    return flask.redirect(flask.url_for('.index'))
+
+>>>>>>> a1d32568 (Regenerate session-ids to prevent session fixation)
 
 @ui.route('/announcement', methods=['GET', 'POST'])
 @access.global_admin

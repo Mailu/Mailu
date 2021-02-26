@@ -2,6 +2,7 @@ from mailu import models
 from mailu.internal import internal
 
 import flask
+import idna
 import re
 import srslib
 
@@ -37,11 +38,48 @@ def postfix_transport(email):
         return flask.abort(404)
     localpart, domain_name = models.Email.resolve_domain(email)
     relay = models.Relay.query.get(domain_name) or flask.abort(404)
-    ret = "smtp:[{0}]".format(relay.smtp)
-    if ":" in relay.smtp:
-        split = relay.smtp.split(':')
-        ret = "smtp:[{0}]:{1}".format(split[0], split[1])
-    return flask.jsonify(ret)
+    target = relay.smtp.lower()
+    port = None
+    if use_mx := target.startswith('mx:'):
+        target = target[3:]
+    if target.startswith('['):
+        if use_mx or ']' not in target:
+            # invalid target (mx: and [])
+            flask.abort(400)
+        host, rest = target[1:].split(']', 1)
+        if rest.startswith(':'):
+            port = rest[1:]
+        elif rest:
+            # invalid target (rest should be :port)
+            flask.abort(400)
+    else:
+        if ':' in target:
+            host, port = target.rsplit(':', 1)
+        else:
+            host = target
+    if not host:
+        host = relay.name.lower()
+        use_mx = True
+    if ':' in host:
+        host = f'ipv6:{host}'
+    else:
+        try:
+            host = idna.encode(host).decode('ascii')
+        except idna.IDNAError:
+            # invalid target (fqdn not encodable)
+            flask.abort(400)
+    if port is not None:
+        try:
+            port = int(port, 10)
+            if port == 25:
+                port = None
+        except ValueError:
+            # invalid target (port should be numeric)
+            flask.abort(400)
+    if not use_mx:
+        host = f'[{host}]'
+    port = '' if port is None else f':{port}'
+    return flask.jsonify(f'smtp:{host}{port}')
 
 
 @internal.route("/postfix/recipient/map/<path:recipient>")

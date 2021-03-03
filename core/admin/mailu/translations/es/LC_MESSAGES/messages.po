@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mailu\n"
-"PO-Revision-Date: 2021-03-03 12:37+0000\n"
+"PO-Revision-Date: 2021-03-04 18:46+0000\n"
 "Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
 "Language-Team: Spanish <https://translate.tedomum.net/projects/mailu/admin/"
 "es/>\n"
@@ -578,7 +578,7 @@ msgstr "Lista de dominios externos (relayed)"
 
 #: mailu/ui/templates/relay/list.html:9
 msgid "New relayed domain"
-msgstr "Nuevo dominio externo (relayed)"
+msgstr "Editar dominio externo (relay)"
 
 #: mailu/ui/forms.py:125
 msgid "Your token (write it down, as it will never be displayed again)"

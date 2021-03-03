@@ -1,11 +1,16 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: Mailu\n"
+"PO-Revision-Date: 2021-03-04 18:46+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: German <https://translate.tedomum.net/projects/mailu/admin/de/"
+">\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: POEditor.com\n"
-"Project-Id-Version: Mailu\n"
-"Language: de\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.0.1\n"
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."
@@ -64,7 +69,7 @@ msgstr "Passwort bestätigen"
 #: mailu/ui/forms.py:80 mailu/ui/templates/user/list.html:22
 #: mailu/ui/templates/user/signup_domain.html:16
 msgid "Quota"
-msgstr "Quota"
+msgstr "Kontingent"
 
 #: mailu/ui/forms.py:81
 msgid "Allow IMAP access"
@@ -699,4 +704,3 @@ msgstr "Domain"
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
 msgstr "Verfügbare Plätze"
-

@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-04-22 12:10+0200\n"
-"PO-Revision-Date: 2020-04-26 13:09+0000\n"
+"PO-Revision-Date: 2021-03-03 11:35+0000\n"
 "Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
 "Language-Team: Catalan <https://translate.tedomum.net/projects/mailu/admin/"
 "ca/>\n"
@@ -304,7 +304,7 @@ msgstr "Resposta automàtica"
 #: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:26
 #: mailu/ui/templates/user/list.html:36
 msgid "Fetched accounts"
-msgstr "Comptes trobats"
+msgstr "Comptes vinculats"
 
 #: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/token/list.html:4
 msgid "Authentication tokens"
@@ -324,7 +324,7 @@ msgstr "Administradors"
 
 #: mailu/ui/templates/sidebar.html:54
 msgid "Relayed domains"
-msgstr "Dominis tramesos"
+msgstr "Dominis delegats"
 
 #: mailu/ui/templates/sidebar.html:59 mailu/ui/templates/user/settings.html:15
 msgid "Antispam"

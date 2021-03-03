@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-04-22 12:10+0200\n"
 "PO-Revision-Date: 2021-03-03 17:17+0000\n"
-"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
 "Language-Team: English <https://translate.tedomum.net/projects/mailu/admin/"
 "en/>\n"
 "Language: en\n"
@@ -328,7 +328,7 @@ msgstr ""
 
 #: mailu/ui/templates/sidebar.html:54
 msgid "Relayed domains"
-msgstr ""
+msgstr "Relayed domains"
 
 #: mailu/ui/templates/sidebar.html:59 mailu/ui/templates/user/settings.html:15
 msgid "Antispam"
@@ -601,11 +601,11 @@ msgstr ""
 
 #: mailu/ui/templates/relay/list.html:4
 msgid "Relayed domain list"
-msgstr ""
+msgstr "Relayed domain list"
 
 #: mailu/ui/templates/relay/list.html:9
 msgid "New relayed domain"
-msgstr ""
+msgstr "New relayed domain"
 
 #: mailu/ui/templates/token/create.html:4
 msgid "Create an authentication token"

@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-04-22 12:10+0200\n"
 "PO-Revision-Date: 2021-03-03 17:57+0000\n"
-"Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: English <https://translate.tedomum.net/projects/mailu/admin/"
 "en/>\n"
 "Language: en\n"
@@ -71,12 +71,12 @@ msgstr ""
 #: mailu/ui/templates/relay/list.html:19 mailu/ui/templates/token/list.html:19
 #: mailu/ui/templates/user/list.html:23
 msgid "Comment"
-msgstr ""
+msgstr "Comment"
 
 #: mailu/ui/forms.py:52 mailu/ui/forms.py:61 mailu/ui/forms.py:66
 #: mailu/ui/forms.py:73 mailu/ui/forms.py:132 mailu/ui/forms.py:141
 msgid "Create"
-msgstr ""
+msgstr "Create"
 
 #: mailu/ui/forms.py:57
 msgid "Initial admin"
@@ -88,11 +88,11 @@ msgstr ""
 
 #: mailu/ui/forms.py:59 mailu/ui/forms.py:79 mailu/ui/forms.py:91
 msgid "Confirm password"
-msgstr ""
+msgstr "Confirm password"
 
 #: mailu/ui/forms.py:65
 msgid "Alternative name"
-msgstr ""
+msgstr "Alternative name"
 
 #: mailu/ui/forms.py:70
 msgid "Relayed domain name"
@@ -109,19 +109,19 @@ msgstr "Quota"
 
 #: mailu/ui/forms.py:81
 msgid "Allow IMAP access"
-msgstr ""
+msgstr "Allow IMAP access"
 
 #: mailu/ui/forms.py:82
 msgid "Allow POP3 access"
-msgstr ""
+msgstr "Allow POP3 access"
 
 #: mailu/ui/forms.py:84
 msgid "Enabled"
-msgstr ""
+msgstr "Enabled"
 
 #: mailu/ui/forms.py:85
 msgid "Save"
-msgstr ""
+msgstr "Save"
 
 #: mailu/ui/forms.py:89
 msgid "Email address"
@@ -139,7 +139,7 @@ msgstr ""
 
 #: mailu/ui/forms.py:98
 msgid "Enable spam filter"
-msgstr ""
+msgstr "Enable spam filter"
 
 #: mailu/ui/forms.py:99
 msgid "Spam filter tolerance"

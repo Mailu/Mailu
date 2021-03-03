@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-04-22 12:10+0200\n"
 "PO-Revision-Date: 2021-03-03 18:18+0000\n"
-"Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: English <https://translate.tedomum.net/projects/mailu/admin/"
 "en/>\n"
 "Language: en\n"
@@ -147,7 +147,7 @@ msgstr "Spam filter tolerance"
 
 #: mailu/ui/forms.py:100
 msgid "Enable forwarding"
-msgstr ""
+msgstr "Enable forwarding"
 
 #: mailu/ui/forms.py:101
 msgid "Keep a copy of the emails"
@@ -160,7 +160,7 @@ msgstr ""
 
 #: mailu/ui/forms.py:105
 msgid "Save settings"
-msgstr ""
+msgstr "Save settings"
 
 #: mailu/ui/forms.py:110
 msgid "Password check"
@@ -184,11 +184,11 @@ msgstr ""
 
 #: mailu/ui/forms.py:119
 msgid "End of vacation"
-msgstr ""
+msgstr "End of vacation"
 
 #: mailu/ui/forms.py:120
 msgid "Update"
-msgstr ""
+msgstr "Update"
 
 #: mailu/ui/forms.py:125
 msgid "Your token (write it down, as it will never be displayed again)"
@@ -200,7 +200,7 @@ msgstr ""
 
 #: mailu/ui/forms.py:136
 msgid "Alias"
-msgstr ""
+msgstr "Alias"
 
 #: mailu/ui/forms.py:138
 msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"

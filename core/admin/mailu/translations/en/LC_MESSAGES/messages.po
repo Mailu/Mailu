@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-04-22 12:10+0200\n"
-"PO-Revision-Date: 2021-03-03 11:35+0000\n"
+"PO-Revision-Date: 2021-03-03 17:17+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: English <https://translate.tedomum.net/projects/mailu/admin/"
 "en/>\n"
@@ -30,13 +30,13 @@ msgstr "Confirm"
 
 #: mailu/ui/forms.py:40 mailu/ui/forms.py:77
 msgid "E-mail"
-msgstr ""
+msgstr "E-mail"
 
 #: mailu/ui/forms.py:41 mailu/ui/forms.py:78 mailu/ui/forms.py:90
 #: mailu/ui/forms.py:109 mailu/ui/forms.py:162
 #: mailu/ui/templates/client.html:32 mailu/ui/templates/client.html:59
 msgid "Password"
-msgstr ""
+msgstr "Password"
 
 #: mailu/ui/forms.py:42 mailu/ui/templates/login.html:4
 #: mailu/ui/templates/sidebar.html:111
@@ -283,7 +283,7 @@ msgstr ""
 
 #: mailu/ui/templates/docker-error.html:4
 msgid "Docker error"
-msgstr ""
+msgstr "Docker error"
 
 #: mailu/ui/templates/docker-error.html:12
 msgid "An error occurred while talking to the Docker server."
@@ -669,7 +669,7 @@ msgstr ""
 
 #: mailu/ui/templates/user/signup_domain.html:14
 msgid "Domain"
-msgstr ""
+msgstr "Domain"
 
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"

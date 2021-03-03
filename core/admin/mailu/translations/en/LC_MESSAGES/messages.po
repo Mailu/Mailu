@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-04-22 12:10+0200\n"
-"PO-Revision-Date: 2021-03-03 17:17+0000\n"
+"PO-Revision-Date: 2021-03-03 17:57+0000\n"
 "Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
 "Language-Team: English <https://translate.tedomum.net/projects/mailu/admin/"
 "en/>\n"
@@ -51,7 +51,7 @@ msgstr ""
 
 #: mailu/ui/forms.py:47
 msgid "Maximum user count"
-msgstr ""
+msgstr "Maximum user count"
 
 #: mailu/ui/forms.py:48
 msgid "Maximum alias count"
@@ -332,7 +332,7 @@ msgstr "Relayed domains"
 
 #: mailu/ui/templates/sidebar.html:59 mailu/ui/templates/user/settings.html:15
 msgid "Antispam"
-msgstr ""
+msgstr "Antispam"
 
 #: mailu/ui/templates/sidebar.html:66
 msgid "Mail domains"

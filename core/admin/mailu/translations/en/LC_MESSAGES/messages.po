@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-04-22 12:10+0200\n"
-"PO-Revision-Date: 2021-03-03 18:18+0000\n"
-"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"PO-Revision-Date: 2021-03-04 18:46+0000\n"
+"Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
 "Language-Team: English <https://translate.tedomum.net/projects/mailu/admin/"
 "en/>\n"
 "Language: en\n"
@@ -196,7 +196,7 @@ msgstr ""
 
 #: mailu/ui/forms.py:130 mailu/ui/templates/token/list.html:20
 msgid "Authorized IP"
-msgstr ""
+msgstr "Authorized IP"
 
 #: mailu/ui/forms.py:136
 msgid "Alias"

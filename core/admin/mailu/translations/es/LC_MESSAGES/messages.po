@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mailu\n"
-"PO-Revision-Date: 2020-03-11 23:03+0000\n"
+"PO-Revision-Date: 2021-03-03 12:37+0000\n"
 "Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
 "Language-Team: Spanish <https://translate.tedomum.net/projects/mailu/admin/"
 "es/>\n"
@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.11.2\n"
+"X-Generator: Weblate 4.0.1\n"
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."
@@ -425,7 +425,7 @@ msgstr "Añadir una cuenta"
 
 #: mailu/ui/templates/fetch/list.html:19
 msgid "Endpoint"
-msgstr "Punto final"
+msgstr "Endpoint"
 
 #: mailu/ui/templates/fetch/list.html:22
 msgid "Last check"
@@ -437,7 +437,7 @@ msgstr "Añadir un gestor"
 
 #: mailu/ui/templates/manager/list.html:4
 msgid "Manager list"
-msgstr "Gestor de lista"
+msgstr "Lista de gestores"
 
 #: mailu/ui/templates/manager/list.html:12
 msgid "Add manager"

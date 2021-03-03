@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-04-22 12:10+0200\n"
 "PO-Revision-Date: 2021-03-03 11:35+0000\n"
-"Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: English <https://translate.tedomum.net/projects/mailu/admin/"
 "en/>\n"
 "Language: en\n"
@@ -105,7 +105,7 @@ msgstr ""
 #: mailu/ui/forms.py:80 mailu/ui/templates/user/list.html:22
 #: mailu/ui/templates/user/signup_domain.html:16
 msgid "Quota"
-msgstr ""
+msgstr "Quota"
 
 #: mailu/ui/forms.py:81
 msgid "Allow IMAP access"
@@ -229,7 +229,7 @@ msgstr ""
 #: mailu/ui/forms.py:159 mailu/ui/templates/client.html:20
 #: mailu/ui/templates/client.html:47
 msgid "TCP port"
-msgstr ""
+msgstr "TCP port"
 
 #: mailu/ui/forms.py:160
 msgid "Enable TLS"

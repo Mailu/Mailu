@@ -54,6 +54,7 @@ DEFAULT_CONFIG = {
     # Advanced settings
     'PASSWORD_SCHEME': 'PBKDF2',
     'LOG_LEVEL': 'WARNING',
+    'SESSION_COOKIE_SECURE': True,
     # Host settings
     'HOST_IMAP': 'imap',
     'HOST_LMTP': 'imap:2525',
@@ -125,7 +126,6 @@ class ConfigManager(dict):
         self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['REDIS_ADDRESS'])
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
-        self.config['SESSION_COOKIE_SECURE'] = self.config['TLS_FLAVOR'] != 'notls'
         # update the app config itself
         app.config = self
 

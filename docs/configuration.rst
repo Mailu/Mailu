@@ -142,6 +142,8 @@ The ``PASSWORD_SCHEME`` is the password encryption scheme. You should use the
 default value, unless you are importing password from a separate system and
 want to keep using the old password encryption scheme.
 
+The ``SESSION_COOKIE_SECURE`` (default: True) setting controls the secure flag on the cookies of the administrative interface. It should only be turned off if you intend to access it over plain HTTP.
+
 The ``LOG_LEVEL`` setting is used by the python start-up scripts as a logging threshold.
 Log messages equal or higher than this priority will be printed.
 Can be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG or NOTSET.

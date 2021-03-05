@@ -72,6 +72,7 @@ DEFAULT_CONFIG = {
     'LOGO_URL': None,
     'LOGO_BACKGROUND': None,
     # Advanced settings
+<<<<<<< HEAD
     'AUTH_REQUIRE_TOKENS': False,
     'API': False,
     'WEB_API': '/api',
@@ -92,6 +93,23 @@ DEFAULT_CONFIG = {
     'PROXY_AUTH_HEADER': 'X-Auth-Email',
     'PROXY_AUTH_CREATE': False,
     'PROXY_AUTH_LOGOUT_URL': None,
+=======
+    'PASSWORD_SCHEME': 'PBKDF2',
+    'LOG_LEVEL': 'WARNING',
+    'SESSION_COOKIE_SECURE': True,
+    # Host settings
+    'HOST_IMAP': 'imap',
+    'HOST_LMTP': 'imap:2525',
+    'HOST_POP3': 'imap',
+    'HOST_SMTP': 'smtp',
+    'HOST_AUTHSMTP': 'smtp',
+    'HOST_ADMIN': 'admin',
+    'WEBMAIL': 'none',
+    'HOST_WEBMAIL': 'webmail',
+    'HOST_WEBDAV': 'webdav:5232',
+    'HOST_REDIS': 'redis',
+    'HOST_FRONT': 'front',
+>>>>>>> 0dcc059c (Add a new knob as discussed on matrix with lub)
     'SUBNET': '192.168.203.0/24',
     'SUBNET6': None,
 }
@@ -151,7 +169,6 @@ class ConfigManager:
         self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['REDIS_ADDRESS'])
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
-        self.config['SESSION_COOKIE_SECURE'] = self.config['TLS_FLAVOR'] != 'notls'
         # update the app config itself
         app.config = self
 >>>>>>> aa8cb989 (Set sensible cookie options)

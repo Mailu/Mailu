@@ -100,6 +100,15 @@ class ConfigManager(dict):
         if self.config["WEBMAIL"] != "none":
             self.config["WEBMAIL_ADDRESS"] = self.get_host_address("WEBMAIL")
 
+    def __get_env(self, key, value):
+        key_file = key + "_FILE"
+        if key_file in os.environ:
+            with open(os.environ.get(key_file)) as file:
+                value_from_file = file.read()
+            return value_from_file.strip()
+        else:
+            return os.environ.get(key, value)
+
     def __coerce_value(self, value):
         if isinstance(value, str) and value.lower() in ('true','yes'):
             return True
@@ -111,7 +120,7 @@ class ConfigManager(dict):
         self.config.update(app.config)
         # get environment variables
         self.config.update({
-            key: self.__coerce_value(os.environ.get(key, value))
+            key: self.__coerce_value(self.__get_env(key, value))
             for key, value in DEFAULT_CONFIG.items()
         })
         self.resolve_hosts()

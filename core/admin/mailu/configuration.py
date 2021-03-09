@@ -52,9 +52,9 @@ DEFAULT_CONFIG = {
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
     # Advanced settings
-    'PASSWORD_SCHEME': 'PBKDF2',
     'LOG_LEVEL': 'WARNING',
     'SESSION_COOKIE_SECURE': True,
+    'CREDENTIAL_ROUNDS': 12,
     # Host settings
     'HOST_IMAP': 'imap',
     'HOST_LMTP': 'imap:2525',

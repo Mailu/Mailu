@@ -1,0 +1,1 @@
+Switch from client side sessions (cookies) to server-side sessions (Redis). This simplies the security model a lot and allows for an easier recovery should a cookie ever land in the hands of an attacker.

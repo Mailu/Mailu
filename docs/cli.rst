@@ -87,7 +87,6 @@ where mail-config.yml looks like:
     - localpart: foo
       domain: example.com
       password_hash: klkjhumnzxcjkajahsdqweqqwr
-      hash_scheme: MD5-CRYPT
 
   aliases:
     - localpart: alias1

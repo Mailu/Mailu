@@ -32,7 +32,7 @@ MarkupSafe==1.1.1
 mysqlclient==1.4.2.post1
 marshmallow==3.10.0
 marshmallow-sqlalchemy==0.24.1
-passlib==1.7.1
+passlib==1.7.4
 psycopg2==2.8.2
 pycparser==2.19
 pyOpenSSL==19.0.0

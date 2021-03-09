@@ -52,8 +52,9 @@ DEFAULT_CONFIG = {
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
     # Advanced settings
-    'PASSWORD_SCHEME': 'PBKDF2',
     'LOG_LEVEL': 'WARNING',
+    'SESSION_COOKIE_SECURE': True,
+    'CREDENTIAL_ROUNDS': 12,
     # Host settings
     'HOST_IMAP': 'imap',
     'HOST_LMTP': 'imap:2525',
@@ -100,6 +101,15 @@ class ConfigManager(dict):
         if self.config["WEBMAIL"] != "none":
             self.config["WEBMAIL_ADDRESS"] = self.get_host_address("WEBMAIL")
 
+    def __get_env(self, key, value):
+        key_file = key + "_FILE"
+        if key_file in os.environ:
+            with open(os.environ.get(key_file)) as file:
+                value_from_file = file.read()
+            return value_from_file.strip()
+        else:
+            return os.environ.get(key, value)
+
     def __coerce_value(self, value):
         if isinstance(value, str) and value.lower() in ('true','yes'):
             return True
@@ -111,7 +121,7 @@ class ConfigManager(dict):
         self.config.update(app.config)
         # get environment variables
         self.config.update({
-            key: self.__coerce_value(os.environ.get(key, value))
+            key: self.__coerce_value(self.__get_env(key, value))
             for key, value in DEFAULT_CONFIG.items()
         })
         self.resolve_hosts()
@@ -123,6 +133,8 @@ class ConfigManager(dict):
 
         self.config['RATELIMIT_STORAGE_URL'] = 'redis://{0}/2'.format(self.config['REDIS_ADDRESS'])
         self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['REDIS_ADDRESS'])
+        self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
+        self.config['SESSION_COOKIE_HTTPONLY'] = True
         # update the app config itself
         app.config = self
 

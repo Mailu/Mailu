@@ -19,6 +19,20 @@ STATUSES = {
     }),
 }
 
+def check_credentials(user, password, ip, protocol=None):
+    if not user or not user.enabled or (protocol == "imap" and not user.enable_imap) or (protocol == "pop3" and not user.enable_pop):
+        return False
+    is_ok = False
+    # All tokens are 32 characters hex lowercase
+    if len(password) == 32:
+        for token in user.tokens:
+            if (token.check_password(password) and
+                (not token.ip or token.ip == ip)):
+                    is_ok = True
+                    break
+    if not is_ok and user.check_password(password):
+        is_ok = True
+    return is_ok
 
 def handle_authentication(headers):
     """ Handle an HTTP nginx authentication request
@@ -47,20 +61,7 @@ def handle_authentication(headers):
         password = raw_password.encode("iso8859-1").decode("utf8")
         ip = urllib.parse.unquote(headers["Client-Ip"])
         user = models.User.query.get(user_email)
-        status = False
-        if user:
-            for token in user.tokens:
-                if (token.check_password(password) and
-                    (not token.ip or token.ip == ip)):
-                        status = True
-            if user.check_password(password):
-                status = True
-            if status:
-                if protocol == "imap" and not user.enable_imap:
-                    status = False
-                elif protocol == "pop3" and not user.enable_pop:
-                    status = False
-        if status and user.enabled:
+        if check_credentials(user, password, ip, protocol):
             return {
                 "Auth-Status": "OK",
                 "Auth-Server": server,

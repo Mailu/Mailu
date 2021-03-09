@@ -126,3 +126,5 @@ milter_default_action = tempfail
 ###############
 # Extra Settings
 ###############
+{# Ensure that the rendered file ends with newline in order to make `postconf` work correctly #}
+{{- "\n" }}

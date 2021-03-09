@@ -129,7 +129,7 @@ So when you have something like this:
 - The admin interface generates ``MX`` and ``SPF`` examples which point to the first entry of ``HOSTNAMES`` but these are only examples.
   You can modify them to use any other ``HOSTNAMES`` entry.
 
-You're mail service will be reachable for IMAP, POP3, SMTP and Webmail at the addresses:
+Your mail service will be reachable for IMAP, POP3, SMTP and Webmail at the addresses:
 
 - mail.example.com
 - mail.foo.com
@@ -170,6 +170,13 @@ Lets start with quoting everything that's wrong:
       (`docker/libnetwork#1099 <https://github.com/docker/libnetwork/issues/1099>`_).
   
   -- `Robbert Klarenbeek <https://github.com/robbertkl>`_ (docker-ipv6nat author)
+  
+Okay, but I still want to use IPv6! Can I just use the installers IPv6 checkbox? **NO, YOU SHOULD NOT DO THAT!** Why you ask?
+Mailu has its own trusted IPv4 network, every container inside this network can use e.g. the SMTP container without further
+authentication. If you enabled IPv6 inside the setup assistant (and fixed the ports to also be exposed on IPv6) Docker will
+still rewrite any incoming IPv6 requests to an IPv4 address, *which is located inside the trusted network*. Therefore any
+incoming connection to the SMTP container will bypass the authentication stage by the front container regardless of your
+settings and causes an Open Relay. And you really don't want this!
 
 So, how to make it work? Well, by using `docker-ipv6nat`_! This nifty container will set up ``ip6tables``,
 just as Docker would do for IPv4. We know that nat-ing is not advised in IPv6,
@@ -250,7 +257,10 @@ Postfix, Dovecot, Nginx and Rspamd support overriding configuration files. Overr
 ``$ROOT/overrides``. Please refer to the official documentation of those programs for the
 correct syntax. The following file names will be taken as override configuration:
 
-- `Postfix`_ - ``postfix.cf`` in postfix sub-directory;
+- `Postfix`_ :
+   - ``main.cf`` as ``$ROOT/overrides/postfix/postfix.cf``
+   - ``master.cf`` as ``$ROOT/overrides/postfix/postfix.master``
+   - All ``$ROOT/overrides/postfix/*.map`` files
 - `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory;
 - `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory;
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
@@ -320,6 +330,24 @@ After successfull login the domain part will be striped and the rest used as use
 
 *Issue reference:* `575`_.
 
+
+How do I use webdav (radicale)?
+```````````````````````````````
+
+| For first time set up, the user must access radicale via the url `https://mail.example.com/webdav/.web` and then
+| 1. Log in using the  user's full email address and password.
+| 2. Click 'Create new addressbook or calendar'
+| 3. Follow instructions for creating an addressbook (for contact management) and calendar.
+|
+| Subsequently to use webdav (radicale), you can configure your carddav/caldav client to use the following url:
+| `https://mail.example.com/webdav/user@example.com`
+| As username you must provide the complete email address (user@example.com).  
+| As password you must provide the password of the email address.
+| The user must be an existing Mailu user.
+
+*issue reference:* `1591`_.
+
+
 .. _`Postfix`: http://www.postfix.org/postconf.5.html
 .. _`Dovecot`: https://doc.dovecot.org/configuration_manual/config_file/config_file_syntax/
 .. _`NGINX`:   https://nginx.org/en/docs/
@@ -335,6 +363,7 @@ After successfull login the domain part will be striped and the rest used as use
 .. _`520`: https://github.com/Mailu/Mailu/issues/520
 .. _`591`: https://github.com/Mailu/Mailu/issues/591
 .. _`575`: https://github.com/Mailu/Mailu/issues/575
+.. _`1591`: https://github.com/Mailu/Mailu/issues/1591
 
 Technical issues
 ----------------

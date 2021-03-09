@@ -51,7 +51,12 @@ $(document).ready(function() {
 		} else if (this.value == 'postgresql') {
 			$("#postgres_db").show();
 			$("#external_db").hide();
-			$("#external_db").prop('checked', false);
+			$("#external_psql").prop('checked', true);
+			$("#external_db").show();
+			$("#db_user").prop('required',true);
+			$("#db_pw").prop('required',true);
+			$("#db_url").prop('required',true);
+			$("#db_name").prop('required',true);
 		} else if (this.value == 'mysql') {
 			$("#postgres_db").hide();
 			$("#external_db").show();

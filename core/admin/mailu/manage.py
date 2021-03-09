@@ -86,13 +86,10 @@ def admin(localpart, domain_name, password, mode='create'):
 @click.argument('localpart')
 @click.argument('domain_name')
 @click.argument('password')
-@click.argument('hash_scheme', required=False)
 @flask_cli.with_appcontext
-def user(localpart, domain_name, password, hash_scheme=None):
+def user(localpart, domain_name, password):
     """ Create a user
     """
-    if hash_scheme is None:
-        hash_scheme = app.config['PASSWORD_SCHEME']
     domain = models.Domain.query.get(domain_name)
     if not domain:
         domain = models.Domain(name=domain_name)
@@ -102,7 +99,7 @@ def user(localpart, domain_name, password, hash_scheme=None):
         domain=domain,
         global_admin=False
     )
-    user.set_password(password, hash_scheme=hash_scheme)
+    user.set_password(password)
     db.session.add(user)
     db.session.commit()
 
@@ -111,17 +108,14 @@ def user(localpart, domain_name, password, hash_scheme=None):
 @click.argument('localpart')
 @click.argument('domain_name')
 @click.argument('password')
-@click.argument('hash_scheme', required=False)
 @flask_cli.with_appcontext
-def password(localpart, domain_name, password, hash_scheme=None):
+def password(localpart, domain_name, password):
     """ Change the password of an user
     """
     email = '{0}@{1}'.format(localpart, domain_name)
     user   = models.User.query.get(email)
-    if hash_scheme is None:
-        hash_scheme = app.config['PASSWORD_SCHEME']
     if user:
-        user.set_password(password, hash_scheme=hash_scheme)
+        user.set_password(password)
     else:
         print("User " + email + " not found.")
     db.session.commit()
@@ -148,13 +142,10 @@ def domain(domain_name, max_users=-1, max_aliases=-1, max_quota_bytes=0):
 @click.argument('localpart')
 @click.argument('domain_name')
 @click.argument('password_hash')
-@click.argument('hash_scheme')
 @flask_cli.with_appcontext
-def user_import(localpart, domain_name, password_hash, hash_scheme = None):
+def user_import(localpart, domain_name, password_hash):
     """ Import a user along with password hash.
     """
-    if hash_scheme is None:
-        hash_scheme = app.config['PASSWORD_SCHEME']
     domain = models.Domain.query.get(domain_name)
     if not domain:
         domain = models.Domain(name=domain_name)
@@ -164,7 +155,7 @@ def user_import(localpart, domain_name, password_hash, hash_scheme = None):
         domain=domain,
         global_admin=False
     )
-    user.set_password(password_hash, hash_scheme=hash_scheme, raw=True)
+    user.set_password(password_hash, raw=True)
     db.session.add(user)
     db.session.commit()
 
@@ -217,7 +208,6 @@ def config_update(verbose=False, delete_objects=False):
         localpart = user_config['localpart']
         domain_name = user_config['domain']
         password_hash = user_config.get('password_hash', None)
-        hash_scheme = user_config.get('hash_scheme', None)
         domain = models.Domain.query.get(domain_name)
         email = '{0}@{1}'.format(localpart, domain_name)
         optional_params = {}
@@ -239,7 +229,7 @@ def config_update(verbose=False, delete_objects=False):
         else:
             for k in optional_params:
                 setattr(user, k, optional_params[k])
-        user.set_password(password_hash, hash_scheme=hash_scheme, raw=True)
+        user.set_password(password_hash, raw=True)
         db.session.add(user)
 
     aliases = new_config.get('aliases', [])

@@ -73,6 +73,13 @@ By default postfix uses "opportunistic TLS" for outbound mail. This can be chang
 by setting ``OUTBOUND_TLS_LEVEL`` to ``encrypt``. This setting is highly recommended
 if you are a relayhost that supports TLS.
 
+Similarily by default nginx uses "opportunistic TLS" for inbound mail. This can be changed
+by setting ``INBOUND_TLS_ENFORCE`` to ``True``. Please note that this is forbidden for
+internet facing hosts according to e.g. `RFC 3207`_ , because this prevents MTAs without STARTTLS
+support or e.g. mismatching TLS versions to deliver emails to Mailu.
+
+.. _`RFC 3207`: https://tools.ietf.org/html/rfc3207
+
 .. _fetchmail:
 
 The ``FETCHMAIL_DELAY`` is a delay (in seconds) for the fetchmail service to
@@ -141,6 +148,8 @@ Advanced settings
 The ``CREDENTIAL_ROUNDS`` (default: 12) setting is the number of rounds used by the password hashing scheme. The number of rounds can be reduced in case faster authentication is needed or increased when additional protection is desired. Keep in mind that this is a mitigation against offline attacks on password hashes, aiming to prevent credential stuffing (due to password re-use) on other systems.
 
 The ``SESSION_COOKIE_SECURE`` (default: True) setting controls the secure flag on the cookies of the administrative interface. It should only be turned off if you intend to access it over plain HTTP.
+
+``SESSION_LIFETIME`` (default: 24) is the length in hours a session is valid for on the administrative interface.
 
 The ``LOG_LEVEL`` setting is used by the python start-up scripts as a logging threshold.
 Log messages equal or higher than this priority will be printed.

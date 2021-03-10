@@ -375,6 +375,8 @@ def config_export(full=False, secrets=False, color=False, dns=False, output=None
     """ Export configuration as YAML or JSON to stdout or file
     """
 
+    log = Logger(want_color=color or None, can_color=output.isatty())
+
     only = only or MailuSchema.Meta.order
 
     context = {
@@ -382,7 +384,6 @@ def config_export(full=False, secrets=False, color=False, dns=False, output=None
         'secrets': secrets,
         'dns': dns,
     }
-    log = Logger(want_color=color or None, can_color=output.isatty())
 
     try:
         schema = MailuSchema(only=only, context=context)

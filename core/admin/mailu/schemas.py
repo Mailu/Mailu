@@ -3,6 +3,7 @@
 
 from copy import deepcopy
 from collections import Counter
+from datetime import timezone
 
 import json
 import logging
@@ -455,7 +456,20 @@ class RenderJSON:
         return json.dumps(*args, **kwargs)
 
 
-### schema: custom fields ###
+### marshmallow: custom fields ###
+
+def _rfc3339(datetime):
+    """ dump datetime according to rfc3339 """
+    if datetime.tzinfo is None:
+        datetime = datetime.astimezone(timezone.utc)
+    res = datetime.isoformat()
+    if res.endswith('+00:00'):
+        return f'{res[:-6]}Z'
+    return res
+
+fields.DateTime.SERIALIZATION_FUNCS['rfc3339'] = _rfc3339
+fields.DateTime.DESERIALIZATION_FUNCS['rfc3339'] = fields.DateTime.DESERIALIZATION_FUNCS['iso']
+fields.DateTime.DEFAULT_FORMAT = 'rfc3339'
 
 class LazyStringField(fields.String):
     """ Field that serializes a "false" value to the empty string
@@ -1135,7 +1149,6 @@ class FetchSchema(BaseSchema):
         """ Schema config """
         model = models.Fetch
         load_instance = True
-        datetimeformat = '%Y-%m-%dT%H:%M:%S.%fZ' # RFC3339, but fixed to UTC
 
         sibling = True
         include_by_context = {

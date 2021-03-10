@@ -1135,6 +1135,7 @@ class FetchSchema(BaseSchema):
         """ Schema config """
         model = models.Fetch
         load_instance = True
+        datetimeformat = '%Y-%m-%dT%H:%M:%S.%fZ' # RFC3339, but fixed to UTC
 
         sibling = True
         include_by_context = {

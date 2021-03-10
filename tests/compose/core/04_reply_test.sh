@@ -2,7 +2,6 @@ cat << EOF | docker-compose -f tests/compose/core/docker-compose.yml exec -T adm
 users:
   - localpart: replyuser
     password_hash: "\$1\$F2OStvi1\$Q8hBIHkdJpJkJn/TrMIZ9/"
-    hash_scheme: MD5-CRYPT
     domain: mailu.io
     reply_enabled: true
     reply_subject: This will not reach me
@@ -15,7 +14,6 @@ cat << EOF | docker-compose -f tests/compose/core/docker-compose.yml exec -T adm
 users:
   - localpart: replyuser
     password_hash: "\$1\$F2OStvi1\$Q8hBIHkdJpJkJn/TrMIZ9/"
-    hash_scheme: MD5-CRYPT
     domain: mailu.io
     reply_enabled: false
 EOF

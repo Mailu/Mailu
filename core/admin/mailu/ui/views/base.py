@@ -18,6 +18,7 @@ def login():
     if form.validate_on_submit():
         user = models.User.login(form.email.data, form.pw.data)
         if user:
+            flask.session.regenerate()
             flask_login.login_user(user)
             endpoint = flask.request.args.get('next', '.index')
             return flask.redirect(flask.url_for(endpoint)
@@ -31,6 +32,7 @@ def login():
 @access.authenticated
 def logout():
     flask_login.logout_user()
+    flask.session.destroy()
     return flask.redirect(flask.url_for('.index'))
 
 

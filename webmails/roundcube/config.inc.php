@@ -5,7 +5,7 @@ $config = array();
 // Generals
 $config['db_dsnw'] = getenv('DB_DSNW');;
 $config['temp_dir'] = '/tmp/';
-$config['des_key'] = getenv('SECRET_KEY');
+$config['des_key'] = getenv('SECRET_KEY') ? getenv('SECRET_KEY') : trim(file_get_contents(getenv('SECRET_KEY_FILE')));
 $config['cipher_method'] = 'AES-256-CBC';
 $config['identities_level'] = 0;
 $config['reply_all_mode'] = 1;

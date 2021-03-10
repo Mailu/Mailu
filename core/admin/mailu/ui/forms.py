@@ -46,6 +46,8 @@ class ConfirmationForm(flask_wtf.FlaskForm):
 
 
 class LoginForm(flask_wtf.FlaskForm):
+    class Meta:
+        csrf = False
     email = fields.StringField(_('E-mail'), [validators.Email()])
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
     submit = fields.SubmitField(_('Sign in'))

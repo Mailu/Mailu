@@ -13,6 +13,7 @@ Flask==1.0.2
 Flask-Babel==0.12.2
 Flask-Bootstrap==3.3.7.1
 Flask-DebugToolbar==0.10.1
+Flask-KVSession==0.6.2
 Flask-Limiter==1.0.1
 Flask-Login==0.4.1
 Flask-Migrate==2.4.0

@@ -119,6 +119,7 @@ def user_password(user_email):
         if form.pw.data != form.pw2.data:
             flask.flash('Passwords do not match', 'error')
         else:
+            flask.session.regenerate()
             user.set_password(form.pw.data)
             models.db.session.commit()
             flask.flash('Password updated for %s' % user)
@@ -186,6 +187,7 @@ def user_signup(domain_name=None):
         if domain.has_email(form.localpart.data):
             flask.flash('Email is already used', 'error')
         else:
+            flask.session.regenerate()
             user = models.User(domain=domain)
             form.populate_obj(user)
             user.set_password(form.pw.data)

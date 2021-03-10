@@ -17,6 +17,9 @@ STATUSES = {
         "smtp": "535 5.7.8",
         "pop3": "-ERR Authentication failed"
     }),
+    "encryption": ("Must issue a STARTTLS command first", {
+        "smtp": "530 5.7.0"
+    }),
 }
 
 def check_credentials(user, password, ip, protocol=None):
@@ -42,12 +45,27 @@ def handle_authentication(headers):
     protocol = headers["Auth-Protocol"]
     # Incoming mail, no authentication
     if method == "none" and protocol == "smtp":
-        server, port = get_server(headers["Auth-Protocol"], False)
-        return {
-            "Auth-Status": "OK",
-            "Auth-Server": server,
-            "Auth-Port": port
-        }
+        server, port = get_server(protocol, False)
+        if app.config["INBOUND_TLS_ENFORCE"]:
+            if "Auth-SSL" in headers and headers["Auth-SSL"] == "on":
+                return {
+                    "Auth-Status": "OK",
+                    "Auth-Server": server,
+                    "Auth-Port": port
+                }
+            else:
+                status, code = get_status(protocol, "encryption")
+                return {
+                    "Auth-Status": status,
+                    "Auth-Error-Code" : code,
+                    "Auth-Wait": 0
+                }
+        else:
+            return {
+                "Auth-Status": "OK",
+                "Auth-Server": server,
+                "Auth-Port": port
+            }
     # Authenticated user
     elif method == "plain":
         server, port = get_server(headers["Auth-Protocol"], True)

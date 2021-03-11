@@ -1,0 +1,1 @@
+Only use static database for clamav when building/testing. This prevents tests from failing with HTTP429 from freshclam because we hammer the clamav update server.

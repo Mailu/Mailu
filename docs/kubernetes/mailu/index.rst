@@ -192,7 +192,7 @@ Happy mailing!
 
 .. _here: https://github.com/hacor/Mailu/blob/master/core/postfix/conf/main.cf#L35
 .. _cert-manager: https://github.com/jetstack/cert-manager
-.. _docs: https://cert-manager.readthedocs.io/en/latest/getting-started/2-installing.html
+.. _docs: https://cert-manager.io/docs/installation/kubernetes/
 
 Imap login fix
 ~~~~~~~~~~~~~~

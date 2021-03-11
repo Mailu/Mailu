@@ -53,33 +53,33 @@ def mapped(cls):
     _model2schema[cls.Meta.model] = cls
     return cls
 
-class MyYamlLexer(YamlLexer):
-    """ colorize yaml constants and integers """
-    def get_tokens(self, text, unfiltered=False):
-        for typ, value in super().get_tokens(text, unfiltered):
-            if typ is Token.Literal.Scalar.Plain:
-                if value in {'true', 'false', 'null'}:
-                    typ = Token.Keyword.Constant
-                elif value == HIDDEN:
-                    typ = Token.Error
-                else:
-                    try:
-                        int(value, 10)
-                    except ValueError:
-                        try:
-                            float(value)
-                        except ValueError:
-                            pass
-                        else:
-                            typ = Token.Literal.Number.Float
-                    else:
-                        typ = Token.Literal.Number.Integer
-            yield typ, value
-
 class Logger:
     """ helps with counting and colorizing
         imported and exported data
     """
+
+    class MyYamlLexer(YamlLexer):
+        """ colorize yaml constants and integers """
+        def get_tokens(self, text, unfiltered=False):
+            for typ, value in super().get_tokens(text, unfiltered):
+                if typ is Token.Literal.Scalar.Plain:
+                    if value in {'true', 'false', 'null'}:
+                        typ = Token.Keyword.Constant
+                    elif value == HIDDEN:
+                        typ = Token.Error
+                    else:
+                        try:
+                            int(value, 10)
+                        except ValueError:
+                            try:
+                                float(value)
+                            except ValueError:
+                                pass
+                            else:
+                                typ = Token.Literal.Number.Float
+                        else:
+                            typ = Token.Literal.Number.Integer
+                yield typ, value
 
     def __init__(self, want_color=None, can_color=False, debug=False, secrets=False):
 
@@ -323,7 +323,7 @@ class Logger:
             return data
 
         lexer = lexer or self.lexer
-        lexer = MyYamlLexer() if lexer == 'yaml' else get_lexer_by_name(lexer)
+        lexer = Logger.MyYamlLexer() if lexer == 'yaml' else get_lexer_by_name(lexer)
         formatter = get_formatter_by_name(formatter or self.formatter, colorscheme=self.colorscheme)
         if strip is None:
             strip = self.strip

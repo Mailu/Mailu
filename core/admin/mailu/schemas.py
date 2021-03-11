@@ -21,16 +21,11 @@ from flask_marshmallow import Marshmallow
 
 from OpenSSL import crypto
 
-try:
-    from pygments import highlight
-    from pygments.token import Token
-    from pygments.lexers import get_lexer_by_name
-    from pygments.lexers.data import YamlLexer
-    from pygments.formatters import get_formatter_by_name
-except ModuleNotFoundError:
-    COLOR_SUPPORTED = False
-else:
-    COLOR_SUPPORTED = True
+from pygments import highlight
+from pygments.token import Token
+from pygments.lexers import get_lexer_by_name
+from pygments.lexers.data import YamlLexer
+from pygments.formatters import get_formatter_by_name
 
 from mailu import models, dkim
 
@@ -92,10 +87,7 @@ class Logger:
         self.debug = debug
         self.print = print
 
-        if want_color and not COLOR_SUPPORTED:
-            raise ValueError('Please install pygments to colorize output')
-
-        self.color = want_color or (can_color and COLOR_SUPPORTED)
+        self.color = want_color or can_color
 
         self._counter = Counter()
         self._schemas = {}

@@ -17,6 +17,7 @@ gunicorn
 tabulate
 PyYAML
 PyOpenSSL
+Pygments
 dnspython
 bcrypt
 tenacity

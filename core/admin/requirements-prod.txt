@@ -36,6 +36,7 @@ marshmallow-sqlalchemy==0.24.1
 passlib==1.7.4
 psycopg2==2.8.2
 pycparser==2.19
+Pygments==2.8.1
 pyOpenSSL==19.0.0
 python-dateutil==2.8.0
 python-editor==1.0.4

@@ -1030,8 +1030,8 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
             self.opts.sqla_session.add(item)
             return item
 
-        # stop early if item has no password attribute
-        if not hasattr(item, 'password'):
+        # stop early when not updating or item has no password attribute
+        if not self.context.get('update') or not hasattr(item, 'password'):
             return item
 
         # did we hash a new plaintext password?

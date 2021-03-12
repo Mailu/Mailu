@@ -355,9 +355,21 @@ class Email(object):
         self.localpart, self.domain_name = value.rsplit('@', 1)
         self._email = value
 
-    # hack for email declared attr - when _email is not updated yet
-    def __str__(self):
-        return str(f'{self.localpart}@{self.domain_name}')
+    @staticmethod
+    def _update_localpart(target, value, *_):
+        if target.domain_name:
+            target._email = f'{value}@{target.domain_name}'
+
+    @staticmethod
+    def _update_domain_name(target, value, *_):
+        if target.localpart:
+            target._email = f'{target.localpart}@{value}'
+
+    @classmethod
+    def __declare_last__(cls):
+        # gets called after mappings are completed
+        sqlalchemy.event.listen(User.localpart, 'set', cls._update_localpart, propagate=True)
+        sqlalchemy.event.listen(User.domain_name, 'set', cls._update_domain_name, propagate=True)
 
     def sendmail(self, subject, body):
         """ send an email to the address """

@@ -1,8 +1,8 @@
+""" Mailu admin app
+"""
+
 import flask
 import flask_bootstrap
-import redis
-from flask_kvsession import KVSessionExtension
-from simplekv.memory.redisstore import RedisStore
 
 from mailu import utils, debug, models, manage, configuration
 
@@ -20,7 +20,8 @@ def create_app_from_config(config):
     # Initialize application extensions
     config.init_app(app)
     models.db.init_app(app)
-    KVSessionExtension(RedisStore(redis.StrictRedis().from_url('redis://{0}/3'.format(config['REDIS_ADDRESS']))), app).cleanup_sessions(app)
+    utils.kvsession.init_kvstore(config)
+    utils.kvsession.init_app(app)
     utils.limiter.init_app(app)
     utils.babel.init_app(app)
     utils.login.init_app(app)
@@ -53,8 +54,7 @@ def create_app_from_config(config):
 
 
 def create_app():
-    """ Create a new application based on the config module 
+    """ Create a new application based on the config module
     """
     config = configuration.ConfigManager()
     return create_app_from_config(config)
-

@@ -1,11 +1,18 @@
-from mailu import models, limiter
+""" Mailu admin app utilities
+"""
+
+from mailu import limiter
 
 import flask
 import flask_login
-import flask_script
 import flask_migrate
 import flask_babel
+import flask_kvsession
+import redis
 
+from simplekv.memory import DictStore
+from simplekv.memory.redisstore import RedisStore
+from itsdangerous.encoding import want_bytes
 from werkzeug.contrib import fixers
 
 
@@ -33,6 +40,10 @@ def get_locale():
 
 # Proxy fixer
 class PrefixMiddleware(object):
+    """ fix proxy headers """
+    def __init__(self):
+        self.app = None
+
     def __call__(self, environ, start_response):
         prefix = environ.get('HTTP_X_FORWARDED_PREFIX', '')
         if prefix:
@@ -48,3 +59,53 @@ proxy = PrefixMiddleware()
 
 # Data migrate
 migrate = flask_migrate.Migrate()
+
+
+# session store
+class NullSigner(object):
+    """NullSigner does not sign nor unsign"""
+    def __init__(self, *args, **kwargs):
+        pass
+    def sign(self, value):
+        """Signs the given string."""
+        return want_bytes(value)
+    def unsign(self, signed_value):
+        """Unsigns the given string."""
+        return want_bytes(signed_value)
+
+class KVSessionIntf(flask_kvsession.KVSessionInterface):
+    """ KVSession interface allowing to run int function on first access """
+    def __init__(self, app, init_fn=None):
+        if init_fn:
+            app.kvsession_init = init_fn
+        else:
+            self._first_run(None)
+    def _first_run(self, app):
+        if app:
+            app.kvsession_init()
+        self.open_session = super().open_session
+        self.save_session = super().save_session
+    def open_session(self, app, request):
+        self._first_run(app)
+        return super().open_session(app, request)
+    def save_session(self, app, session, response):
+        self._first_run(app)
+        return super().save_session(app, session, response)
+
+class KVSessionExt(flask_kvsession.KVSessionExtension):
+    """ Activates Flask-KVSession for an application. """
+    def init_kvstore(self, config):
+        """ Initialize kvstore - fallback to DictStore without REDIS_ADDRESS """
+        if addr := config.get('REDIS_ADDRESS'):
+            self.default_kvstore = RedisStore(redis.StrictRedis().from_url(f'redis://{addr}/3'))
+        else:
+            self.default_kvstore = DictStore()
+
+    def init_app(self, app, session_kvstore=None):
+        """ Initialize application and KVSession. """
+        super().init_app(app, session_kvstore)
+        app.session_interface = KVSessionIntf(app, self.cleanup_sessions)
+
+kvsession = KVSessionExt()
+
+flask_kvsession.Signer = NullSigner

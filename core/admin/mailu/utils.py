@@ -1,6 +1,8 @@
 """ Mailu admin app utilities
 """
 
+from datetime import datetime
+
 from mailu import limiter
 
 import flask
@@ -22,6 +24,7 @@ login.login_view = "ui.login"
 
 @login.unauthorized_handler
 def handle_needs_login():
+    """ redirect unauthorized requests to login page """
     return flask.redirect(
         flask.url_for('ui.login', next=flask.request.endpoint)
     )
@@ -34,7 +37,8 @@ babel = flask_babel.Babel()
 
 @babel.localeselector
 def get_locale():
-    translations = list(map(str, babel.list_translations()))
+    """ selects locale for translation """
+    translations = [str(translation) for translation in babel.list_translations()]
     return flask.request.accept_languages.best_match(translations)
 
 
@@ -100,6 +104,32 @@ class KVSessionExt(flask_kvsession.KVSessionExtension):
             self.default_kvstore = RedisStore(redis.StrictRedis().from_url(f'redis://{addr}/3'))
         else:
             self.default_kvstore = DictStore()
+
+    def cleanup_sessions(self, app=None, dkey=None, dvalue=None):
+        """ Remove sessions from the store. """
+        if not app:
+            app = flask.current_app
+        if dkey is None and dvalue is None:
+            now = datetime.utcnow()
+            for key in app.kvsession_store.keys():
+                try:
+                    sid = flask_kvsession.SessionID.unserialize(key)
+                except ValueError:
+                    pass
+                else:
+                    if sid.has_expired(
+                        app.config['PERMANENT_SESSION_LIFETIME'],
+                        now
+                    ):
+                        app.kvsession_store.delete(key)
+        elif dkey is not None and dvalue is not None:
+            for key in app.kvsession_store.keys():
+                if app.session_interface.serialization_method.loads(
+                    app.kvsession_store.get(key)
+                ).get(dkey, None) == dvalue:
+                    app.kvsession_store.delete(key)
+        else:
+            raise ValueError('Need dkey and dvalue.')
 
     def init_app(self, app, session_kvstore=None):
         """ Initialize application and KVSession. """

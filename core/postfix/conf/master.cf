@@ -12,6 +12,7 @@ smtp      inet  n       -       n       -       -       smtpd
   -o cleanup_service_name=outclean
 outclean  unix n       -       n       -       0       cleanup
   -o header_checks=pcre:/etc/postfix/outclean_header_filter.cf
+  -o nested_header_checks=
 
 # Internal postfix services
 pickup    unix  n       -       n       60      1       pickup

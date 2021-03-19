@@ -1,14 +1,13 @@
 from mailu import dkim
 
 from sqlalchemy.ext import declarative
-from passlib import context, hash
+from passlib import context, hash, registry
 from datetime import datetime, date
 from email.mime import text
 from flask import current_app as app
 
 import flask_sqlalchemy
 import sqlalchemy
-import re
 import time
 import os
 import glob
@@ -305,6 +304,7 @@ class User(Base, Email):
     """ A user is an email address that has a password to access a mailbox.
     """
     __tablename__ = "user"
+    _ctx = None
 
     domain = db.relationship(Domain,
         backref=db.backref('users', cascade='all, delete-orphan'))
@@ -362,25 +362,38 @@ class User(Base, Email):
             self.reply_enddate > now
         )
 
-    scheme_dict = {'PBKDF2': "pbkdf2_sha512",
-                   'BLF-CRYPT': "bcrypt",
-                   'SHA512-CRYPT': "sha512_crypt",
-                   'SHA256-CRYPT': "sha256_crypt",
-                   'MD5-CRYPT': "md5_crypt",
-                   'CRYPT': "des_crypt"}
+    def get_password_context():
+        if User._ctx:
+            return User._ctx
 
-    def get_password_context(self):
-        return context.CryptContext(
-            schemes=self.scheme_dict.values(),
-            default=self.scheme_dict[app.config['PASSWORD_SCHEME']],
+        schemes = registry.list_crypt_handlers()
+        # scrypt throws a warning if the native wheels aren't found
+        schemes.remove('scrypt')
+        # we can't leave plaintext schemes as they will be misidentified
+        for scheme in schemes:
+            if scheme.endswith('plaintext'):
+                schemes.remove(scheme)
+        User._ctx = context.CryptContext(
+            schemes=schemes,
+            default='bcrypt_sha256',
+            bcrypt_sha256__rounds=app.config['CREDENTIAL_ROUNDS'],
+            deprecated='auto'
         )
+        return User._ctx
 
     def check_password(self, password):
-        context = self.get_password_context()
-        reference = re.match('({[^}]+})?(.*)', self.password).group(2)
-        result = context.verify(password, reference)
-        if result and context.identify(reference) != context.default_scheme():
-            self.set_password(password)
+        reference = self.password
+        # strip {scheme} if that's something mailu has added
+        # passlib will identify *crypt based hashes just fine
+        # on its own
+        if self.password.startswith("{"):
+            scheme = self.password.split('}')[0][1:]
+            if scheme in ['PBKDF2', 'BLF-CRYPT', 'SHA512-CRYPT', 'SHA256-CRYPT', 'MD5-CRYPT', 'CRYPT']:
+                reference = reference[len(scheme)+2:]
+
+        result, new_hash = User.get_password_context().verify_and_update(password, reference)
+        if new_hash:
+            self.password = new_hash
             db.session.add(self)
             db.session.commit()
         return result
@@ -389,13 +402,10 @@ class User(Base, Email):
         """Set password for user with specified encryption scheme
            @password: plain text password to encrypt (if raw == True the hash itself)
         """
-        if hash_scheme is None:
-            hash_scheme = app.config['PASSWORD_SCHEME']
-        # for the list of hash schemes see https://wiki2.dovecot.org/Authentication/PasswordSchemes
         if raw:
-            self.password = '{'+hash_scheme+'}' + password
+            self.password = password
         else:
-            self.password = '{'+hash_scheme+'}' + self.get_password_context().encrypt(password, self.scheme_dict[hash_scheme])
+            self.password = User.get_password_context().hash(password)
 
     def get_managed_domains(self):
         if self.global_admin:
@@ -493,10 +503,18 @@ class Token(Base):
     ip = db.Column(db.String(255))
 
     def check_password(self, password):
-        return hash.sha256_crypt.verify(password, self.password)
+        if self.password.startswith("$5$"):
+            if hash.sha256_crypt.verify(password, self.password):
+                self.set_password(password)
+                db.session.add(self)
+                db.session.commit()
+                return True
+            return False
+        return hash.pbkdf2_sha256.verify(password, self.password)
 
     def set_password(self, password):
-        self.password = hash.sha256_crypt.using(rounds=1000).hash(password)
+        # tokens have 128bits of entropy, they are not bruteforceable
+        self.password = hash.pbkdf2_sha256.using(rounds=1).hash(password)
 
     def __str__(self):
         return self.comment

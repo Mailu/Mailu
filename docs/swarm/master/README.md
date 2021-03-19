@@ -106,6 +106,9 @@ As a side effect of this ingress mode "feature", make sure that the ingress subn
 - front and webmail are scalable (pending POD_ADDRESS_RANGE is used), although the let's encrypt magic might not like it (race condidtion ? or risk to be banned by let's encrypt server if too many front containers attemps to renew the certs at the same time) 
 - redis, antispam, antivirus, fetchmail, admin, webdav have not been tested (hence replicas=1 in the following docker-compose.yml file)
 
+## Docker secrets
+There are DB_PW_FILE and SECRET_KEY_FILE environment variables available to specify files for these variables. These can be used to configure Docker secrets instead of writing the values directly into the `docker-compose.yml` or `mailu.env`.
+
 ## Variable substitution and docker-compose.yml
 The docker stack deploy command doesn't support variable substitution in the .yml file itself. 
 As a consequence, we cannot simply use ``` docker stack deploy -c docker.compose.yml mailu ```

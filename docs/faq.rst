@@ -129,7 +129,7 @@ So when you have something like this:
 - The admin interface generates ``MX`` and ``SPF`` examples which point to the first entry of ``HOSTNAMES`` but these are only examples.
   You can modify them to use any other ``HOSTNAMES`` entry.
 
-You're mail service will be reachable for IMAP, POP3, SMTP and Webmail at the addresses:
+Your mail service will be reachable for IMAP, POP3, SMTP and Webmail at the addresses:
 
 - mail.example.com
 - mail.foo.com
@@ -257,7 +257,10 @@ Postfix, Dovecot, Nginx and Rspamd support overriding configuration files. Overr
 ``$ROOT/overrides``. Please refer to the official documentation of those programs for the
 correct syntax. The following file names will be taken as override configuration:
 
-- `Postfix`_ - ``postfix.cf`` in postfix sub-directory;
+- `Postfix`_ :
+   - ``main.cf`` as ``$ROOT/overrides/postfix/postfix.cf``
+   - ``master.cf`` as ``$ROOT/overrides/postfix/postfix.master``
+   - All ``$ROOT/overrides/postfix/*.map`` files
 - `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory;
 - `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory;
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
@@ -525,25 +528,42 @@ The above will block flagged IPs for a week, you can of course change it to you 
   
   actionstart = iptables -N f2b-bad-auth
                 iptables -A f2b-bad-auth -j RETURN
-                iptables -I FORWARD -p tcp -m multiport --dports 1:1024 -j f2b-bad-auth
+                iptables -I DOCKER-USER -p tcp -m multiport --dports 1:1024 -j f2b-bad-auth
   
-  actionstop = iptables -D FORWARD -p tcp -m multiport --dports 1:1024 -j f2b-bad-auth
+  actionstop = iptables -D DOCKER-USER -p tcp -m multiport --dports 1:1024 -j f2b-bad-auth
                iptables -F f2b-bad-auth
                iptables -X f2b-bad-auth
   
-  actioncheck = iptables -n -L FORWARD | grep -q 'f2b-bad-auth[ \t]'
+  actioncheck = iptables -n -L DOCKER-USER | grep -q 'f2b-bad-auth[ \t]'
   
   actionban = iptables -I f2b-bad-auth 1 -s <ip> -j DROP
   
   actionunban = iptables -D f2b-bad-auth -s <ip> -j DROP
 
-5. Restart Fail2Ban
+Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
+
+5. Configure and restart the Fail2Ban service
+
+Make sure Fail2Ban is started after the Docker service by adding a partial override which appends this to the existing configuration.
+
+.. code-block:: bash
+
+  sudo systemctl edit fail2ban
+
+Add the override and save the file.
+
+.. code-block:: bash
+
+  [Unit]
+  After=docker.service
+
+Restart the Fail2Ban service.
 
 .. code-block:: bash
 
   sudo systemctl restart fail2ban
 
-*Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_.
+*Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_, `1727`_.
 
 Users can't change their password from webmail
 ``````````````````````````````````````````````
@@ -667,7 +687,7 @@ iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 25 -j SNAT --to <your mx i
 .. _`1090`: https://github.com/Mailu/Mailu/issues/1090
 .. _`unbound`: https://nlnetlabs.nl/projects/unbound/about/
 .. _`1438`: https://github.com/Mailu/Mailu/issues/1438
-
+.. _`1727`: https://github.com/Mailu/Mailu/issues/1727
 
 A user gets ``Sender address rejected: Access denied. Please check the`` ``message recipient […] and try again`` even though the sender is legitimate?
 ``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````

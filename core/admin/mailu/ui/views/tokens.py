@@ -26,7 +26,7 @@ def token_create(user_email):
     form = forms.TokenForm()
     wtforms_components.read_only(form.displayed_password)
     if not form.raw_password.data:
-        form.raw_password.data = pwd.genword(entropy=128, charset="hex")
+        form.raw_password.data = pwd.genword(entropy=128, length=32, charset="hex")
         form.displayed_password.data = form.raw_password.data
     if form.validate_on_submit():
         token = models.Token(user=user)

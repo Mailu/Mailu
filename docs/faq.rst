@@ -540,24 +540,24 @@ The above will block flagged IPs for a week, you can of course change it to you 
   
   actionunban = iptables -D f2b-bad-auth -s <ip> -j DROP
 
-Using DOCKER-USER chain ensures that blocked IPs are processed in correct order with Docker. See more in: https://docs.docker.com/network/iptables/
+Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
 
-5. Configure and restart Fail2Ban service
+5. Configure and restart the Fail2Ban service
 
-Make sure Fail2Ban is started after Docker service by adding partial override which appends this to existing configuration..
+Make sure Fail2Ban is started after the Docker service by adding a partial override which appends this to the existing configuration.
 
 .. code-block:: bash
 
   sudo systemctl edit fail2ban
 
-Add override and save file.
+Add the override and save the file.
 
 .. code-block:: bash
 
   [Unit]
   After=docker.service
 
-Restart service.
+Restart the Fail2Ban service.
 
 .. code-block:: bash
 

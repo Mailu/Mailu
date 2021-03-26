@@ -34,7 +34,7 @@ install:
 
 before_script:
   - docker-compose -v
-  - echo "$DOCKER_PW" | docker login --username $DOCKER_UN --password-stdin 
+  - echo "$DOCKER_PW" | docker login --username $DOCKER_UN --password-stdin
   - docker-compose -f tests/build.yml build
   - sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
 
@@ -46,6 +46,7 @@ script:
   - travis_wait python tests/compose/test.py filters 10
   - python tests/compose/test.py rainloop 1
   - python tests/compose/test.py roundcube 1
+  - python tests/compose/test.py snappymail 1
   - python tests/compose/test.py webdav 1
 
 deploy:

@@ -50,6 +50,10 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rainloop:${MAILU_VERSION:-local}
     build: ../webmails/rainloop
 
+  snappymail:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}snappymail:${MAILU_VERSION:-local}
+    build: ../webmails/snappymail
+
   fetchmail:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}fetchmail:${MAILU_VERSION:-local}
     build: ../optional/fetchmail

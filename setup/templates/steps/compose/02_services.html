@@ -13,10 +13,11 @@ the security implications caused by such an increase of attack surface.<p>
 <!--   <div class="radio"> -->
 <!--     {{ macros.radio("webmail_type", "roundcube", "RoundCube", "popular Webmail running on top of PHP") }} -->
 <!--     {{ macros.radio("webmail_type", "rainloop", "Rainloop", "lightweight Webmail based on PHP, no database") }} -->
+<!--     {{ macros.radio("webmail_type", "snappymail", "SnappyMail", "simple, modern, lightweight Webmail, no database") }} -->
 <!--   </div> -->
   <br/>
   <select class="btn btn-primary dropdown-toggle" name="webmail_type" id="webmail">
-  	{% for webmailtype in ["none", "roundcube", "rainloop"] %}
+  	{% for webmailtype in ["none", "roundcube", "rainloop", "snappymail"] %}
   	<option value="{{ webmailtype }}" >{{ webmailtype }}</option>
   	{% endfor %}
   </select>

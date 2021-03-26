@@ -67,7 +67,7 @@
     # Run the admin interface in debug mode
     #DEBUG: "True"
 
-    # Choose which webmail to run if any (values: roundcube, rainloop, none)
+    # Choose which webmail to run if any (values: roundcube, rainloop, snappymail, none)
     WEBMAIL: "roundcube"
 
     # Dav server implementation (value: radicale, none)

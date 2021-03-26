@@ -7,13 +7,13 @@ ONBUILD COPY --from=balenalib/rpi-alpine:3.10 /usr/bin/qemu-arm-static /usr/bin/
 FROM ${ARCH}php:7.4-apache as build_other
 
 FROM build_${QEMU}
-#Shared layer between rainloop and roundcube
+#Shared layer between rainloop, roundcube and snappymail
 RUN apt-get update && apt-get install -y \
   python3 curl python3-pip git python3-multidict \
   && rm -rf /var/lib/apt/lists \
   && echo "ServerSignature Off" >> /etc/apache2/apache2.conf
 
-# Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
+# Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube, snappymail
 RUN pip3 install socrate
 
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.4.6/roundcubemail-1.4.6-complete.tar.gz

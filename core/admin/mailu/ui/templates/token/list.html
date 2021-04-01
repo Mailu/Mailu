@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block main_action %}
-<a class="btn btn-primary" href="{{ url_for('.token_create', user_email=user.email) }}">{% trans %}New token{% endtrans %}</a>
+<a class="btn btn-primary float-right" href="{{ url_for('.token_create', user_email=user.email) }}">{% trans %}New token{% endtrans %}</a>
 {% endblock %}
 
 {% block content %}

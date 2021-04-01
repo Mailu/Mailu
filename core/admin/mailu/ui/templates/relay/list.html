@@ -6,7 +6,7 @@
 
 {% block main_action %}
 {% if current_user.global_admin %}
-<a class="btn btn-primary" href="{{ url_for('.relay_create') }}">{% trans %}New relayed domain{% endtrans %}</a>
+<a class="btn btn-primary float-right" href="{{ url_for('.relay_create') }}">{% trans %}New relayed domain{% endtrans %}</a>
 {% endif %}
 {% endblock %}
 

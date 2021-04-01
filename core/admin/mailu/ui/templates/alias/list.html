@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block main_action %}
-<a class="btn btn-primary" href="{{ url_for('.alias_create', domain_name=domain.name) }}">{% trans %}Add alias{% endtrans %}</a>
+<a class="btn btn-primary float-right" href="{{ url_for('.alias_create', domain_name=domain.name) }}">{% trans %}Add alias{% endtrans %}</a>
 {% endblock %}
 
 {% block content %}

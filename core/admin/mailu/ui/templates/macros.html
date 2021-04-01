@@ -38,7 +38,7 @@
   {% else %}
     {{ field.label if label else '' }}{{ form_field_errors(field) }}
       {% if prepend %}<div class="input-group-prepend">{% endif %}
-      {% if append %}<div class="input-group-text">{% endif %}
+      {% if append %}<div class="input-group-append">{% endif %}
         {{ prepend|safe }}{{ field(class_="form-control " + class_, **kwargs) }}{{ append|safe }}
       {% if prepend or append %}</div>{% endif %}
   {% endif %}

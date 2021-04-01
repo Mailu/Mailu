@@ -11,7 +11,7 @@
   "dependencies": {
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
-    "admin-lte": "^2.4.10",
+    "admin-lte": "^3.1.0",
     "babel-loader": "^8.0.5",
     "bootstrap": "^3.4.1",
     "css-loader": "^2.1.1",

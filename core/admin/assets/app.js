@@ -11,7 +11,7 @@ jQuery("document").ready(function() {
         tags: true,
         tokenSeparators: [',', ' ']
     });
-    jQuery(".table").DataTable({
+    jQuery(".dataTable").DataTable({
         "responsive": true,
     });
 });

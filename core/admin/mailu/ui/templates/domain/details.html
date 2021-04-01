@@ -21,7 +21,7 @@
 {% endblock %}
 
 {% block content %}
-{% call macros.table() %}
+{% call macros.table(datatable=False) %}
 {% set hostname = config["HOSTNAMES"].split(",")[0] %}
 <tr>
   <th>{% trans %}Domain name{% endtrans %}</th>

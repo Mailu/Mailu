@@ -12,18 +12,18 @@
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   
-  {% call macros.box(title=_("Displayed name")) %}
+  {% call macros.card(title=_("Displayed name")) %}
   {{ macros.form_field(form.displayed_name) }}
   {% endcall %}
 
-  {% call macros.box(title=_("Antispam")) %}
+  {% call macros.card(title=_("Antispam")) %}
   {{ macros.form_field(form.spam_enabled) }}
   {{ macros.form_field(form.spam_threshold, step=1, max=100,
       prepend='<span class="input-group-addon"><span id="threshold">'+form.spam_threshold.data.__str__()+'</span>&nbsp;/&nbsp;100</span>',
       oninput='$("#threshold").text(this.value);') }}
   {% endcall %}
 
-  {% call macros.box(title=_("Auto-forward")) %}
+  {% call macros.card(title=_("Auto-forward")) %}
   {{ macros.form_field(form.forward_enabled,
       onchange="if(this.checked){$('#forward_destination,#forward_keep').removeAttr('disabled')}
                 else{$('#forward_destination,#forward_keep').attr('disabled', '')}") }}

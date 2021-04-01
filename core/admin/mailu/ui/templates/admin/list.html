@@ -12,17 +12,21 @@
 
 {% block content %}
 {% call macros.table() %}
-<tr>
-  <th>{% trans %}Actions{% endtrans %}</th>
-  <th>{% trans %}Email{% endtrans %}</th>
-</tr>
-{% for admin in admins %}
-<tr>
-  <td>
-    <a href="{{ url_for('.admin_delete', admin=admin.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
-  </td>
-  <td>{{ admin }}</td>
-</tr>
-{% endfor %}
+<thead>
+  <tr>
+    <th>{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}Email{% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
+  {% for admin in admins %}
+  <tr>
+    <td>
+      <a href="{{ url_for('.admin_delete', admin=admin.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+    </td>
+    <td>{{ admin }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
 {% endcall %}
 {% endblock %}

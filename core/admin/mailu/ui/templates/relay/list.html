@@ -12,26 +12,30 @@
 
 {% block content %}
 {% call macros.table() %}
-<tr>
-  <th>{% trans %}Actions{% endtrans %}</th>
-  <th>{% trans %}Domain name{% endtrans %}</th>
-  <th>{% trans %}Remote host{% endtrans %}</th>
-  <th>{% trans %}Comment{% endtrans %}</th>
-  <th>{% trans %}Created{% endtrans %}</th>
-  <th>{% trans %}Last edit{% endtrans %}</th>
-</tr>
-{% for relay in relays %}
-<tr>
-  <td>
-<a href="{{ url_for('.relay_edit', relay_name=relay.name) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
-    <a href="{{ url_for('.relay_delete', relay_name=relay.name) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>&nbsp;
-  </td>
-  <td>{{ relay.name }}</td>
-  <td>{{ relay.smtp or '-' }}</td>
-  <td>{{ relay.comment or '' }}</td>
-  <td>{{ relay.created_at }}</td>
-  <td>{{ relay.updated_at or '' }}</td>
-</tr>
-{% endfor %}
+<thead>
+  <tr>
+    <th>{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}Domain name{% endtrans %}</th>
+    <th>{% trans %}Remote host{% endtrans %}</th>
+    <th>{% trans %}Comment{% endtrans %}</th>
+    <th>{% trans %}Created{% endtrans %}</th>
+    <th>{% trans %}Last edit{% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
+  {% for relay in relays %}
+  <tr>
+    <td>
+      <a href="{{ url_for('.relay_edit', relay_name=relay.name) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
+      <a href="{{ url_for('.relay_delete', relay_name=relay.name) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>&nbsp;
+    </td>
+    <td>{{ relay.name }}</td>
+    <td>{{ relay.smtp or '-' }}</td>
+    <td>{{ relay.comment or '' }}</td>
+    <td>{{ relay.created_at }}</td>
+    <td>{{ relay.updated_at or '' }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
 {% endcall %}
 {% endblock %}

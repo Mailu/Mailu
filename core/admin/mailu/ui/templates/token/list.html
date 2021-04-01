@@ -14,21 +14,25 @@
 
 {% block content %}
 {% call macros.table() %}
-<tr>
-  <th>{% trans %}Actions{% endtrans %}</th>
-  <th>{% trans %}Comment{% endtrans %}</th>
-  <th>{% trans %}Authorized IP{% endtrans %}</th>
-  <th>{% trans %}Created{% endtrans %}</th>
-</tr>
-{% for token in user.tokens %}
-<tr>
-  <td>
-    <a href="{{ url_for('.token_delete', token_id=token.id) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
-  </td>
-  <td>{{ token.comment }}</td>
-  <td>{{ token.ip or "any" }}</td>
-  <td>{{ token.created_at }}</td>
-</tr>
-{% endfor %}
+<thead>
+  <tr>
+    <th>{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}Comment{% endtrans %}</th>
+    <th>{% trans %}Authorized IP{% endtrans %}</th>
+    <th>{% trans %}Created{% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
+  {% for token in user.tokens %}
+  <tr>
+    <td>
+      <a href="{{ url_for('.token_delete', token_id=token.id) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+    </td>
+    <td>{{ token.comment }}</td>
+    <td>{{ token.ip or "any" }}</td>
+    <td>{{ token.created_at }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
 {% endcall %}
 {% endblock %}

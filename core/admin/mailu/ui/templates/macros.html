@@ -86,11 +86,9 @@
 {% macro table(theme="primary") %}
 <div class="row">
   <div class="col-lg-12">
-    <div class="box box-{{ theme }}">
+    <div class="card card-{{ theme }}">
       <table class="table table-bordered">
-        <tbody>
           {{ caller() }}
-        </tbody>
       </table>
     </div>
   </div>

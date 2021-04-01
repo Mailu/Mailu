@@ -14,26 +14,30 @@
 
 {% block content %}
 {% call macros.table() %}
-<tr>
-  <th>{% trans %}Actions{% endtrans %}</th>
-  <th>{% trans %}Email{% endtrans %}</th>
-  <th>{% trans %}Destination{% endtrans %}</th>
-  <th>{% trans %}Comment{% endtrans %}</th>
-  <th>{% trans %}Created{% endtrans %}</th>
-  <th>{% trans %}Last edit{% endtrans %}</th>
-</tr>
-{% for alias in domain.aliases %}
-<tr>
-  <td>
-    <a href="{{ url_for('.alias_edit', alias=alias.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
-    <a href="{{ url_for('.alias_delete', alias=alias.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
-  </td>
-  <td>{{ alias }}</td>
-  <td>{{ alias.destination|join(', ') or '-' }}</td>
-  <td>{{ alias.comment or '' }}</td>
-  <td>{{ alias.created_at }}</td>
-  <td>{{ alias.updated_at or '' }}</td>
-</tr>
-{% endfor %}
+<thead>
+  <tr>
+    <th>{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}Email{% endtrans %}</th>
+    <th>{% trans %}Destination{% endtrans %}</th>
+    <th>{% trans %}Comment{% endtrans %}</th>
+    <th>{% trans %}Created{% endtrans %}</th>
+    <th>{% trans %}Last edit{% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
+  {% for alias in domain.aliases %}
+  <tr>
+    <td>
+      <a href="{{ url_for('.alias_edit', alias=alias.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
+      <a href="{{ url_for('.alias_delete', alias=alias.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+    </td>
+    <td>{{ alias }}</td>
+    <td>{{ alias.destination|join(', ') or '-' }}</td>
+    <td>{{ alias.comment or '' }}</td>
+    <td>{{ alias.created_at }}</td>
+    <td>{{ alias.updated_at or '' }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
 {% endcall %}
 {% endblock %}

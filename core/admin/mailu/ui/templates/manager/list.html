@@ -14,10 +14,13 @@
 
 {% block content %}
 {% call macros.table() %}
-<tr>
-  <th>{% trans %}Actions{% endtrans %}</th>
-  <th>{% trans %}Email{% endtrans %}</th>
-</tr>
+<thead>
+  <tr>
+    <th>{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}Email{% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
 {% for manager in domain.managers %}
 <tr>
   <td>
@@ -26,5 +29,6 @@
   <td>{{ manager }}</td>
 </tr>
 {% endfor %}
+</tbody>
 {% endcall %}
 {% endblock %}

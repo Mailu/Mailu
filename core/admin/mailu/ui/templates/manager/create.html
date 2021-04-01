@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-{% call macros.box() %}
+{% call macros.card() %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.manager, class_='mailselect') }}

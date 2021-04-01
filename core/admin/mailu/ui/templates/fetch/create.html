@@ -11,7 +11,7 @@
 {% block content %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
-  {% call macros.box(title="Remote server") %}
+  {% call macros.card(title="Remote server") %}
   {{ macros.form_field(form.protocol) }}
   {{ macros.form_fields((form.host, form.port)) }}
   {{ macros.form_field(form.tls) }}
@@ -22,7 +22,7 @@
   {{ macros.form_field(form.password) }}
   {% endcall %}
 
-  {% call macros.box(title="Settings") %}
+  {% call macros.card(title="Settings") %}
   {{ macros.form_field(form.keep) }}
   {% endcall %}
 

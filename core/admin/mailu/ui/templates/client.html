@@ -9,7 +9,7 @@ configure your email client
 {% endblock %}
 
 {% block content %}
-{% call macros.box(title="Incoming mail") %}
+{% call macros.card(title="Incoming mail") %}
 <table class="table table-bordered">
   <tbody>
     <tr>
@@ -36,7 +36,7 @@ configure your email client
 </table>
 {% endcall %}
 
-{% call macros.box(title="Outgoing mail") %}
+{% call macros.card(title="Outgoing mail") %}
 <table class="table table-bordered">
   <tbody>
     <tr>

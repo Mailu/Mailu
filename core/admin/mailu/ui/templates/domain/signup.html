@@ -9,7 +9,7 @@
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
 
-  {% call macros.box(title="Requirements") %}
+  {% call macros.card(title="Requirements") %}
   <p>{% trans %}In order to register a new domain, you must first setup the
     domain zone so that the domain <code>MX</code> points to this server{% endtrans %}
     (<code>{{ config["HOSTNAMES"].split(",")[0] }}</code>).
@@ -22,7 +22,7 @@
   </p>
   {% endcall %}
 
-  {% call macros.box() %}
+  {% call macros.card() %}
   {% if form.localpart %}
   {{ macros.form_fields((form.localpart, form.name), append='<span class="input-group-addon">@</span>') }}
   {{ macros.form_fields((form.pw, form.pw2)) }}

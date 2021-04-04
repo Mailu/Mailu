@@ -10,6 +10,8 @@ import hashlib
 import secrets
 import time
 
+from multiprocessing import Value
+
 from mailu import limiter
 
 import flask
@@ -87,10 +89,10 @@ class RedisStore:
             raise KeyError(key)
         return value
 
-    def put(self, key, value, ttl_secs=None):
+    def put(self, key, value, ttl=None):
         """ save item to store. """
-        if ttl_secs:
-            self.redis.setex(key, int(ttl_secs), value)
+        if ttl:
+            self.redis.setex(key, int(ttl), value)
         else:
             self.redis.set(key, value)
 
@@ -172,6 +174,11 @@ class MailuSession(CallbackDict, SessionMixin):
         CallbackDict.__init__(self, initial, _on_update)
 
     @property
+    def saved(self):
+        """ this reflects if the session was saved. """
+        return self._key is not None
+
+    @property
     def sid(self):
         """ this reflects the session's id. """
         if self._sid is None or self._uid is None or self._created is None:
@@ -181,9 +188,7 @@ class MailuSession(CallbackDict, SessionMixin):
     def destroy(self):
         """ destroy session for security reasons. """
 
-        if self._key is not None:
-            self.app.session_store.delete(self._key)
-            self._key = None
+        self.delete()
 
         self._uid = None
         self._sid = None
@@ -191,27 +196,27 @@ class MailuSession(CallbackDict, SessionMixin):
 
         self.clear()
 
-        self.modified = False
+        self.modified = True
         self.new = False
 
     def regenerate(self):
         """ generate new id for session to avoid `session fixation`. """
 
-        if self._key is not None:
-            self.app.session_store.delete(self._key)
-            self._key = None
+        self.delete()
 
         self._sid = None
         self._created = self.app.session_config.gen_created()
 
         self.modified = True
 
+    def delete(self):
+        """ Delete stored session. """
+        if self.saved:
+            self.app.session_store.delete(self._key)
+            self._key = None
+
     def save(self):
         """ Save session to store. """
-
-        # don't save if session was destroyed or is not modified
-        if self._created is None or not self.modified:
-            return False
 
         # set uid from dict data
         if self._uid is None:
@@ -221,33 +226,24 @@ class MailuSession(CallbackDict, SessionMixin):
         if self._sid is None:
             self._sid = self.app.session_config.gen_sid()
 
-        # set created if permanent state changed
-        if self.permanent:
-            if self._created:
-                self._created = b''
-        elif not self._created:
-            self._created = self.app.session_config.gen_created()
-
         # get new session key
         key = self.sid
 
         # delete old session if key has changed
-        if key != self._key and self._key is not None:
-            self.app.session_store.delete(self._key)
+        if key != self._key:
+            self.delete()
 
         # save session
         self.app.session_store.put(
             key,
             pickle.dumps(dict(self)),
-            None if self.permanent else self.app.permanent_session_lifetime.total_seconds()
+            self.app.permanent_session_lifetime.total_seconds()
         )
 
         self._key = key
 
         self.new = False
         self.modified = False
-
-        return True
 
 class MailuSessionConfig:
     """ Stores sessions crypto config """
@@ -264,8 +260,9 @@ class MailuSessionConfig:
 
         hash_bytes = bits//8 + (bits%8>0)
         time_bytes = 4 # 32 bit timestamp for now
+        shaker = hashlib.shake_256 if bits>128 else hashlib.shake_128
 
-        self._shake_fn = hashlib.shake_256 if bits>128 else hashlib.shake_128
+        self._shaker   = shaker(want_bytes(app.config.get('SECRET_KEY', '')))
         self._hash_len = hash_bytes
         self._hash_b64 = len(self._encode(bytes(hash_bytes)))
         self._key_min  = 2*self._hash_b64
@@ -277,13 +274,15 @@ class MailuSessionConfig:
 
     def gen_uid(self, uid):
         """ Generate hashed user id part of session key. """
-        return self._encode(self._shake_fn(want_bytes(uid)).digest(self._hash_len))
+        shaker = self._shaker.copy()
+        shaker.update(want_bytes(uid))
+        return self._encode(shaker.digest(self._hash_len))
 
     def gen_created(self, now=None):
         """ Generate base64 representation of creation time. """
         return self._encode(int(now or time.time()).to_bytes(8, byteorder='big').lstrip(b'\0'))
 
-    def parse_key(self, key, app=None, now=None):
+    def parse_key(self, key, app=None, validate=False, now=None):
         """ Split key into sid, uid and creation time. """
 
         if not (isinstance(key, bytes) and self._key_min <= len(key) <= self._key_max):
@@ -299,13 +298,12 @@ class MailuSessionConfig:
             return None
 
         # validate creation time when requested or store does not support ttl
-        if now is not None or not app.session_store.has_ttl:
+        if validate or not app.session_store.has_ttl:
+            if now is None:
+                now = int(time.time())
             created = int.from_bytes(created, byteorder='big')
-            if created > 0:
-                if now is None:
-                    now = int(time.time())
-                if created < now < created + app.permanent_session_lifetime.total_seconds():
-                    return None
+            if not (created < now < created + app.permanent_session_lifetime.total_seconds()):
+                return None
 
         return (uid, sid, crt)
 
@@ -328,17 +326,40 @@ class MailuSessionInterface(SessionInterface):
     def save_session(self, app, session, response):
         """ Save modified session. """
 
-        if session.save():
-            # session saved. update cookie
-            response.set_cookie(
-                key=app.config['SESSION_COOKIE_NAME'],
-                value=session.sid,
-                expires=self.get_expiration_time(app, session),
-                path=self.get_cookie_path(app),
-                domain=self.get_cookie_domain(app),
-                secure=app.config['SESSION_COOKIE_SECURE'],
-                httponly=app.config['SESSION_COOKIE_HTTPONLY']
-            )
+        # If the session is modified to be empty, remove the cookie.
+        # If the session is empty, return without setting the cookie.
+        if not session:
+            if session.modified:
+                session.delete()
+                response.delete_cookie(
+                    app.session_cookie_name,
+                    domain=self.get_cookie_domain(app),
+                    path=self.get_cookie_path(app),
+                )
+            return
+
+        # Add a "Vary: Cookie" header if the session was accessed
+        if session.accessed:
+            response.vary.add('Cookie')
+
+        # TODO: set cookie from time to time to prevent expiration in browser
+        # also update expire in redis
+
+        if not self.should_set_cookie(app, session):
+            return
+
+        # save session and update cookie
+        session.save()
+        response.set_cookie(
+            app.session_cookie_name,
+            session.sid,
+            expires=self.get_expiration_time(app, session),
+            httponly=self.get_cookie_httponly(app),
+            domain=self.get_cookie_domain(app),
+            path=self.get_cookie_path(app),
+            secure=self.get_cookie_secure(app),
+            samesite=self.get_cookie_samesite(app)
+        )
 
 class MailuSessionExtension:
     """ Server side session handling """
@@ -352,36 +373,29 @@ class MailuSessionExtension:
 
         count = 0
         for key in app.session_store.list():
-            if not app.session_config.parse_key(key, app, now):
+            if not app.session_config.parse_key(key, app, validate=True, now=now):
                 app.session_store.delete(key)
                 count += 1
 
         return count
 
     @staticmethod
-    def prune_sessions(uid=None, keep_permanent=False, keep=None, app=None):
+    def prune_sessions(uid=None, keep=None, app=None):
         """ Remove sessions
             uid: remove all sessions (NONE) or sessions belonging to a specific user
-            keep_permanent: also delete permanent sessions?
             keep: keep listed sessions
         """
 
         keep = keep or set()
         app = app or flask.current_app
-        now = int(time.time())
 
         prefix = None if uid is None else app.session_config.gen_uid(uid)
 
         count = 0
         for key in app.session_store.list(prefix):
-            if key in keep:
-                continue
-            if keep_permanent:
-                if parsed := app.session_config.parse_key(key, app, now):
-                    if not parsed[2]:
-                        continue
-            app.session_store.delete(key)
-            count += 1
+            if key not in keep:
+                app.session_store.delete(key)
+                count += 1
 
         return count
 
@@ -398,14 +412,18 @@ class MailuSessionExtension:
                 redis.StrictRedis().from_url(app.config['SESSION_STORAGE_URL'])
             )
 
-            # clean expired sessions on first use in case lifetime was changed
+            # clean expired sessions oonce on first use in case lifetime was changed
             def cleaner():
-                MailuSessionExtension.cleanup_sessions(app)
+                with cleaned.get_lock():
+                    if not cleaned.value:
+                        cleaned.value = True
+                        flask.current_app.logger.error('cleaning')
+                        MailuSessionExtension.cleanup_sessions(app)
 
-            # TODO: hmm. this will clean once per gunicorn worker
             app.before_first_request(cleaner)
 
         app.session_config = MailuSessionConfig(app)
         app.session_interface = MailuSessionInterface()
 
+cleaned = Value('i', False)
 session = MailuSessionExtension()

@@ -140,6 +140,7 @@ class ConfigManager(dict):
         self.config['SESSION_STORAGE_URL'] = 'redis://{0}/3'.format(self.config['REDIS_ADDRESS'])
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
+        self.config['SESSION_KEY_BITS'] = 128
         self.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=int(self.config['SESSION_LIFETIME']))
         # update the app config itself
         app.config = self

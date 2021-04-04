@@ -1,7 +1,14 @@
 """ Mailu admin app utilities
 """
 
-from datetime import datetime
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
+import hashlib
+import secrets
+import time
 
 from mailu import limiter
 
@@ -9,12 +16,11 @@ import flask
 import flask_login
 import flask_migrate
 import flask_babel
-import flask_kvsession
 import redis
 
-from simplekv.memory import DictStore
-from simplekv.memory.redisstore import RedisStore
+from flask.sessions import SessionMixin, SessionInterface
 from itsdangerous.encoding import want_bytes
+from werkzeug.datastructures import CallbackDict
 from werkzeug.contrib import fixers
 
 
@@ -65,77 +71,341 @@ proxy = PrefixMiddleware()
 migrate = flask_migrate.Migrate()
 
 
-# session store
-class NullSigner(object):
-    """NullSigner does not sign nor unsign"""
-    def __init__(self, *args, **kwargs):
-        pass
-    def sign(self, value):
-        """Signs the given string."""
-        return want_bytes(value)
-    def unsign(self, signed_value):
-        """Unsigns the given string."""
-        return want_bytes(signed_value)
+# session store (inspired by https://github.com/mbr/flask-kvsession)
+class RedisStore:
+    """ Stores session data in a redis db. """
 
-class KVSessionIntf(flask_kvsession.KVSessionInterface):
-    """ KVSession interface allowing to run int function on first access """
-    def __init__(self, app, init_fn=None):
-        if init_fn:
-            app.kvsession_init = init_fn
+    has_ttl = True
+
+    def __init__(self, redisstore):
+        self.redis = redisstore
+
+    def get(self, key):
+        """ load item from store. """
+        value = self.redis.get(key)
+        if value is None:
+            raise KeyError(key)
+        return value
+
+    def put(self, key, value, ttl_secs=None):
+        """ save item to store. """
+        if ttl_secs:
+            self.redis.setex(key, int(ttl_secs), value)
         else:
-            self._first_run(None)
-    def _first_run(self, app):
-        if app:
-            app.kvsession_init()
-        self.open_session = super().open_session
-        self.save_session = super().save_session
-    def open_session(self, app, request):
-        self._first_run(app)
-        return super().open_session(app, request)
-    def save_session(self, app, session, response):
-        self._first_run(app)
-        return super().save_session(app, session, response)
+            self.redis.set(key, value)
 
-class KVSessionExt(flask_kvsession.KVSessionExtension):
-    """ Activates Flask-KVSession for an application. """
-    def init_kvstore(self, config):
-        """ Initialize kvstore - fallback to DictStore without REDIS_ADDRESS """
-        if addr := config.get('REDIS_ADDRESS'):
-            self.default_kvstore = RedisStore(redis.StrictRedis().from_url(f'redis://{addr}/3'))
-        else:
-            self.default_kvstore = DictStore()
+    def delete(self, key):
+        """ delete item from store. """
+        self.redis.delete(key)
 
-    def cleanup_sessions(self, app=None, dkey=None, dvalue=None):
-        """ Remove sessions from the store. """
-        if not app:
+    def list(self, prefix=None):
+        """ return list of keys starting with prefix """
+        if prefix:
+            prefix += b'*'
+        return list(self.redis.scan_iter(match=prefix))
+
+class DictStore:
+    """ Stores session data in a python dict. """
+
+    has_ttl = False
+
+    def __init__(self):
+        self.dict = {}
+
+    def get(self, key):
+        """ load item from store. """
+        return self.dict[key]
+
+    def put(self, key, value, ttl_secs=None):
+        """ save item to store. """
+        self.dict[key] = value
+
+    def delete(self, key):
+        """ delete item from store. """
+        try:
+            del self.dict[key]
+        except KeyError:
+            pass
+
+    def list(self, prefix=None):
+        """ return list of keys starting with prefix """
+        if prefix is None:
+            return list(self.dict.keys())
+        return [key for key in self.dict if key.startswith(prefix)]
+
+class MailuSession(CallbackDict, SessionMixin):
+    """ Custom flask session storage. """
+
+    # default modified to false
+    modified = False
+
+    def __init__(self, key=None, app=None):
+
+        self.app = app or flask.current_app
+
+        initial = None
+
+        key = want_bytes(key)
+        if parsed := self.app.session_config.parse_key(key, self.app):
+            try:
+                initial = pickle.loads(app.session_store.get(key))
+            except (KeyError, EOFError, pickle.UnpicklingError):
+                # either the cookie was manipulated or we did not find the
+                # session in the backend or the pickled data is invalid.
+                # => start new session
+                pass
+            else:
+                (self._uid, self._sid, self._created) = parsed
+                self._key = key
+
+        if initial is None:
+            # start new session
+            self.new = True
+            self._uid = None
+            self._sid = None
+            self._created = self.app.session_config.gen_created()
+            self._key = None
+
+        def _on_update(obj):
+            obj.modified = True
+
+        CallbackDict.__init__(self, initial, _on_update)
+
+    @property
+    def sid(self):
+        """ this reflects the session's id. """
+        if self._sid is None or self._uid is None or self._created is None:
+            return None
+        return b''.join([self._uid, self._sid, self._created])
+
+    def destroy(self):
+        """ destroy session for security reasons. """
+
+        if self._key is not None:
+            self.app.session_store.delete(self._key)
+            self._key = None
+
+        self._uid = None
+        self._sid = None
+        self._created = None
+
+        self.clear()
+
+        self.modified = False
+        self.new = False
+
+    def regenerate(self):
+        """ generate new id for session to avoid `session fixation`. """
+
+        if self._key is not None:
+            self.app.session_store.delete(self._key)
+            self._key = None
+
+        self._sid = None
+        self._created = self.app.session_config.gen_created()
+
+        self.modified = True
+
+    def save(self):
+        """ Save session to store. """
+
+        # don't save if session was destroyed or is not modified
+        if self._created is None or not self.modified:
+            return False
+
+        # set uid from dict data
+        if self._uid is None:
+            self._uid = self.app.session_config.gen_uid(self.get('user_id', ''))
+
+        # create new session id for new or regenerated sessions
+        if self._sid is None:
+            self._sid = self.app.session_config.gen_sid()
+
+        # set created if permanent state changed
+        if self.permanent:
+            if self._created:
+                self._created = b''
+        elif not self._created:
+            self._created = self.app.session_config.gen_created()
+
+        # get new session key
+        key = self.sid
+
+        # delete old session if key has changed
+        if key != self._key and self._key is not None:
+            self.app.session_store.delete(self._key)
+
+        # save session
+        self.app.session_store.put(
+            key,
+            pickle.dumps(dict(self)),
+            None if self.permanent else self.app.permanent_session_lifetime.total_seconds()
+        )
+
+        self._key = key
+
+        self.new = False
+        self.modified = False
+
+        return True
+
+class MailuSessionConfig:
+    """ Stores sessions crypto config """
+
+    def __init__(self, app=None):
+
+        if app is None:
             app = flask.current_app
-        if dkey is None and dvalue is None:
-            now = datetime.utcnow()
-            for key in app.kvsession_store.keys():
-                try:
-                    sid = flask_kvsession.SessionID.unserialize(key)
-                except ValueError:
-                    pass
-                else:
-                    if sid.has_expired(
-                        app.config['PERMANENT_SESSION_LIFETIME'],
-                        now
-                    ):
-                        app.kvsession_store.delete(key)
-        elif dkey is not None and dvalue is not None:
-            for key in app.kvsession_store.keys():
-                if app.session_interface.serialization_method.loads(
-                    app.kvsession_store.get(key)
-                ).get(dkey, None) == dvalue:
-                    app.kvsession_store.delete(key)
+
+        bits = app.config.get('SESSION_KEY_BITS', 64)
+
+        if bits < 64:
+            raise ValueError('Session id entropy must not be less than 64 bits!')
+
+        hash_bytes = bits//8 + (bits%8>0)
+        time_bytes = 4 # 32 bit timestamp for now
+
+        self._shake_fn = hashlib.shake_256 if bits>128 else hashlib.shake_128
+        self._hash_len = hash_bytes
+        self._hash_b64 = len(self._encode(bytes(hash_bytes)))
+        self._key_min  = 2*self._hash_b64
+        self._key_max  = self._key_min + len(self._encode(bytes(time_bytes)))
+
+    def gen_sid(self):
+        """ Generate random session id. """
+        return self._encode(secrets.token_bytes(self._hash_len))
+
+    def gen_uid(self, uid):
+        """ Generate hashed user id part of session key. """
+        return self._encode(self._shake_fn(want_bytes(uid)).digest(self._hash_len))
+
+    def gen_created(self, now=None):
+        """ Generate base64 representation of creation time. """
+        return self._encode(int(now or time.time()).to_bytes(8, byteorder='big').lstrip(b'\0'))
+
+    def parse_key(self, key, app=None, now=None):
+        """ Split key into sid, uid and creation time. """
+
+        if not (isinstance(key, bytes) and self._key_min <= len(key) <= self._key_max):
+            return None
+
+        uid = key[:self._hash_b64]
+        sid = key[self._hash_b64:self._key_min]
+        crt = key[self._key_min:]
+
+        # validate if parts are decodeable
+        created = self._decode(crt)
+        if created is None or self._decode(uid) is None or self._decode(sid) is None:
+            return None
+
+        # validate creation time when requested or store does not support ttl
+        if now is not None or not app.session_store.has_ttl:
+            created = int.from_bytes(created, byteorder='big')
+            if created > 0:
+                if now is None:
+                    now = int(time.time())
+                if created < now < created + app.permanent_session_lifetime.total_seconds():
+                    return None
+
+        return (uid, sid, crt)
+
+    def _encode(self, value):
+        return secrets.base64.urlsafe_b64encode(value).rstrip(b'=')
+
+    def _decode(self, value):
+        try:
+            return secrets.base64.urlsafe_b64decode(value + b'='*(4-len(value)%4))
+        except secrets.binascii.Error:
+            return None
+
+class MailuSessionInterface(SessionInterface):
+    """ Custom flask session interface. """
+
+    def open_session(self, app, request):
+        """ Load or create session. """
+        return MailuSession(request.cookies.get(app.config['SESSION_COOKIE_NAME'], None), app)
+
+    def save_session(self, app, session, response):
+        """ Save modified session. """
+
+        if session.save():
+            # session saved. update cookie
+            response.set_cookie(
+                key=app.config['SESSION_COOKIE_NAME'],
+                value=session.sid,
+                expires=self.get_expiration_time(app, session),
+                path=self.get_cookie_path(app),
+                domain=self.get_cookie_domain(app),
+                secure=app.config['SESSION_COOKIE_SECURE'],
+                httponly=app.config['SESSION_COOKIE_HTTPONLY']
+            )
+
+class MailuSessionExtension:
+    """ Server side session handling """
+
+    @staticmethod
+    def cleanup_sessions(app=None):
+        """ Remove invalid or expired sessions. """
+
+        app = app or flask.current_app
+        now = int(time.time())
+
+        count = 0
+        for key in app.session_store.list():
+            if not app.session_config.parse_key(key, app, now):
+                app.session_store.delete(key)
+                count += 1
+
+        return count
+
+    @staticmethod
+    def prune_sessions(uid=None, keep_permanent=False, keep=None, app=None):
+        """ Remove sessions
+            uid: remove all sessions (NONE) or sessions belonging to a specific user
+            keep_permanent: also delete permanent sessions?
+            keep: keep listed sessions
+        """
+
+        keep = keep or set()
+        app = app or flask.current_app
+        now = int(time.time())
+
+        prefix = None if uid is None else app.session_config.gen_uid(uid)
+
+        count = 0
+        for key in app.session_store.list(prefix):
+            if key in keep:
+                continue
+            if keep_permanent:
+                if parsed := app.session_config.parse_key(key, app, now):
+                    if not parsed[2]:
+                        continue
+            app.session_store.delete(key)
+            count += 1
+
+        return count
+
+    def init_app(self, app):
+        """ Replace session management of application. """
+
+        if app.config.get('MEMORY_SESSIONS'):
+            # in-memory session store for use in development
+            app.session_store = DictStore()
+
         else:
-            raise ValueError('Need dkey and dvalue.')
+            # redis-based session store for use in production
+            app.session_store = RedisStore(
+                redis.StrictRedis().from_url(app.config['SESSION_STORAGE_URL'])
+            )
 
-    def init_app(self, app, session_kvstore=None):
-        """ Initialize application and KVSession. """
-        super().init_app(app, session_kvstore)
-        app.session_interface = KVSessionIntf(app, self.cleanup_sessions)
+            # clean expired sessions on first use in case lifetime was changed
+            def cleaner():
+                MailuSessionExtension.cleanup_sessions(app)
 
-kvsession = KVSessionExt()
+            # TODO: hmm. this will clean once per gunicorn worker
+            app.before_first_request(cleaner)
 
-flask_kvsession.Signer = NullSigner
+        app.session_config = MailuSessionConfig(app)
+        app.session_interface = MailuSessionInterface()
+
+session = MailuSessionExtension()

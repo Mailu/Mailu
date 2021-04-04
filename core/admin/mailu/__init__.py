@@ -20,8 +20,7 @@ def create_app_from_config(config):
     # Initialize application extensions
     config.init_app(app)
     models.db.init_app(app)
-    utils.kvsession.init_kvstore(config)
-    utils.kvsession.init_app(app)
+    utils.session.init_app(app)
     utils.limiter.init_app(app)
     utils.babel.init_app(app)
     utils.login.init_app(app)

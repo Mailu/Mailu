@@ -13,7 +13,6 @@ Flask==1.0.2
 Flask-Babel==0.12.2
 Flask-Bootstrap==3.3.7.1
 Flask-DebugToolbar==0.10.1
-Flask-KVSession==0.6.2
 Flask-Limiter==1.0.1
 Flask-Login==0.4.1
 Flask-Migrate==2.4.0
@@ -39,7 +38,6 @@ python-editor==1.0.4
 pytz==2019.1
 PyYAML==5.1
 redis==3.2.1
-simplekv==0.14.1
 #alpine3:12 provides six==1.15.0
 #six==1.12.0
 socrate==0.1.1

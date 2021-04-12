@@ -16,6 +16,16 @@
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
           </li>
         </ul>
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">{{ session['language'] }}</a>
+            <div class="dropdown-menu dropdown-menu-right p-0">
+                {% for language in session['available_languages'] %}
+                    <a class="dropdown-item {% if language == session['language'] %}active{% endif %} " href="{{ url_for('.set_language', language=language) }}">{{ language }}</a>
+                {% endfor %}
+            </div>
+          </li>
+        </ul>
       </nav>
       <aside class="main-sidebar sidebar-dark-primary">
         <a href="{{ config["WEB_ADMIN"] }}" class="brand-link">

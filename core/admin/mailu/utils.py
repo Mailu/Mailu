@@ -27,16 +27,17 @@ babel = flask_babel.Babel()
 
 @babel.localeselector
 def get_locale():
+    translations = list(map(str, babel.list_translations()))
+    flask.session['available_languages'] = translations
+
     try:
         language = flask.session['language']
     except KeyError:
-        language = None
+        language = flask.request.accept_languages.best_match(translations)
+        flask.session['language'] = language
 
-    if language is not None:
-        return language
+    return language
 
-    translations = list(map(str, babel.list_translations()))
-    return flask.request.accept_languages.best_match(translations)
 
 # Proxy fixer
 class PrefixMiddleware(object):

@@ -19,7 +19,7 @@ if account is not None and domain is not None and password is not None:
     os.system("flask mailu admin %s %s '%s' --mode %s" % (account, domain, password, mode))
 
 start_command="".join([
-    "gunicorn -w 4 -b :80 ",
+    "gunicorn -w 4 -b [::]:80 ",
     "--access-logfile - " if (log.root.level<=log.INFO) else "",
     "--error-logfile - ",
     "--preload ",

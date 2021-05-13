@@ -250,16 +250,21 @@ Postfix, Dovecot, Nginx and Rspamd support overriding configuration files. Overr
 correct syntax. The following file names will be taken as override configuration:
 
 - `Postfix`_ :
-   - ``main.cf`` as ``$ROOT/overrides/postfix/postfix.cf``
-   - ``master.cf`` as ``$ROOT/overrides/postfix/postfix.master``
+   - ``main.cf`` as ``$ROOT/overrides/postfix.cf``
+   - ``master.cf`` as ``$ROOT/overrides/postfix.master``
    - All ``$ROOT/overrides/postfix/*.map`` files
    - For both ``postfix.cf`` and ``postfix.master``, you need to put one configuration per line, as they are fed line-by-line
      to postfix.
+<<<<<<< HEAD
    - ``logrotate.conf`` as ``$ROOT/overrides/postfix/logrotate.conf`` - Replaces the logrotate.conf file used for rotating ``POSTFIX_LOG_FILE``.
 - `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory.
 - `Nginx`_ :
    - All ``*.conf`` files in the ``nginx`` sub-directory.
    - ``proxy.conf`` in the ``nginx/dovecot`` sub-directory.
+=======
+- `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory;
+- `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory;
+>>>>>>> 1f2aee27 (Reflect override settings for postfix)
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
 - `Roundcube`_ - All ``*.inc.php`` files in the ``roundcube`` sub directory.
 

@@ -4,6 +4,11 @@ metadata:
   name: mailu-fetchmail
   namespace: mailu-mailserver
 spec:
+  selector:
+    matchLabels:
+      app: mailu-fetchmail
+      role: mail
+      tier: backend
   replicas: 1
   template:
     metadata:

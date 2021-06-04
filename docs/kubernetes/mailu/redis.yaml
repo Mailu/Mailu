@@ -4,12 +4,12 @@ metadata:
   name: mailu-redis
   namespace: mailu-mailserver
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: mailu-redis
       role: mail
       tier: backend
+  replicas: 1
   template:
     metadata:
       labels:

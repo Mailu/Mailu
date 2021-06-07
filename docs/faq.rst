@@ -261,8 +261,8 @@ correct syntax. The following file names will be taken as override configuration
 - `Postfix`_ - ``postfix.cf`` in postfix sub-directory;
 =======
 - `Postfix`_ :
-   - ``main.cf`` as ``$ROOT/overrides/postfix.cf``
-   - ``master.cf`` as ``$ROOT/overrides/postfix.master``
+   - ``main.cf`` as ``$ROOT/overrides/postfix/postfix.cf``
+   - ``master.cf`` as ``$ROOT/overrides/postfix/postfix.master``
    - All ``$ROOT/overrides/postfix/*.map`` files
    - For both ``postfix.cf`` and ``postfix.master``, you need to put one configuration per line, as they are fed line-by-line
      to postfix.

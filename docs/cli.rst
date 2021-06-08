@@ -212,13 +212,13 @@ mail-config.yml contains the configuration and looks like this:
       comment: test
       smtp: mx.example.com
 
-config-update shows the number of created/modified/deleted objects after import.
+config-import shows the number of created/modified/deleted objects after import.
 To suppress all messages except error messages use ``--quiet``.
 By adding the ``--verbose`` switch the import gets more detailed and shows exactly what attributes changed.
 In all log messages plain-text secrets (dkim-keys, passwords) are hidden by default. Use ``--secrets`` to log secrets.
 If you want to test what would be done when importing without committing any changes, use ``--dry-run``.
 
-By default config-update replaces the whole configuration. ``--update`` allows to modify the existing configuration instead.
+By default config-import replaces the whole configuration. ``--update`` allows to modify the existing configuration instead.
 New elements will be added and existing elements will be modified.
 It is possible to delete a single element or prune all elements from lists and associative arrays using a special notation:
 

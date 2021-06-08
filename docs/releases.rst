@@ -1,6 +1,33 @@
 Release notes
 =============
 
+Full changelog can be found here: https://github.com/Mailu/Mailu/blob/master/CHANGELOG.md
+
+Mailu 1.8 - 2020-09-28
+----------------------
+
+Features
+````````
+
+* Add support for backward-forwarding using SRS (#328)
+* Add options to support different architectures builds (#985)
+* Add support for Traefik v2 certificate dumping (#1011)
+* Resolve hosts to IPs if only HOST_* is set. If *_ADDRESS is set, leave it unresolved. (#1113)
+* Use nginx as http endpoint on kubernetes to simplify ingress (#1158)
+* Advertise correct mail capabilities through the front-container, this also enables support for PIPELINING in mail-protocols and IMAP IDLE which is a (potential) performance gain. (#1160)
+* Change default password scheme to PBKDF2 (#1194)
+* Enable access log of admin service only for log levels of INFO and finer (#1197)
+* japanese loca is now available (#1207)
+* Allow to reject virus mails by setting ANTIVITUS_ACTION=reject (#1259)
+* Update roundcube to 1.4.0 and enable the new elastic skin (#1267)
+* The roundcube container does support mysql now (no setup integration yet) (#1268)
+* Added CardDAV-Plugin for webmail roundcube. (#1298)
+* Allow users to use server-sided full-text-search again by adding the dovecot fts-xapian plugin (#1320)
+* Relay a domain to a nonstandard SMTP port by adding ":<port_num>" to the remote hostname or IP address. (#1357)
+* Allow to enforce TLS for outbound mail by setting OUTBOUND_TLS_LEVEL=encrypt for postfix. (#1478)
+* Introduce option to disable dovecot full-text-search by an enviroment variable. (#1538)
+* Add support for AUTH LOGIN authentication mechanism for relaying email via smart hosts. (#1635)
+
 Mailu 1.7 - 2019-08-22
 ----------------------
 

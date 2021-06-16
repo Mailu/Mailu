@@ -1,1 +1,1 @@
-Support configuring xz and lz4 compression for dovecot.
+Support configuring lz4 and zstd compression for dovecot.

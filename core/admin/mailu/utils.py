@@ -260,9 +260,8 @@ class MailuSessionConfig:
 
         hash_bytes = bits//8 + (bits%8>0)
         time_bytes = 4 # 32 bit timestamp for now
-        shaker = hashlib.shake_256 if bits>128 else hashlib.shake_128
 
-        self._shaker   = shaker(want_bytes(app.config.get('SECRET_KEY', '')))
+        self._shaker   = hashlib.shake_128(want_bytes(app.config.get('SECRET_KEY', '')))
         self._hash_len = hash_bytes
         self._hash_b64 = len(self._encode(bytes(hash_bytes)))
         self._key_min  = 2*self._hash_b64

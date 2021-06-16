@@ -36,15 +36,23 @@ def postfix_alias_map(alias):
 def postfix_transport(email):
     if email == '*' or re.match("(^|.*@)\[.*\]$", email):
         return flask.abort(404)
-    localpart, domain_name = models.Email.resolve_domain(email)
+    _, domain_name = models.Email.resolve_domain(email)
     relay = models.Relay.query.get(domain_name) or flask.abort(404)
     target = relay.smtp.lower()
     port = None
-    if use_mx := target.startswith('mx:'):
+    use_lmtp = False
+    use_mx = False
+    # strip prefixes mx: and lmtp:
+    if target.startswith('mx:'):
         target = target[3:]
+        use_mx = True
+    elif target.startswith('lmtp:'):
+        target = target[5:]
+        use_lmtp = True
+    # split host:port or [host]:port
     if target.startswith('['):
         if use_mx or ']' not in target:
-            # invalid target (mx: and [])
+            # invalid target (mx: and [] or missing ])
             flask.abort(400)
         host, rest = target[1:].split(']', 1)
         if rest.startswith(':'):
@@ -57,29 +65,38 @@ def postfix_transport(email):
             host, port = target.rsplit(':', 1)
         else:
             host = target
+    # default for empty host part is mx:domain
     if not host:
-        host = relay.name.lower()
-        use_mx = True
+        if not use_lmtp:
+            host = relay.name.lower()
+            use_mx = True
+        else:
+            # lmtp: needs a host part
+            flask.abort(400)
+    # detect ipv6 address or encode host
     if ':' in host:
         host = f'ipv6:{host}'
     else:
         try:
             host = idna.encode(host).decode('ascii')
         except idna.IDNAError:
-            # invalid target (fqdn not encodable)
+            # invalid host (fqdn not encodable)
             flask.abort(400)
+    # validate port
     if port is not None:
         try:
             port = int(port, 10)
-            if port == 25:
-                port = None
         except ValueError:
-            # invalid target (port should be numeric)
+            # invalid port (should be numeric)
             flask.abort(400)
-    if not use_mx:
+    # create transport
+    transport = 'lmtp' if use_lmtp else 'smtp'
+    # use [] when not using MX lookups or host is an ipv6 address
+    if host.startswith('ipv6:') or (not use_lmtp and not use_mx):
         host = f'[{host}]'
+    # create port suffix
     port = '' if port is None else f':{port}'
-    return flask.jsonify(f'smtp:{host}{port}')
+    return flask.jsonify(f'{transport}:{host}{port}')
 
 
 @internal.route("/postfix/recipient/map/<path:recipient>")

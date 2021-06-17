@@ -218,13 +218,16 @@ class MailuSession(CallbackDict, SessionMixin):
     def save(self):
         """ Save session to store. """
 
+        set_cookie = False
+
         # set uid from dict data
         if self._uid is None:
             self._uid = self.app.session_config.gen_uid(self.get('user_id', ''))
 
-        # create new session id for new or regenerated sessions
+        # create new session id for new or regenerated sessions and force setting the cookie
         if self._sid is None:
             self._sid = self.app.session_config.gen_sid()
+            set_cookie = True
 
         # get new session key
         key = self.sid
@@ -232,6 +235,9 @@ class MailuSession(CallbackDict, SessionMixin):
         # delete old session if key has changed
         if key != self._key:
             self.delete()
+
+        # remember time to refresh
+        self['_refresh'] = int(time.time()) + self.app.permanent_session_lifetime.total_seconds()/2
 
         # save session
         self.app.session_store.put(
@@ -245,21 +251,34 @@ class MailuSession(CallbackDict, SessionMixin):
         self.new = False
         self.modified = False
 
+        return set_cookie
+
+    def needs_refresh(self):
+        """ Checks if server side session needs to be refreshed. """
+
+        return int(time.time()) > self.get('_refresh', 0)
+
 class MailuSessionConfig:
     """ Stores sessions crypto config """
+
+    # default size of session key parts
+    uid_bits = 64 # default if SESSION_KEY_BITS is not set in config
+    sid_bits = 128 # for now. must be multiple of 8!
+    time_bits = 32 # for now. must be multiple of 8!
 
     def __init__(self, app=None):
 
         if app is None:
             app = flask.current_app
 
-        bits = app.config.get('SESSION_KEY_BITS', 64)
+        bits = app.config.get('SESSION_KEY_BITS', self.uid_bits)
+        if not 64 <= bits <= 256:
+            raise ValueError('SESSION_KEY_BITS must be between 64 and 256!')
 
-        if bits < 64:
-            raise ValueError('Session id entropy must not be less than 64 bits!')
+        uid_bytes = bits//8 + (bits%8>0)
+        sid_bytes = self.sid_bits//8
 
-        hash_bytes = bits//8 + (bits%8>0)
-        time_bytes = 4 # 32 bit timestamp for now
+        key = want_bytes(app.secret_key)
 
         self._hmac    = hmac.new(hmac.digest(key, b'SESSION_UID_HASH', digest='sha256'), digestmod='sha256')
         self._uid_len = uid_bytes
@@ -271,13 +290,13 @@ class MailuSessionConfig:
 
     def gen_sid(self):
         """ Generate random session id. """
-        return self._encode(secrets.token_bytes(self._hash_len))
+        return self._encode(secrets.token_bytes(self._sid_len))
 
     def gen_uid(self, uid):
         """ Generate hashed user id part of session key. """
-        shaker = self._shaker.copy()
-        shaker.update(want_bytes(uid))
-        return self._encode(shaker.digest(self._hash_len))
+        _hmac = self._hmac.copy()
+        _hmac.update(want_bytes(uid))
+        return self._encode(_hmac.digest()[:self._uid_len])
 
     def gen_created(self, now=None):
         """ Generate base64 representation of creation time. """
@@ -289,8 +308,8 @@ class MailuSessionConfig:
         if not (isinstance(key, bytes) and self._key_min <= len(key) <= self._key_max):
             return None
 
-        uid = key[:self._hash_b64]
-        sid = key[self._hash_b64:self._key_min]
+        uid = key[:self._uid_b64]
+        sid = key[self._uid_b64:self._key_min]
         crt = key[self._key_min:]
 
         # validate if parts are decodeable
@@ -303,7 +322,7 @@ class MailuSessionConfig:
             if now is None:
                 now = int(time.time())
             created = int.from_bytes(created, byteorder='big')
-            if not (created < now < created + app.permanent_session_lifetime.total_seconds()):
+            if not created < now < created + app.permanent_session_lifetime.total_seconds():
                 return None
 
         return (uid, sid, crt)
@@ -343,24 +362,29 @@ class MailuSessionInterface(SessionInterface):
         if session.accessed:
             response.vary.add('Cookie')
 
-        # TODO: set cookie from time to time to prevent expiration in browser
-        # also update expire in redis
+        set_cookie = session.permanent and app.config['SESSION_REFRESH_EACH_REQUEST']
+        need_refresh = session.needs_refresh()
 
-        if not self.should_set_cookie(app, session):
-            return
+        # save modified session or refresh unmodified session
+        if session.modified or need_refresh:
+            set_cookie |= session.save()
 
-        # save session and update cookie
-        session.save()
-        response.set_cookie(
-            app.session_cookie_name,
-            session.sid,
-            expires=self.get_expiration_time(app, session),
-            httponly=self.get_cookie_httponly(app),
-            domain=self.get_cookie_domain(app),
-            path=self.get_cookie_path(app),
-            secure=self.get_cookie_secure(app),
-            samesite=self.get_cookie_samesite(app)
-        )
+        # set cookie on refreshed permanent sessions
+        if need_refresh and session.permanent:
+            set_cookie = True
+
+        # set or update cookie if necessary
+        if set_cookie:
+            response.set_cookie(
+                app.session_cookie_name,
+                session.sid,
+                expires=self.get_expiration_time(app, session),
+                httponly=self.get_cookie_httponly(app),
+                domain=self.get_cookie_domain(app),
+                path=self.get_cookie_path(app),
+                secure=self.get_cookie_secure(app),
+                samesite=self.get_cookie_samesite(app)
+            )
 
 class MailuSessionExtension:
     """ Server side session handling """

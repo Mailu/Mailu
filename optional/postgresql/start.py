@@ -2,7 +2,6 @@
 
 import anosql
 import psycopg2
-import jinja2
 import glob
 import os
 import subprocess

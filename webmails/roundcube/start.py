@@ -17,14 +17,14 @@ elif db_flavor == "mysql":
     os.environ["DB_DSNW"] = "mysql://%s:%s@%s/%s" % (
         os.environ.get("ROUNDCUBE_DB_USER", "roundcube"),
         os.environ.get("ROUNDCUBE_DB_PW"),
-        os.environ.get("ROUNDCUBE_DB_HOST", os.environ.get("DB_HOST", "database")),
+        os.environ.get("ROUNDCUBE_DB_HOST", "database"),
         os.environ.get("ROUNDCUBE_DB_NAME", "roundcube")
     )
 elif db_flavor == "postgresql":
     os.environ["DB_DSNW"] = "pgsql://%s:%s@%s/%s" % (
         os.environ.get("ROUNDCUBE_DB_USER", "roundcube"),
         os.environ.get("ROUNDCUBE_DB_PW"),
-        os.environ.get("ROUNDCUBE_DB_HOST", os.environ.get("DB_HOST", "database")),
+        os.environ.get("ROUNDCUBE_DB_HOST", "database"),
         os.environ.get("ROUNDCUBE_DB_NAME", "roundcube")
     )
 else:

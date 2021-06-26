@@ -30,8 +30,8 @@ on:
 ################################################
 
 jobs:
-  build:
-    name: build
+  build-test:
+    name: build and test
     runs-on: ubuntu-latest
 
     steps:
@@ -63,24 +63,6 @@ jobs:
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
         run: docker-compose -f tests/build.yml build
 
-#NOTE: It appears the filter test depends on the core test. The filter test requires an email user
-#that is created by the core test. 
-  core-test:
-    name: core test
-    runs-on: ubuntu-latest
-    needs:
-     - build
-    steps:
-      - uses: actions/checkout@v2
-      - name: Extract branch name
-        shell: bash
-        run: |
-          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: install python packages
-        run: python3 -m pip install -r tests/requirements.txt        
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-       # Ignore the failure of a step and avoid terminating the job.
-        continue-on-error: true
       - name: copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'      
       - name: test core suite
@@ -90,74 +72,20 @@ jobs:
           TRAVIS_BRANCH: ${{ env.BRANCH }} 
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
 
-  filter-test:
-    name: filter test
-    runs-on: ubuntu-latest
-    needs:
-     - build
-    steps:
-      - uses: actions/checkout@v2
-      - name: Extract branch name
-        shell: bash
-        run: |
-          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: install python packages
-        run: python3 -m pip install -r tests/requirements.txt
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-       # Ignore the failure of a step and avoid terminating the job.
-        continue-on-error: true
-      - name: copy all certs
-        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
       - name: 'test clamvav'
         run: python tests/compose/test.py filters 2
         env:
           MAILU_VERSION: ${{ env.BRANCH }}
           TRAVIS_BRANCH: ${{ env.BRANCH }}
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
-          
-  fetch-test:
-    name: fetch test
-    runs-on: ubuntu-latest
-    needs:
-     - build
-    steps:
-      - uses: actions/checkout@v2
-      - name: Extract branch name
-        shell: bash
-        run: |
-          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: install python packages
-        run: python3 -m pip install -r tests/requirements.txt        
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-       # Ignore the failure of a step and avoid terminating the job.
-        continue-on-error: true
-      - name: copy all certs
-        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'           
+                  
       - name: test fetch
         run: python tests/compose/test.py fetchmail 1
         env:
           MAILU_VERSION: ${{ env.BRANCH }}
           TRAVIS_BRANCH: ${{ env.BRANCH }}
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
-          
-  rainloop-test:
-    name: rainloop test
-    runs-on: ubuntu-latest
-    needs:
-     - build    
-    steps:
-      - uses: actions/checkout@v2
-      - name: Extract branch name
-        shell: bash
-        run: |
-          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: install python packages
-        run: python3 -m pip install -r tests/requirements.txt        
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-       # Ignore the failure of a step and avoid terminating the job.
-        continue-on-error: true
-      - name: copy all certs
-        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'         
+                
       - name: test rainloop
         run: python tests/compose/test.py rainloop 1
         env:
@@ -165,49 +93,13 @@ jobs:
           TRAVIS_BRANCH: ${{ env.BRANCH }} 
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
   
-  roundcube-test:
-    name: roundcube test
-    runs-on: ubuntu-latest
-    needs:
-     - build    
-    steps:
-      - uses: actions/checkout@v2
-      - name: Extract branch name
-        shell: bash
-        run: |        
-          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: install python packages
-        run: python3 -m pip install -r tests/requirements.txt      
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-       # Ignore the failure of a step and avoid terminating the job.
-        continue-on-error: true
-      - name: copy all certs
-        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*' 
       - name: test roundcube
         run: python tests/compose/test.py roundcube 1
         env:
           MAILU_VERSION: ${{ env.BRANCH }}
           TRAVIS_BRANCH: ${{ env.BRANCH }} 
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
-          
-  webdav-test:
-    name: webdav test
-    runs-on: ubuntu-latest
-    needs:
-     - build    
-    steps:
-      - uses: actions/checkout@v2
-      - name: Extract branch name
-        shell: bash
-        run: |
-          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: install python packages
-        run: python3 -m pip install -r tests/requirements.txt        
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-       # Ignore the failure of a step and avoid terminating the job.
-        continue-on-error: true
-      - name: copy all certs
-        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'         
+                  
       - name: test webdav
         run: python tests/compose/test.py webdav 1
         env:
@@ -219,13 +111,7 @@ jobs:
     name: deploy step
     runs-on: ubuntu-latest
     needs: 
-      - build
-      - core-test
-      - filter-test
-      - fetch-test
-      - rainloop-test
-      - roundcube-test
-      - webdav-test    
+      - build-test
     steps:
       - uses: actions/checkout@v2
       - name: Extract branch name

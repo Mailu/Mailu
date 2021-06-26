@@ -26,7 +26,8 @@ on:
 #    Password of docker login for pushing the images to repo $DOCKER_ORG
 # DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
 #    The docker repository where the images are pushed to.
-#
+# DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
+#    The docker repository for test images. Only used for the branch TESTING (BORS try). 
 # Add the above secrets to your github repo to determine where the images will be pushed.
 ################################################
 
@@ -256,6 +257,7 @@ jobs:
           DOCKER_UN: ${{ secrets.Docker_Login }}
           DOCKER_PW: ${{ secrets.Docker_Password }}
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
           MAILU_VERSION: ${{ env.BRANCH }}
           TRAVIS_BRANCH: ${{ env.BRANCH }}
           TRAVIS_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}

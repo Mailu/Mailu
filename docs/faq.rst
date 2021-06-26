@@ -61,7 +61,7 @@ have to prevent pushing out something quickly.
 We currently maintain a strict work flow:
 
 #. Someone writes a solution and sends a pull request;
-#. We use Travis-CI for some very basic building and testing;
+#. We use Github actions for some very basic building and testing;
 #. The pull request needs to be code-reviewed and tested by at least two members
    from the contributors team.
   

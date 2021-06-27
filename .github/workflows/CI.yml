@@ -42,7 +42,7 @@ jobs:
       - name: create folder for storing images
         run: sudo mkdir -p /images
       - name: configure images folder for caching
-        using: actions/cache@v2
+        uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
@@ -77,7 +77,7 @@ jobs:
       - name: create folder for storing images
         run: sudo mkdir -p /images
       - name: configure images folder for caching
-        using: actions/cache@v2
+        uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
@@ -106,7 +106,7 @@ jobs:
       - name: create folder for storing images
         run: sudo mkdir -p /images
       - name: configure images folder for caching
-        using: actions/cache@v2
+        uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
@@ -135,7 +135,7 @@ jobs:
       - name: create folder for storing images
         run: sudo mkdir -p /images
       - name: configure images folder for caching
-        using: actions/cache@v2
+        uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
@@ -164,7 +164,7 @@ jobs:
       - name: create folder for storing images
         run: sudo mkdir -p /images
       - name: configure images folder for caching
-        using: actions/cache@v2
+        uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
@@ -193,7 +193,7 @@ jobs:
       - name: create folder for storing images
         run: sudo mkdir -p /images
       - name: configure images folder for caching
-        using: actions/cache@v2
+        uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
@@ -222,7 +222,7 @@ jobs:
       - name: create folder for storing images
         run: sudo mkdir -p /images
       - name: configure images folder for caching
-        using: actions/cache@v2
+        uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
@@ -259,7 +259,7 @@ jobs:
       - name: configure images folder for caching
         # For staging we do not deploy images. So we do not have to load them from cache.
         if: ${{ env.BRANCH != 'staging' }}
-        using: actions/cache@v2
+        uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}

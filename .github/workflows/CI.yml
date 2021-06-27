@@ -63,7 +63,6 @@ jobs:
       - name: save all docker images
         run: docker save ${{ secrets.DOCKER_ORG }}/admin ${{ secrets.DOCKER_ORG }}/clamav ${{ secrets.DOCKER_ORG }}/docs ${{ secrets.DOCKER_ORG }}/dovecot ${{ secrets.DOCKER_ORG }}/fetchmail ${{ secrets.DOCKER_ORG }}/nginx ${{ secrets.DOCKER_ORG }}/none ${{ secrets.DOCKER_ORG }}/postfix ${{ secrets.DOCKER_ORG }}/postgresql ${{ secrets.DOCKER_ORG }}/radicale ${{ secrets.DOCKER_ORG }}/rainloop ${{ secrets.DOCKER_ORG }}/roundcube ${{ secrets.DOCKER_ORG }}/rspamd ${{ secrets.DOCKER_ORG }}/setup ${{ secrets.DOCKER_ORG }}/traefik-certdumper ${{ secrets.DOCKER_ORG }}/unbound -o /images/images.tar.gz
 
-
   test-core:
     name: Perform core tests
     runs-on: ubuntu-latest
@@ -93,7 +92,7 @@ jobs:
           TRAVIS_BRANCH: ${{ env.BRANCH }} 
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
 
- test-fetchmail:
+  test-fetchmail:
     name: Perform fetchmail tests
     runs-on: ubuntu-latest
     needs:

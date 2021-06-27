@@ -8,8 +8,8 @@ This functionality should still be considered experimental!
 Mailu Postgresql
 ----------------
 
-Mailu optionally comes with a pre-configured Postgresql image, wich as of 1.8 is deprecated
-will be removed in 1.9
+Mailu optionally comes with a pre-configured Postgresql image, which as of 1.8, is deprecated
+and will be removed in 1.9.
 This images has the following features:
 
 - Automatic creation of users, db, extensions and password;

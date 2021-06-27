@@ -31,7 +31,7 @@ on:
 
 jobs:
   build:
-    name: build images
+    name: Build images
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -39,28 +39,30 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: create folder for storing images
-        run: sudo mkdir -p /images
-      - name: configure images folder for caching
+      - name: Create folder for storing images
+        run: |
+          sudo mkdir -p /images
+          chmod sudo chmod 777 /images
+      - name: Configure images folder for caching
         uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: check docker-compose version
+      - name: Check docker-compose version
         run: docker-compose -v
-      - name: login docker
+      - name: Login docker
         env:
           DOCKER_UN: ${{ secrets.Docker_Login }}
           DOCKER_PW: ${{ secrets.Docker_Password }}
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
         run: echo "$DOCKER_PW" | docker login --username $DOCKER_UN --password-stdin
-      - name: build all docker images
+      - name: Build all docker images
         env:
           MAILU_VERSION: ${{ env.BRANCH }}
           TRAVIS_BRANCH: ${{ env.BRANCH }}
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
         run: docker-compose -f tests/build.yml build
-      - name: save all docker images
+      - name: Save all docker images
         run: docker save ${{ secrets.DOCKER_ORG }}/admin ${{ secrets.DOCKER_ORG }}/clamav ${{ secrets.DOCKER_ORG }}/docs ${{ secrets.DOCKER_ORG }}/dovecot ${{ secrets.DOCKER_ORG }}/fetchmail ${{ secrets.DOCKER_ORG }}/nginx ${{ secrets.DOCKER_ORG }}/none ${{ secrets.DOCKER_ORG }}/postfix ${{ secrets.DOCKER_ORG }}/postgresql ${{ secrets.DOCKER_ORG }}/radicale ${{ secrets.DOCKER_ORG }}/rainloop ${{ secrets.DOCKER_ORG }}/roundcube ${{ secrets.DOCKER_ORG }}/rspamd ${{ secrets.DOCKER_ORG }}/setup ${{ secrets.DOCKER_ORG }}/traefik-certdumper ${{ secrets.DOCKER_ORG }}/unbound -o /images/images.tar.gz
 
   test-core:
@@ -74,18 +76,18 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: create folder for storing images
+      - name: Create folder for storing images
         run: sudo mkdir -p /images
-      - name: configure images folder for caching
+      - name: Configure images folder for caching
         uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: install python packages
+      - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
-      - name: copy all certs
+      - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
-      - name: test core suite
+      - name: Test core suite
         run: python tests/compose/test.py core 1
         env:
           MAILU_VERSION: ${{ env.BRANCH }}
@@ -103,18 +105,18 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: create folder for storing images
+      - name: Create folder for storing images
         run: sudo mkdir -p /images
-      - name: configure images folder for caching
+      - name: Configure images folder for caching
         uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: install python packages
+      - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
-      - name: copy all certs
+      - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
-      - name: test fetch
+      - name: Test fetch
         run: python tests/compose/test.py fetchmail 1
         env:
           MAILU_VERSION: ${{ env.BRANCH }}
@@ -132,18 +134,18 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: create folder for storing images
+      - name: Create folder for storing images
         run: sudo mkdir -p /images
-      - name: configure images folder for caching
+      - name: Configure images folder for caching
         uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: install python packages
+      - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
-      - name: copy all certs
+      - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
-      - name: 'test clamvav'
+      - name: Test clamvav
         run: python tests/compose/test.py filters 2
         env:
           MAILU_VERSION: ${{ env.BRANCH }}
@@ -161,18 +163,18 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: create folder for storing images
+      - name: Create folder for storing images
         run: sudo mkdir -p /images
-      - name: configure images folder for caching
+      - name: Configure images folder for caching
         uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: install python packages
+      - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
-      - name: copy all certs
+      - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
-      - name: test rainloop
+      - name: Test rainloop
         run: python tests/compose/test.py rainloop 1
         env:
           MAILU_VERSION: ${{ env.BRANCH }}
@@ -190,18 +192,18 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: create folder for storing images
+      - name: Create folder for storing images
         run: sudo mkdir -p /images
-      - name: configure images folder for caching
+      - name: Configure images folder for caching
         uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: install python packages
+      - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
-      - name: copy all certs
+      - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
-      - name: test roundcube
+      - name: Test roundcube
         run: python tests/compose/test.py roundcube 1
         env:
           MAILU_VERSION: ${{ env.BRANCH }}
@@ -219,18 +221,18 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: create folder for storing images
+      - name: Create folder for storing images
         run: sudo mkdir -p /images
-      - name: configure images folder for caching
+      - name: Configure images folder for caching
         uses: actions/cache@v2
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: install python packages
+      - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
-      - name: copy all certs
+      - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
-      - name: test webdav
+      - name: Test webdav
         run: python tests/compose/test.py webdav 1
         env:
           MAILU_VERSION: ${{ env.BRANCH }}
@@ -254,9 +256,11 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: create folder for storing images
-        run: sudo mkdir -p /images        
-      - name: configure images folder for caching
+      - name: Create folder for storing images
+        run: |
+          sudo mkdir -p /images
+          chmod sudo chmod 777 /images     
+      - name: Configure images folder for caching
         # For staging we do not deploy images. So we do not have to load them from cache.
         if: ${{ env.BRANCH != 'staging' }}
         uses: actions/cache@v2
@@ -265,7 +269,7 @@ jobs:
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
       - name: Load docker images
         run: docker load -i /images/images.tar.gz
-      - name: deploy built docker images
+      - name: Deploy built docker images
         env:
           DOCKER_UN: ${{ secrets.Docker_Login }}
           DOCKER_PW: ${{ secrets.Docker_Password }}

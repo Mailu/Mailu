@@ -77,7 +77,9 @@ jobs:
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
       - name: Create folder for storing images
-        run: sudo mkdir -p /images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
       - name: Configure images folder for caching
         uses: actions/cache@v2
         with:
@@ -106,7 +108,9 @@ jobs:
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
       - name: Create folder for storing images
-        run: sudo mkdir -p /images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
       - name: Configure images folder for caching
         uses: actions/cache@v2
         with:
@@ -135,7 +139,9 @@ jobs:
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
       - name: Create folder for storing images
-        run: sudo mkdir -p /images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
       - name: Configure images folder for caching
         uses: actions/cache@v2
         with:
@@ -164,7 +170,9 @@ jobs:
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
       - name: Create folder for storing images
-        run: sudo mkdir -p /images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
       - name: Configure images folder for caching
         uses: actions/cache@v2
         with:
@@ -193,7 +201,9 @@ jobs:
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
       - name: Create folder for storing images
-        run: sudo mkdir -p /images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
       - name: Configure images folder for caching
         uses: actions/cache@v2
         with:
@@ -222,7 +232,9 @@ jobs:
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
       - name: Create folder for storing images
-        run: sudo mkdir -p /images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
       - name: Configure images folder for caching
         uses: actions/cache@v2
         with:

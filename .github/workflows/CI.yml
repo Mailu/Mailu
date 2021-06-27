@@ -85,6 +85,8 @@ jobs:
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        run: docker load -i /images/images.tar.gz
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
@@ -116,6 +118,8 @@ jobs:
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        run: docker load -i /images/images.tar.gz
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
@@ -147,6 +151,8 @@ jobs:
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        run: docker load -i /images/images.tar.gz
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
@@ -178,6 +184,8 @@ jobs:
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        run: docker load -i /images/images.tar.gz
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
@@ -209,6 +217,8 @@ jobs:
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        run: docker load -i /images/images.tar.gz
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
@@ -240,6 +250,8 @@ jobs:
         with:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        run: docker load -i /images/images.tar.gz
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs

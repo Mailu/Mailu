@@ -42,7 +42,7 @@ jobs:
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
-          chmod sudo chmod 777 /images
+          sudo chmod 777 /images
       - name: Configure images folder for caching
         uses: actions/cache@v2
         with:
@@ -259,7 +259,7 @@ jobs:
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
-          chmod sudo chmod 777 /images     
+          sudo chmod 777 /images     
       - name: Configure images folder for caching
         # For staging we do not deploy images. So we do not have to load them from cache.
         if: ${{ env.BRANCH != 'staging' }}

@@ -1,0 +1,9 @@
+Remove startup resolution of HOST_* variables to *_ADDRESS. 
+To be added to changelog.md
+Resolution of HOST_* environment variables at startup, and the corresponding *_ADDRESS variables have been removed.
+Use the HOST_* variables directly instead.
+
+to be added to releases.rst
+Removal of HOST_* address resolution
+The startup scripts will no longer resolve ``HOST_*`` to their IP addresses.
+Previously, ``*_ADDRESS`` variables could directly be set by the user to override the startup address resolution. Since container addresses are not resolved at startup anymore, this override has been removed and ``HOST_*`` variables can be used directly.

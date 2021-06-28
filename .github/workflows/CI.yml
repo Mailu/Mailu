@@ -1,0 +1,133 @@
+name: CI
+on:
+  push:
+    branches:
+      - staging
+      - testing
+      - '1.5'
+      - '1.6'
+      - '1.7'
+      - '1.8'
+      - master
+      # version tags, e.g. 1.7.1
+      - '[1-9].[0-9].[0-9]'
+      # pre-releases, e.g. 1.8-pre1
+      - 1.8-pre[0-9]
+    # test branches, e.g. test-debian
+      - test-*
+
+###############################################
+# REQUIRED secrets
+# DOCKER_UN: ${{ secrets.Docker_Login }}
+#    Username of docker login for pushing the images to repo $DOCKER_ORG
+# DOCKER_PW: ${{ secrets.Docker_Password }}
+#    Password of docker login for pushing the images to repo $DOCKER_ORG
+# DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+#    The docker repository where the images are pushed to.
+# DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
+#    The docker repository for test images. Only used for the branch TESTING (BORS try). 
+# Add the above secrets to your github repo to determine where the images will be pushed.
+################################################
+
+jobs:
+  build-test-deploy:
+    name: build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: |
+          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: install python packages
+        run: python3 -m pip install -r tests/requirements.txt
+      - name: check docker-compose version
+        run: docker-compose -v
+      - name: login docker
+        env:
+          DOCKER_UN: ${{ secrets.Docker_Login }}
+          DOCKER_PW: ${{ secrets.Docker_Password }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+        run: echo "$DOCKER_PW" | docker login --username $DOCKER_UN --password-stdin      
+      # In this step, this action saves a list of existing images,
+      # the cache is created without them in the post run.
+      # It also restores the cache if it exists.
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+       # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+      - name: build all docker images
+        env:
+          MAILU_VERSION: ${{ env.BRANCH }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+        run: docker-compose -f tests/build.yml build
+
+      - name: copy all certs
+        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'      
+      - name: test core suite
+        run: python tests/compose/test.py core 1
+        env:
+          MAILU_VERSION: ${{ env.BRANCH }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }} 
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+
+      - name: 'test clamvav'
+        run: python tests/compose/test.py filters 2
+        env:
+          MAILU_VERSION: ${{ env.BRANCH }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+                  
+      - name: test fetch
+        run: python tests/compose/test.py fetchmail 1
+        env:
+          MAILU_VERSION: ${{ env.BRANCH }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+                
+      - name: test rainloop
+        run: python tests/compose/test.py rainloop 1
+        env:
+          MAILU_VERSION: ${{ env.BRANCH }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }} 
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+  
+      - name: test roundcube
+        run: python tests/compose/test.py roundcube 1
+        env:
+          MAILU_VERSION: ${{ env.BRANCH }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }} 
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+                  
+      - name: test webdav
+        run: python tests/compose/test.py webdav 1
+        env:
+          MAILU_VERSION: ${{ env.BRANCH }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+         
+      - name: deploy built docker images
+        env:
+          DOCKER_UN: ${{ secrets.Docker_Login }}
+          DOCKER_PW: ${{ secrets.Docker_Password }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
+          MAILU_VERSION: ${{ env.BRANCH }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          TRAVIS_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: bash tests/deploy.sh
+
+ # This job is watched by bors. It only complets if building,testing and deploy worked.
+  ci-success:
+    name: CI-Done
+    #Returns true when none of the **previous** steps have failed or been canceled.
+    if: ${{ success() }}
+    needs: 
+      - build-test-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: CI/CD succeeded.
+        run: exit 0
+
+

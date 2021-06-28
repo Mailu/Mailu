@@ -1,10 +1,5 @@
 name: CI
 on:
-#NOTE: The workflow will ONLY trigger when the branch actually contains the CI.yml workflow file.
-#So if a PR is tested on STAGING/TESTING branch by BORS without this file present, then the workflow
-#will NOT trigger. For these situations, manually start the workflow. This should be resolved once all
-#old PRs without the CI.yml workflow file have been merged.
-  workflow_dispatch:
   push:
     branches:
       - staging

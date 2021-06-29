@@ -17,6 +17,7 @@ gunicorn
 tabulate
 PyYAML
 PyOpenSSL
+Pygments
 dnspython
 bcrypt
 tenacity
@@ -24,3 +25,6 @@ mysqlclient
 psycopg2
 idna
 srslib
+marshmallow
+flask-marshmallow
+marshmallow-sqlalchemy

@@ -11,6 +11,7 @@ import sqlalchemy
 import time
 import os
 import glob
+import hmac
 import smtplib
 import idna
 import dns
@@ -457,6 +458,15 @@ in clear-text regardless of the presence of the cache.
     def login(cls, email, password):
         user = cls.query.get(email)
         return user if (user and user.enabled and user.check_password(password)) else None
+
+    @classmethod
+    def get_temp_token(cls, email):
+        user = cls.query.get(email)
+        return hmac.new(app.temp_token_key, bytearray("{}|{}".format(datetime.utcnow().strftime("%Y%m%d"), email), 'utf-8'), 'sha256').hexdigest() if (user and user.enabled) else None
+
+    def verify_temp_token(self, token):
+        return hmac.compare_digest(self.get_temp_token(self.email), token)
+
 
 
 class Alias(Base, Email):

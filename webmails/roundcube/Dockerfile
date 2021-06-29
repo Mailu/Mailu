@@ -1,10 +1,10 @@
 # NOTE: only add file if building for arm
 ARG ARCH=""
 ARG QEMU=other
-FROM ${ARCH}php:7.3-apache as build_arm
+FROM ${ARCH}php:7.4-apache as build_arm
 ONBUILD COPY --from=balenalib/rpi-alpine:3.10 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 
-FROM ${ARCH}php:7.3-apache as build_other
+FROM ${ARCH}php:7.4-apache as build_other
 
 FROM build_${QEMU}
 #Shared layer between rainloop and roundcube
@@ -46,6 +46,7 @@ RUN apt-get update && apt-get install -y \
 
 COPY php.ini /php.ini
 COPY config.inc.php /var/www/html/config/
+COPY mailu.php /var/www/html/plugins/mailu/mailu.php
 COPY start.py /start.py
 
 EXPOSE 80/tcp

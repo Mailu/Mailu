@@ -26,7 +26,7 @@ services:
     {% if bind4 %}
       - "{{ bind4 }}:{{ port }}:{{ port }}"
     {% endif %}
-    {% if bind6 %}
+    {% if ipv6_enabled and bind6 %}
       - "{{ bind6 }}:{{ port }}:{{ port }}"
     {% endif %}
     {% endfor %}
@@ -85,6 +85,7 @@ services:
 
   antispam:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-{{ version }}}
+    hostname: antispam
     restart: always
     env_file: {{ env }}
     volumes:

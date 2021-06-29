@@ -1,6 +1,7 @@
 from mailu import models
 from mailu.ui import ui, forms, access
 
+from flask import current_app as app
 import flask
 import flask_login
 
@@ -17,6 +18,7 @@ def login():
     if form.validate_on_submit():
         user = models.User.login(form.email.data, form.pw.data)
         if user:
+            flask.session.regenerate()
             flask_login.login_user(user)
             endpoint = flask.request.args.get('next', '.index')
             return flask.redirect(flask.url_for(endpoint)
@@ -30,6 +32,7 @@ def login():
 @access.authenticated
 def logout():
     flask_login.logout_user()
+    flask.session.destroy()
     return flask.redirect(flask.url_for('.index'))
 
 
@@ -47,6 +50,9 @@ def announcement():
         flask.flash('Your announcement was sent', 'success')
     return flask.render_template('announcement.html', form=form)
 
+@ui.route('/webmail', methods=['GET'])
+def webmail():
+    return flask.redirect(app.config['WEB_WEBMAIL'])
 
 @ui.route('/client', methods=['GET'])
 def client():

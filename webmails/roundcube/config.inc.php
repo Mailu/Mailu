@@ -5,7 +5,7 @@ $config = array();
 // Generals
 $config['db_dsnw'] = getenv('DB_DSNW');;
 $config['temp_dir'] = '/tmp/';
-$config['des_key'] = getenv('SECRET_KEY');
+$config['des_key'] = getenv('SECRET_KEY') ? getenv('SECRET_KEY') : trim(file_get_contents(getenv('SECRET_KEY_FILE')));
 $config['cipher_method'] = 'AES-256-CBC';
 $config['identities_level'] = 0;
 $config['reply_all_mode'] = 1;
@@ -36,7 +36,11 @@ $config['managesieve_host'] = $imap;
 $config['managesieve_usetls'] = false;
 
 // Customization settings
-$config['support_url'] = getenv('WEB_ADMIN') ? '../..' . getenv('WEB_ADMIN') : '';
+if (filter_var(getenv('ADMIN'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)) {
+	array_push($config['plugins'], 'mailu');
+	$config['support_url'] = getenv('WEB_ADMIN') ? '../..' . getenv('WEB_ADMIN') : '';
+	$config['sso_logout_url'] = getenv('WEB_ADMIN').'/ui/logout';
+}
 $config['product_name'] = 'Mailu Webmail';
 
 // We access the IMAP and SMTP servers locally with internal names, SSL

@@ -7,7 +7,6 @@ import ipaddress
 import socket
 import tenacity
 
-
 SUPPORTED_AUTH_METHODS = ["none", "plain"]
 
 
@@ -26,8 +25,12 @@ def check_credentials(user, password, ip, protocol=None):
     if not user or not user.enabled or (protocol == "imap" and not user.enable_imap) or (protocol == "pop3" and not user.enable_pop):
         return False
     is_ok = False
+    # webmails
+    if len(password) == 64 and ip == app.config['WEBMAIL_ADDRESS']:
+        if user.verify_temp_token(password):
+            is_ok = True
     # All tokens are 32 characters hex lowercase
-    if len(password) == 32:
+    if not is_ok and len(password) == 32:
         for token in user.tokens:
             if (token.check_password(password) and
                 (not token.ip or token.ip == ip)):

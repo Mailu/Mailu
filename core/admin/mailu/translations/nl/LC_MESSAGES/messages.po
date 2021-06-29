@@ -528,7 +528,7 @@ msgstr "Alternatieve naam"
 
 #: mailu/ui/forms.py:70
 msgid "Relayed domain name"
-msgstr "Relayed domainnaam"
+msgstr "Relayed domeinnaam"
 
 #: mailu/ui/forms.py:71 mailu/ui/templates/relay/list.html:18
 msgid "Remote host"
@@ -536,7 +536,7 @@ msgstr "Externe host"
 
 #: mailu/ui/templates/sidebar.html:54
 msgid "Relayed domains"
-msgstr "Relayed domainen"
+msgstr "Relayed domeinen"
 
 #: mailu/ui/templates/alternative/create.html:4
 msgid "Create alternative domain"

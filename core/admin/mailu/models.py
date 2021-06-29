@@ -1,7 +1,6 @@
 """ Mailu config storage model
 """
 
-import re
 import os
 import smtplib
 import json
@@ -17,7 +16,6 @@ import passlib.hash
 import passlib.registry
 import time
 import os
-import glob
 import hmac
 import smtplib
 import idna
@@ -533,7 +531,7 @@ class User(Base, Email):
         if cache_result and current_salt:
             cache_salt, cache_hash = cache_result
             if cache_salt == current_salt:
-                return hash.pbkdf2_sha256.verify(password, cache_hash)
+                return passlib.hash.pbkdf2_sha256.verify(password, cache_hash)
             else:
                 # the cache is local per gunicorn; the password has changed
                 # so the local cache can be invalidated
@@ -560,7 +558,7 @@ we have little control over GC and string interning anyways.
  An attacker that can dump the process' memory is likely to find credentials
 in clear-text regardless of the presence of the cache.
             """
-            self._credential_cache[self.get_id()] = (self.password.split('$')[3], hash.pbkdf2_sha256.using(rounds=1).hash(password))
+            self._credential_cache[self.get_id()] = (self.password.split('$')[3], passlib.hash.pbkdf2_sha256.using(rounds=1).hash(password))
         return result
 
     def set_password(self, password, raw=False):
@@ -604,7 +602,7 @@ in clear-text regardless of the presence of the cache.
     @classmethod
     def get_temp_token(cls, email):
         user = cls.query.get(email)
-        return hmac.new(app.temp_token_key, bytearray("{}|{}".format(datetime.utcnow().strftime("%Y%m%d"), email), 'utf-8'), 'sha256').hexdigest() if (user and user.enabled) else None
+        return hmac.new(app.temp_token_key, bytearray("{}|{}".format(time.strftime('%Y%m%d'), email), 'utf-8'), 'sha256').hexdigest() if (user and user.enabled) else None
 
     def verify_temp_token(self, token):
         return hmac.compare_digest(self.get_temp_token(self.email), token)

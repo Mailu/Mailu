@@ -180,7 +180,11 @@ services:
 {% endif %}
 
   antispam:
+<<<<<<< HEAD
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-{{ version }}}
+=======
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-{{ version }}}
+>>>>>>> 8998e21f (Set static hostname for antispam to preserve history. See #561)
     hostname: antispam
     restart: always
     env_file: {{ env }}

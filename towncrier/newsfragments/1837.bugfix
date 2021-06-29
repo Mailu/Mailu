@@ -1,0 +1,1 @@
+Antispam service now uses a static hostname. Rspamd history is only retained when the service has a fixed hostname.

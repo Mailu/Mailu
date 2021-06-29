@@ -6,6 +6,7 @@ from simplekv.memory.redisstore import RedisStore
 
 from mailu import utils, debug, models, manage, configuration
 
+import hmac
 
 def create_app_from_config(config):
     """ Create a new application based on the given configuration
@@ -27,6 +28,8 @@ def create_app_from_config(config):
     utils.login.user_loader(models.User.get)
     utils.proxy.init_app(app)
     utils.migrate.init_app(app, models.db)
+
+    app.temp_token_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('WEBMAIL_TEMP_TOKEN_KEY', 'utf-8'), 'sha256').digest()
 
     # Initialize debugging tools
     if app.config.get("DEBUG"):

@@ -46,6 +46,7 @@ RUN apt-get update && apt-get install -y \
 
 COPY php.ini /php.ini
 COPY config.inc.php /var/www/html/config/
+COPY mailu.php /var/www/html/plugins/mailu/mailu.php
 COPY start.py /start.py
 
 EXPOSE 80/tcp

@@ -3,6 +3,7 @@ FROM $DISTRO
 # python3 shared with most images
 RUN apk add --no-cache \
     python3 py3-pip bash py3-multidict \
+  && apk add --upgrade sudo \
   && pip3 install --upgrade pip
 
 # Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube

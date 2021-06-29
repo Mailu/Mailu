@@ -292,6 +292,7 @@ jobs:
           path: /images
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
       - name: Load docker images
+        if: ${{ env.BRANCH != 'staging' }}
         run: docker load -i /images/images.tar.gz
       - name: Deploy built docker images
         env:

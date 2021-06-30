@@ -16,9 +16,9 @@ RUN apt-get update && apt-get install -y \
 # Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
 RUN pip3 install socrate
 
-ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.4.6/roundcubemail-1.4.6-complete.tar.gz
+ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.4.11/roundcubemail-1.4.11-complete.tar.gz
 
-ENV CARDDAV_URL https://github.com/blind-coder/rcmcarddav/releases/download/v3.0.3/carddav-3.0.3.tar.bz2
+ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v4.1.2/carddav-v4.1.2.tar.gz
 
 RUN apt-get update && apt-get install -y \
       zlib1g-dev libzip4 libzip-dev libpq-dev \
@@ -28,12 +28,8 @@ RUN apt-get update && apt-get install -y \
  && echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini \
  && rm -rf /var/www/html/ \
  && cd /var/www \
- && curl -L -O ${ROUNDCUBE_URL} \
- && curl -L -O ${CARDDAV_URL} \
- && tar -xf *.tar.gz \
- && tar -xf *.tar.bz2 \
- && rm -f *.tar.gz \
- && rm -f *.tar.bz2 \
+ && curl -sL ${ROUNDCUBE_URL} | tar xz \
+ && curl -sL ${CARDDAV_URL} | tar xz \
  && mv roundcubemail-* html \
  && mv carddav html/plugins/ \
  && cd html \

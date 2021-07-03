@@ -280,7 +280,7 @@ class MailuSessionConfig:
 
         key = want_bytes(app.secret_key)
 
-        self._hmac    = hmac.new(hmac.digest(key, key, digest='sha256'), digestmod='sha256')
+        self._hmac    = hmac.new(hmac.digest(key, b'SESSION_UID_HASH', digest='sha256'), digestmod='sha256')
         self._uid_len = uid_bytes
         self._uid_b64 = len(self._encode(bytes(uid_bytes)))
         self._sid_len = sid_bytes

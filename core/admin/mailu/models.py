@@ -628,10 +628,10 @@ class Alias(Base, Email):
                 sqlalchemy.and_(cls.domain_name == domain_name,
                     sqlalchemy.or_(
                         sqlalchemy.and_(
-                            cls.wildcard is False,
+                            cls.wildcard == False,
                             cls.localpart == localpart
                         ), sqlalchemy.and_(
-                            cls.wildcard is True,
+                            cls.wildcard == True,
                             sqlalchemy.bindparam('l', localpart).like(cls.localpart)
                         )
                     )
@@ -643,10 +643,10 @@ class Alias(Base, Email):
                 sqlalchemy.and_(cls.domain_name == domain_name,
                     sqlalchemy.or_(
                         sqlalchemy.and_(
-                            cls.wildcard is False,
+                            cls.wildcard == False,
                             sqlalchemy.func.lower(cls.localpart) == localpart_lower
                         ), sqlalchemy.and_(
-                            cls.wildcard is True,
+                            cls.wildcard == True,
                             sqlalchemy.bindparam('l', localpart_lower).like(
                                 sqlalchemy.func.lower(cls.localpart))
                         )

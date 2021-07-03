@@ -590,7 +590,7 @@ class DkimKeyField(fields.String):
                 value = value[:pos]
             else:
                 footer = '-----END PRIVATE KEY-----'
-        except ValueError:
+        except ValueError as exc:
             raise ValidationError(f'invalid dkim key {bad_key!r}') from exc
 
         # remove whitespace from key data

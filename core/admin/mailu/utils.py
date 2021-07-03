@@ -261,11 +261,13 @@ class MailuSessionConfig:
         hash_bytes = bits//8 + (bits%8>0)
         time_bytes = 4 # 32 bit timestamp for now
 
-        self._shaker   = hashlib.shake_128(want_bytes(app.config.get('SECRET_KEY', '')))
-        self._hash_len = hash_bytes
-        self._hash_b64 = len(self._encode(bytes(hash_bytes)))
-        self._key_min  = 2*self._hash_b64
-        self._key_max  = self._key_min + len(self._encode(bytes(time_bytes)))
+        self._hmac    = hmac.new(hmac.digest(key, b'SESSION_UID_HASH', digest='sha256'), digestmod='sha256')
+        self._uid_len = uid_bytes
+        self._uid_b64 = len(self._encode(bytes(uid_bytes)))
+        self._sid_len = sid_bytes
+        self._sid_b64 = len(self._encode(bytes(sid_bytes)))
+        self._key_min = self._uid_b64 + self._sid_b64
+        self._key_max = self._key_min + len(self._encode(bytes(self.time_bits//8)))
 
     def gen_sid(self):
         """ Generate random session id. """

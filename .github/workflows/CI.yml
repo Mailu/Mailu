@@ -53,7 +53,7 @@ jobs:
         env:
           MAILU_BRANCH: ${{ env.BRANCH }}
         run: |
-          echo "MAILU_VERSION=${{ MAILU_BRANCH }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images

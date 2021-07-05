@@ -14,7 +14,16 @@ COPY --from=assets /work/static/ ./mailu/static/
 COPY audit.py /
 COPY start.py /
 
+<<<<<<< HEAD
 COPY migrations/ ./migrations/
+=======
+COPY requirements-prod.txt requirements.txt
+RUN apk add --no-cache libressl curl postgresql-libs mariadb-connector-c \
+  && apk add --no-cache --virtual build-dep \
+  libressl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev cargo \
+  && pip3 install -r requirements.txt \
+  && apk del --no-cache build-dep
+>>>>>>> 3bb0d68e (add cargo to build cryptography)
 
 COPY mailu/ ./mailu/
 RUN set -euxo pipefail \

@@ -1,4 +1,4 @@
-ARG DISTRO=alpine:3.8
+ARG DISTRO=alpine:3.14
 FROM $DISTRO
 
 COPY requirements.txt /requirements.txt

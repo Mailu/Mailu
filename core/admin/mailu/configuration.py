@@ -1,5 +1,6 @@
 import os
 
+from datetime import timedelta
 from socrate import system
 
 DEFAULT_CONFIG = {
@@ -54,6 +55,7 @@ DEFAULT_CONFIG = {
     # Advanced settings
     'PASSWORD_SCHEME': 'PBKDF2',
     'LOG_LEVEL': 'WARNING',
+    'SESSION_LIFETIME': 24,
     'SESSION_COOKIE_SECURE': True,
     # Host settings
     'HOST_IMAP': 'imap',
@@ -126,6 +128,8 @@ class ConfigManager(dict):
         self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['REDIS_ADDRESS'])
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
+        self.config['SESSION_KEY_BITS'] = 128
+        self.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=int(self.config['SESSION_LIFETIME']))
         # update the app config itself
         app.config = self
 

@@ -1,0 +1,332 @@
+name: CI
+on:
+  push:
+    branches:
+      - staging
+      - testing
+      - '1.5'
+      - '1.6'
+      - '1.7'
+      - '1.8'
+      - master
+      # version tags, e.g. 1.7.1
+      - '[1-9].[0-9].[0-9]'
+      # pre-releases, e.g. 1.8-pre1
+      - 1.8-pre[0-9]
+      # test branches, e.g. test-debian
+      - test-*
+
+###############################################
+# REQUIRED secrets
+# DOCKER_UN: ${{ secrets.Docker_Login }}
+#    Username of docker login for pushing the images to repo $DOCKER_ORG
+# DOCKER_PW: ${{ secrets.Docker_Password }}
+#    Password of docker login for pushing the images to repo $DOCKER_ORG
+# DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+#    The docker repository where the images are pushed to.
+# DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
+#    The docker repository for test images. Only used for the branch TESTING (BORS try).
+# Add the above secrets to your github repo to determine where the images will be pushed.
+################################################
+
+jobs:
+  build:
+    name: Build images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: |
+          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+        #For branch TESTING, we set the image tag to PR-xxxx
+      - name: Derive MAILU_VERSION for branch testing
+        if: ${{ env.BRANCH == 'testing' }}
+        shell: bash
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for other branches than testing
+        if: ${{ env.BRANCH != 'testing' }}
+        shell: bash
+        env:
+          MAILU_BRANCH: ${{ env.BRANCH }}
+        run: |
+          echo "MAILU_VERSION=${{ MAILU_BRANCH }}" >> $GITHUB_ENV
+      - name: Create folder for storing images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
+      - name: Configure images folder for caching
+        uses: actions/cache@v2
+        with:
+          path: /images
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Check docker-compose version
+        run: docker-compose -v
+      - name: Login docker
+        env:
+          DOCKER_UN: ${{ secrets.Docker_Login }}
+          DOCKER_PW: ${{ secrets.Docker_Password }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+        run: echo "$DOCKER_PW" | docker login --username $DOCKER_UN --password-stdin
+      - name: Build all docker images
+        env:
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+        run: docker-compose -f tests/build.yml build
+      - name: Save all docker images
+        run: docker save ${{ secrets.DOCKER_ORG }}/admin ${{ secrets.DOCKER_ORG }}/clamav ${{ secrets.DOCKER_ORG }}/docs ${{ secrets.DOCKER_ORG }}/dovecot ${{ secrets.DOCKER_ORG }}/fetchmail ${{ secrets.DOCKER_ORG }}/nginx ${{ secrets.DOCKER_ORG }}/none ${{ secrets.DOCKER_ORG }}/postfix ${{ secrets.DOCKER_ORG }}/postgresql ${{ secrets.DOCKER_ORG }}/radicale ${{ secrets.DOCKER_ORG }}/rainloop ${{ secrets.DOCKER_ORG }}/roundcube ${{ secrets.DOCKER_ORG }}/rspamd ${{ secrets.DOCKER_ORG }}/setup ${{ secrets.DOCKER_ORG }}/traefik-certdumper ${{ secrets.DOCKER_ORG }}/unbound -o /images/images.tar.gz
+
+  test-core:
+    name: Perform core tests
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: |
+          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Create folder for storing images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
+      - name: Configure images folder for caching
+        uses: actions/cache@v2
+        with:
+          path: /images
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        run: docker load -i /images/images.tar.gz
+      - name: Install python packages
+        run: python3 -m pip install -r tests/requirements.txt
+      - name: Copy all certs
+        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
+      - name: Test core suite
+        run: python tests/compose/test.py core 1
+        env:
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }} 
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+
+  test-fetchmail:
+    name: Perform fetchmail tests
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: |
+          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Create folder for storing images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
+      - name: Configure images folder for caching
+        uses: actions/cache@v2
+        with:
+          path: /images
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        run: docker load -i /images/images.tar.gz
+      - name: Install python packages
+        run: python3 -m pip install -r tests/requirements.txt
+      - name: Copy all certs
+        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
+      - name: Test fetch
+        run: python tests/compose/test.py fetchmail 1
+        env:
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+
+  test-filters:
+    name: Perform filter tests
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: |
+          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Create folder for storing images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
+      - name: Configure images folder for caching
+        uses: actions/cache@v2
+        with:
+          path: /images
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        run: docker load -i /images/images.tar.gz
+      - name: Install python packages
+        run: python3 -m pip install -r tests/requirements.txt
+      - name: Copy all certs
+        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
+      - name: Test clamvav
+        run: python tests/compose/test.py filters 2
+        env:
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+
+  test-rainloop:
+    name: Perform rainloop tests
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: |
+          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Create folder for storing images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
+      - name: Configure images folder for caching
+        uses: actions/cache@v2
+        with:
+          path: /images
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        run: docker load -i /images/images.tar.gz
+      - name: Install python packages
+        run: python3 -m pip install -r tests/requirements.txt
+      - name: Copy all certs
+        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
+      - name: Test rainloop
+        run: python tests/compose/test.py rainloop 1
+        env:
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }} 
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+
+  test-roundcube:
+    name: Perform roundcube tests
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: |
+          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Create folder for storing images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
+      - name: Configure images folder for caching
+        uses: actions/cache@v2
+        with:
+          path: /images
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        run: docker load -i /images/images.tar.gz
+      - name: Install python packages
+        run: python3 -m pip install -r tests/requirements.txt
+      - name: Copy all certs
+        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
+      - name: Test roundcube
+        run: python tests/compose/test.py roundcube 1
+        env:
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }} 
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+
+  test-webdav:
+    name: Perform webdav tests
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: |
+          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Create folder for storing images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
+      - name: Configure images folder for caching
+        uses: actions/cache@v2
+        with:
+          path: /images
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        run: docker load -i /images/images.tar.gz
+      - name: Install python packages
+        run: python3 -m pip install -r tests/requirements.txt
+      - name: Copy all certs
+        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
+      - name: Test webdav
+        run: python tests/compose/test.py webdav 1
+        env:
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+
+  deploy:
+    name: Deploy images
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - test-core
+      - test-fetchmail
+      - test-filters
+      - test-rainloop
+      - test-roundcube
+      - test-webdav
+    steps:
+      - uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: |
+          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Create folder for storing images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images     
+      - name: Configure images folder for caching
+        # For staging we do not deploy images. So we do not have to load them from cache.
+        if: ${{ env.BRANCH != 'staging' }}
+        uses: actions/cache@v2
+        with:
+          path: /images
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        if: ${{ env.BRANCH != 'staging' }}
+        run: docker load -i /images/images.tar.gz
+      - name: Deploy built docker images
+        env:
+          DOCKER_UN: ${{ secrets.Docker_Login }}
+          DOCKER_PW: ${{ secrets.Docker_Password }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          TRAVIS_BRANCH: ${{ env.BRANCH }}
+        run: bash tests/deploy.sh
+
+ # This job is watched by bors. It only complets if building,testing and deploy worked.
+  ci-success:
+    name: CI-Done
+    #Returns true when none of the **previous** steps have failed or been canceled.
+    if: ${{ success() }}
+    needs: 
+      - deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: CI/CD succeeded.
+        run: exit 0

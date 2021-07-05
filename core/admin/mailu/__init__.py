@@ -6,6 +6,7 @@ import flask_bootstrap
 
 from mailu import utils, debug, models, manage, configuration
 
+import hmac
 
 def create_app_from_config(config):
     """ Create a new application based on the given configuration

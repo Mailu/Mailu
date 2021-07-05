@@ -6,7 +6,7 @@ try:
 except ImportError:
     import pickle
 
-import hashlib
+import hmac
 import secrets
 import time
 

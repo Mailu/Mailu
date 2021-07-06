@@ -144,6 +144,8 @@ want to keep using the old password encryption scheme.
 
 The ``SESSION_COOKIE_SECURE`` (default: True) setting controls the secure flag on the cookies of the administrative interface. It should only be turned off if you intend to access it over plain HTTP.
 
+``SESSION_LIFETIME`` (default: 24) is the length in hours a session is valid for on the administrative interface.
+
 The ``LOG_LEVEL`` setting is used by the python start-up scripts as a logging threshold.
 Log messages equal or higher than this priority will be printed.
 Can be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG or NOTSET.

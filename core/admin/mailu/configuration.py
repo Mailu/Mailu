@@ -1,5 +1,6 @@
 import os
 
+from datetime import timedelta
 from socrate import system
 
 DEFAULT_CONFIG = {
@@ -13,6 +14,7 @@ DEFAULT_CONFIG = {
     'DEBUG': False,
     'DOMAIN_REGISTRATION': False,
     'TEMPLATES_AUTO_RELOAD': True,
+    'MEMORY_SESSIONS': False,
     # Database settings
     'DB_FLAVOR': None,
     'DB_USER': 'mailu',
@@ -54,6 +56,8 @@ DEFAULT_CONFIG = {
     # Advanced settings
     'PASSWORD_SCHEME': 'PBKDF2',
     'LOG_LEVEL': 'WARNING',
+    'SESSION_KEY_BITS': 128,
+    'SESSION_LIFETIME': 24,
     'SESSION_COOKIE_SECURE': True,
     # Host settings
     'HOST_IMAP': 'imap',
@@ -62,7 +66,6 @@ DEFAULT_CONFIG = {
     'HOST_SMTP': 'smtp',
     'HOST_AUTHSMTP': 'smtp',
     'HOST_ADMIN': 'admin',
-    'WEBMAIL': 'none',
     'HOST_WEBMAIL': 'webmail',
     'HOST_WEBDAV': 'webdav:5232',
     'HOST_REDIS': 'redis',
@@ -124,8 +127,10 @@ class ConfigManager(dict):
 
         self.config['RATELIMIT_STORAGE_URL'] = 'redis://{0}/2'.format(self.config['REDIS_ADDRESS'])
         self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['REDIS_ADDRESS'])
+        self.config['SESSION_STORAGE_URL'] = 'redis://{0}/3'.format(self.config['REDIS_ADDRESS'])
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
+        self.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=int(self.config['SESSION_LIFETIME']))
         # update the app config itself
         app.config = self
 

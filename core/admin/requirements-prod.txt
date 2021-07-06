@@ -32,12 +32,8 @@ mysqlclient==1.4.2.post1
 passlib==1.7.1
 psycopg2==2.8.2
 pycparser==2.19
-<<<<<<< HEAD
-pyOpenSSL==19.0.0
-=======
 Pygments==2.8.1
 pyOpenSSL==20.0.1
->>>>>>> 9790dcda (updated dependencies)
 python-dateutil==2.8.0
 python-editor==1.0.4
 pytz==2019.1

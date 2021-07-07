@@ -12,11 +12,26 @@
 {%- call macros.card() %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
+<<<<<<< HEAD
   {%- call macros.fieldset(
       field=form.reply_enabled,
       enabled=user.reply_enabled,
       fields=[form.reply_subject, form.reply_body, form.reply_enddate, form.reply_startdate]) %}
   {%- endcall %}
+=======
+  {{ macros.form_field(form.reply_enabled,
+      onchange="if(this.checked){$('#reply_subject,#reply_body,#reply_enddate,#reply_startdate').removeAttr('readonly')}
+                else{$('#reply_subject,#reply_body,#reply_enddate,#reply_startdate').attr('readonly', '')}") }}
+  {{ macros.form_field(form.reply_subject,
+      **{("rw" if user.reply_enabled else "readonly"): ""}) }}
+    {{ macros.form_field(form.reply_body, rows=10,
+        **{("rw" if user.reply_enabled else "readonly"): ""}) }}
+  {{ macros.form_field(form.reply_enddate,
+        **{("rw" if user.reply_enabled else "readonly"): ""}) }}
+  {{ macros.form_field(form.reply_startdate,
+        **{("rw" if user.reply_enabled else "readonly"): ""}) }}
+
+>>>>>>> 180026bd (also disable startdate)
   {{ macros.form_field(form.submit) }}
 </form>
 {%- endcall %}

@@ -549,10 +549,14 @@ The above will block flagged IPs for a week, you can of course change it to you 
   sudo systemctl restart fail2ban
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 *Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_.
 =======
 *Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_, `1727`_, `1857`_.
 >>>>>>> f80e04a8 (Docs: Replace hardcoded journald logpath with systemd backend)
+=======
+*Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_, `1727`_.
+>>>>>>> a2cf13c5 (Template: Update link to changelog entry documentation for pull requests)
 
 Users can't change their password from webmail
 ``````````````````````````````````````````````

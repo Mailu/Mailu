@@ -513,8 +513,8 @@ follow these steps:
 
   [bad-auth]
   enabled = true
+  backend = systemd
   filter = bad-auth
-  logpath = /var/log/messages
   bantime = 604800
   findtime = 300
   maxretry = 10
@@ -565,7 +565,7 @@ Restart the Fail2Ban service.
 
   sudo systemctl restart fail2ban
 
-*Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_, `1727`_.
+*Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_, `1727`_, `1857`_.
 
 Users can't change their password from webmail
 ``````````````````````````````````````````````

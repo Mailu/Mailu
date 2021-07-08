@@ -513,8 +513,8 @@ follow these steps:
 
   [bad-auth]
   enabled = true
+  backend = systemd
   filter = bad-auth
-  logpath = /var/log/messages
   bantime = 604800
   findtime = 300
   maxretry = 10
@@ -548,7 +548,11 @@ The above will block flagged IPs for a week, you can of course change it to you 
 
   sudo systemctl restart fail2ban
 
+<<<<<<< HEAD
 *Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_.
+=======
+*Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_, `1727`_, `1857`_.
+>>>>>>> f80e04a8 (Docs: Replace hardcoded journald logpath with systemd backend)
 
 Users can't change their password from webmail
 ``````````````````````````````````````````````

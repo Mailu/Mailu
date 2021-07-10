@@ -188,7 +188,7 @@ Coding standards
 ````````````````
 
 All Python code should comply with PEP-8. We should review our code using
-pylint.
+pylint. We should format the code with black and isort.
 
 We should comply with architectural recommendations from the Flask
 documentation.

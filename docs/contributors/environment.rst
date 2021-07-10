@@ -1,6 +1,21 @@
 Development environment
 =======================
 
+Development Station
+---
+
+Get the minimal tooling for development. This will setup a pre-commit
+hook to format the newly added sources. This will also install
+towncrier, in order to produce the changelog files.
+
+.. code-block:: bash
+
+  python3 -m venv <path-to-the-virtualenv>
+  source <path-to-the-virtualenv>/bin/activate
+  pip3 install -r requirements-dev.txt
+  pre-commit install
+
+
 Git
 ---
 
@@ -277,7 +292,7 @@ Merge conflicts
 Before proceeding, check the PR page in the bottom. It should not indicate a merge conflict.
 If there are merge conflicts, you have 2 options:
 
-#. Do a review "request changes" and ask the author to resolve the merge conflict. 
+#. Do a review "request changes" and ask the author to resolve the merge conflict.
 #. Solve the merge conflict yourself on Github, using the web editor.
 
 If it can't be done in the web editor, go for option 1. Unless you want to go through the trouble of

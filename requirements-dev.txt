@@ -1,0 +1,4 @@
+towncrier==21.3.0
+pre-commit==2.13.0
+black==21.6b0
+isort==5.9.2

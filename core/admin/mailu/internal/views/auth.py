@@ -93,11 +93,18 @@ def basic_authentication():
     if authorization and authorization.startswith("Basic "):
         encoded = authorization.replace("Basic ", "")
         user_email, password = base64.b64decode(encoded).split(b":", 1)
+<<<<<<< HEAD
         user_email = user_email.decode("utf8")
         if utils.limiter.should_rate_limit_user(user_email, client_ip):
             response = flask.Response(status=401)
             response.headers["WWW-Authenticate"] = 'Basic realm="Authentication rate limit for this username exceeded"'
             response.headers['Retry-After'] = '60'
+=======
+        user = models.User.query.get(user_email.decode("utf8"))
+        if nginx.check_credentials(user, password.decode('utf-8'), flask.request.remote_addr, "web"):
+            response = flask.Response()
+            response.headers["X-User"] = user.email
+>>>>>>> a0dcd464 (fix #1861: Handle colons in passwords)
             return response
         try:
             user = models.User.query.get(user_email) if '@' in user_email else None

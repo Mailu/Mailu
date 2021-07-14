@@ -1,0 +1,1 @@
+Fix a bug preventing colons from being used in passwords when using radicale/webdav.

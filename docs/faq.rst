@@ -513,8 +513,8 @@ follow these steps:
 
   [bad-auth]
   enabled = true
+  backend = systemd
   filter = bad-auth
-  logpath = /var/log/messages
   bantime = 604800
   findtime = 300
   maxretry = 10
@@ -548,7 +548,7 @@ The above will block flagged IPs for a week, you can of course change it to you 
 
   sudo systemctl restart fail2ban
 
-*Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_.
+*Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_, `1727`_
 
 Users can't change their password from webmail
 ``````````````````````````````````````````````
@@ -672,6 +672,7 @@ iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 25 -j SNAT --to <your mx i
 .. _`1090`: https://github.com/Mailu/Mailu/issues/1090
 .. _`unbound`: https://nlnetlabs.nl/projects/unbound/about/
 .. _`1438`: https://github.com/Mailu/Mailu/issues/1438
+.. _`1727`: https://github.com/Mailu/Mailu/issues/1727
 
 
 A user gets ``Sender address rejected: Access denied. Please check the`` ``message recipient […] and try again`` even though the sender is legitimate?

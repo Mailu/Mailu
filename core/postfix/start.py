@@ -58,8 +58,15 @@ os.environ["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", 
 os.environ["ANTISPAM_MILTER_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM_MILTER", "antispam:11332")
 os.environ["LMTP_ADDRESS"] = system.get_host_address_from_environment("LMTP", "imap:2525")
 os.environ["OUTCLEAN"] = os.environ["HOSTNAMES"].split(",")[0]
+<<<<<<< HEAD
 os.environ["OUTCLEAN_ADDRESS"] = system.resolve_hostname(os.environ["OUTCLEAN"])
 >>>>>>> 8bc1d6c0 (Replace PUBLIC_HOSTNAME/IP in Received headers)
+=======
+try:
+    os.environ["OUTCLEAN_ADDRESS"] = system.resolve_hostname(os.environ["OUTCLEAN"])
+except:
+    os.environ["OUTCLEAN_ADDRESS"] = "10.10.10.10"
+>>>>>>> 1d65529c (The lookup could fail; ensure we set something)
 
 for postfix_file in glob.glob("/conf/*.cf"):
     conf.jinja(postfix_file, os.environ, os.path.join("/etc/postfix", os.path.basename(postfix_file)))

@@ -46,11 +46,20 @@ def is_valid_postconf_line(line):
             and not line == ''
 
 # Actual startup script
+<<<<<<< HEAD
 os.environ['DEFER_ON_TLS_ERROR'] = os.environ['DEFER_ON_TLS_ERROR'] if 'DEFER_ON_TLS_ERROR' in os.environ else 'True'
 
 # Postfix requires IPv6 addresses to be wrapped in square brackets
 if 'RELAYNETS' in os.environ:
     os.environ["RELAYNETS"] = re.sub(r'([0-9a-fA-F]+:[0-9a-fA-F:]+)/', '[\\1]/', os.environ["RELAYNETS"])
+=======
+os.environ["FRONT_ADDRESS"] = system.get_host_address_from_environment("FRONT", "front")
+os.environ["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
+os.environ["ANTISPAM_MILTER_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM_MILTER", "antispam:11332")
+os.environ["LMTP_ADDRESS"] = system.get_host_address_from_environment("LMTP", "imap:2525")
+os.environ["OUTCLEAN"] = os.environ["HOSTNAMES"].split(",")[0]
+os.environ["OUTCLEAN_ADDRESS"] = system.resolve_hostname(os.environ["OUTCLEAN"])
+>>>>>>> 8bc1d6c0 (Replace PUBLIC_HOSTNAME/IP in Received headers)
 
 for postfix_file in glob.glob("/conf/*.cf"):
     conf.jinja(postfix_file, os.environ, os.path.join("/etc/postfix", os.path.basename(postfix_file)))

@@ -1,0 +1,1 @@
+Switched from Travis to Github actions for CI/CD. Improved CI workflow to perform all tests in parallel.

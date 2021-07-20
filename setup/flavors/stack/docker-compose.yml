@@ -70,6 +70,7 @@ services:
 
   antispam:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-{{ version }}}
+    hostname: antispam
     env_file: {{ env }}
     volumes:
       - "{{ root }}/filter:/var/lib/rspamd"

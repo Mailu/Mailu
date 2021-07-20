@@ -1,0 +1,1 @@
+Remove dot in blueprint name to prevent critical flask startup error in setup.

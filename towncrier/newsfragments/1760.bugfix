@@ -1,0 +1,2 @@
+Fix CVE-2021-23240, CVE-2021-3156 and CVE-2021-23239 for postgresql
+by force-upgrading sudo.

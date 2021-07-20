@@ -3,7 +3,6 @@ Flask-Login
 Flask-SQLAlchemy
 Flask-bootstrap
 Flask-Babel
-Flask-KVSession
 Flask-migrate
 Flask-script
 Flask-wtf
@@ -17,6 +16,7 @@ gunicorn
 tabulate
 PyYAML
 PyOpenSSL
+Pygments
 dnspython
 bcrypt
 tenacity
@@ -24,3 +24,6 @@ mysqlclient
 psycopg2
 idna
 srslib
+marshmallow
+flask-marshmallow
+marshmallow-sqlalchemy

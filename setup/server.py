@@ -55,7 +55,7 @@ def build_app(path):
     def app_context():
         return dict(versions=os.getenv("VERSIONS","master").split(','))
 
-    prefix_bp = flask.Blueprint(version, __name__)
+    prefix_bp = flask.Blueprint(version.replace(".", "_"), __name__)
     prefix_bp.jinja_loader = jinja2.ChoiceLoader([
         jinja2.FileSystemLoader(os.path.join(path, "templates")),
         jinja2.FileSystemLoader(os.path.join(path, "flavors"))

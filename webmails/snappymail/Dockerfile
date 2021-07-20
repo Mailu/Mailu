@@ -17,8 +17,8 @@ RUN apt-get update && apt-get install -y \
 # Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, snappymail, roundcube
 RUN pip3 install socrate
 
-#ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.4.2/snappymail-2.4.2.tar.gz
-ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.4.2/snappymail-2.4.2.zip
+#ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.5.3/snappymail-2.5.3.tar.gz
+ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.5.3/snappymail-2.5.3.zip
 
 RUN apt-get update && apt-get install -y \
       unzip python3-jinja2 \

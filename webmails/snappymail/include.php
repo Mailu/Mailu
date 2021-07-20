@@ -10,6 +10,9 @@
 // Uncomment to enable multiple domain installation.
 //define('MULTIDOMAIN', 1);
 
+// Uncomment to disable APCU.
+//define('APP_USE_APCU_CACHE', false);
+
 /**
  * Custom 'data' folder path
  * @return string

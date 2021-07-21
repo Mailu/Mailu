@@ -4,7 +4,7 @@
 
 import os
 
-extensions = ['sphinx.ext.imgmath', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.imgmath', 'sphinx.ext.viewcode', 'sphinx_rtd_theme']
 templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'

@@ -1,5 +1,13 @@
+<<<<<<< HEAD
 recommonmark==0.7.1
 Sphinx==7.3.7
 sphinx-autobuild==2024.4.16
 sphinx-rtd-theme==2.0.0
 docutils==0.20.1
+=======
+recommonmark
+Sphinx
+sphinx-autobuild
+sphinx-rtd-theme
+docutils==0.16
+>>>>>>> 64bf75ef (Added missing extension in conf.py. Added missing library in requirements.txt. Sphinx is only compatible with docutils<0.17)

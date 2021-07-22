@@ -1,4 +1,4 @@
-{% call macros.panel("info", "Step 2 - Pick some features") %}
+{% call macros.panel("info", "Step 3 - Pick some features") %}
 <p>Mailu comes with multiple base features, including a specific admin
 interface, Web email clients, antispam, antivirus, etc.
 In this section you can enable the services to you liking.</p>
@@ -9,14 +9,17 @@ bound to the internal IMAP and SMTP server for users to access their mailbox thr
 the Web. By exposing a complex application such as a Webmail, you should be aware of
 the security implications caused by such an increase of attack surface.<p>
 <div class="form-group">
-  <label>Enable Web email client</label>
+  <label>Enable Web email client (and path to the Web email client)</label>
   <br/>
   <select class="btn btn-primary dropdown-toggle" name="webmail_type" id="webmail">
-  	{% for webmailtype in ["none", "roundcube", "snappymail"] %}
+  	{% for webmailtype in ["none", "roundcube", "rainloop"] %}
   	<option value="{{ webmailtype }}" >{{ webmailtype }}</option>
   	{% endfor %}
   </select>
   <p></p>
+  <div class="input-group">
+    <input class="form-control" type="text" name="webmail_path" id="webmail_path" style="display: none">
+  </div>
 </div>
 
 
@@ -52,26 +55,8 @@ the security implications caused by such an increase of attack surface.<p>
   <i>Fetchmail allows users to retrieve mail from an external mail-server via IMAP/POP3 and puts it in their inbox.</i>
 </div>
 
-<<<<<<< HEAD
-<div class="form-check form-check-inline">
-  <label class="form-check-label">
-    <input class="form-check-input" type="checkbox" name="oletools_enabled" value="true" checked>
-    Enable oletools
-  </label>
-=======
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
->>>>>>> b140fa54 (Update jquery js dependencies in setup)
 
-  <i>Oletools scans documents in email attachments for malicious macros. It has a much lower memory footprint than a full-fledged anti-virus.</i>
-</div>
-
-<div class="form-check form-check-inline">
-  <label class="form-check-label">
-    <input class="form-check-input" type="checkbox" name="tika_enabled" value="true">
-    Enable Tika
-  </label>
-
-  <i>Tika enables the functionality for searching through attachments. Tika scans documents in email attachments, process (OCR, keyword extraction) and then index them in a way they can be efficiently searched. This requires significant resources (RAM, CPU and storage).</i>
-</div>
+<script type="text/javascript" src="{{ url_for('static', filename='render.js') }}"></script>
 
 {% endcall %}

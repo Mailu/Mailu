@@ -1,4 +1,4 @@
-flask
-flask-bootstrap
-redis
-gunicorn
+Flask==1.0.2
+Flask-Bootstrap==3.3.7.1
+gunicorn==19.9.0
+redis==3.2.1

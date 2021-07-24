@@ -23,8 +23,8 @@ conf.jinja("/default.ini", os.environ, "/data/_data_/_default_/domains/default.i
 conf.jinja("/application.ini", os.environ, "/data/_data_/_default_/configs/application.ini")
 conf.jinja("/php.ini", os.environ, "/usr/local/etc/php/conf.d/rainloop.ini")
 
-os.system("chown -R www-data:www-data /data")
-os.system("chmod -R a+rX /var/www/html/")
+os.system("chown -R www-data:www-data /var/www/")
+os.system("chmod -R a+rX /var/www/")
 
-os.execv("/usr/local/bin/apache2-foreground", ["apache2-foreground"])
+os.execv("/usr/local/sbin/php-fpm", [' '])
 

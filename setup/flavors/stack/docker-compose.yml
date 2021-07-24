@@ -28,6 +28,7 @@ services:
     volumes:
       - "{{ root }}/certs:/certs"
       - "{{ root }}/overrides/nginx:/overrides:ro"
+      - webmail:/var/www/webmail
     deploy:
       replicas: 1
 
@@ -124,8 +125,10 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/webmail:/data"
+      - webmail:/webmail
     deploy:
       replicas: 1
+    command: bash -c "cp -ra /var/www/webmail / && /start.py"
     healthcheck:
       disable: true
   {% endif %}
@@ -139,6 +142,9 @@ services:
     healthcheck:
       disable: true
   {% endif %}
+
+volumes:
+    webmail:
 
 networks:
   default:

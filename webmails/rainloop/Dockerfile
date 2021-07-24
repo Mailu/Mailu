@@ -1,51 +1,38 @@
-ARG ARCH=""
-ARG QEMU=other
+FROM php:8-fpm-alpine
 
-# NOTE: only add file if building for arm
-FROM ${ARCH}php:7.4-apache as build_arm
-ONBUILD COPY --from=balenalib/rpi-alpine:3.10 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
-
-FROM ${ARCH}php:7.4-apache as build_other
-
-FROM build_${QEMU}
-#Shared layer between rainloop and roundcube
-RUN apt-get update && apt-get install -y \
-  python3 curl python3-pip git python3-multidict \
-  && rm -rf /var/lib/apt/lists \
-  && echo "ServerSignature Off" >> /etc/apache2/apache2.conf
+# python3 shared with most images
+RUN apk add --no-cache \
+    python3 py3-pip git bash \
+  && pip3 install --upgrade pip
 
 # Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
 RUN pip3 install socrate
 
 ENV RAINLOOP_URL https://github.com/RainLoop/rainloop-webmail/releases/download/v1.16.0/rainloop-community-1.16.0.zip
 
-RUN apt-get update && apt-get install -y \
-      unzip python3-jinja2 \
- && rm -rf /var/www/html/ \
- && mkdir /var/www/html \
- && cd /var/www/html \
+RUN rm -rf /var/www/webmail \
+ && mkdir -p /var/www/webmail/ \
+ && cd /var/www/webmail \
  && curl -L -O ${RAINLOOP_URL} \
  && unzip -q *.zip \
  && rm -f *.zip \
- && rm -rf data/ \
- && find . -type d -exec chmod 755 {} \; \
- && find . -type f -exec chmod 644 {} \; \
- && chown -R www-data: * \
- && apt-get purge -y unzip \
- && rm -rf /var/lib/apt/lists
+ && rm -rf data/
 
-COPY include.php /var/www/html/include.php
-COPY sso.php /var/www/html/sso.php
+COPY include.php /var/www/webmail/include.php
+COPY sso.php /var/www/webmail/sso.php
 COPY php.ini /php.ini
+
+RUN chmod a+rX -R /var/www \
+ && chown -R www-data:www-data /var/www
 
 COPY application.ini /application.ini
 COPY default.ini /default.ini
 
 COPY start.py /start.py
 
-EXPOSE 80/tcp
+EXPOSE 9000/tcp
 VOLUME ["/data"]
 
 CMD /start.py
 
-HEALTHCHECK CMD curl -f -L http://localhost/ || exit 1
+#HEALTHCHECK CMD curl -f -L http://localhost/ || exit 1

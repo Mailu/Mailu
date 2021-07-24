@@ -33,6 +33,7 @@ services:
     volumes:
       - "{{ root }}/certs:/certs"
       - "{{ root }}/overrides/nginx:/overrides:ro"
+      - webmail:/var/www/webmail
 
   {% if resolver_enabled %}
   resolver:
@@ -146,8 +147,10 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/webmail:/data"
+      - webmail:/webmail
     depends_on:
       - imap
+    command: bash -c "cp -ra /var/www/webmail / && /start.py"
   {% endif %}
 
   {% if db_flavor == 'postgresql' and postgresql == 'internal' %}
@@ -159,6 +162,9 @@ services:
       - "{{ root }}/data/psql_db:/data"
       - "{{ root }}/data/psql_backup:/backup"
    {% endif %}
+
+volumes:
+    webmail:
 
 networks:
   default:

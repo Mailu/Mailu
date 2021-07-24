@@ -18,14 +18,14 @@ if (file_exists(APP_INDEX_ROOT_PATH.'rainloop/v/'.APP_VERSION.'/include.php')) {
 }
 
 // Retrieve email and password
-if (in_array('HTTP_X_REMOTE_USER', $_SERVER) && in_array('HTTP_X_REMOTE_USER_TOKEN', $_SERVER)) {
-	$email = $_SERVER['HTTP_X_REMOTE_USER'];
-	$password = $_SERVER['HTTP_X_REMOTE_USER_TOKEN'];
+if (array_key_exists('X-Remote-User', $_SERVER) && array_key_exists('X-Remote-User-Token', $_SERVER)) {
+        $email = $_SERVER['X-Remote-User'];
+        $password = $_SERVER['X-Remote-User-Token'];
 	$ssoHash = \RainLoop\Api::GetUserSsoHash($email, $password);
 
 	// redirect to webmail sso url
 	header('Location: index.php?sso&hash='.$ssoHash);
 }
 else {
-	header('HTTP/1.0 403 Forbidden');
+	print_r('This is a bug in Mailu; please report it');
 }

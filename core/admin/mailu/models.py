@@ -508,8 +508,8 @@ class User(Base, Email):
             return cls._ctx
 
         # compile schemes
-        # - scrypt throws a warning if the native wheels aren't found
-        # - we can't leave plaintext schemes as they will be misidentified
+        # - skip scrypt (throws a warning if the native wheels aren't found)
+        # - skip plaintext schemes (will be misidentified)
         schemes = [
             scheme for scheme in passlib.registry.list_crypt_handlers()
             if not (scheme == 'scrypt' or scheme.endswith('plaintext'))

@@ -25,6 +25,7 @@ if account is not None and domain is not None and password is not None:
     log.info("Creating initial admin account %s@%s with mode %s", account, domain, mode)
     os.system("flask mailu admin %s %s '%s' --mode %s" % (account, domain, password, mode))
 
+<<<<<<< HEAD
 def test_unsupported():
     import codecs
     if os.path.isfile(codecs.decode('/.qbpxrerai', 'rot13')) or os.environ.get(codecs.decode('V_XABJ_ZL_FRGHC_QBRFAG_SVG_ERDHVERZRAGF_NAQ_JBAG_SVYR_VFFHRF_JVGUBHG_CNGPURF', 'rot13'), None) or os.environ.get(codecs.decode('ZNVYH_URYZ_PUNEG', 'rot13'), None):
@@ -32,6 +33,15 @@ def test_unsupported():
     log.critical('Your system is not supported. Please start by reading the documentation and then http://www.catb.org/~esr/faqs/smart-questions.html')
     while True:
         time.sleep(5)
+=======
+start_command="".join([
+    "gunicorn --threads ", str(os.cpu_count()),
+    " -b :80 ",
+    "--access-logfile - " if (log.root.level<=log.INFO) else "",
+    "--error-logfile - ",
+    "--preload ",
+    "'mailu:create_app()'"])
+>>>>>>> 8d9f3214 (Use threads in gunicorn rather than processes)
 
 def test_DNS():
     import dns.resolver

@@ -371,8 +371,8 @@ class Email(object):
     @classmethod
     def __declare_last__(cls):
         # gets called after mappings are completed
-        sqlalchemy.event.listen(User.localpart, 'set', cls._update_localpart, propagate=True)
-        sqlalchemy.event.listen(User.domain_name, 'set', cls._update_domain_name, propagate=True)
+        sqlalchemy.event.listen(cls.localpart, 'set', cls._update_localpart, propagate=True)
+        sqlalchemy.event.listen(cls.domain_name, 'set', cls._update_domain_name, propagate=True)
 
     def sendmail(self, subject, body):
         """ send an email to the address """

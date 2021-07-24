@@ -386,7 +386,3 @@ def setmanager(domain_name, user_name='manager'):
     domain.managers.append(manageruser)
     db.session.add(domain)
     db.session.commit()
-
-
-if __name__ == '__main__':
-    cli()

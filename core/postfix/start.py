@@ -8,12 +8,13 @@ import logging as log
 import sys
 
 from podop   import run_server
+from pwd import getpwnam
 from socrate import system, conf
 
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
 def start_podop():
-    os.setuid(100)
+    os.setuid(getpwnam('postfix').pw_uid)
     url = "http://" + os.environ["ADMIN_ADDRESS"] + "/internal/postfix/"
     # TODO: Remove verbosity setting from Podop?
     run_server(0, "postfix", "/tmp/podop.socket", [

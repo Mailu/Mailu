@@ -15,6 +15,7 @@ import glob
 import smtplib
 import idna
 import dns
+import json
 
 
 db = flask_sqlalchemy.SQLAlchemy()
@@ -27,7 +28,7 @@ class IdnaDomain(db.TypeDecorator):
     impl = db.String(80)
 
     def process_bind_param(self, value, dialect):
-        return idna.encode(value).decode("ascii").lower()
+        return idna.encode(value.lower()).decode('ascii')
 
     def process_result_value(self, value, dialect):
         return idna.decode(value)

@@ -272,7 +272,7 @@ class Domain(Base):
             return dkim.strip_key(dkim_key).decode('utf8')
 
     def generate_dkim_key(self):
-        """ generate and activate new DKIM key """
+        """ generate new DKIM key """
         self.dkim_key = dkim.gen_key()
 
     def has_email(self, localpart):

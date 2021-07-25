@@ -38,7 +38,11 @@ os.environ["ANTISPAM_MILTER_ADDRESS"] = system.get_host_address_from_environment
 os.environ["LMTP_ADDRESS"] = system.get_host_address_from_environment("LMTP", "imap:2525")
 os.environ["OUTCLEAN"] = os.environ["HOSTNAMES"].split(",")[0]
 try:
-    os.environ["OUTCLEAN_ADDRESS"] = system.resolve_hostname(os.environ["OUTCLEAN"])
+    _to_lookup = os.environ["OUTCLEAN"]
+    # Ensure we lookup a FQDN: @see #1884
+    if not _to_lookup.endswith('.'):
+        _to_lookup += '.'
+    os.environ["OUTCLEAN_ADDRESS"] = system.resolve_hostname(_to_lookup)
 except:
     os.environ["OUTCLEAN_ADDRESS"] = "10.10.10.10"
 

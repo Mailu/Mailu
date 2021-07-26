@@ -1,0 +1,19 @@
+apiVersion: v1
+data:
+  key: djEuMC03OWNiMTY5NmI2OTJkMTYwMjA3NTVhYzgtYzc2Y2Q3NjJhMTlhOGEzZWVlYTkyMTZiNTZhMjlk$kind: Secret
+metadata:
+  creationTimestamp: null
+  name: service-key
+  namespace: tothadi-mail
+---
+apiVersion: cert-manager.k8s.cloudflare.com/v1
+kind: OriginIssuer
+metadata:
+  name: prod-issuer
+  namespace: tothadi-mail
+spec:
+  requestType: OriginECC
+  auth:
+    serviceKeyRef:
+      name: service-key
+      key: key

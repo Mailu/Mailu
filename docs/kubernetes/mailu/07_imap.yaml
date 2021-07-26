@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: mailu-imap
-  namespace: mailu-mailserver
+  namespace: tothadi-mail
 spec:
   replicas: 1
   template:
@@ -42,11 +42,11 @@ spec:
             containerPort: 4190
         resources:
           requests:
-            memory: 1Gi
-            cpu: 1000m
+            memory: 200Mi
+            cpu: 200m
           limits:
-            memory: 1Gi
-            cpu: 1000m
+            memory: 200Mi
+            cpu: 200m
       volumes:
         - name: maildata
           persistentVolumeClaim:
@@ -56,7 +56,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: imap
-  namespace: mailu-mailserver
+  namespace: tothadi-mail
   labels:
     app: mailu
     role: mail

@@ -2,10 +2,12 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: mailu-antispam-ingress
-  namespace: mailu-mailserver
+  namespace: tothadi-mail
   annotations:
     kubernetes.io/tls-acme: "true"
-    certmanager.k8s.io/cluster-issuer: letsencrypt-stage
+    cert-manager.io/issuer: prod-issuer
+    cert-manager.io/issuer-kind: OriginIssuer
+    cert-manager.io/issuer-group: cert-manager.k8s.cloudflare.com
     ingress.kubernetes.io/configuration-snippet: |
       rewrite ^/admin/antispam/(.*) /$1 break;
       auth_request /internal/auth/admin;
@@ -18,10 +20,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - "mail.example.com"
-    secretName: letsencrypt-certs-all # If unsure how to generate these, check out https://github.com/ployst/docker-letsencrypt
+    - "mail.tothadi.hu"
+    secretName: tothadi-mail-secret # If unsure how to generate these, check out https://github.com/ployst/docker-letsencrypt
   rules:
-  - host: "mail.example.com"
+  - host: "mail.tothadi.hu"
     http:
       paths:
       - path: "/admin/antispam"

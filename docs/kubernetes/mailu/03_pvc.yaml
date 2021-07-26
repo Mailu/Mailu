@@ -1,0 +1,91 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: redis-hdd
+  namespace: tothadi-mail
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "glusterblock-hdd"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mail-storage
+  namespace: tothadi-mail
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "gluster-heketi-hdd"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+
+#apiVersion: v1
+#kind: PersistentVolume
+#metadata:
+#  name: nfs-redis-vol
+#spec:
+#  capacity:
+#    storage: 1Gi
+#  volumeMode: Filesystem
+#  accessModes:
+#    - ReadWriteOnce
+#  persistentVolumeReclaimPolicy: Retain
+#  storageClassName: nfs-redis
+#  mountOptions:
+#    - hard
+#    - nfsvers=4.1
+#  nfs:
+#    path: /kubestorage/redis
+#    server: 10.42.0.1
+#---
+#apiVersion: v1
+#kind: PersistentVolume
+#metadata:
+#  name: nfs-mail-vol
+#spec:
+#  capacity:
+#    storage: 5Gi
+#  volumeMode: Filesystem
+#  accessModes:
+#    - ReadWriteMany
+#  persistentVolumeReclaimPolicy: Retain
+#  storageClassName: nfs-mail
+#  mountOptions:
+#    - hard
+#    - nfsvers=4.1
+#  nfs:
+#    path: /kubestorage/mail
+#    server: 10.42.0.1
+#---
+#apiVersion: v1
+#kind: PersistentVolumeClaim
+#metadata:
+#  name: redis-hdd
+#  namespace: tothadi-mail
+#spec:
+#  storageClassName: nfs-redis
+#  accessModes:
+#    - ReadWriteOnce
+#  resources:
+#    requests:
+#      storage: 1Gi
+#---
+#apiVersion: v1
+#kind: PersistentVolumeClaim
+#metadata:
+#  name: mail-storage
+#  namespace: tothadi-mail
+#spec:
+#  storageClassName: nfs-mail
+#  accessModes:
+#    - ReadWriteMany
+#  resources:
+#    requests:
+#      storage: 5Gi

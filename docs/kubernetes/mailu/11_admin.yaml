@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: mailu-admin
-  namespace: mailu-mailserver
+  namespace: tothadi-mail
 spec:
   replicas: 1
   template:
@@ -32,11 +32,11 @@ spec:
             protocol: TCP
         resources:
           requests:
-            memory: 500Mi
-            cpu: 500m
+            memory: 50Mi
+            cpu: 100m
           limits:
-            memory: 500Mi
-            cpu: 500m
+            memory: 50Mi
+            cpu: 100m
       volumes:
         - name: maildata
           persistentVolumeClaim:
@@ -47,7 +47,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: admin
-  namespace: mailu-mailserver
+  namespace: tothadi-mail
   labels:
     app: mailu-admin
     role: mail

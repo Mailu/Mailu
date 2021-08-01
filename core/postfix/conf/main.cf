@@ -50,7 +50,7 @@ smtpd_authorized_xclient_hosts={{ POD_ADDRESS_RANGE or SUBNET }}
 # General TLS configuration
 tls_high_cipherlist = EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA256:EECDH:+CAMELLIA128:+AES128:+SSLv3:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!IDEA:!ECDSA:kEDH:CAMELLIA128-SHA:AES128-SHA
 tls_preempt_cipherlist = yes
-tls_ssl_options = NO_COMPRESSION
+tls_ssl_options = NO_COMPRESSION, NO_TICKET
 
 # By default, outgoing TLS is more flexible because
 # 1. not all receiving servers will support TLS,

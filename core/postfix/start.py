@@ -66,6 +66,11 @@ for map_file in glob.glob("/overrides/*.map"):
     os.system("postmap {}".format(destination))
     os.remove(destination)
 
+if not os.path.exists("/etc/postfix/tls_policy.map.db"):
+    with open("/etc/postfix/tls_policy.map", "w") as f:
+        f.write("gmail.com\tsecure\n")
+    os.system("postmap /etc/postfix/tls_policy.map")
+
 if "RELAYUSER" in os.environ:
     path = "/etc/postfix/sasl_passwd"
     conf.jinja("/conf/sasl_passwd", os.environ, path)

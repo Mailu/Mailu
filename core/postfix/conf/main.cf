@@ -55,10 +55,12 @@ tls_ssl_options = NO_COMPRESSION, NO_TICKET
 # By default, outgoing TLS is more flexible because
 # 1. not all receiving servers will support TLS,
 # 2. not all will have and up-to-date TLS stack.
-smtp_tls_security_level = {{ OUTBOUND_TLS_LEVEL|default('may') }}
 smtp_tls_mandatory_protocols = !SSLv2, !SSLv3
 smtp_tls_protocols =!SSLv2,!SSLv3
 smtp_tls_session_cache_database = lmdb:${data_directory}/smtp_scache
+smtp_tls_security_level = {{ OUTBOUND_TLS_LEVEL|default('may') }}
+smtp_tls_policy_maps=hash:/etc/postfix/tls_policy.map
+smtp_tls_CApath = /etc/ssl/certs
 
 ###############
 # Virtual

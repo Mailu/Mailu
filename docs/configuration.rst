@@ -70,7 +70,7 @@ mail in following format: ``[HOST]:PORT``.
 ``RELAYUSER`` and ``RELAYPASSWORD`` can be used when authentication is needed.
 
 By default postfix uses "opportunistic TLS" for outbound mail. This can be changed
-by setting ``OUTBOUND_TLS_LEVEL`` to ``encrypt``. This setting is highly recommended
+by setting ``OUTBOUND_TLS_LEVEL`` to ``encrypt`` or ``secure``. This setting is highly recommended
 if you are a relayhost that supports TLS.
 
 Similarily by default nginx uses "opportunistic TLS" for inbound mail. This can be changed

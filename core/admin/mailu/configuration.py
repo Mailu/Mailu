@@ -32,6 +32,7 @@ DEFAULT_CONFIG = {
     'DOMAIN': 'mailu.io',
     'HOSTNAMES': 'mail.mailu.io,alternative.mailu.io,yetanother.mailu.io',
     'POSTMASTER': 'postmaster',
+    'WILDCARD_SENDERS': '',
     'TLS_FLAVOR': 'cert',
     'INBOUND_TLS_ENFORCE': False,
     'AUTH_RATELIMIT': '10/minute;1000/hour',

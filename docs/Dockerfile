@@ -6,7 +6,7 @@ COPY requirements.txt /requirements.txt
 ARG version=master
 ENV VERSION=$version
 
-RUN apk add --no-cache nginx curl python3 \
+RUN apk add --no-cache nginx curl python3 py3-pip \
  && pip3 install -r /requirements.txt \
  && mkdir /run/nginx
 

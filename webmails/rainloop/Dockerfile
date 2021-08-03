@@ -3,7 +3,7 @@ ARG QEMU=other
 
 # NOTE: only add file if building for arm
 FROM ${ARCH}php:7.4-apache as build_arm
-ONBUILD COPY --from=balenalib/rpi-alpine:3.10 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
+ONBUILD COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 
 FROM ${ARCH}php:7.4-apache as build_other
 

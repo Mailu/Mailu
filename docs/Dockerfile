@@ -1,4 +1,4 @@
-ARG DISTRO=alpine:3.14
+ARG DISTRO=python:3.8-alpine3.14
 FROM $DISTRO
 
 COPY requirements.txt /requirements.txt
@@ -6,9 +6,8 @@ COPY requirements.txt /requirements.txt
 ARG version=master
 ENV VERSION=$version
 
-RUN apk add --no-cache nginx curl python3 py3-pip \
- && pip3 install -r /requirements.txt \
- && mkdir /run/nginx
+RUN apk add --no-cache nginx curl \
+ && pip3 install -r /requirements.txt
 
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 COPY . /docs

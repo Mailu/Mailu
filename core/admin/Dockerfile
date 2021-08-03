@@ -26,7 +26,7 @@ WORKDIR /app
 COPY requirements-prod.txt requirements.txt
 RUN apk add --no-cache openssl curl postgresql-libs mariadb-connector-c \
   && apk add --no-cache --virtual build-dep \
-  openssl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev \
+  openssl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev cargo \
   && pip3 install -r requirements.txt \
   && apk del --no-cache build-dep
 

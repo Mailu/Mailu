@@ -63,7 +63,7 @@ def basic_authentication():
     authorization = flask.request.headers.get("Authorization")
     if authorization and authorization.startswith("Basic "):
         encoded = authorization.replace("Basic ", "")
-        user_email, password = base64.b64decode(encoded).split(b":")
+        user_email, password = base64.b64decode(encoded).split(b":", 1)
         user = models.User.query.get(user_email.decode("utf8"))
         if nginx.check_credentials(user, password.decode('utf-8'), flask.request.remote_addr, "web"):
             response = flask.Response()

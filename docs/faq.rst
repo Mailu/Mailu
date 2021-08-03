@@ -497,6 +497,8 @@ follow these steps:
 
   logging:
     driver: journald
+    options:
+      tag: mailu-front
 
 2. Add the /etc/fail2ban/filter.d/bad-auth.conf
 
@@ -506,6 +508,7 @@ follow these steps:
   [Definition]
   failregex = .* client login failed: .+ client:\ <HOST>
   ignoreregex =
+  journalmatch = CONTAINER_TAG=mailu-front
 
 3. Add the /etc/fail2ban/jail.d/bad-auth.conf
 
@@ -513,8 +516,8 @@ follow these steps:
 
   [bad-auth]
   enabled = true
+  backend = systemd
   filter = bad-auth
-  logpath = /var/log/messages
   bantime = 604800
   findtime = 300
   maxretry = 10

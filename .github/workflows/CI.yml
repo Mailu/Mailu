@@ -112,6 +112,7 @@ jobs:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }} 
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+          COMPOSE_INTERACTIVE_NO_CLI: 1          
 
   test-fetchmail:
     name: Perform fetchmail tests
@@ -239,7 +240,7 @@ jobs:
       - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
       - name: Test roundcube
-        run: python tests/compose/test.py roundcube 1
+        run: python tests/compose/test.py roundcube 2
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }} 

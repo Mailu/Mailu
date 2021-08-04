@@ -125,8 +125,7 @@ jobs:
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }} 
-          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
-          COMPOSE_INTERACTIVE_NO_CLI: 1          
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}       
 
   test-fetchmail:
     name: Perform fetchmail tests

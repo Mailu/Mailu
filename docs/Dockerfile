@@ -14,7 +14,6 @@ RUN apk add --no-cache --virtual .build-deps \
  && sphinx-build -W /docs /build/$VERSION \
  && apk del .build-deps
 
-
 # Build nginx deployment image including generated html
 FROM nginx:1.21-alpine
 

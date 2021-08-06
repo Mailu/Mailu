@@ -1,8 +1,8 @@
 # First stage to build assets
-ARG DISTRO=alpine:3.12
+ARG DISTRO=alpine:3.14
 ARG ARCH=""
 FROM ${ARCH}node:8 as assets
-COPY --from=balenalib/rpi-alpine:3.10 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
+COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 
 COPY package.json ./
 RUN npm install
@@ -24,9 +24,9 @@ RUN mkdir -p /app
 WORKDIR /app
 
 COPY requirements-prod.txt requirements.txt
-RUN apk add --no-cache libressl curl postgresql-libs mariadb-connector-c \
+RUN apk add --no-cache openssl curl postgresql-libs mariadb-connector-c \
   && apk add --no-cache --virtual build-dep \
-  libressl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev cargo \
+  openssl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev cargo \
   && pip3 install -r requirements.txt \
   && apk del --no-cache build-dep
 

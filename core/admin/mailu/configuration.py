@@ -33,8 +33,14 @@ DEFAULT_CONFIG = {
     'HOSTNAMES': 'mail.mailu.io,alternative.mailu.io,yetanother.mailu.io',
     'POSTMASTER': 'postmaster',
     'TLS_FLAVOR': 'cert',
+<<<<<<< HEAD
     'AUTH_RATELIMIT': '10/minute;1000/hour',
     'AUTH_RATELIMIT_SUBNET': True,
+=======
+    'INBOUND_TLS_ENFORCE': False,
+    'AUTH_RATELIMIT': '1000/minute;10000/hour',
+    'AUTH_RATELIMIT_SUBNET': False,
+>>>>>>> 58890407 (Set default of AUTH_RATELIMIT_SUBNET to False. Increase default AUTH_RATELIMIT value.)
     'DISABLE_STATISTICS': False,
     # Mail settings
     'DMARC_RUA': None,

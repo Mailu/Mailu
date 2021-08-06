@@ -40,12 +40,19 @@ address.
 The ``WILDCARD_SENDERS`` setting is a comma delimited list of user email addresses
 that are allowed to send emails from any existing address (spoofing the sender).
 
+<<<<<<< HEAD
 The ``AUTH_RATELIMIT_IP`` (default: 5/hour) holds a security setting for fighting
 attackers that attempt a password spraying attack. The value defines the limit of
 authentication attempts that will be processed on **distinct** non-existing
 accounts for a specific IP subnet as defined in
 ``AUTH_RATELIMIT_IP_V4_MASK`` (default: /24) and
 ``AUTH_RATELIMIT_IP_V6_MASK`` (default: /48).
+=======
+If ``AUTH_RATELIMIT_SUBNET`` is ``True`` (default: False), the ``AUTH_RATELIMIT``
+rules does also apply to auth requests coming from ``SUBNET``, especially for the webmail.
+If you disable this, ensure that the rate limit on the webmail is enforced in a different
+way (e.g. roundcube plug-in), otherwise an attacker can simply bypass the limit using webmail.
+>>>>>>> 58890407 (Set default of AUTH_RATELIMIT_SUBNET to False. Increase default AUTH_RATELIMIT value.)
 
 The ``AUTH_RATELIMIT_USER`` (default: 50/day) holds a security setting for fighting
 attackers that attempt to guess a user's password (typically using a password

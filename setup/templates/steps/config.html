@@ -39,6 +39,7 @@ Or in plain English: if receivers start to classify your mail as spam, this post
 <div class="form-group">
   <label>Authentication rate limit per IP for failed login attempts on unique non-existing accounts (password spraying counter-measure)</label>
   <!--   Validates number input only -->
+<<<<<<< HEAD
   <p><input class="form-control" style="width: 9%; display: inline;" type="number" name="auth_ratelimit_ip" value="5" required > / hour
   </p>
 </div>
@@ -55,6 +56,10 @@ Or in plain English: if receivers start to classify your mail as spam, this post
   <label>Outgoing message rate limit (per user)</label>
   <!--   Validates number input only -->
   <p><input class="form-control" style="width: 7%; display: inline;" type="number" name="message_ratelimit_pd" value="200" required > / day
+=======
+  <p><input class="form-control" style="width: 7%; display: inline;" type="number" name="auth_ratelimit_pm"
+  		value="10000" required > / minute
+>>>>>>> 58890407 (Set default of AUTH_RATELIMIT_SUBNET to False. Increase default AUTH_RATELIMIT value.)
   </p>
 </div>
 

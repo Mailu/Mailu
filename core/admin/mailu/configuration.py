@@ -40,6 +40,7 @@ DEFAULT_CONFIG = {
     'WILDCARD_SENDERS': '',
     'TLS_FLAVOR': 'cert',
     'INBOUND_TLS_ENFORCE': False,
+<<<<<<< HEAD
     'DEFER_ON_TLS_ERROR': True,
     'AUTH_RATELIMIT_IP': '5/hour',
     'AUTH_RATELIMIT_IP_V4_MASK': 24,
@@ -47,6 +48,10 @@ DEFAULT_CONFIG = {
     'AUTH_RATELIMIT_USER': '50/day',
     'AUTH_RATELIMIT_EXEMPTION': '',
     'AUTH_RATELIMIT_EXEMPTION_LENGTH': 86400,
+=======
+    'AUTH_RATELIMIT': '1000/minute;10000/hour',
+    'AUTH_RATELIMIT_SUBNET': False,
+>>>>>>> 58890407 (Set default of AUTH_RATELIMIT_SUBNET to False. Increase default AUTH_RATELIMIT value.)
     'DISABLE_STATISTICS': False,
     # Mail settings
     'DMARC_RUA': None,

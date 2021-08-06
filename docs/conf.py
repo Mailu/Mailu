@@ -36,7 +36,11 @@ html_context = {
     'github_user': 'mailu',
     'github_repo': 'mailu',
     'github_version': version,
+<<<<<<< HEAD
     'stable_version': '2024.06',
+=======
+    'stable_version': '1.8',
+>>>>>>> 4b891433 (Update documentation config and release notes page.)
     'versions': [
         ('2024.06', '/2024.06/'),
         ('2.0', '/2.0/'),

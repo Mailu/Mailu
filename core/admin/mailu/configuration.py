@@ -34,8 +34,8 @@ DEFAULT_CONFIG = {
     'POSTMASTER': 'postmaster',
     'TLS_FLAVOR': 'cert',
     'INBOUND_TLS_ENFORCE': False,
-    'AUTH_RATELIMIT': '10/minute;1000/hour',
-    'AUTH_RATELIMIT_SUBNET': True,
+    'AUTH_RATELIMIT': '1000/minute;10000/hour',
+    'AUTH_RATELIMIT_SUBNET': False,
     'DISABLE_STATISTICS': False,
     # Mail settings
     'DMARC_RUA': None,

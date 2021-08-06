@@ -4,6 +4,7 @@ Changelog
 2024.06.0 - 2024-06
 -------------------
 
+<<<<<<< HEAD
 For full details see the [releases page](https://mailu.io/2024.06/releases.html)
 
 For the upgrade create a new docker-compose.yml file and mailu.env file via setup.mailu.io. After that any old settings can be reapplied to mailu.env. Before making any changes, carefully read the [configuration reference](https://mailu.io/2.0/configuration.html). New settings have been introduced and some settings have been removed. Multiple changes have been made to the docker-compose.yml file and mailu.env file. If Tika is enabled, then 1GB to 2GB of extra memory is required.
@@ -461,6 +462,25 @@ Please note that the shipped image for PostgreSQL database is fully deprecated n
 - Misc:  ([#1696](https://github.com/Mailu/Mailu/issues/1696), [#1712](https://github.com/Mailu/Mailu/issues/1712), [#1828](https://github.com/Mailu/Mailu/issues/1828), [#1830](https://github.com/Mailu/Mailu/issues/1830))
 
 
+=======
+There are some changes to the configuration overrides. Override files are now mounted read-only into the containers.
+The Dovecot and Postfix overrides are moved in their own sub-directory.
+If there are local override files, they will need to be moved from overrides/ to overrides/dovecot and overrides/postfix/.
+See https://mailu.io/1.8/faq.html#how-can-i-override-settings for all the mappings.
+
+<<<<<<< HEAD
+Please note that the shipped image for PostgreSQL database is deprecated.
+We advise to switch to an external database server.
+=======
+One major change for the docker compose file is that the antispam needs a fixed hostname [#1837](https://github.com/Mailu/Mailu/issues/1837).
+This is handled when you regenerate the docker-compose file. A fixed hostname is required to retain rspamd history.
+
+Please not that the shipped image for PostgreSQL database is deprecated.
+We advise to switch to an external PostgreSQL database server.
+>>>>>>> afaacf5a... Update CHANGELOG.md and process towncrier newsfragments.
+
+<!-- TOWNCRIER -->
+>>>>>>> a7d99bde (Update CHANGELOG.md and process towncrier newsfragments.)
 1.8.0 - 2021-08-06
 --------------------
 
@@ -471,14 +491,22 @@ Please note that the shipped image for PostgreSQL database is fully deprecated n
 - Bugfixes: Replace PUBLIC_HOSTNAME and PUBLIC_IP in "Received" headers to ensure that no undue spam points are attributed ([#191](https://github.com/Mailu/Mailu/issues/191))
 - Bugfixes: Don't replace nested headers (typically in attached emails) ([#1660](https://github.com/Mailu/Mailu/issues/1660))
 - Bugfixes: Fix letsencrypt access to certbot for the mail-letsencrypt flavour ([#1686](https://github.com/Mailu/Mailu/issues/1686))
+<<<<<<< HEAD
 - Bugfixes: Fix CVE-2020-25275 and CVE-2020-24386 by upgrading alpine for
+=======
+- Bugfixes: Fix CVE-2020-25275 and CVE-2020-24386 by using alpine 3.13 for
+>>>>>>> a7d99bde (Update CHANGELOG.md and process towncrier newsfragments.)
   dovecot which contains a fixed dovecot version. ([#1720](https://github.com/Mailu/Mailu/issues/1720))
 - Bugfixes: Antispam service now uses a static hostname. Rspamd history is only retained when the service has a fixed hostname. ([#1837](https://github.com/Mailu/Mailu/issues/1837))
 - Bugfixes: Fix a bug preventing colons from being used in passwords when using radicale/webdav. ([#1861](https://github.com/Mailu/Mailu/issues/1861))
 - Bugfixes: Remove dot in blueprint name to prevent critical flask startup error in setup. ([#1874](https://github.com/Mailu/Mailu/issues/1874))
 - Bugfixes: fix punycode encoding of domain names ([#1891](https://github.com/Mailu/Mailu/issues/1891))
 - Improved Documentation: Update fail2ban documentation to use systemd backend instead of filepath for journald ([#1857](https://github.com/Mailu/Mailu/issues/1857))
+<<<<<<< HEAD
 - Misc: Switch from client side (cookie) sessions to server side sessions and protect against session-fixation attacks. We recommend that you change your SECRET_KEY after upgrading. ([#1783](https://github.com/Mailu/Mailu/issues/1783))
+=======
+- Misc:  ([#1783](https://github.com/Mailu/Mailu/issues/1783))
+>>>>>>> a7d99bde (Update CHANGELOG.md and process towncrier newsfragments.)
 
 
 v1.8.0rc - 2020-09-28

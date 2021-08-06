@@ -267,6 +267,8 @@ correct syntax. The following file names will be taken as override configuration
 - `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory;
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
 
+To override the root location (``/``) in Nginx ``WEBROOT_REDIRECT`` needs to be set to ``none`` in the env file (see :ref:`web settings <web_settings>`).
+
 *Issue reference:* `206`_, `1368`_.
 
 I want to integrate Nextcloud 15 (and newer) with Mailu

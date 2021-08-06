@@ -468,19 +468,19 @@ The Dovecot and Postfix overrides are moved in their own sub-directory.
 If there are local override files, they will need to be moved from overrides/ to overrides/dovecot and overrides/postfix/.
 See https://mailu.io/1.8/faq.html#how-can-i-override-settings for all the mappings.
 
-<<<<<<< HEAD
-Please note that the shipped image for PostgreSQL database is deprecated.
-We advise to switch to an external database server.
-=======
-One major change for the docker compose file is that the antispam needs a fixed hostname [#1837](https://github.com/Mailu/Mailu/issues/1837).
-This is handled when you regenerate the docker-compose file. A fixed hostname is required to retain rspamd history.
+One major change for the docker compose file is that the antispam container needs a fixed hostname [#1837](https://github.com/Mailu/Mailu/issues/1837).
+This is handled when you regenerate the docker-compose file. A fixed hostname is required to retain rspamd history. 
+This is also handled in the helm-chart repo.
 
 Please not that the shipped image for PostgreSQL database is deprecated.
 We advise to switch to an external PostgreSQL database server.
->>>>>>> afaacf5a... Update CHANGELOG.md and process towncrier newsfragments.
 
+<<<<<<< HEAD
 <!-- TOWNCRIER -->
 >>>>>>> a7d99bde (Update CHANGELOG.md and process towncrier newsfragments.)
+=======
+
+>>>>>>> 6581f8f0 (Resolve merge conflict)
 1.8.0 - 2021-08-06
 --------------------
 

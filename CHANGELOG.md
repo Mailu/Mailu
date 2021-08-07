@@ -4,18 +4,49 @@ Changelog
 Upgrade should run fine as long as you generate a new compose or stack
 configuration and upgrade your mailu.env.
 
-Please note that the current 1.8 is what we call a "soft release": It’s there for everyone to see and use, but to limit possible user-impact of this very big release, it’s not yet the default in the setup-utility for new users. When upgrading, please treat it with some care, and be sure to always have backups!
-
 There are some changes to the configuration overrides. Override files are now mounted read-only into the containers.
 The Dovecot and Postfix overrides are moved in their own sub-directory.
 If there are local override files, they will need to be moved from overrides/ to overrides/dovecot and overrides/postfix/.
 See https://mailu.io/1.8/faq.html#how-can-i-override-settings for all the mappings.
 
-Please not that the shipped image for PostgreSQL database is deprecated.
-We advise to switch to an external database server.
+One major change for the docker compose file is that the antispam container needs a fixed hostname [#1837](https://github.com/Mailu/Mailu/issues/1837).
+This is handled when you regenerate the docker-compose file. A fixed hostname is required to retain rspamd history. 
+This is also handled in the helm-chart repo.
 
-<!-- TOWNCRIER -->
-v1.8.0 - 2020-09-28
+Improvements have been made to protect again session-fixation attacks. 
+To be fully protected, it is required to change your SECRET_KEY in Mailu.env after upgrading. 
+A new SECRET_KEY is generated when you recreate your docker-compose.yml & mailu.env file via setup.mailu.io.
+
+The SECRET_KEY is an uppercase alphanumeric string of length 16. You can manually create such a string via
+```cat /dev/urandom | tr -dc 'A-Z0-9' | fold -w ${1:-16} | head -n 1```
+
+After changing mailu.env, it is required to recreate all containers for the changes to be propagated.
+
+Please note that the shipped image for PostgreSQL database is deprecated.
+We advise to switch to an external PostgreSQL database server.
+
+
+1.8.0 - 2021-08-06
+--------------------
+
+- Features: Update version of roundcube webmail and carddav plugin. This is a security update. ([#1841](https://github.com/Mailu/Mailu/issues/1841))
+- Features: Update version of rainloop webmail to 1.16.0. This is a security update. ([#1845](https://github.com/Mailu/Mailu/issues/1845))
+- Features: Changed default value of AUTH_RATELIMIT_SUBNET to false. Increased default value of the rate limit in setup utility (AUTH_RATELIMIT) to a higher value. ([#1867](https://github.com/Mailu/Mailu/issues/1867))
+- Features: Update jquery used in setup. Set pinned versions in requirements.txt for setup. This is a security update. ([#1880](https://github.com/Mailu/Mailu/issues/1880))
+- Bugfixes: Replace PUBLIC_HOSTNAME and PUBLIC_IP in "Received" headers to ensure that no undue spam points are attributed ([#191](https://github.com/Mailu/Mailu/issues/191))
+- Bugfixes: Don't replace nested headers (typically in attached emails) ([#1660](https://github.com/Mailu/Mailu/issues/1660))
+- Bugfixes: Fix letsencrypt access to certbot for the mail-letsencrypt flavour ([#1686](https://github.com/Mailu/Mailu/issues/1686))
+- Bugfixes: Fix CVE-2020-25275 and CVE-2020-24386 by upgrading alpine for
+  dovecot which contains a fixed dovecot version. ([#1720](https://github.com/Mailu/Mailu/issues/1720))
+- Bugfixes: Antispam service now uses a static hostname. Rspamd history is only retained when the service has a fixed hostname. ([#1837](https://github.com/Mailu/Mailu/issues/1837))
+- Bugfixes: Fix a bug preventing colons from being used in passwords when using radicale/webdav. ([#1861](https://github.com/Mailu/Mailu/issues/1861))
+- Bugfixes: Remove dot in blueprint name to prevent critical flask startup error in setup. ([#1874](https://github.com/Mailu/Mailu/issues/1874))
+- Bugfixes: fix punycode encoding of domain names ([#1891](https://github.com/Mailu/Mailu/issues/1891))
+- Improved Documentation: Update fail2ban documentation to use systemd backend instead of filepath for journald ([#1857](https://github.com/Mailu/Mailu/issues/1857))
+- Misc: Switch from client side (cookie) sessions to server side sessions and protect against session-fixation attacks. We recommend that you change your SECRET_KEY after upgrading. ([#1783](https://github.com/Mailu/Mailu/issues/1783))
+
+
+v1.8.0rc - 2020-09-28
 --------------------
 
 - Features: Add support for backward-forwarding using SRS ([#328](https://github.com/Mailu/Mailu/issues/328))

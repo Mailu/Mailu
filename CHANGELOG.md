@@ -492,10 +492,14 @@ We advise to switch to an external PostgreSQL database server.
 - Bugfixes: Don't replace nested headers (typically in attached emails) ([#1660](https://github.com/Mailu/Mailu/issues/1660))
 - Bugfixes: Fix letsencrypt access to certbot for the mail-letsencrypt flavour ([#1686](https://github.com/Mailu/Mailu/issues/1686))
 <<<<<<< HEAD
+<<<<<<< HEAD
 - Bugfixes: Fix CVE-2020-25275 and CVE-2020-24386 by upgrading alpine for
 =======
 - Bugfixes: Fix CVE-2020-25275 and CVE-2020-24386 by using alpine 3.13 for
 >>>>>>> a7d99bde (Update CHANGELOG.md and process towncrier newsfragments.)
+=======
+- Bugfixes: Fix CVE-2020-25275 and CVE-2020-24386 by upgrading alpine for
+>>>>>>> f0997ed0 (Improved changelog entry)
   dovecot which contains a fixed dovecot version. ([#1720](https://github.com/Mailu/Mailu/issues/1720))
 - Bugfixes: Antispam service now uses a static hostname. Rspamd history is only retained when the service has a fixed hostname. ([#1837](https://github.com/Mailu/Mailu/issues/1837))
 - Bugfixes: Fix a bug preventing colons from being used in passwords when using radicale/webdav. ([#1861](https://github.com/Mailu/Mailu/issues/1861))

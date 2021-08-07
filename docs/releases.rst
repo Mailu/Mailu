@@ -211,7 +211,7 @@ Mailu 2.0 - 2023-04-03
 Upgrade should run fine as long as you generate a new compose or stack
 configuration and upgrade your mailu.env.
 
-Please not that the shipped image for PostgreSQL database is deprecated.
+Please note that the shipped image for PostgreSQL database is deprecated.
 The shipped image for PostgreSQL is not maintained anymore from release 1.8.
 We recommend switching to an external PostgreSQL image as soon as possible.
 

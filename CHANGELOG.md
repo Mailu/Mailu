@@ -472,7 +472,7 @@ One major change for the docker compose file is that the antispam container need
 This is handled when you regenerate the docker-compose file. A fixed hostname is required to retain rspamd history. 
 This is also handled in the helm-chart repo.
 
-Please not that the shipped image for PostgreSQL database is deprecated.
+Please note that the shipped image for PostgreSQL database is deprecated.
 We advise to switch to an external PostgreSQL database server.
 
 <<<<<<< HEAD

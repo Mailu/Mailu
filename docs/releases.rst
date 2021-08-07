@@ -139,7 +139,7 @@ Here’s a short summary of new features:
 - Roundcube and Rainloop have been updated.
 - All dependencies have been updated to the latest security update.
 - Fail2ban documentation has been improved.
-- Switch from client side (cookie) sessions to server side sessions.
+- Switch from client side (cookie) sessions to server side sessions and protect against session-fixation attacks. We recommend that you change your SECRET_KEY after upgrading.
 - Full-text-search is back after having been disabled for a while due to nasty bugs. It can still be disabled via the mailu.env file.
 - Tons of documentation improvements, especially geared towards new users.
 - (Experimental) support for different architectures, such as ARM.
@@ -738,8 +738,13 @@ Override files are now mounted read-only into the containers. The Dovecot and Po
 Recreate SECRET_KEY after upgrading
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+<<<<<<< HEAD
 Improvements have been made to protect again session-fixation attacks.
 To be fully protected, it is required to change your SECRET_KEY in Mailu.env after upgrading.
+=======
+Improvements have been made to protect again session-fixation attacks. 
+To be fully protected, it is required to change your SECRET_KEY in Mailu.env after upgrading. 
+>>>>>>> 14a18715 (enhanced security changelog entry and added recommendation to recreate secret_key)
 A new SECRET_KEY is generated when you recreate your docker-compose.yml & mailu.env file via setup.mailu.io.
 
 The SECRET_KEY is an uppercase alphanumeric string of length 16. You can manually create such a string via

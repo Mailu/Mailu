@@ -472,6 +472,15 @@ One major change for the docker compose file is that the antispam container need
 This is handled when you regenerate the docker-compose file. A fixed hostname is required to retain rspamd history. 
 This is also handled in the helm-chart repo.
 
+Improvements have been made to protect again session-fixation attacks. 
+To be fully protected, it is required to change your SECRET_KEY in Mailu.env after upgrading. 
+A new SECRET_KEY is generated when you recreate your docker-compose.yml & mailu.env file via setup.mailu.io.
+
+The SECRET_KEY is an uppercase alphanumeric string of length 16. You can manually create such a string via
+```cat /dev/urandom | tr -dc 'A-Z0-9' | fold -w ${1:-16} | head -n 1```
+
+After changing mailu.env, it is required to recreate all containers for the changes to be propagated.
+
 Please note that the shipped image for PostgreSQL database is deprecated.
 We advise to switch to an external PostgreSQL database server.
 
@@ -507,10 +516,14 @@ We advise to switch to an external PostgreSQL database server.
 - Bugfixes: fix punycode encoding of domain names ([#1891](https://github.com/Mailu/Mailu/issues/1891))
 - Improved Documentation: Update fail2ban documentation to use systemd backend instead of filepath for journald ([#1857](https://github.com/Mailu/Mailu/issues/1857))
 <<<<<<< HEAD
+<<<<<<< HEAD
 - Misc: Switch from client side (cookie) sessions to server side sessions and protect against session-fixation attacks. We recommend that you change your SECRET_KEY after upgrading. ([#1783](https://github.com/Mailu/Mailu/issues/1783))
 =======
 - Misc:  ([#1783](https://github.com/Mailu/Mailu/issues/1783))
 >>>>>>> a7d99bde (Update CHANGELOG.md and process towncrier newsfragments.)
+=======
+- Misc: Switch from client side (cookie) sessions to server side sessions and protect against session-fixation attacks. We recommend that you change your SECRET_KEY after upgrading. ([#1783](https://github.com/Mailu/Mailu/issues/1783))
+>>>>>>> 14a18715 (enhanced security changelog entry and added recommendation to recreate secret_key)
 
 
 v1.8.0rc - 2020-09-28

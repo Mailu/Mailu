@@ -82,7 +82,8 @@ def handle_authentication(headers):
         password = raw_password.encode("iso8859-1").decode("utf8")
         ip = urllib.parse.unquote(headers["Client-Ip"])
         user = models.User.query.get(user_email)
-        if check_credentials(user, password, ip, protocol):
+        port = int(urllib.parse.unquote(headers["Auth-Port"]))
+        if port != 25 or check_credentials(user, password, ip, protocol):
             return {
                 "Auth-Status": "OK",
                 "Auth-Server": server,

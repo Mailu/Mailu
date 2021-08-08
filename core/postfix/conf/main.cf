@@ -36,8 +36,12 @@ relayhost = {{ RELAYHOST }}
 {% if RELAYUSER %}
 smtp_sasl_auth_enable = yes
 smtp_sasl_password_maps = lmdb:/etc/postfix/sasl_passwd
+<<<<<<< HEAD
 smtp_sasl_security_options = noanonymous, noplaintext
 smtp_sasl_tls_security_options = noanonymous
+=======
+smtp_sasl_security_options = noanonymous
+>>>>>>> bcdc1376 (Alpine has removed support for btree and hash)
 {% endif %}
 
 # Recipient delimiter for extended addresses
@@ -57,6 +61,7 @@ tls_ssl_options = NO_COMPRESSION, NO_TICKET
 # 2. not all will have and up-to-date TLS stack.
 smtp_tls_mandatory_protocols = !SSLv2, !SSLv3
 smtp_tls_protocols =!SSLv2,!SSLv3
+<<<<<<< HEAD
 smtp_tls_security_level = {{ OUTBOUND_TLS_LEVEL|default('dane') }}
 smtp_tls_dane_insecure_mx_policy = {{ 'dane' if DEFER_ON_TLS_ERROR else 'may' }}
 smtp_tls_policy_maps=lmdb:/etc/postfix/tls_policy.map, ${podop}dane, socketmap:unix:/tmp/mta-sts.socket:postfix
@@ -68,6 +73,9 @@ smtp_dns_support_level = dnssec
 delay_warning_time = 5m
 smtp_tls_loglevel = 1
 notify_classes = resource, software, delay
+=======
+smtp_tls_session_cache_database = lmdb:${data_directory}/smtp_scache
+>>>>>>> bcdc1376 (Alpine has removed support for btree and hash)
 
 ###############
 # Virtual

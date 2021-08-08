@@ -25,7 +25,8 @@ def start_podop():
         ("recipientmap", "url", url + "recipient/map/§"),
         ("sendermap", "url", url + "sender/map/§"),
         ("senderaccess", "url", url + "sender/access/§"),
-        ("senderlogin", "url", url + "sender/login/§")
+        ("senderlogin", "url", url + "sender/login/§"),
+        ("senderrate", "url", url + "sender/rate/§")
     ])
 
 def is_valid_postconf_line(line):

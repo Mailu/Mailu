@@ -14,7 +14,7 @@ command = [
     "--cert-name", "mailu",
     "--preferred-challenges", "http", "--http-01-port", "8008",
     "--keep-until-expiring",
-    "--rsa-key-size", "4096",
+    "--rsa-key-size", "3072",
     "--config-dir", "/certs/letsencrypt",
     "--post-hook", "/config.py"
 ]

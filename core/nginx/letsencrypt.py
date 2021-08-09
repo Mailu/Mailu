@@ -31,8 +31,7 @@ command2 = [
 ]
 
 def format_for_nginx(fullchain, output):
-    """ nginx expects cert + intermediate
-    whereas letsencrypt provides ca + intermediate + cert
+    """ nginx doesn't need the "compat"
     """
     certs = []
     with open(fullchain, 'r') as pem:
@@ -43,7 +42,7 @@ def format_for_nginx(fullchain, output):
                 certs += [cert]
                 cert = ''
     with open(output, 'w') as pem:
-        for cert in reversed(certs[1:]):
+        for cert in certs[:-1]:
             pem.write(cert)
 
 # Wait for nginx to start

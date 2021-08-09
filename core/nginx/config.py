@@ -27,10 +27,10 @@ keypair_name = os.getenv("TLS_KEYPAIR_FILENAME", default="key.pem")
 args["TLS"] = {
     "cert": ("/certs/%s" % cert_name, "/certs/%s" % keypair_name),
     "letsencrypt": ("/certs/letsencrypt/live/mailu/fullchain.pem",
-        "/certs/letsencrypt/live/mailu/privkey.pem"),
+        "/certs/letsencrypt/live/mailu/privkey.pem", "/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem", "/certs/letsencrypt/live/mailu-ecdsa/privkey.pem"),
     "mail": ("/certs/%s" % cert_name, "/certs/%s" % keypair_name),
     "mail-letsencrypt": ("/certs/letsencrypt/live/mailu/fullchain.pem",
-        "/certs/letsencrypt/live/mailu/privkey.pem"),
+        "/certs/letsencrypt/live/mailu/privkey.pem", "/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem", "/certs/letsencrypt/live/mailu-ecdsa/privkey.pem"),
     "notls": None
 }[args["TLS_FLAVOR"]]
 

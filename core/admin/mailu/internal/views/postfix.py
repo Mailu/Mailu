@@ -144,7 +144,7 @@ def postfix_sender_rate(sender):
     """ Rate limit outbound emails per sender login
     """
     user = models.User.get(sender) or flask.abort(404)
-    return flask.abort(404) if user.sender_limiter.hit() else flask.jsonify("REJECT")
+    return flask.abort(404) if user.sender_limiter.hit() else flask.jsonify("450 4.2.1 You are sending too many emails too fast.")
 
 @internal.route("/postfix/sender/access/<path:sender>")
 def postfix_sender_access(sender):

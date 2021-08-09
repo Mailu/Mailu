@@ -43,6 +43,8 @@ recipient_delimiter = {{ RECIPIENT_DELIMITER }}
 # In kubernetes and Docker swarm, such address cannot be determined using the hostname. Allow for the whole Mailu subnet instead.
 smtpd_authorized_xclient_hosts={{ POD_ADDRESS_RANGE or SUBNET }}
 
+auth_mechanisms = plain
+
 ###############
 # TLS
 ###############

@@ -31,7 +31,6 @@ mydestination =
 # Relayhost if any is configured
 relayhost = {{ RELAYHOST }}
 {% if RELAYUSER %}
-smtp_sasl_auth_enable = yes
 smtp_sasl_password_maps = lmdb:/etc/postfix/sasl_passwd
 smtp_sasl_security_options = noanonymous, noplaintext
 smtp_sasl_tls_security_options = noanonymous

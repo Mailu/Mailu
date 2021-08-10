@@ -31,7 +31,7 @@ command2 = [
 ]
 
 def format_for_nginx(fullchain, output):
-    """ nginx doesn't need the "compat"
+    """ We may want to strip ISRG Root X1 out
     """
     certs = []
     with open(fullchain, 'r') as pem:
@@ -42,7 +42,7 @@ def format_for_nginx(fullchain, output):
                 certs += [cert]
                 cert = ''
     with open(output, 'w') as pem:
-        for cert in certs[:-1] if len(certs)>2 else certs:
+        for cert in certs[:-1] if len(certs)>2 and os.getenv('LETSENCRYPT_SHORTCHAIN', default="False") else certs:
             pem.write(cert)
 
 # Wait for nginx to start

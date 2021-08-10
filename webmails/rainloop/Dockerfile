@@ -1,51 +1,65 @@
-ARG ARCH=""
-ARG QEMU=other
+ARG DISTRO=nginx:1.21-alpine
+FROM $DISTRO
 
-# NOTE: only add file if building for arm
-FROM ${ARCH}php:7.4-apache as build_arm
-ONBUILD COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
+# Shared later between dovecot postfix nginx rspamd rainloop and roundloop
+RUN apk add --no-cache \
+    python3 py3-pip \
+ && pip3 install socrate==0.2.0
 
-FROM ${ARCH}php:7.4-apache as build_other
+# Shared layer between rainloop and roundcube
+#  https://www.rainloop.net/docs/system-requirements/
+#  Rainloop:
+#     cURL            Builtin
+#     iconv           php7-iconv
+#     json            php7-json
+#     libxml          php7-xml
+#     dom             php7-dom
+#     openssl         php7-openssl
+#     DateTime        Builtin
+#     PCRE            Builtin
+#     SPL             Builtin
+#  Recommended:
+#     php7-fpm        FastCGI Process Manager
+#  Optional PHP extension (for contacts):
+#     php7-pdo        Accessing databases in PHP
+#     php7-pdo_sqlite Access to SQLite 3 databases
+RUN apk add --no-cache \
+ && apk add php7 php7-fpm php7-curl php7-iconv php7-json php7-xml php7-dom php7-openssl \
+ && rm /etc/nginx/conf.d/default.conf \
+ && rm /etc/php7/php-fpm.d/www.conf
 
-FROM build_${QEMU}
-#Shared layer between rainloop and roundcube
-RUN apt-get update && apt-get install -y \
-  python3 curl python3-pip git python3-multidict \
-  && rm -rf /var/lib/apt/lists \
-  && echo "ServerSignature Off" >> /etc/apache2/apache2.conf
+# nginx / PHP config files
+COPY config/nginx-rainloop.conf /etc/nginx/conf.d/rainloop.conf
+COPY config/php-rainloop.conf /etc/php7/php-fpm.d/rainloop.conf
 
-# Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
-RUN pip3 install socrate
+# Rainloop login
+COPY login/include.php /var/www/rainloop/include.php
+COPY login/sso.php /var/www/rainloop/sso.php
 
+# Parsed en moved at startup
+COPY defaults/php.ini /defaults/php.ini
+COPY defaults/application.ini /defaults/application.ini
+COPY defaults/default.ini /defaults/default.ini
+
+# Install Rainloop from source
 ENV RAINLOOP_URL https://github.com/RainLoop/rainloop-webmail/releases/download/v1.16.0/rainloop-community-1.16.0.zip
 
-RUN apt-get update && apt-get install -y \
-      unzip python3-jinja2 \
- && rm -rf /var/www/html/ \
- && mkdir /var/www/html \
- && cd /var/www/html \
+RUN apk add --no-cache \
+      unzip py3-jinja2 \
+ && mkdir -p /var/www/rainloop \
+ && cd /var/www/rainloop \
  && curl -L -O ${RAINLOOP_URL} \
  && unzip -q *.zip \
  && rm -f *.zip \
  && rm -rf data/ \
  && find . -type d -exec chmod 755 {} \; \
  && find . -type f -exec chmod 644 {} \; \
- && chown -R www-data: * \
- && apt-get purge -y unzip \
- && rm -rf /var/lib/apt/lists
-
-COPY include.php /var/www/html/include.php
-COPY sso.php /var/www/html/sso.php
-COPY php.ini /php.ini
-
-COPY application.ini /application.ini
-COPY default.ini /default.ini
+ && chown -R nginx:nginx /var/www/rainloop \
+ && apk del unzip
 
 COPY start.py /start.py
 
 EXPOSE 80/tcp
 VOLUME ["/data"]
 
-CMD /start.py
-
-HEALTHCHECK CMD curl -f -L http://localhost/ || exit 1
+CMD php-fpm7 && /start.py

@@ -81,8 +81,8 @@ def handle_authentication(headers):
         raw_password = urllib.parse.unquote(headers["Auth-Pass"])
         password = raw_password.encode("iso8859-1").decode("utf8")
         ip = urllib.parse.unquote(headers["Client-Ip"])
-        port = int(urllib.parse.unquote(headers["Auth-Port"]))
-        if port == 25:
+        service_port = int(urllib.parse.unquote(headers["Auth-Port"]))
+        if service_port == 25:
             return {
                 "Auth-Status": "AUTH not supported",
                 "Auth-Error-Code": "502 5.5.1",

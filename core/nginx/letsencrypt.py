@@ -42,7 +42,7 @@ def format_for_nginx(fullchain, output):
                 certs += [cert]
                 cert = ''
     with open(output, 'w') as pem:
-        for cert in certs[:-1]:
+        for cert in certs[:-1] if len(certs)>2 else certs:
             pem.write(cert)
 
 # Wait for nginx to start

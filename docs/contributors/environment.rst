@@ -178,9 +178,9 @@ In the case of a PR from a fellow team member, a single review is enough
 to initiate merging. In all other cases, two approving reviews are required.
 There is also a possibility to set the ``review/need2`` to require a second review.
 
-After Travis successfully tests the PR and the required amount of reviews are acquired,
+After the Github Action workflow successfully tests the PR and the required amount of reviews are acquired,
 Mergify will trigger with a ``bors r+`` command. Bors will batch any approved PR's,
-merges them with master in a staging branch where Travis builds and tests the result.
+merges them with master in a staging branch where the Github Action workflow builds and tests the result.
 After a successful test, the actual master gets fast-forwarded to that point.
 
 System requirements
@@ -201,16 +201,16 @@ us on `Matrix`_.
 Test images
 ```````````
 
-All PR's automatically get build by Travis, controlled by `bors-ng`_.
+All PR's automatically get build by a Github Action workflow, controlled by `bors-ng`_.
 Some primitive auto testing is done.
 The resulting images get uploaded to Docker hub, under the
-tag name ``mailutest/<name>:pr-<no>``.
+tag name ``mailuci/<name>:pr-<no>``.
 
 For example, to test PR #500 against master, reviewers can use:
 
 .. code-block:: bash
 
-  export DOCKER_ORG="mailutest"
+  export DOCKER_ORG="mailuci"
   export MAILU_VERSION="pr-500"
   docker-compose pull
   docker-compose up -d
@@ -232,8 +232,8 @@ after Bors confirms a successful build.
 When bors try fails
 ```````````````````
 
-Sometimes Travis fails when another PR triggers a ``bors try`` command,
-before Travis cloned the git repository.
+Sometimes the Github Action workflow fails when another PR triggers a ``bors try`` command,
+before the Github Action workflow cloned the git repository.
 Inspect the build log in the link provided by *bors-ng* to find out the cause.
 If you see something like the following error on top of the logs,
 feel free to write a comment with ``bors retry``.

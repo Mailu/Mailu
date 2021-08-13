@@ -3,7 +3,7 @@ ARG QEMU=other
 
 # NOTE: only add file if building for arm
 FROM ${ARCH}php:7.4-apache as build_arm
-ONBUILD COPY --from=balenalib/rpi-alpine:3.10 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
+ONBUILD COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 
 FROM ${ARCH}php:7.4-apache as build_other
 
@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
 # Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
 RUN pip3 install socrate
 
-ENV RAINLOOP_URL https://github.com/RainLoop/rainloop-webmail/releases/download/v1.14.0/rainloop-community-1.14.0.zip
+ENV RAINLOOP_URL https://github.com/RainLoop/rainloop-webmail/releases/download/v1.16.0/rainloop-community-1.16.0.zip
 
 RUN apt-get update && apt-get install -y \
       unzip python3-jinja2 \
@@ -35,6 +35,7 @@ RUN apt-get update && apt-get install -y \
  && rm -rf /var/lib/apt/lists
 
 COPY include.php /var/www/html/include.php
+COPY sso.php /var/www/html/sso.php
 COPY php.ini /php.ini
 
 COPY application.ini /application.ini

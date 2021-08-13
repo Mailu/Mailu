@@ -41,7 +41,7 @@ The ``AUTH_RATELIMIT`` holds a security setting for fighting attackers that
 try to guess user passwords. The value is the limit of failed authentication attempts
 that a single IP address can perform against IMAP, POP and SMTP authentication endpoints.
 
-If ``AUTH_RATELIMIT_SUBNET`` is ``True`` (which is the default), the ``AUTH_RATELIMIT``
+If ``AUTH_RATELIMIT_SUBNET`` is ``True`` (default: False), the ``AUTH_RATELIMIT``
 rules does also apply to auth requests coming from ``SUBNET``, especially for the webmail.
 If you disable this, ensure that the rate limit on the webmail is enforced in a different
 way (e.g. roundcube plug-in), otherwise an attacker can simply bypass the limit using webmail.
@@ -99,14 +99,19 @@ the localpart for DMARC rua and ruf email addresses.
 Full-text search is enabled for IMAP is enabled by default. This feature can be disabled
 (e.g. for performance reasons) by setting the optional variable ``FULL_TEXT_SEARCH`` to ``off``.
 
+.. _web_settings:
+
 Web settings
 ------------
 
-The ``WEB_ADMIN`` contains the path to the main admin interface, while
-``WEB_WEBMAIL`` contains the path to the Web email client.
-The ``WEBROOT_REDIRECT`` redirects all non-found queries to the set path.
-An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables classic
-behavior of a 404 result when not found.
+- ``WEB_ADMIN`` contains the path to the main admin interface 
+
+- ``WEB_WEBMAIL`` contains the path to the Web email client.
+
+- ``WEBROOT_REDIRECT`` redirects all non-found queries to the set path.
+  An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables classic behavior of a 404 result when not found. 
+  Alternatively, ``WEBROOT_REDIRECT`` can be set to ``none`` if you are using an Nginx override for ``location /``.
+
 All three options need a leading slash (``/``) to work.
 
   .. note:: ``WEBROOT_REDIRECT`` has to point to a valid path on the webserver.
@@ -195,4 +200,24 @@ resolved. This can be used to rely on DNS based service discovery with changing 
 When using ``*_ADDRESS``, the hostnames must be full-qualified hostnames. Otherwise nginx will not be able to
 resolve the hostnames.
 
+Database settings
+-----------------
 
+
+The admin service stores configurations in a database.
+
+- ``DB_FLAVOR``: the database type for mailu admin service. (``sqlite``, ``postgresql``, ``mysql``)
+- ``DB_HOST``: the database host for mailu admin service. (when not ``sqlite``)
+- ``DB_PORT``: the database port for mailu admin service. (when not ``sqlite``)
+- ``DB_PW``: the database password for mailu admin service. (when not ``sqlite``)
+- ``DB_USER``: the database user for mailu admin service. (when not ``sqlite``)
+- ``DB_NAME``: the database name for mailu admin service. (when not ``sqlite``)
+
+The roundcube service stores configurations in a database.
+
+- ``ROUNDCUBE_DB_FLAVOR``: the database type for roundcube service. (``sqlite``, ``postgresql``, ``mysql``)
+- ``ROUNDCUBE_DB_HOST``: the database host for roundcube service. (when not ``sqlite``)
+- ``ROUNDCUBE_DB_PORT``: the database port for roundcube service. (when not ``sqlite``)
+- ``ROUNDCUBE_DB_PW``: the database password for roundcube service. (when not ``sqlite``)
+- ``ROUNDCUBE_DB_USER``: the database user for roundcube service. (when not ``sqlite``)
+- ``ROUNDCUBE_DB_NAME``: the database name for roundcube service. (when not ``sqlite``)

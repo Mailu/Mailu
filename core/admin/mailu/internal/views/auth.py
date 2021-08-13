@@ -43,6 +43,18 @@ def admin_authentication():
         return ""
     return flask.abort(403)
 
+@internal.route("/auth/user")
+def user_authentication():
+    """ Fails if the user is not authenticated.
+    """
+    if (not flask_login.current_user.is_anonymous
+        and flask_login.current_user.enabled):
+        response = flask.Response()
+        response.headers["X-User"] = flask_login.current_user.get_id()
+        response.headers["X-User-Token"] = models.User.get_temp_token(flask_login.current_user.get_id())
+        return response
+    return flask.abort(403)
+
 
 @internal.route("/auth/basic")
 def basic_authentication():
@@ -51,7 +63,7 @@ def basic_authentication():
     authorization = flask.request.headers.get("Authorization")
     if authorization and authorization.startswith("Basic "):
         encoded = authorization.replace("Basic ", "")
-        user_email, password = base64.b64decode(encoded).split(b":")
+        user_email, password = base64.b64decode(encoded).split(b":", 1)
         user = models.User.query.get(user_email.decode("utf8"))
         if nginx.check_credentials(user, password.decode('utf-8'), flask.request.remote_addr, "web"):
             response = flask.Response()

@@ -61,7 +61,7 @@ have to prevent pushing out something quickly.
 We currently maintain a strict work flow:
 
 #. Someone writes a solution and sends a pull request;
-#. We use Travis-CI for some very basic building and testing;
+#. We use Github actions for some very basic building and testing;
 #. The pull request needs to be code-reviewed and tested by at least two members
    from the contributors team.
   
@@ -261,9 +261,13 @@ correct syntax. The following file names will be taken as override configuration
    - ``main.cf`` as ``$ROOT/overrides/postfix/postfix.cf``
    - ``master.cf`` as ``$ROOT/overrides/postfix/postfix.master``
    - All ``$ROOT/overrides/postfix/*.map`` files
+   - For both ``postfix.cf`` and ``postfix.master``, you need to put one configuration per line, as they are fed line-by-line
+     to postfix.
 - `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory;
 - `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory;
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
+
+To override the root location (``/``) in Nginx ``WEBROOT_REDIRECT`` needs to be set to ``none`` in the env file (see :ref:`web settings <web_settings>`).
 
 *Issue reference:* `206`_, `1368`_.
 
@@ -495,6 +499,8 @@ follow these steps:
 
   logging:
     driver: journald
+    options:
+      tag: mailu-front
 
 2. Add the /etc/fail2ban/filter.d/bad-auth.conf
 
@@ -504,6 +510,7 @@ follow these steps:
   [Definition]
   failregex = .* client login failed: .+ client:\ <HOST>
   ignoreregex =
+  journalmatch = CONTAINER_TAG=mailu-front
 
 3. Add the /etc/fail2ban/jail.d/bad-auth.conf
 
@@ -511,8 +518,8 @@ follow these steps:
 
   [bad-auth]
   enabled = true
+  backend = systemd
   filter = bad-auth
-  logpath = /var/log/messages
   bantime = 604800
   findtime = 300
   maxretry = 10

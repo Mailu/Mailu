@@ -50,5 +50,17 @@
   <td><pre>_dmarc.{{ domain.name }}. 600 IN TXT "v=DMARC1; p=reject;{% if config["DMARC_RUA"] %} rua=mailto:{{ config["DMARC_RUA"] }}@{{ config["DOMAIN"] }};{% endif %}{% if config["DMARC_RUF"] %} ruf=mailto:{{ config["DMARC_RUF"] }}@{{ config["DOMAIN"] }};{% endif %} adkim=s; aspf=s"</pre></td>
 </tr>
 {% endif %}
+<tr>
+  <th>{% trans %}DNS client auto-configuration (RFC6186) entries{% endtrans %}</th>
+  <td>
+    <pre style="white-space: pre-wrap; word-wrap: break-word;">_submission._tcp.{{ domain.name }}. 600 IN SRV 1 1 587 {{ config["HOSTNAMES"].split(',')[0] }}.</pre>
+    <pre style="white-space: pre-wrap; word-wrap: break-word;">_imap._tcp.{{ domain.name }}. 600 IN SRV 100 1 143 {{ config["HOSTNAMES"].split(',')[0] }}.</pre>
+    <pre style="white-space: pre-wrap; word-wrap: break-word;">_pop3._tcp.{{ domain.name }}. 600 IN SRV 100 1 110 {{ config["HOSTNAMES"].split(',')[0] }}.</pre>
+{% if config["TLS_FLAVOR"] != "notls" %}
+    <pre style="white-space: pre-wrap; word-wrap: break-word;">_submissions._tcp.{{ domain.name }}. 600 IN SRV 10 1 465 {{ config["HOSTNAMES"].split(',')[0] }}.</pre>
+    <pre style="white-space: pre-wrap; word-wrap: break-word;">_imaps._tcp.{{ domain.name }}. 600 IN SRV 10 1 993 {{ config["HOSTNAMES"].split(',')[0] }}.</pre>
+    <pre style="white-space: pre-wrap; word-wrap: break-word;">_pop3s._tcp.{{ domain.name }}. 600 IN SRV 10 1 995 {{ config["HOSTNAMES"].split(',')[0] }}.</pre>
+{% endif %}</td>
+</tr>
 {% endcall %}
 {% endblock %}

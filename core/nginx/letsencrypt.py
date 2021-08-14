@@ -54,5 +54,4 @@ while True:
     format_for_nginx('/certs/letsencrypt/live/mailu/fullchain.pem', '/certs/letsencrypt/live/mailu/nginx-chain.pem')
     subprocess.call(command2)
     format_for_nginx('/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem', '/certs/letsencrypt/live/mailu-ecdsa/nginx-chain.pem')
-    time.sleep(3600)
-
+    time.sleep(86400)

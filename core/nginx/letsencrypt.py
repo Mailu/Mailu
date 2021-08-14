@@ -48,7 +48,7 @@ def format_for_nginx(fullchain, output):
 # Wait for nginx to start
 time.sleep(5)
 
-# Run certbot every hour
+# Run certbot every day
 while True:
     subprocess.call(command)
     format_for_nginx('/certs/letsencrypt/live/mailu/fullchain.pem', '/certs/letsencrypt/live/mailu/nginx-chain.pem')

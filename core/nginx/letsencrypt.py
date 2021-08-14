@@ -22,8 +22,8 @@ command = [
 # Wait for nginx to start
 time.sleep(5)
 
-# Run certbot every hour
+# Run certbot every day
 while True:
     subprocess.call(command)
-    time.sleep(3600)
+    time.sleep(86400)
 

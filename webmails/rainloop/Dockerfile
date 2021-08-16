@@ -59,7 +59,7 @@ RUN apk add --no-cache \
  && find . -type d -exec chmod 755 {} \; \
  && find . -type f -exec chmod 644 {} \; \
  && chown -R nginx:nginx /var/www/rainloop \
- && apk del curl unzip
+ && apk del unzip
 
 COPY start.py /start.py
 

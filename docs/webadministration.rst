@@ -334,7 +334,10 @@ For adding a new user the following options can be configured.
 * Enabled. Tick this checkbox to enable the user account. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail.
   The email inbox of the user is still retained. This option can be used to temporarily suspend an user account.
 
-* Quota. The maximum quota for the user's email box.
+* Storage Quota. The maximum quota for the user's email box.
+
+* Sending Quota. The sending quota is the limit of messages a single user can send per day. 
+  This is meant to fight outbound spam in case of a compromised or malicious account on the server.
 
 * Allow IMAP access. When ticked, allows email retrieval via the IMAP protocol.
 

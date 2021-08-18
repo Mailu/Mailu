@@ -315,6 +315,21 @@ This page is also accessible for domain managers. On the users page new users ca
 
 * Fetched accounts. Access the fetched accounts page of the user. See the :ref:`fetched accounts page <webadministration_fetched_accounts>` for more information.
 
+This page also shows an overview of the following settings of an user:
+
+* Email. The email address of the user.
+
+* Features. Shows if IMAP or POP3 access is enabled.
+
+* Storage quota. Shows how much assigned storage has been consumed.
+
+* Sending Quota. The sending quota is the limit of messages a single user can send per day. 
+
+* Comment. A desription for the user. 
+
+* Created. Date when the user was created.
+
+* Last edit. Last date when the user was modified. 
 
 .. _webadministration_add_user:
 
@@ -335,9 +350,6 @@ For adding a new user the following options can be configured.
   The email inbox of the user is still retained. This option can be used to temporarily suspend an user account.
 
 * Storage Quota. The maximum quota for the user's email box.
-
-* Sending Quota. The sending quota is the limit of messages a single user can send per day. 
-  This is meant to fight outbound spam in case of a compromised or malicious account on the server.
 
 * Allow IMAP access. When ticked, allows email retrieval via the IMAP protocol.
 

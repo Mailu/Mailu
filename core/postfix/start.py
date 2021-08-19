@@ -15,6 +15,7 @@ log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
 def start_podop():
     os.setuid(getpwnam('postfix').pw_uid)
+    os.mkdir('/dev/shm/postfix',mode=0o700)
     url = "http://" + os.environ["ADMIN_ADDRESS"] + "/internal/postfix/"
     # TODO: Remove verbosity setting from Podop?
     run_server(0, "postfix", "/tmp/podop.socket", [
@@ -25,7 +26,8 @@ def start_podop():
         ("recipientmap", "url", url + "recipient/map/§"),
         ("sendermap", "url", url + "sender/map/§"),
         ("senderaccess", "url", url + "sender/access/§"),
-        ("senderlogin", "url", url + "sender/login/§")
+        ("senderlogin", "url", url + "sender/login/§"),
+        ("senderrate", "url", url + "sender/rate/§")
     ])
 
 def is_valid_postconf_line(line):

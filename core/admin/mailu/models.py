@@ -27,7 +27,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
 from werkzeug.utils import cached_property
 
-from mailu import dkim
+from mailu import dkim, utils
 
 
 db = flask_sqlalchemy.SQLAlchemy()
@@ -499,6 +499,12 @@ class User(Base, Email):
             self.reply_enabled and
             self.reply_startdate < now and
             self.reply_enddate > now
+        )
+
+    @property
+    def sender_limiter(self):
+        return utils.limiter.get_limiter(
+            app.config["MESSAGE_RATELIMIT"], "sender", self.email
         )
 
     @classmethod

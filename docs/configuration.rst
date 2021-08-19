@@ -165,6 +165,11 @@ See the `python docs`_ for more information.
 
 .. _`python docs`: https://docs.python.org/3.6/library/logging.html#logging-levels
 
+The ``LETSENCRYPT_SHORTCHAIN`` (default: False) setting controls whether we send the ISRG Root X1 certificate in TLS handshakes. This is required for `android handsets older than 7.1.1` but slows down the performance of modern devices.
+
+.. _`android handsets older than 7.1.1`: https://community.letsencrypt.org/t/production-chain-changes/150739
+
+
 Antivirus settings
 ------------------
 

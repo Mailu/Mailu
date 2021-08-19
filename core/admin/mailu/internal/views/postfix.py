@@ -133,10 +133,12 @@ def postfix_sender_map(sender):
 
 @internal.route("/postfix/sender/login/<path:sender>")
 def postfix_sender_login(sender):
+    wildcard_senders = [s for s in flask.current_app.config.get('WILDCARD_SENDERS', '').lower().replace(' ', '').split(',') if s]
     localpart, domain_name = models.Email.resolve_domain(sender)
     if localpart is None:
-        return flask.abort(404)
+        return flask.jsonify(",".join(wildcard_senders)) if wildcard_senders else flask.abort(404)
     destination = models.Email.resolve_destination(localpart, domain_name, True)
+    destination = [*destination, *wildcard_senders] if destination else [*wildcard_senders]
     return flask.jsonify(",".join(destination)) if destination else flask.abort(404)
 
 @internal.route("/postfix/sender/rate/<path:sender>")

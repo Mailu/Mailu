@@ -63,6 +63,8 @@ smtp_tls_policy_maps=hash:/etc/postfix/tls_policy.map
 smtp_tls_CApath = /etc/ssl/certs
 smtp_tls_session_cache_database = lmdb:/dev/shm/postfix/smtp_scache
 smtpd_tls_session_cache_database = lmdb:/dev/shm/postfix/smtpd_scache
+smtp_host_lookup = dns
+smtp_dns_support_level = dnssec
 
 ###############
 # Virtual

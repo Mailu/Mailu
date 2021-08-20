@@ -32,6 +32,7 @@ DEFAULT_CONFIG = {
     'DOMAIN': 'mailu.io',
     'HOSTNAMES': 'mail.mailu.io,alternative.mailu.io,yetanother.mailu.io',
     'POSTMASTER': 'postmaster',
+    'WILDCARD_SENDERS': '',
     'TLS_FLAVOR': 'cert',
     'INBOUND_TLS_ENFORCE': False,
     'AUTH_RATELIMIT': '1000/minute;10000/hour',
@@ -46,6 +47,7 @@ DEFAULT_CONFIG = {
     'DKIM_SELECTOR': 'dkim',
     'DKIM_PATH': '/dkim/{domain}.{selector}.key',
     'DEFAULT_QUOTA': 1000000000,
+    'MESSAGE_RATELIMIT': '200/day',
     # Web settings
     'SITENAME': 'Mailu',
     'WEBSITE': 'https://mailu.io',

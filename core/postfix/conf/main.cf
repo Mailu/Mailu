@@ -33,7 +33,8 @@ relayhost = {{ RELAYHOST }}
 {% if RELAYUSER %}
 smtp_sasl_auth_enable = yes
 smtp_sasl_password_maps = lmdb:/etc/postfix/sasl_passwd
-smtp_sasl_security_options = noanonymous
+smtp_sasl_security_options = noanonymous, noplaintext
+smtp_sasl_tls_security_options = noanonymous
 {% endif %}
 
 # Recipient delimiter for extended addresses
@@ -57,10 +58,11 @@ tls_ssl_options = NO_COMPRESSION, NO_TICKET
 # 2. not all will have and up-to-date TLS stack.
 smtp_tls_mandatory_protocols = !SSLv2, !SSLv3
 smtp_tls_protocols =!SSLv2,!SSLv3
-smtp_tls_session_cache_database = lmdb:${data_directory}/smtp_scache
 smtp_tls_security_level = {{ OUTBOUND_TLS_LEVEL|default('may') }}
 smtp_tls_policy_maps=hash:/etc/postfix/tls_policy.map
 smtp_tls_CApath = /etc/ssl/certs
+smtp_tls_session_cache_database = lmdb:/dev/shm/postfix/smtp_scache
+smtpd_tls_session_cache_database = lmdb:/dev/shm/postfix/smtpd_scache
 
 ###############
 # Virtual
@@ -100,6 +102,8 @@ smtpd_sender_login_maps = ${podop}senderlogin
 
 # Restrictions for incoming SMTP, other restrictions are applied in master.cf
 smtpd_helo_required = yes
+
+check_ratelimit = check_sasl_access ${podop}senderrate
 
 smtpd_client_restrictions =
   permit_mynetworks,

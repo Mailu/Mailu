@@ -1,5 +1,12 @@
 #!/bin/bash
 
-tee >(rspamc -h {{ ANTISPAM_WEBUI_ADDRESS }} -P mailu learn_ham /dev/stdin) \
-	>(rspamc -h {{ ANTISPAM_WEBUI_ADDRESS }} -P mailu -f 11 fuzzy_del /dev/stdin) \
-	| rspamc -h {{ ANTISPAM_WEBUI_ADDRESS }} -P mailu -f 13 fuzzy_add /dev/stdin
+RSPAMD_HOST="$(getent hosts {{ ANTISPAM_WEBUI_ADDRESS }})"
+if [[ $? -ne 0 ]]
+then
+	echo "Failed to lookup {{ ANTISPAM_WEBUI_ADDRESS }}" >&2
+	exit 1
+fi
+
+tee >(rspamc -h $RSPAMD_HOST -P mailu learn_ham /dev/stdin) \
+	>(rspamc -h $RSPAMD_HOST -P mailu -f 11 fuzzy_del /dev/stdin) \
+	| rspamc -h $RSPAMD_HOST -P mailu -f 13 fuzzy_add /dev/stdin

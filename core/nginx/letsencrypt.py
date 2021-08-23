@@ -21,7 +21,10 @@ command = [
     "--cert-name", "mailu",
     "--preferred-challenges", "http", "--http-01-port", "8008",
     "--keep-until-expiring",
+<<<<<<< HEAD
     "--allow-subset-of-names",
+=======
+>>>>>>> 3e676e23 (fix #1270)
     "--renew-with-new-domains",
     "--config-dir", "/certs/letsencrypt",
     "--post-hook", "/config.py"

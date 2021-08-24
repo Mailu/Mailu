@@ -3,7 +3,11 @@
 Kubernetes setup
 ================
 
+<<<<<<< HEAD
 Please see `the Helm Chart documentation`_.
+=======
+Hold up! These instructions are not recommended for setting up Mailu in a production Kubernetes environment. Please see `the Helm Chart documentation`_.
+>>>>>>> 0a6f3448 (k8s is helm-chart only)
 
 We are looking for maintainers: if you are interested please join our `Matrix`_ room.
 

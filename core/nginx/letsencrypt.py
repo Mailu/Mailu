@@ -14,46 +14,11 @@ command = [
     "--cert-name", "mailu",
     "--preferred-challenges", "http", "--http-01-port", "8008",
     "--keep-until-expiring",
-<<<<<<< HEAD
     "--rsa-key-size", "4096",
     "--config-dir", "/certs/letsencrypt",
-    "--post-hook", "/config.py"
-]
-=======
     "--renew-with-new-domains",
-    "--config-dir", "/certs/letsencrypt",
     "--post-hook", "/config.py"
 ]
-command2 = [
-    "certbot",
-    "-n", "--agree-tos", # non-interactive
-    "-d", os.environ["HOSTNAMES"],
-    "-m", "{}@{}".format(os.environ["POSTMASTER"], os.environ["DOMAIN"]),
-    "certonly", "--standalone",
-    "--cert-name", "mailu-ecdsa",
-    "--preferred-challenges", "http", "--http-01-port", "8008",
-    "--keep-until-expiring",
-    "--key-type", "ecdsa",
-    "--renew-with-new-domains",
-    "--config-dir", "/certs/letsencrypt",
-    "--post-hook", "/config.py"
-]
-
-def format_for_nginx(fullchain, output):
-    """ We may want to strip ISRG Root X1 out
-    """
-    certs = []
-    with open(fullchain, 'r') as pem:
-        cert = ''
-        for line in pem:
-            cert += line
-            if '-----END CERTIFICATE-----' in line:
-                certs += [cert]
-                cert = ''
-    with open(output, 'w') as pem:
-        for cert in certs[:-1] if len(certs)>2 and os.getenv('LETSENCRYPT_SHORTCHAIN', default="False") else certs:
-            pem.write(cert)
->>>>>>> 3e676e23 (fix #1270)
 
 # Wait for nginx to start
 time.sleep(5)

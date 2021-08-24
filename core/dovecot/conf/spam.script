@@ -1,6 +1,6 @@
 #!/bin/bash
 
-RSPAMD_HOST="$(getent hosts {{ ANTISPAM_WEBUI_ADDRESS }})"
+RSPAMD_HOST="$(getent hosts {{ ANTISPAM_WEBUI_ADDRESS }}|cut -d\  -f1)"
 if [[ $? -ne 0 ]]
 then
 	echo "Failed to lookup {{ ANTISPAM_WEBUI_ADDRESS }}" >&2

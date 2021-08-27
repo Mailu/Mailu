@@ -10,7 +10,6 @@ There are basically three options, from the most to the least recommended one:
 - have Mailu Web frontend listen locally and use your own Web frontend on top of it
 - use ``Traefik`` in another container as central system-reverse-proxy
 - override Mailu Web frontend configuration
-- disable Mailu Web frontend completely and use your own
 
 All options will require that you modify the ``docker-compose.yml`` file.
 
@@ -259,9 +258,3 @@ You can also download the example configuration files:
 - :download:`compose/traefik/docker-compose.yml`
 - :download:`compose/traefik/traefik.toml`
 
-Disable completely Mailu reverse proxy
---------------------------------------
-
-You must not disable Mailu reverse proxy by removing the ``front`` section from the ``docker-compose.yml``.
-
-``front`` is handling authentication and is also proxying e.g. SMTP and IMAP. A basic HTTP reverse proxy as described in this document is not sufficient for this.

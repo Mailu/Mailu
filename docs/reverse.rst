@@ -7,9 +7,9 @@ In such a configuration, one would usually run a frontend reverse proxy to serve
 
 There are basically three options, from the most to the least recommended one:
 
-- have Mailu Web frontend listen locally and use your own Web frontend on top of it
-- use ``Traefik`` in another container as central system-reverse-proxy
-- override Mailu Web frontend configuration
+- `have Mailu Web frontend listen locally and use your own Web frontend on top of it`_
+- `use Traefik in another container as central system-reverse-proxy`_
+- `override Mailu Web frontend configuration`_
 
 All options will require that you modify the ``docker-compose.yml`` file.
 
@@ -257,4 +257,8 @@ You can also download the example configuration files:
 
 - :download:`compose/traefik/docker-compose.yml`
 - :download:`compose/traefik/traefik.toml`
+
+.. _have Mailu Web frontend listen locally and use your own Web frontend on top of it: #have-mailu-web-frontend-listen-locally
+.. _use Traefik in another container as central system-reverse-proxy: #traefik-as-reverse-proxy
+.. _override Mailu Web frontend configuration: #override-mailu-configuration
 

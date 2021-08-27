@@ -67,7 +67,7 @@ def basic_authentication():
         user = models.User.query.get(user_email.decode("utf8"))
         if nginx.check_credentials(user, password.decode('utf-8'), flask.request.remote_addr, "web"):
             response = flask.Response()
-            response.headers["X-User"] = user.email
+            response.headers["X-User"] = models.IdnaEmail.process_bind_param(flask_login, user.email, "")
             return response
     response = flask.Response(status=401)
     response.headers["WWW-Authenticate"] = 'Basic realm="Login Required"'

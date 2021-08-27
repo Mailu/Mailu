@@ -1,29 +1,30 @@
-# Translations template for PROJECT.
-# Copyright (C) 2018 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+# Translations template for Mailu.
+# Copyright (C) 2018 Mailu
+# This file is distributed under the same license as the Mailu project.
+# Modi Sacks, 2019-2021.
+# Yaron Shahrabani <sh.yaron@gmail.com>, 2021.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"Project-Id-Version: Mailu 1.5.1\n"
+"Report-Msgid-Bugs-To: heb-bugzap@projects.hamakor.org.il \n"
 "POT-Creation-Date: 2018-04-22 12:10+0200\n"
-"PO-Revision-Date: 2019-11-27 22:20+0000\n"
-"Last-Translator: Mordi Sacks \n"
+"PO-Revision-Date: 2021-07-19 09:04+0300\n"
+"Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
 "Language-Team: Hebrew <https://translate.tedomum.net/projects/mailu/admin/he/"
 ">\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n == 1) ? 0 : ((n == 2) ? 1 : ((n > 10 && "
 "n % 10 == 0) ? 2 : 3));\n"
-"X-Generator: Weblate 3.3\n"
+"X-Generator: Poedit 3.0\n"
 "Generated-By: Babel 2.5.3\n"
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."
-msgstr "כתובת דוא\"ל לא חוקית."
+msgstr "כתובת דוא״ל שגויה."
 
 #: mailu/ui/forms.py:36
 msgid "Confirm"
@@ -31,7 +32,7 @@ msgstr "אישור"
 
 #: mailu/ui/forms.py:40 mailu/ui/forms.py:77
 msgid "E-mail"
-msgstr "דוא\"ל"
+msgstr "דוא״ל"
 
 #: mailu/ui/forms.py:41 mailu/ui/forms.py:78 mailu/ui/forms.py:90
 #: mailu/ui/forms.py:109 mailu/ui/forms.py:162
@@ -48,23 +49,23 @@ msgstr "כניסה"
 #: mailu/ui/templates/domain/details.html:27
 #: mailu/ui/templates/domain/list.html:18 mailu/ui/templates/relay/list.html:17
 msgid "Domain name"
-msgstr "שם דומיין"
+msgstr "שם תחום"
 
 #: mailu/ui/forms.py:47
 msgid "Maximum user count"
-msgstr ""
+msgstr "כמות המשתמשים המרבית"
 
 #: mailu/ui/forms.py:48
 msgid "Maximum alias count"
-msgstr ""
+msgstr "כמות הכינויים המרבית"
 
 #: mailu/ui/forms.py:49
 msgid "Maximum user quota"
-msgstr ""
+msgstr "מיכסת המשתמשים המרבית"
 
 #: mailu/ui/forms.py:50
 msgid "Enable sign-up"
-msgstr ""
+msgstr "לאפשר הרשמה"
 
 #: mailu/ui/forms.py:51 mailu/ui/forms.py:72 mailu/ui/forms.py:83
 #: mailu/ui/forms.py:128 mailu/ui/forms.py:140
@@ -72,53 +73,53 @@ msgstr ""
 #: mailu/ui/templates/relay/list.html:19 mailu/ui/templates/token/list.html:19
 #: mailu/ui/templates/user/list.html:23
 msgid "Comment"
-msgstr ""
+msgstr "תגובה"
 
 #: mailu/ui/forms.py:52 mailu/ui/forms.py:61 mailu/ui/forms.py:66
 #: mailu/ui/forms.py:73 mailu/ui/forms.py:132 mailu/ui/forms.py:141
 msgid "Create"
-msgstr ""
+msgstr "יצירה"
 
 #: mailu/ui/forms.py:57
 msgid "Initial admin"
-msgstr ""
+msgstr "מנהל ראשוני"
 
 #: mailu/ui/forms.py:58
 msgid "Admin password"
-msgstr ""
+msgstr "סיסמת ניהול"
 
 #: mailu/ui/forms.py:59 mailu/ui/forms.py:79 mailu/ui/forms.py:91
 msgid "Confirm password"
-msgstr ""
+msgstr "אישור סיסמה"
 
 #: mailu/ui/forms.py:65
 msgid "Alternative name"
-msgstr ""
+msgstr "שם חלופי"
 
 #: mailu/ui/forms.py:70
 msgid "Relayed domain name"
-msgstr ""
+msgstr "שם תחום מועבר"
 
 #: mailu/ui/forms.py:71 mailu/ui/templates/relay/list.html:18
 msgid "Remote host"
-msgstr ""
+msgstr "מארח מרוחק"
 
 #: mailu/ui/forms.py:80 mailu/ui/templates/user/list.html:22
 #: mailu/ui/templates/user/signup_domain.html:16
 msgid "Quota"
-msgstr ""
+msgstr "מיכסה"
 
 #: mailu/ui/forms.py:81
 msgid "Allow IMAP access"
-msgstr ""
+msgstr "לאפשר גישה ב־IMAP"
 
 #: mailu/ui/forms.py:82
 msgid "Allow POP3 access"
-msgstr ""
+msgstr "לאפשר גישה ב־POP3"
 
 #: mailu/ui/forms.py:84
 msgid "Enabled"
-msgstr ""
+msgstr "מופעל"
 
 #: mailu/ui/forms.py:85
 msgid "Save"
@@ -126,7 +127,7 @@ msgstr "שמירה"
 
 #: mailu/ui/forms.py:89
 msgid "Email address"
-msgstr "דואר אלקטרוני"
+msgstr "כתובת דוא״ל"
 
 #: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
 #: mailu/ui/templates/user/signup.html:4
@@ -136,244 +137,244 @@ msgstr "הרשמה"
 
 #: mailu/ui/forms.py:97
 msgid "Displayed name"
-msgstr ""
+msgstr "שם מוצג"
 
 #: mailu/ui/forms.py:98
 msgid "Enable spam filter"
-msgstr ""
+msgstr "הפעלת מסנן ספאם"
 
 #: mailu/ui/forms.py:99
 msgid "Spam filter tolerance"
-msgstr ""
+msgstr "סובלנות מסנן הספאם"
 
 #: mailu/ui/forms.py:100
 msgid "Enable forwarding"
-msgstr ""
+msgstr "הפעלת העברה"
 
 #: mailu/ui/forms.py:101
 msgid "Keep a copy of the emails"
-msgstr ""
+msgstr "להשאיר עותק מההודעות"
 
 #: mailu/ui/forms.py:103 mailu/ui/forms.py:139
 #: mailu/ui/templates/alias/list.html:20
 msgid "Destination"
-msgstr ""
+msgstr "יעד"
 
 #: mailu/ui/forms.py:105
 msgid "Save settings"
-msgstr ""
+msgstr "שמירת הגדרות"
 
 #: mailu/ui/forms.py:110
 msgid "Password check"
-msgstr ""
+msgstr "בדיקת סיסמה"
 
 #: mailu/ui/forms.py:111 mailu/ui/templates/sidebar.html:16
 msgid "Update password"
-msgstr ""
+msgstr "עדכון סיסמה"
 
 #: mailu/ui/forms.py:115
 msgid "Enable automatic reply"
-msgstr ""
+msgstr "הפעלת תגובה אוטומטית"
 
 #: mailu/ui/forms.py:116
 msgid "Reply subject"
-msgstr ""
+msgstr "נושא התגובה"
 
 #: mailu/ui/forms.py:117
 msgid "Reply body"
-msgstr ""
+msgstr "גוף התגובה"
 
 #: mailu/ui/forms.py:119
 msgid "End of vacation"
-msgstr ""
+msgstr "סוף החופשה"
 
 #: mailu/ui/forms.py:120
 msgid "Update"
-msgstr ""
+msgstr "עדכון"
 
 #: mailu/ui/forms.py:125
 msgid "Your token (write it down, as it will never be displayed again)"
-msgstr ""
+msgstr "האסימון שלך (כדאי לשמור עליו היטב כיוון שהוא לא יופיע פעם נוספת)"
 
 #: mailu/ui/forms.py:130 mailu/ui/templates/token/list.html:20
 msgid "Authorized IP"
-msgstr ""
+msgstr "כתובת IP מורשית"
 
 #: mailu/ui/forms.py:136
 msgid "Alias"
-msgstr ""
+msgstr "כינוי"
 
 #: mailu/ui/forms.py:138
 msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"
-msgstr ""
+msgstr "להשתמש בתחביר דמוי SQL (למשל: catch-all aliases)"
 
 #: mailu/ui/forms.py:145
 msgid "Admin email"
-msgstr ""
+msgstr "דוא״ל ההנהלה"
 
 #: mailu/ui/forms.py:146 mailu/ui/forms.py:151 mailu/ui/forms.py:164
 msgid "Submit"
-msgstr ""
+msgstr "הגשה"
 
 #: mailu/ui/forms.py:150
 msgid "Manager email"
-msgstr ""
+msgstr "דוא״ל המפקח"
 
 #: mailu/ui/forms.py:155
 msgid "Protocol"
-msgstr ""
+msgstr "פרוטוקול"
 
 #: mailu/ui/forms.py:158
 msgid "Hostname or IP"
-msgstr ""
+msgstr "שם מארח או כתובת IP"
 
 #: mailu/ui/forms.py:159 mailu/ui/templates/client.html:20
 #: mailu/ui/templates/client.html:47
 msgid "TCP port"
-msgstr ""
+msgstr "פתחת TCP"
 
 #: mailu/ui/forms.py:160
 msgid "Enable TLS"
-msgstr ""
+msgstr "הפעלת TLS"
 
 #: mailu/ui/forms.py:161 mailu/ui/templates/client.html:28
 #: mailu/ui/templates/client.html:55 mailu/ui/templates/fetch/list.html:20
 msgid "Username"
-msgstr ""
+msgstr "שם משתמש"
 
 #: mailu/ui/forms.py:163
 msgid "Keep emails on the server"
-msgstr ""
+msgstr "להשאיר את ההודעות על השרת"
 
 #: mailu/ui/forms.py:168
 msgid "Announcement subject"
-msgstr ""
+msgstr "נושא ההכרזה"
 
 #: mailu/ui/forms.py:170
 msgid "Announcement body"
-msgstr ""
+msgstr "גוף ההכרזה"
 
 #: mailu/ui/forms.py:172
 msgid "Send"
-msgstr ""
+msgstr "שליחה"
 
 #: mailu/ui/templates/announcement.html:4
 msgid "Public announcement"
-msgstr ""
+msgstr "הכרזה פומבית"
 
 #: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:82
 msgid "Client setup"
-msgstr ""
+msgstr "הגדרת לקוח"
 
 #: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
 msgid "Mail protocol"
-msgstr ""
+msgstr "פרוטוקול דוא״ל"
 
 #: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
 msgid "Server name"
-msgstr ""
+msgstr "שם שרת"
 
 #: mailu/ui/templates/confirm.html:4
 msgid "Confirm action"
-msgstr ""
+msgstr "אישור הפעולה"
 
 #: mailu/ui/templates/confirm.html:13
 #, python-format
 msgid "You are about to %(action)s. Please confirm your action."
-msgstr ""
+msgstr "פעולה זו תבצע %(action)s. נא לאשר את הפעולה שלך."
 
 #: mailu/ui/templates/docker-error.html:4
 msgid "Docker error"
-msgstr ""
+msgstr "שגיאת Docker"
 
 #: mailu/ui/templates/docker-error.html:12
 msgid "An error occurred while talking to the Docker server."
-msgstr ""
+msgstr "אירעה שגיאה בעת החיבור לשרת ה־Docker."
 
 #: mailu/ui/templates/login.html:8
 msgid "to access the administration tools"
-msgstr ""
+msgstr "כדי לגשת לכלי הניהול"
 
 #: mailu/ui/templates/sidebar.html:11 mailu/ui/templates/user/list.html:34
 msgid "Settings"
-msgstr ""
+msgstr "הגדרות"
 
 #: mailu/ui/templates/sidebar.html:21 mailu/ui/templates/user/list.html:35
 msgid "Auto-reply"
-msgstr ""
+msgstr "מענה אוטומטית"
 
 #: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:26
 #: mailu/ui/templates/user/list.html:36
 msgid "Fetched accounts"
-msgstr ""
+msgstr "חשבונות נמשכים"
 
 #: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/token/list.html:4
 msgid "Authentication tokens"
-msgstr ""
+msgstr "אסימוני אימות"
 
 #: mailu/ui/templates/sidebar.html:35
 msgid "Administration"
-msgstr ""
+msgstr "ניהול"
 
 #: mailu/ui/templates/sidebar.html:44
 msgid "Announcement"
-msgstr ""
+msgstr "הכרזה"
 
 #: mailu/ui/templates/sidebar.html:49
 msgid "Administrators"
-msgstr ""
+msgstr "מנהלים"
 
 #: mailu/ui/templates/sidebar.html:54
 msgid "Relayed domains"
-msgstr ""
+msgstr "שמות תחום מועברים"
 
 #: mailu/ui/templates/sidebar.html:59 mailu/ui/templates/user/settings.html:15
 msgid "Antispam"
-msgstr ""
+msgstr "מניעת ספאם"
 
 #: mailu/ui/templates/sidebar.html:66
 msgid "Mail domains"
-msgstr ""
+msgstr "דמות תחום לדוא״ל"
 
 #: mailu/ui/templates/sidebar.html:72
 msgid "Go to"
-msgstr ""
+msgstr "מעבר אל"
 
 #: mailu/ui/templates/sidebar.html:76
 msgid "Webmail"
-msgstr ""
+msgstr "דוא״ל בדפדפן"
 
 #: mailu/ui/templates/sidebar.html:87
 msgid "Website"
-msgstr ""
+msgstr "אתר"
 
 #: mailu/ui/templates/sidebar.html:92
 msgid "Help"
-msgstr ""
+msgstr "עזרה"
 
 #: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
 msgid "Register a domain"
-msgstr ""
+msgstr "רישום שם תחום"
 
 #: mailu/ui/templates/sidebar.html:105
 msgid "Sign out"
-msgstr ""
+msgstr "יציאה"
 
 #: mailu/ui/templates/working.html:4
 msgid "We are still working on this feature!"
-msgstr ""
+msgstr "אנחנו עדיין עובדים על היכולת הזאת!"
 
 #: mailu/ui/templates/admin/create.html:4
 msgid "Add a global administrator"
-msgstr ""
+msgstr "הוספת מנהל כללי"
 
 #: mailu/ui/templates/admin/list.html:4
 msgid "Global administrators"
-msgstr ""
+msgstr "מנהלים כלליים"
 
 #: mailu/ui/templates/admin/list.html:9
 msgid "Add administrator"
-msgstr ""
+msgstr "הוספת מנהל"
 
 #: mailu/ui/templates/admin/list.html:16 mailu/ui/templates/alias/list.html:18
 #: mailu/ui/templates/alternative/list.html:18
@@ -382,12 +383,12 @@ msgstr ""
 #: mailu/ui/templates/relay/list.html:16 mailu/ui/templates/token/list.html:18
 #: mailu/ui/templates/user/list.html:18
 msgid "Actions"
-msgstr ""
+msgstr "פעולות"
 
 #: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
 #: mailu/ui/templates/manager/list.html:19 mailu/ui/templates/user/list.html:20
 msgid "Email"
-msgstr ""
+msgstr "דוא״ל"
 
 #: mailu/ui/templates/admin/list.html:22 mailu/ui/templates/alias/list.html:29
 #: mailu/ui/templates/alternative/list.html:25
@@ -396,23 +397,23 @@ msgstr ""
 #: mailu/ui/templates/relay/list.html:27 mailu/ui/templates/token/list.html:26
 #: mailu/ui/templates/user/list.html:31
 msgid "Delete"
-msgstr ""
+msgstr "מחיקה"
 
 #: mailu/ui/templates/alias/create.html:4
 msgid "Create alias"
-msgstr ""
+msgstr "יצירת כינוי"
 
 #: mailu/ui/templates/alias/edit.html:4
 msgid "Edit alias"
-msgstr ""
+msgstr "עריכת כינוי"
 
 #: mailu/ui/templates/alias/list.html:4
 msgid "Alias list"
-msgstr ""
+msgstr "רשימת כינויים"
 
 #: mailu/ui/templates/alias/list.html:12
 msgid "Add alias"
-msgstr ""
+msgstr "הוספת כינוי"
 
 #: mailu/ui/templates/alias/list.html:22
 #: mailu/ui/templates/alternative/list.html:20
@@ -420,254 +421,259 @@ msgstr ""
 #: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:21
 #: mailu/ui/templates/user/list.html:24
 msgid "Created"
-msgstr ""
+msgstr "נוצר"
 
 #: mailu/ui/templates/alias/list.html:23 mailu/ui/templates/domain/list.html:23
 #: mailu/ui/templates/fetch/list.html:25 mailu/ui/templates/relay/list.html:21
 #: mailu/ui/templates/user/list.html:25
 msgid "Last edit"
-msgstr ""
+msgstr "עריכה אחרונה"
 
 #: mailu/ui/templates/alias/list.html:28 mailu/ui/templates/domain/list.html:30
 #: mailu/ui/templates/fetch/list.html:30 mailu/ui/templates/relay/list.html:26
 #: mailu/ui/templates/user/list.html:30
 msgid "Edit"
-msgstr ""
+msgstr "עריכה"
 
 #: mailu/ui/templates/alternative/create.html:4
 msgid "Create alternative domain"
-msgstr ""
+msgstr "יצירת שם תחום חלופי"
 
 #: mailu/ui/templates/alternative/list.html:4
 msgid "Alternative domain list"
-msgstr ""
+msgstr "רשימת שמות תחום חלופיים"
 
 #: mailu/ui/templates/alternative/list.html:12
 msgid "Add alternative"
-msgstr ""
+msgstr "הוספת חלופה"
 
 #: mailu/ui/templates/alternative/list.html:19
 msgid "Name"
-msgstr ""
+msgstr "שם"
 
 #: mailu/ui/templates/domain/create.html:4
 #: mailu/ui/templates/domain/list.html:9
 msgid "New domain"
-msgstr ""
+msgstr "שם תחום חדש"
 
 #: mailu/ui/templates/domain/details.html:4
 msgid "Domain details"
-msgstr ""
+msgstr "פרטי שם התחום"
 
 #: mailu/ui/templates/domain/details.html:15
 msgid "Regenerate keys"
-msgstr ""
+msgstr "יצירת מפתחות מחדש"
 
 #: mailu/ui/templates/domain/details.html:17
 msgid "Generate keys"
-msgstr ""
+msgstr "יצירת מפתחות"
 
 #: mailu/ui/templates/domain/details.html:31
 msgid "DNS MX entry"
-msgstr ""
+msgstr "רשומת MX ב־DNS"
 
 #: mailu/ui/templates/domain/details.html:35
 msgid "DNS SPF entries"
-msgstr ""
+msgstr "רשומות SPF ב־DNS"
 
 #: mailu/ui/templates/domain/details.html:42
 msgid "DKIM public key"
-msgstr ""
+msgstr "מפתח DKIM ציבורי"
 
 #: mailu/ui/templates/domain/details.html:46
 msgid "DNS DKIM entry"
-msgstr ""
+msgstr "רשומת DKIM ב־DNS"
 
 #: mailu/ui/templates/domain/details.html:50
 msgid "DNS DMARC entry"
-msgstr ""
+msgstr "רשומת DMARC ב־DNS"
 
 #: mailu/ui/templates/domain/edit.html:4
 msgid "Edit domain"
-msgstr ""
+msgstr "עריכת שם תחום"
 
 #: mailu/ui/templates/domain/list.html:4
 msgid "Domain list"
-msgstr ""
+msgstr "רשימת שמות תחום"
 
 #: mailu/ui/templates/domain/list.html:17
 msgid "Manage"
-msgstr ""
+msgstr "ניהול"
 
 #: mailu/ui/templates/domain/list.html:19
 msgid "Mailbox count"
-msgstr ""
+msgstr "כמות תיבות דוא״ל"
 
 #: mailu/ui/templates/domain/list.html:20
 msgid "Alias count"
-msgstr ""
+msgstr "כמות כינויים"
 
 #: mailu/ui/templates/domain/list.html:28
 msgid "Details"
-msgstr ""
+msgstr "פרטים"
 
 #: mailu/ui/templates/domain/list.html:35
 msgid "Users"
-msgstr ""
+msgstr "משתמשים"
 
 #: mailu/ui/templates/domain/list.html:36
 msgid "Aliases"
-msgstr ""
+msgstr "כינויים"
 
 #: mailu/ui/templates/domain/list.html:37
 msgid "Managers"
-msgstr ""
+msgstr "מפקחים"
 
 #: mailu/ui/templates/domain/list.html:39
 msgid "Alternatives"
-msgstr ""
+msgstr "חלופות"
 
 #: mailu/ui/templates/domain/signup.html:13
 msgid ""
 "In order to register a new domain, you must first setup the\n"
 "    domain zone so that the domain <code>MX</code> points to this server"
 msgstr ""
+"כדי לרשום שם תחום חדש, תחילה עליך להקים את אזור התחום\n"
+"    ‏(domain zone) כדי שה־<code>MX</code> של שם התחום יפנה לשרת הזה"
 
 #: mailu/ui/templates/domain/signup.html:18
 msgid ""
 "If you do not know how to setup an <code>MX</code> record for your DNS "
 "zone,\n"
-"    please contact your DNS provider or administrator. Also, please wait "
-"a\n"
+"    please contact your DNS provider or administrator. Also, please wait a\n"
 "    couple minutes after the <code>MX</code> is set so the local server "
 "cache\n"
 "    expires."
 msgstr ""
+"אם לא ברור לך איך להקים רשומת <code>MX</code> עבור אזור ה־DNS שלך,\n"
+"    נא ליצור קשר עם ספק ה־ DNS או ההנהלה שלך. כמו כן, נא להמתין מספר דקות\n"
+"    לאחר הגדרת ה־<code>MX</code> כדי לאפשר לתוקף המטמון המקורי בשרת\n"
+"    לפוג."
 
 #: mailu/ui/templates/fetch/create.html:4
 msgid "Add a fetched account"
-msgstr ""
+msgstr "הוספת חשבון נמשך"
 
 #: mailu/ui/templates/fetch/edit.html:4
 msgid "Update a fetched account"
-msgstr ""
+msgstr "עדכון חשבון שנמשך"
 
 #: mailu/ui/templates/fetch/list.html:12
 msgid "Add an account"
-msgstr ""
+msgstr "הוספת חשבון"
 
 #: mailu/ui/templates/fetch/list.html:19
 msgid "Endpoint"
-msgstr ""
+msgstr "נקודת גישה"
 
 #: mailu/ui/templates/fetch/list.html:21
 msgid "Keep emails"
-msgstr ""
+msgstr "לשמור על ההודעות"
 
 #: mailu/ui/templates/fetch/list.html:22
 msgid "Last check"
-msgstr ""
+msgstr "בדיקה אחרונה"
 
 #: mailu/ui/templates/fetch/list.html:35
 msgid "yes"
-msgstr ""
+msgstr "כן"
 
 #: mailu/ui/templates/fetch/list.html:35
 msgid "no"
-msgstr ""
+msgstr "לא"
 
 #: mailu/ui/templates/manager/create.html:4
 msgid "Add a manager"
-msgstr ""
+msgstr "הוספת מנהל"
 
 #: mailu/ui/templates/manager/list.html:4
 msgid "Manager list"
-msgstr ""
+msgstr "רשימת מנהלים"
 
 #: mailu/ui/templates/manager/list.html:12
 msgid "Add manager"
-msgstr ""
+msgstr "הוספת מנהל"
 
 #: mailu/ui/templates/relay/create.html:4
 msgid "New relay domain"
-msgstr ""
+msgstr "שם תחום מועבר"
 
 #: mailu/ui/templates/relay/edit.html:4
 msgid "Edit relayd domain"
-msgstr ""
+msgstr "עריכת שמות תחום מועברים"
 
 #: mailu/ui/templates/relay/list.html:4
 msgid "Relayed domain list"
-msgstr ""
+msgstr "רשימת שמות תחום מועברים"
 
 #: mailu/ui/templates/relay/list.html:9
 msgid "New relayed domain"
-msgstr ""
+msgstr "שם תחום מועבר חדש"
 
 #: mailu/ui/templates/token/create.html:4
 msgid "Create an authentication token"
-msgstr ""
+msgstr "יצירת אסימון אימות"
 
 #: mailu/ui/templates/token/list.html:12
 msgid "New token"
-msgstr ""
+msgstr "אסימון חדש"
 
 #: mailu/ui/templates/user/create.html:4
 msgid "New user"
-msgstr ""
+msgstr "משתמש חדש"
 
 #: mailu/ui/templates/user/create.html:15
 msgid "General"
-msgstr ""
+msgstr "כללי"
 
 #: mailu/ui/templates/user/create.html:22
 msgid "Features and quotas"
-msgstr ""
+msgstr "יכולות ומיכסות"
 
 #: mailu/ui/templates/user/edit.html:4
 msgid "Edit user"
-msgstr ""
+msgstr "עריכת משתמש"
 
 #: mailu/ui/templates/user/forward.html:4
 msgid "Forward emails"
-msgstr ""
+msgstr "העברת הודעות"
 
 #: mailu/ui/templates/user/list.html:4
 msgid "User list"
-msgstr ""
+msgstr "רשימת משתמשים"
 
 #: mailu/ui/templates/user/list.html:12
 msgid "Add user"
-msgstr ""
+msgstr "הוספת משתמש"
 
 #: mailu/ui/templates/user/list.html:19 mailu/ui/templates/user/settings.html:4
 msgid "User settings"
-msgstr ""
+msgstr "הגדרות משתמש"
 
 #: mailu/ui/templates/user/list.html:21
 msgid "Features"
-msgstr ""
+msgstr "יכולות"
 
 #: mailu/ui/templates/user/password.html:4
 msgid "Password update"
-msgstr ""
+msgstr "עדכון סיסמה"
 
 #: mailu/ui/templates/user/reply.html:4
 msgid "Automatic reply"
-msgstr ""
+msgstr "מענה אוטומטי"
 
 #: mailu/ui/templates/user/settings.html:22
 msgid "Auto-forward"
-msgstr ""
+msgstr "העברה אוטומטית"
 
 #: mailu/ui/templates/user/signup_domain.html:8
 msgid "pick a domain for the new account"
-msgstr ""
+msgstr "נא לבחור שם תחום לחשבון החדש"
 
 #: mailu/ui/templates/user/signup_domain.html:14
 msgid "Domain"
-msgstr ""
+msgstr "שם תחום"
 
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
-msgstr ""
+msgstr "מקומות פנויים"

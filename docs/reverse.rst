@@ -88,7 +88,7 @@ Here is an example configuration :
 
   server {
     listen <public_ip>:443;
-    server_name yourpublicname.tld;
+    server_name external.example.com;
     # [...] here goes your standard configuration
 
     location /webmail {
@@ -98,7 +98,7 @@ Here is an example configuration :
 
   server {
     listen <internal_ip>:443;
-    server_name yourinternalname.tld;
+    server_name internal.example.com;
     # [...] here goes your standard configuration
 
     location /admin {
@@ -112,7 +112,7 @@ Depending on how you access the front server, you might want to add a ``proxy_re
 
 .. code-block:: nginx
 
-  proxy_redirect https://localhost https://your-domain.com;
+  proxy_redirect https://localhost https://example.com;
 
 This will stop redirects (301 and 302) sent by the Webmail, nginx front and admin interface from sending you to ``localhost``.
 
@@ -150,8 +150,8 @@ Add the respective Traefik labels for your domain/configuration, like
 
 .. note:: Please don’t forget to add ``TRAEFIK_DOMAIN=[...]`` TO YOUR ``.env``
 
-If your Traefik is configured to automatically request certificates from *letsencrypt*, then you’ll have a certificate for ``mail.your.doma.in`` now. However,
-``mail.your.doma.in`` might only be the location where you want the Mailu web-interfaces to live — your mail should be sent/received from ``your.doma.in``,
+If your Traefik is configured to automatically request certificates from *letsencrypt*, then you’ll have a certificate for ``mail.your.example.com`` now. However,
+``mail.your.example.com`` might only be the location where you want the Mailu web-interfaces to live — your mail should be sent/received from ``your.example.com``,
 and this is the ``DOMAIN`` in your ``.env``?
 To support that use-case, Traefik can request ``SANs`` for your domain. The configuration for this will depend on your Traefik version.
 
@@ -170,12 +170,12 @@ Add the appropriate labels for your domain(s) to the ``front`` container in ``do
         # Enable TLS
         - "traefik.http.routers.mailu-secure.tls"
         # Your main domain
-        - "traefik.http.routers.mailu-secure.tls.domains[0].main=your.doma.in"
+        - "traefik.http.routers.mailu-secure.tls.domains[0].main=your.example.com"
         # Optional SANs for your main domain
-        - "traefik.http.routers.mailu-secure.tls.domains[0].sans=mail.your.doma.in,webmail.your.doma.in,smtp.your.doma.in"
+        - "traefik.http.routers.mailu-secure.tls.domains[0].sans=mail.your.example.com,webmail.your.example.com,smtp.your.example.com"
         # Optionally add other domains
-        - "traefik.http.routers.mailu-secure.tls.domains[1].main=mail.other.doma.in"
-        - "traefik.http.routers.mailu-secure.tls.domains[1].sans=mail2.other.doma.in,mail3.other.doma.in"
+        - "traefik.http.routers.mailu-secure.tls.domains[1].main=mail.other.example.com"
+        - "traefik.http.routers.mailu-secure.tls.domains[1].sans=mail2.other.example.com,mail3.other.example.com"
         # Your ACME certificate resolver
         - "traefik.http.routers.mailu-secure.tls.certResolver=foo"
 
@@ -192,8 +192,8 @@ Lets add something like
 
   [acme]
     [[acme.domains]]
-      main = "your.doma.in" # this is the same as $TRAEFIK_DOMAIN!
-      sans = ["mail.your.doma.in", "webmail.your.doma.in", "smtp.your.doma.in"]
+      main = "your.example.com" # this is the same as $TRAEFIK_DOMAIN!
+      sans = ["mail.your.example.com", "webmail.your.example.com", "smtp.your.example.com"]
 
 to your ``traefik.toml``.
 

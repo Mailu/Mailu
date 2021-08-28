@@ -37,6 +37,8 @@ The ``POSTMASTER`` is the local part of the postmaster email address. It is
 recommended to setup a generic value and later configure a mail alias for that
 address.
 
+The ``WILDCARD_SENDERS`` setting is a comma delimited list of user email addresses that are allowed to send emails from any existing address (spoofing the sender).
+
 The ``AUTH_RATELIMIT`` holds a security setting for fighting attackers that
 try to guess user passwords. The value is the limit of failed authentication attempts
 that a single IP address can perform against IMAP, POP and SMTP authentication endpoints.
@@ -70,8 +72,8 @@ mail in following format: ``[HOST]:PORT``.
 ``RELAYUSER`` and ``RELAYPASSWORD`` can be used when authentication is needed.
 
 By default postfix uses "opportunistic TLS" for outbound mail. This can be changed
-by setting ``OUTBOUND_TLS_LEVEL`` to ``encrypt``. This setting is highly recommended
-if you are a relayhost that supports TLS.
+by setting ``OUTBOUND_TLS_LEVEL`` to ``encrypt`` or ``secure``. This setting is highly recommended
+if you are using a relayhost that supports TLS.
 
 Similarily by default nginx uses "opportunistic TLS" for inbound mail. This can be changed
 by setting ``INBOUND_TLS_ENFORCE`` to ``True``. Please note that this is forbidden for
@@ -162,6 +164,11 @@ Can be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG or NOTSET.
 See the `python docs`_ for more information.
 
 .. _`python docs`: https://docs.python.org/3.6/library/logging.html#logging-levels
+
+The ``LETSENCRYPT_SHORTCHAIN`` (default: False) setting controls whether we send the ISRG Root X1 certificate in TLS handshakes. This is required for `android handsets older than 7.1.1` but slows down the performance of modern devices.
+
+.. _`android handsets older than 7.1.1`: https://community.letsencrypt.org/t/production-chain-changes/150739
+
 
 Antivirus settings
 ------------------

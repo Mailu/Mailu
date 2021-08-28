@@ -81,6 +81,13 @@ def handle_authentication(headers):
         raw_password = urllib.parse.unquote(headers["Auth-Pass"])
         password = raw_password.encode("iso8859-1").decode("utf8")
         ip = urllib.parse.unquote(headers["Client-Ip"])
+        service_port = int(urllib.parse.unquote(headers["Auth-Port"]))
+        if service_port == 25:
+            return {
+                "Auth-Status": "AUTH not supported",
+                "Auth-Error-Code": "502 5.5.1",
+                "Auth-Wait": 0
+            }
         user = models.User.query.get(user_email)
         if check_credentials(user, password, ip, protocol):
             return {

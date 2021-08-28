@@ -18,7 +18,7 @@ if (file_exists(APP_INDEX_ROOT_PATH.'rainloop/v/'.APP_VERSION.'/include.php')) {
 }
 
 // Retrieve email and password
-if (in_array('HTTP_X_REMOTE_USER', $_SERVER) && in_array('HTTP_X_REMOTE_USER_TOKEN', $_SERVER)) {
+if (isset($_SERVER['HTTP_X_REMOTE_USER']) && isset($_SERVER['HTTP_X_REMOTE_USER_TOKEN'])) {
 	$email = $_SERVER['HTTP_X_REMOTE_USER'];
 	$password = $_SERVER['HTTP_X_REMOTE_USER_TOKEN'];
 	$ssoHash = \RainLoop\Api::GetUserSsoHash($email, $password);

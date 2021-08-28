@@ -1,0 +1,1 @@
+Ensure that we do not trust the source-ip address set in headers if REAL_IP_HEADER isn't set. If you are using Mailu behind a reverse proxy, please ensure that you do read the documentation.

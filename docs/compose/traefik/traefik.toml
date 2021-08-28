@@ -28,6 +28,6 @@ entryPoint = "http"
 
 # This should include all of your mail domains, and main= should be your $TRAEFIK_DOMAIN
 [[acme.domains]]
-  main = "mail.your.doma.in"
-  sans = ["web.mail.your.doma.in", "smtp.mail.doma.in", "imap.mail.doma.in"]
+  main = "mail.example.com"
+  sans = ["web.mail.example.com", "smtp.mail.example.com", "imap.mail.example.com"]
 

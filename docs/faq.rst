@@ -376,7 +376,7 @@ Mailu can serve an `MTA-STS policy`_; To configure it you will need to:
 
 1. setup the appropriate DNS/CNAME record (``mta-sts.example.com`` -> ``mailu.example.com``) and DNS/TXT record (``_mta-sts.example.com`` -> ``v=STSv1; id=1``) paying attention to the ``TTL`` as this is used by MTA-STS.
 
-2. configure an override with the policy itself; for example, your ``overrides/mta-sts.conf`` could read:
+2. configure an override with the policy itself; for example, your ``overrides/nginx/mta-sts.conf`` could read:
 
 .. code-block:: bash
 

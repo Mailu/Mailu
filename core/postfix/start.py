@@ -30,6 +30,12 @@ def start_podop():
         ("senderrate", "url", url + "sender/rate/§")
     ])
 
+def start_mta_sts_daemon():
+    os.chmod("/root/", 0o755) # read access to /root/.netrc required
+    os.setuid(getpwnam('postfix').pw_uid)
+    from postfix_mta_sts_resolver import daemon
+    daemon.main()
+
 def is_valid_postconf_line(line):
     return not line.startswith("#") \
             and not line == ''
@@ -68,6 +74,9 @@ for map_file in glob.glob("/overrides/*.map"):
     os.system("postmap {}".format(destination))
     os.remove(destination)
 
+if os.path.exists("/overrides/mta-sts-daemon.yml"):
+    shutil.copyfile("/overrides/mta-sts-daemon.yml", "/etc/mta-sts-daemon.yml")
+
 if not os.path.exists("/etc/postfix/tls_policy.map.db"):
     with open("/etc/postfix/tls_policy.map", "w") as f:
         for domain in ['gmail.com', 'yahoo.com', 'hotmail.com', 'aol.com', 'outlook.com', 'comcast.net', 'icloud.com', 'msn.com', 'hotmail.co.uk', 'live.com', 'yahoo.co.in', 'me.com', 'mail.ru', 'cox.net', 'yahoo.co.uk', 'verizon.net', 'ymail.com', 'hotmail.it', 'kw.com', 'yahoo.com.tw', 'mac.com', 'live.se', 'live.nl', 'yahoo.com.br', 'googlemail.com', 'libero.it', 'web.de', 'allstate.com', 'btinternet.com', 'online.no', 'yahoo.com.au', 'live.dk', 'earthlink.net', 'yahoo.fr', 'yahoo.it', 'gmx.de', 'hotmail.fr', 'shawinc.com', 'yahoo.de', 'moe.edu.sg', 'naver.com', 'bigpond.com', 'statefarm.com', 'remax.net', 'rocketmail.com', 'live.no', 'yahoo.ca', 'bigpond.net.au', 'hotmail.se', 'gmx.at', 'live.co.uk', 'mail.com', 'yahoo.in', 'yandex.ru', 'qq.com', 'charter.net', 'indeedemail.com', 'alice.it', 'hotmail.de', 'bluewin.ch', 'optonline.net', 'wp.pl', 'yahoo.es', 'hotmail.no', 'pindotmedia.com', 'orange.fr', 'live.it', 'yahoo.co.id', 'yahoo.no', 'hotmail.es', 'morganstanley.com', 'wellsfargo.com', 'wanadoo.fr', 'facebook.com', 'yahoo.se', 'fema.dhs.gov', 'rogers.com', 'yahoo.com.hk', 'live.com.au', 'nic.in', 'nab.com.au', 'ubs.com', 'shaw.ca', 'umich.edu', 'westpac.com.au', 'yahoo.com.mx', 'yahoo.com.sg', 'farmersagent.com', 'yahoo.dk', 'dhs.gov']:
@@ -81,6 +90,7 @@ if "RELAYUSER" in os.environ:
 
 # Run Podop and Postfix
 multiprocessing.Process(target=start_podop).start()
+multiprocessing.Process(target=start_mta_sts_daemon).start()
 os.system("/usr/libexec/postfix/post-install meta_directory=/etc/postfix create-missing")
 # Before starting postfix, we need to check permissions on /queue
 # in the event that postfix,postdrop id have changed

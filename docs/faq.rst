@@ -383,7 +383,7 @@ Mailu can serve an `MTA-STS policy`_; To configure it you will need to:
    location ^~ /.well-known/mta-sts.txt {
    return 200 "version: STSv1
    mode: enforce
-   max_age: 86401
+   max_age: 1296000
    mx: mailu.example.com\r\n";
    }
 

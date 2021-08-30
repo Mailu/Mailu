@@ -73,7 +73,7 @@ mail in following format: ``[HOST]:PORT``.
 
 By default postfix uses "opportunistic TLS" for outbound mail. This can be changed
 by setting ``OUTBOUND_TLS_LEVEL`` to ``encrypt`` or ``secure``. This setting is highly recommended
-if you are using a relayhost that supports TLS.
+if you are using a relayhost that supports TLS but discouraged otherwise. ``DEFER_ON_TLS_ERROR`` (default: True) controls whether incomplete policies (DANE without DNSSEC or "testing" MTA-STS policies) will be taken into account and whether emails will be defered if the additional checks enforced by those policies fail.
 
 Similarily by default nginx uses "opportunistic TLS" for inbound mail. This can be changed
 by setting ``INBOUND_TLS_ENFORCE`` to ``True``. Please note that this is forbidden for

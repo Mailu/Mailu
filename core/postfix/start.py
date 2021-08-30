@@ -76,6 +76,7 @@ for map_file in glob.glob("/overrides/*.map"):
 
 if os.path.exists("/overrides/mta-sts-daemon.yml"):
     shutil.copyfile("/overrides/mta-sts-daemon.yml", "/etc/mta-sts-daemon.yml")
+conf.jinja("/etc/mta-sts-daemon.yml", os.environ, "/etc/mta-sts-daemon.yml")
 
 if not os.path.exists("/etc/postfix/tls_policy.map.db"):
     with open("/etc/postfix/tls_policy.map", "w") as f:

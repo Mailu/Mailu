@@ -80,7 +80,7 @@ conf.jinja("/etc/mta-sts-daemon.yml", os.environ, "/etc/mta-sts-daemon.yml")
 
 if not os.path.exists("/etc/postfix/tls_policy.map.db"):
     with open("/etc/postfix/tls_policy.map", "w") as f:
-        for domain in ['yahoo.com', 'hotmail.com', 'aol.com', 'outlook.com', 'icloud.com', 'msn.com', 'hotmail.co.uk', 'live.com', 'yahoo.co.in', 'me.com', 'cox.net', 'yahoo.co.uk', 'verizon.net', 'ymail.com', 'hotmail.it', 'kw.com', 'yahoo.com.tw', 'mac.com', 'live.se', 'live.nl', 'yahoo.com.br', 'libero.it', 'web.de', 'allstate.com', 'btinternet.com', 'online.no', 'yahoo.com.au', 'live.dk', 'earthlink.net', 'yahoo.fr', 'yahoo.it', 'gmx.de', 'hotmail.fr', 'shawinc.com', 'yahoo.de', 'moe.edu.sg', 'naver.com', 'bigpond.com', 'statefarm.com', 'remax.net', 'rocketmail.com', 'live.no', 'yahoo.ca', 'bigpond.net.au', 'hotmail.se', 'gmx.at', 'live.co.uk', 'mail.com', 'yahoo.in', 'yandex.ru', 'qq.com', 'charter.net', 'indeedemail.com', 'alice.it', 'hotmail.de', 'bluewin.ch', 'optonline.net', 'yahoo.es', 'hotmail.no', 'pindotmedia.com', 'orange.fr', 'live.it', 'yahoo.co.id', 'yahoo.no', 'hotmail.es', 'morganstanley.com', 'wellsfargo.com', 'wanadoo.fr', 'facebook.com', 'yahoo.se', 'fema.dhs.gov', 'rogers.com', 'yahoo.com.hk', 'live.com.au', 'nic.in', 'nab.com.au', 'ubs.com', 'shaw.ca', 'umich.edu', 'westpac.com.au', 'yahoo.com.mx', 'yahoo.com.sg', 'farmersagent.com', 'yahoo.dk', 'dhs.gov']:
+        for domain in ['example.com']:
             f.write(f'{domain}\tsecure\n')
     os.system("postmap /etc/postfix/tls_policy.map")
 

@@ -40,7 +40,16 @@ module.exports = {
                 use: [{
                     loader: 'expose-loader',
                     options: {
-                      exposes: ['$','jQuery'] 
+                      exposes: [
+                        {
+                          globalName: '$',
+                          override: true,
+                        },
+                        {
+                          globalName: 'jQuery',
+                          override: true,
+                        },
+                      ] 
                     },               
                 }]
             }

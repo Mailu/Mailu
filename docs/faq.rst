@@ -374,7 +374,7 @@ How do I setup a MTA-STS policy?
 
 Mailu can serve an `MTA-STS policy`_; To configure it you will need to:
 
-1. add ``mta-sts.example.com`` to the ``HOSTNAMES`` configuration variable (and ensure that a valid SSL certificate is available for it)
+1. add ``mta-sts.example.com`` to the ``HOSTNAMES`` configuration variable (and ensure that a valid SSL certificate is available for it; this may mean restarting your smtp container)
 
 2. configure an override with the policy itself; for example, your ``overrides/nginx/mta-sts.conf`` could read:
 

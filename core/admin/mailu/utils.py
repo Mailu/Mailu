@@ -54,8 +54,10 @@ def has_dane_record(domain, timeout=5):
                     if record.usage in [2,3]: # postfix wants DANE-only
                         return True
     except dns.resolver.NoNameservers:
-        # this could be an attack / a failed DNSSEC lookup
-        return True
+        # If the DNSSEC data is invalid and the DNS resolver is DNSSEC enabled
+        # we will receive this non-specific exception. The safe behaviour is to
+        # accept to defer the email.
+        return app.config['DEFER_ON_TLS_ERROR']
     except:
         pass
 

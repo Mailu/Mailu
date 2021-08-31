@@ -6,6 +6,9 @@ try:
 except ImportError:
     import pickle
 
+import dns
+import dns.resolver
+
 import hmac
 import secrets
 import time
@@ -25,7 +28,6 @@ from itsdangerous.encoding import want_bytes
 from werkzeug.datastructures import CallbackDict
 from werkzeug.contrib import fixers
 
-
 # Login configuration
 login = flask_login.LoginManager()
 login.login_view = "ui.login"
@@ -36,6 +38,26 @@ def handle_needs_login():
     return flask.redirect(
         flask.url_for('ui.login', next=flask.request.endpoint)
     )
+
+# DNS stub configured to do DNSSEC enabled queries
+resolver = dns.resolver.Resolver()
+resolver.use_edns(0, 0, 1500)
+resolver.flags = dns.flags.AD | dns.flags.RD
+
+def has_dane_record(domain, timeout=5):
+    try:
+        result = resolver.query(f'_25._tcp.{domain}', dns.rdatatype.TLSA,dns.rdataclass.IN, lifetime=timeout)
+        if (result.response.flags & dns.flags.AD) == dns.flags.AD:
+            for record in result:
+                if isinstance(record, dns.rdtypes.ANY.TLSA.TLSA):
+                    record.validate()
+                    if record.usage in [2,3]: # postfix wants DANE-only
+                        return True
+    except dns.resolver.NoNameservers:
+        # this could be an attack / a failed DNSSEC lookup
+        return True
+    except:
+        pass
 
 # Rate limiter
 limiter = limiter.LimitWraperFactory()

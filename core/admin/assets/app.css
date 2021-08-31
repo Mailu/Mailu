@@ -21,10 +21,3 @@
   padding: unset !important;
 }
 
-/* 
- * Temporary workaround to get FontAwesome icons working. 
- * Should be updated if AdminLTE is updated to use the same version. 
- * This workaround can be removed if someone gets the icons working
- * again via the plugins included with AdminLTE
-  */
-@import url("//use.fontawesome.com/releases/v5.15.3/css/all.css");

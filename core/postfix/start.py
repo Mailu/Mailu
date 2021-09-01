@@ -19,10 +19,10 @@ def start_podop():
     url = "http://" + os.environ["ADMIN_ADDRESS"] + "/internal/postfix/"
     # TODO: Remove verbosity setting from Podop?
     run_server(0, "postfix", "/tmp/podop.socket", [
-		("transport", "url", url + "transport/§"),
-                ("alias", "url", url + "alias/§"),
-                ("dane", "url", url + "dane/§"),
-		("domain", "url", url + "domain/§"),
+        ("transport", "url", url + "transport/§"),
+        ("alias", "url", url + "alias/§"),
+        ("dane", "url", url + "dane/§"),
+        ("domain", "url", url + "domain/§"),
         ("mailbox", "url", url + "mailbox/§"),
         ("recipientmap", "url", url + "recipient/map/§"),
         ("sendermap", "url", url + "sender/map/§"),

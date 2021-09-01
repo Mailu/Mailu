@@ -20,7 +20,7 @@ def start_podop():
     # TODO: Remove verbosity setting from Podop?
     run_server(0, "postfix", "/tmp/podop.socket", [
 		("transport", "url", url + "transport/§"),
-		("alias", "url", url + "alias/§"),
+                ("alias", "url", url + "alias/§"),
                 ("dane", "url", url + "dane/§"),
 		("domain", "url", url + "domain/§"),
         ("mailbox", "url", url + "mailbox/§"),
@@ -79,7 +79,7 @@ if os.path.exists("/overrides/mta-sts-daemon.yml"):
     shutil.copyfile("/overrides/mta-sts-daemon.yml", "/etc/mta-sts-daemon.yml")
 conf.jinja("/etc/mta-sts-daemon.yml", os.environ, "/etc/mta-sts-daemon.yml")
 
-if not os.path.exists("/etc/postfix/tls_policy.map.db"):
+if not os.path.exists("/etc/postfix/tls_policy.map.lmdb"):
     with open("/etc/postfix/tls_policy.map", "w") as f:
         for domain in ['example.com']:
             f.write(f'{domain}\tsecure\n')

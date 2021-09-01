@@ -60,7 +60,7 @@ smtp_tls_mandatory_protocols = !SSLv2, !SSLv3
 smtp_tls_protocols =!SSLv2,!SSLv3
 smtp_tls_security_level = {{ OUTBOUND_TLS_LEVEL|default('dane') }}
 smtp_tls_dane_insecure_mx_policy = {% if DEFER_ON_TLS_ERROR == 'false' %}may{% else %}dane{% endif %}
-smtp_tls_policy_maps=hash:/etc/postfix/tls_policy.map, ${podop}dane, socketmap:unix:/tmp/mta-sts.socket:postfix
+smtp_tls_policy_maps=lmdb:/etc/postfix/tls_policy.map, ${podop}dane, socketmap:unix:/tmp/mta-sts.socket:postfix
 smtp_tls_CApath = /etc/ssl/certs
 smtp_tls_session_cache_database = lmdb:/dev/shm/postfix/smtp_scache
 smtpd_tls_session_cache_database = lmdb:/dev/shm/postfix/smtpd_scache

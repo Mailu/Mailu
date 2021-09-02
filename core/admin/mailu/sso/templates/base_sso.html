@@ -1,0 +1,51 @@
+{% import "macros.html" as macros %}
+{% import "bootstrap/utils.html" as utils %}
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('.static', filename='vendor.css') }}">
+    <link rel="stylesheet" href="{{ url_for('.static', filename='app.css') }}">
+    <title>Mailu-login - {{ config["SITENAME"] }}</title>
+  </head>
+  <body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+      <header class="main-header">
+        <div class="logo">
+          <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+            <span class="sr-only">Toggle navigation</span>
+          </a>
+
+          <a>
+            <span class="logo-lg"></span>
+          </a>
+        </div>
+      </header>
+
+      <div class="content-wrapper">
+        <section class="content-header">
+          <div class="pull-right">
+            {% block main_action %}
+            {% endblock %}
+          </div>
+          <h1>
+            {% block title %}{% endblock %}
+            <small>{% block subtitle %}{% endblock %}</small>
+          </h1>
+        </section>
+
+        <section class="content">
+          {{ utils.flashed_messages(container=False) }}
+          {% block content %}{% endblock %}
+        </section>
+      </div>
+      <footer class="main-footer">
+        Built with <i class="fa fa-heart"></i> using <a class="white-text" href="http://flask.pocoo.org/">Flask</a> and
+        <a class="white-text" href="https://almsaeedstudio.com/preview">AdminLTE</a>
+        <span class="pull-right"><i class="fa fa-code-fork"></i> on <a class="white-text" href="https://github.com/Mailu/Mailu">Github</a></a></span>
+      </footer>
+    </div>
+    <script src="{{ url_for('static', filename='vendor.js') }}"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>

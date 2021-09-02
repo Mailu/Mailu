@@ -28,13 +28,13 @@ from werkzeug.contrib import fixers
 
 # Login configuration
 login = flask_login.LoginManager()
-login.login_view = "ui.login"
+login.login_view = "sso.login"
 
 @login.unauthorized_handler
 def handle_needs_login():
     """ redirect unauthorized requests to login page """
     return flask.redirect(
-        flask.url_for('ui.login', next=flask.request.endpoint)
+        flask.url_for('sso.login', next=flask.request.endpoint)
     )
 
 # Rate limiter

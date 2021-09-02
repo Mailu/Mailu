@@ -31,6 +31,7 @@ RUN apk add --no-cache openssl curl postgresql-libs mariadb-connector-c \
   && apk del --no-cache build-dep
 
 COPY --from=assets static ./mailu/ui/static
+COPY --from=assets static ./mailu/sso/static
 COPY mailu ./mailu
 COPY migrations ./migrations
 COPY start.py /start.py

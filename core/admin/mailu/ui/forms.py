@@ -44,14 +44,14 @@ class MultipleEmailAddressesVerify(object):
 class ConfirmationForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Confirm'))
 
-
+"""
 class LoginForm(flask_wtf.FlaskForm):
     class Meta:
         csrf = False
     email = fields.StringField(_('E-mail'), [validators.Email()])
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
     submit = fields.SubmitField(_('Sign in'))
-
+"""
 
 class DomainForm(flask_wtf.FlaskForm):
     name = fields.StringField(_('Domain name'), [validators.DataRequired()])

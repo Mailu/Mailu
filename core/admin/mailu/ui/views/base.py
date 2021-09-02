@@ -12,6 +12,7 @@ def index():
     return flask.redirect(flask.url_for('.user_settings'))
 
 
+""" 
 @ui.route('/login', methods=['GET', 'POST'])
 def login():
     form = forms.LoginForm()
@@ -26,7 +27,7 @@ def login():
         else:
             flask.flash('Wrong e-mail or password', 'error')
     return flask.render_template('login.html', form=form)
-
+"""
 
 @ui.route('/logout', methods=['GET'])
 @access.authenticated

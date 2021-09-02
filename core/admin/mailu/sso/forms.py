@@ -6,6 +6,8 @@ import flask_login
 import flask_wtf
 import re
 
+LOCALPART_REGEX = "^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*$"
+
 class LoginForm(flask_wtf.FlaskForm):
     class Meta:
         csrf = False

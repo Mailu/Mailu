@@ -1,0 +1,60 @@
+<div class="sidebar">
+
+
+  <nav class="mt-2">
+    <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
+      {% if config['ADMIN'] %} 
+      <li class="nav-item">
+        <a href="{{ url_for('ui.client') }}" class="nav-link">
+          <i class="nav-icon fa fa-laptop"></i>
+          <p class="text">{% trans %}Client setup{% endtrans %}</p>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="https://mailu.io" target="_blank" class="nav-link">
+          <i class="nav-icon fa fa-life-ring"></i>
+          <p class="text">{% trans %}Help{% endtrans %}</p>
+        </a>
+      </li>
+      {% endif %}
+      {% if False %}
+      <!-- Domain self-registration is only available when
+           - Admin is available
+           - Domain Self-registration is enabled 
+           - The current user is not logged on
+      -->
+      {% endif %}
+      {% if config['DOMAIN_REGISTRATION'] %}
+      {% if not current_user.is_authenticated %}
+      {% if config['ADMIN'] %} 
+      <li class="nav-item">
+        <a href="{{ url_for('ui.domain_signup') }}" class="nav-link">
+          <i class="nav-icon fa fa-plus-square"></i>
+          <p class="text">{% trans %}Register a domain{% endtrans %}</p>
+        </a>
+      </li>
+      {% endif %}
+      {% endif %}
+      {% endif %}
+      {% if False %}
+      <!-- User self-registration is only available when
+           - Admin is available
+           - Self-registration is enabled 
+           - The current user is not logged on
+      -->
+      {% endif %}
+      {% if not current_user.is_authenticated %}
+      {% if signup_domains %}
+      {% if config['ADMIN'] %} 
+      <li class="nav-item">
+        <a href="{{ url_for('ui.user_signup') }}" class="nav-link">
+          <i class="nav-icon fa fa-user-plus"></i>
+          <p class="text">{% trans %}Sign up{% endtrans %}</p>
+        </a>
+      </li>
+      {% endif %}
+      {% endif %}
+      {% endif %}  
+    </ul>
+  </nav>
+</div>

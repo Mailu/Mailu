@@ -5,5 +5,9 @@
 {% endblock %}
 
 {% block subtitle %}
-{% trans %}to access IF statement for switch text for loggin in what the administration tools{% endtrans %}
+{% if endpoint == 'ui.index' %}
+{% trans %}to access the configuration page{% endtrans %}
+{% elif endpoint == 'ui.webmail' %}
+{% trans %}to access the webmail page{% endtrans %}
+{% endif %}
 {% endblock %}

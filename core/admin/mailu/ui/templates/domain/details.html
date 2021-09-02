@@ -1,66 +1,69 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Domain details{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block subtitle %}
+{%- block subtitle %}
 {{ domain.name }}
-{% endblock %}
+{%- endblock %}
 
-{% block main_action %}
-{% if current_user.global_admin %}
+{%- block main_action %}
+{%- if current_user.global_admin %}
 <a class="btn btn-primary float-right" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}">
-  {% if domain.dkim_publickey %}
+  {%- if domain.dkim_publickey %}
   {% trans %}Regenerate keys{% endtrans %}
-  {% else %}
+  {%- else %}
   {% trans %}Generate keys{% endtrans %}
-  {% endif %}
+  {%- endif %}
 </a>
-{% endif %}
-{% endblock %}
+{%- endif %}
+{%- endblock %}
 
-{% block content %}
-{% call macros.table(datatable=False) %}
-{% set hostname = config["HOSTNAMES"].split(",")[0] %}
+{%- block content %}
+{%- call macros.table(datatable=False) %}
 <tr>
   <th>{% trans %}Domain name{% endtrans %}</th>
   <td>{{ domain.name }}</td>
 </tr>
 <tr>
-  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa {{ 'fa-check-circle' if domain.check_mx() else 'fa-exclamation-circle' }}"></i></th>
-  <td><pre>{{ domain.name }}. 600 IN MX 10 {{ hostname }}.</pre></td>
+  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa {{ 'fa-check-circle text-success' if domain.check_mx() else 'fa-exclamation-circle text-danger' }}"></i></th>
+  <td>{{ macros.clip("dns_mx") }}<pre id="dns_mx" class="pre-config border bg-light">{{ domain.dns_mx }}</pre></td>
 </tr>
 <tr>
   <th>{% trans %}DNS SPF entries{% endtrans %}</th>
-  <td><pre>
-{{ domain.name }}. 600 IN TXT "v=spf1 mx a:{{ hostname }} -all"</pre></td>
+  <td>{{ macros.clip("dns_spf") }}<pre id="dns_spf" class="pre-config border bg-light">{{ domain.dns_spf }}</pre>
+  </td>
 </tr>
-{% if domain.dkim_publickey %}
+{%- if domain.dkim_publickey %}
 <tr>
   <th>{% trans %}DKIM public key{% endtrans %}</th>
-  <td><pre style="white-space: pre-wrap; word-wrap: break-word;">{{ domain.dkim_publickey }}</pre></td>
+  <td>{{ macros.clip("dkim_key") }}<pre id="dkim_key" class="pre-config border bg-light">{{ domain.dkim_publickey }}</pre></td>
 </tr>
 <tr>
   <th>{% trans %}DNS DKIM entry{% endtrans %}</th>
-  <td><pre style="white-space: pre-wrap; word-wrap: break-word;">{{ config["DKIM_SELECTOR"] }}._domainkey.{{ domain.name }}. 600 IN TXT "v=DKIM1; k=rsa; p={{ domain.dkim_publickey }}"</pre></td>
+  <td>{{ macros.clip("dns_dkim") }}<pre id="dns_dkim" class="pre-config border bg-light">{{ domain.dns_dkim }}</pre></td>
 </tr>
 <tr>
   <th>{% trans %}DNS DMARC entry{% endtrans %}</th>
-  <td><pre>_dmarc.{{ domain.name }}. 600 IN TXT "v=DMARC1; p=reject;{% if config["DMARC_RUA"] %} rua=mailto:{{ config["DMARC_RUA"] }}@{{ config["DOMAIN"] }};{% endif %}{% if config["DMARC_RUF"] %} ruf=mailto:{{ config["DMARC_RUF"] }}@{{ config["DOMAIN"] }};{% endif %} adkim=s; aspf=s"</pre></td>
+  <td>{{ macros.clip("dns_dmark") }}<pre id="dns_dmark" class="pre-config border bg-light">{{ domain.dns_dmarc }}</pre></td>
 </tr>
-{% endif %}
+{%- endif %}
+{%- set tlsa_record=domain.dns_tlsa %}
+{%- if tlsa_record %}
+<tr>
+  <th>{% trans %}DNS TLSA entry{% endtrans %}</br><span class="text-secondary text-xs font-weight-normal">Let's Encrypt</br>ISRG Root X1</span></th>
+  <td>{{ macros.clip("dns_tlsa") }}<pre id="dns_tlsa" class="pre-config border bg-light">{{ tlsa_record }}</pre></td>
+</tr>
+{%- endif %}
 <tr>
   <th>{% trans %}DNS client auto-configuration (RFC6186) entries{% endtrans %}</th>
   <td>
-    <pre style="white-space: pre-wrap; word-wrap: break-word;">_submission._tcp.{{ domain.name }}. 600 IN SRV 1 1 587 {{ config["HOSTNAMES"].split(',')[0] }}.</pre>
-    <pre style="white-space: pre-wrap; word-wrap: break-word;">_imap._tcp.{{ domain.name }}. 600 IN SRV 100 1 143 {{ config["HOSTNAMES"].split(',')[0] }}.</pre>
-    <pre style="white-space: pre-wrap; word-wrap: break-word;">_pop3._tcp.{{ domain.name }}. 600 IN SRV 100 1 110 {{ config["HOSTNAMES"].split(',')[0] }}.</pre>
-{% if config["TLS_FLAVOR"] != "notls" %}
-    <pre style="white-space: pre-wrap; word-wrap: break-word;">_submissions._tcp.{{ domain.name }}. 600 IN SRV 10 1 465 {{ config["HOSTNAMES"].split(',')[0] }}.</pre>
-    <pre style="white-space: pre-wrap; word-wrap: break-word;">_imaps._tcp.{{ domain.name }}. 600 IN SRV 10 1 993 {{ config["HOSTNAMES"].split(',')[0] }}.</pre>
-    <pre style="white-space: pre-wrap; word-wrap: break-word;">_pop3s._tcp.{{ domain.name }}. 600 IN SRV 10 1 995 {{ config["HOSTNAMES"].split(',')[0] }}.</pre>
-{% endif %}</td>
+    {{ macros.clip("dns_autoconfig") }}<pre id="dns_autoconfig" class="pre-config border bg-light">
+{%- for line in domain.dns_autoconfig %}
+{{ line }}
+{%- endfor -%}
+    </pre></td>
 </tr>
-{% endcall %}
-{% endblock %}
+{%- endcall %}
+{%- endblock %}

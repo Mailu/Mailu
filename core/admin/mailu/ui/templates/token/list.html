@@ -1,19 +1,19 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Authentication tokens{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block subtitle %}
+{%- block subtitle %}
 {{ user }}
-{% endblock %}
+{%- endblock %}
 
-{% block main_action %}
+{%- block main_action %}
 <a class="btn btn-primary float-right" href="{{ url_for('.token_create', user_email=user.email) }}">{% trans %}New token{% endtrans %}</a>
-{% endblock %}
+{%- endblock %}
 
-{% block content %}
-{% call macros.table() %}
+{%- block content %}
+{%- call macros.table() %}
 <thead>
   <tr>
     <th>{% trans %}Actions{% endtrans %}</th>
@@ -23,7 +23,7 @@
   </tr>
 </thead>
 <tbody>
-  {% for token in user.tokens %}
+  {%- for token in user.tokens %}
   <tr>
     <td>
       <a href="{{ url_for('.token_delete', token_id=token.id) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
@@ -32,7 +32,7 @@
     <td>{{ token.ip or "any" }}</td>
     <td>{{ token.created_at }}</td>
   </tr>
-  {% endfor %}
+  {%- endfor %}
 </tbody>
-{% endcall %}
-{% endblock %}
+{%- endcall %}
+{%- endblock %}

@@ -1,19 +1,19 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Fetched accounts{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block subtitle %}
+{%- block subtitle %}
 {{ user }}
-{% endblock %}
+{%- endblock %}
 
-{% block main_action %}
+{%- block main_action %}
 <a class="btn btn-primary float-right" href="{{ url_for('.fetch_create', user_email=user.email) }}">{% trans %}Add an account{% endtrans %}</a>
-{% endblock %}
+{%- endblock %}
 
-{% block content %}
-{% call macros.table() %}
+{%- block content %}
+{%- call macros.table() %}
 <thead>
   <tr>
     <th>{% trans %}Actions{% endtrans %}</th>
@@ -27,7 +27,7 @@
   </tr>
 </thead>
 <tbody>
-  {% for fetch in user.fetches %}
+  {%- for fetch in user.fetches %}
   <tr>
     <td>
       <a href="{{ url_for('.fetch_edit', fetch_id=fetch.id) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
@@ -41,7 +41,7 @@
     <td>{{ fetch.created_at }}</td>
     <td>{{ fetch.updated_at or '' }}</td>
   </tr>
-  {% endfor %}
+  {%- endfor %}
 </tbody>
-{% endcall %}
-{% endblock %}
+{%- endcall %}
+{%- endblock %}

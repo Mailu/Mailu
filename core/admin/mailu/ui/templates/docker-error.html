@@ -1,14 +1,14 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Docker error{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block subtitle %}
+{%- block subtitle %}
 {{ action }}
-{% endblock %}
+{%- endblock %}
 
-{% block content %}
+{%- block content %}
 <p>{% trans action %}An error occurred while talking to the Docker server.{% endtrans %}</p>
-<pre>{{ error }}</pre>
-{% endblock %}
+<pre class="pre-config border bg-light">{{ error }}</pre>
+{%- endblock %}

@@ -46,15 +46,10 @@ babel = flask_babel.Babel()
 @babel.localeselector
 def get_locale():
     """ selects locale for translation """
-    translations = list(map(str, babel.list_translations()))
-    flask.session['available_languages'] = translations
-
-    try:
-        language = flask.session['language']
-    except KeyError:
-        language = flask.request.accept_languages.best_match(translations)
+    language = flask.session.get('language')
+    if not language in flask.current_app.config.translations:
+        language = flask.request.accept_languages.best_match(flask.current_app.config.translations.keys())
         flask.session['language'] = language
-
     return language
 
 
@@ -450,7 +445,7 @@ class MailuSessionExtension:
                 with cleaned.get_lock():
                     if not cleaned.value:
                         cleaned.value = True
-                        flask.current_app.logger.error('cleaning')
+                        flask.current_app.logger.info('cleaning')
                         MailuSessionExtension.cleanup_sessions(app)
 
             app.before_first_request(cleaner)

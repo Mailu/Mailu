@@ -1,22 +1,24 @@
-// jQuery
-import jQuery from 'jquery';
-import 'admin-lte/plugins/select2/css/select2.css';
-
-// bootstrap
-// import 'bootstrap/less/bootstrap.less';
-// import 'bootstrap';
-
-// FontAwesome
-import 'admin-lte/plugins/fontawesome-free/css/fontawesome.css';
-import 'admin-lte/plugins/fontawesome-free/css/regular.css';
-import 'admin-lte/plugins/fontawesome-free/css/solid.css';
-
 // AdminLTE
+import 'admin-lte/plugins/jquery/jquery.min.js';
+import 'admin-lte/plugins/bootstrap/js/bootstrap.bundle.min.js';
 import 'admin-lte/build/scss/adminlte.scss';
-import 'admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.css';
-import 'admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.css';
-import 'admin-lte/plugins/bootstrap/js/bootstrap.js';
 import 'admin-lte/build/js/AdminLTE.js';
-import 'admin-lte/build/js/Layout.js';
-import 'admin-lte/build/js/ControlSidebar.js';
-import 'admin-lte/build/js/PushMenu.js';
+
+// fontawesome plugin
+import 'admin-lte/plugins/fontawesome-free/css/all.min.css';
+
+// select2 plugin
+import 'admin-lte/plugins/select2/css/select2.min.css';
+import 'admin-lte/plugins/select2/js/select2.min.js';
+
+// dataTables plugin
+import 'admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css';
+import 'admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css';
+import 'admin-lte/plugins/datatables/jquery.dataTables.min.js';
+import 'admin-lte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js';
+import 'admin-lte/plugins/datatables-responsive/js/dataTables.responsive.min.js';
+import 'admin-lte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js';
+
+// clipboard.js
+import 'clipboard/dist/clipboard.min.js';
+

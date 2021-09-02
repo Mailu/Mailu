@@ -1,3 +1,5 @@
+<!--TODO add translations for: configure your client, Incoming mail and Outgoing mail-->
+
 {% extends "base.html" %}
 
 {% block title %}
@@ -9,8 +11,7 @@ configure your email client
 {% endblock %}
 
 {% block content %}
-{% call macros.box(title="Incoming mail") %}
-<table class="table table-bordered">
+{% call macros.table(title="Incoming mail", datatable=False) %}
   <tbody>
     <tr>
       <th>{% trans %}Mail protocol{% endtrans %}</th>
@@ -33,11 +34,9 @@ configure your email client
       <td><pre>*******</pre></td>
     </tr>
   </tbody>
-</table>
 {% endcall %}
 
-{% call macros.box(title="Outgoing mail") %}
-<table class="table table-bordered">
+{% call macros.table(title="Outgoing mail", datatable=False) %}
   <tbody>
     <tr>
       <th>{% trans %}Mail protocol{% endtrans %}</th>
@@ -60,6 +59,5 @@ configure your email client
       <td><pre>*******</pre></td>
     </tr>
   </tbody>
-</table>
 {% endcall %}
 {% endblock %}

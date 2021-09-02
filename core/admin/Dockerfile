@@ -1,7 +1,8 @@
 # First stage to build assets
 ARG DISTRO=alpine:3.14
 ARG ARCH=""
-FROM ${ARCH}node:8 as assets
+
+FROM ${ARCH}node:16 as assets
 COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 
 COPY package.json ./

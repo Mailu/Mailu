@@ -9,15 +9,18 @@
 {% endblock %}
 
 {% block main_action %}
-<a class="btn btn-primary" href="{{ url_for('.manager_create', domain_name=domain.name) }}">{% trans %}Add manager{% endtrans %}</a>
+<a class="btn btn-primary float-right" href="{{ url_for('.manager_create', domain_name=domain.name) }}">{% trans %}Add manager{% endtrans %}</a>
 {% endblock %}
 
 {% block content %}
 {% call macros.table() %}
-<tr>
-  <th>{% trans %}Actions{% endtrans %}</th>
-  <th>{% trans %}Email{% endtrans %}</th>
-</tr>
+<thead>
+  <tr>
+    <th>{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}Email{% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
 {% for manager in domain.managers %}
 <tr>
   <td>
@@ -26,5 +29,6 @@
   <td>{{ manager }}</td>
 </tr>
 {% endfor %}
+</tbody>
 {% endcall %}
 {% endblock %}

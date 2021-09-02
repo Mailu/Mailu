@@ -1,3 +1,3 @@
 __all__ = [
-    'base', 'hello'
+    'base'
 ]

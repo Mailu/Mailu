@@ -9,12 +9,12 @@
 {% endblock %}
 
 {% block content %}
-{% call macros.box() %}
+{% call macros.card() %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.reply_enabled,
       onchange="if(this.checked){$('#reply_subject,#reply_body,#reply_enddate,#reply_startdate').removeAttr('readonly')}
-                else{$('#reply_subject,#reply_body,#reply_enddate').attr('readonly', '')}") }}
+                else{$('#reply_subject,#reply_body,#reply_enddate,#reply_startdate').attr('readonly', '')}") }}
   {{ macros.form_field(form.reply_subject,
       **{("rw" if user.reply_enabled else "readonly"): ""}) }}
     {{ macros.form_field(form.reply_body, rows=10,

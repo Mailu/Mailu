@@ -4,7 +4,7 @@
 
 import os
 
-extensions = ['sphinx.ext.imgmath', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.imgmath', 'sphinx.ext.viewcode', 'sphinx_rtd_theme']
 templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
@@ -36,7 +36,7 @@ html_context = {
     'github_user': 'mailu',
     'github_repo': 'mailu',
     'github_version': version,
-    'stable_version': '1.7',
+    'stable_version': '1.8',
     'versions': [
         ('1.5', '/1.5/'),
         ('1.6', '/1.6/'),

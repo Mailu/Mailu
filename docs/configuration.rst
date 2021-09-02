@@ -37,11 +37,13 @@ The ``POSTMASTER`` is the local part of the postmaster email address. It is
 recommended to setup a generic value and later configure a mail alias for that
 address.
 
+The ``WILDCARD_SENDERS`` setting is a comma delimited list of user email addresses that are allowed to send emails from any existing address (spoofing the sender).
+
 The ``AUTH_RATELIMIT`` holds a security setting for fighting attackers that
 try to guess user passwords. The value is the limit of failed authentication attempts
 that a single IP address can perform against IMAP, POP and SMTP authentication endpoints.
 
-If ``AUTH_RATELIMIT_SUBNET`` is ``True`` (which is the default), the ``AUTH_RATELIMIT``
+If ``AUTH_RATELIMIT_SUBNET`` is ``True`` (default: False), the ``AUTH_RATELIMIT``
 rules does also apply to auth requests coming from ``SUBNET``, especially for the webmail.
 If you disable this, ensure that the rate limit on the webmail is enforced in a different
 way (e.g. roundcube plug-in), otherwise an attacker can simply bypass the limit using webmail.
@@ -70,8 +72,8 @@ mail in following format: ``[HOST]:PORT``.
 ``RELAYUSER`` and ``RELAYPASSWORD`` can be used when authentication is needed.
 
 By default postfix uses "opportunistic TLS" for outbound mail. This can be changed
-by setting ``OUTBOUND_TLS_LEVEL`` to ``encrypt``. This setting is highly recommended
-if you are a relayhost that supports TLS.
+by setting ``OUTBOUND_TLS_LEVEL`` to ``encrypt`` or ``secure``. This setting is highly recommended
+if you are using a relayhost that supports TLS.
 
 Similarily by default nginx uses "opportunistic TLS" for inbound mail. This can be changed
 by setting ``INBOUND_TLS_ENFORCE`` to ``True``. Please note that this is forbidden for
@@ -99,14 +101,19 @@ the localpart for DMARC rua and ruf email addresses.
 Full-text search is enabled for IMAP is enabled by default. This feature can be disabled
 (e.g. for performance reasons) by setting the optional variable ``FULL_TEXT_SEARCH`` to ``off``.
 
+.. _web_settings:
+
 Web settings
 ------------
 
-The ``WEB_ADMIN`` contains the path to the main admin interface, while
-``WEB_WEBMAIL`` contains the path to the Web email client.
-The ``WEBROOT_REDIRECT`` redirects all non-found queries to the set path.
-An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables classic
-behavior of a 404 result when not found.
+- ``WEB_ADMIN`` contains the path to the main admin interface 
+
+- ``WEB_WEBMAIL`` contains the path to the Web email client.
+
+- ``WEBROOT_REDIRECT`` redirects all non-found queries to the set path.
+  An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables classic behavior of a 404 result when not found. 
+  Alternatively, ``WEBROOT_REDIRECT`` can be set to ``none`` if you are using an Nginx override for ``location /``.
+
 All three options need a leading slash (``/``) to work.
 
   .. note:: ``WEBROOT_REDIRECT`` has to point to a valid path on the webserver.
@@ -157,6 +164,12 @@ Can be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG or NOTSET.
 See the `python docs`_ for more information.
 
 .. _`python docs`: https://docs.python.org/3.6/library/logging.html#logging-levels
+
+The ``LETSENCRYPT_SHORTCHAIN`` (default: False) setting controls whether we send the ISRG Root X1 certificate in TLS handshakes. This is required for `android handsets older than 7.1.1` but slows down the performance of modern devices.
+
+.. _`android handsets older than 7.1.1`: https://community.letsencrypt.org/t/production-chain-changes/150739
+
+The ``REAL_IP_HEADER`` (default: unset) and ``REAL_IP_FROM`` (default: unset) settings controls whether HTTP headers such as ``X-Forwarded-For`` or ``X-Real-IP`` should be trusted. The former should be the name of the HTTP header to extract the client IP address from and the later a comma separated list of IP addresses designing which proxies to trust. If you are using Mailu behind a reverse proxy, you should set both. Setting the former without the later introduces a security vulnerability allowing a potential attacker to spoof his source address.
 
 Antivirus settings
 ------------------

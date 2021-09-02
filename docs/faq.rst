@@ -267,6 +267,8 @@ correct syntax. The following file names will be taken as override configuration
 - `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory;
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
 
+To override the root location (``/``) in Nginx ``WEBROOT_REDIRECT`` needs to be set to ``none`` in the env file (see :ref:`web settings <web_settings>`).
+
 *Issue reference:* `206`_, `1368`_.
 
 I want to integrate Nextcloud 15 (and newer) with Mailu
@@ -497,6 +499,8 @@ follow these steps:
 
   logging:
     driver: journald
+    options:
+      tag: mailu-front
 
 2. Add the /etc/fail2ban/filter.d/bad-auth.conf
 
@@ -506,6 +510,7 @@ follow these steps:
   [Definition]
   failregex = .* client login failed: .+ client:\ <HOST>
   ignoreregex =
+  journalmatch = CONTAINER_TAG=mailu-front
 
 3. Add the /etc/fail2ban/jail.d/bad-auth.conf
 
@@ -513,8 +518,8 @@ follow these steps:
 
   [bad-auth]
   enabled = true
+  backend = systemd
   filter = bad-auth
-  logpath = /var/log/messages
   bantime = 604800
   findtime = 300
   maxretry = 10

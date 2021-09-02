@@ -27,7 +27,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
 from werkzeug.utils import cached_property
 
-from mailu import dkim
+from mailu import dkim, utils
 
 
 db = flask_sqlalchemy.SQLAlchemy()
@@ -57,10 +57,9 @@ class IdnaEmail(db.TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         """ encode unicode domain part of email address to punycode """
-        localpart, domain_name = value.rsplit('@', 1)
+        localpart, domain_name = value.lower().rsplit('@', 1)
         if '@' in localpart:
             raise ValueError('email local part must not contain "@"')
-        domain_name = domain_name.lower()
         return f'{localpart}@{idna.encode(domain_name).decode("ascii")}'
 
     def process_result_value(self, value, dialect):
@@ -272,11 +271,12 @@ class Domain(Base):
             return dkim.strip_key(dkim_key).decode('utf8')
 
     def generate_dkim_key(self):
-        """ generate and activate new DKIM key """
+        """ generate new DKIM key """
         self.dkim_key = dkim.gen_key()
 
     def has_email(self, localpart):
         """ checks if localpart is configured for domain """
+        localpart = localpart.lower()
         for email in chain(self.users, self.aliases):
             if email.localpart == localpart:
                 return True
@@ -355,8 +355,8 @@ class Email(object):
     @email.setter
     def email(self, value):
         """ setter for email - sets _email, localpart and domain_name at once """
-        self.localpart, self.domain_name = value.rsplit('@', 1)
-        self._email = value
+        self._email = value.lower()
+        self.localpart, self.domain_name = self._email.rsplit('@', 1)
 
     @staticmethod
     def _update_localpart(target, value, *_):
@@ -371,8 +371,8 @@ class Email(object):
     @classmethod
     def __declare_last__(cls):
         # gets called after mappings are completed
-        sqlalchemy.event.listen(User.localpart, 'set', cls._update_localpart, propagate=True)
-        sqlalchemy.event.listen(User.domain_name, 'set', cls._update_domain_name, propagate=True)
+        sqlalchemy.event.listen(cls.localpart, 'set', cls._update_localpart, propagate=True)
+        sqlalchemy.event.listen(cls.domain_name, 'set', cls._update_domain_name, propagate=True)
 
     def sendmail(self, subject, body):
         """ send an email to the address """
@@ -389,8 +389,7 @@ class Email(object):
     def resolve_domain(cls, email):
         """ resolves domain alternative to real domain """
         localpart, domain_name = email.rsplit('@', 1) if '@' in email else (None, email)
-        alternative = Alternative.query.get(domain_name)
-        if alternative:
+        if alternative := Alternative.query.get(domain_name):
             domain_name = alternative.domain_name
         return (localpart, domain_name)
 
@@ -401,12 +400,14 @@ class Email(object):
         localpart_stripped = None
         stripped_alias = None
 
-        if os.environ.get('RECIPIENT_DELIMITER') in localpart:
-            localpart_stripped = localpart.rsplit(os.environ.get('RECIPIENT_DELIMITER'), 1)[0]
+        delim = os.environ.get('RECIPIENT_DELIMITER')
+        if delim in localpart:
+            localpart_stripped = localpart.rsplit(delim, 1)[0]
 
         user = User.query.get(f'{localpart}@{domain_name}')
         if not user and localpart_stripped:
             user = User.query.get(f'{localpart_stripped}@{domain_name}')
+
         if user:
             email = f'{localpart}@{domain_name}'
 
@@ -416,15 +417,15 @@ class Email(object):
                     destination.append(email)
             else:
                 destination = [email]
+
             return destination
 
         pure_alias = Alias.resolve(localpart, domain_name)
-        stripped_alias = Alias.resolve(localpart_stripped, domain_name)
 
         if pure_alias and not pure_alias.wildcard:
             return pure_alias.destination
 
-        if stripped_alias:
+        if stripped_alias := Alias.resolve(localpart_stripped, domain_name):
             return stripped_alias.destination
 
         if pure_alias:
@@ -498,6 +499,12 @@ class User(Base, Email):
             self.reply_enabled and
             self.reply_startdate < now and
             self.reply_enddate > now
+        )
+
+    @property
+    def sender_limiter(self):
+        return utils.limiter.get_limiter(
+            app.config["MESSAGE_RATELIMIT"], "sender", self.email
         )
 
     @classmethod

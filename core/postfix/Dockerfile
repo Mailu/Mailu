@@ -1,4 +1,4 @@
-ARG DISTRO=alpine:3.12
+ARG DISTRO=alpine:3.14
 FROM $DISTRO
 # python3 shared with most images
 RUN apk add --no-cache \
@@ -12,7 +12,7 @@ RUN pip3 install socrate==0.2.0
 RUN pip3 install "podop>0.2.5"
 
 # Image specific layers under this line
-RUN apk add --no-cache postfix postfix-pcre cyrus-sasl-plain cyrus-sasl-login
+RUN apk add --no-cache postfix postfix-pcre cyrus-sasl-login
 
 COPY conf /conf
 COPY start.py /start.py

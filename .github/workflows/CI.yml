@@ -13,7 +13,7 @@ on:
       - '[1-9].[0-9].[0-9]'
       # pre-releases, e.g. 1.8-pre1
       - 1.8-pre[0-9]
-    # test branches, e.g. test-debian
+      # test branches, e.g. test-debian
       - test-*
 
 ###############################################
@@ -39,6 +39,21 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+        #For branch TESTING, we set the image tag to PR-xxxx
+      - name: Derive MAILU_VERSION for branch testing
+        if: ${{ env.BRANCH == 'testing' }}
+        shell: bash
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for other branches than testing
+        if: ${{ env.BRANCH != 'testing' }}
+        shell: bash
+        env:
+          MAILU_BRANCH: ${{ env.BRANCH }}
+        run: |
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -58,7 +73,7 @@ jobs:
         run: echo "$DOCKER_PW" | docker login --username $DOCKER_UN --password-stdin
       - name: Build all docker images
         env:
-          MAILU_VERSION: ${{ env.BRANCH }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }}
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
         run: docker-compose -f tests/build.yml build
@@ -76,6 +91,20 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for branch testing
+        if: ${{ env.BRANCH == 'testing' }}
+        shell: bash
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for other branches than testing
+        if: ${{ env.BRANCH != 'testing' }}
+        shell: bash
+        env:
+          MAILU_BRANCH: ${{ env.BRANCH }}
+        run: |
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV          
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -92,9 +121,9 @@ jobs:
       - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
       - name: Test core suite
-        run: python tests/compose/test.py core 1
+        run: python tests/compose/test.py core 2
         env:
-          MAILU_VERSION: ${{ env.BRANCH }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }} 
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
 
@@ -109,6 +138,20 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for branch testing
+        if: ${{ env.BRANCH == 'testing' }}
+        shell: bash
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for other branches than testing
+        if: ${{ env.BRANCH != 'testing' }}
+        shell: bash
+        env:
+          MAILU_BRANCH: ${{ env.BRANCH }}
+        run: |
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV          
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -125,9 +168,9 @@ jobs:
       - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
       - name: Test fetch
-        run: python tests/compose/test.py fetchmail 1
+        run: python tests/compose/test.py fetchmail 2
         env:
-          MAILU_VERSION: ${{ env.BRANCH }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }}
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
 
@@ -142,6 +185,20 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for branch testing
+        if: ${{ env.BRANCH == 'testing' }}
+        shell: bash
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for other branches than testing
+        if: ${{ env.BRANCH != 'testing' }}
+        shell: bash
+        env:
+          MAILU_BRANCH: ${{ env.BRANCH }}
+        run: |
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV          
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -158,9 +215,9 @@ jobs:
       - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
       - name: Test clamvav
-        run: python tests/compose/test.py filters 2
+        run: python tests/compose/test.py filters 3
         env:
-          MAILU_VERSION: ${{ env.BRANCH }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }}
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
 
@@ -175,6 +232,20 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for branch testing
+        if: ${{ env.BRANCH == 'testing' }}
+        shell: bash
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for other branches than testing
+        if: ${{ env.BRANCH != 'testing' }}
+        shell: bash
+        env:
+          MAILU_BRANCH: ${{ env.BRANCH }}
+        run: |
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV          
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -191,9 +262,9 @@ jobs:
       - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
       - name: Test rainloop
-        run: python tests/compose/test.py rainloop 1
+        run: python tests/compose/test.py rainloop 2
         env:
-          MAILU_VERSION: ${{ env.BRANCH }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }} 
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
 
@@ -208,6 +279,20 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for branch testing
+        if: ${{ env.BRANCH == 'testing' }}
+        shell: bash
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for other branches than testing
+        if: ${{ env.BRANCH != 'testing' }}
+        shell: bash
+        env:
+          MAILU_BRANCH: ${{ env.BRANCH }}
+        run: |
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV          
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -224,9 +309,9 @@ jobs:
       - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
       - name: Test roundcube
-        run: python tests/compose/test.py roundcube 1
+        run: python tests/compose/test.py roundcube 2
         env:
-          MAILU_VERSION: ${{ env.BRANCH }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }} 
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
 
@@ -241,6 +326,20 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for branch testing
+        if: ${{ env.BRANCH == 'testing' }}
+        shell: bash
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for other branches than testing
+        if: ${{ env.BRANCH != 'testing' }}
+        shell: bash
+        env:
+          MAILU_BRANCH: ${{ env.BRANCH }}
+        run: |
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV          
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -257,9 +356,9 @@ jobs:
       - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
       - name: Test webdav
-        run: python tests/compose/test.py webdav 1
+        run: python tests/compose/test.py webdav 2
         env:
-          MAILU_VERSION: ${{ env.BRANCH }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }}
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
 
@@ -280,6 +379,21 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+        #For branch TESTING, we set the image tag to PR-xxxx
+      - name: Derive MAILU_VERSION for branch testing
+        if: ${{ env.BRANCH == 'testing' }}
+        shell: bash
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION for other branches than testing
+        if: ${{ env.BRANCH != 'testing' }}
+        shell: bash
+        env:
+          MAILU_BRANCH: ${{ env.BRANCH }}
+        run: |
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -300,9 +414,8 @@ jobs:
           DOCKER_PW: ${{ secrets.Docker_Password }}
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
           DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
-          MAILU_VERSION: ${{ env.BRANCH }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }}
-          TRAVIS_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: bash tests/deploy.sh
 
  # This job is watched by bors. It only complets if building,testing and deploy worked.

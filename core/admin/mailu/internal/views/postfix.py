@@ -1,5 +1,6 @@
-from mailu import models
+from mailu import models, utils
 from mailu.internal import internal
+from flask import current_app as app
 
 import flask
 import idna
@@ -30,7 +31,6 @@ def postfix_alias_map(alias):
         return flask.jsonify(domain_name)
     destination = models.Email.resolve_destination(localpart, domain_name)
     return flask.jsonify(",".join(destination)) if destination else flask.abort(404)
-
 
 @internal.route("/postfix/transport/<path:email>")
 def postfix_transport(email):
@@ -133,12 +133,20 @@ def postfix_sender_map(sender):
 
 @internal.route("/postfix/sender/login/<path:sender>")
 def postfix_sender_login(sender):
+    wildcard_senders = [s for s in flask.current_app.config.get('WILDCARD_SENDERS', '').lower().replace(' ', '').split(',') if s]
     localpart, domain_name = models.Email.resolve_domain(sender)
     if localpart is None:
-        return flask.abort(404)
+        return flask.jsonify(",".join(wildcard_senders)) if wildcard_senders else flask.abort(404)
     destination = models.Email.resolve_destination(localpart, domain_name, True)
+    destination = [*destination, *wildcard_senders] if destination else [*wildcard_senders]
     return flask.jsonify(",".join(destination)) if destination else flask.abort(404)
 
+@internal.route("/postfix/sender/rate/<path:sender>")
+def postfix_sender_rate(sender):
+    """ Rate limit outbound emails per sender login
+    """
+    user = models.User.get(sender) or flask.abort(404)
+    return flask.abort(404) if user.sender_limiter.hit() else flask.jsonify("450 4.2.1 You are sending too many emails too fast.")
 
 @internal.route("/postfix/sender/access/<path:sender>")
 def postfix_sender_access(sender):

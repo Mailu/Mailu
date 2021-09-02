@@ -315,6 +315,21 @@ This page is also accessible for domain managers. On the users page new users ca
 
 * Fetched accounts. Access the fetched accounts page of the user. See the :ref:`fetched accounts page <webadministration_fetched_accounts>` for more information.
 
+This page also shows an overview of the following settings of an user:
+
+* Email. The email address of the user.
+
+* Features. Shows if IMAP or POP3 access is enabled.
+
+* Storage quota. Shows how much assigned storage has been consumed.
+
+* Sending Quota. The sending quota is the limit of messages a single user can send per day. 
+
+* Comment. A desription for the user. 
+
+* Created. Date when the user was created.
+
+* Last edit. Last date when the user was modified. 
 
 .. _webadministration_add_user:
 
@@ -334,7 +349,7 @@ For adding a new user the following options can be configured.
 * Enabled. Tick this checkbox to enable the user account. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail.
   The email inbox of the user is still retained. This option can be used to temporarily suspend an user account.
 
-* Quota. The maximum quota for the user's email box.
+* Storage Quota. The maximum quota for the user's email box.
 
 * Allow IMAP access. When ticked, allows email retrieval via the IMAP protocol.
 

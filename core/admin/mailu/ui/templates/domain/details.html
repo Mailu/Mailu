@@ -10,7 +10,7 @@
 
 {% block main_action %}
 {% if current_user.global_admin %}
-<a class="btn btn-primary" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}">
+<a class="btn btn-primary float-right" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}">
   {% if domain.dkim_publickey %}
   {% trans %}Regenerate keys{% endtrans %}
   {% else %}
@@ -21,7 +21,7 @@
 {% endblock %}
 
 {% block content %}
-{% call macros.table() %}
+{% call macros.table(datatable=False) %}
 {% set hostname = config["HOSTNAMES"].split(",")[0] %}
 <tr>
   <th>{% trans %}Domain name{% endtrans %}</th>

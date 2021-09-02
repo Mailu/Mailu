@@ -50,7 +50,7 @@ def user_authentication():
     if (not flask_login.current_user.is_anonymous
         and flask_login.current_user.enabled):
         response = flask.Response()
-        response.headers["X-User"] = flask_login.current_user.get_id()
+        response.headers["X-User"] = models.IdnaEmail.process_bind_param(flask_login, flask_login.current_user.get_id(), "")
         response.headers["X-User-Token"] = models.User.get_temp_token(flask_login.current_user.get_id())
         return response
     return flask.abort(403)
@@ -63,11 +63,11 @@ def basic_authentication():
     authorization = flask.request.headers.get("Authorization")
     if authorization and authorization.startswith("Basic "):
         encoded = authorization.replace("Basic ", "")
-        user_email, password = base64.b64decode(encoded).split(b":")
+        user_email, password = base64.b64decode(encoded).split(b":", 1)
         user = models.User.query.get(user_email.decode("utf8"))
         if nginx.check_credentials(user, password.decode('utf-8'), flask.request.remote_addr, "web"):
             response = flask.Response()
-            response.headers["X-User"] = user.email
+            response.headers["X-User"] = models.IdnaEmail.process_bind_param(flask_login, user.email, "")
             return response
     response = flask.Response(status=401)
     response.headers["WWW-Authenticate"] = 'Basic realm="Login Required"'

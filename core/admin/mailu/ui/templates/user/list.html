@@ -9,42 +9,46 @@
 {% endblock %}
 
 {% block main_action %}
-<a class="btn btn-primary" href="{{ url_for('.user_create', domain_name=domain.name) }}">{% trans %}Add user{% endtrans %}</a>
+<a class="btn btn-primary float-right" href="{{ url_for('.user_create', domain_name=domain.name) }}">{% trans %}Add user{% endtrans %}</a>
 {% endblock %}
 
 {% block content %}
 {% call macros.table() %}
-<tr>
-  <th>{% trans %}Actions{% endtrans %}</th>
-  <th>{% trans %}User settings{% endtrans %}</th>
-  <th>{% trans %}Email{% endtrans %}</th>
-  <th>{% trans %}Features{% endtrans %}</th>
-  <th>{% trans %}Quota{% endtrans %}</th>
-  <th>{% trans %}Comment{% endtrans %}</th>
-  <th>{% trans %}Created{% endtrans %}</th>
-  <th>{% trans %}Last edit{% endtrans %}</th>
-</tr>
-{% for user in domain.users %}
-<tr {% if not user.enabled %}class="warning"{% endif %}>
-  <td>
-    <a href="{{ url_for('.user_edit', user_email=user.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
-    <a href="{{ url_for('.user_delete', user_email=user.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
-  </td>
-  <td>
-    <a href="{{ url_for('.user_settings', user_email=user.email) }}" title="{% trans %}Settings{% endtrans %}"><i class="fa fa-wrench"></i></a>&nbsp;
-    <a href="{{ url_for('.user_reply', user_email=user.email) }}" title="{% trans %}Auto-reply{% endtrans %}"><i class="fa fa-plane"></i></a>&nbsp;
-    <a href="{{ url_for('.fetch_list', user_email=user.email) }}" title="{% trans %}Fetched accounts{% endtrans %}"><i class="fa fa-download"></i></a>&nbsp;
-  </td>
-  <td>{{ user }}</td>
-  <td>
-    {% if user.enable_imap %}<span class="label label-info">imap</span>{% endif %}
-    {% if user.enable_pop %}<span class="label label-info">pop3</span>{% endif %}
-  </td>
-  <td>{{ user.quota_bytes_used | filesizeformat }} / {{ (user.quota_bytes | filesizeformat) if user.quota_bytes else '∞' }}</td>
-  <td>{{ user.comment or '-' }}</td>
-  <td>{{ user.created_at }}</td>
-  <td>{{ user.updated_at or '' }}</td>
-</tr>
-{% endfor %}
+<thead>
+  <tr>
+    <th>{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}User settings{% endtrans %}</th>
+    <th>{% trans %}Email{% endtrans %}</th>
+    <th>{% trans %}Features{% endtrans %}</th>
+    <th>{% trans %}Quota{% endtrans %}</th>
+    <th>{% trans %}Comment{% endtrans %}</th>
+    <th>{% trans %}Created{% endtrans %}</th>
+    <th>{% trans %}Last edit{% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
+  {% for user in domain.users %}
+  <tr {% if not user.enabled %}class="warning"{% endif %}>
+    <td>
+      <a href="{{ url_for('.user_edit', user_email=user.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fas fa-pencil-alt"></i></a>&nbsp;
+      <a href="{{ url_for('.user_delete', user_email=user.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+    </td>
+    <td>
+      <a href="{{ url_for('.user_settings', user_email=user.email) }}" title="{% trans %}Settings{% endtrans %}"><i class="fa fa-wrench"></i></a>&nbsp;
+      <a href="{{ url_for('.user_reply', user_email=user.email) }}" title="{% trans %}Auto-reply{% endtrans %}"><i class="fa fa-plane"></i></a>&nbsp;
+      <a href="{{ url_for('.fetch_list', user_email=user.email) }}" title="{% trans %}Fetched accounts{% endtrans %}"><i class="fa fa-download"></i></a>&nbsp;
+    </td>
+    <td>{{ user }}</td>
+    <td>
+      {% if user.enable_imap %}<span class="badge bg-info">imap</span>{% endif %}
+      {% if user.enable_pop %}<span class="badge bg-info">pop3</span>{% endif %}
+    </td>
+    <td>{{ user.quota_bytes_used | filesizeformat }} / {{ (user.quota_bytes | filesizeformat) if user.quota_bytes else '∞' }}</td>
+    <td>{{ user.comment or '-' }}</td>
+    <td>{{ user.created_at }}</td>
+    <td>{{ user.updated_at or '' }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
 {% endcall %}
 {% endblock %}

@@ -12,20 +12,20 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@babel/core": "^7.14.6",
-    "admin-lte": "^2.4.18",
-    "babel-loader": "^8.0.6",
-    "css-loader": "^2.1.1",
-    "expose-loader": "^0.7.5",
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "admin-lte": "^3.1.0",
+    "babel-loader": "^8.2.2",
+    "css-loader": "^6.2.0",
+    "expose-loader": "^3.0.0",
     "jquery": "^3.6.0",
-    "less": "^3.13.1",
-    "less-loader": "^5.0.0",
-    "mini-css-extract-plugin": "^1.2.1",
-    "node-sass": "^4.13.1",
-    "sass-loader": "^7.3.1",
+    "less": "^4.1.1",
+    "less-loader": "^10.0.1",
+    "mini-css-extract-plugin": "^2.2.0",
+    "node-sass": "^6.0.1",
+    "sass-loader": "^12.1.0",
     "select2": "^4.0.13",
-    "url-loader": "^2.3.0",
-    "webpack": "^4.33.0",
-    "webpack-cli": "^3.3.12"
+    "webpack": "^5.50.0",
+    "webpack-cli": "^4.7.2"
   }
 }

@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-{% call macros.box(theme="warning") %}
+{% call macros.card(theme="warning") %}
 <p>{% trans action %}You are about to {{ action }}. Please confirm your action.{% endtrans %}</p>
 {{ macros.form(form) }}
 {% endcall %}

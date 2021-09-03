@@ -45,7 +45,7 @@
         </ul>
       </nav>
       <aside class="main-sidebar sidebar-dark-primary nav-compact elevation-4">
-        <a href="{{ url_for('.domain_list') }}" class="brand-link bg-primary">
+        <a href="{{ url_for('.domain_list' if current_user.manager_of or current_user.global_admin else '.user_settings') }}" class="brand-link bg-primary">
           <img src="{{ url_for('.static', filename='mailu.png') }}" width="33" height="33" alt="Mailu" class="brand-image mailu-logo img-circle elevation-3">
           <span class="brand-text font-weight-light">{{ config["SITENAME"] }}</span>
         </a>

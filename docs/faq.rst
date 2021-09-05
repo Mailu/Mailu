@@ -369,6 +369,31 @@ How do I use webdav (radicale)?
 .. _`575`: https://github.com/Mailu/Mailu/issues/575
 .. _`1591`: https://github.com/Mailu/Mailu/issues/1591
 
+How do I setup a MTA-STS policy?
+````````````````````````````````
+
+Mailu can serve an `MTA-STS policy`_; To configure it you will need to:
+
+1. add ``mta-sts.example.com`` to the ``HOSTNAMES`` configuration variable (and ensure that a valid SSL certificate is available for it; this may mean restarting your smtp container)
+
+2. configure an override with the policy itself; for example, your ``overrides/nginx/mta-sts.conf`` could read:
+
+.. code-block:: bash
+
+   location ^~ /.well-known/mta-sts.txt {
+   return 200 "version: STSv1
+   mode: enforce
+   max_age: 1296000
+   mx: mailu.example.com\r\n";
+   }
+
+3. setup the appropriate DNS/CNAME record (``mta-sts.example.com`` -> ``mailu.example.com``) and DNS/TXT record (``_mta-sts.example.com`` -> ``v=STSv1; id=1``) paying attention to the ``TTL`` as this is used by MTA-STS.
+
+*issue reference:* `1798`_.
+
+.. _`1798`: https://github.com/Mailu/Mailu/issues/1798
+.. _`MTA-STS policy`: https://datatracker.ietf.org/doc/html/rfc8461
+
 Technical issues
 ----------------
 
@@ -396,6 +421,22 @@ Any mail related connection is proxied by nginx. Therefore the SMTP Banner is al
 *Issue reference:* `1368`_.
 
 .. _`1368`: https://github.com/Mailu/Mailu/issues/1368
+
+My emails are getting defered, what can I do?
+`````````````````````````````````````````````
+
+Emails are asynchronous and it's not abnormal for them to be defered sometimes. That being said, Mailu enforces secure connections where possible using DANE and MTA-STS, both of which have the potential to delay indefinitely delivery if something is misconfigured.
+
+If delivery to a specific domain fails because their DANE records are invalid or their TLS configuration inadequate (expired certificate, ...), you can assist delivery by downgrading the security level for that domain by creating an override at ``overrides/postfix/tls_policy.map`` as follow:
+
+.. code-block:: bash
+
+   domain.example.com   may
+   domain.example.org   encrypt
+
+The syntax and options are as described in `postfix's documentation`_. Re-creating the smtp container will be required for changes to take effect.
+
+.. _`postfix's documentation`: http://www.postfix.org/postconf.5.html#smtp_tls_policy_maps
 
 403 - Access Denied Errors
 ---------------------------

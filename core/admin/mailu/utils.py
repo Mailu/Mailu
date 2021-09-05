@@ -6,6 +6,9 @@ try:
 except ImportError:
     import pickle
 
+import dns
+import dns.resolver
+
 import hmac
 import secrets
 import time
@@ -25,7 +28,6 @@ from itsdangerous.encoding import want_bytes
 from werkzeug.datastructures import CallbackDict
 from werkzeug.contrib import fixers
 
-
 # Login configuration
 login = flask_login.LoginManager()
 login.login_view = "ui.login"
@@ -36,6 +38,34 @@ def handle_needs_login():
     return flask.redirect(
         flask.url_for('ui.login', next=flask.request.endpoint)
     )
+
+# DNS stub configured to do DNSSEC enabled queries
+resolver = dns.resolver.Resolver()
+resolver.use_edns(0, 0, 1232)
+resolver.flags = dns.flags.AD | dns.flags.RD
+
+def has_dane_record(domain, timeout=10):
+    try:
+        result = resolver.query(f'_25._tcp.{domain}', dns.rdatatype.TLSA,dns.rdataclass.IN, lifetime=timeout)
+        if result.response.flags & dns.flags.AD:
+            for record in result:
+                if isinstance(record, dns.rdtypes.ANY.TLSA.TLSA):
+                    record.validate()
+                    if record.usage in [2,3] and record.selector in [0,1] and record.mtype in [0,1,2]:
+                        return True
+    except dns.resolver.NoNameservers:
+        # If the DNSSEC data is invalid and the DNS resolver is DNSSEC enabled
+        # we will receive this non-specific exception. The safe behaviour is to
+        # accept to defer the email.
+        flask.current_app.logger.warn(f'Unable to lookup the TLSA record for {domain}. Is the DNSSEC zone okay on https://dnsviz.net/d/{domain}/dnssec/?')
+        return app.config['DEFER_ON_TLS_ERROR']
+    except dns.exception.Timeout:
+        flask.current_app.logger.warn(f'Timeout while resolving the TLSA record for {domain} ({timeout}s).')
+    except dns.resolver.NXDOMAIN:
+        pass # this is expected, not TLSA record is fine
+    except Exception as e:
+        flask.current_app.logger.error(f'Error while looking up the TLSA record for {domain} {e}')
+        pass
 
 # Rate limiter
 limiter = limiter.LimitWraperFactory()

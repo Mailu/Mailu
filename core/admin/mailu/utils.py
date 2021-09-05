@@ -47,7 +47,7 @@ resolver.flags = dns.flags.AD | dns.flags.RD
 def has_dane_record(domain, timeout=10):
     try:
         result = resolver.query(f'_25._tcp.{domain}', dns.rdatatype.TLSA,dns.rdataclass.IN, lifetime=timeout)
-        if (result.response.flags & dns.flags.AD) == dns.flags.AD:
+        if result.response.flags & dns.flags.AD):
             for record in result:
                 if isinstance(record, dns.rdtypes.ANY.TLSA.TLSA):
                     record.validate()
@@ -57,8 +57,14 @@ def has_dane_record(domain, timeout=10):
         # If the DNSSEC data is invalid and the DNS resolver is DNSSEC enabled
         # we will receive this non-specific exception. The safe behaviour is to
         # accept to defer the email.
+        flask.current_app.logger.warn(f'Unable to lookup the TLSA record for {domain}. Is the DNSSEC zone okay on https://dnsviz.net/d/{domain}/dnssec/?')
         return app.config['DEFER_ON_TLS_ERROR']
-    except:
+    except dns.exception.Timeout:
+        flask.current_app.logger.warn(f'Timeout while resolving the TLSA record for {domain} ({timeout}s).')
+    except dns.resolver.NXDOMAIN:
+        pass # this is expected, not TLSA record is fine
+    except Exception as e:
+        flask.current_app.logger.error(f'Error while looking up the TLSA record for {domain} {e}')
         pass
 
 # Rate limiter

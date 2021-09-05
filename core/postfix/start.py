@@ -80,8 +80,7 @@ if os.path.exists("/overrides/mta-sts-daemon.yml"):
 conf.jinja("/etc/mta-sts-daemon.yml", os.environ, "/etc/mta-sts-daemon.yml")
 
 if not os.path.exists("/etc/postfix/tls_policy.map.lmdb"):
-    with open("/etc/postfix/tls_policy.map", "a") as f:
-        pass
+    open("/etc/postfix/tls_policy.map", "a").close()
     os.system("postmap /etc/postfix/tls_policy.map")
 
 if "RELAYUSER" in os.environ:

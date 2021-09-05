@@ -47,7 +47,7 @@ resolver.flags = dns.flags.AD | dns.flags.RD
 def has_dane_record(domain, timeout=10):
     try:
         result = resolver.query(f'_25._tcp.{domain}', dns.rdatatype.TLSA,dns.rdataclass.IN, lifetime=timeout)
-        if result.response.flags & dns.flags.AD):
+        if result.response.flags & dns.flags.AD:
             for record in result:
                 if isinstance(record, dns.rdtypes.ANY.TLSA.TLSA):
                     record.validate()

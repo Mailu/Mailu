@@ -445,7 +445,7 @@ class MailuSessionExtension:
                 with cleaned.get_lock():
                     if not cleaned.value:
                         cleaned.value = True
-                        flask.current_app.logger.info('cleaning')
+                        flask.current_app.logger.info('cleaning session store')
                         MailuSessionExtension.cleanup_sessions(app)
 
             app.before_first_request(cleaner)

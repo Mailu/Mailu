@@ -41,7 +41,7 @@ def handle_needs_login():
 
 # DNS stub configured to do DNSSEC enabled queries
 resolver = dns.resolver.Resolver()
-resolver.use_edns(0, 0, 1500)
+resolver.use_edns(0, 0, 1232)
 resolver.flags = dns.flags.AD | dns.flags.RD
 
 def has_dane_record(domain, timeout=10):

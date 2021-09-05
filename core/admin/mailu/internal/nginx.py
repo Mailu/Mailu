@@ -71,16 +71,6 @@ def handle_authentication(headers):
             }
     # Authenticated user
     elif method == "plain":
-        server, port = get_server(headers["Auth-Protocol"], True)
-        # According to RFC2616 section 3.7.1 and PEP 3333, HTTP headers should
-        # be ASCII and are generally considered ISO8859-1. However when passing
-        # the password, nginx does not transcode the input UTF string, thus
-        # we need to manually decode.
-        raw_user_email = urllib.parse.unquote(headers["Auth-User"])
-        user_email = raw_user_email.encode("iso8859-1").decode("utf8")
-        raw_password = urllib.parse.unquote(headers["Auth-Pass"])
-        password = raw_password.encode("iso8859-1").decode("utf8")
-        ip = urllib.parse.unquote(headers["Client-Ip"])
         service_port = int(urllib.parse.unquote(headers["Auth-Port"]))
         if service_port == 25:
             return {
@@ -88,20 +78,33 @@ def handle_authentication(headers):
                 "Auth-Error-Code": "502 5.5.1",
                 "Auth-Wait": 0
             }
-        user = models.User.query.get(user_email)
-        if check_credentials(user, password, ip, protocol):
-            return {
-                "Auth-Status": "OK",
-                "Auth-Server": server,
-                "Auth-Port": port
-            }
+        # According to RFC2616 section 3.7.1 and PEP 3333, HTTP headers should
+        # be ASCII and are generally considered ISO8859-1. However when passing
+        # the password, nginx does not transcode the input UTF string, thus
+        # we need to manually decode.
+        raw_user_email = urllib.parse.unquote(headers["Auth-User"])
+        raw_password = urllib.parse.unquote(headers["Auth-Pass"])
+        try:
+            user_email = raw_user_email.encode("iso8859-1").decode("utf8")
+            password = raw_password.encode("iso8859-1").decode("utf8")
+        except:
+            app.logger.warn(f'Received undecodable user/password from nginx: {raw_user_email!r}/{raw_password!r}')
         else:
-            status, code = get_status(protocol, "authentication")
-            return {
-                "Auth-Status": status,
-                "Auth-Error-Code": code,
-                "Auth-Wait": 0
-            }
+            user = models.User.query.get(user_email)
+            ip = urllib.parse.unquote(headers["Client-Ip"])
+            if check_credentials(user, password, ip, protocol):
+                server, port = get_server(headers["Auth-Protocol"], True)
+                return {
+                    "Auth-Status": "OK",
+                    "Auth-Server": server,
+                    "Auth-Port": port
+                }
+        status, code = get_status(protocol, "authentication")
+        return {
+            "Auth-Status": status,
+            "Auth-Error-Code": code,
+            "Auth-Wait": 0
+        }
     # Unexpected
     return {}
 

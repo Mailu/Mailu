@@ -80,9 +80,8 @@ if os.path.exists("/overrides/mta-sts-daemon.yml"):
 conf.jinja("/etc/mta-sts-daemon.yml", os.environ, "/etc/mta-sts-daemon.yml")
 
 if not os.path.exists("/etc/postfix/tls_policy.map.lmdb"):
-    with open("/etc/postfix/tls_policy.map", "w") as f:
-        for domain in ['example.com']:
-            f.write(f'{domain}\tsecure\n')
+    with open("/etc/postfix/tls_policy.map", "a") as f:
+        pass
     os.system("postmap /etc/postfix/tls_policy.map")
 
 if "RELAYUSER" in os.environ:

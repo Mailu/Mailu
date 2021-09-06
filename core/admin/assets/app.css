@@ -2,6 +2,9 @@
 .mailu-logo {
   opacity: .8;
 }
+.bg-mailu-logo {
+  background-color: #2980b9!important;
+}
 
 /* user image */
 .div-circle {

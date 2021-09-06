@@ -56,6 +56,8 @@ DEFAULT_CONFIG = {
     'WEBMAIL': 'none',
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
+    'LOGO_URL': None,
+    'LOGO_BACKGROUND': None,
     # Advanced settings
     'LOG_LEVEL': 'WARNING',
     'SESSION_KEY_BITS': 128,

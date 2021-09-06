@@ -19,7 +19,7 @@
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars" title="{% trans %}toggle sidebar{% endtrans %}" aria-expanded="false"></i><span class="sr-only">{% trans %}toggle sidebar{% endtrans %}</span></a>
           </li>
           <li class="nav-item">
-            {%- for page, url in path %}
+          {%- for page, url in path %}
             {%- if loop.index > 1 %}
             <i class="fas fa-greater-than text-xs text-gray" aria-hidden="true"></i>
             {%- endif %}
@@ -28,25 +28,25 @@
             {%- else %}
             <span class="nav-link d-inline-block">{{ page }}</span>
             {%- endif %}
-            {%- endfor %}
+          {%- endfor %}
           </li>
         </ul>
         <ul class="navbar-nav ml-auto">
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
-                <i class="fas fa-language text-xl" aria-hidden="true" title="{% trans %}change language{% endtrans %}"></i><span class="sr-only">Language</span>
-                <span class="badge badge-primary navbar-badge">{{ session['language'] }}</span></a>
+              <i class="fas fa-language text-xl" aria-hidden="true" title="{% trans %}change language{% endtrans %}"></i><span class="sr-only">Language</span>
+              <span class="badge badge-primary navbar-badge">{{ session['language'] }}</span></a>
             <div class="dropdown-menu dropdown-menu-right p-0" id="mailu-languages">
-              {%- for locale in config.translations.values() %}
-                <a class="dropdown-item{% if locale.language == session['language'] %} active{% endif %}" href="{{ url_for('.set_language', language=locale.language) }}">{{ locale.get_language_name().title() }}</a>
-              {%- endfor %}
+            {%- for locale in config.translations.values() %}
+              <a class="dropdown-item{% if locale.language == session['language'] %} active{% endif %}" href="{{ url_for('.set_language', language=locale.language) }}">{{ locale.get_language_name().title() }}</a>
+            {%- endfor %}
             </div>
           </li>
         </ul>
       </nav>
       <aside class="main-sidebar sidebar-dark-primary nav-compact elevation-4">
-        <a href="{{ url_for('.domain_list' if current_user.manager_of or current_user.global_admin else '.user_settings') }}" class="brand-link bg-primary">
-          <img src="{{ url_for('.static', filename='mailu.png') }}" width="33" height="33" alt="Mailu" class="brand-image mailu-logo img-circle elevation-3">
+        <a href="{{ url_for('.domain_list' if current_user.manager_of or current_user.global_admin else '.user_settings') }}" class="brand-link bg-mailu-logo"{% if config["LOGO_BACKGROUND"] %} style="background-color:{{ config["LOGO_BACKGROUND"] }}!important;"{% endif %}>
+          <img src="{{ config["LOGO_URL"] if config["LOGO_URL"] else url_for('.static', filename='mailu.png') }}" width="33" height="33" alt="Mailu" class="brand-image mailu-logo img-circle elevation-3">
           <span class="brand-text font-weight-light">{{ config["SITENAME"] }}</span>
         </a>
         {%- include "sidebar.html" %}
@@ -66,7 +66,7 @@
           </div>
         </section>
         <div class="content">
-          {{ utils.flashed_messages(container=False) }}
+          {{ utils.flashed_messages(container=False, default_category='success') }}
           {%- block content %}{%- endblock %}
         </div>
       </div>

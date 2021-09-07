@@ -36,43 +36,45 @@ def handle_authentication(headers):
         }
     # Authenticated user
     elif method == "plain":
-        server, port = get_server(headers["Auth-Protocol"], True)
         # According to RFC2616 section 3.7.1 and PEP 3333, HTTP headers should
         # be ASCII and are generally considered ISO8859-1. However when passing
         # the password, nginx does not transcode the input UTF string, thus
         # we need to manually decode.
         raw_user_email = urllib.parse.unquote(headers["Auth-User"])
-        user_email = raw_user_email.encode("iso8859-1").decode("utf8")
         raw_password = urllib.parse.unquote(headers["Auth-Pass"])
-        password = raw_password.encode("iso8859-1").decode("utf8")
-        ip = urllib.parse.unquote(headers["Client-Ip"])
-        user = models.User.query.get(user_email)
-        status = False
-        if user:
-            for token in user.tokens:
-                if (token.check_password(password) and
-                    (not token.ip or token.ip == ip)):
-                        status = True
-            if user.check_password(password):
-                status = True
-            if status:
-                if protocol == "imap" and not user.enable_imap:
-                    status = False
-                elif protocol == "pop3" and not user.enable_pop:
-                    status = False
-        if status and user.enabled:
-            return {
-                "Auth-Status": "OK",
-                "Auth-Server": server,
-                "Auth-Port": port
-            }
+        try:
+            user_email = raw_user_email.encode("iso8859-1").decode("utf8")
+            password = raw_password.encode("iso8859-1").decode("utf8")
+        except:
+            app.logger.warn(f'Received undecodable user/password from nginx: {raw_user_email!r}/{raw_password!r}')
         else:
-            status, code = get_status(protocol, "authentication")
-            return {
-                "Auth-Status": status,
-                "Auth-Error-Code": code,
-                "Auth-Wait": 0
-            }
+            user = models.User.query.get(user_email)
+            status = False
+            if user and user.enabled:
+                if (protocol == "imap" and user.enable_imap) or \
+                   (protocol == "pop3" and user.enable_pop) or \
+                   (protocol != "imap" and protocol != "pop3"):
+                    ip = urllib.parse.unquote(headers["Client-Ip"])
+                    for token in user.tokens:
+                        if (token.check_password(password) and
+                            (not token.ip or token.ip == ip)):
+                                status = True
+                                break
+                    if not status and user.check_password(password):
+                        status = True
+            if status:
+                server, port = get_server(headers["Auth-Protocol"], True)
+                return {
+                    "Auth-Status": "OK",
+                    "Auth-Server": server,
+                    "Auth-Port": port
+                }
+        status, code = get_status(protocol, "authentication")
+        return {
+            "Auth-Status": status,
+            "Auth-Error-Code": code,
+            "Auth-Wait": 0
+        }
     # Unexpected
     return {}
 

@@ -52,7 +52,8 @@ def handle_authentication(headers):
             status = False
             if user and user.enabled:
                 if (protocol == "imap" and user.enable_imap) or \
-                   (protocol == "pop3" and user.enable_pop):
+                   (protocol == "pop3" and user.enable_pop) or \
+                   (protocol != "imap" and protocol != "pop3"):
                     ip = urllib.parse.unquote(headers["Client-Ip"])
                     for token in user.tokens:
                         if (token.check_password(password) and

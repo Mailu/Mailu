@@ -124,6 +124,13 @@ Both ``SITENAME`` and ``WEBSITE`` are customization options for the panel menu
 in the admin interface, while ``SITENAME`` is a customization option for
 every Web interface.
 
+- ``LOGO_BACKGROUND`` sets a custom background colour for the brand logo in the topleft of the main admin interface.
+  For a list of colour codes refer to this page of `w3schools`_.
+
+- ``LOGO_URL`` sets a URL for a custom logo. This logo replaces the Mailu logo in the topleft of the main admin interface.
+
+.. _`w3schools`: https://www.w3schools.com/cssref/css_colors.asp
+
 .. _admin_account:
 
 Admin account - automatic creation

@@ -20,7 +20,6 @@ RUN apk add --no-cache postfix postfix-pcre cyrus-sasl-login
 
 COPY conf /conf
 COPY start.py /start.py
-COPY mta-sts-daemon.yml /etc/
 
 EXPOSE 25/tcp 10025/tcp
 VOLUME ["/queue"]

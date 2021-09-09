@@ -145,7 +145,9 @@ class ConfigManager(dict):
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
         self.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=int(self.config['SESSION_LIFETIME']))
-        self.config['HOSTNAME'] = self.config['HOSTNAMES'].split(',', 1)[0].strip()
+        hostnames = [host.strip() for host in self.config['HOSTNAMES'].split(',', 1)]
+        self.config['HOSTNAMES'] = ','.join(hostnames)
+        self.config['HOSTNAME'] = hostnames[0]
         # update the app config itself
         app.config = self
 

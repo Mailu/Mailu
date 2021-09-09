@@ -312,7 +312,7 @@ class Domain(Base):
     def check_mx(self):
         """ checks if MX record for domain points to mailu host """
         try:
-            hostnames = set(fqdn.strip() for fqdn in app.config['HOSTNAMES'].split(','))
+            hostnames = set(app.config['HOSTNAMES'].split(','))
             return any(
                 rset.exchange.to_text().rstrip('.') in hostnames
                 for rset in dns.resolver.query(self.name, 'MX')

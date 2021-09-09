@@ -35,6 +35,7 @@ DEFAULT_CONFIG = {
     'WILDCARD_SENDERS': '',
     'TLS_FLAVOR': 'cert',
     'INBOUND_TLS_ENFORCE': False,
+    'DEFER_ON_TLS_ERROR': True,
     'AUTH_RATELIMIT': '1000/minute;10000/hour',
     'AUTH_RATELIMIT_SUBNET': False,
     'DISABLE_STATISTICS': False,

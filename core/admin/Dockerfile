@@ -1,5 +1,5 @@
 # First stage to build assets
-ARG DISTRO=alpine:3.14
+ARG DISTRO=alpine:3.14.2
 ARG ARCH=""
 
 FROM ${ARCH}node:16 as assets
@@ -33,8 +33,8 @@ WORKDIR /app
 
 COPY requirements-prod.txt requirements.txt
 RUN set -eu \
- && apk add --no-cache openssl curl postgresql-libs mariadb-connector-c \
- && apk add --no-cache --virtual build-dep openssl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev cargo \
+ && apk add --no-cache libressl curl postgresql-libs mariadb-connector-c \
+ && apk add --no-cache --virtual build-dep libressl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev cargo \
  && pip3 install -r requirements.txt \
  && apk del --no-cache build-dep
 

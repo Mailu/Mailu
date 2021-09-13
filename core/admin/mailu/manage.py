@@ -48,14 +48,13 @@ def advertise():
 @click.argument('localpart')
 @click.argument('domain_name')
 @click.argument('password')
-@click.option('-m', '--mode', default='create')
+@click.option('-m', '--mode', default='create', metavar='MODE', help='''\b'create' (default): create user. it's an error if user already exists
+'ifmissing': only update password if user is missing
+'update': create user or update password if user exists
+''')
 @with_appcontext
 def admin(localpart, domain_name, password, mode):
     """ Create an admin user
-        'mode' can be:
-            - 'create': (default) create user. it's an error if user already exists
-            - 'ifmissing': if user exists, nothing happens, else it will be created
-            - 'update': user is created or, if it exists, its password gets updated
     """
 
     if not mode in ('create', 'update', 'ifmissing'):

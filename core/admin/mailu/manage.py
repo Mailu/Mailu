@@ -42,22 +42,12 @@ def advertise():
 @click.argument('localpart')
 @click.argument('domain_name')
 @click.argument('password')
-<<<<<<< HEAD
-<<<<<<< HEAD
-@click.option('-m', '--mode')
-@flask_cli.with_appcontext
-def admin(localpart, domain_name, password, mode='create'):
-=======
-@click.option('-m', '--mode', default='create')
-=======
 @click.option('-m', '--mode', default='create', metavar='MODE', help='''\b'create' (default): create user. it's an error if user already exists
 'ifmissing': only update password if user is missing
 'update': create user or update password if user exists
 ''')
->>>>>>> 25cf8b53 (better help formatting)
-@with_appcontext
+@flask_cli.with_appcontext
 def admin(localpart, domain_name, password, mode):
->>>>>>> b63081cb (display error (not exception) when creating admin)
     """ Create an admin user
     """
 
@@ -69,20 +59,10 @@ def admin(localpart, domain_name, password, mode):
         domain = models.Domain(name=domain_name)
         db.session.add(domain)
 
-<<<<<<< HEAD
-    user = None
-    if mode == 'ifmissing' or mode == 'update':
-        email = '{}@{}'.format(localpart, domain_name)
-        user = models.User.query.get(email)
-
-        if user and mode == 'ifmissing':
-            print('user %s exists, not updating' % email)
-=======
     email = f'{localpart}@{domain_name}'
     if user := models.User.query.get(email):
         if mode == 'ifmissing':
             print(f'user {email!r} exists, not updating')
->>>>>>> b63081cb (display error (not exception) when creating admin)
             return
         elif mode == 'update':
             user.set_password(password)

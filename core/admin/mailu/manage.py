@@ -43,19 +43,22 @@ def advertise():
 @click.argument('domain_name')
 @click.argument('password')
 <<<<<<< HEAD
+<<<<<<< HEAD
 @click.option('-m', '--mode')
 @flask_cli.with_appcontext
 def admin(localpart, domain_name, password, mode='create'):
 =======
 @click.option('-m', '--mode', default='create')
+=======
+@click.option('-m', '--mode', default='create', metavar='MODE', help='''\b'create' (default): create user. it's an error if user already exists
+'ifmissing': only update password if user is missing
+'update': create user or update password if user exists
+''')
+>>>>>>> 25cf8b53 (better help formatting)
 @with_appcontext
 def admin(localpart, domain_name, password, mode):
 >>>>>>> b63081cb (display error (not exception) when creating admin)
     """ Create an admin user
-        'mode' can be:
-            - 'create': (default) create user. it's an error if user already exists
-            - 'ifmissing': if user exists, nothing happens, else it will be created
-            - 'update': user is created or, if it exists, its password gets updated
     """
 
     if not mode in ('create', 'update', 'ifmissing'):

@@ -48,44 +48,45 @@ def advertise():
 @click.argument('localpart')
 @click.argument('domain_name')
 @click.argument('password')
-@click.option('-m', '--mode')
+@click.option('-m', '--mode', default='create')
 @with_appcontext
-def admin(localpart, domain_name, password, mode='create'):
+def admin(localpart, domain_name, password, mode):
     """ Create an admin user
         'mode' can be:
-            - 'create' (default) Will try to create user and will raise an exception if present
+            - 'create': (default) create user. it's an error if user already exists
             - 'ifmissing': if user exists, nothing happens, else it will be created
             - 'update': user is created or, if it exists, its password gets updated
     """
+
+    if not mode in ('create', 'update', 'ifmissing'):
+        raise click.ClickException(f'invalid mode: {mode!r}')
+
     domain = models.Domain.query.get(domain_name)
     if not domain:
         domain = models.Domain(name=domain_name)
         db.session.add(domain)
 
-    user = None
-    if mode == 'ifmissing' or mode == 'update':
-        email = f'{localpart}@{domain_name}'
-        user = models.User.query.get(email)
-
-        if user and mode == 'ifmissing':
-            print('user %s exists, not updating' % email)
+    email = f'{localpart}@{domain_name}'
+    if user := models.User.query.get(email):
+        if mode == 'ifmissing':
+            print(f'user {email!r} exists, not updating')
             return
-
-    if not user:
+        elif mode == 'update':
+            user.set_password(password)
+            db.session.commit()
+            print("updated admin password")
+        else:
+            raise click.ClickException(f'user {email!r} exists, not created')
+    else:
         user = models.User(
             localpart=localpart,
             domain=domain,
             global_admin=True
         )
-        user.set_password(password)
         db.session.add(user)
+        user.set_password(password)
         db.session.commit()
         print("created admin user")
-    elif mode == 'update':
-        user.set_password(password)
-        db.session.commit()
-        print("updated admin password")
-
 
 
 @mailu.command()

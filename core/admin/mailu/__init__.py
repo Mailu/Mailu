@@ -14,8 +14,7 @@ def create_app_from_config(config):
     app = flask.Flask(__name__)
     app.cli.add_command(manage.mailu)
 
-    # Bootstrap is used for basic JS and CSS loading
-    # TODO: remove this and use statically generated assets instead
+    # Bootstrap is used for error display and flash messages
     app.bootstrap = flask_bootstrap.Bootstrap(app)
 
     # Initialize application extensions
@@ -31,6 +30,15 @@ def create_app_from_config(config):
 
     app.temp_token_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('WEBMAIL_TEMP_TOKEN_KEY', 'utf-8'), 'sha256').digest()
 
+    # Initialize list of translations
+    config.translations = {
+        str(locale): locale
+        for locale in sorted(
+            utils.babel.list_translations(),
+            key=lambda l: l.get_language_name().title()
+        )
+    }
+
     # Initialize debugging tools
     if app.config.get("DEBUG"):
         debug.toolbar.init_app(app)
@@ -43,8 +51,8 @@ def create_app_from_config(config):
     def inject_defaults():
         signup_domains = models.Domain.query.filter_by(signup_enabled=True).all()
         return dict(
-            signup_domains=signup_domains,
-            config=app.config
+            signup_domains= signup_domains,
+            config        = app.config,
         )
 
     # Import views

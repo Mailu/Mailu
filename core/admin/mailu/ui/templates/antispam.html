@@ -1,0 +1,15 @@
+{%- extends "base.html" %}
+
+{%- block title %}
+{% trans %}Antispam{% endtrans %}
+{%- endblock %}
+
+{%- block subtitle %}
+{% trans %}RSPAMD status page{% endtrans %}
+{%- endblock %}
+
+{%- block content %}
+<div class="embed-responsive embed-responsive-1by1">
+  <iframe class="embed-responsive-item" src="{{ config["WEB_ADMIN"] }}/antispam/"></iframe>
+</div>
+{%- endblock %}

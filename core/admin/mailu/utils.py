@@ -6,6 +6,9 @@ try:
 except ImportError:
     import pickle
 
+import dns
+import dns.resolver
+
 import hmac
 import secrets
 import time
@@ -25,7 +28,6 @@ from itsdangerous.encoding import want_bytes
 from werkzeug.datastructures import CallbackDict
 from werkzeug.contrib import fixers
 
-
 # Login configuration
 login = flask_login.LoginManager()
 login.login_view = "sso.login"
@@ -37,6 +39,34 @@ def handle_needs_login():
         flask.url_for('sso.login', next=flask.request.endpoint)
     )
 
+# DNS stub configured to do DNSSEC enabled queries
+resolver = dns.resolver.Resolver()
+resolver.use_edns(0, 0, 1232)
+resolver.flags = dns.flags.AD | dns.flags.RD
+
+def has_dane_record(domain, timeout=10):
+    try:
+        result = resolver.query(f'_25._tcp.{domain}', dns.rdatatype.TLSA,dns.rdataclass.IN, lifetime=timeout)
+        if result.response.flags & dns.flags.AD:
+            for record in result:
+                if isinstance(record, dns.rdtypes.ANY.TLSA.TLSA):
+                    record.validate()
+                    if record.usage in [2,3] and record.selector in [0,1] and record.mtype in [0,1,2]:
+                        return True
+    except dns.resolver.NoNameservers:
+        # If the DNSSEC data is invalid and the DNS resolver is DNSSEC enabled
+        # we will receive this non-specific exception. The safe behaviour is to
+        # accept to defer the email.
+        flask.current_app.logger.warn(f'Unable to lookup the TLSA record for {domain}. Is the DNSSEC zone okay on https://dnsviz.net/d/{domain}/dnssec/?')
+        return app.config['DEFER_ON_TLS_ERROR']
+    except dns.exception.Timeout:
+        flask.current_app.logger.warn(f'Timeout while resolving the TLSA record for {domain} ({timeout}s).')
+    except dns.resolver.NXDOMAIN:
+        pass # this is expected, not TLSA record is fine
+    except Exception as e:
+        flask.current_app.logger.error(f'Error while looking up the TLSA record for {domain} {e}')
+        pass
+
 # Rate limiter
 limiter = limiter.LimitWraperFactory()
 
@@ -46,15 +76,10 @@ babel = flask_babel.Babel()
 @babel.localeselector
 def get_locale():
     """ selects locale for translation """
-    translations = list(map(str, babel.list_translations()))
-    flask.session['available_languages'] = translations
-
-    try:
-        language = flask.session['language']
-    except KeyError:
-        language = flask.request.accept_languages.best_match(translations)
+    language = flask.session.get('language')
+    if not language in flask.current_app.config.translations:
+        language = flask.request.accept_languages.best_match(flask.current_app.config.translations.keys())
         flask.session['language'] = language
-
     return language
 
 
@@ -450,7 +475,7 @@ class MailuSessionExtension:
                 with cleaned.get_lock():
                     if not cleaned.value:
                         cleaned.value = True
-                        flask.current_app.logger.error('cleaning')
+                        flask.current_app.logger.info('cleaning session store')
                         MailuSessionExtension.cleanup_sessions(app)
 
             app.before_first_request(cleaner)

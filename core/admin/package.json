@@ -12,20 +12,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@babel/core": "^7.15.0",
-    "@babel/preset-env": "^7.15.0",
     "admin-lte": "^3.1.0",
     "babel-loader": "^8.2.2",
+    "clipboard": "^2.0.8",
+    "compression-webpack-plugin": "^8.0.1",
     "css-loader": "^6.2.0",
-    "expose-loader": "^3.0.0",
-    "jquery": "^3.6.0",
-    "less": "^4.1.1",
+    "css-minimizer-webpack-plugin": "^3.0.2",
+    "datatables.net-plugins": "^1.10.24",
+    "import-glob": "^1.5.0",
     "less-loader": "^10.0.1",
     "mini-css-extract-plugin": "^2.2.0",
-    "node-sass": "^6.0.1",
+    "sass": "<1.33.0",
     "sass-loader": "^12.1.0",
-    "select2": "^4.0.13",
-    "webpack": "^5.50.0",
-    "webpack-cli": "^4.7.2"
+    "terser-webpack-plugin": "^5.2.0",
+    "webpack-cli": "^4.8.0"
   }
 }

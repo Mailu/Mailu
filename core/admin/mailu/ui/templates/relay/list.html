@@ -1,17 +1,17 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Relayed domain list{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block main_action %}
-{% if current_user.global_admin %}
+{%- block main_action %}
+{%- if current_user.global_admin %}
 <a class="btn btn-primary float-right" href="{{ url_for('.relay_create') }}">{% trans %}New relayed domain{% endtrans %}</a>
-{% endif %}
-{% endblock %}
+{%- endif %}
+{%- endblock %}
 
-{% block content %}
-{% call macros.table() %}
+{%- block content %}
+{%- call macros.table() %}
 <thead>
   <tr>
     <th>{% trans %}Actions{% endtrans %}</th>
@@ -23,7 +23,7 @@
   </tr>
 </thead>
 <tbody>
-  {% for relay in relays %}
+  {%- for relay in relays %}
   <tr>
     <td>
       <a href="{{ url_for('.relay_edit', relay_name=relay.name) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
@@ -35,7 +35,7 @@
     <td>{{ relay.created_at }}</td>
     <td>{{ relay.updated_at or '' }}</td>
   </tr>
-  {% endfor %}
+  {%- endfor %}
 </tbody>
-{% endcall %}
-{% endblock %}
+{%- endcall %}
+{%- endblock %}

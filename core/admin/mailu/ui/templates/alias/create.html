@@ -1,15 +1,15 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Create alias{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block subtitle %}
+{%- block subtitle %}
 {{ domain }}
-{% endblock %}
+{%- endblock %}
 
-{% block content %}
-{% call macros.card() %}
+{%- block content %}
+{%- call macros.card() %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.localpart, append='<span class="input-group-text">@'+domain.name+'</span>') }}
@@ -18,5 +18,5 @@
   {{ macros.form_field(form.comment) }}
   {{ macros.form_field(form.submit) }}
 </form>
-{% endcall %}
-{% endblock %}
+{%- endcall %}
+{%- endblock %}

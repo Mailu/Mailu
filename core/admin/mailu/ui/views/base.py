@@ -40,3 +40,8 @@ def webmail():
 @ui.route('/client', methods=['GET'])
 def client():
     return flask.render_template('client.html')
+
+@ui.route('/antispam', methods=['GET'])
+def antispam():
+    return flask.render_template('antispam.html')
+

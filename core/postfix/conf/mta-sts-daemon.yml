@@ -1,0 +1,10 @@
+path: "/tmp/mta-sts.socket"
+mode: 0600
+shutdown_timeout: 20
+cache:
+  type: internal
+  options:
+    cache_size: 10000
+default_zone:
+  strict_testing: {{ 'true' if DEFER_ON_TLS_ERROR else 'false' }}
+  timeout: 4

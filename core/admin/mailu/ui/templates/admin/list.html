@@ -1,17 +1,17 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Global administrators{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block main_action %}
+{%- block main_action %}
 <a class="btn btn-primary float-right" href="{{ url_for('.admin_create') }}">
   {% trans %}Add administrator{% endtrans %}
 </a>
-{% endblock %}
+{%- endblock %}
 
-{% block content %}
-{% call macros.table() %}
+{%- block content %}
+{%- call macros.table() %}
 <thead>
   <tr>
     <th>{% trans %}Actions{% endtrans %}</th>
@@ -19,14 +19,14 @@
   </tr>
 </thead>
 <tbody>
-  {% for admin in admins %}
+  {%- for admin in admins %}
   <tr>
     <td>
       <a href="{{ url_for('.admin_delete', admin=admin.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
     </td>
     <td>{{ admin }}</td>
   </tr>
-  {% endfor %}
+  {%- endfor %}
 </tbody>
-{% endcall %}
-{% endblock %}
+{%- endcall %}
+{%- endblock %}

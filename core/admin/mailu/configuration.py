@@ -57,6 +57,8 @@ DEFAULT_CONFIG = {
     'WEBMAIL': 'none',
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
+    'LOGO_URL': None,
+    'LOGO_BACKGROUND': None,
     # Advanced settings
     'LOG_LEVEL': 'WARNING',
     'SESSION_KEY_BITS': 128,
@@ -144,6 +146,9 @@ class ConfigManager(dict):
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
         self.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=int(self.config['SESSION_LIFETIME']))
+        hostnames = [host.strip() for host in self.config['HOSTNAMES'].split(',')]
+        self.config['HOSTNAMES'] = ','.join(hostnames)
+        self.config['HOSTNAME'] = hostnames[0]
         # update the app config itself
         app.config = self
 

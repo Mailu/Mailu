@@ -1,19 +1,19 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Alias list{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block subtitle %}
+{%- block subtitle %}
 {{ domain.name }}
-{% endblock %}
+{%- endblock %}
 
-{% block main_action %}
+{%- block main_action %}
 <a class="btn btn-primary float-right" href="{{ url_for('.alias_create', domain_name=domain.name) }}">{% trans %}Add alias{% endtrans %}</a>
-{% endblock %}
+{%- endblock %}
 
-{% block content %}
-{% call macros.table() %}
+{%- block content %}
+{%- call macros.table() %}
 <thead>
   <tr>
     <th>{% trans %}Actions{% endtrans %}</th>
@@ -25,7 +25,7 @@
   </tr>
 </thead>
 <tbody>
-  {% for alias in domain.aliases %}
+  {%- for alias in domain.aliases %}
   <tr>
     <td>
       <a href="{{ url_for('.alias_edit', alias=alias.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
@@ -37,7 +37,7 @@
     <td>{{ alias.created_at }}</td>
     <td>{{ alias.updated_at or '' }}</td>
   </tr>
-  {% endfor %}
+  {%- endfor %}
 </tbody>
-{% endcall %}
-{% endblock %}
+{%- endcall %}
+{%- endblock %}

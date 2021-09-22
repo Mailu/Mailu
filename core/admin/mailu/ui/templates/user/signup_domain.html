@@ -1,26 +1,26 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Sign up{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block subtitle %}
+{%- block subtitle %}
 {% trans %}pick a domain for the new account{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block content %}
-{% call macros.table() %}
+{%- block content %}
+{%- call macros.table() %}
 <tr>
   <th>{% trans %}Domain{% endtrans %}</th>
   <th>{% trans %}Available slots{% endtrans %}</th>
   <th>{% trans %}Quota{% endtrans %}</th>
 </tr>
-{% for domain_name, domain in available_domains.items() %}
+{%- for domain_name, domain in available_domains.items() %}
 <tr>
   <td><a href="{{ url_for('.user_signup', domain_name=domain_name) }}">{{ domain_name }}</a></td>
   <td>{{ '∞' if domain.max_users == -1 else domain.max_users - (domain.users | count)}}</td>
   <td>{{ domain.max_quota_bytes or config['DEFAULT_QUOTA'] | filesizeformat }}</td>
 </tr>
-{% endfor %}
-{% endcall %}
-{% endblock %}
+{%- endfor %}
+{%- endcall %}
+{%- endblock %}

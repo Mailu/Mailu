@@ -129,23 +129,6 @@ def user_password(user_email):
     return flask.render_template('user/password.html', form=form, user=user)
 
 
-@ui.route('/user/forward', methods=['GET', 'POST'], defaults={'user_email': None})
-@ui.route('/user/forward/<path:user_email>', methods=['GET', 'POST'])
-@access.owner(models.User, 'user_email')
-def user_forward(user_email):
-    user_email_or_current = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email_or_current) or flask.abort(404)
-    form = forms.UserForwardForm(obj=user)
-    if form.validate_on_submit():
-        form.populate_obj(user)
-        models.db.session.commit()
-        flask.flash('Forward destination updated for %s' % user)
-        if user_email:
-            return flask.redirect(
-                flask.url_for('.user_list', domain_name=user.domain.name))
-    return flask.render_template('user/forward.html', form=form, user=user)
-
-
 @ui.route('/user/reply', methods=['GET', 'POST'], defaults={'user_email': None})
 @ui.route('/user/reply/<path:user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')

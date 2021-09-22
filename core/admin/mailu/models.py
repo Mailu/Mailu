@@ -209,16 +209,16 @@ class Domain(Base):
                 os.unlink(file_path)
             self._dkim_key_on_disk = self._dkim_key
 
-    @property
+    @cached_property
     def dns_mx(self):
         """ return MX record for domain """
-        hostname = app.config['HOSTNAMES'].split(',', 1)[0]
+        hostname = app.config['HOSTNAME']
         return f'{self.name}. 600 IN MX 10 {hostname}.'
 
-    @property
+    @cached_property
     def dns_spf(self):
         """ return SPF record for domain """
-        hostname = app.config['HOSTNAMES'].split(',', 1)[0]
+        hostname = app.config['HOSTNAME']
         return f'{self.name}. 600 IN TXT "v=spf1 mx a:{hostname} ~all"'
 
     @property
@@ -226,12 +226,11 @@ class Domain(Base):
         """ return DKIM record for domain """
         if self.dkim_key:
             selector = app.config['DKIM_SELECTOR']
-            return (
-                f'{selector}._domainkey.{self.name}. 600 IN TXT'
-                f'"v=DKIM1; k=rsa; p={self.dkim_publickey}"'
-            )
+            txt = f'v=DKIM1; k=rsa; p={self.dkim_publickey}'
+            record = ' '.join(f'"{txt[p:p+250]}"' for p in range(0, len(txt), 250))
+            return f'{selector}._domainkey.{self.name}. 600 IN TXT {record}'
 
-    @property
+    @cached_property
     def dns_dmarc(self):
         """ return DMARC record for domain """
         if self.dkim_key:
@@ -241,6 +240,34 @@ class Domain(Base):
             ruf = app.config['DMARC_RUF']
             ruf = f' ruf=mailto:{ruf}@{domain};' if ruf else ''
             return f'_dmarc.{self.name}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
+
+    @cached_property
+    def dns_autoconfig(self):
+        """ return list of auto configuration records (RFC6186) """
+        hostname = app.config['HOSTNAME']
+        protocols = [
+            ('submission', 587),
+            ('imap', 143),
+            ('pop3', 110),
+        ]
+        if app.config['TLS_FLAVOR'] != 'notls':
+            protocols.extend([
+                ('imaps', 993),
+                ('pop3s', 995),
+            ])
+        return list([
+            f'_{proto}._tcp.{self.name}. 600 IN SRV 1 1 {port} {hostname}.'
+            for proto, port
+            in protocols
+        ])
+
+    @cached_property
+    def dns_tlsa(self):
+        """ return TLSA record for domain when using letsencrypt """
+        hostname = app.config['HOSTNAME']
+        if app.config['TLS_FLAVOR'] in ('letsencrypt', 'mail-letsencrypt'):
+            # current ISRG Root X1 (RSA 4096, O = Internet Security Research Group, CN = ISRG Root X1) @20210902
+            return f'_25._tcp.{hostname}. 600 IN TLSA 2 1 1 0b9fa5a59eed715c26c1020c711b4f6ec42d58b0015e14337a39dad301c5afc3'
 
     @property
     def dkim_key(self):

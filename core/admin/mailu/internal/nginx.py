@@ -77,8 +77,7 @@ def handle_authentication(headers):
     # Authenticated user
     elif method == "plain":
         is_valid_user = False
-        service_port = int(urllib.parse.unquote(headers["Auth-Port"]))
-        if 'Auth-Port' in headers and  service_port == 25:
+        if 'Auth-Port' in headers and int(urllib.parse.unquote(headers["Auth-Port"])) == 25:
             return {
                 "Auth-Status": "AUTH not supported",
                 "Auth-Error-Code": "502 5.5.1",

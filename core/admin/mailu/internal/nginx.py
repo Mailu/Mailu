@@ -19,6 +19,11 @@ STATUSES = {
     "encryption": ("Must issue a STARTTLS command first", {
         "smtp": "530 5.7.0"
     }),
+    "ratelimit": ("Temporary authentication failure (rate-limit)", {
+        "imap": "LIMIT",
+        "smtp": "451 4.3.2",
+        "pop3": "-ERR [LOGIN-DELAY] Retry later"
+    }),
 }
 
 def check_credentials(user, password, ip, protocol=None):
@@ -71,8 +76,9 @@ def handle_authentication(headers):
             }
     # Authenticated user
     elif method == "plain":
+        is_valid_user = False
         service_port = int(urllib.parse.unquote(headers["Auth-Port"]))
-        if service_port == 25:
+        if 'Auth-Port' in headers and  service_port == 25:
             return {
                 "Auth-Status": "AUTH not supported",
                 "Auth-Error-Code": "502 5.5.1",
@@ -91,18 +97,23 @@ def handle_authentication(headers):
             app.logger.warn(f'Received undecodable user/password from nginx: {raw_user_email!r}/{raw_password!r}')
         else:
             user = models.User.query.get(user_email)
+            is_valid_user = True
             ip = urllib.parse.unquote(headers["Client-Ip"])
             if check_credentials(user, password, ip, protocol):
                 server, port = get_server(headers["Auth-Protocol"], True)
                 return {
                     "Auth-Status": "OK",
                     "Auth-Server": server,
+                    "Auth-User": user_email,
+                    "Auth-User-Exists": is_valid_user,
                     "Auth-Port": port
                 }
         status, code = get_status(protocol, "authentication")
         return {
             "Auth-Status": status,
             "Auth-Error-Code": code,
+            "Auth-User": user_email,
+            "Auth-User-Exists": is_valid_user,
             "Auth-Wait": 0
         }
     # Unexpected

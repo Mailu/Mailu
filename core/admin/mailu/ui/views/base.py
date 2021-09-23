@@ -33,9 +33,11 @@ def login():
             response = flask.redirect(flask.url_for(endpoint)
                 or flask.url_for('.index'))
             response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('ui.login'))
+            flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')
             return response
         else:
             utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)
+            flask.current_app.logger.warn(f'Login failed for {username} from {client_ip}.')
             flask.flash('Wrong e-mail or password', 'error')
     return flask.render_template('login.html', form=form)
 

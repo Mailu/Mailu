@@ -47,7 +47,10 @@ class LimitWraperFactory(object):
     def should_rate_limit_ip(self, ip):
         limiter = self.get_limiter(app.config["AUTH_RATELIMIT_IP"], 'auth-ip')
         client_network = utils.extract_network_from_ip(ip)
-        return self.is_subject_to_rate_limits(ip) and not limiter.test(client_network)
+        is_rate_limited = self.is_subject_to_rate_limits(ip) and not limiter.test(client_network)
+        if is_rate_limited:
+            app.logger.warn(f'Authentication attempt from {ip} has been rate-limited.')
+        return is_rate_limited
 
     def rate_limit_ip(self, ip):
         if ip != app.config['WEBMAIL_ADDRESS']:
@@ -58,7 +61,10 @@ class LimitWraperFactory(object):
 
     def should_rate_limit_user(self, username, ip, device_cookie=None, device_cookie_name=None):
         limiter = self.get_limiter(app.config["AUTH_RATELIMIT_USER"], 'auth-user')
-        return self.is_subject_to_rate_limits(ip) and not limiter.test(device_cookie if device_cookie_name == username else username)
+        is_rate_limited = self.is_subject_to_rate_limits(ip) and not limiter.test(device_cookie if device_cookie_name == username else username)
+        if is_rate_limited:
+            app.logger.warn(f'Authentication attempt from {ip} for {username} has been rate-limited.')
+        return is_rate_limited
 
     def rate_limit_user(self, username, ip, device_cookie=None, device_cookie_name=None):
         limiter = self.get_limiter(app.config["AUTH_RATELIMIT_USER"], 'auth-user')

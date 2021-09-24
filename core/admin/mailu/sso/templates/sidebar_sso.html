@@ -1,8 +1,15 @@
-<div class="sidebar">
-
-
-  <nav class="mt-2">
+<div class="sidebar text-sm">
+  <nav class="mt-2">    
     <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
+    <li class="nav-header text-uppercase text-primary" role="none">{% trans %}Go to{% endtrans %}</li>   
+      {%- if config["WEBMAIL"] != "none" %}
+      <li class="nav-item" role="none">
+        <a href="{{ config["WEB_WEBMAIL"] }}" target="_blank" class="nav-link" role="menuitem">
+        <i class="nav-icon far fa-envelope"></i>
+        <p>{% trans %}Webmail{% endtrans %} <i class="fas fa-external-link-alt text-xs"></i></p>
+        </a>
+      </li>
+      {% endif %}
       {% if config['ADMIN'] %} 
       <li class="nav-item">
         <a href="{{ url_for('ui.client') }}" class="nav-link">
@@ -10,20 +17,25 @@
           <p class="text">{% trans %}Client setup{% endtrans %}</p>
         </a>
       </li>
+      {% endif %}
+      <li class="nav-item" role="none">
+        <a href="{{ config["WEBSITE"] }}" target="_blank" class="nav-link" role="menuitem" rel="noreferrer">
+        <i class="nav-icon fa fa-globe"></i>
+        <p>{% trans %}Website{% endtrans %} <i class="fas fa-external-link-alt text-xs"></i></p>
+        </a>
+      </li>
       <li class="nav-item">
         <a href="https://mailu.io" target="_blank" class="nav-link">
           <i class="nav-icon fa fa-life-ring"></i>
           <p class="text">{% trans %}Help{% endtrans %}</p>
         </a>
-      </li>
-      {% endif %}
-      {% if False %}
-      <!-- Domain self-registration is only available when
+      </li>      
+      {#
+          Domain self-registration is only available when
            - Admin is available
            - Domain Self-registration is enabled 
-           - The current user is not logged on
-      -->
-      {% endif %}
+           - The current user is not logged on      
+      #}
       {% if config['DOMAIN_REGISTRATION'] %}
       {% if not current_user.is_authenticated %}
       {% if config['ADMIN'] %} 
@@ -36,13 +48,12 @@
       {% endif %}
       {% endif %}
       {% endif %}
-      {% if False %}
-      <!-- User self-registration is only available when
+      {#
+          User self-registration is only available when
            - Admin is available
            - Self-registration is enabled 
-           - The current user is not logged on
-      -->
-      {% endif %}
+           - The current user is not logged on      
+      #}
       {% if not current_user.is_authenticated %}
       {% if signup_domains %}
       {% if config['ADMIN'] %} 

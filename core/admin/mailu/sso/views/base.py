@@ -10,12 +10,22 @@ import flask_login
 def login():
     form = forms.LoginForm()
     endpoint = flask.request.args.get('next', 'ui.index')
-    
-    if endpoint == 'ui.webmail':
-        endpoint = 'ui.webmail'
-    else:
-        endpoint = 'ui.index'
+
+    if str(app.config['WEBMAIL']).upper != 'NONE' and str(app.config['ADMIN']).upper != 'NONE' and endpoint != 'ui.webmail':
+        form.target.choices = [('Configuration page', 'Configuration page'), ('Webmail', 'Webmail')]
+    elif str(app.config['WEBMAIL']).upper != 'NONE' and str(app.config['ADMIN']).upper != 'NONE' and endpoint == 'ui.webmail':
+        form.target.choices = [('Webmail', 'Webmail'), ('Configuration page', 'Configuration page')]
+    elif str(app.config['WEBMAIL']).upper != 'NONE' and str(app.config['ADMIN']).upper == 'NONE':
+        form.target.choices = [('Webmail', 'Webmail')]
+    elif str(app.config['WEBMAIL']).upper == 'NONE' and str(app.config['ADMIN']).upper != 'NONE':
+        form.target.choices = [('Configuration page', 'Configuration page')]
+
     if form.validate_on_submit():
+        if form.target.data == 'Configuration page':
+            endpoint = 'ui.index'
+        elif form.target.data == 'webmail':
+            endpoint = 'ui.webmail'
+
         user = models.User.login(form.email.data, form.pw.data)
         if user:
             flask.session.regenerate()

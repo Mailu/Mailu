@@ -1,13 +1,13 @@
-{% extends "form_sso.html" %}
+{%- extends "form_sso.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Sign in{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block subtitle %}
-{% if endpoint == 'ui.index' %}
+{%- block subtitle %}
+{%- if endpoint == 'ui.index' %}
 {% trans %}to access the configuration page{% endtrans %}
-{% elif endpoint == 'ui.webmail' %}
+{%- elif endpoint == 'ui.webmail' %}
 {% trans %}to access the webmail page{% endtrans %}
-{% endif %}
-{% endblock %}
+{%- endif %}
+{%- endblock %}

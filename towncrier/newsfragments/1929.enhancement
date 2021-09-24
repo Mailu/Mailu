@@ -1,0 +1,5 @@
+Improved the SSO page.
+ - Now shows the login target.
+ - Added toggle to choose login target.
+ - Made SSO page available separately. SSO page can now be used without Admin.
+

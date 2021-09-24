@@ -39,7 +39,7 @@ address.
 
 The ``WILDCARD_SENDERS`` setting is a comma delimited list of user email addresses that are allowed to send emails from any existing address (spoofing the sender).
 
-The ``AUTH_RATELIMIT_IP`` (default: 10/hour) holds a security setting for fighting
+The ``AUTH_RATELIMIT_IP`` (default: 60/hour) holds a security setting for fighting
 attackers that waste server ressources by trying to guess user passwords (typically
 using a password spraying attack). The value defines the limit of authentication
 attempts that will be processed on non-existing accounts for a specific IP subnet

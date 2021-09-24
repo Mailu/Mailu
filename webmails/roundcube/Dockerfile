@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y \
  && sed -i 's,^php_value.*upload_max_filesize,#&,g' .htaccess \
  && chown -R www-data: logs temp \
  && rm -rf /var/lib/apt/lists \
- && a2enmod rewrite deflate expires headers
+ && a2enmod deflate expires headers
 
 COPY php.ini /php.ini
 COPY config.inc.php /var/www/html/config/

@@ -12,18 +12,18 @@ def login():
     endpoint = flask.request.args.get('next', 'ui.index')
 
     if str(app.config['WEBMAIL']).upper != 'NONE' and str(app.config['ADMIN']).upper != 'NONE' and endpoint != 'ui.webmail':
-        form.target.choices = [('Configuration page', 'Configuration page'), ('Webmail', 'Webmail')]
+        form.target.choices = [('Admin', 'Admin'), ('Webmail', 'Webmail')]
     elif str(app.config['WEBMAIL']).upper != 'NONE' and str(app.config['ADMIN']).upper != 'NONE' and endpoint == 'ui.webmail':
-        form.target.choices = [('Webmail', 'Webmail'), ('Configuration page', 'Configuration page')]
+        form.target.choices = [('Webmail', 'Webmail'), ('Admin', 'Admin')]
     elif str(app.config['WEBMAIL']).upper != 'NONE' and str(app.config['ADMIN']).upper == 'NONE':
         form.target.choices = [('Webmail', 'Webmail')]
     elif str(app.config['WEBMAIL']).upper == 'NONE' and str(app.config['ADMIN']).upper != 'NONE':
-        form.target.choices = [('Configuration page', 'Configuration page')]
+        form.target.choices = [('Admin', 'Admin')]
 
     if form.validate_on_submit():
-        if form.target.data == 'Configuration page':
+        if str(form.target.data) == 'Admin':
             endpoint = 'ui.index'
-        elif form.target.data == 'webmail':
+        elif str(form.target.data) == 'Webmail':
             endpoint = 'ui.webmail'
 
         user = models.User.login(form.email.data, form.pw.data)
@@ -33,5 +33,7 @@ def login():
             return flask.redirect(flask.url_for(endpoint))
         else:
             flask.flash('Wrong e-mail or password', 'error')
+            client_ip = flask.request.headers["X-Real-IP"] if 'X-Real-IP' in flask.request.headers else flask.request.remote_addr
+            flask.current_app.logger.warn(f'Login failed for {str(form.email.data)} from {client_ip}.')
     return flask.render_template('login.html', form=form, endpoint=endpoint)
     

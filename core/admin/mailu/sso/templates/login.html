@@ -3,11 +3,3 @@
 {%- block title %}
 {% trans %}Sign in{% endtrans %}
 {%- endblock %}
-
-{%- block subtitle %}
-{%- if endpoint == 'ui.index' %}
-{% trans %}to access the configuration page{% endtrans %}
-{%- elif endpoint == 'ui.webmail' %}
-{% trans %}to access the webmail page{% endtrans %}
-{%- endif %}
-{%- endblock %}

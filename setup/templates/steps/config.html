@@ -48,10 +48,18 @@ Or in plain english: if receivers start to classify your mail as spam, this post
 </div>
 
 <div class="form-group">
-  <label>Authentication rate limit (per source IP address)</label>
+  <label>Authentication rate limit per IP for failed login attempts for non-existing accounts</label>
   <!--   Validates number input only -->
-  <p><input class="form-control" style="width: 9%; display: inline;" type="number" name="auth_ratelimit_pm"
-  		value="10000" required > / minute
+  <p><input class="form-control" style="width: 9%; display: inline;" type="number" name="auth_ratelimit_ip"
+  		value="60" required > / hour
+  </p>
+</div>
+
+<div class="form-group">
+  <label>Authentication rate limit per user for failed login attempts for existing accounts</label>
+  <!--   Validates number input only -->
+  <p><input class="form-control" style="width: 9%; display: inline;" type="number" name="auth_ratelimit_user"
+  		value="100" required > / day
   </p>
 </div>
 

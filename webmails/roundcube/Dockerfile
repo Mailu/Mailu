@@ -33,13 +33,17 @@ RUN apt-get update && apt-get install -y \
  && mv roundcubemail-* html \
  && mv carddav html/plugins/ \
  && cd html \
- && rm -rf CHANGELOG INSTALL LICENSE README.md UPGRADING composer.json-dist installer \
+ && rm -rf CHANGELOG INSTALL LICENSE README.md UPGRADING composer.json-dist installer composer.* \
  && sed -i 's,mod_php5.c,mod_php7.c,g' .htaccess \
  && sed -i 's,^php_value.*post_max_size,#&,g' .htaccess \
  && sed -i 's,^php_value.*upload_max_filesize,#&,g' .htaccess \
- && chown -R www-data: logs temp \
+ && ln -sf index.php /var/www/html/sso.php \
+ && chown -R root:root . \
+ && touch logs/errors.log \
+ && chown -R www-data:www-data logs temp \
+ && chmod -R a+rX . \
  && rm -rf /var/lib/apt/lists \
- && a2enmod deflate expires headers
+ && a2enmod rewrite deflate expires headers
 
 COPY php.ini /php.ini
 COPY config.inc.php /var/www/html/config/

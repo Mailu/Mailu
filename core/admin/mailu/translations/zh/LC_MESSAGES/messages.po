@@ -321,7 +321,7 @@ msgstr "中继域"
 
 #: mailu/ui/templates/sidebar.html:59 mailu/ui/templates/user/settings.html:15
 msgid "Antispam"
-msgstr "发垃圾邮件"
+msgstr "反垃圾邮件"
 
 #: mailu/ui/templates/sidebar.html:66
 msgid "Mail domains"

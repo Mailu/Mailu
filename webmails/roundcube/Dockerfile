@@ -11,7 +11,8 @@ FROM build_${QEMU}
 RUN apt-get update && apt-get install -y \
   python3 curl python3-pip git python3-multidict \
   && rm -rf /var/lib/apt/lists \
-  && echo "ServerSignature Off" >> /etc/apache2/apache2.conf
+  && echo "ServerSignature Off\nServerName roundcube" >> /etc/apache2/apache2.conf \
+  && sed -i 's,CustomLog.*combined$,\0 "'"expr=!(%{HTTP_USER_AGENT}=='health'\&\&(-R '127.0.0.1/8' || -R '::1'))"'",' /etc/apache2/sites-available/000-default.conf
 
 # Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
 RUN pip3 install socrate
@@ -38,9 +39,9 @@ RUN apt-get update && apt-get install -y \
  && sed -i 's,^php_value.*post_max_size,#&,g' .htaccess \
  && sed -i 's,^php_value.*upload_max_filesize,#&,g' .htaccess \
  && ln -sf index.php /var/www/html/sso.php \
+ && ln -sf /dev/stderr /var/www/html/logs/errors.log \
  && chown -R root:root . \
- && touch logs/errors.log \
- && chown -R www-data:www-data logs temp \
+ && chown www-data:www-data logs temp \
  && chmod -R a+rX . \
  && rm -rf /var/lib/apt/lists \
  && a2enmod rewrite deflate expires headers
@@ -55,4 +56,4 @@ VOLUME ["/data"]
 
 CMD /start.py
 
-HEALTHCHECK CMD curl -f -L http://localhost/ || exit 1
+HEALTHCHECK CMD curl -f -L -H 'User-Agent: health' http://localhost/ || exit 1

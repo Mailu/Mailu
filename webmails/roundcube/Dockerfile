@@ -55,4 +55,4 @@ VOLUME ["/data"]
 
 CMD /start.py
 
-HEALTHCHECK CMD curl -f -L http://localhost/ || exit 1
+HEALTHCHECK CMD curl -f -L -H 'User-Agent: health' http://localhost/ || exit 1

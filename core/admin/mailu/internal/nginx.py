@@ -5,6 +5,7 @@ import re
 import urllib
 import ipaddress
 import socket
+import sqlalchemy.exc
 import tenacity
 
 SUPPORTED_AUTH_METHODS = ["none", "plain"]
@@ -90,15 +91,19 @@ def handle_authentication(headers):
         except:
             app.logger.warn(f'Received undecodable user/password from nginx: {raw_user_email!r}/{raw_password!r}')
         else:
-            user = models.User.query.get(user_email)
-            ip = urllib.parse.unquote(headers["Client-Ip"])
-            if check_credentials(user, password, ip, protocol):
-                server, port = get_server(headers["Auth-Protocol"], True)
-                return {
-                    "Auth-Status": "OK",
-                    "Auth-Server": server,
-                    "Auth-Port": port
-                }
+            try:
+                user = models.User.query.get(user_email)
+            except sqlalchemy.exc.StatementError as exc:
+                exc = str(exc).split('\n', 1)[0]
+                app.logger.warn(f'Invalid user {user_email!r}: {exc}')
+            else:
+                if check_credentials(user, password, urllib.parse.unquote(headers["Client-Ip"]), protocol):
+                    server, port = get_server(headers["Auth-Protocol"], True)
+                    return {
+                        "Auth-Status": "OK",
+                        "Auth-Server": server,
+                        "Auth-Port": port
+                    }
         status, code = get_status(protocol, "authentication")
         return {
             "Auth-Status": status,

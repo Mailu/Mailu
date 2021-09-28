@@ -57,6 +57,8 @@ class IdnaEmail(db.TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         """ encode unicode domain part of email address to punycode """
+        if not '@' in value:
+            raise ValueError('invalid email address (no "@")')
         localpart, domain_name = value.lower().rsplit('@', 1)
         if '@' in localpart:
             raise ValueError('email local part must not contain "@"')

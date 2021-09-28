@@ -57,8 +57,5 @@ except subprocess.CalledProcessError as e:
 # Setup database permissions
 os.system("chown -R www-data:www-data /data")
 
-# Tail roundcube logs
-subprocess.Popen(["tail", "-f", "-n", "0", "/var/www/html/logs/errors.log"])
-
 # Run apache
 os.execv("/usr/local/bin/apache2-foreground", ["apache2-foreground"])

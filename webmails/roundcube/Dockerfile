@@ -38,9 +38,9 @@ RUN apt-get update && apt-get install -y \
  && sed -i 's,^php_value.*post_max_size,#&,g' .htaccess \
  && sed -i 's,^php_value.*upload_max_filesize,#&,g' .htaccess \
  && ln -sf index.php /var/www/html/sso.php \
+ && ln -sf /dev/stderr /var/www/html/logs/errors.log \
  && chown -R root:root . \
- && touch logs/errors.log \
- && chown -R www-data:www-data logs temp \
+ && chown www-data:www-data logs temp \
  && chmod -R a+rX . \
  && rm -rf /var/lib/apt/lists \
  && a2enmod rewrite deflate expires headers

@@ -29,6 +29,7 @@ def create_app_from_config(config):
     utils.migrate.init_app(app, models.db)
 
     app.temp_token_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('WEBMAIL_TEMP_TOKEN_KEY', 'utf-8'), 'sha256').digest()
+    app.srs_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('SRS_KEY', 'utf-8'), 'sha256').digest()
 
     # Initialize list of translations
     config.translations = {

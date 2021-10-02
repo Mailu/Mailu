@@ -1,7 +1,7 @@
 # This configuration was copied from Mailinabox. The original version is available at:
 # https://raw.githubusercontent.com/mail-in-a-box/mailinabox/master/conf/postfix_outgoing_mail_header_filters
 
-/^\s*Received:[^\n]*(.*)/	IGNORE
+/^\s*Received:[^\n]*/	IGNORE
 
 # Remove other typically private information.
 /^\s*User-Agent:/        IGNORE

@@ -8,14 +8,11 @@
 {% trans %}to access the administration tools{% endtrans %}
 {%- endblock %}
 
-{%+ block content %}
 {% if config["SESSION_COOKIE_SECURE"] %}
-<script language="javascript">
-	if(window.location.protocol != "https:") {
-		document.write('<div class="alert alert-danger" role="alert">The login form has been disabled as <b>SESSION_COOKIE_SECURE</b> is on but you are accessing Mailu over HTTP</div>');
-		window.stop();
-	}
-</script>
-{% endif %}
+{%- block content %}
+<div id="login_needs_https" class="alert alert-danger d-none" role="alert">
+{% trans %}The login form has been disabled as <b>SESSION_COOKIE_SECURE</b> is on but you are accessing Mailu over HTTP.{% endtrans %}
+</div>
 {{ super() }}
-{%+ endblock %}
+{%- endblock %}
+{% endif %}

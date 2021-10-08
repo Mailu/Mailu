@@ -1,0 +1,1 @@
+Disable the login page if SESSION_COOKIE_SECURE is incompatible with how Mailu is accessed as this seems to be a common misconfiguration.

@@ -8,11 +8,11 @@
 {% trans %}to access the administration tools{% endtrans %}
 {%- endblock %}
 
-{% if config["SESSION_COOKIE_SECURE"] %}
 {%- block content %}
+{% if config["SESSION_COOKIE_SECURE"] %}
 <div id="login_needs_https" class="alert alert-danger d-none" role="alert">
 {% trans %}The login form has been disabled as <b>SESSION_COOKIE_SECURE</b> is on but you are accessing Mailu over HTTP.{% endtrans %}
 </div>
+{% endif %}
 {{ super() }}
 {%- endblock %}
-{% endif %}

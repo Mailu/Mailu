@@ -49,7 +49,7 @@ DEFAULT_CONFIG = {
     'DKIM_PATH': '/dkim/{domain}.{selector}.key',
     'DEFAULT_QUOTA': 1000000000,
     'MESSAGE_RATELIMIT': '200/day',
-    'RECIPIENT_DELIMITER': None,
+    'RECIPIENT_DELIMITER': '',
     # Web settings
     'SITENAME': 'Mailu',
     'WEBSITE': 'https://mailu.io',

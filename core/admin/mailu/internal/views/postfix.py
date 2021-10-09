@@ -146,6 +146,7 @@ def postfix_sender_login(sender):
         return flask.jsonify(",".join(wildcard_senders)) if wildcard_senders else flask.abort(404)
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     localpart = localpart[:next((i for i, ch in enumerate(localpart) if ch in flask.current_app.config.get('RECIPIENT_DELIMITER')), None)]
     destinations = set(models.Email.resolve_destination(localpart, domain_name, True) or [])
     destinations.update(wildcard_senders)
@@ -159,6 +160,9 @@ def postfix_sender_login(sender):
 =======
     if delim := flask.current_app.config.get('RECIPIENT_DELIMITER'):
         localpart = localpart.split(delim, 1)[0]
+=======
+    localpart = localpart[:next((i for i, ch in enumerate(localpart) if ch in flask.current_app.config.get('RECIPIENT_DELIMITER')), None)]
+>>>>>>> 14360f89 (RECIPIENT_DELIMITER can have several characters)
     destination = models.Email.resolve_destination(localpart, domain_name, True)
 >>>>>>> 8c59f356 (use RECIPIENT_DELIMITER for splitting)
     destination = [*destination, *wildcard_senders] if destination else [*wildcard_senders]

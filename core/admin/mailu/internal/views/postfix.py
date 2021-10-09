@@ -144,6 +144,7 @@ def postfix_sender_login(sender):
     localpart, domain_name = models.Email.resolve_domain(sender)
     if localpart is None:
         return flask.jsonify(",".join(wildcard_senders)) if wildcard_senders else flask.abort(404)
+<<<<<<< HEAD
     localpart = localpart[:next((i for i, ch in enumerate(localpart) if ch in flask.current_app.config.get('RECIPIENT_DELIMITER')), None)]
     destinations = set(models.Email.resolve_destination(localpart, domain_name, True) or [])
     destinations.update(wildcard_senders)
@@ -151,6 +152,12 @@ def postfix_sender_login(sender):
     if destinations:
         return flask.jsonify(",".join(idna_encode(destinations)))
     return flask.abort(404)
+=======
+    user, plus = localpart.split("+", 1)
+    destination = models.Email.resolve_destination(user, domain_name, True)
+    destination = [*destination, *wildcard_senders] if destination else [*wildcard_senders]
+    return flask.jsonify(",".join(destination)) if destination else flask.abort(404)
+>>>>>>> 1d571ded (split localpart into user and tag)
 
 @internal.route("/postfix/sender/rate/<path:sender>")
 def postfix_sender_rate(sender):

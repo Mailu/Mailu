@@ -85,8 +85,9 @@ def postfix_sender_login(sender):
     destination = models.Email.resolve_destination(localpart, domain_name, True)
 =======
         return flask.jsonify(",".join(wildcard_senders)) if wildcard_senders else flask.abort(404)
-    user, plus = localpart.split("+", 1)
-    destination = models.Email.resolve_destination(user, domain_name, True)
+    if delim := flask.current_app.config.get('RECIPIENT_DELIMITER'):
+        localpart = localpart.split(delim, 1)[0]
+    destination = models.Email.resolve_destination(localpart, domain_name, True)
     destination = [*destination, *wildcard_senders] if destination else [*wildcard_senders]
 >>>>>>> 1d571ded (split localpart into user and tag)
     return flask.jsonify(",".join(destination)) if destination else flask.abort(404)

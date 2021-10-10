@@ -45,15 +45,7 @@ DEFAULT_CONFIG = {
     'DKIM_SELECTOR': 'dkim',
     'DKIM_PATH': '/dkim/{domain}.{selector}.key',
     'DEFAULT_QUOTA': 1000000000,
-<<<<<<< HEAD
-=======
-    'MESSAGE_RATELIMIT': '200/day',
-<<<<<<< HEAD
-    'RECIPIENT_DELIMITER': None,
->>>>>>> 8c59f356 (use RECIPIENT_DELIMITER for splitting)
-=======
     'RECIPIENT_DELIMITER': '',
->>>>>>> 14360f89 (RECIPIENT_DELIMITER can have several characters)
     # Web settings
     'SITENAME': 'Mailu',
     'WEBSITE': 'https://mailu.io',

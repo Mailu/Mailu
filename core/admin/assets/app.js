@@ -8,10 +8,10 @@ jQuery("document").ready(function() {
     });
 
     // disable login if not possible
-    var l = $('#login_needs_https');
+    var l = jQuery('#login_needs_https');
     if (l.length && window.location.protocol != 'https:') {
         l.removeClass("d-none");
-        $('form :input').prop('disabled', true);
+        jQuery('form :input').prop('disabled', true);
     }
 });
 

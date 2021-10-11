@@ -20,3 +20,7 @@
 .sidebar-toggle {
   padding: unset !important;
 }
+
+.d-none {
+  display: none !important;
+}

@@ -46,7 +46,8 @@ DEFAULT_CONFIG = {
     'WELCOME_SUBJECT': 'Dummy welcome topic',
     'WELCOME_BODY': 'Dummy welcome body',
     'DKIM_SELECTOR': 'dkim',
-    'DKIM_PATH': '/dkim/{domain}.{selector}.key',
+    'DKIM_REDIS_KEY_PREFIX': 'DKIM_KEYS',
+    'DKIM_REDIS_KEY': '{domain}.{selector}.key',
     'DEFAULT_QUOTA': 1000000000,
     'MESSAGE_RATELIMIT': '200/day',
     # Web settings
@@ -143,6 +144,7 @@ class ConfigManager(dict):
         self.config['RATELIMIT_STORAGE_URL'] = 'redis://{0}/2'.format(self.config['REDIS_ADDRESS'])
         self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['REDIS_ADDRESS'])
         self.config['SESSION_STORAGE_URL'] = 'redis://{0}/3'.format(self.config['REDIS_ADDRESS'])
+        self.config['DKIM_STORAGE_URL'] = 'redis://{0}/4'.format(self.config['REDIS_ADDRESS'])
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
         self.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=int(self.config['SESSION_LIFETIME']))

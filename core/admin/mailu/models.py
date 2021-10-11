@@ -20,6 +20,7 @@ import hmac
 import smtplib
 import idna
 import dns
+import redis
 
 from flask import current_app as app
 from sqlalchemy.ext import declarative
@@ -189,24 +190,23 @@ class Domain(Base):
     signup_enabled = db.Column(db.Boolean, nullable=False, default=False)
 
     _dkim_key = None
-    _dkim_key_on_disk = None
-
-    def _dkim_file(self):
-        """ return filename for active DKIM key """
-        return app.config['DKIM_PATH'].format(
-            domain=self.name,
-            selector=app.config['DKIM_SELECTOR']
-        )
+    _dkim_key_on_redis = None
 
     def save_dkim_key(self):
-        """ save changed DKIM key to disk """
-        if self._dkim_key != self._dkim_key_on_disk:
-            file_path = self._dkim_file()
+        """ save changed DKIM key to redis """
+        if self._dkim_key != self._dkim_key_on_redis:
+            r = redis.StrictRedis().from_url(app.config['DKIM_STORAGE_URL'])
             if self._dkim_key:
-                with open(file_path, 'wb') as handle:
-                    handle.write(self._dkim_key)
-            elif os.path.exists(file_path):
-                os.unlink(file_path)
+                r.hset(
+                    app.config['DKIM_REDIS_KEY_PREFIX'],
+                    app.config['DKIM_REDIS_KEY'],
+                    self._dkim_key,
+                )
+            else:
+                r.hdel(
+                    app.config['DKIM_REDIS_KEY_PREFIX'],
+                    app.config['DKIM_REDIS_KEY'],
+                )
             self._dkim_key_on_disk = self._dkim_key
 
     @cached_property
@@ -273,10 +273,12 @@ class Domain(Base):
     def dkim_key(self):
         """ return private DKIM key """
         if self._dkim_key is None:
-            file_path = self._dkim_file()
-            if os.path.exists(file_path):
-                with open(file_path, 'rb') as handle:
-                    self._dkim_key = self._dkim_key_on_disk = handle.read()
+            r = redis.StrictRedis().from_url(app.config['DKIM_STORAGE_URL'])
+            if r.hexists(app.config['DKIM_REDIS_KEY_PREFIX'], app.config['DKIM_REDIS_KEY']):
+                self._dkim_key = self._dkim_key_on_disk = r.hexists(
+                    app.config['DKIM_REDIS_KEY_PREFIX'],
+                    app.config['DKIM_REDIS_KEY'],
+                )
             else:
                 self._dkim_key = self._dkim_key_on_disk = b''
         return self._dkim_key if self._dkim_key else None

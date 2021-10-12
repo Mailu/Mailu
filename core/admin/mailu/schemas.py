@@ -189,7 +189,7 @@ class Logger:
             # look at Domains originally loaded from db
             if not isinstance(target, models.Domain) or not target._sa_instance_state.load_path:
                 continue
-            before = target._dkim_key_on_disk
+            before = target._dkim_key_on_redis
             after = target._dkim_key
             # "de-dupe" messages; this event is fired at every flush
             if before == after or (target, before, after) in self._dedupe_dkim:

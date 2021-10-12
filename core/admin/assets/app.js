@@ -66,5 +66,12 @@ $('document').ready(function() {
     // init clipboard.js
     new ClipboardJS('.btn-clip');
 
+    // disable login if not possible
+    var l = $('#login_needs_https');
+    if (l.length && window.location.protocol != 'https:') {
+        l.removeClass("d-none");
+        $('form :input').prop('disabled', true);
+    }
+
 });
 

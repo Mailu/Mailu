@@ -60,7 +60,7 @@ def has_dane_record(domain, timeout=10):
         # we will receive this non-specific exception. The safe behaviour is to
         # accept to defer the email.
         flask.current_app.logger.warn(f'Unable to lookup the TLSA record for {domain}. Is the DNSSEC zone okay on https://dnsviz.net/d/{domain}/dnssec/?')
-        return app.config['DEFER_ON_TLS_ERROR']
+        return flask.current_app.config['DEFER_ON_TLS_ERROR']
     except dns.exception.Timeout:
         flask.current_app.logger.warn(f'Timeout while resolving the TLSA record for {domain} ({timeout}s).')
     except dns.resolver.NXDOMAIN:

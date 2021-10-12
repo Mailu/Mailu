@@ -5,6 +5,7 @@ import re
 import urllib
 import ipaddress
 import socket
+import sqlalchemy.exc
 import tenacity
 
 SUPPORTED_AUTH_METHODS = ["none", "plain"]
@@ -77,7 +78,7 @@ def handle_authentication(headers):
     # Authenticated user
     elif method == "plain":
         is_valid_user = False
-        if 'Auth-Port' in headers and int(urllib.parse.unquote(headers["Auth-Port"])) == 25:
+        if 'Auth-Port' in headers and urllib.parse.unquote(headers["Auth-Port"]) == '25':
             return {
                 "Auth-Status": "AUTH not supported",
                 "Auth-Error-Code": "502 5.5.1",
@@ -92,21 +93,26 @@ def handle_authentication(headers):
         try:
             user_email = raw_user_email.encode("iso8859-1").decode("utf8")
             password = raw_password.encode("iso8859-1").decode("utf8")
+            ip = urllib.parse.unquote(headers["Client-Ip"])
         except:
             app.logger.warn(f'Received undecodable user/password from nginx: {raw_user_email!r}/{raw_password!r}')
         else:
-            user = models.User.query.get(user_email)
-            is_valid_user = True
-            ip = urllib.parse.unquote(headers["Client-Ip"])
-            if check_credentials(user, password, ip, protocol):
-                server, port = get_server(headers["Auth-Protocol"], True)
-                return {
-                    "Auth-Status": "OK",
-                    "Auth-Server": server,
-                    "Auth-User": user_email,
-                    "Auth-User-Exists": is_valid_user,
-                    "Auth-Port": port
-                }
+            try:
+                user = models.User.query.get(user_email)
+                is_valid_user = True
+            except sqlalchemy.exc.StatementError as exc:
+                exc = str(exc).split('\n', 1)[0]
+                app.logger.warn(f'Invalid user {user_email!r}: {exc}')
+            else:
+                if check_credentials(user, password, ip, protocol):
+                    server, port = get_server(headers["Auth-Protocol"], True)
+                    return {
+                        "Auth-Status": "OK",
+                        "Auth-Server": server,
+                        "Auth-User": user_email,
+                        "Auth-User-Exists": is_valid_user,
+                        "Auth-Port": port
+                    }
         status, code = get_status(protocol, "authentication")
         return {
             "Auth-Status": status,

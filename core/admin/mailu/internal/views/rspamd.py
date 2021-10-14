@@ -1,4 +1,4 @@
-from mailu import models, dkim
+from mailu import models
 from mailu.internal import internal
 
 import flask
@@ -22,7 +22,7 @@ def rspamd_dkim_key(domain_name):
                 {
                     'domain'  : domain.name,
                     'key'     : key.decode('utf8'),
-                    'selector': 'dkim',
+                    'selector': flask.current_app.config.get('DKIM_SELECTOR', 'dkim'),
                 }
             ]
         }

@@ -562,6 +562,8 @@ class User(Base, Email):
         """ verifies password against stored hash
             and updates hash if outdated
         """
+        if password == '':
+            return False
         cache_result = self._credential_cache.get(self.get_id())
         current_salt = self.password.split('$')[3] if len(self.password.split('$')) == 5 else None
         if cache_result and current_salt:

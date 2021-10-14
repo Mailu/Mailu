@@ -377,11 +377,39 @@ class User(Base, Email):
         )
 
     def check_password(self, password):
+<<<<<<< HEAD
         context = self.get_password_context()
         reference = re.match('({[^}]+})?(.*)', self.password).group(2)
         result = context.verify(password, reference)
         if result and context.identify(reference) != context.default_scheme():
             self.set_password(password)
+=======
+        """ verifies password against stored hash
+            and updates hash if outdated
+        """
+        if password == '':
+            return False
+        cache_result = self._credential_cache.get(self.get_id())
+        current_salt = self.password.split('$')[3] if len(self.password.split('$')) == 5 else None
+        if cache_result and current_salt:
+            cache_salt, cache_hash = cache_result
+            if cache_salt == current_salt:
+                return passlib.hash.pbkdf2_sha256.verify(password, cache_hash)
+            else:
+                # the cache is local per gunicorn; the password has changed
+                # so the local cache can be invalidated
+                del self._credential_cache[self.get_id()]
+        reference = self.password
+        # strip {scheme} if that's something mailu has added
+        # passlib will identify *crypt based hashes just fine
+        # on its own
+        if reference.startswith(('{PBKDF2}', '{BLF-CRYPT}', '{SHA512-CRYPT}', '{SHA256-CRYPT}', '{MD5-CRYPT}', '{CRYPT}')):
+            reference = reference.split('}', 1)[1]
+
+        result, new_hash = User.get_password_context().verify_and_update(password, reference)
+        if new_hash:
+            self.password = new_hash
+>>>>>>> 632ce663 (Prevent logins with no password)
             db.session.add(self)
             db.session.commit()
         return result

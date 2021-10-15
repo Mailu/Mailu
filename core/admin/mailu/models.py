@@ -377,6 +377,8 @@ class User(Base, Email):
         )
 
     def check_password(self, password):
+        if password == '':
+            return False
         context = self.get_password_context()
         reference = re.match('({[^}]+})?(.*)', self.password).group(2)
         result = context.verify(password, reference)

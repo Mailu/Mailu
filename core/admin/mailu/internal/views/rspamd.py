@@ -12,7 +12,7 @@ def vault_error(*messages, status=404):
 # hashicorp vault answer format:
 # {"request_id":"...","lease_id":"","renewable":false,"lease_duration":2764800,"data":{...see above...},"wrap_info":null,"warnings":null,"auth":null}
 
-@internal.route("/rspamd/vault/v1/dkim/<domain_name>")
+@internal.route("/rspamd/vault/v1/dkim/<domain_name>", methods=['GET'])
 def rspamd_dkim_key(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(vault_error('unknown domain'))
     key = domain.dkim_key or flask.abort(vault_error('no dkim key', status=400))

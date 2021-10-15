@@ -244,6 +244,13 @@ class Domain(Base):
             return f'_dmarc.{self.name}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
 
     @cached_property
+    def dns_dmarc_report(self):
+        """ return DMARC report record for mailu server """
+        if self.dkim_key:
+            domain = app.config['DOMAIN']
+            return f'{self.name}._report._dmarc.{domain}. 600 IN TXT "v=DMARC1"'
+
+    @cached_property
     def dns_autoconfig(self):
         """ return list of auto configuration records (RFC6186) """
         hostname = app.config['HOSTNAME']

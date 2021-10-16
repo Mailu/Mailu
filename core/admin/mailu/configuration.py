@@ -152,7 +152,7 @@ class ConfigManager(dict):
         self.config['SESSION_COOKIE_HTTPONLY'] = True
         self.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=int(self.config['SESSION_LIFETIME']))
         hostnames = [host.strip() for host in self.config['HOSTNAMES'].split(',')]
-        self.config['AUTH_RATELIMIT_EXEMPTION'] = set(ipaddress.ip_network(net.strip(), False) for net in config['AUTH_RATELIMIT_EXEMPTION'].split(','))
+        self.config['AUTH_RATELIMIT_EXEMPTION'] = set(ipaddress.ip_network(net.strip(), False) for net in self.config['AUTH_RATELIMIT_EXEMPTION'].split(','))
         self.config['HOSTNAMES'] = ','.join(hostnames)
         self.config['HOSTNAME'] = hostnames[0]
         # update the app config itself

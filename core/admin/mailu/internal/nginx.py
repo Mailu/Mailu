@@ -94,6 +94,7 @@ def handle_authentication(headers):
         try:
             user_email = raw_user_email.encode("iso8859-1").decode("utf8")
             password = raw_password.encode("iso8859-1").decode("utf8")
+            ip = urllib.parse.unquote(headers["Client-Ip"])
         except:
             app.logger.warn(f'Received undecodable user/password from nginx: {raw_user_email!r}/{raw_password!r}')
         else:

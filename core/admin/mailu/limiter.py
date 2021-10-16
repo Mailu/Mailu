@@ -39,7 +39,7 @@ class LimitWraperFactory(object):
         return LimitWrapper(self.limiter, limits.parse(limit), *args)
 
     def is_subject_to_rate_limits(self, ip):
-        return not (self.storage.get(f'exempt-{ip}') > 0)
+        return False if utils.is_subject_to_rate_limits(ip) else not (self.storage.get(f'exempt-{ip}') > 0)
 
     def exempt_ip_from_ratelimits(self, ip):
         self.storage.incr(f'exempt-{ip}', app.config["AUTH_RATELIMIT_EXEMPTION_LENGTH"], True)

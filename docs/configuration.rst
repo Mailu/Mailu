@@ -55,6 +55,10 @@ after a successful login for which a specific IP address is exempted from rate l
 This ensures that users behind a NAT don't get locked out when a single client is
 misconfigured... but also potentially allow for users to attack each-other.
 
+The ``AUTH_RATELIMIT_EXEMPTION`` (default: '') is a comma separated list of network
+CIDRs that won't be subject to any form of rate limiting. Specifying ``0.0.0.0/0, ::/0``
+there is a good way to disable rate limiting altogether.
+
 The ``TLS_FLAVOR`` sets how Mailu handles TLS connections. Setting this value to
 ``notls`` will cause Mailu not to server any web content! More on :ref:`tls_flavor`.
 

@@ -79,6 +79,12 @@ def extract_network_from_ip(ip):
     else:
         return str(n.supernet(prefixlen_diff=(128-int(app.config["AUTH_RATELIMIT_IP_V6_MASK"]))).network_address)
 
+def is_exempt_from_ratelimits(ip):
+    for range in [net.strip() for net in app.config['AUTH_RATELIMIT_EXEMPTION'].split(',')]:
+        if ipaddress.ip_address(ip) in ipaddress.ip_network(ip, False):
+            return False
+    return True
+
 # Application translation
 babel = flask_babel.Babel()
 

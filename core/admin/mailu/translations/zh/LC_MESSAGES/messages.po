@@ -98,11 +98,11 @@ msgstr "配额"
 
 #: mailu/ui/forms.py:81
 msgid "Allow IMAP access"
-msgstr "允许 IMAP 访问"
+msgstr "允许IMAP访问"
 
 #: mailu/ui/forms.py:82
 msgid "Allow POP3 access"
-msgstr "允许 POP3 访问"
+msgstr "允许POP3访问"
 
 #: mailu/ui/forms.py:84
 msgid "Enabled"
@@ -185,7 +185,7 @@ msgstr "您的令牌（请记录，它只显示这一次）"
 
 #: mailu/ui/forms.py:130 mailu/ui/templates/token/list.html:20
 msgid "Authorized IP"
-msgstr "授权 IP"
+msgstr "授权IP"
 
 #: mailu/ui/forms.py:136
 msgid "Alias"
@@ -272,7 +272,7 @@ msgstr "即将%(action)s，请确认您的操作。"
 
 #: mailu/ui/templates/docker-error.html:4
 msgid "Docker error"
-msgstr "Docker 错误"
+msgstr "Docker错误"
 
 #: mailu/ui/templates/docker-error.html:12
 msgid "An error occurred while talking to the Docker server."
@@ -321,7 +321,7 @@ msgstr "中继域"
 
 #: mailu/ui/templates/sidebar.html:59 mailu/ui/templates/user/settings.html:15
 msgid "Antispam"
-msgstr "发垃圾邮件"
+msgstr "反垃圾邮件"
 
 #: mailu/ui/templates/sidebar.html:66
 msgid "Mail domains"
@@ -465,19 +465,19 @@ msgstr "DNS MX条目"
 
 #: mailu/ui/templates/domain/details.html:35
 msgid "DNS SPF entries"
-msgstr "DNS SPF 条目"
+msgstr "DNS SPF条目"
 
 #: mailu/ui/templates/domain/details.html:42
 msgid "DKIM public key"
-msgstr "DKIM 公钥"
+msgstr "DKIM公钥"
 
 #: mailu/ui/templates/domain/details.html:46
 msgid "DNS DKIM entry"
-msgstr "DNS DKIM 条目"
+msgstr "DNS DKIM条目"
 
 #: mailu/ui/templates/domain/details.html:50
 msgid "DNS DMARC entry"
-msgstr "DNS DMARC 条目"
+msgstr "DNS DMARC条目"
 
 #: mailu/ui/templates/domain/edit.html:4
 msgid "Edit domain"

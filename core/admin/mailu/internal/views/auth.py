@@ -24,7 +24,7 @@ def nginx_authentication():
     for key, value in headers.items():
         response.headers[key] = str(value)
     is_valid_user = False
-    if "Auth-User-Exists" in response.headers and response.headers["Auth-User-Exists"]:
+    if response.headers.get("Auth-User-Exists"):
         username = response.headers["Auth-User"]
         if utils.limiter.should_rate_limit_user(username, client_ip):
             # FIXME could be done before handle_authentication()
@@ -69,7 +69,7 @@ def user_authentication():
 def basic_authentication():
     """ Tries to authenticate using the Authorization header.
     """
-    client_ip = flask.request.headers["X-Real-IP"] if 'X-Real-IP' in flask.request.headers else flask.request.remote_addr
+    client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
     if utils.limiter.should_rate_limit_ip(client_ip):
         response = flask.Response(status=401)
         response.headers["WWW-Authenticate"] = 'Basic realm="Authentication rate limit from one source exceeded"'

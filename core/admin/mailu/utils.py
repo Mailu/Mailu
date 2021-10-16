@@ -59,14 +59,14 @@ def has_dane_record(domain, timeout=10):
         # If the DNSSEC data is invalid and the DNS resolver is DNSSEC enabled
         # we will receive this non-specific exception. The safe behaviour is to
         # accept to defer the email.
-        flask.current_app.logger.warn(f'Unable to lookup the TLSA record for {domain}. Is the DNSSEC zone okay on https://dnsviz.net/d/{domain}/dnssec/?')
-        return flask.current_app.config['DEFER_ON_TLS_ERROR']
+        app.logger.warn(f'Unable to lookup the TLSA record for {domain}. Is the DNSSEC zone okay on https://dnsviz.net/d/{domain}/dnssec/?')
+        return app.config['DEFER_ON_TLS_ERROR']
     except dns.exception.Timeout:
-        flask.current_app.logger.warn(f'Timeout while resolving the TLSA record for {domain} ({timeout}s).')
+        app.logger.warn(f'Timeout while resolving the TLSA record for {domain} ({timeout}s).')
     except dns.resolver.NXDOMAIN:
         pass # this is expected, not TLSA record is fine
     except Exception as e:
-        flask.current_app.logger.error(f'Error while looking up the TLSA record for {domain} {e}')
+        app.logger.error(f'Error while looking up the TLSA record for {domain} {e}')
         pass
 
 # Rate limiter
@@ -88,8 +88,8 @@ babel = flask_babel.Babel()
 def get_locale():
     """ selects locale for translation """
     language = flask.session.get('language')
-    if not language in flask.current_app.config.translations:
-        language = flask.request.accept_languages.best_match(flask.current_app.config.translations.keys())
+    if not language in app.config.translations:
+        language = flask.request.accept_languages.best_match(app.config.translations.keys())
         flask.session['language'] = language
     return language
 
@@ -486,7 +486,7 @@ class MailuSessionExtension:
                 with cleaned.get_lock():
                     if not cleaned.value:
                         cleaned.value = True
-                        flask.current_app.logger.info('cleaning session store')
+                        app.logger.info('cleaning session store')
                         MailuSessionExtension.cleanup_sessions(app)
 
             app.before_first_request(cleaner)

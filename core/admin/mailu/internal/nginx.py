@@ -89,6 +89,7 @@ def handle_authentication(headers):
         # we need to manually decode.
         raw_user_email = urllib.parse.unquote(headers["Auth-User"])
         raw_password = urllib.parse.unquote(headers["Auth-Pass"])
+        user_email = 'invalid'
         try:
             user_email = raw_user_email.encode("iso8859-1").decode("utf8")
             password = raw_password.encode("iso8859-1").decode("utf8")

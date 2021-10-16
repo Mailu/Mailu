@@ -5,19 +5,17 @@ from flask import current_app as app
 import flask
 import flask_login
 import base64
-import ipaddress
-
 
 @internal.route("/auth/email")
 def nginx_authentication():
     """ Main authentication endpoint for Nginx email server
     """
-    limiter = utils.limiter.get_limiter(app.config["AUTH_RATELIMIT"], "auth-ip")
     client_ip = flask.request.headers["Client-Ip"]
-    if not limiter.test(client_ip):
+    if utils.limiter.should_rate_limit_ip(client_ip):
+        status, code = nginx.get_status(flask.request.headers['Auth-Protocol'], 'ratelimit')
         response = flask.Response()
-        response.headers['Auth-Status'] = 'Authentication rate limit from one source exceeded'
-        response.headers['Auth-Error-Code'] = '451 4.3.2'
+        response.headers['Auth-Status'] = status
+        response.headers['Auth-Error-Code'] = code
         if int(flask.request.headers['Auth-Login-Attempt']) < 10:
             response.headers['Auth-Wait'] = '3'
         return response
@@ -25,13 +23,26 @@ def nginx_authentication():
     response = flask.Response()
     for key, value in headers.items():
         response.headers[key] = str(value)
-    if ("Auth-Status" not in headers) or (headers["Auth-Status"] != "OK"):
-        limit_subnet = str(app.config["AUTH_RATELIMIT_SUBNET"]) != 'False'
-        subnet = ipaddress.ip_network(app.config["SUBNET"])
-        if limit_subnet or ipaddress.ip_address(client_ip) not in subnet:
-            limiter.hit(flask.request.headers["Client-Ip"])
+    is_valid_user = False
+    if response.headers.get("Auth-User-Exists"):
+        username = response.headers["Auth-User"]
+        if utils.limiter.should_rate_limit_user(username, client_ip):
+            # FIXME could be done before handle_authentication()
+            status, code = nginx.get_status(flask.request.headers['Auth-Protocol'], 'ratelimit')
+            response = flask.Response()
+            response.headers['Auth-Status'] = status
+            response.headers['Auth-Error-Code'] = code
+            if int(flask.request.headers['Auth-Login-Attempt']) < 10:
+                response.headers['Auth-Wait'] = '3'
+            return response
+        is_valid_user = True
+    if headers.get("Auth-Status") == "OK":
+        utils.limiter.exempt_ip_from_ratelimits(client_ip)
+    elif is_valid_user:
+        utils.limiter.rate_limit_user(username, client_ip)
+    else:
+        rate_limit_ip(client_ip)
     return response
-
 
 @internal.route("/auth/admin")
 def admin_authentication():
@@ -60,15 +71,29 @@ def user_authentication():
 def basic_authentication():
     """ Tries to authenticate using the Authorization header.
     """
+    client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
+    if utils.limiter.should_rate_limit_ip(client_ip):
+        response = flask.Response(status=401)
+        response.headers["WWW-Authenticate"] = 'Basic realm="Authentication rate limit from one source exceeded"'
+        response.headers['Retry-After'] = '60'
+        return response
     authorization = flask.request.headers.get("Authorization")
     if authorization and authorization.startswith("Basic "):
         encoded = authorization.replace("Basic ", "")
         user_email, password = base64.b64decode(encoded).split(b":", 1)
-        user = models.User.query.get(user_email.decode("utf8"))
-        if nginx.check_credentials(user, password.decode('utf-8'), flask.request.remote_addr, "web"):
+        user_email = user_email.decode("utf8")
+        if utils.limiter.should_rate_limit_user(user_email, client_ip):
+            response = flask.Response(status=401)
+            response.headers["WWW-Authenticate"] = 'Basic realm="Authentication rate limit for this username exceeded"'
+            response.headers['Retry-After'] = '60'
+            return response
+        user = models.User.query.get(user_email)
+        if user and nginx.check_credentials(user, password.decode('utf-8'), client_ip, "web"):
             response = flask.Response()
             response.headers["X-User"] = models.IdnaEmail.process_bind_param(flask_login, user.email, "")
+            utils.limiter.exempt_ip_from_ratelimits(client_ip)
             return response
+        utils.limiter.rate_limit_user(user_email, client_ip) if user else utils.limiter.rate_limit_ip(client_ip)
     response = flask.Response(status=401)
     response.headers["WWW-Authenticate"] = 'Basic realm="Login Required"'
     return response

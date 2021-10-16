@@ -39,14 +39,25 @@ address.
 
 The ``WILDCARD_SENDERS`` setting is a comma delimited list of user email addresses that are allowed to send emails from any existing address (spoofing the sender).
 
-The ``AUTH_RATELIMIT`` holds a security setting for fighting attackers that
-try to guess user passwords. The value is the limit of failed authentication attempts
-that a single IP address can perform against IMAP, POP and SMTP authentication endpoints.
+The ``AUTH_RATELIMIT_IP`` (default: 60/hour) holds a security setting for fighting
+attackers that waste server resources by trying to guess user passwords (typically
+using a password spraying attack). The value defines the limit of authentication
+attempts that will be processed on non-existing accounts for a specific IP subnet
+(as defined in ``AUTH_RATELIMIT_IP_V4_MASK`` and ``AUTH_RATELIMIT_IP_V6_MASK`` below).
 
-If ``AUTH_RATELIMIT_SUBNET`` is ``True`` (default: False), the ``AUTH_RATELIMIT``
-rules does also apply to auth requests coming from ``SUBNET``, especially for the webmail.
-If you disable this, ensure that the rate limit on the webmail is enforced in a different
-way (e.g. roundcube plug-in), otherwise an attacker can simply bypass the limit using webmail.
+The ``AUTH_RATELIMIT_USER`` (default: 100/day) holds a security setting for fighting
+attackers that attempt to guess a user's password (typically using a password
+bruteforce attack). The value defines the limit of authentication attempts allowed
+for any given account within a specific timeframe.
+
+The ``AUTH_RATELIMIT_EXEMPTION_LENGTH`` (default: 86400) is the number of seconds
+after a successful login for which a specific IP address is exempted from rate limits.
+This ensures that users behind a NAT don't get locked out when a single client is
+misconfigured... but also potentially allow for users to attack each-other.
+
+The ``AUTH_RATELIMIT_EXEMPTION`` (default: '') is a comma separated list of network
+CIDRs that won't be subject to any form of rate limiting. Specifying ``0.0.0.0/0, ::/0``
+there is a good way to disable rate limiting altogether.
 
 The ``TLS_FLAVOR`` sets how Mailu handles TLS connections. Setting this value to
 ``notls`` will cause Mailu not to server any web content! More on :ref:`tls_flavor`.

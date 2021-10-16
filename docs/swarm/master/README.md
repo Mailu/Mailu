@@ -100,6 +100,9 @@ https://github.com/moby/moby/issues/25526#issuecomment-336363408
 ### Don't create an open relay !
 As a side effect of this ingress mode "feature", make sure that the ingress subnet is not in your RELAYHOST, otherwise you would create an smtp open relay :-(
 
+### Ratelimits
+
+When using ingress mode you probably want to disable rate limits, because all requests originate from the same ip address. Otherwise automatic login attempts can easily DoS the legitimate users.
 
 ## Scalability
 - smtp and imap are scalable

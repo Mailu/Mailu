@@ -57,6 +57,8 @@ class IdnaEmail(db.TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         """ encode unicode domain part of email address to punycode """
+        if not '@' in value:
+            raise ValueError('invalid email address (no "@")')
         localpart, domain_name = value.lower().rsplit('@', 1)
         if '@' in localpart:
             raise ValueError('email local part must not contain "@"')
@@ -240,6 +242,13 @@ class Domain(Base):
             ruf = app.config['DMARC_RUF']
             ruf = f' ruf=mailto:{ruf}@{domain};' if ruf else ''
             return f'_dmarc.{self.name}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
+
+    @cached_property
+    def dns_dmarc_report(self):
+        """ return DMARC report record for mailu server """
+        if self.dkim_key:
+            domain = app.config['DOMAIN']
+            return f'{self.name}._report._dmarc.{domain}. 600 IN TXT "v=DMARC1"'
 
     @cached_property
     def dns_autoconfig(self):
@@ -560,6 +569,8 @@ class User(Base, Email):
         """ verifies password against stored hash
             and updates hash if outdated
         """
+        if password == '':
+            return False
         cache_result = self._credential_cache.get(self.get_id())
         current_salt = self.password.split('$')[3] if len(self.password.split('$')) == 5 else None
         if cache_result and current_salt:

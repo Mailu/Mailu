@@ -14,7 +14,7 @@ def index():
 
 @ui.route('/login', methods=['GET', 'POST'])
 def login():
-    client_ip = flask.request.headers["X-Real-IP"] if 'X-Real-IP' in flask.request.headers else flask.request.remote_addr
+    client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
     form = forms.LoginForm()
     if form.validate_on_submit():
         device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))

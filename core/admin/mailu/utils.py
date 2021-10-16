@@ -74,12 +74,10 @@ limiter = limiter.LimitWraperFactory()
 
 def extract_network_from_ip(ip):
     n = ipaddress.ip_network(ip)
-    if isinstance(n, ipaddress.IPv4Network):
+    if n.version == 4:
         return str(n.supernet(prefixlen_diff=(32-int(app.config["AUTH_RATELIMIT_IP_V4_MASK"]))).network_address)
-    elif isinstance(n, ipaddress.IPv6Network):
+    else:
         return str(n.supernet(prefixlen_diff=(128-int(app.config["AUTH_RATELIMIT_IP_V6_MASK"]))).network_address)
-    else: # not sure what to do with it
-        return ip
 
 # Application translation
 babel = flask_babel.Babel()

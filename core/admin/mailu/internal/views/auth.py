@@ -86,7 +86,7 @@ def basic_authentication():
             response.headers['Retry-After'] = '60'
             return response
         user = models.User.query.get(user_email)
-        if user and nginx.check_credentials(user, password.decode('utf-8'), flask.request.remote_addr, "web"):
+        if user and nginx.check_credentials(user, password.decode('utf-8'), client_ip, "web"):
             response = flask.Response()
             response.headers["X-User"] = models.IdnaEmail.process_bind_param(flask_login, user.email, "")
             utils.limiter.exempt_ip_from_ratelimits(client_ip)

@@ -36,10 +36,12 @@ def nginx_authentication():
                 response.headers['Auth-Wait'] = '3'
             return response
         is_valid_user = True
-    if headers.get('Auth-Status') != 'OK':
-        utils.limiter.rate_limit_user(username, client_ip) if is_valid_user else rate_limit_ip(client_ip)
-    elif headers["Auth-Status"] == "OK":
+    if headers.get("Auth-Status") == "OK":
         utils.limiter.exempt_ip_from_ratelimits(client_ip)
+    elif is_valid_user:
+        utils.limiter.rate_limit_user(username, client_ip)
+    else:
+        rate_limit_ip(client_ip)
     return response
 
 @internal.route("/auth/admin")

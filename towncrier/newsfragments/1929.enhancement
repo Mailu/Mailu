@@ -2,4 +2,5 @@ Improved the SSO page.
  - Now shows the login target.
  - Added toggle to choose login target.
  - Made SSO page available separately. SSO page can now be used without Admin.
+ - Introduced stub /static which is used by all sites for accessing static files.
 

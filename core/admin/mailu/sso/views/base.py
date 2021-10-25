@@ -11,13 +11,13 @@ def login():
     form = forms.LoginForm()
     endpoint = flask.request.args.get('next', 'ui.index')
 
-    if str(app.config['WEBMAIL']).upper != 'NONE' and str(app.config['ADMIN']).upper != 'NONE' and endpoint != 'ui.webmail':
+    if str(app.config['WEBMAIL']).upper() != 'NONE' and str(app.config['ADMIN']).upper() != 'FALSE' and endpoint != 'ui.webmail':
         form.target.choices = [('Admin', 'Admin'), ('Webmail', 'Webmail')]
-    elif str(app.config['WEBMAIL']).upper != 'NONE' and str(app.config['ADMIN']).upper != 'NONE' and endpoint == 'ui.webmail':
+    elif str(app.config['WEBMAIL']).upper() != 'NONE' and str(app.config['ADMIN']).upper() != 'FALSE' and endpoint == 'ui.webmail':
         form.target.choices = [('Webmail', 'Webmail'), ('Admin', 'Admin')]
-    elif str(app.config['WEBMAIL']).upper != 'NONE' and str(app.config['ADMIN']).upper == 'NONE':
+    elif str(app.config['WEBMAIL']).upper() != 'NONE' and str(app.config['ADMIN']).upper() == 'FALSE':
         form.target.choices = [('Webmail', 'Webmail')]
-    elif str(app.config['WEBMAIL']).upper == 'NONE' and str(app.config['ADMIN']).upper != 'NONE':
+    elif str(app.config['WEBMAIL']).upper() == 'NONE' and str(app.config['ADMIN']).upper() != 'FALSE':
         form.target.choices = [('Admin', 'Admin')]
 
     if form.validate_on_submit():
@@ -37,3 +37,9 @@ def login():
             flask.current_app.logger.warn(f'Login failed for {str(form.email.data)} from {client_ip}.')
     return flask.render_template('login.html', form=form, endpoint=endpoint)
     
+@sso.route('/logout', methods=['GET'])
+@access.authenticated
+def logout():
+    flask_login.logout_user()
+    flask.session.destroy()
+    return flask.redirect(flask.url_for('.login'))

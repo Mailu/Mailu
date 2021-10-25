@@ -2,6 +2,7 @@ import os
 
 from datetime import timedelta
 from socrate import system
+import ipaddress
 
 DEFAULT_CONFIG = {
     # Specific to the admin UI
@@ -36,8 +37,12 @@ DEFAULT_CONFIG = {
     'TLS_FLAVOR': 'cert',
     'INBOUND_TLS_ENFORCE': False,
     'DEFER_ON_TLS_ERROR': True,
-    'AUTH_RATELIMIT': '1000/minute;10000/hour',
-    'AUTH_RATELIMIT_SUBNET': False,
+    'AUTH_RATELIMIT_IP': '60/hour',
+    'AUTH_RATELIMIT_IP_V4_MASK': 24,
+    'AUTH_RATELIMIT_IP_V6_MASK': 56,
+    'AUTH_RATELIMIT_USER': '100/day',
+    'AUTH_RATELIMIT_EXEMPTION': '',
+    'AUTH_RATELIMIT_EXEMPTION_LENGTH': 86400,
     'DISABLE_STATISTICS': False,
     # Mail settings
     'DMARC_RUA': None,
@@ -49,6 +54,7 @@ DEFAULT_CONFIG = {
     'DKIM_PATH': '/dkim/{domain}.{selector}.key',
     'DEFAULT_QUOTA': 1000000000,
     'MESSAGE_RATELIMIT': '200/day',
+    'RECIPIENT_DELIMITER': '',
     # Web settings
     'SITENAME': 'Mailu',
     'WEBSITE': 'https://mailu.io',
@@ -148,6 +154,7 @@ class ConfigManager(dict):
         self.config['SESSION_COOKIE_HTTPONLY'] = True
         self.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=int(self.config['SESSION_LIFETIME']))
         hostnames = [host.strip() for host in self.config['HOSTNAMES'].split(',')]
+        self.config['AUTH_RATELIMIT_EXEMPTION'] = set(ipaddress.ip_network(cidr, False) for cidr in (cidr.strip() for cidr in self.config['AUTH_RATELIMIT_EXEMPTION'].split(',')) if cidr)
         self.config['HOSTNAMES'] = ','.join(hostnames)
         self.config['HOSTNAME'] = hostnames[0]
         # update the app config itself

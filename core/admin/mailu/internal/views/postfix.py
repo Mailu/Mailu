@@ -108,7 +108,7 @@ def postfix_recipient_map(recipient):
 
     This is meant for bounces to go back to the original sender.
     """
-    srs = srslib.SRS(flask.current_app.config["SECRET_KEY"])
+    srs = srslib.SRS(flask.current_app.srs_key)
     if srslib.SRS.is_srs_address(recipient):
         try:
             return flask.jsonify(srs.reverse(recipient))
@@ -123,7 +123,7 @@ def postfix_sender_map(sender):
 
     This is for bounces to come back the reverse path properly.
     """
-    srs = srslib.SRS(flask.current_app.config["SECRET_KEY"])
+    srs = srslib.SRS(flask.current_app.srs_key)
     domain = flask.current_app.config["DOMAIN"]
     try:
         localpart, domain_name = models.Email.resolve_domain(sender)
@@ -140,6 +140,7 @@ def postfix_sender_login(sender):
     localpart, domain_name = models.Email.resolve_domain(sender)
     if localpart is None:
         return flask.jsonify(",".join(wildcard_senders)) if wildcard_senders else flask.abort(404)
+    localpart = localpart[:next((i for i, ch in enumerate(localpart) if ch in flask.current_app.config.get('RECIPIENT_DELIMITER')), None)]
     destination = models.Email.resolve_destination(localpart, domain_name, True)
     destination = [*destination, *wildcard_senders] if destination else [*wildcard_senders]
     return flask.jsonify(",".join(destination)) if destination else flask.abort(404)

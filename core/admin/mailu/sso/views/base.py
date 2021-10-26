@@ -11,14 +11,28 @@ def login():
     form = forms.LoginForm()
     endpoint = flask.request.args.get('next', 'ui.index')
 
-    if str(app.config['WEBMAIL']).upper() != 'NONE' and str(app.config['ADMIN']).upper() != 'FALSE' and endpoint != 'ui.webmail':
-        form.target.choices = [('Admin', 'Admin'), ('Webmail', 'Webmail')]
-    elif str(app.config['WEBMAIL']).upper() != 'NONE' and str(app.config['ADMIN']).upper() != 'FALSE' and endpoint == 'ui.webmail':
-        form.target.choices = [('Webmail', 'Webmail'), ('Admin', 'Admin')]
-    elif str(app.config['WEBMAIL']).upper() != 'NONE' and str(app.config['ADMIN']).upper() == 'FALSE':
-        form.target.choices = [('Webmail', 'Webmail')]
-    elif str(app.config['WEBMAIL']).upper() == 'NONE' and str(app.config['ADMIN']).upper() != 'FALSE':
-        form.target.choices = [('Admin', 'Admin')]
+    if (
+        str(app.config["WEBMAIL"]).upper() != "NONE"
+        and str(app.config["ADMIN"]).upper() != "FALSE"
+        and endpoint != "ui.webmail"
+    ):
+        form.target.choices = [("Admin", "Admin"), ("Webmail", "Webmail")]
+    elif (
+        str(app.config["WEBMAIL"]).upper() != "NONE"
+        and str(app.config["ADMIN"]).upper() != "FALSE"
+        and endpoint == "ui.webmail"
+    ):
+        form.target.choices = [("Webmail", "Webmail"), ("Admin", "Admin")]
+    elif (
+        str(app.config["WEBMAIL"]).upper() != "NONE"
+        and str(app.config["ADMIN"]).upper() == "FALSE"
+    ):
+        form.target.choices = [("Webmail", "Webmail")]
+    elif (
+        str(app.config["WEBMAIL"]).upper() == "NONE"
+        and str(app.config["ADMIN"]).upper() != "FALSE"
+    ):
+        form.target.choices = [("Admin", "Admin")]
 
     if form.validate_on_submit():
         if str(form.target.data) == 'Admin':

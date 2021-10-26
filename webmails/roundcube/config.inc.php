@@ -41,7 +41,7 @@ if (filter_var(getenv('ADMIN'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)
 }
 $config['product_name'] = 'Mailu Webmail';
 array_push($config['plugins'], 'mailu');
-$config['sso_logout_url'] = 'sso/ui/logout';
+$config['sso_logout_url'] = '/sso/logout';
 
 // We access the IMAP and SMTP servers locally with internal names, SSL
 // will obviously fail but this sounds better than allowing insecure login

@@ -11,14 +11,6 @@ import flask_login
 def index():
     return flask.redirect(flask.url_for('.user_settings'))
 
-@ui.route('/logout', methods=['GET'])
-@access.authenticated
-def logout():
-    flask_login.logout_user()
-    flask.session.destroy()
-    return flask.redirect(flask.url_for('.index'))
-
-
 @ui.route('/announcement', methods=['GET', 'POST'])
 @access.global_admin
 def announcement():

@@ -130,7 +130,7 @@
       {%- endif %}
       {%- if current_user.is_authenticated %}
       <li class="nav-item" role="none">
-        <a href="{{ url_for('.logout') }}" class="nav-link" role="menuitem">
+        <a href="{{ url_for('sso.logout') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fas fa-sign-out-alt"></i>
           <p>{% trans %}Sign out{% endtrans %}</p>
         </a>

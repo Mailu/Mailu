@@ -58,10 +58,11 @@ def create_app_from_config(config):
         )
 
     # Import views
-    from mailu import ui, internal, sso
+    from mailu import ui, internal, sso, static_files
     app.register_blueprint(ui.ui, url_prefix='/ui')
     app.register_blueprint(internal.internal, url_prefix='/internal')
     app.register_blueprint(sso.sso, url_prefix='/sso')
+    app.register_blueprint(static_files.static, url_prefix='/static')
     return app
 
 

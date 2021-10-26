@@ -1,15 +1,15 @@
 {%- import "macros.html" as macros %}
 {%- import "bootstrap/utils.html" as utils %}
 <!doctype html>
-<html lang="{{ session['language'] }}" data-static="{{ url_for('.static', filename='') }}">
+<html lang="{{ session['language'] }}" data-static="/static/">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{% trans %}Admin page for{% endtrans %} {{ config["SITENAME"] }}">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Mailu-Admin | {{ config["SITENAME"] }}</title>
-    <link rel="stylesheet" href="{{ url_for('.static', filename='vendor.css') }}">
-    <link rel="stylesheet" href="{{ url_for('.static', filename='app.css') }}">
+    <link rel="stylesheet" href="/static/vendor.css">
+    <link rel="stylesheet" href="/static/app.css">
   </head>
   <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
@@ -46,7 +46,7 @@
       </nav>
       <aside class="main-sidebar sidebar-dark-primary nav-compact elevation-4">
         <a class="brand-link bg-mailu-logo"{% if config["LOGO_BACKGROUND"] %} style="background-color:{{ config["LOGO_BACKGROUND"] }}!important;"{% endif %}>
-          <img src="{{ config["LOGO_URL"] if config["LOGO_URL"] else url_for('.static', filename='mailu.png') }}" width="33" height="33" alt="Mailu" class="brand-image mailu-logo img-circle elevation-3">
+          <img src="{{ config["LOGO_URL"] if config["LOGO_URL"] else '/static/mailu.png' }}" width="33" height="33" alt="Mailu" class="brand-image mailu-logo img-circle elevation-3">
           <span class="brand-text font-weight-light">{{ config["SITENAME"] }}</span>
         </a>
         {%- include "sidebar_sso.html" %}
@@ -80,7 +80,7 @@
         </span>
       </footer>
     </div>
-    <script src="{{ url_for('.static', filename='vendor.js') }}"></script>
-    <script src="{{ url_for('.static', filename='app.js') }}"></script>
+    <script src="/static/vendor.js"></script>
+    <script src="/static/app.js"></script>
   </body>
 </html>

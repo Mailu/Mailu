@@ -1,3 +1,4 @@
+from werkzeug.utils import redirect
 from mailu import models
 from mailu.sso import sso, forms
 from mailu.ui import access
@@ -22,14 +23,16 @@ def login():
     if form.validate_on_submit():
         if str(form.target.data) == 'Admin':
             endpoint = 'ui.index'
+            destination = app.config['WEB_ADMIN']
         elif str(form.target.data) == 'Webmail':
             endpoint = 'ui.webmail'
+            destination = app.config['WEB_WEBMAIL']
 
         user = models.User.login(form.email.data, form.pw.data)
         if user:
             flask.session.regenerate()
             flask_login.login_user(user)           
-            return flask.redirect(flask.url_for(endpoint))
+            return flask.redirect(destination)
         else:
             flask.flash('Wrong e-mail or password', 'error')
             client_ip = flask.request.headers["X-Real-IP"] if 'X-Real-IP' in flask.request.headers else flask.request.remote_addr

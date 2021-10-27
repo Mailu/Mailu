@@ -38,7 +38,7 @@ RUN set -eu \
  && pip3 install -r requirements.txt \
  && apk del --no-cache build-dep
 
-COPY --from=assets static ./mailu/static_files/static
+COPY --from=assets static ./mailu/static
 COPY mailu ./mailu
 COPY migrations ./migrations
 COPY start.py /start.py

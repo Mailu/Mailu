@@ -95,26 +95,6 @@ def get_locale():
         flask.session['language'] = language
     return language
 
-
-# Proxy fixer
-class PrefixMiddleware(object):
-    """ fix proxy headers """
-    def __init__(self):
-        self.app = None
-
-    def __call__(self, environ, start_response):
-        prefix = environ.get('HTTP_X_FORWARDED_PREFIX', '')
-        if prefix:
-            environ['SCRIPT_NAME'] = prefix
-        return self.app(environ, start_response)
-
-    def init_app(self, app):
-        self.app = fixers.ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
-        app.wsgi_app = self
-
-proxy = PrefixMiddleware()
-
-
 # Data migrate
 migrate = flask_migrate.Migrate()
 

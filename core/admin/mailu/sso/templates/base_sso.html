@@ -8,8 +8,8 @@
     <meta name="description" content="{% trans %}Admin page for{% endtrans %} {{ config["SITENAME"] }}">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Mailu-Admin | {{ config["SITENAME"] }}</title>
-    <link rel="stylesheet" href="/static/vendor.css">
-    <link rel="stylesheet" href="/static/app.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
   </head>
   <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
@@ -80,7 +80,7 @@
         </span>
       </footer>
     </div>
-    <script src="/static/vendor.js"></script>
-    <script src="/static/app.js"></script>
+    <script src="{{ url_for('static', filename='vendor.js') }}"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
   </body>
 </html>

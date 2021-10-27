@@ -22,7 +22,7 @@ def login():
 
     if form.validate_on_submit():
         if str(form.target.data) == 'Admin':
-            endpoint = 'ui.index'
+            endpoint = 'ui.user_settings'
             destination = app.config['WEB_ADMIN']
         elif str(form.target.data) == 'Webmail':
             endpoint = 'ui.webmail'

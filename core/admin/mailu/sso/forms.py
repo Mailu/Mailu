@@ -11,8 +11,9 @@ LOCALPART_REGEX = "^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`
 class LoginForm(flask_wtf.FlaskForm):
     class Meta:
         csrf = False
-    target = fields.SelectField( _('Go to') )
-    email = fields.StringField(_('E-mail'), [validators.Email()])
+    email = fields.StringField(_('E-mail'), [validators.Email(), validators.DataRequired()])
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
-    submit = fields.SubmitField(_('Sign in'))
+    submitAdmin = fields.SubmitField(_('Sign in'))
+    submitWebmail = fields.SubmitField(_('Sign in'))
+
 

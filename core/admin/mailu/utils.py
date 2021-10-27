@@ -38,7 +38,7 @@ login.login_view = "sso.login"
 def handle_needs_login():
     """ redirect unauthorized requests to login page """
     return flask.redirect(
-        flask.url_for('sso.login', next=flask.request.endpoint)
+        flask.url_for('sso.login')
     )
 
 # DNS stub configured to do DNSSEC enabled queries
@@ -94,6 +94,23 @@ def get_locale():
         language = flask.request.accept_languages.best_match(app.config.translations.keys())
         flask.session['language'] = language
     return language
+
+
+# Proxy fixer
+class PrefixMiddleware(object):
+    """ fix proxy headers """
+    def __init__(self):
+        self.app = None
+
+    def __call__(self, environ, start_response):
+        return self.app(environ, start_response)       
+
+    def init_app(self, app):
+        self.app = fixers.ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+        app.wsgi_app = self
+
+proxy = PrefixMiddleware()
+
 
 # Data migrate
 migrate = flask_migrate.Migrate()

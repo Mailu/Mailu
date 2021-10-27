@@ -10,22 +10,20 @@ import flask_login
 @sso.route('/login', methods=['GET', 'POST'])
 def login():
     form = forms.LoginForm()
-    endpoint = flask.request.args.get('next', 'ui.index')
-
-    form.target.choices = []
+    form.submitAdmin.label.text = form.submitAdmin.label.text + ' Admin'
+    form.submitWebmail.label.text = form.submitWebmail.label.text + ' Webmail'
+    
+    fields = []
     if str(app.config["ADMIN"]).upper() != "FALSE":
-        form.target.choices += [("Admin", "Admin")]
+        fields.append(form.submitAdmin)
     if str(app.config["WEBMAIL"]).upper() != "NONE":
-        form.target.choices += [("Webmail", "Webmail")]
-    if endpoint == "ui.webmail":
-        form.target.choices.reverse()
+        fields.append(form.submitWebmail)
+    fields = tuple(fields)
 
     if form.validate_on_submit():
-        if str(form.target.data) == 'Admin':
-            endpoint = 'ui.user_settings'
+        if form.submitAdmin.data:
             destination = app.config['WEB_ADMIN']
-        elif str(form.target.data) == 'Webmail':
-            endpoint = 'ui.webmail'
+        elif form.submitWebmail.data:
             destination = app.config['WEB_WEBMAIL']
 
         user = models.User.login(form.email.data, form.pw.data)
@@ -37,7 +35,7 @@ def login():
             flask.flash('Wrong e-mail or password', 'error')
             client_ip = flask.request.headers["X-Real-IP"] if 'X-Real-IP' in flask.request.headers else flask.request.remote_addr
             flask.current_app.logger.warn(f'Login failed for {str(form.email.data)} from {client_ip}.')
-    return flask.render_template('login.html', form=form, endpoint=endpoint)
+    return flask.render_template('login.html', form=form, fields=fields)
     
 @sso.route('/logout', methods=['GET'])
 @access.authenticated

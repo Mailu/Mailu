@@ -25,6 +25,7 @@ def create_app_from_config(config):
     utils.babel.init_app(app)
     utils.login.init_app(app)
     utils.login.user_loader(models.User.get)
+    utils.proxy.init_app(app)
     utils.migrate.init_app(app, models.db)
 
     app.device_cookie_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('DEVICE_COOKIE_KEY', 'utf-8'), 'sha256').digest()

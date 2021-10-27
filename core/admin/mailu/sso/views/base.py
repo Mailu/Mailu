@@ -21,7 +21,7 @@ def login():
 
     if form.validate_on_submit():
         if str(form.target.data) == 'Admin':
-            endpoint = 'ui.index'
+            endpoint = 'ui.user_settings'
         elif str(form.target.data) == 'Webmail':
             endpoint = 'ui.webmail'
 

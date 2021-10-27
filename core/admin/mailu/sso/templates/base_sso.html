@@ -38,7 +38,7 @@
               <span class="badge badge-primary navbar-badge">{{ session['language'] }}</span></a>
             <div class="dropdown-menu dropdown-menu-right p-0" id="mailu-languages">
             {%- for locale in config.translations.values() %}
-              <a class="dropdown-item{% if locale.language == session['language'] %} active{% endif %}" href="{{ url_for('ui.set_language', language=locale.language) }}">{{ locale.get_language_name().title() }}</a>
+              <a class="dropdown-item{% if locale.language == session['language'] %} active{% endif %}" href="{{ url_for('sso.set_language', language=locale.language) }}">{{ locale.get_language_name().title() }}</a>
             {%- endfor %}
             </div>
           </li>

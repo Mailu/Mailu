@@ -47,7 +47,7 @@ Then on your own frontend, point to these local ports. In practice, you only nee
     }
   }
 
-Because the admin interface is served as ``/admin``, the Webmail as ``/webmail``, the single sign on page as ``/sso`` and webdav as ``/webdav``, you may also want to use a single virtual host and serve other applications (still Nginx):
+Because the admin interface is served as ``/admin``, the Webmail as ``/webmail``, the single sign on page as ``/sso``, webdav as ``/webdav`` and the static files endpoint as ``/static``, you may also want to use a single virtual host and serve other applications (still Nginx):
 
 .. code-block:: nginx
 
@@ -70,6 +70,11 @@ Because the admin interface is served as ``/admin``, the Webmail as ``/webmail``
 
     location /webdav {
       proxy_pass https://localhost:8443/webdav;
+      proxy_set_header Host $http_host;
+    }
+
+    location /static {
+      proxy_pass https://localhost:8443/static;
       proxy_set_header Host $http_host;
     }    
 

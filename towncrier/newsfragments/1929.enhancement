@@ -1,6 +1,9 @@
-Improved the SSO page.
- - Now shows the login target.
- - Added toggle to choose login target.
- - Made SSO page available separately. SSO page can now be used without Admin.
+Improved the SSO page. Warning! The new endpoint /sso is introduced.
+This endpoint is now used for handling sign on requests.
+You may want to update your reverse proxy to proxy /sso to Mailu (to the front service).
+ - New SSO page is used for logging in Admin or Webmail.
+ - Made SSO page available separately. SSO page can now be used without Admin accessible (ADMIN=false).
  - Introduced stub /static which is used by all sites for accessing static files.
+ - Removed the /admin/ prefix to reduce complexity of routing with Mailu. Admin is accessible directly via /admin instead of /admin/ui
+Note: Failed logon attempts are logged in the logs of admin. You can watch this
 

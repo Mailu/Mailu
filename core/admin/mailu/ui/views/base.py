@@ -33,7 +33,6 @@ def webmail():
 def client():
     return flask.render_template('client.html')
 
-@ui.route('/antispam', methods=['GET'])
+@ui.route('/webui_antispam', methods=['GET'])
 def antispam():
     return flask.render_template('antispam.html')
-

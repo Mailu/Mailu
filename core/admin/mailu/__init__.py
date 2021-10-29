@@ -11,7 +11,7 @@ import hmac
 def create_app_from_config(config):
     """ Create a new application based on the given configuration
     """
-    app = flask.Flask(__name__)
+    app = flask.Flask(__name__, static_folder='static', static_url_path='/static')
     app.cli.add_command(manage.mailu)
 
     # Bootstrap is used for error display and flash messages
@@ -58,10 +58,10 @@ def create_app_from_config(config):
         )
 
     # Import views
-    from mailu import ui, internal
-    app.register_blueprint(ui.ui, url_prefix='/ui')
+    from mailu import ui, internal, sso
+    app.register_blueprint(ui.ui, url_prefix=app.config['WEB_ADMIN'])
     app.register_blueprint(internal.internal, url_prefix='/internal')
-
+    app.register_blueprint(sso.sso, url_prefix='/sso')
     return app
 
 
@@ -70,3 +70,4 @@ def create_app():
     """
     config = configuration.ConfigManager()
     return create_app_from_config(config)
+

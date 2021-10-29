@@ -41,7 +41,7 @@ def nginx_authentication():
     elif is_valid_user:
         utils.limiter.rate_limit_user(username, client_ip)
     else:
-        rate_limit_ip(client_ip)
+        utils.limiter.rate_limit_ip(client_ip)
     return response
 
 @internal.route("/auth/admin")

@@ -32,13 +32,13 @@ from werkzeug.contrib import fixers
 
 # Login configuration
 login = flask_login.LoginManager()
-login.login_view = "ui.login"
+login.login_view = "sso.login"
 
 @login.unauthorized_handler
 def handle_needs_login():
     """ redirect unauthorized requests to login page """
     return flask.redirect(
-        flask.url_for('ui.login', next=flask.request.endpoint)
+        flask.url_for('sso.login')
     )
 
 # DNS stub configured to do DNSSEC enabled queries
@@ -103,9 +103,6 @@ class PrefixMiddleware(object):
         self.app = None
 
     def __call__(self, environ, start_response):
-        prefix = environ.get('HTTP_X_FORWARDED_PREFIX', '')
-        if prefix:
-            environ['SCRIPT_NAME'] = prefix
         return self.app(environ, start_response)
 
     def init_app(self, app):

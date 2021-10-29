@@ -103,7 +103,7 @@ class PrefixMiddleware(object):
         self.app = None
 
     def __call__(self, environ, start_response):
-        return self.app(environ, start_response)       
+        return self.app(environ, start_response)
 
     def init_app(self, app):
         self.app = fixers.ProxyFix(app.wsgi_app, x_for=1, x_proto=1)

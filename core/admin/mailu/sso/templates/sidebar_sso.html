@@ -1,7 +1,7 @@
 <div class="sidebar text-sm">
-  <nav class="mt-2">    
+  <nav class="mt-2">
     <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
-    <li class="nav-header text-uppercase text-primary" role="none">{% trans %}Go to{% endtrans %}</li>   
+    <li class="nav-header text-uppercase text-primary" role="none">{% trans %}Go to{% endtrans %}</li>
       {% if config['ADMIN'] %} 
       <li class="nav-item">
         <a href="{{ url_for('ui.client') }}" class="nav-link">
@@ -21,12 +21,12 @@
           <i class="nav-icon fa fa-life-ring"></i>
           <p class="text">{% trans %}Help{% endtrans %}</p>
         </a>
-      </li>      
+      </li>
       {#
           Domain self-registration is only available when
            - Admin is available
            - Domain Self-registration is enabled 
-           - The current user is not logged on      
+           - The current user is not logged on
       #}
       {% if config['DOMAIN_REGISTRATION'] %}
       {% if not current_user.is_authenticated %}
@@ -44,7 +44,7 @@
           User self-registration is only available when
            - Admin is available
            - Self-registration is enabled 
-           - The current user is not logged on      
+           - The current user is not logged on
       #}
       {% if not current_user.is_authenticated %}
       {% if signup_domains %}
@@ -57,7 +57,7 @@
       </li>
       {% endif %}
       {% endif %}
-      {% endif %}  
+      {% endif %}
     </ul>
   </nav>
 </div>

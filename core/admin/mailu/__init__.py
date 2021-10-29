@@ -70,3 +70,4 @@ def create_app():
     """
     config = configuration.ConfigManager()
     return create_app_from_config(config)
+

@@ -13,7 +13,7 @@ def login():
     form = forms.LoginForm()
     form.submitAdmin.label.text = form.submitAdmin.label.text + ' Admin'
     form.submitWebmail.label.text = form.submitWebmail.label.text + ' Webmail'
-    
+
     fields = []
     if str(app.config["ADMIN"]).upper() != "FALSE":
         fields.append(form.submitAdmin)
@@ -36,7 +36,7 @@ def login():
         user = models.User.login(username, form.pw.data)
         if user:
             flask.session.regenerate()
-            flask_login.login_user(user)            
+            flask_login.login_user(user)
             response = flask.redirect(destination)
             response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'))
             flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')
@@ -46,10 +46,11 @@ def login():
             flask.current_app.logger.warn(f'Login failed for {username} from {client_ip}.')
             flask.flash('Wrong e-mail or password', 'error')
     return flask.render_template('login.html', form=form, fields=fields)
-    
+
 @sso.route('/logout', methods=['GET'])
 @access.authenticated
 def logout():
     flask_login.logout_user()
     flask.session.destroy()
     return flask.redirect(flask.url_for('.login'))
+

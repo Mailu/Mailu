@@ -2,62 +2,54 @@
   <nav class="mt-2">
     <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
     <li class="nav-header text-uppercase text-primary" role="none">{% trans %}Go to{% endtrans %}</li>
-      {% if config['ADMIN'] %} 
+    {%- if config['ADMIN'] %}
       <li class="nav-item">
         <a href="{{ url_for('ui.client') }}" class="nav-link">
           <i class="nav-icon fa fa-laptop"></i>
           <p class="text">{% trans %}Client setup{% endtrans %}</p>
         </a>
       </li>
-      {% endif %}
+    {%- endif %}
       <li class="nav-item" role="none">
         <a href="{{ config["WEBSITE"] }}" target="_blank" class="nav-link" role="menuitem" rel="noreferrer">
-        <i class="nav-icon fa fa-globe"></i>
-        <p>{% trans %}Website{% endtrans %} <i class="fas fa-external-link-alt text-xs"></i></p>
+          <i class="nav-icon fa fa-globe"></i>
+          <p>{% trans %}Website{% endtrans %} <i class="fas fa-external-link-alt text-xs"></i></p>
         </a>
       </li>
       <li class="nav-item" role="none">
         <a href="https://mailu.io" target="_blank" class="nav-link" role="menuitem">
           <i class="nav-icon fa fa-life-ring"></i>
-          <p class="text">{% trans %}Help{% endtrans %}</p>
+          <p class="text">{% trans %}Help{% endtrans %} <i class="fas fa-external-link-alt text-xs"></i></p>
         </a>
       </li>
-      {#
-          Domain self-registration is only available when
-           - Admin is available
-           - Domain Self-registration is enabled 
-           - The current user is not logged on
-      #}
-      {% if config['DOMAIN_REGISTRATION'] %}
-      {% if not current_user.is_authenticated %}
-      {% if config['ADMIN'] %} 
+    {#-
+      Domain self-registration is only available when
+       - Admin is available
+       - Domain Self-registration is enabled
+       - The current user is not logged on
+    #}
+    {%- if config['DOMAIN_REGISTRATION'] and not current_user.is_authenticated and config['ADMIN'] %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('ui.domain_signup') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fa fa-plus-square"></i>
           <p class="text">{% trans %}Register a domain{% endtrans %}</p>
         </a>
       </li>
-      {% endif %}
-      {% endif %}
-      {% endif %}
-      {#
-          User self-registration is only available when
-           - Admin is available
-           - Self-registration is enabled 
-           - The current user is not logged on
-      #}
-      {% if not current_user.is_authenticated %}
-      {% if signup_domains %}
-      {% if config['ADMIN'] %} 
+    {%- endif %}
+    {#-
+      User self-registration is only available when
+       - Admin is available
+       - Self-registration is enabled
+       - The current user is not logged on
+    #}
+    {%- if not current_user.is_authenticated and signup_domains and config['ADMIN'] %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('ui.user_signup') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fa fa-user-plus"></i>
           <p class="text">{% trans %}Sign up{% endtrans %}</p>
         </a>
       </li>
-      {% endif %}
-      {% endif %}
-      {% endif %}
+    {%- endif %}
     </ul>
   </nav>
 </div>

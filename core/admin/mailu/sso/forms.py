@@ -1,12 +1,6 @@
-from wtforms import validators, fields, widgets
-from wtforms_components import fields as fields_
+from wtforms import validators, fields
 from flask_babel import lazy_gettext as _
-
-import flask_login
 import flask_wtf
-import re
-
-LOCALPART_REGEX = "^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*$"
 
 class LoginForm(flask_wtf.FlaskForm):
     class Meta:
@@ -15,5 +9,3 @@ class LoginForm(flask_wtf.FlaskForm):
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
     submitAdmin = fields.SubmitField(_('Sign in'))
     submitWebmail = fields.SubmitField(_('Sign in'))
-
-

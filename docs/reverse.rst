@@ -54,29 +54,10 @@ Because the admin interface is served as ``/admin``, the Webmail as ``/webmail``
   server {
     # [...] here goes your standard configuration
 
-    location /webmail {
-      proxy_pass https://localhost:8443/webmail;
-    }
-
-    location /admin {
-      proxy_pass https://localhost:8443/admin;
+    location ~ ^/(admin|sso|static|webdav|webmail)/ {
+      proxy_pass https://localhost:8443;
       proxy_set_header Host $http_host;
     }
-
-    location /sso {
-      proxy_pass https://localhost:8443/sso;
-      proxy_set_header Host $http_host;
-    }
-
-    location /webdav {
-      proxy_pass https://localhost:8443/webdav;
-      proxy_set_header Host $http_host;
-    }
-
-    location /static {
-      proxy_pass https://localhost:8443/static;
-      proxy_set_header Host $http_host;
-    }    
 
     location /main_app {
       proxy_pass https://some-host;

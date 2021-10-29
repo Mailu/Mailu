@@ -1,6 +1,4 @@
-from mailu.sso import sso, forms
-from mailu.ui import access
-
+from mailu.sso import sso
 import flask
 
 @sso.route('/language/<language>', methods=['POST'])

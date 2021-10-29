@@ -119,7 +119,7 @@ def password(localpart, domain_name, password):
     """ Change the password of an user
     """
     email = f'{localpart}@{domain_name}'
-    user   = models.User.query.get(email)
+    user  = models.User.query.get(email)
     if user:
         user.set_password(password)
     else:

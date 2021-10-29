@@ -58,7 +58,7 @@
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {%- for field in form %}
-    {%- if  bootstrap_is_hidden_field(field) %}
+    {%- if bootstrap_is_hidden_field(field) %}
       {{ field() }}
     {%- else %}
       {{ form_field(field) }}

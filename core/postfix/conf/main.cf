@@ -17,7 +17,7 @@ queue_directory = /queue
 message_size_limit = {{ MESSAGE_SIZE_LIMIT }}
 
 # Relayed networks
-mynetworks = 127.0.0.1/32 [::1]/128 {{ SUBNET }} {{ RELAYNETS }}
+mynetworks = 127.0.0.1/32 [::1]/128 {{ SUBNET }} {{ RELAYNETS.split(",") }}
 
 # Empty alias list to override the configuration variable and disable NIS
 alias_maps =

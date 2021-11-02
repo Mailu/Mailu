@@ -52,5 +52,5 @@ tenacity==5.0.4
 validators==0.12.6
 visitor==0.1.3
 Werkzeug==0.15.5
-WTForms==2.2.1
-WTForms-Components==0.10.4
+WTForms==2.3.3
+WTForms-Components==0.10.5

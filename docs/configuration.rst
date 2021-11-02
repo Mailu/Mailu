@@ -62,6 +62,8 @@ there is a good way to disable rate limiting altogether.
 The ``TLS_FLAVOR`` sets how Mailu handles TLS connections. Setting this value to
 ``notls`` will cause Mailu not to server any web content! More on :ref:`tls_flavor`.
 
+The ``TZ`` sets the timezone Mailu will use. The timezone naming convention usually uses a ``Region/City`` format. This defaults to ``Etc/UTC``
+
 Mail settings
 -------------
 

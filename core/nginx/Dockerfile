@@ -9,7 +9,7 @@ RUN apk add --no-cache \
 RUN pip3 install socrate==0.2.0
 
 # Image specific layers under this line
-RUN apk add --no-cache certbot nginx nginx-mod-mail openssl curl \
+RUN apk add --no-cache certbot nginx nginx-mod-mail openssl curl tzdata \
  && pip3 install watchdog
 
 COPY conf /conf

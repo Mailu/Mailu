@@ -3,7 +3,7 @@ FROM $DISTRO
 
 # python3 shared with most images
 RUN apk add --no-cache \
-    python3 py3-pip bash \
+    python3 py3-pip bash tzdata \
   && pip3 install --upgrade pip
 
 # Image specific layers under this line

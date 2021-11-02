@@ -3,6 +3,8 @@
 import sys
 import tabulate
 
+sys.path[0:0] = ['/app']
+
 import mailu
 app = mailu.create_app()
 

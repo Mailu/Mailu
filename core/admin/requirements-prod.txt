@@ -53,8 +53,6 @@ pycparser==2.20
 Pygments==2.10.0
 pyOpenSSL==21.0.0
 pyparsing==2.4.7
-python-dateutil==2.8.0
-python-editor==1.0.4
 pytz==2019.1
 PyYAML==6.0
 redis==3.2.1

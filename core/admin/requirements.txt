@@ -20,7 +20,6 @@ Pygments
 dnspython
 tenacity
 mysqlclient
-psycopg2
 idna
 srslib
 marshmallow

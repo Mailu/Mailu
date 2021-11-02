@@ -19,7 +19,8 @@ import os
 import hmac
 import smtplib
 import idna
-import dns
+import dns.resolver
+import dns.exception
 
 from flask import current_app as app
 from sqlalchemy.ext import declarative

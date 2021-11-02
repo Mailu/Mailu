@@ -6,8 +6,12 @@ try:
 except ImportError:
     import pickle
 
-import dns
 import dns.resolver
+import dns.exception
+import dns.flags
+import dns.rdtypes
+import dns.rdatatype
+import dns.rdataclass
 
 import hmac
 import secrets

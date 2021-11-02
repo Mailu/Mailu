@@ -43,6 +43,7 @@ COPY --from=assets static ./mailu/ui/static
 COPY mailu ./mailu
 COPY migrations ./migrations
 COPY start.py /start.py
+COPY audit.py /audit.py
 
 RUN pybabel compile -d mailu/translations
 

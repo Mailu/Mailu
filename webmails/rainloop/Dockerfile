@@ -6,7 +6,7 @@ ONBUILD COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/
 
 # Shared later between dovecot postfix nginx rspamd rainloop and roundloop
 RUN apk add --no-cache \
-    python3 py3-pip \
+    python3 py3-pip tzdata \
  && pip3 install socrate==0.2.0
 
 #  https://www.rainloop.net/docs/system-requirements/

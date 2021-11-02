@@ -9,7 +9,7 @@ FROM ${ARCH}php:7.4-apache as build_other
 FROM build_${QEMU}
 #Shared layer between rainloop and roundcube
 RUN apt-get update && apt-get install -y \
-  python3 curl python3-pip git python3-multidict \
+  python3 curl python3-pip git python3-multidict tzdata \
   && rm -rf /var/lib/apt/lists \
   && echo "ServerSignature Off\nServerName roundcube" >> /etc/apache2/apache2.conf \
   && sed -i 's,CustomLog.*combined$,\0 "'"expr=!(%{HTTP_USER_AGENT}=='health'\&\&(-R '127.0.0.1/8' || -R '::1'))"'",' /etc/apache2/sites-available/000-default.conf
@@ -21,12 +21,14 @@ ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1
 
 ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v4.1.2/carddav-v4.1.2.tar.gz
 
+ENV TZ Etc/UTC
+
 RUN apt-get update && apt-get install -y \
       zlib1g-dev libzip4 libzip-dev libpq-dev \
       python3-jinja2 \
       gpg \
  && docker-php-ext-install zip pdo_mysql pdo_pgsql \
- && echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini \
+ && echo date.timezone=${TZ} > /usr/local/etc/php/conf.d/timezone.ini \
  && rm -rf /var/www/html/ \
  && cd /var/www \
  && curl -sL ${ROUNDCUBE_URL} | tar xz \

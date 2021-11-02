@@ -28,7 +28,7 @@ import redis
 from flask.sessions import SessionMixin, SessionInterface
 from itsdangerous.encoding import want_bytes
 from werkzeug.datastructures import CallbackDict
-from werkzeug.contrib import fixers
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Login configuration
 login = flask_login.LoginManager()
@@ -109,7 +109,7 @@ class PrefixMiddleware(object):
         return self.app(environ, start_response)
 
     def init_app(self, app):
-        self.app = fixers.ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+        self.app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
         app.wsgi_app = self
 
 proxy = PrefixMiddleware()

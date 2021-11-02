@@ -19,7 +19,7 @@ dnspython==1.16.0
 dominate==2.3.5
 email-validator==1.1.3
 Flask==1.0.2
-Flask-Babel==0.12.2
+Flask-Babel==1.0.0
 Flask-Bootstrap==3.3.7.1
 Flask-DebugToolbar==0.10.1
 Flask-Limiter==1.0.1
@@ -28,7 +28,7 @@ flask-marshmallow==0.14.0
 Flask-Migrate==2.4.0
 Flask-Script==2.0.6
 Flask-SQLAlchemy==2.4.0
-Flask-WTF==0.14.2
+Flask-WTF==0.15.1
 gunicorn==20.1.0
 html5lib==1.1
 idna==2.8
@@ -72,6 +72,6 @@ urllib3==1.26.5
 validators==0.12.6
 visitor==0.1.3
 webencodings==0.5.1
-Werkzeug==0.15.5
+Werkzeug==1.0.1
 WTForms==2.3.3
 WTForms-Components==0.10.5

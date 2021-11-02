@@ -53,6 +53,12 @@ try:
     subprocess.check_call(["/var/www/html/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT)
 except subprocess.CalledProcessError as e:
     quit(1)
+else:
+    try:
+        print("Cleaning database")
+        subprocess.check_call(["/var/www/html/bin/cleandb.sh"], stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        quit(1)
 
 # Setup database permissions
 os.system("chown -R www-data:www-data /data")

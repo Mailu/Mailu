@@ -35,7 +35,8 @@ COPY requirements-prod.txt requirements.txt
 RUN set -eu \
  && apk add --no-cache libressl curl postgresql-libs mariadb-connector-c \
  && apk add --no-cache --virtual build-dep libressl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev cargo \
- && pip3 install -r requirements.txt \
+ && pip install --upgrade pip \
+ && pip install -r requirements.txt \
  && apk del --no-cache build-dep
 
 COPY --from=assets static ./mailu/ui/static

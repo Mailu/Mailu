@@ -33,7 +33,7 @@ def create_app_from_config(config):
     app.srs_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('SRS_KEY', 'utf-8'), 'sha256').digest()
 
     # Initialize list of translations
-    config.translations = {
+    app.config.translations = {
         str(locale): locale
         for locale in sorted(
             utils.babel.list_translations(),

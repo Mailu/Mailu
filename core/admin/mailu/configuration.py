@@ -88,7 +88,7 @@ DEFAULT_CONFIG = {
     'POD_ADDRESS_RANGE': None
 }
 
-class ConfigManager(dict):
+class ConfigManager:
     """ Naive configuration manager that uses environment only
     """
 
@@ -103,19 +103,16 @@ class ConfigManager(dict):
 
     def get_host_address(self, name):
         # if MYSERVICE_ADDRESS is defined, use this
-        if '{}_ADDRESS'.format(name) in os.environ:
-            return os.environ.get('{}_ADDRESS'.format(name))
+        if f'{name}_ADDRESS' in os.environ:
+            return os.environ.get(f'{name}_ADDRESS')
         # otherwise use the host name and resolve it
-        return system.resolve_address(self.config['HOST_{}'.format(name)])
+        return system.resolve_address(self.config[f'HOST_{name}'])
 
     def resolve_hosts(self):
-        self.config["IMAP_ADDRESS"] = self.get_host_address("IMAP")
-        self.config["POP3_ADDRESS"] = self.get_host_address("POP3")
-        self.config["AUTHSMTP_ADDRESS"] = self.get_host_address("AUTHSMTP")
-        self.config["SMTP_ADDRESS"] = self.get_host_address("SMTP")
-        self.config["REDIS_ADDRESS"] = self.get_host_address("REDIS")
-        if self.config["WEBMAIL"] != "none":
-            self.config["WEBMAIL_ADDRESS"] = self.get_host_address("WEBMAIL")
+        for key in ['IMAP', 'POP3', 'AUTHSMTP', 'SMTP', 'REDIS']:
+            self.config[f'{key}_ADDRESS'] = self.get_host_address(key)
+        if self.config['WEBMAIL'] != 'none':
+            self.config['WEBMAIL_ADDRESS'] = self.get_host_address('WEBMAIL')
 
     def __get_env(self, key, value):
         key_file = key + "_FILE"
@@ -134,6 +131,7 @@ class ConfigManager(dict):
         return value
 
     def init_app(self, app):
+        # get current app config
         self.config.update(app.config)
         # get environment variables
         self.config.update({
@@ -147,9 +145,9 @@ class ConfigManager(dict):
             template = self.DB_TEMPLATES[self.config['DB_FLAVOR']]
             self.config['SQLALCHEMY_DATABASE_URI'] = template.format(**self.config)
 
-        self.config['RATELIMIT_STORAGE_URL'] = 'redis://{0}/2'.format(self.config['REDIS_ADDRESS'])
-        self.config['QUOTA_STORAGE_URL'] = 'redis://{0}/1'.format(self.config['REDIS_ADDRESS'])
-        self.config['SESSION_STORAGE_URL'] = 'redis://{0}/3'.format(self.config['REDIS_ADDRESS'])
+        self.config['RATELIMIT_STORAGE_URL'] = f'redis://{self.config["REDIS_ADDRESS"]}/2'
+        self.config['QUOTA_STORAGE_URL'] = f'redis://{self.config["REDIS_ADDRESS"]}/1'
+        self.config['SESSION_STORAGE_URL'] = f'redis://{self.config["REDIS_ADDRESS"]}/3'
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
         self.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=int(self.config['SESSION_LIFETIME']))
@@ -157,25 +155,7 @@ class ConfigManager(dict):
         self.config['AUTH_RATELIMIT_EXEMPTION'] = set(ipaddress.ip_network(cidr, False) for cidr in (cidr.strip() for cidr in self.config['AUTH_RATELIMIT_EXEMPTION'].split(',')) if cidr)
         self.config['HOSTNAMES'] = ','.join(hostnames)
         self.config['HOSTNAME'] = hostnames[0]
-        # update the app config itself
-        app.config = self
 
-    def setdefault(self, key, value):
-        if key not in self.config:
-            self.config[key] = value
-        return self.config[key]
+        # update the app config
+        app.config.update(self.config)
 
-    def get(self, *args):
-        return self.config.get(*args)
-
-    def keys(self):
-        return self.config.keys()
-
-    def __getitem__(self, key):
-        return self.config.get(key)
-
-    def __setitem__(self, key, value):
-        self.config[key] = value
-
-    def __contains__(self, key):
-        return key in self.config

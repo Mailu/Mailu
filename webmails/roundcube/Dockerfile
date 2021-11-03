@@ -39,6 +39,8 @@ ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1
 
 ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v4.2.2/carddav-v4.2.2.tar.gz
 
+ENV TZ Etc/UTC
+
 RUN set -eu \
  && rm -rf /var/www/html/ \
  && cd /var/www \
@@ -53,7 +55,8 @@ RUN set -eu \
  && chown -R root:root . \
  && chown www-data:www-data logs temp \
  && chmod -R a+rX . \
- && a2enmod rewrite deflate expires headers
+ && a2enmod rewrite deflate expires headers \
+ && echo date.timezone=${TZ} > /usr/local/etc/php/conf.d/timezone.ini
 
 COPY php.ini /php.ini
 COPY config.inc.php /var/www/html/config/

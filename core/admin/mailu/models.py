@@ -39,6 +39,8 @@ class IdnaDomain(db.TypeDecorator):
     """
 
     impl = db.String(80)
+    cache_ok = True
+    python_type = str
 
     def process_bind_param(self, value, dialect):
         """ encode unicode domain name to punycode """
@@ -48,13 +50,13 @@ class IdnaDomain(db.TypeDecorator):
         """ decode punycode domain name to unicode """
         return idna.decode(value)
 
-    python_type = str
-
 class IdnaEmail(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
 
     impl = db.String(255)
+    cache_ok = True
+    python_type = str
 
     def process_bind_param(self, value, dialect):
         """ encode unicode domain part of email address to punycode """
@@ -70,13 +72,13 @@ class IdnaEmail(db.TypeDecorator):
         localpart, domain_name = value.rsplit('@', 1)
         return f'{localpart}@{idna.decode(domain_name)}'
 
-    python_type = str
-
 class CommaSeparatedList(db.TypeDecorator):
     """ Stores a list as a comma-separated string, compatible with Postfix.
     """
 
     impl = db.String
+    cache_ok = True
+    python_type = list
 
     def process_bind_param(self, value, dialect):
         """ join list of items to comma separated string """
@@ -91,13 +93,13 @@ class CommaSeparatedList(db.TypeDecorator):
         """ split comma separated string to list """
         return list(filter(bool, (item.strip() for item in value.split(',')))) if value else []
 
-    python_type = list
-
 class JSONEncoded(db.TypeDecorator):
     """ Represents an immutable structure as a json-encoded string.
     """
 
     impl = db.String
+    cache_ok = True
+    python_type = str
 
     def process_bind_param(self, value, dialect):
         """ encode data as json """
@@ -106,8 +108,6 @@ class JSONEncoded(db.TypeDecorator):
     def process_result_value(self, value, dialect):
         """ decode json to data """
         return json.loads(value) if value else None
-
-    python_type = str
 
 class Base(db.Model):
     """ Base class for all models

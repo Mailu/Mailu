@@ -145,6 +145,11 @@ class Logger:
             if history.has_changes() and history.deleted:
                 before = history.deleted[-1]
                 after = getattr(target, attr.key)
+                # we don't have ordered lists
+                if isinstance(before, list):
+                    before = set(before)
+                if isinstance(after, list):
+                    after = set(after)
                 # TODO: this can be removed when comment is not nullable in model
                 if attr.key == 'comment' and not before and not after:
                     pass

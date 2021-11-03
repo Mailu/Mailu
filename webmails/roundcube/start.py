@@ -8,7 +8,7 @@ import subprocess
 
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
-os.environ["MAX_FILESIZE"] = str(int(int(os.environ.get("MESSAGE_SIZE_LIMIT")) / 0.66 / 1048576))
+os.environ["MAX_FILESIZE"] = str(int(int(os.environ.get("MESSAGE_SIZE_LIMIT")) * 0.66 / 1048576))
 
 db_flavor = os.environ.get("ROUNDCUBE_DB_FLAVOR", "sqlite")
 if db_flavor == "sqlite":

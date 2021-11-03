@@ -43,7 +43,9 @@ $('document').ready(function() {
             var infinity = $(this).data('infinity');
             var step = $(this).attr('step');
             $(this).on('input', function() {
-                value_element.text((infinity && this.value == 0) ? '∞' : (this.value/step).toFixed(2));
+                var num = (infinity && this.value == 0) ? '∞' : (this.value/step).toFixed(2);
+                if (num.endsWith('.00')) num = num.substr(0, num.length - 3);
+                value_element.text(num);
             }).trigger('input');
         }
     });

@@ -23,9 +23,9 @@ class mailu extends rcube_plugin
 
   function authenticate($args)
   {
-    if (!in_array('HTTP_X_REMOTE_USER', $_SERVER) || !in_array('HTTP_X_REMOTE_USER_TOKEN', $_SERVER)) {
-        header('HTTP/1.0 403 Forbidden');
-        die();
+    if (!array_key_exists('HTTP_X_REMOTE_USER', $_SERVER) or !array_key_exists('HTTP_X_REMOTE_USER_TOKEN', $_SERVER)) {
+        header('Location: sso.php');
+        exit();
     }
     $args['user'] = $_SERVER['HTTP_X_REMOTE_USER'];
     $args['pass'] = $_SERVER['HTTP_X_REMOTE_USER_TOKEN'];

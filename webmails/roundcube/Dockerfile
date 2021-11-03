@@ -1,32 +1,45 @@
-# NOTE: only add file if building for arm
+# NOTE: only add qemu-arm-static if building for arm
 ARG ARCH=""
 ARG QEMU=other
-FROM ${ARCH}php:7.4-apache as build_arm
+FROM ${ARCH}php:8.0-apache as build_arm
 ONBUILD COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
+FROM ${ARCH}php:8.0-apache as build_other
 
-FROM ${ARCH}php:7.4-apache as build_other
 
 FROM build_${QEMU}
-#Shared layer between rainloop and roundcube
-RUN apt-get update && apt-get install -y \
-  python3 curl python3-pip git python3-multidict \
-  && rm -rf /var/lib/apt/lists \
-  && echo "ServerSignature Off\nServerName roundcube" >> /etc/apache2/apache2.conf \
-  && sed -i 's,CustomLog.*combined$,\0 "'"expr=!(%{HTTP_USER_AGENT}=='health'\&\&(-R '127.0.0.1/8' || -R '::1'))"'",' /etc/apache2/sites-available/000-default.conf
 
-# Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
-RUN pip3 install socrate
+RUN set -eu \
+ && apt update \
+ && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
+ && apt install -y --no-install-recommends \
+      python3 curl python3-pip git python3-multidict \
+      python3-jinja2 gpg tzdata \
+ && pip3 install socrate \
+ && echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini \
+ && echo "ServerSignature Off\nServerName roundcube" >> /etc/apache2/apache2.conf \
+ && sed -i 's,CustomLog.*combined$,\0 "'"expr=!(%{HTTP_USER_AGENT}=='health'\&\&(-R '127.0.0.1/8' || -R '::1'))"'",' /etc/apache2/sites-available/000-default.conf \
+\
+ && mark="$(apt-mark showmanual)" \
+ && apt install -y --no-install-recommends \
+      libfreetype6-dev libicu-dev libjpeg62-turbo-dev libldap2-dev libmagickwand-dev \
+      libpng-dev libpq-dev libsqlite3-dev libzip-dev libpspell-dev libonig-dev \
+ && ln -s php.ini-production /usr/local/etc/php/php.ini \
+ && docker-php-ext-configure gd --with-jpeg --with-freetype \
+ && docker-php-ext-install exif gd intl zip pspell pdo_mysql pdo_pgsql pdo_sqlite \
+ && pecl install imagick \
+ && docker-php-ext-enable imagick opcache \
+ && apt-mark auto '.*' >/dev/null \
+ && apt-mark manual ${mark} >/dev/null \
+ && ldd "$(php -r 'echo ini_get("extension_dir");')"/*.so | awk '/=>/ { print $3 }' | sort -u | \
+    xargs -r dpkg-query -S | cut -d: -f1 | sort -u | xargs -r apt-mark manual >/dev/null \
+ && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+ && rm -rf /var/lib/apt/lists
 
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.5.0/roundcubemail-1.5.0-complete.tar.gz
 
 ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v4.2.2/carddav-v4.2.2.tar.gz
 
-RUN apt-get update && apt-get install -y \
-      zlib1g-dev libzip4 libzip-dev libpq-dev \
-      python3-jinja2 \
-      gpg \
- && docker-php-ext-install zip pdo_mysql pdo_pgsql \
- && echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini \
+RUN set -eu \
  && rm -rf /var/www/html/ \
  && cd /var/www \
  && curl -sL ${ROUNDCUBE_URL} | tar xz \
@@ -34,13 +47,12 @@ RUN apt-get update && apt-get install -y \
  && mv roundcubemail-* html \
  && mv carddav html/plugins/ \
  && cd html \
- && rm -rf CHANGELOG INSTALL LICENSE README.md UPGRADING composer.json-dist installer composer.* \
+ && rm -rf CHANGELOG.md SECURITY.md INSTALL LICENSE README.md UPGRADING composer.json-dist installer composer.* \
  && ln -sf index.php /var/www/html/sso.php \
  && ln -sf /dev/stderr /var/www/html/logs/errors.log \
  && chown -R root:root . \
  && chown www-data:www-data logs temp \
  && chmod -R a+rX . \
- && rm -rf /var/lib/apt/lists \
  && a2enmod rewrite deflate expires headers
 
 COPY php.ini /php.ini
@@ -54,3 +66,4 @@ VOLUME ["/data"]
 CMD /start.py
 
 HEALTHCHECK CMD curl -f -L -H 'User-Agent: health' http://localhost/ || exit 1
+

@@ -269,7 +269,7 @@ class MailuSession(CallbackDict, SessionMixin):
 
         # set uid from dict data
         if self._uid is None:
-            self._uid = self.app.session_config.gen_uid(self.get('user_id', ''))
+            self._uid = self.app.session_config.gen_uid(self.get('_user_id', ''))
 
         # create new session id for new or regenerated sessions and force setting the cookie
         if self._sid is None:

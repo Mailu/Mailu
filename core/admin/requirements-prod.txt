@@ -22,7 +22,7 @@ Flask-Babel==1.0.0
 Flask-Bootstrap==3.3.7.1
 Flask-DebugToolbar==0.10.1
 Flask-Limiter==1.0.1
-Flask-Login==0.4.1
+Flask-Login==0.5.0
 flask-marshmallow==0.14.0
 Flask-Migrate==3.1.0
 Flask-Script==2.0.6

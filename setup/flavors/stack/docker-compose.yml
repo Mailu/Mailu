@@ -74,7 +74,6 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/filter:/var/lib/rspamd"
-      - "{{ root }}/dkim:/dkim:ro"
       - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d:ro"
     deploy:
       replicas: 1

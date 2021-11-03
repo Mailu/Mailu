@@ -18,8 +18,12 @@
   {%- endif %}
 {%- endmacro %}
 
-{%- macro form_fields(fields, prepend='', append='', label=True) %}
+{%- macro form_fields(fields, prepend='', append='', label=True, spacing=True) %}
+  {%- if spacing %}
   {%- set width = (12 / fields|length)|int %}
+  {%- else %}
+  {%- set width = 0 %}
+  {% endif %}
   <div class="form-group">
     <div class="row">
       {%- for field in fields %}
@@ -54,7 +58,7 @@
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {%- for field in form %}
-    {%- if  bootstrap_is_hidden_field(field) %}
+    {%- if bootstrap_is_hidden_field(field) %}
       {{ field() }}
     {%- else %}
       {{ form_field(field) }}

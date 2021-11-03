@@ -1,0 +1,1 @@
+Ensure that RCVD_NO_TLS_LAST doesn't add to the spam score (as TLS usage can't be determined)

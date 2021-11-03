@@ -37,11 +37,11 @@ $config['managesieve_usetls'] = false;
 
 // Customization settings
 if (filter_var(getenv('ADMIN'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)) {
-	array_push($config['plugins'], 'mailu');
-	$config['support_url'] = getenv('WEB_ADMIN') ? '../..' . getenv('WEB_ADMIN') : '';
-	$config['sso_logout_url'] = getenv('WEB_ADMIN').'/ui/logout';
+	$config['support_url'] = getenv('WEB_ADMIN') ? '../..' . getenv('WEB_ADMIN') : '';	
 }
 $config['product_name'] = 'Mailu Webmail';
+array_push($config['plugins'], 'mailu');
+$config['sso_logout_url'] = '/sso/logout';
 
 // We access the IMAP and SMTP servers locally with internal names, SSL
 // will obviously fail but this sounds better than allowing insecure login

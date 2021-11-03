@@ -78,12 +78,6 @@ def handle_authentication(headers):
     # Authenticated user
     elif method == "plain":
         is_valid_user = False
-        if headers["Auth-Port"] == '25':
-            return {
-                "Auth-Status": "AUTH not supported",
-                "Auth-Error-Code": "502 5.5.1",
-                "Auth-Wait": 0
-            }
         # According to RFC2616 section 3.7.1 and PEP 3333, HTTP headers should
         # be ASCII and are generally considered ISO8859-1. However when passing
         # the password, nginx does not transcode the input UTF string, thus

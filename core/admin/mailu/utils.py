@@ -18,10 +18,9 @@ import secrets
 import time
 
 from multiprocessing import Value
-
 from mailu import limiter
-
 from flask import current_app as app
+
 import flask
 import flask_login
 import flask_migrate

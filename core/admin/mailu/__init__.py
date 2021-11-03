@@ -57,6 +57,11 @@ def create_app_from_config(config):
             config        = app.config,
         )
 
+    # Jinja filter
+    @app.template_filter()
+    def format_date(value):
+        return utils.flask_babel.format_date(value) if value else ''
+
     # Import views
     from mailu import ui, internal, sso
     app.register_blueprint(ui.ui, url_prefix=app.config['WEB_ADMIN'])

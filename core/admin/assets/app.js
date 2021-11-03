@@ -18,7 +18,7 @@ $('document').ready(function() {
         $.post({
             url: $(this).attr('href'),
             success: function() {
-                location.reload();
+                window.location = window.location.href;
             },
         });
     });

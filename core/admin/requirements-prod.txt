@@ -1,4 +1,4 @@
-alembic==1.0.10
+alembic==1.7.4
 appdirs==1.4.4
 Babel==2.6.0
 bcrypt==3.2.0

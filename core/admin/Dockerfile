@@ -25,7 +25,7 @@ COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm
 
 # python3 shared with most images
 RUN set -eu \
- && apk add --no-cache python3 py3-pip git bash \
+ && apk add --no-cache python3 py3-pip py3-wheel git bash \
  && pip3 install --upgrade pip
 
 RUN mkdir -p /app

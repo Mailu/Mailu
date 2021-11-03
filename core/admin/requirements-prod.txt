@@ -7,7 +7,7 @@ CacheControl==0.12.6
 certifi==2020.12.5
 cffi==1.15.0
 chardet==4.0.0
-Click==7.0
+click==8.0.3
 colorama==0.4.4
 contextlib2==0.6.0
 cryptography==35.0.0
@@ -24,7 +24,7 @@ Flask-DebugToolbar==0.10.1
 Flask-Limiter==1.0.1
 Flask-Login==0.4.1
 flask-marshmallow==0.14.0
-Flask-Migrate==2.4.0
+Flask-Migrate==3.1.0
 Flask-Script==2.0.6
 Flask-SQLAlchemy==2.4.0
 Flask-WTF==0.15.1
@@ -69,6 +69,6 @@ urllib3==1.26.5
 validators==0.18.2
 visitor==0.1.3
 webencodings==0.5.1
-Werkzeug==1.0.1
+Werkzeug==2.0.2
 WTForms==2.3.3
 WTForms-Components==0.10.5

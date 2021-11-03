@@ -11,6 +11,13 @@ def nginx_authentication():
     """ Main authentication endpoint for Nginx email server
     """
     client_ip = flask.request.headers["Client-Ip"]
+    headers = flask.request.headers
+    if headers["Auth-Port"] == '25' and headers['Auth-Method'] == 'plain':
+        response = flask.Response()
+        response.headers['Auth-Status'] = 'AUTH not supported'
+        response.headers['Auth-Error-Code'] = '502 5.5.1'
+        utils.limiter.rate_limit_ip(client_ip)
+        return response
     if utils.limiter.should_rate_limit_ip(client_ip):
         status, code = nginx.get_status(flask.request.headers['Auth-Protocol'], 'ratelimit')
         response = flask.Response()
@@ -41,7 +48,7 @@ def nginx_authentication():
     elif is_valid_user:
         utils.limiter.rate_limit_user(username, client_ip)
     else:
-        rate_limit_ip(client_ip)
+        utils.limiter.rate_limit_ip(client_ip)
     return response
 
 @internal.route("/auth/admin")

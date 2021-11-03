@@ -92,7 +92,7 @@
       {%- endif %}
 
       <li class="nav-header text-uppercase text-primary" role="none">{% trans %}Go to{% endtrans %}</li>
-      {%- if config["WEBMAIL"] != "none" %}
+      {%- if config["WEBMAIL"] != "none" and current_user.is_authenticated %}
       <li class="nav-item" role="none">
         <a href="{{ config["WEB_WEBMAIL"] }}" target="_blank" class="nav-link" role="menuitem">
         <i class="nav-icon far fa-envelope"></i>
@@ -130,14 +130,14 @@
       {%- endif %}
       {%- if current_user.is_authenticated %}
       <li class="nav-item" role="none">
-        <a href="{{ url_for('.logout') }}" class="nav-link" role="menuitem">
+        <a href="{{ url_for('sso.logout') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fas fa-sign-out-alt"></i>
           <p>{% trans %}Sign out{% endtrans %}</p>
         </a>
       </li>
-      {%- else %}
+      {% else %}
       <li class="nav-item" role="none">
-        <a href="{{ url_for('.login') }}" class="nav-link" role="menuitem">
+        <a href="{{ url_for('sso.login') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fas fa-sign-in-alt"></i>
           <p>{% trans %}Sign in{% endtrans %}</p>
         </a>

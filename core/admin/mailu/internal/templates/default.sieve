@@ -19,7 +19,7 @@ if header :index 2 :matches "Received" "from * by * for <*>; *"
 }
 
 {% if user.spam_enabled %}
-if spamtest :percent :value "gt" :comparator "i;ascii-numeric"  "{{ user.spam_threshold }}"
+if spamtest :percent :value "gt" :comparator "i;ascii-numeric" "{{ user.spam_threshold }}"
 {
   setflag "\\seen";
   fileinto :create "Junk";
@@ -32,6 +32,6 @@ if exists "X-Virus" {
   stop;
 }
 
-{% if user.reply_active  %}
+{% if user.reply_active %}
 vacation :days 1 {% if user.displayed_name != "" %}:from "{{ user.displayed_name }} <{{ user.email }}>"{% endif %} :subject "{{ user.reply_subject }}" "{{ user.reply_body }}";
 {% endif %}

@@ -7,7 +7,7 @@ import multiprocessing
 import logging as log
 import sys
 
-from podop   import run_server
+from podop import run_server
 from pwd import getpwnam
 from socrate import system, conf
 

@@ -73,14 +73,14 @@ The ``MESSAGE_RATELIMIT`` is the limit of messages a single user can send. This 
 meant to fight outbound spam in case of compromised or malicious account on the
 server.
 
-The ``RELAYNETS`` are network addresses for which mail is relayed for free with
-no authentication required. This should be used with great care. If you want other
-Docker services' outbound mail to be relayed, you can set this to ``172.16.0.0/12``
-to include **all** Docker networks. The default is to leave this empty.
+The ``RELAYNETS`` (default: unset) is a comma delimited list of network addresses
+for which mail is relayed for with no authentication required. This should be
+used with great care as misconfigurations may turn your Mailu instance into an
+open-relay!
 
-The ``RELAYHOST`` is an optional address of a mail server relaying all outgoing
-mail in following format: ``[HOST]:PORT``.
-``RELAYUSER`` and ``RELAYPASSWORD`` can be used when authentication is needed.
+The ``RELAYHOST`` is an optional address to use as a smarthost for all outgoing
+mail in following format: ``[HOST]:PORT``. ``RELAYUSER`` and ``RELAYPASSWORD``
+can be used when authentication is required.
 
 By default postfix uses "opportunistic TLS" for outbound mail. This can be changed
 by setting ``OUTBOUND_TLS_LEVEL`` to ``encrypt`` or ``secure``. This setting is

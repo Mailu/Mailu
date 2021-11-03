@@ -551,11 +551,11 @@ msgid ""
 "cache\n"
 "    expires."
 msgstr ""
-"Jeśli nie wiesz, jak skonfigurować rekord <code> MX </code>  dla swojej "
+"Jeśli nie wiesz, jak skonfigurować rekord <code> MX </code> dla swojej "
 "strefy DNS,\n"
 "skontaktuj się z dostawcą DNS lub administratorem. Proszę również "
 "poczekać\n"
-"kilka minut po ustawieniu <code> MX </code> , żeby pamięć podręczna "
+"kilka minut po ustawieniu <code> MX </code>, żeby pamięć podręczna "
 "serwera lokalnego wygasła."
 
 #: mailu/ui/templates/fetch/create.html:4

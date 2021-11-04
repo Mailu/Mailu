@@ -29,7 +29,6 @@ RUN apt-get update && apt-get install -y \
       python3-jinja2 \
       gpg \
  && docker-php-ext-install zip pdo_mysql pdo_pgsql \
- && echo date.timezone=${TZ} > /usr/local/etc/php/conf.d/timezone.ini \
  && rm -rf /var/www/html/ \
  && cd /var/www \
  && curl -sL ${ROUNDCUBE_URL} | tar xz \

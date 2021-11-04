@@ -4,6 +4,8 @@ ARG ARCH=""
 FROM ${ARCH}alpine:3.14
 ONBUILD COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 
+ENV TZ Etc/UTC
+
 # Shared later between dovecot postfix nginx rspamd rainloop and roundloop
 RUN apk add --no-cache \
     python3 py3-pip tzdata \

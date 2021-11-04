@@ -7,6 +7,9 @@ ONBUILD COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/
 FROM ${ARCH}php:7.4-apache as build_other
 
 FROM build_${QEMU}
+
+ENV TZ Etc/UTC
+
 #Shared layer between rainloop and roundcube
 RUN apt-get update && apt-get install -y \
   python3 curl python3-pip git python3-multidict tzdata \
@@ -20,8 +23,6 @@ RUN pip3 install socrate
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.4.11/roundcubemail-1.4.11-complete.tar.gz
 
 ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v4.1.2/carddav-v4.1.2.tar.gz
-
-ENV TZ Etc/UTC
 
 RUN apt-get update && apt-get install -y \
       zlib1g-dev libzip4 libzip-dev libpq-dev \

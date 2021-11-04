@@ -11,6 +11,9 @@ RUN git clone https://github.com/grosjo/fts-xapian.git \
   && make install
 
 FROM $DISTRO
+
+ENV TZ Etc/UTC
+
 # python3 shared with most images
 RUN apk add --no-cache \
     python3 py3-pip git bash py3-multidict py3-yarl tzdata \

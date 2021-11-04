@@ -1,5 +1,8 @@
 ARG DISTRO=alpine:3.14.2
 FROM $DISTRO
+
+ENV TZ Etc/UTC
+
 # python3 shared with most images
 RUN apk add --no-cache \
     python3 py3-pip bash py3-multidict tzdata \

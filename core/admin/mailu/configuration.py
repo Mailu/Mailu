@@ -44,6 +44,7 @@ DEFAULT_CONFIG = {
     'AUTH_RATELIMIT_EXEMPTION': '',
     'AUTH_RATELIMIT_EXEMPTION_LENGTH': 86400,
     'DISABLE_STATISTICS': False,
+    'TZ': 'Etc/UTC',
     # Mail settings
     'DMARC_RUA': None,
     'DMARC_RUF': None,

@@ -44,7 +44,6 @@ DEFAULT_CONFIG = {
     'AUTH_RATELIMIT_EXEMPTION': '',
     'AUTH_RATELIMIT_EXEMPTION_LENGTH': 86400,
     'DISABLE_STATISTICS': False,
-    'TZ': 'Etc/UTC',
     # Mail settings
     'DMARC_RUA': None,
     'DMARC_RUF': None,
@@ -73,6 +72,7 @@ DEFAULT_CONFIG = {
     'SESSION_LIFETIME': 24,
     'SESSION_COOKIE_SECURE': True,
     'CREDENTIAL_ROUNDS': 12,
+    'TZ': 'Etc/UTC',
     # Host settings
     'HOST_IMAP': 'imap',
     'HOST_LMTP': 'imap:2525',

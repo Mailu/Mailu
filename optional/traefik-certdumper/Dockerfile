@@ -1,6 +1,8 @@
 FROM ldez/traefik-certs-dumper
 
-RUN apk --no-cache add inotify-tools util-linux bash
+ENV TZ Etc/UTC
+
+RUN apk --no-cache add inotify-tools util-linux bash tzdata
 
 COPY run.sh /
 

@@ -8,6 +8,8 @@ FROM ${ARCH}php:8.0-apache as build_other
 
 FROM build_${QEMU}
 
+ENV TZ Etc/UTC
+
 RUN set -eu \
  && apt update \
  && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
@@ -38,8 +40,6 @@ RUN set -eu \
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.5.0/roundcubemail-1.5.0-complete.tar.gz
 
 ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v4.2.2/carddav-v4.2.2.tar.gz
-
-ENV TZ Etc/UTC
 
 RUN set -eu \
  && rm -rf /var/www/html/ \

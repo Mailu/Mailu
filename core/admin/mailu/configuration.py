@@ -72,6 +72,7 @@ DEFAULT_CONFIG = {
     'SESSION_LIFETIME': 24,
     'SESSION_COOKIE_SECURE': True,
     'CREDENTIAL_ROUNDS': 12,
+    'TZ': 'Etc/UTC',
     # Host settings
     'HOST_IMAP': 'imap',
     'HOST_LMTP': 'imap:2525',

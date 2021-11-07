@@ -14,6 +14,11 @@ def vault_error(*messages, status=404):
 
 @internal.route("/rspamd/vault/v1/dkim/<domain_name>", methods=['GET'])
 def rspamd_dkim_key(domain_name):
+    models.Relay.query.get(domain_name) and return flask.jsonify({
+        'data': {
+            'selectors': []
+        }
+    })
     domain = models.Domain.query.get(domain_name) or flask.abort(vault_error('unknown domain'))
     key = domain.dkim_key or flask.abort(vault_error('no dkim key', status=400))
     return flask.jsonify({

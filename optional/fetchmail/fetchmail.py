@@ -13,6 +13,7 @@ import traceback
 
 FETCHMAIL = """
 fetchmail -N \
+    --idfile /data/.fetchids \
     --sslcertck --sslcertpath /etc/ssl/certs \
     -f {}
 """

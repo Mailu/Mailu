@@ -12,6 +12,9 @@ RUN apk add --no-cache \
 RUN apk add --no-cache fetchmail ca-certificates openssl \
  && pip3 install requests
 
+RUN mkdir -p /data
+RUN chown fetchmail:fetchmail /data
+
 COPY fetchmail.py /fetchmail.py
 
 USER fetchmail

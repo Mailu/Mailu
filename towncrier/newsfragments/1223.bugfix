@@ -1,0 +1,4 @@
+Fixed fetchmail losing track of fetched emails upon container recreation. 
+The relevant fetchmail files are now retained in the /data folder (in the fetchmail image).
+See the docker-compose.yml file for the relevant volume mapping.
+If you already had your own mapping, you must double check the volume mapping and take action.

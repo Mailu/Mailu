@@ -138,7 +138,7 @@ class TokenForm(flask_wtf.FlaskForm):
 class AliasForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('Alias'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
     wildcard = fields.BooleanField(
-        _('Use SQL LIKE Syntax (e.g. for catch-all aliases)'))
+        _('Use SQL LIKE Syntax (e.g. for catch-all aliases - <a href="https://mailu.io/master/webadministration.html?highlight=sql%20like#aliases">documentation</a>)'))
     destination = DestinationField(_('Destination'))
     comment = fields.StringField(_('Comment'))
     submit = fields.SubmitField(_('Save'))

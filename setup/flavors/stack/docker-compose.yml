@@ -110,7 +110,7 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}fetchmail:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
-      - "{{ root }}/fetchmail:/data"
+      - "{{ root }}/data/fetchmail:/data"
     deploy:
       replicas: 1
     healthcheck:

@@ -130,7 +130,7 @@ services:
     restart: always
     env_file: {{ env }}
     volumes:
-      - "{{ root }}/fetchmail:/data"
+      - "{{ root }}/data/fetchmail:/data"
     {% if resolver_enabled %}
     depends_on:
       - resolver

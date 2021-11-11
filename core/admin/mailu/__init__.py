@@ -57,10 +57,14 @@ def create_app_from_config(config):
             config        = app.config,
         )
 
-    # Jinja filter
+    # Jinja filters
     @app.template_filter()
     def format_date(value):
         return utils.flask_babel.format_date(value) if value else ''
+
+    @app.template_filter()
+    def format_datetime(value):
+        return utils.flask_babel.format_datetime(value) if value else ''
 
     # Import views
     from mailu import ui, internal, sso

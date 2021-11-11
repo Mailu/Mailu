@@ -32,8 +32,8 @@
     <td>{{ relay.name }}</td>
     <td>{{ relay.smtp or '-' }}</td>
     <td>{{ relay.comment or '' }}</td>
-    <td>{{ relay.created_at }}</td>
-    <td>{{ relay.updated_at or '' }}</td>
+    <td>{{ relay.created_at | format_date }}</td>
+    <td>{{ relay.updated_at | format_date }}</td>
   </tr>
   {%- endfor %}
 </tbody>

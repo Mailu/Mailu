@@ -24,7 +24,7 @@
     <div class="row">
       {%- for field in fields %}
       <div class="col-lg-{{ width }} col-xs-12 {{ 'has-error' if field.errors else '' }}">
-        {%- if field is iterable %}
+        {%- if field.__class__.__name__ == 'list' %}
           {%- for subfield in field %}
             {{ form_individual_field(subfield, prepend=prepend, append=append, label=label, **kwargs) }}
           {%- endfor %}

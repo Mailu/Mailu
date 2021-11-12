@@ -28,10 +28,10 @@ $('document').ready(function() {
         var fieldset = $(this).parents('fieldset');
         if (this.checked) {
             fieldset.removeAttr('disabled');
-            fieldset.find('input').not(this).removeAttr('disabled');
+            fieldset.find('input,textarea').not(this).removeAttr('disabled');
         } else {
             fieldset.attr('disabled', '');
-            fieldset.find('input').not(this).attr('disabled', '');
+            fieldset.find('input,textarea').not(this).attr('disabled', '');
         }
     });
 

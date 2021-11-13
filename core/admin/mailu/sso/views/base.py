@@ -19,6 +19,7 @@ def login():
         fields.append(form.submitAdmin)
     if str(app.config["WEBMAIL"]).upper() != "NONE":
         fields.append(form.submitWebmail)
+    fields = [fields]
 
     if form.validate_on_submit():
         if form.submitAdmin.data:

@@ -6,18 +6,21 @@ try:
 except ImportError:
     import pickle
 
-import dns
 import dns.resolver
+import dns.exception
+import dns.flags
+import dns.rdtypes
+import dns.rdatatype
+import dns.rdataclass
 
 import hmac
 import secrets
 import time
 
 from multiprocessing import Value
-
 from mailu import limiter
-
 from flask import current_app as app
+
 import flask
 import flask_login
 import flask_migrate
@@ -28,7 +31,7 @@ import redis
 from flask.sessions import SessionMixin, SessionInterface
 from itsdangerous.encoding import want_bytes
 from werkzeug.datastructures import CallbackDict
-from werkzeug.contrib import fixers
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Login configuration
 login = flask_login.LoginManager()
@@ -106,7 +109,7 @@ class PrefixMiddleware(object):
         return self.app(environ, start_response)
 
     def init_app(self, app):
-        self.app = fixers.ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+        self.app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
         app.wsgi_app = self
 
 proxy = PrefixMiddleware()
@@ -265,7 +268,7 @@ class MailuSession(CallbackDict, SessionMixin):
 
         # set uid from dict data
         if self._uid is None:
-            self._uid = self.app.session_config.gen_uid(self.get('user_id', ''))
+            self._uid = self.app.session_config.gen_uid(self.get('_user_id', ''))
 
         # create new session id for new or regenerated sessions and force setting the cookie
         if self._sid is None:

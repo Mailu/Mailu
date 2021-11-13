@@ -19,6 +19,7 @@
     <th>{% trans %}Actions{% endtrans %}</th>
     <th>{% trans %}Name{% endtrans %}</th>
     <th>{% trans %}Created{% endtrans %}</th>
+    <th>{% trans %}Last edit{% endtrans %}</th>
   </tr>
 </thead>
 <tbody>
@@ -28,7 +29,8 @@
       <a href="{{ url_for('.alternative_delete', alternative=alternative.name) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
     </td>
     <td>{{ alternative }}</td>
-    <td>{{ alternative.created_at }}</td>
+    <td>{{ alternative.created_at | format_date }}</td>
+    <td>{{ alternative.updated_at | format_date }}</td>
   </tr>
   {%- endfor %}
 </tbody>

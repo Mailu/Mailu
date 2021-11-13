@@ -5,7 +5,6 @@ from flask import current_app as app
 import flask
 import flask_login
 import wtforms_components
-import dns.resolver
 
 
 @ui.route('/domain', methods=['GET'])

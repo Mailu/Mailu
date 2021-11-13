@@ -1,4 +1,5 @@
 Reverse proxy documentation has been updated to reflect new security hardening from PR#1959.
-If you do not set the required header, Mailu will not have access to the real ip address of the connecting client.
+If you do not set the configuration parameters in Mailu what reverse proxy header to trust,
+then Mailu will not have access to the real ip address of the connecting client.
 This means that rate limiting will not properly work. You can also not use fail2ban. 
-It is very important to set this header when using a reverse proxy.
+It is very important to configure this when using a reverse proxy.

@@ -19,9 +19,9 @@ on:
 ###############################################
 # REQUIRED secrets
 # DOCKER_UN: ${{ secrets.Docker_Login }}
-#    Username of docker login for pushing the images to repo $DOCKER_ORG
+#    Username of docker login for pushing the images to repo $DOCKER_ORG and $DOCKER_ORG_TESTS
 # DOCKER_PW: ${{ secrets.Docker_Password }}
-#    Password of docker login for pushing the images to repo $DOCKER_ORG
+#    Password of docker login for pushing the images to repo $DOCKER_ORG and $DOCKER_ORG_TESTS
 # DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
 #    The docker repository where the images are pushed to.
 # DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
@@ -47,6 +47,7 @@ jobs:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }} >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
@@ -54,6 +55,7 @@ jobs:
           MAILU_BRANCH: ${{ env.BRANCH }}
         run: |
           echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }} >> $GITHUB_ENV	
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -69,16 +71,16 @@ jobs:
         env:
           DOCKER_UN: ${{ secrets.Docker_Login }}
           DOCKER_PW: ${{ secrets.Docker_Password }}
-          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
         run: echo "$DOCKER_PW" | docker login --username $DOCKER_UN --password-stdin
       - name: Build all docker images
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }}
-          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
         run: docker-compose -f tests/build.yml build
       - name: Save all docker images
-        run: docker save ${{ secrets.DOCKER_ORG }}/admin ${{ secrets.DOCKER_ORG }}/clamav ${{ secrets.DOCKER_ORG }}/docs ${{ secrets.DOCKER_ORG }}/dovecot ${{ secrets.DOCKER_ORG }}/fetchmail ${{ secrets.DOCKER_ORG }}/nginx ${{ secrets.DOCKER_ORG }}/none ${{ secrets.DOCKER_ORG }}/postfix ${{ secrets.DOCKER_ORG }}/postgresql ${{ secrets.DOCKER_ORG }}/radicale ${{ secrets.DOCKER_ORG }}/rainloop ${{ secrets.DOCKER_ORG }}/roundcube ${{ secrets.DOCKER_ORG }}/rspamd ${{ secrets.DOCKER_ORG }}/setup ${{ secrets.DOCKER_ORG }}/traefik-certdumper ${{ secrets.DOCKER_ORG }}/unbound -o /images/images.tar.gz
+        run: docker save ${{ env.DOCKER_ORG }}/admin ${{ env.DOCKER_ORG }}/clamav ${{ env.DOCKER_ORG }}/docs ${{ env.DOCKER_ORG }}/dovecot ${{ env.DOCKER_ORG }}/fetchmail ${{ env.DOCKER_ORG }}/nginx ${{ env.DOCKER_ORG }}/none ${{ env.DOCKER_ORG }}/postfix ${{ env.DOCKER_ORG }}/postgresql ${{ env.DOCKER_ORG }}/radicale ${{ env.DOCKER_ORG }}/rainloop ${{ env.DOCKER_ORG }}/roundcube ${{ env.DOCKER_ORG }}/rspamd ${{ env.DOCKER_ORG }}/setup ${{ env.DOCKER_ORG }}/traefik-certdumper ${{ env.DOCKER_ORG }}/unbound -o /images/images.tar.gz
 
   test-core:
     name: Perform core tests
@@ -125,7 +127,7 @@ jobs:
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }} 
-          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-fetchmail:
     name: Perform fetchmail tests
@@ -172,7 +174,7 @@ jobs:
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }}
-          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-filters:
     name: Perform filter tests
@@ -219,7 +221,7 @@ jobs:
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }}
-          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-rainloop:
     name: Perform rainloop tests
@@ -266,7 +268,7 @@ jobs:
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }} 
-          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-roundcube:
     name: Perform roundcube tests
@@ -313,7 +315,7 @@ jobs:
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }} 
-          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-webdav:
     name: Perform webdav tests
@@ -360,7 +362,7 @@ jobs:
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }}
-          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   deploy:
     name: Deploy images
@@ -412,8 +414,7 @@ jobs:
         env:
           DOCKER_UN: ${{ secrets.Docker_Login }}
           DOCKER_PW: ${{ secrets.Docker_Password }}
-          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
-          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           TRAVIS_BRANCH: ${{ env.BRANCH }}
         run: bash tests/deploy.sh

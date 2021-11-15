@@ -55,7 +55,7 @@ jobs:
           MAILU_BRANCH: ${{ env.BRANCH }}
         run: |
           echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV	
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -100,13 +100,15 @@ jobs:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
         env:
           MAILU_BRANCH: ${{ env.BRANCH }}
         run: |
-          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV          
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -126,7 +128,7 @@ jobs:
         run: python tests/compose/test.py core 2
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          TRAVIS_BRANCH: ${{ env.BRANCH }} 
+          TRAVIS_BRANCH: ${{ env.BRANCH }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-fetchmail:
@@ -147,13 +149,15 @@ jobs:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
         env:
           MAILU_BRANCH: ${{ env.BRANCH }}
         run: |
-          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV          
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -194,13 +198,15 @@ jobs:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
         env:
           MAILU_BRANCH: ${{ env.BRANCH }}
         run: |
-          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV          
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -241,13 +247,15 @@ jobs:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
         env:
           MAILU_BRANCH: ${{ env.BRANCH }}
         run: |
-          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV          
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -267,7 +275,7 @@ jobs:
         run: python tests/compose/test.py rainloop 2
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          TRAVIS_BRANCH: ${{ env.BRANCH }} 
+          TRAVIS_BRANCH: ${{ env.BRANCH }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-roundcube:
@@ -288,13 +296,15 @@ jobs:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
         env:
           MAILU_BRANCH: ${{ env.BRANCH }}
         run: |
-          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV          
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -314,7 +324,7 @@ jobs:
         run: python tests/compose/test.py roundcube 2
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          TRAVIS_BRANCH: ${{ env.BRANCH }} 
+          TRAVIS_BRANCH: ${{ env.BRANCH }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-webdav:
@@ -335,13 +345,15 @@ jobs:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
         env:
           MAILU_BRANCH: ${{ env.BRANCH }}
         run: |
-          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV          
+          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -389,6 +401,7 @@ jobs:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
@@ -396,10 +409,11 @@ jobs:
           MAILU_BRANCH: ${{ env.BRANCH }}
         run: |
           echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
-          sudo chmod 777 /images     
+          sudo chmod 777 /images
       - name: Configure images folder for caching
         # For staging we do not deploy images. So we do not have to load them from cache.
         if: ${{ env.BRANCH != 'staging' }}
@@ -424,7 +438,7 @@ jobs:
     name: CI-Done
     #Returns true when none of the **previous** steps have failed or been canceled.
     if: ${{ success() }}
-    needs: 
+    needs:
       - deploy
     runs-on: ubuntu-latest
     steps:

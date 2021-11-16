@@ -19,6 +19,7 @@ def login():
         fields.append(form.submitAdmin)
     if str(app.config["WEBMAIL"]).upper() != "NONE":
         fields.append(form.submitWebmail)
+    fields = [fields]
 
     if form.validate_on_submit():
         if form.submitAdmin.data:
@@ -38,7 +39,7 @@ def login():
             flask.session.regenerate()
             flask_login.login_user(user)
             response = flask.redirect(destination)
-            response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'))
+            response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
             flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')
             return response
         else:

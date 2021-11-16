@@ -129,6 +129,8 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}fetchmail:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    volumes:
+      - "{{ root }}/data/fetchmail:/data"
     {% if resolver_enabled %}
     depends_on:
       - resolver

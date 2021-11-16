@@ -46,8 +46,8 @@
     <td>{{ domain.users | count }} / {{ '∞' if domain.max_users == -1 else domain.max_users }}</td>
     <td>{{ domain.aliases | count }} / {{ '∞' if domain.max_aliases == -1 else domain.max_aliases }}</td>
     <td>{{ domain.comment or '' }}</td>
-    <td>{{ domain.created_at }}</td>
-    <td>{{ domain.updated_at or '' }}</td>
+    <td>{{ domain.created_at | format_date }}</td>
+    <td>{{ domain.updated_at | format_date }}</td>
   </tr>
   {%- endfor %}
 </tbody>

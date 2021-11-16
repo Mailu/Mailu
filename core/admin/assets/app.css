@@ -52,3 +52,8 @@ fieldset:disabled .form-control:disabled {
 .select2-container--default .select2-selection--multiple .select2-selection__choice {
   color: black;
 }
+
+/* range input spacing */
+.input-group-text {
+  margin-right: 1em;
+}

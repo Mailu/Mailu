@@ -18,17 +18,19 @@
   {%- endif %}
 {%- endmacro %}
 
-{%- macro form_fields(fields, prepend='', append='', label=True, spacing=True) %}
-  {%- if spacing %}
+{%- macro form_fields(fields, prepend='', append='', label=True) %}
   {%- set width = (12 / fields|length)|int %}
-  {%- else %}
-  {%- set width = 0 %}
-  {% endif %}
   <div class="form-group">
     <div class="row">
       {%- for field in fields %}
       <div class="col-lg-{{ width }} col-xs-12 {{ 'has-error' if field.errors else '' }}">
-        {{ form_individual_field(field, prepend=prepend, append=append, label=label, **kwargs) }}
+        {%- if field.__class__.__name__ == 'list' %}
+          {%- for subfield in field %}
+            {{ form_individual_field(subfield, prepend=prepend, append=append, label=label, **kwargs) }}
+          {%- endfor %}
+        {%- else %}
+          {{ form_individual_field(field, prepend=prepend, append=append, label=label, **kwargs) }}
+        {%- endif %}
       </div>
       {%- endfor %}
     </div>

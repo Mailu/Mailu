@@ -27,7 +27,7 @@ ENV TZ Etc/UTC
 
 # python3 shared with most images
 RUN set -eu \
- && apk add --no-cache python3 py3-pip git bash tzdata \
+ && apk add --no-cache python3 py3-pip py3-wheel git bash tzdata \
  && pip3 install --upgrade pip
 
 RUN mkdir -p /app
@@ -37,13 +37,15 @@ COPY requirements-prod.txt requirements.txt
 RUN set -eu \
  && apk add --no-cache libressl curl postgresql-libs mariadb-connector-c \
  && apk add --no-cache --virtual build-dep libressl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev cargo \
- && pip3 install -r requirements.txt \
+ && pip install --upgrade pip \
+ && pip install -r requirements.txt \
  && apk del --no-cache build-dep
 
 COPY --from=assets static ./mailu/static
 COPY mailu ./mailu
 COPY migrations ./migrations
 COPY start.py /start.py
+COPY audit.py /audit.py
 
 RUN pybabel compile -d mailu/translations
 

@@ -34,8 +34,8 @@
     <td>{{ alias }}</td>
     <td>{{ alias.destination|join(', ') or '-' }}</td>
     <td>{{ alias.comment or '' }}</td>
-    <td>{{ alias.created_at }}</td>
-    <td>{{ alias.updated_at or '' }}</td>
+    <td>{{ alias.created_at | format_date }}</td>
+    <td>{{ alias.updated_at | format_date }}</td>
   </tr>
   {%- endfor %}
 </tbody>

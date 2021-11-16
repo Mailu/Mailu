@@ -45,8 +45,8 @@
     </td>
     <td>{{ user.quota_bytes_used | filesizeformat }} / {{ (user.quota_bytes | filesizeformat) if user.quota_bytes else '∞' }}</td>
     <td>{{ user.comment or '-' }}</td>
-    <td>{{ user.created_at }}</td>
-    <td>{{ user.updated_at or '' }}</td>
+    <td>{{ user.created_at | format_date }}</td>
+    <td>{{ user.updated_at | format_date }}</td>
   </tr>
   {%- endfor %}
 </tbody>

@@ -33,7 +33,7 @@ def create_app_from_config(config):
     app.srs_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('SRS_KEY', 'utf-8'), 'sha256').digest()
 
     # Initialize list of translations
-    config.translations = {
+    app.config.translations = {
         str(locale): locale
         for locale in sorted(
             utils.babel.list_translations(),
@@ -56,6 +56,15 @@ def create_app_from_config(config):
             signup_domains= signup_domains,
             config        = app.config,
         )
+
+    # Jinja filters
+    @app.template_filter()
+    def format_date(value):
+        return utils.flask_babel.format_date(value) if value else ''
+
+    @app.template_filter()
+    def format_datetime(value):
+        return utils.flask_babel.format_datetime(value) if value else ''
 
     # Import views
     from mailu import ui, internal, sso

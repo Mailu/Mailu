@@ -18,7 +18,7 @@ $('document').ready(function() {
         $.post({
             url: $(this).attr('href'),
             success: function() {
-                location.reload();
+                window.location = window.location.href;
             },
         });
     });
@@ -28,10 +28,10 @@ $('document').ready(function() {
         var fieldset = $(this).parents('fieldset');
         if (this.checked) {
             fieldset.removeAttr('disabled');
-            fieldset.find('input').not(this).removeAttr('disabled');
+            fieldset.find('input,textarea').not(this).removeAttr('disabled');
         } else {
             fieldset.attr('disabled', '');
-            fieldset.find('input').not(this).attr('disabled', '');
+            fieldset.find('input,textarea').not(this).attr('disabled', '');
         }
     });
 
@@ -43,7 +43,9 @@ $('document').ready(function() {
             var infinity = $(this).data('infinity');
             var step = $(this).attr('step');
             $(this).on('input', function() {
-                value_element.text((infinity && this.value == 0) ? '∞' : (this.value/step).toFixed(2));
+                var num = (infinity && this.value == 0) ? '∞' : (this.value/step).toFixed(2);
+                if (num.endsWith('.00')) num = num.substr(0, num.length - 3);
+                value_element.text(num);
             }).trigger('input');
         }
     });

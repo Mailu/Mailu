@@ -20,6 +20,7 @@
     <th>{% trans %}Comment{% endtrans %}</th>
     <th>{% trans %}Authorized IP{% endtrans %}</th>
     <th>{% trans %}Created{% endtrans %}</th>
+    <th>{% trans %}Last edit{% endtrans %}</th>
   </tr>
 </thead>
 <tbody>
@@ -30,7 +31,8 @@
     </td>
     <td>{{ token.comment }}</td>
     <td>{{ token.ip or "any" }}</td>
-    <td>{{ token.created_at }}</td>
+    <td>{{ token.created_at | format_date }}</td>
+    <td>{{ token.updated_at | format_date }}</td>
   </tr>
   {%- endfor %}
 </tbody>

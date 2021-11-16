@@ -1,6 +1,6 @@
 import flask_debugtoolbar
 
-from werkzeug.contrib import profiler as werkzeug_profiler
+from werkzeug.middleware.profiler import ProfilerMiddleware
 
 
 # Debugging toolbar
@@ -10,7 +10,7 @@ toolbar = flask_debugtoolbar.DebugToolbarExtension()
 # Profiler
 class Profiler(object):
     def init_app(self, app):
-        app.wsgi_app = werkzeug_profiler.ProfilerMiddleware(
+        app.wsgi_app = ProfilerMiddleware(
             app.wsgi_app, restrictions=[30]
         )
 

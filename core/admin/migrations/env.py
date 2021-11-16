@@ -1,10 +1,12 @@
-from __future__ import with_statement
+import logging
+import tenacity
+
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
-import logging
-import tenacity
-from tenacity import retry
+
+from flask import current_app
+from mailu import models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -17,19 +19,11 @@ logger = logging.getLogger('alembic.env')
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-from flask import current_app
-config.set_main_option('sqlalchemy.url',
-                       current_app.config.get('SQLALCHEMY_DATABASE_URI'))
-#target_metadata = current_app.extensions['migrate'].db.metadata
-from mailu import models
+config.set_main_option(
+    'sqlalchemy.url',
+    current_app.config.get('SQLALCHEMY_DATABASE_URI')
+)
 target_metadata = models.Base.metadata
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
 
 
 def run_migrations_offline():
@@ -37,14 +31,14 @@ def run_migrations_offline():
 
     This configures the context with just a URL
     and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
+    here as well. By skipping the Engine creation
     we don't even need a DBAPI to be available.
 
     Calls to context.execute() here emit the given string to the
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = config.get_main_option('sqlalchemy.url')
     context.configure(url=url)
 
     with context.begin_transaction():
@@ -69,28 +63,35 @@ def run_migrations_online():
                 directives[:] = []
                 logger.info('No changes in schema detected.')
 
-    engine = engine_from_config(config.get_section(config.config_ini_section),
-                                prefix='sqlalchemy.',
-                                poolclass=pool.NullPool)
+    engine = engine_from_config(
+        config.get_section(config.config_ini_section),
+        prefix    = 'sqlalchemy.',
+        poolclass = pool.NullPool
+    )
 
-    connection = tenacity.Retrying(
-        stop=tenacity.stop_after_attempt(100),
-        wait=tenacity.wait_random(min=2, max=5),
-        before=tenacity.before_log(logging.getLogger("tenacity.retry"), logging.DEBUG),
-        before_sleep=tenacity.before_sleep_log(logging.getLogger("tenacity.retry"), logging.INFO),
-        after=tenacity.after_log(logging.getLogger("tenacity.retry"), logging.DEBUG)
-        ).call(engine.connect)
+    @tenacity.retry(
+        stop   = tenacity.stop_after_attempt(100),
+        wait   = tenacity.wait_random(min=2, max=5),
+        before = tenacity.before_log(logging.getLogger('tenacity.retry'), logging.DEBUG),
+        before_sleep = tenacity.before_sleep_log(logging.getLogger('tenacity.retry'), logging.INFO),
+        after  = tenacity.after_log(logging.getLogger('tenacity.retry'), logging.DEBUG)
+    )
+    def try_connect(db):
+        return db.connect()
 
-    context.configure(connection=connection,
-                      target_metadata=target_metadata,
-                      process_revision_directives=process_revision_directives,
-                      **current_app.extensions['migrate'].configure_args)
+    with try_connect(engine) as connection:
 
-    try:
+        context.configure(
+            connection      = connection,
+            target_metadata = target_metadata,
+            process_revision_directives = process_revision_directives,
+            **current_app.extensions['migrate'].configure_args
+        )
+
         with context.begin_transaction():
             context.run_migrations()
-    finally:
-        connection.close()
+
+    connection.close()
 
 if context.is_offline_mode():
     run_migrations_offline()

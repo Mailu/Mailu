@@ -74,7 +74,6 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/filter:/var/lib/rspamd"
-      - "{{ root }}/dkim:/dkim:ro"
       - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d:ro"
     deploy:
       replicas: 1
@@ -111,7 +110,7 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}fetchmail:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     volumes:
-      - "{{ root }}/data:/data"
+      - "{{ root }}/data/fetchmail:/data"
     deploy:
       replicas: 1
     healthcheck:

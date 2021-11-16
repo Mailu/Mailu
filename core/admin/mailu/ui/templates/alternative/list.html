@@ -1,36 +1,38 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Alternative domain list{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block subtitle %}
+{%- block subtitle %}
 {{ domain.name }}
-{% endblock %}
+{%- endblock %}
 
-{% block main_action %}
+{%- block main_action %}
 <a class="btn btn-primary float-right" href="{{ url_for('.alternative_create', domain_name=domain.name) }}">{% trans %}Add alternative{% endtrans %}</a>
-{% endblock %}
+{%- endblock %}
 
-{% block content %}
-{% call macros.table() %}
+{%- block content %}
+{%- call macros.table() %}
 <thead>
   <tr>
     <th>{% trans %}Actions{% endtrans %}</th>
     <th>{% trans %}Name{% endtrans %}</th>
     <th>{% trans %}Created{% endtrans %}</th>
+    <th>{% trans %}Last edit{% endtrans %}</th>
   </tr>
 </thead>
 <tbody>
-  {% for alternative in domain.alternatives %}
+  {%- for alternative in domain.alternatives %}
   <tr>
     <td>
       <a href="{{ url_for('.alternative_delete', alternative=alternative.name) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
     </td>
     <td>{{ alternative }}</td>
-    <td>{{ alternative.created_at }}</td>
+    <td>{{ alternative.created_at | format_date }}</td>
+    <td>{{ alternative.updated_at | format_date }}</td>
   </tr>
-  {% endfor %}
+  {%- endfor %}
 </tbody>
-{% endcall %}
-{% endblock %}
+{%- endcall %}
+{%- endblock %}

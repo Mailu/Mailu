@@ -11,7 +11,10 @@ There are basically three options, from the most to the least recommended one:
 - `use Traefik in another container as central system-reverse-proxy`_
 - `override Mailu Web frontend configuration`_
 
-All options will require that you modify the ``docker-compose.yml`` file.
+All options will require that you modify the ``docker-compose.yml`` and ``mailu.env`` file.
+
+Mailu must also be configured with the information what header is used by the reverse proxy for passing the remote client IP. 
+This is configured in the mailu.env file. See the :ref:`configuration reference <reverse_proxy_headers>` for more information.
 
 Have Mailu Web frontend listen locally
 --------------------------------------
@@ -43,24 +46,30 @@ Then on your own frontend, point to these local ports. In practice, you only nee
     # [...] here goes your standard configuration
 
     location / {
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr
       proxy_pass https://localhost:8443;
     }
   }
 
-Because the admin interface is served as ``/admin`` and the Webmail as ``/webmail`` you may also want to use a single virtual host and serve other applications (still Nginx):
+.. code-block:: docker
+
+  #mailu.env file
+  REAL_IP_HEADER=X-Real-IP
+  REAL_IP_FROM=x.x.x.x,y.y.y.y.y
+  #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu. 
+  
+Because the admin interface is served as ``/admin``, the Webmail as ``/webmail``, the single sign on page as ``/sso``, webdav as ``/webdav`` and the static files endpoint as ``/static``, you may also want to use a single virtual host and serve other applications (still Nginx):
 
 .. code-block:: nginx
 
   server {
     # [...] here goes your standard configuration
 
-    location /webmail {
-      proxy_pass https://localhost:8443/webmail;
-    }
-
-    location /admin {
-      proxy_pass https://localhost:8443/admin;
-      proxy_set_header Host $http_host;
+    location ~ ^/(admin|sso|static|webdav|webmail)/ {
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr
+      proxy_pass https://localhost:8443;     
     }
 
     location /main_app {
@@ -80,6 +89,13 @@ Because the admin interface is served as ``/admin`` and the Webmail as ``/webmai
     }
   }
 
+.. code-block:: docker
+  
+  #mailu.env file
+  REAL_IP_HEADER=X-Real-IP
+  REAL_IP_FROM=x.x.x.x,y.y.y.y.y
+  #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu. 
+
 Finally, you might want to serve the admin interface on a separate virtual host but not expose the admin container directly (have your own HTTPS virtual hosts on top of Mailu, one public for the Webmail and one internal for administration for instance).
 
 Here is an example configuration :
@@ -92,6 +108,8 @@ Here is an example configuration :
     # [...] here goes your standard configuration
 
     location /webmail {
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr
       proxy_pass https://localhost:8443/webmail;
     }
   }
@@ -102,11 +120,20 @@ Here is an example configuration :
     # [...] here goes your standard configuration
 
     location /admin {
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr
       proxy_pass https://localhost:8443/admin;
       proxy_set_header Host $http_host;
     }
 
   }
+
+.. code-block:: docker
+
+  #mailu.env file
+  REAL_IP_HEADER=X-Real-IP
+  REAL_IP_FROM=x.x.x.x,y.y.y.y.y
+  #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu. 
 
 Depending on how you access the front server, you might want to add a ``proxy_redirect`` directive to your ``location`` blocks:
 
@@ -155,7 +182,16 @@ If your Traefik is configured to automatically request certificates from *letsen
 and this is the ``DOMAIN`` in your ``.env``?
 To support that use-case, Traefik can request ``SANs`` for your domain. The configuration for this will depend on your Traefik version.
 
-----
+Mailu must also be configured with the information what header is used by the reverse proxy for passing the remote client IP.  This is configured in mailu.env:
+
+.. code-block:: docker
+  
+  #mailu.env file
+  REAL_IP_HEADER=X-Real-IP
+  REAL_IP_FROM=x.x.x.x,y.y.y.y.y
+  #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu. 
+
+For more information see the :ref:`configuration reference <reverse_proxy_headers>` for more information.
 
 Traefik 2.x using labels configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -182,53 +218,6 @@ Add the appropriate labels for your domain(s) to the ``front`` container in ``do
 Of course, be sure to define the Certificate Resolver ``foo`` in the static configuration as well.
 
 Alternatively, you can define SANs in the Traefik static configuration using routers, or in the static configuration using entrypoints. Refer to the Traefik documentation for more details.
-
-Traefik 1.x with TOML configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Lets add something like
-
-.. code-block:: yaml
-
-  [acme]
-    [[acme.domains]]
-      main = "your.example.com" # this is the same as $TRAEFIK_DOMAIN!
-      sans = ["mail.your.example.com", "webmail.your.example.com", "smtp.your.example.com"]
-
-to your ``traefik.toml``.
-
-----
-
-You might need to clear your ``acme.json``, if a certificate for one of these domains already exists.
-
-You will need some solution which dumps the certificates in ``acme.json``, so you can include them in the ``mailu/front`` container.
-One such example is ``mailu/traefik-certdumper``, which has been adapted for use in Mailu. You can add it to your ``docker-compose.yml`` like:
-
-.. code-block:: yaml
-
-  certdumper:
-    restart: always
-    image: mailu/traefik-certdumper:$VERSION
-    environment:
-    # Make sure this is the same as the main=-domain in traefik.toml
-    # !!! Also don’t forget to add "TRAEFIK_DOMAIN=[...]" to your .env!
-      - DOMAIN=$TRAEFIK_DOMAIN
-    volumes:
-      # Folder, which contains the acme.json
-      - "/data/traefik:/traefik"
-      # Folder, where cert.pem and key.pem will be written
-      - "/data/mailu/certs:/output"
-
-
-Assuming you have ``volume-mounted`` your ``acme.json`` put to ``/data/traefik`` on your host. The dumper will then write out ``/data/mailu/certs/cert.pem`` and ``/data/mailu/certs/key.pem`` whenever ``acme.json`` is updated.
-Yay! Now let’s mount this to our ``front`` container like:
-
-.. code-block:: yaml
-
-    volumes:
-      - /data/mailu/certs:/certs
-
-This works, because we set ``TLS_FLAVOR=mail``, which picks up the key-certificate pair (e.g., ``cert.pem`` and ``key.pem``) from the certs folder in the root path (``/certs/``).
 
 .. _`Traefik`: https://traefik.io/
 

@@ -7,11 +7,15 @@ ONBUILD COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/
 FROM ${ARCH}php:7.4-apache as build_other
 
 FROM build_${QEMU}
+
+ENV TZ Etc/UTC
+
 #Shared layer between rainloop and roundcube
 RUN apt-get update && apt-get install -y \
-  python3 curl python3-pip git python3-multidict \
+  python3 curl python3-pip git python3-multidict tzdata \
   && rm -rf /var/lib/apt/lists \
-  && echo "ServerSignature Off" >> /etc/apache2/apache2.conf
+  && echo "ServerSignature Off\nServerName roundcube" >> /etc/apache2/apache2.conf \
+  && sed -i 's,CustomLog.*combined$,\0 "'"expr=!(%{HTTP_USER_AGENT}=='health'\&\&(-R '127.0.0.1/8' || -R '::1'))"'",' /etc/apache2/sites-available/000-default.conf
 
 # Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
 RUN pip3 install socrate
@@ -25,7 +29,6 @@ RUN apt-get update && apt-get install -y \
       python3-jinja2 \
       gpg \
  && docker-php-ext-install zip pdo_mysql pdo_pgsql \
- && echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini \
  && rm -rf /var/www/html/ \
  && cd /var/www \
  && curl -sL ${ROUNDCUBE_URL} | tar xz \
@@ -33,12 +36,17 @@ RUN apt-get update && apt-get install -y \
  && mv roundcubemail-* html \
  && mv carddav html/plugins/ \
  && cd html \
- && rm -rf CHANGELOG INSTALL LICENSE README.md UPGRADING composer.json-dist installer \
+ && rm -rf CHANGELOG INSTALL LICENSE README.md UPGRADING composer.json-dist installer composer.* \
  && sed -i 's,mod_php5.c,mod_php7.c,g' .htaccess \
  && sed -i 's,^php_value.*post_max_size,#&,g' .htaccess \
  && sed -i 's,^php_value.*upload_max_filesize,#&,g' .htaccess \
- && chown -R www-data: logs temp \
- && rm -rf /var/lib/apt/lists
+ && ln -sf index.php /var/www/html/sso.php \
+ && ln -sf /dev/stderr /var/www/html/logs/errors.log \
+ && chown -R root:root . \
+ && chown www-data:www-data logs temp \
+ && chmod -R a+rX . \
+ && rm -rf /var/lib/apt/lists \
+ && a2enmod rewrite deflate expires headers
 
 COPY php.ini /php.ini
 COPY config.inc.php /var/www/html/config/
@@ -50,4 +58,4 @@ VOLUME ["/data"]
 
 CMD /start.py
 
-HEALTHCHECK CMD curl -f -L http://localhost/ || exit 1
+HEALTHCHECK CMD curl -f -L -H 'User-Agent: health' http://localhost/ || exit 1

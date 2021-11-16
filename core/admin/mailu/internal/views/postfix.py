@@ -7,6 +7,9 @@ import idna
 import re
 import srslib
 
+@internal.route("/postfix/dane/<domain_name>")
+def postfix_dane_map(domain_name):
+    return flask.jsonify('dane-only') if utils.has_dane_record(domain_name) else flask.abort(404)
 
 @internal.route("/postfix/domain/<domain_name>")
 def postfix_mailbox_domain(domain_name):
@@ -105,7 +108,7 @@ def postfix_recipient_map(recipient):
 
     This is meant for bounces to go back to the original sender.
     """
-    srs = srslib.SRS(flask.current_app.config["SECRET_KEY"])
+    srs = srslib.SRS(flask.current_app.srs_key)
     if srslib.SRS.is_srs_address(recipient):
         try:
             return flask.jsonify(srs.reverse(recipient))
@@ -120,7 +123,7 @@ def postfix_sender_map(sender):
 
     This is for bounces to come back the reverse path properly.
     """
-    srs = srslib.SRS(flask.current_app.config["SECRET_KEY"])
+    srs = srslib.SRS(flask.current_app.srs_key)
     domain = flask.current_app.config["DOMAIN"]
     try:
         localpart, domain_name = models.Email.resolve_domain(sender)
@@ -137,6 +140,7 @@ def postfix_sender_login(sender):
     localpart, domain_name = models.Email.resolve_domain(sender)
     if localpart is None:
         return flask.jsonify(",".join(wildcard_senders)) if wildcard_senders else flask.abort(404)
+    localpart = localpart[:next((i for i, ch in enumerate(localpart) if ch in flask.current_app.config.get('RECIPIENT_DELIMITER')), None)]
     destination = models.Email.resolve_destination(localpart, domain_name, True)
     destination = [*destination, *wildcard_senders] if destination else [*wildcard_senders]
     return flask.jsonify(",".join(destination)) if destination else flask.abort(404)
@@ -145,6 +149,8 @@ def postfix_sender_login(sender):
 def postfix_sender_rate(sender):
     """ Rate limit outbound emails per sender login
     """
+    if sender in flask.current_app.config['MESSAGE_RATELIMIT_EXEMPTION']:
+        flask.abort(404)
     user = models.User.get(sender) or flask.abort(404)
     return flask.abort(404) if user.sender_limiter.hit() else flask.jsonify("450 4.2.1 You are sending too many emails too fast.")
 

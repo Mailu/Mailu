@@ -19,7 +19,8 @@ import os
 import hmac
 import smtplib
 import idna
-import dns
+import dns.resolver
+import dns.exception
 
 from flask import current_app as app
 from sqlalchemy.ext import declarative
@@ -38,6 +39,8 @@ class IdnaDomain(db.TypeDecorator):
     """
 
     impl = db.String(80)
+    cache_ok = True
+    python_type = str
 
     def process_bind_param(self, value, dialect):
         """ encode unicode domain name to punycode """
@@ -47,16 +50,18 @@ class IdnaDomain(db.TypeDecorator):
         """ decode punycode domain name to unicode """
         return idna.decode(value)
 
-    python_type = str
-
 class IdnaEmail(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
 
     impl = db.String(255)
+    cache_ok = True
+    python_type = str
 
     def process_bind_param(self, value, dialect):
         """ encode unicode domain part of email address to punycode """
+        if not '@' in value:
+            raise ValueError('invalid email address (no "@")')
         localpart, domain_name = value.lower().rsplit('@', 1)
         if '@' in localpart:
             raise ValueError('email local part must not contain "@"')
@@ -67,13 +72,13 @@ class IdnaEmail(db.TypeDecorator):
         localpart, domain_name = value.rsplit('@', 1)
         return f'{localpart}@{idna.decode(domain_name)}'
 
-    python_type = str
-
 class CommaSeparatedList(db.TypeDecorator):
     """ Stores a list as a comma-separated string, compatible with Postfix.
     """
 
     impl = db.String
+    cache_ok = True
+    python_type = list
 
     def process_bind_param(self, value, dialect):
         """ join list of items to comma separated string """
@@ -88,13 +93,13 @@ class CommaSeparatedList(db.TypeDecorator):
         """ split comma separated string to list """
         return list(filter(bool, (item.strip() for item in value.split(',')))) if value else []
 
-    python_type = list
-
 class JSONEncoded(db.TypeDecorator):
     """ Represents an immutable structure as a json-encoded string.
     """
 
     impl = db.String
+    cache_ok = True
+    python_type = str
 
     def process_bind_param(self, value, dialect):
         """ encode data as json """
@@ -103,8 +108,6 @@ class JSONEncoded(db.TypeDecorator):
     def process_result_value(self, value, dialect):
         """ decode json to data """
         return json.loads(value) if value else None
-
-    python_type = str
 
 class Base(db.Model):
     """ Base class for all models
@@ -209,16 +212,16 @@ class Domain(Base):
                 os.unlink(file_path)
             self._dkim_key_on_disk = self._dkim_key
 
-    @property
+    @cached_property
     def dns_mx(self):
         """ return MX record for domain """
-        hostname = app.config['HOSTNAMES'].split(',', 1)[0]
+        hostname = app.config['HOSTNAME']
         return f'{self.name}. 600 IN MX 10 {hostname}.'
 
-    @property
+    @cached_property
     def dns_spf(self):
         """ return SPF record for domain """
-        hostname = app.config['HOSTNAMES'].split(',', 1)[0]
+        hostname = app.config['HOSTNAME']
         return f'{self.name}. 600 IN TXT "v=spf1 mx a:{hostname} ~all"'
 
     @property
@@ -226,12 +229,11 @@ class Domain(Base):
         """ return DKIM record for domain """
         if self.dkim_key:
             selector = app.config['DKIM_SELECTOR']
-            return (
-                f'{selector}._domainkey.{self.name}. 600 IN TXT'
-                f'"v=DKIM1; k=rsa; p={self.dkim_publickey}"'
-            )
+            txt = f'v=DKIM1; k=rsa; p={self.dkim_publickey}'
+            record = ' '.join(f'"{txt[p:p+250]}"' for p in range(0, len(txt), 250))
+            return f'{selector}._domainkey.{self.name}. 600 IN TXT {record}'
 
-    @property
+    @cached_property
     def dns_dmarc(self):
         """ return DMARC record for domain """
         if self.dkim_key:
@@ -241,6 +243,41 @@ class Domain(Base):
             ruf = app.config['DMARC_RUF']
             ruf = f' ruf=mailto:{ruf}@{domain};' if ruf else ''
             return f'_dmarc.{self.name}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
+
+    @cached_property
+    def dns_dmarc_report(self):
+        """ return DMARC report record for mailu server """
+        if self.dkim_key:
+            domain = app.config['DOMAIN']
+            return f'{self.name}._report._dmarc.{domain}. 600 IN TXT "v=DMARC1"'
+
+    @cached_property
+    def dns_autoconfig(self):
+        """ return list of auto configuration records (RFC6186) """
+        hostname = app.config['HOSTNAME']
+        protocols = [
+            ('submission', 587),
+            ('imap', 143),
+            ('pop3', 110),
+        ]
+        if app.config['TLS_FLAVOR'] != 'notls':
+            protocols.extend([
+                ('imaps', 993),
+                ('pop3s', 995),
+            ])
+        return list([
+            f'_{proto}._tcp.{self.name}. 600 IN SRV 1 1 {port} {hostname}.'
+            for proto, port
+            in protocols
+        ])
+
+    @cached_property
+    def dns_tlsa(self):
+        """ return TLSA record for domain when using letsencrypt """
+        hostname = app.config['HOSTNAME']
+        if app.config['TLS_FLAVOR'] in ('letsencrypt', 'mail-letsencrypt'):
+            # current ISRG Root X1 (RSA 4096, O = Internet Security Research Group, CN = ISRG Root X1) @20210902
+            return f'_25._tcp.{hostname}. 600 IN TLSA 2 1 1 0b9fa5a59eed715c26c1020c711b4f6ec42d58b0015e14337a39dad301c5afc3'
 
     @property
     def dkim_key(self):
@@ -533,6 +570,8 @@ class User(Base, Email):
         """ verifies password against stored hash
             and updates hash if outdated
         """
+        if password == '':
+            return False
         cache_result = self._credential_cache.get(self.get_id())
         current_salt = self.password.split('$')[3] if len(self.password.split('$')) == 5 else None
         if cache_result and current_salt:

@@ -1,68 +1,86 @@
-{% import "macros.html" as macros %}
-{% import "bootstrap/utils.html" as utils %}
+{%- import "macros.html" as macros %}
+{%- import "bootstrap/utils.html" as utils %}
 <!doctype html>
-<html>
+<html lang="{{ session['language'] }}" data-static="/static/">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('.static', filename='vendor.css') }}">
-    <link rel="stylesheet" href="{{ url_for('.static', filename='app.css') }}">
-    <title>Mailu-Admin - {{ config["SITENAME"] }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{% trans %}Admin page for{% endtrans %} {{ config["SITENAME"] }}">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Mailu-Admin | {{ config["SITENAME"] }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
   </head>
   <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
       <nav class="main-header navbar navbar-expand navbar-white navbar-light">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars" title="{% trans %}toggle sidebar{% endtrans %}" aria-expanded="false"></i><span class="sr-only">{% trans %}toggle sidebar{% endtrans %}</span></a>
+          </li>
+          <li class="nav-item">
+          {%- for page, url in path %}
+            {%- if loop.index > 1 %}
+            <i class="fas fa-greater-than text-xs text-gray" aria-hidden="true"></i>
+            {%- endif %}
+            {%- if url %}
+            <a class="nav-link d-inline-block" href="{{ url }}" role="button">{{ page }}</a>
+            {%- else %}
+            <span class="nav-link d-inline-block">{{ page }}</span>
+            {%- endif %}
+          {%- endfor %}
           </li>
         </ul>
         <ul class="navbar-nav ml-auto">
           <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">{{ session['language'] }}</a>
-            <div class="dropdown-menu dropdown-menu-right p-0">
-                {% for language in session['available_languages'] %}
-                    <a class="dropdown-item {% if language == session['language'] %}active{% endif %} " href="{{ url_for('.set_language', language=language) }}">{{ language }}</a>
-                {% endfor %}
+            <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
+              <i class="fas fa-language text-xl" aria-hidden="true" title="{% trans %}change language{% endtrans %}"></i><span class="sr-only">Language</span>
+              <span class="badge badge-primary navbar-badge">{{ session['language'] }}</span></a>
+            <div class="dropdown-menu dropdown-menu-right p-0" id="mailu-languages">
+            {%- for locale in config.translations.values() %}
+              <a class="dropdown-item{% if locale|string() == session['language'] %} active{% endif %}" href="{{ url_for('.set_language', language=locale) }}">{{ locale.get_language_name().title() }}</a>
+            {%- endfor %}
             </div>
           </li>
         </ul>
       </nav>
-      <aside class="main-sidebar sidebar-dark-primary">
-        <a href="{{ config["WEB_ADMIN"] }}" class="brand-link">
-         <span class="brand-text font-weight-light">{{ config["SITENAME"] }}</span>
+      <aside class="main-sidebar sidebar-dark-primary nav-compact elevation-4">
+        <a href="{{ url_for('.domain_list' if current_user.manager_of or current_user.global_admin else '.user_settings') }}" class="brand-link bg-mailu-logo"{% if config["LOGO_BACKGROUND"] %} style="background-color:{{ config["LOGO_BACKGROUND"] }}!important;"{% endif %}>
+          <img src="{{ config["LOGO_URL"] if config["LOGO_URL"] else url_for('static', filename='mailu.png') }}" width="33" height="33" alt="Mailu" class="brand-image mailu-logo img-circle elevation-3">
+          <span class="brand-text font-weight-light">{{ config["SITENAME"] }}</span>
         </a>
-        {% block sidebar %}
-        {% include "sidebar.html" %}
-        {% endblock %}
+        {%- include "sidebar.html" %}
       </aside>
-      <div class="content-wrapper">
+      <div class="content-wrapper text-sm">
         <section class="content-header">
           <div class="container-fluid">
             <div class="row mb-2">
               <div class="col-sm-6">
-                <h1 class="m-0">{% block title %}{% endblock %}</h1>
+                <h1 class="m-0">{%- block title %}{%- endblock %}</h1>
                 <small>{% block subtitle %}{% endblock %}</small>
               </div>
               <div class="col-sm-6">
-                {% block main_action %}
-                {% endblock %}
+                {%- block main_action %}{%- endblock %}
               </div>
             </div>
           </div>
         </section>
-
         <div class="content">
-          {{ utils.flashed_messages(container=False) }}
-          {% block content %}{% endblock %}
+          {{ utils.flashed_messages(container=False, default_category='success') }}
+          {%- block content %}{%- endblock %}
         </div>
       </div>
       <footer class="main-footer">
-        Built with <i class="fa fa-heart"></i> using <a class="white-text" href="http://flask.pocoo.org/">Flask</a> and
-        <a class="white-text" href="https://adminlte.io/themes/v3/index3.html">AdminLTE</a>
-        <span class="pull-right"><i class="fa fa-code-fork"></i>on <a class="white-text" href="https://github.com/Mailu/Mailu">Github</a></a></span>
+        Built with <i class="fa fa-heart text-danger" aria-hidden="true"></i><span class="sr-only">love</span>
+        using <a href="https://flask.palletsprojects.com/">Flask</a>
+        and <a href="https://adminlte.io/themes/v3/index3.html">AdminLTE</a>.
+        <span class="fa-pull-right">
+          <i class="fa fa-code-branch" aria-hidden="true"></i><span class="sr-only">fork</span>
+          on <a href="https://github.com/Mailu/Mailu">Github</a>
+        </span>
       </footer>
     </div>
-    <script src="{{ url_for('.static', filename='vendor.js') }}"></script>
-    <script src="{{ url_for('.static', filename='app.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor.js') }}"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
   </body>
 </html>

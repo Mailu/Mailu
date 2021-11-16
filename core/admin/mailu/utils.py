@@ -6,39 +6,85 @@ try:
 except ImportError:
     import pickle
 
+import dns.resolver
+import dns.exception
+import dns.flags
+import dns.rdtypes
+import dns.rdatatype
+import dns.rdataclass
+
 import hmac
 import secrets
 import time
 
 from multiprocessing import Value
-
 from mailu import limiter
+from flask import current_app as app
 
 import flask
 import flask_login
 import flask_migrate
 import flask_babel
+import ipaddress
 import redis
 
 from flask.sessions import SessionMixin, SessionInterface
 from itsdangerous.encoding import want_bytes
 from werkzeug.datastructures import CallbackDict
-from werkzeug.contrib import fixers
-
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Login configuration
 login = flask_login.LoginManager()
-login.login_view = "ui.login"
+login.login_view = "sso.login"
 
 @login.unauthorized_handler
 def handle_needs_login():
     """ redirect unauthorized requests to login page """
     return flask.redirect(
-        flask.url_for('ui.login', next=flask.request.endpoint)
+        flask.url_for('sso.login')
     )
+
+# DNS stub configured to do DNSSEC enabled queries
+resolver = dns.resolver.Resolver()
+resolver.use_edns(0, 0, 1232)
+resolver.flags = dns.flags.AD | dns.flags.RD
+
+def has_dane_record(domain, timeout=10):
+    try:
+        result = resolver.query(f'_25._tcp.{domain}', dns.rdatatype.TLSA,dns.rdataclass.IN, lifetime=timeout)
+        if result.response.flags & dns.flags.AD:
+            for record in result:
+                if isinstance(record, dns.rdtypes.ANY.TLSA.TLSA):
+                    record.validate()
+                    if record.usage in [2,3] and record.selector in [0,1] and record.mtype in [0,1,2]:
+                        return True
+    except dns.resolver.NoNameservers:
+        # If the DNSSEC data is invalid and the DNS resolver is DNSSEC enabled
+        # we will receive this non-specific exception. The safe behaviour is to
+        # accept to defer the email.
+        app.logger.warn(f'Unable to lookup the TLSA record for {domain}. Is the DNSSEC zone okay on https://dnsviz.net/d/{domain}/dnssec/?')
+        return app.config['DEFER_ON_TLS_ERROR']
+    except dns.exception.Timeout:
+        app.logger.warn(f'Timeout while resolving the TLSA record for {domain} ({timeout}s).')
+    except dns.resolver.NXDOMAIN:
+        pass # this is expected, not TLSA record is fine
+    except Exception as e:
+        app.logger.error(f'Error while looking up the TLSA record for {domain} {e}')
+        pass
 
 # Rate limiter
 limiter = limiter.LimitWraperFactory()
+
+def extract_network_from_ip(ip):
+    n = ipaddress.ip_network(ip)
+    if n.version == 4:
+        return str(n.supernet(prefixlen_diff=(32-int(app.config["AUTH_RATELIMIT_IP_V4_MASK"]))).network_address)
+    else:
+        return str(n.supernet(prefixlen_diff=(128-int(app.config["AUTH_RATELIMIT_IP_V6_MASK"]))).network_address)
+
+def is_exempt_from_ratelimits(ip):
+    ip = ipaddress.ip_address(ip)
+    return any(ip in cidr for cidr in app.config['AUTH_RATELIMIT_EXEMPTION'])
 
 # Application translation
 babel = flask_babel.Babel()
@@ -46,15 +92,10 @@ babel = flask_babel.Babel()
 @babel.localeselector
 def get_locale():
     """ selects locale for translation """
-    translations = list(map(str, babel.list_translations()))
-    flask.session['available_languages'] = translations
-
-    try:
-        language = flask.session['language']
-    except KeyError:
-        language = flask.request.accept_languages.best_match(translations)
+    language = flask.session.get('language')
+    if not language in app.config.translations:
+        language = flask.request.accept_languages.best_match(app.config.translations.keys())
         flask.session['language'] = language
-
     return language
 
 
@@ -65,13 +106,10 @@ class PrefixMiddleware(object):
         self.app = None
 
     def __call__(self, environ, start_response):
-        prefix = environ.get('HTTP_X_FORWARDED_PREFIX', '')
-        if prefix:
-            environ['SCRIPT_NAME'] = prefix
         return self.app(environ, start_response)
 
     def init_app(self, app):
-        self.app = fixers.ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+        self.app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
         app.wsgi_app = self
 
 proxy = PrefixMiddleware()
@@ -230,7 +268,7 @@ class MailuSession(CallbackDict, SessionMixin):
 
         # set uid from dict data
         if self._uid is None:
-            self._uid = self.app.session_config.gen_uid(self.get('user_id', ''))
+            self._uid = self.app.session_config.gen_uid(self.get('_user_id', ''))
 
         # create new session id for new or regenerated sessions and force setting the cookie
         if self._sid is None:
@@ -450,7 +488,7 @@ class MailuSessionExtension:
                 with cleaned.get_lock():
                     if not cleaned.value:
                         cleaned.value = True
-                        flask.current_app.logger.error('cleaning')
+                        app.logger.info('cleaning session store')
                         MailuSessionExtension.cleanup_sessions(app)
 
             app.before_first_request(cleaner)

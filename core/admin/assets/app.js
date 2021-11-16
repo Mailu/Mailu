@@ -1,17 +1,79 @@
 require('./app.css');
 
-import 'admin-lte/plugins/select2/js/select2.js';
-import 'admin-lte/plugins/datatables/jquery.dataTables.js';
-import 'admin-lte/plugins/datatables-bs4/js/dataTables.bootstrap4.js';
-import 'admin-lte/plugins/datatables-responsive/js/dataTables.responsive.js';
-import 'admin-lte/plugins/datatables-responsive/js/responsive.bootstrap4.js';
+import logo from './mailu.png';
+import modules from "./*.json";
 
-jQuery("document").ready(function() {
-    jQuery(".mailselect").select2({
+// TODO: conditionally (or lazy) load select2 and dataTable
+$('document').ready(function() {
+
+    // intercept anchors with data-clicked attribute and open alternate location instead
+    $('[data-clicked]').click(function(e) {
+        e.preventDefault();
+        window.location.href = $(this).data('clicked');
+    });
+
+    // use post for language selection
+    $('#mailu-languages > a').click(function(e) {
+        e.preventDefault();
+        $.post({
+            url: $(this).attr('href'),
+            success: function() {
+                window.location = window.location.href;
+            },
+        });
+    });
+
+    // allow en-/disabling of inputs in fieldset with checkbox in legend
+    $('fieldset legend input[type=checkbox]').change(function() {
+        var fieldset = $(this).parents('fieldset');
+        if (this.checked) {
+            fieldset.removeAttr('disabled');
+            fieldset.find('input,textarea').not(this).removeAttr('disabled');
+        } else {
+            fieldset.attr('disabled', '');
+            fieldset.find('input,textarea').not(this).attr('disabled', '');
+        }
+    });
+
+    // display of range input value
+    $('input[type=range]').each(function() {
+        var value_element = $('#'+this.id+'_value');
+        if (value_element.length) {
+            value_element = $(value_element[0]);
+            var infinity = $(this).data('infinity');
+            var step = $(this).attr('step');
+            $(this).on('input', function() {
+                var num = (infinity && this.value == 0) ? '∞' : (this.value/step).toFixed(2);
+                if (num.endsWith('.00')) num = num.substr(0, num.length - 3);
+                value_element.text(num);
+            }).trigger('input');
+        }
+    });
+
+    // init select2
+    $('.mailselect').select2({
         tags: true,
-        tokenSeparators: [',', ' ']
+        tokenSeparators: [',', ' '],
     });
-    jQuery(".dataTable").DataTable({
-        "responsive": true,
+
+    // init dataTable
+    var d = $(document.documentElement);
+    $('.dataTable').DataTable({
+        'responsive': true,
+        language: {
+            url: d.data('static') + d.attr('lang') + '.json',
+        },
     });
+
+    // init clipboard.js
+    new ClipboardJS('.btn-clip');
+
+    // disable login if not possible
+    var l = $('#login_needs_https');
+    if (l.length && window.location.protocol != 'https:') {
+        l.removeClass("d-none");
+        $('form :input').prop('disabled', true);
+    }
+
 });
+

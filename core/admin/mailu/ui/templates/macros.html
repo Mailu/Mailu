@@ -1,104 +1,133 @@
-{% macro form_errors(form) %}
-  {% if form.errors %}
-    {% for fieldname, errors in form.errors.items() %}
-      {% if bootstrap_is_hidden_field(form[fieldname]) %}
-        {% for error in errors %}
+{%- macro form_errors(form) %}
+  {%- if form.errors %}
+    {%- for fieldname, errors in form.errors.items() %}
+      {%- if bootstrap_is_hidden_field(form[fieldname]) %}
+        {%- for error in errors %}
           <p class="error">{{error}}</p>
-        {% endfor %}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-{% endmacro %}
+        {%- endfor %}
+      {%- endif %}
+    {%- endfor %}
+  {%- endif %}
+{%- endmacro %}
 
-{% macro form_field_errors(field) %}
-  {% if field.errors %}
-    {% for error in field.errors %}
+{%- macro form_field_errors(field) %}
+  {%- if field.errors %}
+    {%- for error in field.errors %}
       <p class="help-block inline">{{ error }}</p>
-    {% endfor %}
-  {% endif %}
-{% endmacro %}
+    {%- endfor %}
+  {%- endif %}
+{%- endmacro %}
 
-{% macro form_fields(fields, prepend='', append='', label=True) %}
-  {% set width = (12 / fields|length)|int %}
+{%- macro form_fields(fields, prepend='', append='', label=True) %}
+  {%- set width = (12 / fields|length)|int %}
   <div class="form-group">
     <div class="row">
-      {% for field in fields %}
+      {%- for field in fields %}
       <div class="col-lg-{{ width }} col-xs-12 {{ 'has-error' if field.errors else '' }}">
-        {{ form_individual_field(field, prepend=prepend, append=append, label=label, **kwargs) }}
+        {%- if field.__class__.__name__ == 'list' %}
+          {%- for subfield in field %}
+            {{ form_individual_field(subfield, prepend=prepend, append=append, label=label, **kwargs) }}
+          {%- endfor %}
+        {%- else %}
+          {{ form_individual_field(field, prepend=prepend, append=append, label=label, **kwargs) }}
+        {%- endif %}
       </div>
-      {% endfor %}
+      {%- endfor %}
     </div>
   </div>
-{% endmacro %}
+{%- endmacro %}
 
-{% macro form_individual_field(field, prepend='', append='', label=True, class_="") %}
-  {% if field.type == "BooleanField" %}
-    {{ field(**kwargs) }}<span>&nbsp;&nbsp;</span>
-    {{ field.label if label else '' }}
-  {% else %}
+{%- macro form_individual_field(field, prepend='', append='', label=True, class_="") %}
+  {%- if field.type == "BooleanField" %}
+    {{ field(**kwargs) }}<span>&nbsp;&nbsp;</span>{{ field.label if label else '' }}
+  {%- else %}
     {{ field.label if label else '' }}{{ form_field_errors(field) }}
-      {% if prepend %}<div class="input-group-prepend">{% endif %}
-      {% if append %}<div class="input-group-append">{% endif %}
-        {{ prepend|safe }}{{ field(class_="form-control " + class_, **kwargs) }}{{ append|safe }}
-      {% if prepend or append %}</div>{% endif %}
-  {% endif %}
-{% endmacro %}
+    {%- if prepend %}<div class="input-group-prepend">{%- elif append %}<div class="input-group-append">{%- endif %}
+      {{ prepend|safe }}{{ field(class_=("form-control " + class_) if class_ else "form-control", **kwargs) }}{{ append|safe }}
+    {%- if prepend or append %}</div>{%- endif %}
+  {%- endif %}
+{%- endmacro %}
 
-{% macro form_field(field) %}
-  {% if field.type == 'SubmitField' %}
-  {{ form_fields((field,), label=False, class="btn btn-default", **kwargs) }}
-  {% else %}
-  {{ form_fields((field,), **kwargs) }}
-  {% endif %}
-{% endmacro %}
+{%- macro form_field(field) %}
+  {%- if field.type == 'SubmitField' %}
+  {{- form_fields((field,), label=False, class="btn btn-default", **kwargs) }}
+  {%- else %}
+  {{- form_fields((field,), **kwargs) }}
+  {%- endif %}
+{%- endmacro %}
 
-{% macro form(form) %}
+{%- macro form(form) %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
-  {% for field in form %}
-    {% if  bootstrap_is_hidden_field(field) %}
+  {%- for field in form %}
+    {%- if bootstrap_is_hidden_field(field) %}
       {{ field() }}
-    {% else %}
+    {%- else %}
       {{ form_field(field) }}
-    {% endif %}
-  {% endfor %}
+    {%- endif %}
+  {%- endfor %}
 </form>
-{% endmacro %}
+{%- endmacro %}
 
-{% macro card(title=None, theme="primary", header=True) %}
+{%- macro card(title=None, theme="primary", header=True) %}
 <div class="row">
   <div class="col-lg-12">
     <div class="card card-outline card-{{ theme }}">
-      {% if header %}
+      {%- if header %}
       <div class="card-header border-0">
-        {% if title %}
+        {%- if title %}
         <h3 class="card-title">{{ title }}</h3>
-        {% endif %}
+        {%- endif %}
       </div>
-      {% endif %}
+      {%- endif %}
       <div class="card-body">
-       {{ caller() }}
+       {{- caller() }}
       </div>
     </div>
   </div>
 </div>
-{% endmacro %}
+{%- endmacro %}
 
-{% macro table(title=None, theme="primary", datatable=True) %}
+{%- macro table(title=None, theme="primary", datatable=True) %}
 <div class="row">
   <div class="col-lg-12">
     <div class="card card-outline card-{{ theme }}">
+      {%- if title %}
       <div class="card-header border-0">
-        {% if title %}
         <h3 class="card-title">{{ title }}</h3>
-        {% endif %}
       </div>
+      {%- endif %}
       <div class="card-body">
-        <table class="table table-bordered {% if datatable %} dataTable {% endif %}">
-          {{ caller() }}
+        <table class="table table-bordered{% if datatable %} dataTable{% endif %}">
+          {{- caller() }}
         </table>
       </div>
     </div>
   </div>
 </div>
-{% endmacro %}
+{%- endmacro %}
+
+{%- macro fieldset(title=None, field=None, enabled=None, fields=None) %}
+{%- if field or title %}
+<fieldset{% if not enabled %} disabled{% endif %}>
+{%- if field %}
+<legend>{{ form_individual_field(field) }}</legend>
+{%- else %}
+<legend>{{ title }}</legend>
+{%- endif %}
+{%- endif %}
+{{- caller() }}
+{%- if fields %}
+  {%- set kwargs = {"enabled" if enabled else "disabled": ""} %}
+  {%- for field in fields %}
+    {{ form_field(field, **kwargs) }}
+  {%- endfor %}
+{%- endif %}
+</fieldset>
+{%- endmacro %}
+
+{%- macro clip(target, title=_("copy to clipboard"), icon="copy", color="primary", action="copy") %}
+<button class="btn btn-{{ color }} btn-xs btn-clip float-right ml-2 mt-1" data-clipboard-action="{{ action }}" data-clipboard-target="#{{ target }}">
+<i class="fas fa-{{ icon }}" title="{{ title }}" aria-expanded="false"></i><span class="sr-only">{{ title }}</span>
+</button>
+{%- endmacro %}

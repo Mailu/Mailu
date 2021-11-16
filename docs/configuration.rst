@@ -39,14 +39,25 @@ address.
 
 The ``WILDCARD_SENDERS`` setting is a comma delimited list of user email addresses that are allowed to send emails from any existing address (spoofing the sender).
 
-The ``AUTH_RATELIMIT`` holds a security setting for fighting attackers that
-try to guess user passwords. The value is the limit of failed authentication attempts
-that a single IP address can perform against IMAP, POP and SMTP authentication endpoints.
+The ``AUTH_RATELIMIT_IP`` (default: 60/hour) holds a security setting for fighting
+attackers that waste server resources by trying to guess user passwords (typically
+using a password spraying attack). The value defines the limit of authentication
+attempts that will be processed on non-existing accounts for a specific IP subnet
+(as defined in ``AUTH_RATELIMIT_IP_V4_MASK`` and ``AUTH_RATELIMIT_IP_V6_MASK`` below).
 
-If ``AUTH_RATELIMIT_SUBNET`` is ``True`` (default: False), the ``AUTH_RATELIMIT``
-rules does also apply to auth requests coming from ``SUBNET``, especially for the webmail.
-If you disable this, ensure that the rate limit on the webmail is enforced in a different
-way (e.g. roundcube plug-in), otherwise an attacker can simply bypass the limit using webmail.
+The ``AUTH_RATELIMIT_USER`` (default: 100/day) holds a security setting for fighting
+attackers that attempt to guess a user's password (typically using a password
+bruteforce attack). The value defines the limit of authentication attempts allowed
+for any given account within a specific timeframe.
+
+The ``AUTH_RATELIMIT_EXEMPTION_LENGTH`` (default: 86400) is the number of seconds
+after a successful login for which a specific IP address is exempted from rate limits.
+This ensures that users behind a NAT don't get locked out when a single client is
+misconfigured... but also potentially allow for users to attack each-other.
+
+The ``AUTH_RATELIMIT_EXEMPTION`` (default: '') is a comma separated list of network
+CIDRs that won't be subject to any form of rate limiting. Specifying ``0.0.0.0/0, ::/0``
+there is a good way to disable rate limiting altogether.
 
 The ``TLS_FLAVOR`` sets how Mailu handles TLS connections. Setting this value to
 ``notls`` will cause Mailu not to server any web content! More on :ref:`tls_flavor`.
@@ -58,22 +69,28 @@ The ``MESSAGE_SIZE_LIMIT`` is the maximum size of a single email. It should not
 be too low to avoid dropping legitimate emails and should not be too high to
 avoid filling the disks with large junk emails.
 
-The ``MESSAGE_RATELIMIT`` is the limit of messages a single user can send. This is
-meant to fight outbound spam in case of compromised or malicious account on the
-server.
+The ``MESSAGE_RATELIMIT`` (default: 200/day) is the maximum number of messages
+a single user can send. ``MESSAGE_RATELIMIT_EXEMPTION`` contains a comma delimited
+list of user email addresses that are exempted from any restriction.  Those
+settings are meant to reduce outbound spam in case of compromised or malicious
+account on the server.
 
-The ``RELAYNETS`` are network addresses for which mail is relayed for free with
-no authentication required. This should be used with great care. If you want other
-Docker services' outbound mail to be relayed, you can set this to ``172.16.0.0/12``
-to include **all** Docker networks. The default is to leave this empty.
+The ``RELAYNETS`` (default: unset) is a comma delimited list of network addresses
+for which mail is relayed for with no authentication required. This should be
+used with great care as misconfigurations may turn your Mailu instance into an
+open-relay!
 
-The ``RELAYHOST`` is an optional address of a mail server relaying all outgoing
-mail in following format: ``[HOST]:PORT``.
-``RELAYUSER`` and ``RELAYPASSWORD`` can be used when authentication is needed.
+The ``RELAYHOST`` is an optional address to use as a smarthost for all outgoing
+mail in following format: ``[HOST]:PORT``. ``RELAYUSER`` and ``RELAYPASSWORD``
+can be used when authentication is required.
 
 By default postfix uses "opportunistic TLS" for outbound mail. This can be changed
-by setting ``OUTBOUND_TLS_LEVEL`` to ``encrypt`` or ``secure``. This setting is highly recommended
-if you are using a relayhost that supports TLS.
+by setting ``OUTBOUND_TLS_LEVEL`` to ``encrypt`` or ``secure``. This setting is
+highly recommended if you are using a relayhost that supports TLS but discouraged
+otherwise. ``DEFER_ON_TLS_ERROR`` (default: True) controls whether incomplete
+policies (DANE without DNSSEC or "testing" MTA-STS policies) will be taken into
+account and whether emails will be defered if the additional checks enforced by
+those policies fail.
 
 Similarily by default nginx uses "opportunistic TLS" for inbound mail. This can be changed
 by setting ``INBOUND_TLS_ENFORCE`` to ``True``. Please note that this is forbidden for
@@ -89,9 +106,10 @@ go and fetch new email if available. Do not use too short delays if you do not
 want to be blacklisted by external services, but not too long delays if you
 want to receive your email in time.
 
-The ``RECIPIENT_DELIMITER`` is a character used to delimit localpart from a
-custom address part. For instance, if set to ``+``, users can use addresses
-like ``localpart+custom@domain.tld`` to deliver mail to ``localpart@domain.tld``.
+The ``RECIPIENT_DELIMITER`` is a list of characters used to delimit localpart
+from a custom address part. For instance, if set to ``+-``, users can use
+addresses like ``localpart+custom@example.com`` or ``localpart-custom@example.com``
+to deliver mail to ``localpart@example.com``.
 This is useful to provide external parties with different email addresses and
 later classify incoming mail based on the custom part.
 
@@ -123,6 +141,13 @@ All three options need a leading slash (``/``) to work.
 Both ``SITENAME`` and ``WEBSITE`` are customization options for the panel menu
 in the admin interface, while ``SITENAME`` is a customization option for
 every Web interface.
+
+- ``LOGO_BACKGROUND`` sets a custom background colour for the brand logo in the topleft of the main admin interface.
+  For a list of colour codes refer to this page of `w3schools`_.
+
+- ``LOGO_URL`` sets a URL for a custom logo. This logo replaces the Mailu logo in the topleft of the main admin interface.
+
+.. _`w3schools`: https://www.w3schools.com/cssref/css_colors.asp
 
 .. _admin_account:
 
@@ -169,7 +194,13 @@ The ``LETSENCRYPT_SHORTCHAIN`` (default: False) setting controls whether we send
 
 .. _`android handsets older than 7.1.1`: https://community.letsencrypt.org/t/production-chain-changes/150739
 
-The ``REAL_IP_HEADER`` (default: unset) and ``REAL_IP_FROM`` (default: unset) settings controls whether HTTP headers such as ``X-Forwarded-For`` or ``X-Real-IP`` should be trusted. The former should be the name of the HTTP header to extract the client IP address from and the later a comma separated list of IP addresses designing which proxies to trust. If you are using Mailu behind a reverse proxy, you should set both. Setting the former without the later introduces a security vulnerability allowing a potential attacker to spoof his source address.
+.. _reverse_proxy_headers:
+
+The ``REAL_IP_HEADER`` (default: unset) and ``REAL_IP_FROM`` (default: unset) settings controls whether HTTP headers such as ``X-Forwarded-For`` or ``X-Real-IP`` should be trusted. The former should be the name of the HTTP header to extract the client IP address from and the later a comma separated list of IP addresses designating which proxies to trust. If you are using Mailu behind a reverse proxy, you should set both. Setting the former without the later introduces a security vulnerability allowing a potential attacker to spoof his source address.
+
+The ``TZ`` sets the timezone Mailu will use. The timezone naming convention usually uses a ``Region/City`` format. See `TZ database name`_  for a list of valid timezones This defaults to ``Etc/UTC``. Warning: if you are observing different timestamps in your log files you should change your hosts timezone to UTC instead of changing TZ to your local timezone. Using UTC allows easy log correlation with remote MTAs.
+
+.. _`TZ database name`: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
 Antivirus settings
 ------------------

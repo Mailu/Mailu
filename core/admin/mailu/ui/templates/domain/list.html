@@ -1,17 +1,17 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Domain list{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block main_action %}
-{% if current_user.global_admin %}
+{%- block main_action %}
+{%- if current_user.global_admin %}
 <a class="btn btn-primary float-right" href="{{ url_for('.domain_create') }}">{% trans %}New domain{% endtrans %}</a>
-{% endif %}
-{% endblock %}
+{%- endif %}
+{%- endblock %}
 
-{% block content %}
-{% call macros.table() %}
+{%- block content %}
+{%- call macros.table() %}
 <thead>
   <tr>
     <th>{% trans %}Actions{% endtrans %}</th>
@@ -25,31 +25,31 @@
   </tr>
 </thead>
 <tbody>
-  {% for domain in current_user.get_managed_domains() %}
+  {%- for domain in current_user.get_managed_domains() %}
   <tr>
     <td>
       <a href="{{ url_for('.domain_details', domain_name=domain.name) }}" title="{% trans %}Details{% endtrans %}"><i class="fa fa-list"></i></a>&nbsp;
-      {% if current_user.global_admin %}
+      {%- if current_user.global_admin %}
       <a href="{{ url_for('.domain_edit', domain_name=domain.name) }}" title="{% trans %}Edit{% endtrans %}"><i class="fas fa-pencil-alt"></i></a>&nbsp;
       <a href="{{ url_for('.domain_delete', domain_name=domain.name) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>&nbsp;
-      {% endif %}
+      {%- endif %}
     </td>
     <td>
       <a href="{{ url_for('.user_list', domain_name=domain.name) }}" title="{% trans %}Users{% endtrans %}"><i class="far fa-envelope"></i></a>&nbsp;
       <a href="{{ url_for('.alias_list', domain_name=domain.name) }}" title="{% trans %}Aliases{% endtrans %}"><i class="fa fa-at"></i></a>&nbsp;
       <a href="{{ url_for('.manager_list', domain_name=domain.name) }}" title="{% trans %}Managers{% endtrans %}"><i class="fa fa-user"></i></a>&nbsp;
-      {% if current_user.global_admin %}
+      {%- if current_user.global_admin %}
       <a href="{{ url_for('.alternative_list', domain_name=domain.name) }}" title="{% trans %}Alternatives{% endtrans %}"><i class="fa fa-asterisk"></i></a>&nbsp;
-      {% endif %}
+      {%- endif %}
     </td>
     <td>{{ domain.name }}</td>
     <td>{{ domain.users | count }} / {{ '∞' if domain.max_users == -1 else domain.max_users }}</td>
     <td>{{ domain.aliases | count }} / {{ '∞' if domain.max_aliases == -1 else domain.max_aliases }}</td>
     <td>{{ domain.comment or '' }}</td>
-    <td>{{ domain.created_at }}</td>
-    <td>{{ domain.updated_at or '' }}</td>
+    <td>{{ domain.created_at | format_date }}</td>
+    <td>{{ domain.updated_at | format_date }}</td>
   </tr>
-  {% endfor %}
+  {%- endfor %}
 </tbody>
-{% endcall %}
-{% endblock %}
+{%- endcall %}
+{%- endblock %}

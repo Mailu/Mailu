@@ -17,7 +17,7 @@ queue_directory = /queue
 message_size_limit = {{ MESSAGE_SIZE_LIMIT }}
 
 # Relayed networks
-mynetworks = 127.0.0.1/32 [::1]/128 {{ SUBNET }} {{ RELAYNETS }}
+mynetworks = 127.0.0.1/32 [::1]/128 {{ SUBNET }}  {% if RELAYNETS %}{{ RELAYNETS.split(",") | join(' ') }}{% endif %}
 
 # Empty alias list to override the configuration variable and disable NIS
 alias_maps =
@@ -58,13 +58,17 @@ tls_ssl_options = NO_COMPRESSION, NO_TICKET
 # 2. not all will have and up-to-date TLS stack.
 smtp_tls_mandatory_protocols = !SSLv2, !SSLv3
 smtp_tls_protocols =!SSLv2,!SSLv3
-smtp_tls_security_level = {{ OUTBOUND_TLS_LEVEL|default('may') }}
-smtp_tls_policy_maps=lmdb:/etc/postfix/tls_policy.map
+smtp_tls_security_level = {{ OUTBOUND_TLS_LEVEL|default('dane') }}
+smtp_tls_dane_insecure_mx_policy = {{ 'dane' if DEFER_ON_TLS_ERROR else 'may' }}
+smtp_tls_policy_maps=lmdb:/etc/postfix/tls_policy.map, ${podop}dane, socketmap:unix:/tmp/mta-sts.socket:postfix
 smtp_tls_CApath = /etc/ssl/certs
 smtp_tls_session_cache_database = lmdb:/dev/shm/postfix/smtp_scache
 smtpd_tls_session_cache_database = lmdb:/dev/shm/postfix/smtpd_scache
 smtp_host_lookup = dns
 smtp_dns_support_level = dnssec
+delay_warning_time = 5m
+smtp_tls_loglevel = 1
+notify_classes = resource, software, delay
 
 ###############
 # Virtual

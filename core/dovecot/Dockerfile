@@ -1,4 +1,4 @@
-ARG DISTRO=alpine:3.14
+ARG DISTRO=alpine:3.14.2
 FROM $DISTRO as builder
 WORKDIR /tmp
 RUN apk add git build-base automake autoconf libtool dovecot-dev xapian-core-dev icu-dev
@@ -11,9 +11,12 @@ RUN git clone https://github.com/grosjo/fts-xapian.git \
   && make install
 
 FROM $DISTRO
+
+ENV TZ Etc/UTC
+
 # python3 shared with most images
 RUN apk add --no-cache \
-    python3 py3-pip git bash py3-multidict py3-yarl \
+    python3 py3-pip git bash py3-multidict py3-yarl tzdata \
   && pip3 install --upgrade pip
 
 # Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube

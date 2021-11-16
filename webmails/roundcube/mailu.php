@@ -52,6 +52,12 @@ class mailu extends rcube_plugin
   }
   function login_failed($args)
   {
+      $ua = $_SERVER['HTTP_USER_AGENT'];
+      $ra = $_SERVER['REMOTE_ADDR'];
+      if ($ua == 'health' and ($ra == '127.0.0.1' or $ra == '::1')) {
+        echo "OK";
+        exit;
+      }
       header('Location: sso.php');
       exit();
   }

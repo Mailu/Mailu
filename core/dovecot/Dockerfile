@@ -11,8 +11,11 @@ RUN git clone https://github.com/grosjo/fts-xapian.git \
   && make install
 
 FROM $DISTRO
-
+ARG VERSION
 ENV TZ Etc/UTC
+
+LABEL version=$VERSION
+RUN echo $VERSION >> /version
 
 # python3 shared with most images
 RUN apk add --no-cache \

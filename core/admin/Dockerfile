@@ -21,9 +21,13 @@ RUN set -eu \
 
 # Actual application
 FROM $DISTRO
+ARG VERSION
 COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 
 ENV TZ Etc/UTC
+
+LABEL version=$VERSION
+RUN echo $VERSION >> /version
 
 # python3 shared with most images
 RUN set -eu \

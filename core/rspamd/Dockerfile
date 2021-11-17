@@ -1,7 +1,10 @@
 ARG DISTRO=alpine:3.14.2
 FROM $DISTRO
-
+ARG VERSION
 ENV TZ Etc/UTC
+
+LABEL version=$VERSION
+RUN echo $VERSION >> /version
 
 # python3 shared with most images
 RUN apk add --no-cache \

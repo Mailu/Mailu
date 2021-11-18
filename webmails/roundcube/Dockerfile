@@ -11,7 +11,6 @@ ARG VERSION
 ENV TZ Etc/UTC
 
 LABEL version=$VERSION
-RUN echo $VERSION >> /version
 
 #Shared layer between rainloop and roundcube
 RUN apt-get update && apt-get install -y \
@@ -62,3 +61,4 @@ VOLUME ["/data"]
 CMD /start.py
 
 HEALTHCHECK CMD curl -f -L -H 'User-Agent: health' http://localhost/ || exit 1
+RUN echo $VERSION >> /version

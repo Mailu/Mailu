@@ -8,7 +8,6 @@ ONBUILD COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/
 ENV TZ Etc/UTC
 
 LABEL version=$VERSION
-RUN echo $VERSION >> /version
 
 # Shared later between dovecot postfix nginx rspamd rainloop and roundloop
 RUN apk add --no-cache \
@@ -75,3 +74,4 @@ VOLUME ["/data"]
 CMD php-fpm7 && /start.py
 
 HEALTHCHECK CMD curl -f -L http://localhost/ || exit 1
+RUN echo $VERSION >> /version

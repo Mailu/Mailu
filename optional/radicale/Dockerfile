@@ -5,7 +5,6 @@ ARG VERSION
 ENV TZ Etc/UTC
 
 LABEL version=$VERSION
-RUN echo $VERSION >> /version
 
 # python3 shared with most images
 RUN apk add --no-cache \
@@ -25,3 +24,4 @@ VOLUME ["/data"]
 CMD radicale -S -C /radicale.conf
 
 HEALTHCHECK CMD curl -f -L http://localhost:5232/ || exit 1
+RUN echo $VERSION >> /version

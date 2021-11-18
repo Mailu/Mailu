@@ -5,7 +5,6 @@ ARG VERSION
 ENV TZ Etc/UTC
 
 LABEL version=$VERSION
-RUN echo $VERSION >> /version
 
 # python3 shared with most images
 RUN apk add --no-cache \
@@ -32,3 +31,4 @@ VOLUME ["/overrides"]
 CMD /start.py
 
 HEALTHCHECK CMD curl -k -f -L http://localhost/health || exit 1
+RUN echo $VERSION >> /version

@@ -5,7 +5,6 @@ ARG VERSION
 ENV TZ Etc/UTC
 
 LABEL version=$VERSION
-RUN echo $VERSION >> /version
 
 # python3 shared with most images
 RUN apk add --no-cache \
@@ -24,3 +23,4 @@ VOLUME ["/data"]
 CMD /start.py
 
 HEALTHCHECK --start-period=350s CMD /health.sh
+RUN echo $VERSION >> /version

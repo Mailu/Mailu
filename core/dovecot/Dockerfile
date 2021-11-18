@@ -15,7 +15,6 @@ ARG VERSION
 ENV TZ Etc/UTC
 
 LABEL version=$VERSION
-RUN echo $VERSION >> /version
 
 # python3 shared with most images
 RUN apk add --no-cache \
@@ -44,3 +43,4 @@ VOLUME ["/mail"]
 CMD /start.py
 
 HEALTHCHECK --start-period=350s CMD echo QUIT|nc localhost 110|grep "Dovecot ready."
+RUN echo $VERSION >> /version

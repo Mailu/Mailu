@@ -5,7 +5,6 @@ ARG VERSION
 ENV TZ Etc/UTC
 
 LABEL version=$VERSION
-RUN echo $VERSION >> /version
 
 # python3 shared with most images
 RUN apk add --no-cache \
@@ -21,3 +20,4 @@ RUN mkdir -p /data
 COPY fetchmail.py /fetchmail.py
 
 CMD ["/fetchmail.py"]
+RUN echo $VERSION >> /version

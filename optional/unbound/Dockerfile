@@ -5,7 +5,6 @@ ARG VERSION
 ENV TZ Etc/UTC
 
 LABEL version=$VERSION
-RUN echo $VERSION >> /version
 
 # python3 shared with most images
 RUN apk add --no-cache \
@@ -31,3 +30,4 @@ EXPOSE 53/udp 53/tcp
 CMD /start.py
 
 HEALTHCHECK CMD dig @127.0.0.1 || exit 1
+RUN echo $VERSION >> /version

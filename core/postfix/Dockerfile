@@ -6,7 +6,6 @@ ARG VERSION
 ENV TZ Etc/UTC
 
 LABEL version=$VERSION
-RUN echo $VERSION >> /version
 
 # python3 shared with most images
 RUN apk add --no-cache \
@@ -35,3 +34,4 @@ VOLUME ["/queue"]
 CMD /start.py
 
 HEALTHCHECK --start-period=350s CMD echo QUIT|nc localhost 25|grep "220 .* ESMTP Postfix"
+RUN echo $VERSION >> /version

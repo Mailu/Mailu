@@ -1,47 +1,84 @@
 Changing the database back-end
 ==============================
 
-By default Mailu uses a SQLite database. Recently, we have changed the internals of Mailu
-to enable the support of alternative database solutions as postgresql and mysql/mariadb.
-This functionality should still be considered experimental!
+By default Mailu uses a SQLite database. We have changed the internals of Mailu
+to enable the support of alternative database solutions as PostgreSQL and MySQL/MariaDB.
 
-Mailu Postgresql
-----------------
 
-Mailu optionally comes with a pre-configured Postgresql image, which as of 1.8, is deprecated
-and will be removed in 1.9.
-This images has the following features:
+Migrating to a different database back-end
+------------------------------------------
 
-- Automatic creation of users, db, extensions and password;
-- TCP connections are only allowed from the mailu `SUBNET`;
-- Automatic minutely *wal archiving* and weekly `pg_basebackup`;
-- Automatic cleaning of *wal archives* and *base backups*;
-  Two versions always remain available;
-- When `/data` is empty and backups are present, the backups are restored automatically;
-  Useful in swarm environments, since the /data directory should not be on any network 
-  filesystem (performance).
+From Mailu 1.9, Mailu has a :ref:`cli command (link) <config-export>` for exporting and importing the complete Mailu configuration.
+Using this tool it is very easy to switch what database back-end is used for Mailu.
+Unfortunately roundcube does not have a tool for exporting/importing roundcube configuration.
+This means it is not possible to switch the database back-end used by roundcube using out of box tools.
 
-To make use of this functionality, just select `postgresql` as database flavor.
-Don't select the usage of an external database. The ``docker-compose.yml`` and ``mailu.env``
-will pull in ``mailu/postgresql``. This image and ``mailu/admin`` contain all the scripts
-to automatically setup the database.
+To switch to a different database back-end:
 
-After bring up the service, it might be useful to check the logs with:
+1. Run config-export to export the configuration. E.g.  `docker-compose exec admin flask mailu config-export --secrets --output mail-config.yml`
+2. Set up your new database server. Refer to the subsequent sections for tips for creating the database.
+3. Modify the database settings (DB_*) in mailu.env. Refer to the :ref:`configuration guide (link) <db_settings>` for the exact settings.
+4. Start your Mailu deployment.
+5. Run config-import to import the configuration. E.g. `docker exec -i $(docker-compose ps -q admin) flask mailu config-import -v < mail-config.yml`
 
-.. code-block:: bash
+Mailu has now been switched to the new database back-end. The Mailu configuration has also been migrated.
 
-  docker-compose logs -f admin database
+.. note::
+   The setup configuration wizard (setup.mailu.io) only supports creating config files for the same database back-end. When creating new config files, select the desired database flavour in the setup and enter dummy values for roundcube.
+   In the generated mailu.env file, configure all ROUNDCUBE_DB_* environment variables to the old values. For SQLite you can remove all the ROUNDCUBE_DB_* values.
 
-External Postgresql
+
+External MySQL/MariaDB
+----------------------
+
+It is also possible to use a MySQL/MariaDB database server, hosted elsewhere.
+In this case you'll have to take to create an empty database for Mailu, corresponding user,
+password and sufficient privileges on the database to ``CREATE TABLE``, ``DROP`` etc.
+Usually making the user owner of the database would be the easiest thing to do.
+
+The following commands can serve as an example on how to set up MySQL/MariaDB for Mailu usage.
+Adjust this to your own liking.
+
+.. code-block:: sql
+
+  mysql> CREATE DATABASE mailu;
+  mysql> CREATE USER 'mailu'@'%' IDENTIFIED BY 'my-strong-password-here';
+  mysql> GRANT ALL PRIVILEGES ON mailu.* TO 'mailu'@'%';
+  mysql> FLUSH PRIVILEGES;
+
+Note that if you get any errors related to ``caching_sha2_password`` it can be solved by changing the encryption
+of the password to ``mysql_native_password`` instead of the latest authentication plugin ``caching_sha2_password``.
+
+.. code-block:: sql
+
+  mysql> SELECT host, user, plugin FROM mysql.user;
+
+  +-----------+-------+-----------------------+
+  | host      | user  | plugin                |
+  +-----------+-------+-----------------------+
+  | %         | mailu | caching_sha2_password |
+  +-----------+-------+-----------------------+
+
+  mysql> update mysql.user set plugin = 'mysql_native_password' where user = 'mailu';
+  mysql> SELECT host, user, plugin FROM mysql.user;
+
+  +------+-------+-----------------------+
+  | host | user  | plugin                |
+  +------+-------+-----------------------+
+  | %    | mailu | mysql_native_password |
+  +------+-------+-----------------------+
+
+
+External PostgreSQL
 -------------------
 
-It is also possible to use a Postgresql database server, hosted elsewhere.
+It is also possible to use a PostgreSQL database server, hosted elsewhere.
 In this case you'll have to take to create an empty database for Mailu, corresponding user,
 password and sufficient privileges on the database to ``CREATE TABLE``, ``DROP`` etc.
 Usually making the user owner of the database would be the easiest thing to do.
 Don't forget to set ``pg_hba.conf`` accordingly.
 
-The following commands can serve as an example on how to set up postgresql for Mailu usage.
+The following commands can serve as an example on how to set up PostgreSQL for Mailu usage.
 Adjust this to your own liking.
 
 .. code-block:: bash
@@ -72,42 +109,130 @@ In ``pg_hba.conf`` there should be a line like this:
 Note that this example is the bare-minimum to get Mailu working. It goes without saying that
 the database admin will have to setup his own means of backups and TLS encrypted connections.
 
-External MySQL/Mariadb
-----------------------
+Nowadays it is recommended to use the official PostgreSQL image from the PostgreSQL community. The repository is located `here <https://hub.docker.com/_/postgres>`_.
 
-It is also possible to use a mysql/mariadb database server, hosted elsewhere.
-In this case you'll have to take to create an empty database for Mailu, corresponding user,
-password and sufficient privileges on the database to ``CREATE TABLE``, ``DROP`` etc.
-Usually making the user owner of the database would be the easiest thing to do.
+.. _migrate_mailu_postgresql:
 
-The following commands can serve as an example on how to set up mysql/mariadb for Mailu usage.
-Adjust this to your own liking.
+Mailu PostgreSQL
+----------------
 
-.. code-block:: sql
+Mailu optionally came with a pre-configured PostgreSQL image which was deprecated in Mailu 1.8.
+Since Mailu 1.9 it is removed from Mailu. The following section describes how to move to a different PostgreSQL image for novice administrators. The official PostgreSQL image (Postgres) will be used.
 
-  mysql> CREATE DATABASE mailu;
-  mysql> CREATE USER 'mailu'@'%' IDENTIFIED BY 'my-strong-password-here';
-  mysql> GRANT ALL PRIVILEGES ON mailu.* TO 'mailu'@'%';
-  mysql> FLUSH PRIVILEGES;
-  
-Note that if you get any errors related to ``caching_sha2_password`` it can be solved by changing the encryption 
-of the password to ``mysql_native_password`` instead of the latest authentication plugin ``caching_sha2_password``.
+A Mailu deployment with the Mailu PostgreSQL image, only used PostgreSQL for the Admin container (Web administration interface). Roundcube used SQLite as database back-end.
+Mailu uses the following configuration for connecting to the database:
 
-.. code-block:: sql
+- Database host: 'database'
+- Database name: 'mailu'
+- Database user: 'mailu'
+- Database password: See DB_PW in mailu.env.
 
-  mysql> SELECT host, user, plugin FROM mysql.user;
-  
-  +-----------+-------+-----------------------+
-  | host      | user  | plugin                |
-  +-----------+-------+-----------------------+
-  | %         | mailu | caching_sha2_password |
-  +-----------+-------+-----------------------+
-  
-  mysql> update mysql.user set plugin = 'mysql_native_password' where user = 'mailu';
-  mysql> SELECT host, user, plugin FROM mysql.user;
-  
-  +------+-------+-----------------------+
-  | host | user  | plugin                |
-  +------+-------+-----------------------+
-  | %    | mailu | mysql_native_password |
-  +------+-------+-----------------------+
+.. note::
+
+   The following instructions assume that
+     - project mailu is used. (-p mailu). If a different project (prefix) is used, then a different project can be specified.
+     - the data folder is /mailu. Change this to a different value in case Mailu makes use of a different data folder.
+     - All commands must be executed as root. On Debian/Ubuntu the sudo command is used to execute commands as root.
+
+Prepare the environment. Mailu must not be in use. Only the database container.
+
+1. Open a terminal.
+2. `cd /mailu`
+3. `docker-compose -p mailu down`
+4. `docker-compose -p mailu up -d database`
+
+Create the dump SQL file for recreating the database.
+
+1. `docker-compose -p mailu exec database /bin/bash`
+2. `pg_dump -h database -p 5432 -U mailu > /backup/backup_db.sql`
+3. Enter the password. See the value of DB_PW in mailu.env.
+4. `exit`
+5. The dump is saved to /mailu/data/psql_backup/backup_db.sql.
+6. `docker-compose -p mailu down`
+
+Prepare the new PostgreSQL deployment.
+
+1. `mkdir -p /mailu/data/external_psql/pgdata`
+2. Create the file docker-compose-postgresql.yml with the following contents:
+
+.. code-block:: docker
+
+   version: '3.1'
+   services:
+     database:
+       image: postgres:13
+       restart: always
+       environment:
+         - POSTGRES_USER=mailu
+         - POSTGRES_PASSWORD=DB_PW from mailu.env file
+         - PGDATA=/var/lib/postgresql/data/pgdata
+       volumes:
+         - "/mailu/data/external_psql/pgdata:/var/lib/postgresql/data/pgdata"
+         - "/mailu/data/psql_backup:/dump"
+
+
+3. `docker-compose -f docker-compose-postgresql.yml up -d`
+4. `docker-compose -f docker-compose-postgresql.yml exec database /bin/bash`
+5. `cat /dump/backup_db.sql | psql -h localhost -p 5432 -U mailu`
+6. `exit`
+7. `docker-compose -f docker-compose-postgresql.yml down`
+8. Remove the file docker-compose-postgresql.yml.
+
+The new PostgreSQL deployment has the dump loaded now. Now it is time to modify Mailu to use the official PostgreSQL docker image.
+
+1. Edit docker-compose.yml and change:
+
+.. code-block:: docker
+
+     database:
+       image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postgresql:${MAILU_VERSION:-master}
+       restart: always
+       env_file: mailu.env
+       volumes:
+         - "/mailu_db/data/psql_db:/data"
+         - "/mailu_db/data/psql_backup:/backup"
+
+to
+
+.. code-block:: docker
+
+     database:
+       image: postgres:13
+       restart: always
+       environment:
+         - PGDATA=/var/lib/postgresql/data/pgdata
+       volumes:
+         - "/mailu/data/external_psql/pgdata:/var/lib/postgresql/data/pgdata"
+
+
+2. Edit mailu.env and append the following after the block
+
+.. code-block:: docker
+
+   ###################################
+   # Database settings
+   ###################################
+
+
+.. code-block:: docker
+
+   DB_HOST=database
+   DB_PORT=5432
+   DB_USER=mailu
+   DB_NAME=mailu
+
+Mailu is now configured to use the official PostgreSQL docker image. Bring your new deployment online
+
+1. `docker-compose -p mailu up -d`
+
+Optionally you can remove left-over files which were used by the old database:
+
+- /mailu/data/psql_backup (old database backup files
+- /mailu/data/psql_db (old database files)
+
+.. note::
+   The setup configuration wizard (setup.mailu.io) only supports creating config files for the same database back-end. When creating new config files, select PostgreSQL in the setup and enter dummy values for roundcube.
+   In the generated mailu.env file, remove all ROUNDCUBE_DB_* environment variables.
+   Now Admin will use PostgreSQL and roundcube will keep using Roundcube.
+
+   Roundcube does not offer a migration tool for moving from SQLite to PostgreSQL.

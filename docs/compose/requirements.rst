@@ -5,8 +5,20 @@ Hardware considerations
 -----------------------
 
 You should make sure that your hardware (virtual or physical) is compatible with
-the latest Linux kernel. Also, you should have at least 3GB of total memory and
-1GB of free memory/swap when running Mailu.
+the latest Linux kernel. The minimal required memory and swap are:
+
+* When using antivirus (clamav):
+
+  * 3GB of memory
+
+  * 1GB of swap
+
+* When not using antivirus (clamav):
+
+  * 1GB of memory
+
+  * 1GB of swap
+
 
 Pick a distribution
 -------------------

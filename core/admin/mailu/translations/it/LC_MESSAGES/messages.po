@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mailu\n"
-"PO-Revision-Date: 2020-03-11 23:03+0000\n"
+"PO-Revision-Date: 2021-03-04 18:46+0000\n"
 "Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
 "Language-Team: Italian <https://translate.tedomum.net/projects/mailu/admin/"
 "it/>\n"
@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.11.2\n"
+"X-Generator: Weblate 4.0.1\n"
 
 #: mailu/ui/forms.py:32
 msgid "Invalid email address."

@@ -1,30 +1,34 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Manager list{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block subtitle %}
+{%- block subtitle %}
 {{ domain.name }}
-{% endblock %}
+{%- endblock %}
 
-{% block main_action %}
-<a class="btn btn-primary" href="{{ url_for('.manager_create', domain_name=domain.name) }}">{% trans %}Add manager{% endtrans %}</a>
-{% endblock %}
+{%- block main_action %}
+<a class="btn btn-primary float-right" href="{{ url_for('.manager_create', domain_name=domain.name) }}">{% trans %}Add manager{% endtrans %}</a>
+{%- endblock %}
 
-{% block content %}
-{% call macros.table() %}
-<tr>
-  <th>{% trans %}Actions{% endtrans %}</th>
-  <th>{% trans %}Email{% endtrans %}</th>
-</tr>
-{% for manager in domain.managers %}
+{%- block content %}
+{%- call macros.table() %}
+<thead>
+  <tr>
+    <th>{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}Email{% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
+{%- for manager in domain.managers %}
 <tr>
   <td>
     <a href="{{ url_for('.manager_delete', domain_name=domain.name, user_email=manager.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
   </td>
   <td>{{ manager }}</td>
 </tr>
-{% endfor %}
-{% endcall %}
-{% endblock %}
+{%- endfor %}
+</tbody>
+{%- endcall %}
+{%- endblock %}

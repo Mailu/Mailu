@@ -1,21 +1,20 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}New domain{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block content %}
-{% call macros.box() %}
+{%- block content %}
+{%- call macros.card() %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.name) }}
   {{ macros.form_fields((form.max_users, form.max_aliases)) }}
-  {{ macros.form_field(form.max_quota_bytes, step=1000000000, max=50000000000,
-      prepend='<span class="input-group-addon"><span id="quota">'+((form.max_quota_bytes.data//1000000000).__str__() if form.max_quota_bytes.data else '∞')+'</span> GiB</span>',
-      oninput='$("#quota").text(this.value == 0  ? "∞" : this.value/1000000000);') }}
+  {{ macros.form_field(form.max_quota_bytes, step=10**9, max=50*10**9, data_infinity="true",
+      prepend='<span class="input-group-text"><span id="max_quota_bytes_value"></span>&nbsp;GB</span>') }}
   {{ macros.form_field(form.signup_enabled) }}
   {{ macros.form_field(form.comment) }}
   {{ macros.form_field(form.submit) }}
 </form>
-{% endcall %}
-{% endblock %}
+{%- endcall %}
+{%- endblock %}

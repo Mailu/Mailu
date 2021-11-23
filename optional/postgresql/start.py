@@ -2,7 +2,6 @@
 
 import anosql
 import psycopg2
-import jinja2
 import glob
 import os
 import subprocess
@@ -38,7 +37,6 @@ if not os.listdir("/data"):
                 rec.write("restore_command = 'gunzip < /backup/wal_archive/%f > %p'\n")
                 rec.write("standby_mode = off\n")
             os.system("chown postgres:postgres /data/recovery.conf")
-            #os.system("sudo -u postgres pg_ctl start -D /data -o '-h \"''\" '")
     else:
         # Bootstrap the database
         os.system("sudo -u postgres initdb -D /data")

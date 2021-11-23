@@ -1,31 +1,31 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Add a fetched account{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block subtitle %}
+{%- block subtitle %}
 {{ user }}
-{% endblock %}
+{%- endblock %}
 
-{% block content %}
+{%- block content %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
-  {% call macros.box(title="Remote server") %}
+  {%- call macros.card(title="Remote server") %}
   {{ macros.form_field(form.protocol) }}
   {{ macros.form_fields((form.host, form.port)) }}
   {{ macros.form_field(form.tls) }}
-  {% endcall %}
+  {%- endcall %}
 
-  {% call macros.box(title="Authentication") %}
+  {%- call macros.card(title="Authentication") %}
   {{ macros.form_field(form.username) }}
   {{ macros.form_field(form.password) }}
-  {% endcall %}
+  {%- endcall %}
 
-  {% call macros.box(title="Settings") %}
+  {%- call macros.card(title="Settings") %}
   {{ macros.form_field(form.keep) }}
-  {% endcall %}
+  {%- endcall %}
 
   {{ macros.form_field(form.submit) }}
 </form>
-{% endblock %}
+{%- endblock %}

@@ -10,8 +10,8 @@ log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
 # Actual startup script
 
-os.environ["FRONT_ADDRESS"] = system.get_host_address_from_environment("FRONT", "front")
 os.environ["REDIS_ADDRESS"] = system.get_host_address_from_environment("REDIS", "redis")
+os.environ["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
 
 if os.environ.get("ANTIVIRUS") == 'clamav':
     os.environ["ANTIVIRUS_ADDRESS"] = system.get_host_address_from_environment("ANTIVIRUS", "antivirus:3310")

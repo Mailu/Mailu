@@ -2,34 +2,29 @@
   "name": "mailu",
   "version": "1.0.0",
   "description": "Mailu admin assets",
-  "main": "assest/index.js",
+  "main": "assets/index.js",
+  "directories": {
+    "lib": "lib"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@babel/core": "^7.4.4",
-    "@babel/preset-env": "^7.4.4",
-    "admin-lte": "^2.4.10",
-    "babel-loader": "^8.0.5",
-    "bootstrap": "^3.4.1",
-    "css-loader": "^2.1.1",
-    "expose-loader": "^0.7.5",
-    "file-loader": "^3.0.1",
-    "font-awesome": "^4.7.0",
-    "font-awesome-loader": "^1.0.2",
-    "jQuery": "^1.7.4",
-    "less": "^3.9.0",
-    "less-loader": "^5.0.0",
-    "mini-css-extract-plugin": "^0.6.0",
-    "node-sass": "^4.12.0",
-    "popper.js": "^1.15.0",
-    "sass-loader": "^7.1.0",
-    "select2": "^4.0.7-rc.0",
-    "style-loader": "^0.23.1",
-    "url-loader": "^1.1.2",
-    "webpack": "^4.30.0",
-    "webpack-cli": "^3.3.2"
+    "admin-lte": "^3.1.0",
+    "babel-loader": "^8.2.2",
+    "clipboard": "^2.0.8",
+    "compression-webpack-plugin": "^8.0.1",
+    "css-loader": "^6.2.0",
+    "css-minimizer-webpack-plugin": "^3.0.2",
+    "datatables.net-plugins": "^1.10.24",
+    "import-glob": "^1.5.0",
+    "less-loader": "^10.0.1",
+    "mini-css-extract-plugin": "^2.2.0",
+    "sass": "<1.33.0",
+    "sass-loader": "^12.1.0",
+    "terser-webpack-plugin": "^5.2.0",
+    "webpack-cli": "^4.8.0"
   }
 }

@@ -44,13 +44,6 @@ class MultipleEmailAddressesVerify(object):
 class ConfirmationForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Confirm'))
 
-
-class LoginForm(flask_wtf.FlaskForm):
-    email = fields.StringField(_('E-mail'), [validators.Email()])
-    pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
-    submit = fields.SubmitField(_('Sign in'))
-
-
 class DomainForm(flask_wtf.FlaskForm):
     name = fields.StringField(_('Domain name'), [validators.DataRequired()])
     max_users = fields_.IntegerField(_('Maximum user count'), [validators.NumberRange(min=-1)], default=10)
@@ -86,7 +79,7 @@ class UserForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('E-mail'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
     pw = fields.PasswordField(_('Password'))
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
-    quota_bytes = fields_.IntegerSliderField(_('Quota'), default=1000000000)
+    quota_bytes = fields_.IntegerSliderField(_('Quota'), default=10**9)
     enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)
     enable_pop = fields.BooleanField(_('Allow POP3 access'), default=True)
     displayed_name = fields.StringField(_('Displayed name'))

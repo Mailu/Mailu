@@ -1,39 +1,43 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Alias list{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block subtitle %}
+{%- block subtitle %}
 {{ domain.name }}
-{% endblock %}
+{%- endblock %}
 
-{% block main_action %}
-<a class="btn btn-primary" href="{{ url_for('.alias_create', domain_name=domain.name) }}">{% trans %}Add alias{% endtrans %}</a>
-{% endblock %}
+{%- block main_action %}
+<a class="btn btn-primary float-right" href="{{ url_for('.alias_create', domain_name=domain.name) }}">{% trans %}Add alias{% endtrans %}</a>
+{%- endblock %}
 
-{% block content %}
-{% call macros.table() %}
-<tr>
-  <th>{% trans %}Actions{% endtrans %}</th>
-  <th>{% trans %}Email{% endtrans %}</th>
-  <th>{% trans %}Destination{% endtrans %}</th>
-  <th>{% trans %}Comment{% endtrans %}</th>
-  <th>{% trans %}Created{% endtrans %}</th>
-  <th>{% trans %}Last edit{% endtrans %}</th>
-</tr>
-{% for alias in domain.aliases %}
-<tr>
-  <td>
-    <a href="{{ url_for('.alias_edit', alias=alias.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
-    <a href="{{ url_for('.alias_delete', alias=alias.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
-  </td>
-  <td>{{ alias }}</td>
-  <td>{{ alias.destination|join(', ') or '-' }}</td>
-  <td>{{ alias.comment or '' }}</td>
-  <td>{{ alias.created_at }}</td>
-  <td>{{ alias.updated_at or '' }}</td>
-</tr>
-{% endfor %}
-{% endcall %}
-{% endblock %}
+{%- block content %}
+{%- call macros.table() %}
+<thead>
+  <tr>
+    <th>{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}Email{% endtrans %}</th>
+    <th>{% trans %}Destination{% endtrans %}</th>
+    <th>{% trans %}Comment{% endtrans %}</th>
+    <th>{% trans %}Created{% endtrans %}</th>
+    <th>{% trans %}Last edit{% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
+  {%- for alias in domain.aliases %}
+  <tr>
+    <td>
+      <a href="{{ url_for('.alias_edit', alias=alias.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
+      <a href="{{ url_for('.alias_delete', alias=alias.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+    </td>
+    <td>{{ alias }}</td>
+    <td>{{ alias.destination|join(', ') or '-' }}</td>
+    <td>{{ alias.comment or '' }}</td>
+    <td>{{ alias.created_at | format_date }}</td>
+    <td>{{ alias.updated_at | format_date }}</td>
+  </tr>
+  {%- endfor %}
+</tbody>
+{%- endcall %}
+{%- endblock %}

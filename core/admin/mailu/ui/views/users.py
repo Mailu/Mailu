@@ -119,6 +119,7 @@ def user_password(user_email):
         if form.pw.data != form.pw2.data:
             flask.flash('Passwords do not match', 'error')
         else:
+            flask.session.regenerate()
             user.set_password(form.pw.data)
             models.db.session.commit()
             flask.flash('Password updated for %s' % user)
@@ -126,23 +127,6 @@ def user_password(user_email):
                 return flask.redirect(flask.url_for('.user_list',
                     domain_name=user.domain.name))
     return flask.render_template('user/password.html', form=form, user=user)
-
-
-@ui.route('/user/forward', methods=['GET', 'POST'], defaults={'user_email': None})
-@ui.route('/user/forward/<path:user_email>', methods=['GET', 'POST'])
-@access.owner(models.User, 'user_email')
-def user_forward(user_email):
-    user_email_or_current = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email_or_current) or flask.abort(404)
-    form = forms.UserForwardForm(obj=user)
-    if form.validate_on_submit():
-        form.populate_obj(user)
-        models.db.session.commit()
-        flask.flash('Forward destination updated for %s' % user)
-        if user_email:
-            return flask.redirect(
-                flask.url_for('.user_list', domain_name=user.domain.name))
-    return flask.render_template('user/forward.html', form=form, user=user)
 
 
 @ui.route('/user/reply', methods=['GET', 'POST'], defaults={'user_email': None})
@@ -186,6 +170,7 @@ def user_signup(domain_name=None):
         if domain.has_email(form.localpart.data):
             flask.flash('Email is already used', 'error')
         else:
+            flask.session.regenerate()
             user = models.User(domain=domain)
             form.populate_obj(user)
             user.set_password(form.pw.data)

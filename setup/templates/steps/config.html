@@ -48,10 +48,25 @@ Or in plain english: if receivers start to classify your mail as spam, this post
 </div>
 
 <div class="form-group">
-  <label>Authentication rate limit (per source IP address)</label>
+  <label>Authentication rate limit per IP for failed login attempts or non-existing accounts</label>
   <!--   Validates number input only -->
-  <p><input class="form-control" style="width: 7%; display: inline;" type="number" name="auth_ratelimit_pm"
-  		value="10" required > / minute
+  <p><input class="form-control" style="width: 9%; display: inline;" type="number" name="auth_ratelimit_ip"
+  		value="60" required > / hour
+  </p>
+</div>
+
+<div class="form-group">
+  <label>Authentication rate limit per user</label>
+  <!--   Validates number input only -->
+  <p><input class="form-control" style="width: 9%; display: inline;" type="number" name="auth_ratelimit_user"
+  		value="100" required > / day
+  </p>
+</div>
+
+<div class="form-group">
+  <label>Outgoing message rate limit (per user)</label>
+  <!--   Validates number input only -->
+  <p><input class="form-control" style="width: 7%; display: inline;" type="number" name="message_ratelimit_pd" value="200" required > / day
   </p>
 </div>
 
@@ -83,7 +98,7 @@ manage your email domains, users, etc.</p>
     <input class="form-control" type="text" name="admin_path" id="admin_path" style="display: none">
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <script type="text/javascript" src="{{ url_for('static', filename='render.js') }}"></script>
 

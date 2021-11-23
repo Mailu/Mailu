@@ -1,4 +1,4 @@
-ARG DISTRO=alpine:3.10
+ARG DISTRO=alpine:3.14.2
 FROM $DISTRO
 
 RUN mkdir -p /app

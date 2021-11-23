@@ -1,61 +1,76 @@
-var path = require("path");
-var webpack = require("webpack");
-var css = require("mini-css-extract-plugin");
+const path = require('path');
+const webpack = require('webpack');
+const css = require('mini-css-extract-plugin');
+const mini = require('css-minimizer-webpack-plugin');
+const terse = require('terser-webpack-plugin');
+const compress = require('compression-webpack-plugin');
 
 module.exports = {
-    mode: "development",
+    mode: 'production',
     entry: {
-        app: "./assets/app.js",
-        vendor: "./assets/vendor.js"
+        app: {
+            import: './assets/app.js',
+            dependOn: 'vendor',
+        },
+        vendor: './assets/vendor.js',
     },
     output: {
-        path: path.resolve(__dirname, "static/"),
-        filename: "[name].js"
+        path: path.resolve(__dirname, 'static/'),
+        filename: '[name].js',
+        assetModuleFilename: '[name][ext]',
     },
     module: {
         rules: [
             {
                 test: /\.js$/,
-                use: ['babel-loader']
+                use: ['babel-loader', 'import-glob'],
             },
             {
-                test: /\.scss$/,
-                use: [css.loader, 'css-loader', 'sass-loader']
+                test: /\.s?css$/i,
+                use: [css.loader, 'css-loader', 'sass-loader'],
             },
             {
-                test: /\.less$/,
-                use: [css.loader, 'css-loader', 'less-loader']
+                test: /\.less$/i,
+                use: [css.loader, 'css-loader', 'less-loader'],
             },
             {
-                test: /\.css$/,
-                use: [css.loader, 'css-loader']
+                test: /\.(json|png|svg|jpg|jpeg|gif)$/i,
+                type: 'asset/resource',
             },
-            {
-                test: /\.woff($|\?)|\.woff2($|\?)|\.ttf($|\?)|\.eot($|\?)|\.svg($|\?)/,
-                use: ['url-loader']
-            },
-            {
-                // Exposes jQuery for use outside Webpack build
-                test: require.resolve('jquery'),
-                use: [{
-                    loader: 'expose-loader',
-                    options: 'jQuery'
-                }, {
-                    loader: 'expose-loader',
-                    options: '$'
-                }]
-            }
-        ]
+        ],
     },
     plugins: [
-	      new css({
-	          filename: "[name].css",
-	          chunkFilename: "[id].css"
-	      }),
+        new css({
+            filename: '[name].css',
+            chunkFilename: '[id].css',
+        }),
         new webpack.ProvidePlugin({
-            $: "jquery",
-            jQuery: "jquery"
-        })
-    ]
-}
-
+            $: 'jquery',
+            jQuery: 'jquery',
+            ClipboardJS: 'clipboard',
+        }),
+        new compress({
+            filename: '[path][base].gz',
+            algorithm: "gzip",
+            exclude: /\.(png|gif|jpe?g)$/,
+            threshold: 5120,
+            minRatio: 0.8,
+            deleteOriginalAssets: false,
+        }),
+    ],
+    optimization: {
+        minimize: true,
+        minimizer: [
+            new terse(),
+            new mini({
+                minimizerOptions: {
+                    preset: [
+                        'default', {
+                            discardComments: { removeAll: true },
+                        },
+                    ],
+                },
+            }),
+        ],
+    },
+};

@@ -5,7 +5,6 @@ from flask import current_app as app
 import flask
 import flask_login
 import wtforms_components
-import dns.resolver
 
 
 @ui.route('/domain', methods=['GET'])
@@ -74,6 +73,8 @@ def domain_details(domain_name):
 def domain_genkeys(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     domain.generate_dkim_key()
+    models.db.session.add(domain)
+    models.db.session.commit()
     return flask.redirect(
         flask.url_for(".domain_details", domain_name=domain_name))
 

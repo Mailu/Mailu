@@ -5,8 +5,8 @@ import re
 import urllib
 import ipaddress
 import socket
+import sqlalchemy.exc
 import tenacity
-
 
 SUPPORTED_AUTH_METHODS = ["none", "plain"]
 
@@ -17,8 +17,34 @@ STATUSES = {
         "smtp": "535 5.7.8",
         "pop3": "-ERR Authentication failed"
     }),
+    "encryption": ("Must issue a STARTTLS command first", {
+        "smtp": "530 5.7.0"
+    }),
+    "ratelimit": ("Temporary authentication failure (rate-limit)", {
+        "imap": "LIMIT",
+        "smtp": "451 4.3.2",
+        "pop3": "-ERR [LOGIN-DELAY] Retry later"
+    }),
 }
 
+def check_credentials(user, password, ip, protocol=None):
+    if not user or not user.enabled or (protocol == "imap" and not user.enable_imap) or (protocol == "pop3" and not user.enable_pop):
+        return False
+    is_ok = False
+    # webmails
+    if len(password) == 64 and ip == app.config['WEBMAIL_ADDRESS']:
+        if user.verify_temp_token(password):
+            is_ok = True
+    # All tokens are 32 characters hex lowercase
+    if not is_ok and len(password) == 32:
+        for token in user.tokens:
+            if (token.check_password(password) and
+                (not token.ip or token.ip == ip)):
+                    is_ok = True
+                    break
+    if not is_ok and user.check_password(password):
+        is_ok = True
+    return is_ok
 
 def handle_authentication(headers):
     """ Handle an HTTP nginx authentication request
@@ -28,51 +54,69 @@ def handle_authentication(headers):
     protocol = headers["Auth-Protocol"]
     # Incoming mail, no authentication
     if method == "none" and protocol == "smtp":
-        server, port = get_server(headers["Auth-Protocol"], False)
-        return {
-            "Auth-Status": "OK",
-            "Auth-Server": server,
-            "Auth-Port": port
-        }
-    # Authenticated user
-    elif method == "plain":
-        server, port = get_server(headers["Auth-Protocol"], True)
-        # According to RFC2616 section 3.7.1 and PEP 3333, HTTP headers should
-        # be ASCII and are generally considered ISO8859-1. However when passing
-        # the password, nginx does not transcode the input UTF string, thus
-        # we need to manually decode.
-        raw_user_email = urllib.parse.unquote(headers["Auth-User"])
-        user_email = raw_user_email.encode("iso8859-1").decode("utf8")
-        raw_password = urllib.parse.unquote(headers["Auth-Pass"])
-        password = raw_password.encode("iso8859-1").decode("utf8")
-        ip = urllib.parse.unquote(headers["Client-Ip"])
-        user = models.User.query.get(user_email)
-        status = False
-        if user:
-            for token in user.tokens:
-                if (token.check_password(password) and
-                    (not token.ip or token.ip == ip)):
-                        status = True
-            if user.check_password(password):
-                status = True
-            if status:
-                if protocol == "imap" and not user.enable_imap:
-                    status = False
-                elif protocol == "pop3" and not user.enable_pop:
-                    status = False
-        if status and user.enabled:
+        server, port = get_server(protocol, False)
+        if app.config["INBOUND_TLS_ENFORCE"]:
+            if "Auth-SSL" in headers and headers["Auth-SSL"] == "on":
+                return {
+                    "Auth-Status": "OK",
+                    "Auth-Server": server,
+                    "Auth-Port": port
+                }
+            else:
+                status, code = get_status(protocol, "encryption")
+                return {
+                    "Auth-Status": status,
+                    "Auth-Error-Code" : code,
+                    "Auth-Wait": 0
+                }
+        else:
             return {
                 "Auth-Status": "OK",
                 "Auth-Server": server,
                 "Auth-Port": port
             }
+    # Authenticated user
+    elif method == "plain":
+        is_valid_user = False
+        # According to RFC2616 section 3.7.1 and PEP 3333, HTTP headers should
+        # be ASCII and are generally considered ISO8859-1. However when passing
+        # the password, nginx does not transcode the input UTF string, thus
+        # we need to manually decode.
+        raw_user_email = urllib.parse.unquote(headers["Auth-User"])
+        raw_password = urllib.parse.unquote(headers["Auth-Pass"])
+        user_email = 'invalid'
+        try:
+            user_email = raw_user_email.encode("iso8859-1").decode("utf8")
+            password = raw_password.encode("iso8859-1").decode("utf8")
+            ip = urllib.parse.unquote(headers["Client-Ip"])
+        except:
+            app.logger.warn(f'Received undecodable user/password from nginx: {raw_user_email!r}/{raw_password!r}')
         else:
-            status, code = get_status(protocol, "authentication")
-            return {
-                "Auth-Status": status,
-                "Auth-Error-Code": code,
-                "Auth-Wait": 0
-            }
+            try:
+                user = models.User.query.get(user_email)
+                is_valid_user = True
+            except sqlalchemy.exc.StatementError as exc:
+                exc = str(exc).split('\n', 1)[0]
+                app.logger.warn(f'Invalid user {user_email!r}: {exc}')
+            else:
+                ip = urllib.parse.unquote(headers["Client-Ip"])
+                if check_credentials(user, password, ip, protocol):
+                    server, port = get_server(headers["Auth-Protocol"], True)
+                    return {
+                        "Auth-Status": "OK",
+                        "Auth-Server": server,
+                        "Auth-User": user_email,
+                        "Auth-User-Exists": is_valid_user,
+                        "Auth-Port": port
+                    }
+        status, code = get_status(protocol, "authentication")
+        return {
+            "Auth-Status": status,
+            "Auth-Error-Code": code,
+            "Auth-User": user_email,
+            "Auth-User-Exists": is_valid_user,
+            "Auth-Wait": 0
+        }
     # Unexpected
     return {}
 

@@ -61,7 +61,7 @@ have to prevent pushing out something quickly.
 We currently maintain a strict work flow:
 
 #. Someone writes a solution and sends a pull request;
-#. We use Travis-CI for some very basic building and testing;
+#. We use Github actions for some very basic building and testing;
 #. The pull request needs to be code-reviewed and tested by at least two members
    from the contributors team.
   
@@ -129,7 +129,7 @@ So when you have something like this:
 - The admin interface generates ``MX`` and ``SPF`` examples which point to the first entry of ``HOSTNAMES`` but these are only examples.
   You can modify them to use any other ``HOSTNAMES`` entry.
 
-You're mail service will be reachable for IMAP, POP3, SMTP and Webmail at the addresses:
+Your mail service will be reachable for IMAP, POP3, SMTP and Webmail at the addresses:
 
 - mail.example.com
 - mail.foo.com
@@ -257,10 +257,17 @@ Postfix, Dovecot, Nginx and Rspamd support overriding configuration files. Overr
 ``$ROOT/overrides``. Please refer to the official documentation of those programs for the
 correct syntax. The following file names will be taken as override configuration:
 
-- `Postfix`_ - ``postfix.cf`` in postfix sub-directory;
+- `Postfix`_ :
+   - ``main.cf`` as ``$ROOT/overrides/postfix/postfix.cf``
+   - ``master.cf`` as ``$ROOT/overrides/postfix/postfix.master``
+   - All ``$ROOT/overrides/postfix/*.map`` files
+   - For both ``postfix.cf`` and ``postfix.master``, you need to put one configuration per line, as they are fed line-by-line
+     to postfix.
 - `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory;
 - `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory;
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
+
+To override the root location (``/``) in Nginx ``WEBROOT_REDIRECT`` needs to be set to ``none`` in the env file (see :ref:`web settings <web_settings>`).
 
 *Issue reference:* `206`_, `1368`_.
 
@@ -362,6 +369,83 @@ How do I use webdav (radicale)?
 .. _`575`: https://github.com/Mailu/Mailu/issues/575
 .. _`1591`: https://github.com/Mailu/Mailu/issues/1591
 
+How do I setup a MTA-STS policy?
+````````````````````````````````
+
+Mailu can serve an `MTA-STS policy`_; To configure it you will need to:
+
+1. add ``mta-sts.example.com`` to the ``HOSTNAMES`` configuration variable (and ensure that a valid SSL certificate is available for it; this may mean restarting your smtp container)
+
+2. configure an override with the policy itself; for example, your ``overrides/nginx/mta-sts.conf`` could read:
+
+.. code-block:: bash
+
+   location ^~ /.well-known/mta-sts.txt {
+   return 200 "version: STSv1
+   mode: enforce
+   max_age: 1296000
+   mx: mailu.example.com\r\n";
+   }
+
+3. setup the appropriate DNS/CNAME record (``mta-sts.example.com`` -> ``mailu.example.com``) and DNS/TXT record (``_mta-sts.example.com`` -> ``v=STSv1; id=1``) paying attention to the ``TTL`` as this is used by MTA-STS.
+
+*issue reference:* `1798`_.
+
+.. _`1798`: https://github.com/Mailu/Mailu/issues/1798
+.. _`MTA-STS policy`: https://datatracker.ietf.org/doc/html/rfc8461
+
+How do I setup client autoconfiguration?
+````````````````````````````````````````
+
+Mailu can serve an `XML file for autoconfiguration`_; To configure it you will need to:
+
+1. add ``autoconfig.example.com`` to the ``HOSTNAMES`` configuration variable (and ensure that a valid SSL certificate is available for it; this may mean restarting your smtp container)
+
+2. configure an override with the policy itself; for example, your ``overrides/nginx/autoconfiguration.conf`` could read:
+
+.. code-block:: bash
+
+   location ^~ /mail/config-v1.1.xml {
+   return 200 "<?xml version=\"1.0\"?>
+   <clientConfig version=\"1.1\">
+   <emailProvider id=\"%EMAILDOMAIN%\">
+   <domain>%EMAILDOMAIN%</domain>
+
+   <displayName>Email</displayName>
+   <displayShortName>Email</displayShortName>
+
+   <incomingServer type=\"imap\">
+   <hostname>mailu.example.com</hostname>
+   <port>993</port>
+   <socketType>SSL</socketType>
+   <username>%EMAILADDRESS%</username>
+   <authentication>password-cleartext</authentication>
+   </incomingServer>
+
+   <outgoingServer type=\"smtp\">
+   <hostname>mailu.example.com</hostname>
+   <port>465</port>
+   <socketType>SSL</socketType>
+   <username>%EMAILADDRESS%</username>
+   <authentication>password-cleartext</authentication>
+   <addThisServer>true</addThisServer>
+   <useGlobalPreferredServer>true</useGlobalPreferredServer>
+   </outgoingServer>
+
+   <documentation url=\"https://mailu.example.com/admin/ui/client\">
+   <descr lang=\"en\">Configure your email client</descr>
+   </documentation>
+   </emailProvider>
+   </clientConfig>\r\n";
+   }
+
+3. setup the appropriate DNS/CNAME record (``autoconfig.example.com`` -> ``mailu.example.com``).
+
+*issue reference:* `224`_.
+
+.. _`224`: https://github.com/Mailu/Mailu/issues/224
+.. _`XML file for autoconfiguration`: https://wiki.mozilla.org/Thunderbird:Autoconfiguration:ConfigFileFormat
+
 Technical issues
 ----------------
 
@@ -389,6 +473,22 @@ Any mail related connection is proxied by nginx. Therefore the SMTP Banner is al
 *Issue reference:* `1368`_.
 
 .. _`1368`: https://github.com/Mailu/Mailu/issues/1368
+
+My emails are getting defered, what can I do?
+`````````````````````````````````````````````
+
+Emails are asynchronous and it's not abnormal for them to be defered sometimes. That being said, Mailu enforces secure connections where possible using DANE and MTA-STS, both of which have the potential to delay indefinitely delivery if something is misconfigured.
+
+If delivery to a specific domain fails because their DANE records are invalid or their TLS configuration inadequate (expired certificate, ...), you can assist delivery by downgrading the security level for that domain by creating an override at ``overrides/postfix/tls_policy.map`` as follow:
+
+.. code-block:: bash
+
+   domain.example.com   may
+   domain.example.org   encrypt
+
+The syntax and options are as described in `postfix's documentation`_. Re-creating the smtp container will be required for changes to take effect.
+
+.. _`postfix's documentation`: http://www.postfix.org/postconf.5.html#smtp_tls_policy_maps
 
 403 - Access Denied Errors
 ---------------------------
@@ -492,6 +592,8 @@ follow these steps:
 
   logging:
     driver: journald
+    options:
+      tag: mailu-front
 
 2. Add the /etc/fail2ban/filter.d/bad-auth.conf
 
@@ -501,6 +603,7 @@ follow these steps:
   [Definition]
   failregex = .* client login failed: .+ client:\ <HOST>
   ignoreregex =
+  journalmatch = CONTAINER_TAG=mailu-front
 
 3. Add the /etc/fail2ban/jail.d/bad-auth.conf
 
@@ -508,8 +611,8 @@ follow these steps:
 
   [bad-auth]
   enabled = true
+  backend = systemd
   filter = bad-auth
-  logpath = /var/log/messages
   bantime = 604800
   findtime = 300
   maxretry = 10
@@ -525,25 +628,42 @@ The above will block flagged IPs for a week, you can of course change it to you 
   
   actionstart = iptables -N f2b-bad-auth
                 iptables -A f2b-bad-auth -j RETURN
-                iptables -I FORWARD -p tcp -m multiport --dports 1:1024 -j f2b-bad-auth
+                iptables -I DOCKER-USER -p tcp -m multiport --dports 1:1024 -j f2b-bad-auth
   
-  actionstop = iptables -D FORWARD -p tcp -m multiport --dports 1:1024 -j f2b-bad-auth
+  actionstop = iptables -D DOCKER-USER -p tcp -m multiport --dports 1:1024 -j f2b-bad-auth
                iptables -F f2b-bad-auth
                iptables -X f2b-bad-auth
   
-  actioncheck = iptables -n -L FORWARD | grep -q 'f2b-bad-auth[ \t]'
+  actioncheck = iptables -n -L DOCKER-USER | grep -q 'f2b-bad-auth[ \t]'
   
   actionban = iptables -I f2b-bad-auth 1 -s <ip> -j DROP
   
   actionunban = iptables -D f2b-bad-auth -s <ip> -j DROP
 
-5. Restart Fail2Ban
+Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
+
+5. Configure and restart the Fail2Ban service
+
+Make sure Fail2Ban is started after the Docker service by adding a partial override which appends this to the existing configuration.
+
+.. code-block:: bash
+
+  sudo systemctl edit fail2ban
+
+Add the override and save the file.
+
+.. code-block:: bash
+
+  [Unit]
+  After=docker.service
+
+Restart the Fail2Ban service.
 
 .. code-block:: bash
 
   sudo systemctl restart fail2ban
 
-*Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_.
+*Issue reference:* `85`_, `116`_, `171`_, `584`_, `592`_, `1727`_.
 
 Users can't change their password from webmail
 ``````````````````````````````````````````````
@@ -667,7 +787,7 @@ iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 25 -j SNAT --to <your mx i
 .. _`1090`: https://github.com/Mailu/Mailu/issues/1090
 .. _`unbound`: https://nlnetlabs.nl/projects/unbound/about/
 .. _`1438`: https://github.com/Mailu/Mailu/issues/1438
-
+.. _`1727`: https://github.com/Mailu/Mailu/issues/1727
 
 A user gets ``Sender address rejected: Access denied. Please check the`` ``message recipient […] and try again`` even though the sender is legitimate?
 ``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````

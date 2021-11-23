@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-04-22 12:10+0200\n"
-"PO-Revision-Date: 2020-03-11 23:03+0000\n"
-"Last-Translator: Jae Beojkkoch <jae@jae.moe>\n"
+"PO-Revision-Date: 2021-03-04 18:46+0000\n"
+"Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
 "Language-Team: English <https://translate.tedomum.net/projects/mailu/admin/"
 "en/>\n"
 "Language: en\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.11.2\n"
+"X-Generator: Weblate 4.0.1\n"
 "Generated-By: Babel 2.5.3\n"
 
 #: mailu/ui/forms.py:32
@@ -30,13 +30,13 @@ msgstr "Confirm"
 
 #: mailu/ui/forms.py:40 mailu/ui/forms.py:77
 msgid "E-mail"
-msgstr ""
+msgstr "E-mail"
 
 #: mailu/ui/forms.py:41 mailu/ui/forms.py:78 mailu/ui/forms.py:90
 #: mailu/ui/forms.py:109 mailu/ui/forms.py:162
 #: mailu/ui/templates/client.html:32 mailu/ui/templates/client.html:59
 msgid "Password"
-msgstr ""
+msgstr "Password"
 
 #: mailu/ui/forms.py:42 mailu/ui/templates/login.html:4
 #: mailu/ui/templates/sidebar.html:111
@@ -51,7 +51,7 @@ msgstr ""
 
 #: mailu/ui/forms.py:47
 msgid "Maximum user count"
-msgstr ""
+msgstr "Maximum user count"
 
 #: mailu/ui/forms.py:48
 msgid "Maximum alias count"
@@ -59,11 +59,11 @@ msgstr ""
 
 #: mailu/ui/forms.py:49
 msgid "Maximum user quota"
-msgstr ""
+msgstr "Maximum user quota"
 
 #: mailu/ui/forms.py:50
 msgid "Enable sign-up"
-msgstr ""
+msgstr "Enable sign-up"
 
 #: mailu/ui/forms.py:51 mailu/ui/forms.py:72 mailu/ui/forms.py:83
 #: mailu/ui/forms.py:128 mailu/ui/forms.py:140
@@ -71,28 +71,28 @@ msgstr ""
 #: mailu/ui/templates/relay/list.html:19 mailu/ui/templates/token/list.html:19
 #: mailu/ui/templates/user/list.html:23
 msgid "Comment"
-msgstr ""
+msgstr "Comment"
 
 #: mailu/ui/forms.py:52 mailu/ui/forms.py:61 mailu/ui/forms.py:66
 #: mailu/ui/forms.py:73 mailu/ui/forms.py:132 mailu/ui/forms.py:141
 msgid "Create"
-msgstr ""
+msgstr "Create"
 
 #: mailu/ui/forms.py:57
 msgid "Initial admin"
-msgstr ""
+msgstr "Initial admin"
 
 #: mailu/ui/forms.py:58
 msgid "Admin password"
-msgstr ""
+msgstr "Admin password"
 
 #: mailu/ui/forms.py:59 mailu/ui/forms.py:79 mailu/ui/forms.py:91
 msgid "Confirm password"
-msgstr ""
+msgstr "Confirm password"
 
 #: mailu/ui/forms.py:65
 msgid "Alternative name"
-msgstr ""
+msgstr "Alternative name"
 
 #: mailu/ui/forms.py:70
 msgid "Relayed domain name"
@@ -105,23 +105,23 @@ msgstr ""
 #: mailu/ui/forms.py:80 mailu/ui/templates/user/list.html:22
 #: mailu/ui/templates/user/signup_domain.html:16
 msgid "Quota"
-msgstr ""
+msgstr "Quota"
 
 #: mailu/ui/forms.py:81
 msgid "Allow IMAP access"
-msgstr ""
+msgstr "Allow IMAP access"
 
 #: mailu/ui/forms.py:82
 msgid "Allow POP3 access"
-msgstr ""
+msgstr "Allow POP3 access"
 
 #: mailu/ui/forms.py:84
 msgid "Enabled"
-msgstr ""
+msgstr "Enabled"
 
 #: mailu/ui/forms.py:85
 msgid "Save"
-msgstr ""
+msgstr "Save"
 
 #: mailu/ui/forms.py:89
 msgid "Email address"
@@ -131,7 +131,7 @@ msgstr ""
 #: mailu/ui/templates/user/signup.html:4
 #: mailu/ui/templates/user/signup_domain.html:4
 msgid "Sign up"
-msgstr ""
+msgstr "Sign up"
 
 #: mailu/ui/forms.py:97
 msgid "Displayed name"
@@ -139,15 +139,15 @@ msgstr ""
 
 #: mailu/ui/forms.py:98
 msgid "Enable spam filter"
-msgstr ""
+msgstr "Enable spam filter"
 
 #: mailu/ui/forms.py:99
 msgid "Spam filter tolerance"
-msgstr ""
+msgstr "Spam filter tolerance"
 
 #: mailu/ui/forms.py:100
 msgid "Enable forwarding"
-msgstr ""
+msgstr "Enable forwarding"
 
 #: mailu/ui/forms.py:101
 msgid "Keep a copy of the emails"
@@ -160,7 +160,7 @@ msgstr ""
 
 #: mailu/ui/forms.py:105
 msgid "Save settings"
-msgstr ""
+msgstr "Save settings"
 
 #: mailu/ui/forms.py:110
 msgid "Password check"
@@ -184,11 +184,11 @@ msgstr ""
 
 #: mailu/ui/forms.py:119
 msgid "End of vacation"
-msgstr ""
+msgstr "End of vacation"
 
 #: mailu/ui/forms.py:120
 msgid "Update"
-msgstr ""
+msgstr "Update"
 
 #: mailu/ui/forms.py:125
 msgid "Your token (write it down, as it will never be displayed again)"
@@ -196,11 +196,11 @@ msgstr ""
 
 #: mailu/ui/forms.py:130 mailu/ui/templates/token/list.html:20
 msgid "Authorized IP"
-msgstr ""
+msgstr "Authorized IP"
 
 #: mailu/ui/forms.py:136
 msgid "Alias"
-msgstr ""
+msgstr "Alias"
 
 #: mailu/ui/forms.py:138
 msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"
@@ -229,7 +229,7 @@ msgstr ""
 #: mailu/ui/forms.py:159 mailu/ui/templates/client.html:20
 #: mailu/ui/templates/client.html:47
 msgid "TCP port"
-msgstr ""
+msgstr "TCP port"
 
 #: mailu/ui/forms.py:160
 msgid "Enable TLS"
@@ -283,7 +283,7 @@ msgstr ""
 
 #: mailu/ui/templates/docker-error.html:4
 msgid "Docker error"
-msgstr ""
+msgstr "Docker error"
 
 #: mailu/ui/templates/docker-error.html:12
 msgid "An error occurred while talking to the Docker server."
@@ -328,11 +328,11 @@ msgstr ""
 
 #: mailu/ui/templates/sidebar.html:54
 msgid "Relayed domains"
-msgstr ""
+msgstr "Relayed domains"
 
 #: mailu/ui/templates/sidebar.html:59 mailu/ui/templates/user/settings.html:15
 msgid "Antispam"
-msgstr ""
+msgstr "Antispam"
 
 #: mailu/ui/templates/sidebar.html:66
 msgid "Mail domains"
@@ -593,7 +593,7 @@ msgstr ""
 
 #: mailu/ui/templates/relay/create.html:4
 msgid "New relay domain"
-msgstr ""
+msgstr "New relay domain"
 
 #: mailu/ui/templates/relay/edit.html:4
 msgid "Edit relayd domain"
@@ -601,11 +601,11 @@ msgstr ""
 
 #: mailu/ui/templates/relay/list.html:4
 msgid "Relayed domain list"
-msgstr ""
+msgstr "Relayed domain list"
 
 #: mailu/ui/templates/relay/list.html:9
 msgid "New relayed domain"
-msgstr ""
+msgstr "New relayed domain"
 
 #: mailu/ui/templates/token/create.html:4
 msgid "Create an authentication token"
@@ -669,7 +669,7 @@ msgstr ""
 
 #: mailu/ui/templates/user/signup_domain.html:14
 msgid "Domain"
-msgstr ""
+msgstr "Domain"
 
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"

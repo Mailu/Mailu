@@ -1,18 +1,18 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Register a domain{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block content %}
+{%- block content %}
 
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
 
-  {% call macros.box(title="Requirements") %}
+  {%- call macros.card(title="Requirements") %}
   <p>{% trans %}In order to register a new domain, you must first setup the
     domain zone so that the domain <code>MX</code> points to this server{% endtrans %}
-    (<code>{{ config["HOSTNAMES"].split(",")[0] }}</code>).
+    (<code>{{ config["HOSTNAME"] }}</code>).
   </p>
   <p>
     {% trans %}If you do not know how to setup an <code>MX</code> record for your DNS zone,
@@ -20,17 +20,17 @@
     couple minutes after the <code>MX</code> is set so the local server cache
     expires.{% endtrans %}
   </p>
-  {% endcall %}
+  {%- endcall %}
 
-  {% call macros.box() %}
-  {% if form.localpart %}
-  {{ macros.form_fields((form.localpart, form.name), append='<span class="input-group-addon">@</span>') }}
+  {%- call macros.card() %}
+  {%- if form.localpart %}
+  {{ macros.form_fields((form.localpart, form.name), append='<span class="input-group-text">@</span>') }}
   {{ macros.form_fields((form.pw, form.pw2)) }}
-  {% else %}
+  {%- else %}
   {{ macros.form_field(form.name) }}
-  {% endif %}
+  {%- endif %}
   {{ macros.form_field(form.captcha) }}
   {{ macros.form_field(form.submit) }}
-  {% endcall %}
+  {%- endcall %}
 </form>
-{% endblock %}
+{%- endblock %}

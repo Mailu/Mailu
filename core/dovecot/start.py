@@ -6,7 +6,7 @@ import multiprocessing
 import logging as log
 import sys
 
-from podop   import run_server
+from podop import run_server
 from socrate import system, conf
 
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))

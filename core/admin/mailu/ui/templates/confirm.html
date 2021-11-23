@@ -1,16 +1,16 @@
-{% extends "base.html" %}
+{%- extends "base.html" %}
 
-{% block title %}
+{%- block title %}
 {% trans %}Confirm action{% endtrans %}
-{% endblock %}
+{%- endblock %}
 
-{% block subtitle %}
+{%- block subtitle %}
 {{ action }}
-{% endblock %}
+{%- endblock %}
 
-{% block content %}
-{% call macros.box(theme="warning") %}
+{%- block content %}
+{%- call macros.card(theme="warning") %}
 <p>{% trans action %}You are about to {{ action }}. Please confirm your action.{% endtrans %}</p>
 {{ macros.form(form) }}
-{% endcall %}
-{% endblock %}
+{%- endcall %}
+{%- endblock %}

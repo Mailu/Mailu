@@ -1,22 +1,59 @@
-.select2-search--inline .select2-search__field:focus {
-  border: none;
+/* mailu logo */
+.mailu-logo {
+  opacity: .8;
+}
+.bg-mailu-logo {
+  background-color: #2980b9!important;
 }
 
-.sidebar h4 {
-  padding-left: 5px;
-  padding-right: 5px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* user image */
+.div-circle {
+  position: relative;
+  width: 2.1rem;
+  height: 2.1rem;
+  opacity: .8;
+  background-color: white;
+  border-radius: 50%;
+}
+.div-circle > i {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%)
 }
 
-.sidebar-collapse .sidebar h4 {
-  display: none !important;
+/* nice round preformatted configuration display */
+.pre-config {
+  padding: 9px;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: anywhere;
+  border-radius: 4px;
 }
 
-.logo a {
-  color: #fff;
+/* fieldset */
+legend {
+  font-size: inherit;
+}
+fieldset:disabled :not(legend) label {
+  opacity: .5;
+}
+fieldset:disabled .form-control:disabled {
+  color: gray;
 }
 
-.sidebar-toggle {
-  padding: unset !important;
+/* fix animation for icons in menu text */
+.sidebar .nav-link p i {
+  transition: margin-left .3s linear,opacity .3s ease,visibility .3s ease;
+}
+
+/* fix select2 text color */
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+  color: black;
+}
+
+/* range input spacing */
+.input-group-text {
+  margin-right: 1em;
 }

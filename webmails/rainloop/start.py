@@ -19,11 +19,11 @@ shutil.rmtree(base + "domains/", ignore_errors=True)
 os.makedirs(base + "domains", exist_ok=True)
 os.makedirs(base + "configs", exist_ok=True)
 
-conf.jinja("/default.ini", os.environ, "/data/_data_/_default_/domains/default.ini")
-conf.jinja("/application.ini", os.environ, "/data/_data_/_default_/configs/application.ini")
-conf.jinja("/php.ini", os.environ, "/usr/local/etc/php/conf.d/rainloop.ini")
+conf.jinja("/defaults/default.ini", os.environ, "/data/_data_/_default_/domains/default.ini")
+conf.jinja("/defaults/application.ini", os.environ, "/data/_data_/_default_/configs/application.ini")
+conf.jinja("/defaults/php.ini", os.environ, "/etc/php7/php.ini")
 
-os.system("chown -R www-data:www-data /data")
+os.system("chown -R nginx:nginx /data")
+os.system("chmod -R a+rX /var/www/rainloop/")
 
-os.execv("/usr/local/bin/apache2-foreground", ["apache2-foreground"])
-
+os.execv("/usr/sbin/nginx", ["nginx", "-g", "daemon off;"])

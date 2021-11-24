@@ -1,4 +1,4 @@
-ARG DISTRO=alpine:3.14.2
+ARG DISTRO=alpine:3.15
 FROM $DISTRO
 
 ENV TZ Etc/UTC

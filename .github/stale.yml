@@ -24,7 +24,7 @@ exemptLabels:
   - type/security
 
 # Set to true to ignore issues in a project (defaults to false)
-exemptProjects: false
+exemptProjects: true
 
 # Set to true to ignore issues in a milestone (defaults to false)
 exemptMilestones: true
@@ -36,10 +36,14 @@ exemptAssignees: true
 staleLabel: status/response_needed
 
 # Comment to post when marking as stale. Set to `false` to disable
-markComment: >
-  This issue has been automatically marked as stale because it has not had
-  recent activity. It will be closed if no further activity occurs. Thank you
-  for your contributions.
+markComment: |
+  Issues not for bugs, enhancement requests or discussion go stale after 21 days of inactivity. This issue will be automatically closed after 14 days.
+  For all metrics refer to the [stale.yml file](https://github.com/Mailu/Mailu/blob/master/.github/stale.yml).
+  Github issues are not meant for user support. For **user-support questions**, reach out  on the [matrix support channel](https://matrix.to/#/#mailu:tedomum.net).
+
+  Mark the issue as fresh by simply adding a comment to the issue.
+  If this issue is safe to close, please do so now.
+
 
 # Comment to post when removing the stale label.
 # unmarkComment: >
@@ -47,9 +51,8 @@ markComment: >
 
 # Comment to post when closing a stale Issue or Pull Request.
 closeComment: >
-  This issue has not seen activity since as it has become stale. It will now be
-  automatically closed. Please note that this is an automatic action, and not
-  meant in any offensive way.
+  This issue has not seen activity since as it has become stale.
+  Stale issues are automatically closed after 14 days.
 
 # Limit the number of actions per hour, from 1-30. Default is 30
 limitPerRun: 30

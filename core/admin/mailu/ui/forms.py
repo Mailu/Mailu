@@ -80,7 +80,7 @@ class UserForm(flask_wtf.FlaskForm):
     pw = fields.PasswordField(_('Password'))
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
     quota_bytes = fields_.IntegerSliderField(_('Quota'), default=10**9)
-    enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)
+    enable_imap = fields.BooleanField(_('Allow IMAP/Webmail access'), default=True)
     enable_pop = fields.BooleanField(_('Allow POP3 access'), default=True)
     displayed_name = fields.StringField(_('Displayed name'))
     comment = fields.StringField(_('Comment'))

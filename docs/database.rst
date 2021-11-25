@@ -47,26 +47,6 @@ Adjust this to your own liking.
   mysql> FLUSH PRIVILEGES;
 
 
-.. code-block:: sql
-
-  mysql> SELECT host, user, plugin FROM mysql.user;
-
-  +-----------+-------+-----------------------+
-  | host      | user  | plugin                |
-  +-----------+-------+-----------------------+
-  | %         | mailu | caching_sha2_password |
-  +-----------+-------+-----------------------+
-
-  mysql> update mysql.user set plugin = 'mysql_native_password' where user = 'mailu';
-  mysql> SELECT host, user, plugin FROM mysql.user;
-
-  +------+-------+-----------------------+
-  | host | user  | plugin                |
-  +------+-------+-----------------------+
-  | %    | mailu | mysql_native_password |
-  +------+-------+-----------------------+
-
-
 External PostgreSQL
 -------------------
 

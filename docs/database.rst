@@ -2,7 +2,7 @@ Changing the database back-end
 ==============================
 
 By default Mailu uses a SQLite database. We have changed the internals of Mailu
-to enable the support of alternative database solutions as PostgreSQL and MySQL/MariaDB.
+to enable the support of alternative database solutions such as PostgreSQL and MySQL/MariaDB.
 
 
 Migrating to a different database back-end
@@ -10,7 +10,7 @@ Migrating to a different database back-end
 
 From Mailu 1.9, Mailu has a :ref:`cli command (link) <config-export>` for exporting and importing the complete Mailu configuration.
 Using this tool it is very easy to switch what database back-end is used for Mailu.
-Unfortunately roundcube does not have a tool for exporting/importing roundcube configuration.
+Unfortunately roundcube does not have a tool for exporting/importing its configuration.
 This means it is not possible to switch the database back-end used by roundcube using out of box tools.
 
 To switch to a different database back-end:
@@ -42,12 +42,10 @@ Adjust this to your own liking.
 .. code-block:: sql
 
   mysql> CREATE DATABASE mailu;
-  mysql> CREATE USER 'mailu'@'%' IDENTIFIED BY 'my-strong-password-here';
+  mysql> CREATE USER `mailu`@`%` IDENTIFIED WITH mysql_native_password BY `my-strong-password-here`;
   mysql> GRANT ALL PRIVILEGES ON mailu.* TO 'mailu'@'%';
   mysql> FLUSH PRIVILEGES;
 
-Note that if you get any errors related to ``caching_sha2_password`` it can be solved by changing the encryption
-of the password to ``mysql_native_password`` instead of the latest authentication plugin ``caching_sha2_password``.
 
 .. code-block:: sql
 

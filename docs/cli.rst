@@ -121,6 +121,8 @@ additional fields:
 
 * wildcard
 
+.. _config-export:
+
 config-export
 -------------
 

@@ -1,0 +1,2 @@
+Added documentation for how to switch the database back-end used by Mailu.
+Added documentation for migrating from the deprecated Mailu PostgreSQL image to a different PostgreSQL database.

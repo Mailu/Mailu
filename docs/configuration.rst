@@ -124,12 +124,12 @@ Full-text search is enabled for IMAP is enabled by default. This feature can be 
 Web settings
 ------------
 
-- ``WEB_ADMIN`` contains the path to the main admin interface 
+- ``WEB_ADMIN`` contains the path to the main admin interface
 
 - ``WEB_WEBMAIL`` contains the path to the Web email client.
 
 - ``WEBROOT_REDIRECT`` redirects all non-found queries to the set path.
-  An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables classic behavior of a 404 result when not found. 
+  An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables classic behavior of a 404 result when not found.
   Alternatively, ``WEBROOT_REDIRECT`` can be set to ``none`` if you are using an Nginx override for ``location /``.
 
 All three options need a leading slash (``/``) to work.
@@ -238,6 +238,8 @@ Alternatively, ``*_ADDRESS`` can directly be set. In this case, the values of ``
 resolved. This can be used to rely on DNS based service discovery with changing services IP addresses.
 When using ``*_ADDRESS``, the hostnames must be full-qualified hostnames. Otherwise nginx will not be able to
 resolve the hostnames.
+
+.. _db_settings:
 
 Database settings
 -----------------

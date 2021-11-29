@@ -37,7 +37,7 @@ RUN set -eu \
  && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
  && rm -rf /var/lib/apt/lists
 
-ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.5.0/roundcubemail-1.5.0-complete.tar.gz
+ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.5.1/roundcubemail-1.5.1-complete.tar.gz
 
 ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v4.2.2/carddav-v4.2.2.tar.gz
 

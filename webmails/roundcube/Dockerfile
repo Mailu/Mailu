@@ -39,7 +39,7 @@ RUN set -eu \
 
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.5.1/roundcubemail-1.5.1-complete.tar.gz
 
-ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v4.2.2/carddav-v4.2.2.tar.gz
+ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v4.3.0/carddav-v4.3.0.tar.gz
 
 RUN set -eu \
  && rm -rf /var/www/html/ \

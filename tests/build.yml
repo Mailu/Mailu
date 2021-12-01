@@ -38,10 +38,6 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-local}
     build: ../core/admin
 
-  postgresql:
-    image: ${DOCKER_ORG:-mailu}/postgresql:${MAILU_VERSION:-local}
-    build: ../optional/postgresql
-
   roundcube:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}roundcube:${MAILU_VERSION:-local}
     build: ../webmails/roundcube

@@ -23,10 +23,6 @@ To switch to a different database back-end:
 
 Mailu has now been switched to the new database back-end. The Mailu configuration has also been migrated.
 
-.. note::
-   The setup configuration wizard (setup.mailu.io) only supports creating config files for the same database back-end. When creating new config files, select the desired database flavour in the setup and enter dummy values for roundcube.
-   In the generated mailu.env file, configure all ROUNDCUBE_DB_* environment variables to the old values. For SQLite you can remove all the ROUNDCUBE_DB_* values.
-
 
 External MySQL/MariaDB
 ----------------------
@@ -209,8 +205,5 @@ Optionally you can remove left-over files which were used by the old database:
 - /mailu/data/psql_db (old database files)
 
 .. note::
-   The setup configuration wizard (setup.mailu.io) only supports creating config files for the same database back-end. When creating new config files, select PostgreSQL in the setup and enter dummy values for roundcube.
-   In the generated mailu.env file, remove all ROUNDCUBE_DB_* environment variables.
-   Now Admin will use PostgreSQL and roundcube will keep using Roundcube.
-
    Roundcube does not offer a migration tool for moving from SQLite to PostgreSQL.
+   In case roundcube is used, then in the setup utility SQLite can be chosen as database back end for roundcube.

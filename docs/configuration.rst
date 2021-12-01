@@ -188,9 +188,6 @@ Log messages equal or higher than this priority will be printed.
 Can be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG or NOTSET.
 See the `python docs`_ for more information.
 
-``POSTFIX_LOG_FILE`` enables postfix logging to the given file (in addition to log to stdout).
-Log rotation should be done externally.
-
 .. _`python docs`: https://docs.python.org/3.6/library/logging.html#logging-levels
 
 The ``LETSENCRYPT_SHORTCHAIN`` (default: False) setting controls whether we send the ISRG Root X1 certificate in TLS handshakes. This is required for `android handsets older than 7.1.1` but slows down the performance of modern devices.
@@ -270,8 +267,11 @@ Mail log settings
 
 By default, all services log directly to stdout/stderr. Logs can be collected by any docker log processing solution.
 
-In some situations, a separate mail log is required (e.g. for legal reasons). Postfix can be configured to write the logs to a
-syslog server that stores the log files to a volume. It can be configured by the following options:
+Postfix writes the logs to a syslog server which logs to stdout. This is used to filter out messages from the healthcheck.
+In some situations, a separate mail log is required (e.g. for legal reasons). The syslog server can be configured to write log files to a volume. It can be configured by the following options:
 
-- ``POSTFIX_LOG_SYSLOG``: (default: ``disabled``) set to ``local`` to enable a local syslog server for postfix
-- ``POSTFIX_LOG_FILE``: The file to log the mail log to
+- ``POSTFIX_LOG_SYSLOG`` (default: ``local`` ): Set to ``local`` (default) to enable the syslog server. Set to ``disable`` to disable the syslog server. If disabled, Postfix will log directly to stdout and the healthcheck messages will not be filtered out.
+- ``POSTFIX_LOG_FILE``: The file to log the mail log to. When enabled, the syslog server will also log to stdout.
+
+When ``POSTFIX_LOG_FILE`` is enabled, the logrotate program will automatically rotate the logs every week and keep 52 logs.
+To override the logrotate configuration, create the file logrotate.conf with the desired configuration in the :ref:`Postfix overrides folder<override-label>`.

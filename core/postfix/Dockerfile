@@ -19,7 +19,7 @@ RUN apk add --no-cache --virtual .build-deps gcc musl-dev python3-dev
 RUN pip3 install --no-binary :all: postfix-mta-sts-resolver==1.0.1
 RUN apk del .build-deps gcc musl-dev python3-dev
 
-RUN apk add --no-cache postfix postfix-pcre cyrus-sasl-login rsyslog
+RUN apk add --no-cache postfix postfix-pcre cyrus-sasl-login rsyslog logrotate
 
 COPY conf /conf
 COPY start.py /start.py

@@ -17,7 +17,7 @@ fi
 #After that, both tags are pushed to the docker repository.
 if [ "$PINNED_MAILU_VERSION" != "" ] && [ "$BRANCH" != "master" ]
 then
-  images=$(docker-compose -f Mailu/tests/build.yml config | awk -F ':' '/image:/{ print $2 }')
+  images=$(docker-compose -f tests/build.yml config | awk -F ':' '/image:/{ print $2 }')
   for image in $images
   do
     docker tag "${image}":"${PINNED_MAILU_VERSION}" "${image}":${MAILU_VERSION}
@@ -36,7 +36,7 @@ fi
 #Then we publish the images with tag master
 if [ "$PINNED_MAILU_VERSION" != "" ] && [ "$BRANCH" == "master" ]
 then
-  images=$(docker-compose -f Mailu/tests/build.yml config | awk -F ':' '/image:/{ print $2 }')
+  images=$(docker-compose -f tests/build.yml config | awk -F ':' '/image:/{ print $2 }')
   for image in $images
   do
     docker tag "${image}":"${PINNED_MAILU_VERSION}" "${image}":${MAILU_VERSION}

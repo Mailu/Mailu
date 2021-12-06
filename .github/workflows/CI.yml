@@ -12,6 +12,8 @@ on:
       # test branches, e.g. test-debian
       - test-*
 
+concurrency: ci-${{ github.ref }}
+
 ###############################################
 # REQUIRED secrets
 # DOCKER_UN: ${{ secrets.Docker_Login }}

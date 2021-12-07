@@ -1,4 +1,4 @@
-ARG DISTRO=alpine:3.14
+ARG DISTRO=alpine:3.14.2
 
 FROM $DISTRO
 

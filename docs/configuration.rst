@@ -268,9 +268,8 @@ Mail log settings
 By default, all services log directly to stdout/stderr. Logs can be collected by any docker log processing solution.
 
 Postfix writes the logs to a syslog server which logs to stdout. This is used to filter out messages from the healthcheck.
-In some situations, a separate mail log is required (e.g. for legal reasons). The syslog server can be configured to write log files to a volume. It can be configured by the following options:
+In some situations, a separate mail log is required (e.g. for legal reasons). The syslog server can be configured to write log files to a volume. It can be configured with the following option:
 
-- ``POSTFIX_LOG_SYSLOG`` (default: ``local`` ): Set to ``local`` (default) to enable the syslog server. Set to ``disable`` to disable the syslog server. If disabled, Postfix will log directly to stdout and the healthcheck messages will not be filtered out.
 - ``POSTFIX_LOG_FILE``: The file to log the mail log to. When enabled, the syslog server will also log to stdout.
 
 When ``POSTFIX_LOG_FILE`` is enabled, the logrotate program will automatically rotate the logs every week and keep 52 logs.

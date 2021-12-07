@@ -2,11 +2,6 @@
 # General
 ###############
 
-{% if POSTFIX_LOG_SYSLOG != "local" %}
-# Logging configuration
-maillog_file = /dev/stdout
-{% endif %}
-
 # Main domain and hostname
 mydomain = {{ DOMAIN }}
 myhostname = {{ HOSTNAMES.split(",")[0] }}

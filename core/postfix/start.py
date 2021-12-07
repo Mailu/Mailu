@@ -82,15 +82,14 @@ if "RELAYUSER" in os.environ:
     conf.jinja("/conf/sasl_passwd", os.environ, path)
     os.system("postmap {}".format(path))
 
-if os.environ["POSTFIX_LOG_SYSLOG"] == "local":
-    # Configure and start local rsyslog server
-    conf.jinja("/conf/rsyslog.conf", os.environ, "/etc/rsyslog.conf")
-    os.system("/usr/sbin/rsyslogd -n &")
-    # Configure logrotate
-    if os.environ["POSTFIX_LOG_FILE"] != "":
-        conf.jinja("/conf/logrotate.conf", os.environ, "/etc/logrotate.d/postfix.conf")
-        if os.path.exists("/overrides/logrotate.conf"):
-            shutil.copyfile("/overrides/logrotate.conf", "/etc/logrotate.d/postfix.conf")
+# Configure and start local rsyslog server
+conf.jinja("/conf/rsyslog.conf", os.environ, "/etc/rsyslog.conf")
+os.system("/usr/sbin/rsyslogd -n &")
+# Configure logrotate
+if os.environ["POSTFIX_LOG_FILE"] != "":
+    conf.jinja("/conf/logrotate.conf", os.environ, "/etc/logrotate.d/postfix.conf")
+    if os.path.exists("/overrides/logrotate.conf"):
+        shutil.copyfile("/overrides/logrotate.conf", "/etc/logrotate.d/postfix.conf")
 
 # Run Podop and Postfix
 multiprocessing.Process(target=start_podop).start()

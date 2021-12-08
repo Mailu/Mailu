@@ -21,6 +21,7 @@ DEFAULT_CONFIG = {
     'DB_USER': 'mailu',
     'DB_PW': None,
     'DB_HOST': 'database',
+    'DB_PORT': None,
     'DB_NAME': 'mailu',
     'SQLITE_DATABASE_FILE':'data/main.db',
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
@@ -144,6 +145,8 @@ class ConfigManager:
 
         # automatically set the sqlalchemy string
         if self.config['DB_FLAVOR']:
+            if self.config['DB_PORT']:
+                self.config['DB_HOST'] = f'{self.config["DB_HOST"]}:{str(self.config["DB_PORT"])}'
             template = self.DB_TEMPLATES[self.config['DB_FLAVOR']]
             self.config['SQLALCHEMY_DATABASE_URI'] = template.format(**self.config)
 

@@ -32,7 +32,7 @@ def check_credentials(user, password, ip, protocol=None, auth_port=None):
         return False
     is_ok = False
     # webmails
-    if len(password) == 64 and auth_port == '10143':
+    if len(password) == 64 and auth_port in ['10143', '10025']:
         if user.verify_temp_token(password):
             is_ok = True
     # All tokens are 32 characters hex lowercase

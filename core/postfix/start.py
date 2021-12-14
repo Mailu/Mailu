@@ -85,9 +85,10 @@ if "RELAYUSER" in os.environ:
 # Configure and start local rsyslog server
 conf.jinja("/conf/rsyslog.conf", os.environ, "/etc/rsyslog.conf")
 os.system("/usr/sbin/rsyslogd -n &")
-# Configure logrotate
+# Configure logrotate and start crond
 if os.environ["POSTFIX_LOG_FILE"] != "":
     conf.jinja("/conf/logrotate.conf", os.environ, "/etc/logrotate.d/postfix.conf")
+    os.system("/usr/sbin/crond")
     if os.path.exists("/overrides/logrotate.conf"):
         shutil.copyfile("/overrides/logrotate.conf", "/etc/logrotate.d/postfix.conf")
 

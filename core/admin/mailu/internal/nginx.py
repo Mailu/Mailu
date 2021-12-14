@@ -27,12 +27,12 @@ STATUSES = {
     }),
 }
 
-def check_credentials(user, password, ip, protocol=None):
+def check_credentials(user, password, ip, protocol=None, auth_port=None):
     if not user or not user.enabled or (protocol == "imap" and not user.enable_imap) or (protocol == "pop3" and not user.enable_pop):
         return False
     is_ok = False
     # webmails
-    if len(password) == 64 and ip == app.config['WEBMAIL_ADDRESS']:
+    if len(password) == 64 and auth_port == '10143':
         if user.verify_temp_token(password):
             is_ok = True
     # All tokens are 32 characters hex lowercase
@@ -100,7 +100,7 @@ def handle_authentication(headers):
                 app.logger.warn(f'Invalid user {user_email!r}: {exc}')
             else:
                 ip = urllib.parse.unquote(headers["Client-Ip"])
-                if check_credentials(user, password, ip, protocol):
+                if check_credentials(user, password, ip, protocol, headers["Auth-Port"]):
                     server, port = get_server(headers["Auth-Protocol"], True)
                     return {
                         "Auth-Status": "OK",

@@ -1,7 +1,10 @@
 ARG DISTRO=alpine:3.14.2
 FROM $DISTRO
+ARG VERSION
 
 ENV TZ Etc/UTC
+
+LABEL version=$VERSION
 
 # python3 shared with most images
 RUN apk add --no-cache \
@@ -37,3 +40,4 @@ EXPOSE 5432
 
 CMD /start.py
 HEALTHCHECK CMD psql -h 127.0.0.1 -d postgres -U health -c "select 1 as ok;" || exit 1
+RUN echo $VERSION >> /version

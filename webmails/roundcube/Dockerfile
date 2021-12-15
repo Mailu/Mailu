@@ -7,8 +7,10 @@ ONBUILD COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/
 FROM ${ARCH}php:7.4-apache as build_other
 
 FROM build_${QEMU}
-
+ARG VERSION
 ENV TZ Etc/UTC
+
+LABEL version=$VERSION
 
 #Shared layer between rainloop and roundcube
 RUN apt-get update && apt-get install -y \
@@ -59,3 +61,4 @@ VOLUME ["/data"]
 CMD /start.py
 
 HEALTHCHECK CMD curl -f -L -H 'User-Agent: health' http://localhost/ || exit 1
+RUN echo $VERSION >> /version

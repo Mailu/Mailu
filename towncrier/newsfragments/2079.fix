@@ -1,0 +1,2 @@
+#2079 Webmail token check does not work if WEBMAIL_ADDRESS is set to a hostname.
+#2081 Fix typo in nginx config for webmail port (10043 to 10143)

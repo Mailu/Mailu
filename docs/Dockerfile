@@ -19,7 +19,10 @@ RUN apk add --no-cache --virtual .build-deps \
 FROM nginx:1.21-alpine
 
 ARG version=master
+ARG pinned_version=master
 ENV VERSION=$version
+ENV TZ Etc/UTC
+LABEL version=$VERSION
 
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /build/$VERSION /build/$VERSION
@@ -27,3 +30,4 @@ COPY --from=build /build/$VERSION /build/$VERSION
 EXPOSE 80/tcp
 
 CMD nginx -g "daemon off;"
+RUN echo $pinned_version >> /version

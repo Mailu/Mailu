@@ -1,5 +1,9 @@
 ARG DISTRO=alpine:3.14.2
 FROM $DISTRO
+ARG VERSION
+ENV TZ Etc/UTC
+LABEL version=$VERSION
+
 
 RUN mkdir -p /app
 WORKDIR /app
@@ -17,3 +21,4 @@ COPY static ./static
 EXPOSE 80/tcp
 
 CMD gunicorn -w 4 -b :80 --access-logfile - --error-logfile - --preload main:app
+RUN echo $VERSION >> /version

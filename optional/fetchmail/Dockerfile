@@ -1,7 +1,10 @@
 ARG DISTRO=alpine:3.14.2
 FROM $DISTRO
+ARG VERSION
 
 ENV TZ Etc/UTC
+
+LABEL version=$VERSION
 
 # python3 shared with most images
 RUN apk add --no-cache \
@@ -17,3 +20,4 @@ RUN mkdir -p /data
 COPY fetchmail.py /fetchmail.py
 
 CMD ["/fetchmail.py"]
+RUN echo $VERSION >> /version

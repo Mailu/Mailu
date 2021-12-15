@@ -1,7 +1,9 @@
 ARG DISTRO=alpine:3.15
 FROM $DISTRO
-
+ARG VERSION
 ENV TZ Etc/UTC
+
+LABEL version=$VERSION
 
 # python3 shared with most images
 RUN apk add --no-cache \
@@ -26,3 +28,4 @@ VOLUME ["/var/lib/rspamd"]
 CMD /start.py
 
 HEALTHCHECK --start-period=350s CMD curl -f -L http://localhost:11334/ || exit 1
+RUN echo $VERSION >> /version

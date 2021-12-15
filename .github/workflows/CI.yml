@@ -9,12 +9,10 @@ on:
       - '1.7'
       - '1.8'
       - master
-      # version tags, e.g. 1.7.1
-      - '[1-9].[0-9].[0-9]'
-      # pre-releases, e.g. 1.8-pre1
-      - 1.8-pre[0-9]
       # test branches, e.g. test-debian
       - test-*
+
+concurrency: ci-${{ github.ref }}
 
 ###############################################
 # REQUIRED secrets
@@ -28,6 +26,18 @@ on:
 #    The docker repository for test images. Only used for the branch TESTING (BORS try).
 # Add the above secrets to your github repo to determine where the images will be pushed.
 ################################################
+# Code block that is used as one liner.
+##!/bin/bash
+#version=$( git tag --list "{{ env.MAILU_VERSION }}.*" | tail -1  )
+#root_version=${version%.*}
+#patch_version=${version##*.}
+#if [ "$patch_version" == "" ]
+#then
+#  pinned_version={{ env.MAILU_VERSION }}.0
+#else
+#  pinned_version=$root_version.$(expr $patch_version + 1)
+#fi
+#echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
 
 jobs:
   build:
@@ -35,27 +45,49 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
         #For branch TESTING, we set the image tag to PR-xxxx
-      - name: Derive MAILU_VERSION for branch testing
+      - name: Derive MAILU_VERSION and PINNED_MAILU_VERSION for branch testing
         if: ${{ env.BRANCH == 'testing' }}
         shell: bash
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
         env:
-          MAILU_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
         run: |
-          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for normal release x.y
+        if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' }}
+        shell: bash
+        run: |
+          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for staging
+        if: ${{ env.BRANCH == 'staging' }}
+        shell: bash
+        run: |
+          echo "PINNED_MAILU_VERSION=staging" >> $GITHUB_ENV      
+      - name: Derive PINNED_MAILU_VERSION for master
+        if: ${{ env.BRANCH == 'master' }}
+        shell: bash
+        env:
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
+        run: |
+          echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -76,7 +108,7 @@ jobs:
       - name: Build all docker images
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
         run: docker-compose -f tests/build.yml build
       - name: Save all docker images
@@ -89,26 +121,49 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: Derive MAILU_VERSION for branch testing
+        #For branch TESTING, we set the image tag to PR-xxxx
+      - name: Derive MAILU_VERSION and PINNED_MAILU_VERSION for branch testing
         if: ${{ env.BRANCH == 'testing' }}
         shell: bash
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
         env:
-          MAILU_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
         run: |
-          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for normal release x.y
+        if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
+        shell: bash
+        run: |
+          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for staging
+        if: ${{ env.BRANCH == 'staging' }}
+        shell: bash
+        run: |
+          echo "PINNED_MAILU_VERSION=staging" >> $GITHUB_ENV          
+      - name: Derive PINNED_MAILU_VERSION for master
+        if: ${{ env.BRANCH == 'master' }}
+        shell: bash
+        env:
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
+        run: |
+          echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -128,7 +183,7 @@ jobs:
         run: python tests/compose/test.py core 2
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-fetchmail:
@@ -138,26 +193,49 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: Derive MAILU_VERSION for branch testing
+        #For branch TESTING, we set the image tag to PR-xxxx
+      - name: Derive MAILU_VERSION and PINNED_MAILU_VERSION for branch testing
         if: ${{ env.BRANCH == 'testing' }}
         shell: bash
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
         env:
-          MAILU_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
         run: |
-          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for normal release x.y
+        if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
+        shell: bash
+        run: |
+          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for staging
+        if: ${{ env.BRANCH == 'staging' }}
+        shell: bash
+        run: |
+          echo "PINNED_MAILU_VERSION=staging" >> $GITHUB_ENV          
+      - name: Derive PINNED_MAILU_VERSION for master
+        if: ${{ env.BRANCH == 'master' }}
+        shell: bash
+        env:
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
+        run: |
+          echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -177,7 +255,7 @@ jobs:
         run: python tests/compose/test.py fetchmail 2
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-filters:
@@ -187,26 +265,49 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: Derive MAILU_VERSION for branch testing
+        #For branch TESTING, we set the image tag to PR-xxxx
+      - name: Derive MAILU_VERSION and PINNED_MAILU_VERSION for branch testing
         if: ${{ env.BRANCH == 'testing' }}
         shell: bash
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
         env:
-          MAILU_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
         run: |
-          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for normal release x.y
+        if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
+        shell: bash
+        run: |
+          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for staging
+        if: ${{ env.BRANCH == 'staging' }}
+        shell: bash
+        run: |
+          echo "PINNED_MAILU_VERSION=staging" >> $GITHUB_ENV          
+      - name: Derive PINNED_MAILU_VERSION for master
+        if: ${{ env.BRANCH == 'master' }}
+        shell: bash
+        env:
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
+        run: |
+          echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -226,7 +327,7 @@ jobs:
         run: python tests/compose/test.py filters 3
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-rainloop:
@@ -236,26 +337,49 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: Derive MAILU_VERSION for branch testing
+        #For branch TESTING, we set the image tag to PR-xxxx
+      - name: Derive MAILU_VERSION and PINNED_MAILU_VERSION for branch testing
         if: ${{ env.BRANCH == 'testing' }}
         shell: bash
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
         env:
-          MAILU_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
         run: |
-          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for normal release x.y
+        if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
+        shell: bash
+        run: |
+          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for staging
+        if: ${{ env.BRANCH == 'staging' }}
+        shell: bash
+        run: |
+          echo "PINNED_MAILU_VERSION=staging" >> $GITHUB_ENV          
+      - name: Derive PINNED_MAILU_VERSION for master
+        if: ${{ env.BRANCH == 'master' }}
+        shell: bash
+        env:
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
+        run: |
+          echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -275,7 +399,7 @@ jobs:
         run: python tests/compose/test.py rainloop 2
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-roundcube:
@@ -285,26 +409,49 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: Derive MAILU_VERSION for branch testing
+        #For branch TESTING, we set the image tag to PR-xxxx
+      - name: Derive MAILU_VERSION and PINNED_MAILU_VERSION for branch testing
         if: ${{ env.BRANCH == 'testing' }}
         shell: bash
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
         env:
-          MAILU_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
         run: |
-          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for normal release x.y
+        if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
+        shell: bash
+        run: |
+          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for staging
+        if: ${{ env.BRANCH == 'staging' }}
+        shell: bash
+        run: |
+          echo "PINNED_MAILU_VERSION=staging" >> $GITHUB_ENV          
+      - name: Derive PINNED_MAILU_VERSION for master
+        if: ${{ env.BRANCH == 'master' }}
+        shell: bash
+        env:
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
+        run: |
+          echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -324,7 +471,7 @@ jobs:
         run: python tests/compose/test.py roundcube 2
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-webdav:
@@ -334,26 +481,49 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: Derive MAILU_VERSION for branch testing
+        #For branch TESTING, we set the image tag to PR-xxxx
+      - name: Derive MAILU_VERSION and PINNED_MAILU_VERSION for branch testing
         if: ${{ env.BRANCH == 'testing' }}
         shell: bash
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
         env:
-          MAILU_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
         run: |
-          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for normal release x.y
+        if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
+        shell: bash
+        run: |
+          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for staging
+        if: ${{ env.BRANCH == 'staging' }}
+        shell: bash
+        run: |
+          echo "PINNED_MAILU_VERSION=staging" >> $GITHUB_ENV          
+      - name: Derive PINNED_MAILU_VERSION for master
+        if: ${{ env.BRANCH == 'master' }}
+        shell: bash
+        env:
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
+        run: |
+          echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -373,7 +543,7 @@ jobs:
         run: python tests/compose/test.py webdav 2
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   deploy:
@@ -389,27 +559,49 @@ jobs:
       - test-webdav
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
         #For branch TESTING, we set the image tag to PR-xxxx
-      - name: Derive MAILU_VERSION for branch testing
+      - name: Derive MAILU_VERSION and PINNED_MAILU_VERSION for branch testing
         if: ${{ env.BRANCH == 'testing' }}
         shell: bash
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG_TESTS }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
         env:
-          MAILU_BRANCH: ${{ env.BRANCH }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
         run: |
-          echo "MAILU_VERSION=${{ env.MAILU_BRANCH }}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ secrets.DOCKER_ORG }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for normal release x.y
+        if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
+        shell: bash
+        run: |
+          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for staging
+        if: ${{ env.BRANCH == 'staging' }}
+        shell: bash
+        run: |
+          echo "PINNED_MAILU_VERSION=staging" >> $GITHUB_ENV          
+      - name: Derive PINNED_MAILU_VERSION for master
+        if: ${{ env.BRANCH == 'master' }}
+        shell: bash
+        env:
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
+        run: |
+          echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -430,13 +622,49 @@ jobs:
           DOCKER_PW: ${{ secrets.Docker_Password }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          TRAVIS_BRANCH: ${{ env.BRANCH }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+          BRANCH: ${{ env.BRANCH }}
         run: bash tests/deploy.sh
+
+  tag-release:
+    runs-on: ubuntu-latest
+    needs:
+      - deploy
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
+      - name: Extract branch name
+        shell: bash
+        run: |
+          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Derive MAILU_VERSION amd DOCKER_ORG
+        if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' }}
+        shell: bash
+        env:
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+        run: |
+          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION for normal release x.y
+        if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' }}
+        shell: bash
+        run: |
+          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+      - name: Tag and create release
+        if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' && env.PINNED_MAILU_VERSION != '' }}
+        uses: ncipollo/release-action@v1
+        with:
+          bodyFile: "RELEASE_TEMPLATE.md"
+          commit: ${{ env.GITHUB_SHA }}
+          tag: ${{ env.PINNED_MAILU_VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
  # This job is watched by bors. It only complets if building,testing and deploy worked.
   ci-success:
     name: CI-Done
-    #Returns true when none of the **previous** steps have failed or been canceled.
+    #Returns true when none of the **previous** steps have failed or have been canceled.
     if: ${{ success() }}
     needs:
       - deploy

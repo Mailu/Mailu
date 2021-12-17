@@ -38,7 +38,6 @@ RUN set -eu \
  && rm -rf /var/lib/apt/lists
 
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.5.1/roundcubemail-1.5.1-complete.tar.gz
-
 ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v4.3.0/carddav-v4.3.0.tar.gz
 
 RUN set -eu \
@@ -58,10 +57,10 @@ RUN set -eu \
  && a2enmod rewrite deflate expires headers \
  && echo date.timezone=${TZ} > /usr/local/etc/php/conf.d/timezone.ini
 
-COPY php.ini /php.ini
-COPY config.inc.php /var/www/html/config/
 COPY mailu.php /var/www/html/plugins/mailu/mailu.php
-COPY start.py /start.py
+COPY php.ini /
+COPY config.inc.php /
+COPY start.py /
 
 EXPOSE 80/tcp
 VOLUME ["/data"]

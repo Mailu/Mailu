@@ -21,9 +21,12 @@ RUN set -eu \
 
 # Actual application
 FROM $DISTRO
+ARG VERSION
 COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 
 ENV TZ Etc/UTC
+
+LABEL version=$VERSION
 
 # python3 shared with most images
 RUN set -eu \
@@ -56,3 +59,4 @@ ENV FLASK_APP mailu
 CMD /start.py
 
 HEALTHCHECK CMD curl -f -L http://localhost/sso/login?next=ui.index || exit 1
+RUN echo $VERSION >> /version

@@ -66,10 +66,10 @@ def has_dane_record(domain, timeout=10):
         return app.config['DEFER_ON_TLS_ERROR']
     except dns.exception.Timeout:
         app.logger.warn(f'Timeout while resolving the TLSA record for {domain} ({timeout}s).')
-    except dns.resolver.NXDOMAIN:
+    except (dns.resolver.NXDOMAIN, dns.name.EmptyLabel):
         pass # this is expected, not TLSA record is fine
     except Exception as e:
-        app.logger.error(f'Error while looking up the TLSA record for {domain} {e}')
+        app.logger.info(f'Error while looking up the TLSA record for {domain} {e}')
         pass
 
 # Rate limiter

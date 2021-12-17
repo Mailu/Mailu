@@ -7,8 +7,10 @@ FROM ${ARCH}php:8.0-apache as build_other
 
 
 FROM build_${QEMU}
-
+ARG VERSION
 ENV TZ Etc/UTC
+
+LABEL version=$VERSION
 
 RUN set -eu \
  && apt update \
@@ -69,3 +71,4 @@ CMD /start.py
 
 HEALTHCHECK CMD curl -f -L -H 'User-Agent: health' http://localhost/ || exit 1
 
+RUN echo $VERSION >> /version

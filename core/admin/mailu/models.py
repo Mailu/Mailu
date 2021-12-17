@@ -551,13 +551,13 @@ class User(Base, Email):
         if cls._ctx:
             return cls._ctx
 
-        schemes = passlib.registry.list_crypt_handlers()
-        # scrypt throws a warning if the native wheels aren't found
-        schemes.remove('scrypt')
-        # we can't leave plaintext schemes as they will be misidentified
-        for scheme in schemes:
-            if scheme.endswith('plaintext'):
-                schemes.remove(scheme)
+        # compile schemes
+        # - skip scrypt (throws a warning if the native wheels aren't found)
+        # - skip plaintext schemes (will be misidentified)
+        schemes = [
+            scheme for scheme in passlib.registry.list_crypt_handlers()
+            if not (scheme == 'scrypt' or scheme.endswith('plaintext'))
+        ]
         cls._ctx = passlib.context.CryptContext(
             schemes=schemes,
             default='bcrypt_sha256',

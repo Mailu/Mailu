@@ -1,7 +1,11 @@
 ARG DISTRO=alpine:3.14.2
+
 FROM $DISTRO
+ARG VERSION
 
 ENV TZ Etc/UTC
+
+LABEL version=$VERSION
 
 # python3 shared with most images
 RUN apk add --no-cache \
@@ -30,3 +34,4 @@ VOLUME ["/queue"]
 CMD /start.py
 
 HEALTHCHECK --start-period=350s CMD echo QUIT|nc localhost 25|grep "220 .* ESMTP Postfix"
+RUN echo $VERSION >> /version

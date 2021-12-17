@@ -51,7 +51,7 @@ context['SECRET_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray('ROUN
 
 # roundcube plugins
 # (using "dict" because it is ordered and "set" is not)
-plugins = dict((p, None) for p in env.get("ROUNCUBE_PLUGINS", "").replace(" ", "").split(",") if p and os.path.isdir(os.path.join("/var/www/plugins", p)))
+plugins = dict((p, None) for p in env.get("ROUNDCUBE_PLUGINS", "").replace(" ", "").split(",") if p and os.path.isdir(os.path.join("/var/www/plugins", p)))
 if plugins:
     plugins["mailu"] = None
 else:

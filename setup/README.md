@@ -6,7 +6,7 @@ Until this point, the app is working as it follows:
 - after you choose your desired flavor it will iterare over the files in the flavor directory and building the page
   (`templates/steps/config.html is general for all flavors`)
 - when you complete all required fields and press "Setup Mailu" button it will redirect you to the setup page (`flavors/choosen-flavor/setup.html`)
-  
+
 To add a new flavor you need to create a directory under `templates/steps/` in which you are adding actual steps.
 Eg: Adding a WIP step we'll create `templates/steps/kubernetes/wip.html`
 
@@ -16,9 +16,9 @@ wip.html will start with
 
 ```
 {% call macros.panel("info", "Step X - Work in progress") %}
-``` 
+```
 
-and end with 
+and end with
 ```
 {% endcall %}
 ```
@@ -29,9 +29,9 @@ In the example below the string entered in the input field is stored in the vari
 <input type="text" name="var_test">
 ```
 
-In order to user the variable furter you use it like `{{ var_test }}`
+In order to use the variable furter you use it like `{{ var_test }}`
 
-In the setup page (`flavors/kubernetes/setup.html`) you cand add steps by importing macros
+In the setup page (`flavors/kubernetes/setup.html`) you can add steps by importing macros
 
 ```
 {% import "macros.html" as macros %}

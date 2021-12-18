@@ -13,7 +13,7 @@ services:
     restart: always
     volumes:
       - "{{ root }}/redis:/data"
-    
+
   # Core services
   front:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}nginx:${MAILU_VERSION:-{{ version }}}
@@ -150,16 +150,6 @@ services:
     depends_on:
       - imap
   {% endif %}
-
-  {% if db_flavor == 'postgresql' and postgresql == 'internal' %}
-  database:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postgresql:${MAILU_VERSION:-{{ version }}}
-    restart: always
-    env_file: {{ env }}
-    volumes:
-      - "{{ root }}/data/psql_db:/data"
-      - "{{ root }}/data/psql_backup:/backup"
-   {% endif %}
 
 networks:
   default:

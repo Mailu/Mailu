@@ -35,80 +35,39 @@ $(document).ready(function() {
 
 $(document).ready(function() {
 	if ($("#database").val() == 'sqlite') {
-		$("#postgres_db").hide();
-	} else if ($("#database").val() == 'postgresql') {
-		$("#postgres_db").show();
-	} else if ($("#database").val() == 'mysql') {
+		$("#external_db").hide();
+	} else {
 		$("#external_db").show();
 	}
-	if ($('#external_psql').prop('checked')) {
-		$("#external_db").show();
-	}
+
+	$("#webmail").click(function() {
+		if (this.value == 'roundcube') {
+			$("#db_flavor_rc_sel").show();
+		} else {
+			$("#db_flavor_rc_sel").hide();
+			$("#roundcube_db_user,#roundcube_db_pw,#roundcube_db_url,#roundcube_db_name").prop('required',false);
+		}
+	});
+
 	$("#database").click(function() {
 		if (this.value == 'sqlite') {
-			$("#postgres_db").hide();
 			$("#external_db").hide();
-		} else if (this.value == 'postgresql') {
-			$("#postgres_db").show();
-			$("#external_db").hide();
-			$("#external_psql").prop('checked', true);
-			$("#external_db").show();
-			$("#db_user").prop('required',true);
-			$("#db_pw").prop('required',true);
-			$("#db_url").prop('required',true);
-			$("#db_name").prop('required',true);
-			if ($("#webmail").val() == 'roundcube') {
-				$("#roundcube_external_db").show();
-				$("#roundcube_db_user").prop('required',true);
-				$("#roundcube_db_pw").prop('required',true);
-				$("#roundcube_db_url").prop('required',true);
-				$("#roundcube_db_name").prop('required',true);
-			}
-		} else if (this.value == 'mysql') {
-			$("#postgres_db").hide();
-			$("#external_db").show();
-			$("#db_user").prop('required',true);
-			$("#db_pw").prop('required',true);
-			$("#db_url").prop('required',true);
-			$("#db_name").prop('required',true);
-			if ($("#webmail").val() == 'roundcube') {
-				$("#roundcube_external_db").show();
-				$("#roundcube_db_user").prop('required',true);
-				$("#roundcube_db_pw").prop('required',true);
-				$("#roundcube_db_url").prop('required',true);
-				$("#roundcube_db_name").prop('required',true);
-			}
-		}
-	});
-	$("#external_psql").change(function() {
-		if ($(this).is(":checked")) {
-			$("#external_db").show();
-			$("#db_user").prop('required',true);
-			$("#db_pw").prop('required',true);
-			$("#db_url").prop('required',true);
-			$("#db_name").prop('required',true);
-			if ($("#webmail").val() == 'roundcube') {
-				$("#roundcube_external_db").show();
-				$("#roundcube_db_user").prop('required',true);
-				$("#roundcube_db_pw").prop('required',true);
-				$("#roundcube_db_url").prop('required',true);
-				$("#roundcube_db_name").prop('required',true);
-			}
+			$("#db_user,#db_pw,#db_url,#db_name").prop('required',false);
+			$("#roundcube_db_user,#roundcube_db_pw,#roundcube_db_url,#roundcube_db_name").prop('required',false);
 		} else {
-			$("#external_db").hide();
+			$("#external_db").show();
+			$("#db_user,#db_pw,#db_url,#db_name").prop('required',true);
 		}
 	});
-	$("#internal_psql").change(function() {
-		if ($(this).is(":checked")) {
-			$("#external_db").hide();
-			$("#db_user").val("");
-			$("#db_pw").val("");
-			$("#db_url").val("");
-			$("#db_name").val("");
-			$("#db_user").prop('required',false);
-			$("#db_pw").prop('required',false);
-			$("#db_url").prop('required',false);
-			$("#db_name").prop('required',false);
+
+	$("#database_rc").click(function() {
+		if (this.value == 'sqlite'){
+			$("#roundcube_external_db").hide();
+			$("#roundcube_db_user,#roundcube_db_pw,#roundcube_db_url,#roundcube_db_name").prop('required',false);
+		}
+		else if ($("#webmail").val() == 'roundcube') {
+			$("#roundcube_external_db").show();
+			$("#roundcube_db_user,#roundcube_db_pw,#roundcube_db_url,#roundcube_db_name").prop('required',true);
 		}
 	});
 });

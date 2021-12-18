@@ -65,13 +65,6 @@ services:
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
-  postgresql:
-    image: ${DOCKER_ORG:-mailu}/postgresql:${PINNED_MAILU_VERSION:-local}
-    build:
-      context: ../optional/postgresql
-      args:
-        VERSION: ${PINNED_MAILU_VERSION:-local}
-
   roundcube:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}roundcube:${PINNED_MAILU_VERSION:-local}
     build:

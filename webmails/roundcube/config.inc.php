@@ -55,6 +55,11 @@ $config['sso_logout_url'] = '/sso/logout';
 // configure enigma gpg plugin
 $config['enigma_pgp_homedir'] = '/data/gpg';
 
-// Set From header for DKIM signed message delivery reports
+// set From header for DKIM signed message delivery reports
 $config['mdn_use_from'] = true;
+
+// includes
+{%- for inc in INCLUDES %}
+include('{{ inc }}');
+{%- endfor %}
 

@@ -59,6 +59,9 @@ else:
 
 context["PLUGINS"] = ",".join(f"'{p}'" for p in plugins)
 
+# add overrides
+context["INCLUDES"] = sorted(inc for inc in os.listdir("/overrides") if inc.endswith(".inc")) if os.path.isdir("/overrides") else []
+
 # create config files
 conf.jinja("/php.ini", context, "/usr/local/etc/php/conf.d/roundcube.ini")
 conf.jinja("/config.inc.php", context, "/var/www/html/config/config.inc.php")

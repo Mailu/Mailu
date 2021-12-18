@@ -57,7 +57,10 @@ RUN set -eu \
  && chown www-data:www-data logs temp \
  && chmod -R a+rX . \
  && a2enmod rewrite deflate expires headers \
- && echo date.timezone=${TZ} > /usr/local/etc/php/conf.d/timezone.ini
+ && echo date.timezone=${TZ} > /usr/local/etc/php/conf.d/timezone.ini \
+ && rm -rf plugins/{autologon,example_addressbook,http_authentication,krb_authentication,new_user_identity,password,redundant_attachments,squirrelmail_usercopy,userinfo,virtuser_file,virtuser_query}
+
+# enable database_attachments (and memcache?)
 
 COPY mailu.php /var/www/html/plugins/mailu/mailu.php
 COPY php.ini /
@@ -65,7 +68,8 @@ COPY config.inc.php /
 COPY start.py /
 
 EXPOSE 80/tcp
-VOLUME ["/data"]
+VOLUME /data
+VOLUME /overrides
 
 CMD /start.py
 

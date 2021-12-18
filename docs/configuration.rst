@@ -262,3 +262,52 @@ The roundcube service stores configurations in a database.
 - ``ROUNDCUBE_DB_PW``: the database password for roundcube service. (when not ``sqlite``)
 - ``ROUNDCUBE_DB_USER``: the database user for roundcube service. (when not ``sqlite``)
 - ``ROUNDCUBE_DB_NAME``: the database name for roundcube service. (when not ``sqlite``)
+
+.. _webmail_settings
+
+Webmail settings
+----------------
+
+
+When using roundcube it is possible to select the plugins to be enabled by setting ``ROUNDCUBE_PLUGINS`` to
+a comma separated list of plugin-names. Included plugins are:
+
+- acl (needs configuration)
+- additional_message_headers (needs configuration)
+- archive
+- attachment_reminder
+- carddav
+- database_attachmentsi
+- debug_logger
+- emoticons
+- enigma
+- help
+- hide_blockquote
+- identicon
+- identity_select
+- jqueryui
+- mailu
+- managesieve
+- markasjunk
+- new_user_dialog
+- newmail_notifier
+- reconnect
+- show_additional_headers (needs configuration)
+- subscriptions_option
+- vcard_attachments
+- zipdownload
+
+If ``ROUNDCUBE_PLUGINS`` is not set the following plugins are enabled by default:
+
+- archive
+- carddav
+- enigma
+- mailu
+- managesieve
+- markasjunk
+- zipdownload
+
+To disable all plugins just set ``ROUNDCUBE_PLUGINS`` to ``mailu``.
+
+To configure a plugin add php files named ``*.inc`` to roundcube's :ref:`override section <override-label>`.
+

@@ -147,6 +147,7 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/webmail:/data"
+      - "{{ root }}/overrides/{{ webmail_type }}:/overrides:ro"
     depends_on:
       - imap
   {% endif %}

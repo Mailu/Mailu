@@ -15,7 +15,14 @@ class mailu extends rcube_plugin
   function startup($args)
   {
     if (empty($_SESSION['user_id'])) {
-        $args['action'] = 'login';
+      $args['action'] = 'login';
+    }
+
+    $ua = $_SERVER['HTTP_USER_AGENT'];
+    $ra = $_SERVER['REMOTE_ADDR'];
+    if ($ua == 'health' and ($ra == '127.0.0.1' or $ra == '::1')) {
+      print('OK');
+      exit();
     }
 
     return $args;
@@ -24,13 +31,13 @@ class mailu extends rcube_plugin
   function authenticate($args)
   {
     if (!array_key_exists('HTTP_X_REMOTE_USER', $_SERVER) or !array_key_exists('HTTP_X_REMOTE_USER_TOKEN', $_SERVER)) {
-        if ($_SERVER['PHP_SELF'] == '/sso.php') {
-            header('HTTP/1.0 403 Forbidden');
-            print('mailu sso failure');
-        } else {
-            header('Location: sso.php');
-        }
-        exit();
+      if ($_SERVER['PHP_SELF'] == '/sso.php') {
+        header('HTTP/1.0 403 Forbidden');
+        print('mailu sso failure');
+      } else {
+        header('Location: sso.php');
+      }
+      exit();
     }
 
     $args['user'] = $_SERVER['HTTP_X_REMOTE_USER'];
@@ -53,20 +60,14 @@ class mailu extends rcube_plugin
 
   function login($args)
   {
-      header('Location: index.php');
-      exit();
+    header('Location: index.php');
+    exit();
   }
 
   function login_failed($args)
   {
-      $ua = $_SERVER['HTTP_USER_AGENT'];
-      $ra = $_SERVER['REMOTE_ADDR'];
-      if ($ua == 'health' and ($ra == '127.0.0.1' or $ra == '::1')) {
-        print('OK');
-      } else {
-        header('Location: sso.php');
-      }
-      exit();
+    header('Location: sso.php');
+    exit();
   }
 
 }

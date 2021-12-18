@@ -1,14 +1,4 @@
 ARG DISTRO=alpine:3.14.2
-FROM $DISTRO as builder
-WORKDIR /tmp
-RUN apk add git build-base automake autoconf libtool dovecot-dev xapian-core-dev icu-dev
-RUN git clone https://github.com/grosjo/fts-xapian.git \
-  && cd fts-xapian \
-  && git checkout 1.2.7 \
-  && autoreconf -vi \
-  && PANDOC=false ./configure --with-dovecot=/usr/lib/dovecot \
-  && make \
-  && make install
 
 FROM $DISTRO
 ARG VERSION
@@ -29,10 +19,8 @@ RUN pip3 install "podop>0.2.5"
 
 # Image specific layers under this line
 RUN apk add --no-cache \
-  dovecot dovecot-lmtpd dovecot-pop3d dovecot-submissiond dovecot-pigeonhole-plugin rspamd-client xapian-core \
+  dovecot dovecot-lmtpd dovecot-pop3d dovecot-submissiond dovecot-pigeonhole-plugin rspamd-client xapian-core dovecot-fts-xapian \
   && mkdir /var/lib/dovecot
-
-COPY --from=builder /usr/lib/dovecot/lib21_fts_xapian_plugin.* /usr/lib/dovecot/
 
 COPY conf /conf
 COPY start.py /start.py

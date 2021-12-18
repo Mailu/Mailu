@@ -262,3 +262,17 @@ The roundcube service stores configurations in a database.
 - ``ROUNDCUBE_DB_PW``: the database password for roundcube service. (when not ``sqlite``)
 - ``ROUNDCUBE_DB_USER``: the database user for roundcube service. (when not ``sqlite``)
 - ``ROUNDCUBE_DB_NAME``: the database name for roundcube service. (when not ``sqlite``)
+
+
+Mail log settings
+-----------------
+
+By default, all services log directly to stdout/stderr. Logs can be collected by any docker log processing solution.
+
+Postfix writes the logs to a syslog server which logs to stdout. This is used to filter out messages from the healthcheck.
+In some situations, a separate mail log is required (e.g. for legal reasons). The syslog server can be configured to write log files to a volume. It can be configured with the following option:
+
+- ``POSTFIX_LOG_FILE``: The file to log the mail log to. When enabled, the syslog server will also log to stdout.
+
+When ``POSTFIX_LOG_FILE`` is enabled, the logrotate program will automatically rotate the logs every week and keep 52 logs.
+To override the logrotate configuration, create the file logrotate.conf with the desired configuration in the :ref:`Postfix overrides folder<override-label>`.

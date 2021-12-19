@@ -123,6 +123,7 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/webmail:/data"
+      - "{{ root }}/overrides/{{ webmail_type }}:/overrides:ro"
     deploy:
       replicas: 1
     healthcheck:

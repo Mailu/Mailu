@@ -100,6 +100,7 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/webmail:/data"
+      - "$ROOT/overrides/$WEBMAIL:/overrides:ro"
     depends_on:
       - imap
 

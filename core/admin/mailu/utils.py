@@ -121,7 +121,6 @@ proxy = PrefixMiddleware()
 # Data migrate
 migrate = flask_migrate.Migrate()
 
-
 # session store (inspired by https://github.com/mbr/flask-kvsession)
 class RedisStore:
     """ Stores session data in a redis db. """
@@ -232,7 +231,8 @@ class MailuSession(CallbackDict, SessionMixin):
 
     def destroy(self):
         """ destroy session for security reasons. """
-
+        if 'webmail_token' in self:
+            self.app.session_store.delete(self['webmail_token'])
         self.delete()
 
         self._uid = None
@@ -273,6 +273,11 @@ class MailuSession(CallbackDict, SessionMixin):
         if self._sid is None:
             self._sid = self.app.session_config.gen_sid()
             set_cookie = True
+            if 'webmail_token' in self:
+                app.session_store.put(self['webmail_token'],
+                        self.sid,
+                        int(app.config['PERMANENT_SESSION_LIFETIME']),
+                )
 
         # get new session key
         key = self.sid
@@ -477,3 +482,24 @@ class MailuSessionExtension:
 
 cleaned = Value('i', False)
 session = MailuSessionExtension()
+
+# this is used by the webmail to authenticate IMAP/SMTP
+def verify_temp_token(email, token):
+    try:
+        if token.startswith('token-'):
+            sessid = app.session_store.get(token)
+            if sessid:
+                session = MailuSession(sessid, app)
+                if session.get('_user_id', '') == email:
+                    return True
+    except:
+        pass
+
+def gen_temp_token(email, session):
+    token = session.get('webmail_token', 'token-'+secrets.token_urlsafe())
+    session['webmail_token'] = token
+    app.session_store.put(token,
+            session.sid,
+            int(app.config['PERMANENT_SESSION_LIFETIME']),
+    )
+    return token

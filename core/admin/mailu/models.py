@@ -16,7 +16,6 @@ import passlib.hash
 import passlib.registry
 import time
 import os
-import hmac
 import smtplib
 import idna
 import dns.resolver
@@ -644,15 +643,6 @@ in clear-text regardless of the presence of the cache.
         """ login user when enabled and password is valid """
         user = cls.query.get(email)
         return user if (user and user.enabled and user.check_password(password)) else None
-
-    @classmethod
-    def get_temp_token(cls, email):
-        user = cls.query.get(email)
-        return hmac.new(app.temp_token_key, bytearray("{}|{}".format(time.strftime('%Y%m%d'), email), 'utf-8'), 'sha256').hexdigest() if (user and user.enabled) else None
-
-    def verify_temp_token(self, token):
-        return hmac.compare_digest(self.get_temp_token(self.email), token)
-
 
 
 class Alias(Base, Email):

@@ -68,8 +68,9 @@ def user_authentication():
     if (not flask_login.current_user.is_anonymous
         and flask_login.current_user.enabled):
         response = flask.Response()
-        response.headers["X-User"] = models.IdnaEmail.process_bind_param(flask_login, flask_login.current_user.get_id(), "")
-        response.headers["X-User-Token"] = models.User.get_temp_token(flask_login.current_user.get_id())
+        email = flask_login.current_user.get_id()
+        response.headers["X-User"] = models.IdnaEmail.process_bind_param(flask_login, email, "")
+        response.headers["X-User-Token"] = utils.gen_temp_token(email, flask.session)
         return response
     return flask.abort(403)
 

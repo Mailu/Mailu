@@ -181,7 +181,7 @@ The ``CREDENTIAL_ROUNDS`` (default: 12) setting is the number of rounds used by 
 
 The ``SESSION_COOKIE_SECURE`` (default: True) setting controls the secure flag on the cookies of the administrative interface. It should only be turned off if you intend to access it over plain HTTP.
 
-``SESSION_LIFETIME`` (default: 24) is the length in hours a session is valid for on the administrative interface.
+``SESSION_TIMEOUT`` (default: 3600) is the maximum amount of time in seconds between requests before a session is invalidated. ``PERMANENT_SESSION_LIFETIME`` (default: 108000) is the maximum amount of time in seconds a session can be kept alive for if it hasn't timed-out.
 
 The ``LOG_LEVEL`` setting is used by the python start-up scripts as a logging threshold.
 Log messages equal or higher than this priority will be printed.

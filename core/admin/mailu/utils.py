@@ -28,6 +28,7 @@ import flask_babel
 import ipaddress
 import redis
 
+from datetime import datetime, timedelta
 from flask.sessions import SessionMixin, SessionInterface
 from itsdangerous.encoding import want_bytes
 from werkzeug.datastructures import CallbackDict
@@ -125,8 +126,6 @@ migrate = flask_migrate.Migrate()
 class RedisStore:
     """ Stores session data in a redis db. """
 
-    has_ttl = True
-
     def __init__(self, redisstore):
         self.redis = redisstore
 
@@ -157,8 +156,6 @@ class RedisStore:
 class DictStore:
     """ Stores session data in a python dict. """
 
-    has_ttl = False
-
     def __init__(self):
         self.dict = {}
 
@@ -166,7 +163,7 @@ class DictStore:
         """ load item from store. """
         return self.dict[key]
 
-    def put(self, key, value, ttl_secs=None):
+    def put(self, key, value, ttl=None):
         """ save item to store. """
         self.dict[key] = value
 
@@ -284,14 +281,11 @@ class MailuSession(CallbackDict, SessionMixin):
         if key != self._key:
             self.delete()
 
-        # remember time to refresh
-        self['_refresh'] = int(time.time()) + self.app.permanent_session_lifetime.total_seconds()/2
-
         # save session
         self.app.session_store.put(
             key,
             pickle.dumps(dict(self)),
-            self.app.permanent_session_lifetime.total_seconds()
+            int(app.config['SESSION_TIMEOUT']),
         )
 
         self._key = key
@@ -300,11 +294,6 @@ class MailuSession(CallbackDict, SessionMixin):
         self.modified = False
 
         return set_cookie
-
-    def needs_refresh(self):
-        """ Checks if server side session needs to be refreshed. """
-
-        return int(time.time()) > self.get('_refresh', 0)
 
 class MailuSessionConfig:
     """ Stores sessions crypto config """
@@ -350,7 +339,7 @@ class MailuSessionConfig:
         """ Generate base64 representation of creation time. """
         return self._encode(int(now or time.time()).to_bytes(8, byteorder='big').lstrip(b'\0'))
 
-    def parse_key(self, key, app=None, validate=False, now=None):
+    def parse_key(self, key, app=None, now=None):
         """ Split key into sid, uid and creation time. """
 
         if not (isinstance(key, bytes) and self._key_min <= len(key) <= self._key_max):
@@ -365,13 +354,12 @@ class MailuSessionConfig:
         if created is None or self._decode(uid) is None or self._decode(sid) is None:
             return None
 
-        # validate creation time when requested or store does not support ttl
-        if validate or not app.session_store.has_ttl:
-            if now is None:
-                now = int(time.time())
-            created = int.from_bytes(created, byteorder='big')
-            if not created < now < created + app.permanent_session_lifetime.total_seconds():
-                return None
+        # validate creation time
+        if now is None:
+            now = int(time.time())
+        created = int.from_bytes(created, byteorder='big')
+        if not created <= now <= created + app.config['PERMANENT_SESSION_LIFETIME']:
+            return None
 
         return (uid, sid, crt)
 
@@ -410,23 +398,12 @@ class MailuSessionInterface(SessionInterface):
         if session.accessed:
             response.vary.add('Cookie')
 
-        set_cookie = session.permanent and app.config['SESSION_REFRESH_EACH_REQUEST']
-        need_refresh = session.needs_refresh()
-
-        # save modified session or refresh unmodified session
-        if session.modified or need_refresh:
-            set_cookie |= session.save()
-
-        # set cookie on refreshed permanent sessions
-        if need_refresh and session.permanent:
-            set_cookie = True
-
-        # set or update cookie if necessary
-        if set_cookie:
+        # save session and update cookie if necessary
+        if session.save():
             response.set_cookie(
                 app.session_cookie_name,
                 session.sid,
-                expires=self.get_expiration_time(app, session),
+                expires=datetime.now()+timedelta(seconds=int(app.config['PERMANENT_SESSION_LIFETIME'])),
                 httponly=self.get_cookie_httponly(app),
                 domain=self.get_cookie_domain(app),
                 path=self.get_cookie_path(app),
@@ -446,7 +423,7 @@ class MailuSessionExtension:
 
         count = 0
         for key in app.session_store.list():
-            if not app.session_config.parse_key(key, app, validate=True, now=now):
+            if not app.session_config.parse_key(key, app, now=now):
                 app.session_store.delete(key)
                 count += 1
 

@@ -15,7 +15,14 @@ class mailu extends rcube_plugin
   function startup($args)
   {
     if (empty($_SESSION['user_id'])) {
-        $args['action'] = 'login';
+      $args['action'] = 'login';
+    }
+
+    $ua = $_SERVER['HTTP_USER_AGENT'];
+    $ra = $_SERVER['REMOTE_ADDR'];
+    if ($ua == 'health' and ($ra == '127.0.0.1' or $ra == '::1')) {
+      print('OK');
+      exit();
     }
 
     return $args;
@@ -23,10 +30,16 @@ class mailu extends rcube_plugin
 
   function authenticate($args)
   {
-    if (!in_array('HTTP_X_REMOTE_USER', $_SERVER) || !in_array('HTTP_X_REMOTE_USER_TOKEN', $_SERVER)) {
+    if (!array_key_exists('HTTP_X_REMOTE_USER', $_SERVER) or !array_key_exists('HTTP_X_REMOTE_USER_TOKEN', $_SERVER)) {
+      if ($_SERVER['PHP_SELF'] == '/sso.php') {
         header('HTTP/1.0 403 Forbidden');
-        die();
+        print('mailu sso failure');
+      } else {
+        header('Location: sso.php');
+      }
+      exit();
     }
+
     $args['user'] = $_SERVER['HTTP_X_REMOTE_USER'];
     $args['pass'] = $_SERVER['HTTP_X_REMOTE_USER_TOKEN'];
 
@@ -36,30 +49,25 @@ class mailu extends rcube_plugin
     return $args;
   }
 
-  function logout($args) {
-    // Redirect to global SSO logout path.
+  // Redirect to global SSO logout path.
+  function logout($args)
+  {
     $this->load_config();
-
     $sso_logout_url = rcmail::get_instance()->config->get('sso_logout_url');
-    header("Location: " . $sso_logout_url, true);
-    exit;
+    header('Location: ' . $sso_logout_url, true);
+    exit();
   }
 
   function login($args)
   {
-      header('Location: index.php');
-      exit();
+    header('Location: index.php');
+    exit();
   }
+
   function login_failed($args)
   {
-      $ua = $_SERVER['HTTP_USER_AGENT'];
-      $ra = $_SERVER['REMOTE_ADDR'];
-      if ($ua == 'health' and ($ra == '127.0.0.1' or $ra == '::1')) {
-        echo "OK";
-        exit;
-      }
-      header('Location: sso.php');
-      exit();
+    header('Location: sso.php');
+    exit();
   }
 
 }

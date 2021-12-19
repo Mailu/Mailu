@@ -92,6 +92,8 @@ babel = flask_babel.Babel()
 @babel.localeselector
 def get_locale():
     """ selects locale for translation """
+    if not app.config['SESSION_COOKIE_NAME'] in flask.request.cookies:
+        return flask.request.accept_languages.best_match(app.config.translations.keys())
     language = flask.session.get('language')
     if not language in app.config.translations:
         language = flask.request.accept_languages.best_match(app.config.translations.keys())

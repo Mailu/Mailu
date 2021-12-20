@@ -357,7 +357,7 @@ class MailuSessionConfig:
         if now is None:
             now = int(time.time())
         created = int.from_bytes(created, byteorder='big')
-        if not created <= now <= created + app.config['PERMANENT_SESSION_LIFETIME']:
+        if not created <= now <= created + int(app.config['PERMANENT_SESSION_LIFETIME']):
             return None
 
         return (uid, sid, crt)

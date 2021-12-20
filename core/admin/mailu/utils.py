@@ -246,12 +246,8 @@ class MailuSession(CallbackDict, SessionMixin):
 
     def regenerate(self):
         """ generate new id for session to avoid `session fixation`. """
-
         self.delete()
-
         self._sid = None
-        self._created = self.app.session_config.gen_created()
-
         self.modified = True
 
     def delete(self):
@@ -262,9 +258,7 @@ class MailuSession(CallbackDict, SessionMixin):
 
     def save(self):
         """ Save session to store. """
-
         set_cookie = False
-
         # set uid from dict data
         if self._uid is None:
             self._uid = self.app.session_config.gen_uid(self.get('_user_id', ''))

@@ -13,7 +13,7 @@ $config['log_driver'] = 'stdout';
 $config['zipdownload_selection'] = true;
 $config['enable_spellcheck'] = true;
 $config['spellcheck_engine'] = 'pspell';
-$config['session_lifetime'] = {{ SESSION_TIMEOUT // 60 }};
+$config['session_lifetime'] = {{ SESSION_TIMEOUT }}; //60
 
 // Mail servers
 $config['default_host'] = '{{ FRONT_ADDRESS or "front" }}';

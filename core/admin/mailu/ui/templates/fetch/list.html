@@ -30,7 +30,7 @@
   {%- for fetch in user.fetches %}
   <tr>
     <td>
-      <a href="{{ url_for('.fetch_edit', fetch_id=fetch.id) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
+      <a href="{{ url_for('.fetch_edit', fetch_id=fetch.id) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil-alt"></i></a>&nbsp;
       <a href="{{ url_for('.fetch_delete', fetch_id=fetch.id) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
     </td>
     <td>{{ fetch.protocol }}{{ 's' if fetch.tls else '' }}://{{ fetch.host }}:{{ fetch.port }}</td>

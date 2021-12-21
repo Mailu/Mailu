@@ -70,7 +70,8 @@ DEFAULT_CONFIG = {
     # Advanced settings
     'LOG_LEVEL': 'WARNING',
     'SESSION_KEY_BITS': 128,
-    'SESSION_LIFETIME': 24,
+    'SESSION_TIMEOUT': 3600,
+    'PERMANENT_SESSION_LIFETIME': 30*24*3600,
     'SESSION_COOKIE_SECURE': True,
     'CREDENTIAL_ROUNDS': 12,
     'TZ': 'Etc/UTC',
@@ -152,7 +153,11 @@ class ConfigManager:
         self.config['SESSION_STORAGE_URL'] = f'redis://{self.config["REDIS_ADDRESS"]}/3'
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
-        self.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=int(self.config['SESSION_LIFETIME']))
+        self.config['SESSION_PERMANENT'] = True
+        self.config['SESSION_TIMEOUT'] = int(self.config['SESSION_TIMEOUT'])
+        self.config['PERMANENT_SESSION_LIFETIME'] = int(self.config['PERMANENT_SESSION_LIFETIME'])
+        self.config['AUTH_RATELIMIT_IP_V4_MASK'] = int(self.config['AUTH_RATELIMIT_IP_V4_MASK'])
+        self.config['AUTH_RATELIMIT_IP_V6_MASK'] = int(self.config['AUTH_RATELIMIT_IP_V6_MASK'])
         hostnames = [host.strip() for host in self.config['HOSTNAMES'].split(',')]
         self.config['AUTH_RATELIMIT_EXEMPTION'] = set(ipaddress.ip_network(cidr, False) for cidr in (cidr.strip() for cidr in self.config['AUTH_RATELIMIT_EXEMPTION'].split(',')) if cidr)
         self.config['MESSAGE_RATELIMIT_EXEMPTION'] = set([s for s in self.config['MESSAGE_RATELIMIT_EXEMPTION'].lower().replace(' ', '').split(',') if s])

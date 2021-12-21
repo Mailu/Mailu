@@ -1,4 +1,4 @@
-from mailu import models
+from mailu import models, utils
 from flask import current_app as app
 
 import re
@@ -32,8 +32,8 @@ def check_credentials(user, password, ip, protocol=None, auth_port=None):
         return False
     is_ok = False
     # webmails
-    if len(password) == 64 and auth_port in ['10143', '10025']:
-        if user.verify_temp_token(password):
+    if auth_port in ['10143', '10025'] and password.startswith('token-'):
+        if utils.verify_temp_token(user.get_id(), password):
             is_ok = True
     # All tokens are 32 characters hex lowercase
     if not is_ok and len(password) == 32:

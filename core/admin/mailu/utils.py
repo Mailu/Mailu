@@ -231,8 +231,6 @@ class MailuSession(CallbackDict, SessionMixin):
 
     def destroy(self):
         """ destroy session for security reasons. """
-        if 'webmail_token' in self:
-            self.app.session_store.delete(self['webmail_token'])
         self.delete()
 
         self._uid = None
@@ -246,13 +244,15 @@ class MailuSession(CallbackDict, SessionMixin):
 
     def regenerate(self):
         """ generate new id for session to avoid `session fixation`. """
-        self.delete()
+        self.delete(clear_token=False)
         self._sid = None
         self.modified = True
 
-    def delete(self):
+    def delete(self, clear_token=True):
         """ Delete stored session. """
         if self.saved:
+            if clear_token and 'webmail_token' in self:
+                self.app.session_store.delete(self['webmail_token'])
             self.app.session_store.delete(self._key)
             self._key = None
 

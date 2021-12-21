@@ -79,9 +79,9 @@ limiter = limiter.LimitWraperFactory()
 def extract_network_from_ip(ip):
     n = ipaddress.ip_network(ip)
     if n.version == 4:
-        return str(n.supernet(prefixlen_diff=(32-int(app.config["AUTH_RATELIMIT_IP_V4_MASK"]))).network_address)
+        return str(n.supernet(prefixlen_diff=(32-app.config["AUTH_RATELIMIT_IP_V4_MASK"])).network_address)
     else:
-        return str(n.supernet(prefixlen_diff=(128-int(app.config["AUTH_RATELIMIT_IP_V6_MASK"]))).network_address)
+        return str(n.supernet(prefixlen_diff=(128-app.config["AUTH_RATELIMIT_IP_V6_MASK"])).network_address)
 
 def is_exempt_from_ratelimits(ip):
     ip = ipaddress.ip_address(ip)
@@ -270,7 +270,7 @@ class MailuSession(CallbackDict, SessionMixin):
             if 'webmail_token' in self:
                 app.session_store.put(self['webmail_token'],
                         self.sid,
-                        int(app.config['PERMANENT_SESSION_LIFETIME']),
+                        app.config['PERMANENT_SESSION_LIFETIME'],
                 )
 
         # get new session key
@@ -284,7 +284,7 @@ class MailuSession(CallbackDict, SessionMixin):
         self.app.session_store.put(
             key,
             pickle.dumps(dict(self)),
-            int(app.config['SESSION_TIMEOUT']),
+            app.config['SESSION_TIMEOUT'],
         )
 
         self._key = key
@@ -357,7 +357,7 @@ class MailuSessionConfig:
         if now is None:
             now = int(time.time())
         created = int.from_bytes(created, byteorder='big')
-        if not created <= now <= created + int(app.config['PERMANENT_SESSION_LIFETIME']):
+        if not created <= now <= created + app.config['PERMANENT_SESSION_LIFETIME']:
             return None
 
         return (uid, sid, crt)
@@ -402,7 +402,7 @@ class MailuSessionInterface(SessionInterface):
             response.set_cookie(
                 app.session_cookie_name,
                 session.sid,
-                expires=datetime.now()+timedelta(seconds=int(app.config['PERMANENT_SESSION_LIFETIME'])),
+                expires=datetime.now()+timedelta(seconds=app.config['PERMANENT_SESSION_LIFETIME']),
                 httponly=self.get_cookie_httponly(app),
                 domain=self.get_cookie_domain(app),
                 path=self.get_cookie_path(app),
@@ -494,6 +494,6 @@ def gen_temp_token(email, session):
     session['webmail_token'] = token
     app.session_store.put(token,
             session.sid,
-            int(app.config['PERMANENT_SESSION_LIFETIME']),
+            app.config['PERMANENT_SESSION_LIFETIME'],
     )
     return token

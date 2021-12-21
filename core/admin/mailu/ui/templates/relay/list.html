@@ -26,7 +26,7 @@
   {%- for relay in relays %}
   <tr>
     <td>
-      <a href="{{ url_for('.relay_edit', relay_name=relay.name) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil"></i></a>&nbsp;
+      <a href="{{ url_for('.relay_edit', relay_name=relay.name) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil-alt"></i></a>&nbsp;
       <a href="{{ url_for('.relay_delete', relay_name=relay.name) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>&nbsp;
     </td>
     <td>{{ relay.name }}</td>

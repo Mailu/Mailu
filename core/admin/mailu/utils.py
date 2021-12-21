@@ -422,7 +422,16 @@ class MailuSessionExtension:
 
         count = 0
         for key in app.session_store.list():
-            if not app.session_config.parse_key(key, app, now=now):
+            if key.startswith('token-'):
+                if sessid := app.session_store.get(token):
+                    if not app.session_config.parse_key(sessid, app, now=now):
+                        app.session_store.delete(sessid)
+                        app.session_store.delete(key)
+                        count += 1
+                else:
+                    app.session_store.delete(key)
+                    count += 1
+            elif not app.session_config.parse_key(key, app, now=now):
                 app.session_store.delete(key)
                 count += 1
 
@@ -442,7 +451,7 @@ class MailuSessionExtension:
 
         count = 0
         for key in app.session_store.list(prefix):
-            if key not in keep:
+            if key not in keep and not key.startswith('token-'):
                 app.session_store.delete(key)
                 count += 1
 

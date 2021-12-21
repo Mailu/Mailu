@@ -481,8 +481,7 @@ session = MailuSessionExtension()
 def verify_temp_token(email, token):
     try:
         if token.startswith('token-'):
-            sessid = app.session_store.get(token)
-            if sessid:
+            if sessid := app.session_store.get(token)
                 session = MailuSession(sessid, app)
                 if session.get('_user_id', '') == email:
                     return True

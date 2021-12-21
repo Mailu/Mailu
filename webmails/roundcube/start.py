@@ -63,8 +63,7 @@ context["PLUGINS"] = ",".join(f"'{p}'" for p in plugins)
 context["INCLUDES"] = sorted(inc for inc in os.listdir("/overrides") if inc.endswith(".inc")) if os.path.isdir("/overrides") else []
 
 # calculate variables for config file
-env["SESSION_TIMEOUT_MINUTES"] = str(int(env.get("SESSION_TIMEOUT", "3600")) // 60 ) if int(env.get("SESSION_TIMEOUT", "3600")) >= 60 else "1"
-context.update(env)
+context["SESSION_TIMEOUT_MINUTES"] = max(int(env.get("SESSION_TIMEOUT", "3600")) // 60, 1)
 
 # create config files
 conf.jinja("/php.ini", context, "/usr/local/etc/php/conf.d/roundcube.ini")

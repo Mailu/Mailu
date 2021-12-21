@@ -268,9 +268,9 @@ class MailuSession(CallbackDict, SessionMixin):
             self._sid = self.app.session_config.gen_sid()
             set_cookie = True
             if 'webmail_token' in self:
-                app.session_store.put(self['webmail_token'],
+                self.app.session_store.put(self['webmail_token'],
                         self.sid,
-                        app.config['PERMANENT_SESSION_LIFETIME'],
+                        self.app.config['PERMANENT_SESSION_LIFETIME'],
                 )
 
         # get new session key
@@ -357,7 +357,7 @@ class MailuSessionConfig:
         if now is None:
             now = int(time.time())
         created = int.from_bytes(created, byteorder='big')
-        if not created <= now <= created + app.config['PERMANENT_SESSION_LIFETIME']:
+        if not created <= now <= created + self.app.config['PERMANENT_SESSION_LIFETIME']:
             return None
 
         return (uid, sid, crt)

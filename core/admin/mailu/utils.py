@@ -231,8 +231,6 @@ class MailuSession(CallbackDict, SessionMixin):
 
     def destroy(self):
         """ destroy session for security reasons. """
-        if 'webmail_token' in self:
-            self.app.session_store.delete(self['webmail_token'])
         self.delete()
 
         self._uid = None
@@ -246,13 +244,15 @@ class MailuSession(CallbackDict, SessionMixin):
 
     def regenerate(self):
         """ generate new id for session to avoid `session fixation`. """
-        self.delete()
+        self.delete(clear_token=False)
         self._sid = None
         self.modified = True
 
-    def delete(self):
+    def delete(self, clear_token=True):
         """ Delete stored session. """
         if self.saved:
+            if clear_token and 'webmail_token' in self:
+                self.app.session_store.delete(self['webmail_token'])
             self.app.session_store.delete(self._key)
             self._key = None
 
@@ -268,9 +268,9 @@ class MailuSession(CallbackDict, SessionMixin):
             self._sid = self.app.session_config.gen_sid()
             set_cookie = True
             if 'webmail_token' in self:
-                app.session_store.put(self['webmail_token'],
+                self.app.session_store.put(self['webmail_token'],
                         self.sid,
-                        app.config['PERMANENT_SESSION_LIFETIME'],
+                        self.app.config['PERMANENT_SESSION_LIFETIME'],
                 )
 
         # get new session key
@@ -357,7 +357,7 @@ class MailuSessionConfig:
         if now is None:
             now = int(time.time())
         created = int.from_bytes(created, byteorder='big')
-        if not created <= now <= created + app.config['PERMANENT_SESSION_LIFETIME']:
+        if not created <= now <= created + self.app.config['PERMANENT_SESSION_LIFETIME']:
             return None
 
         return (uid, sid, crt)
@@ -422,7 +422,16 @@ class MailuSessionExtension:
 
         count = 0
         for key in app.session_store.list():
-            if not app.session_config.parse_key(key, app, now=now):
+            if key.startswith('token-'):
+                if sessid := app.session_store.get(token):
+                    if not app.session_config.parse_key(sessid, app, now=now):
+                        app.session_store.delete(sessid)
+                        app.session_store.delete(key)
+                        count += 1
+                else:
+                    app.session_store.delete(key)
+                    count += 1
+            elif not app.session_config.parse_key(key, app, now=now):
                 app.session_store.delete(key)
                 count += 1
 
@@ -442,7 +451,7 @@ class MailuSessionExtension:
 
         count = 0
         for key in app.session_store.list(prefix):
-            if key not in keep:
+            if key not in keep and not key.startswith('token-'):
                 app.session_store.delete(key)
                 count += 1
 
@@ -481,8 +490,7 @@ session = MailuSessionExtension()
 def verify_temp_token(email, token):
     try:
         if token.startswith('token-'):
-            sessid = app.session_store.get(token)
-            if sessid:
+            if sessid := app.session_store.get(token):
                 session = MailuSession(sessid, app)
                 if session.get('_user_id', '') == email:
                     return True

@@ -300,7 +300,7 @@ class MailuSessionConfig:
     # default size of session key parts
     uid_bits = 64 # default if SESSION_KEY_BITS is not set in config
     sid_bits = 128 # for now. must be multiple of 8!
-    time_bits = 32 # for now. must be multiple of 8!
+    time_bits = 32 # for now. must be multiple of 8!  
 
     def __init__(self, app=None):
 
@@ -341,6 +341,9 @@ class MailuSessionConfig:
     def parse_key(self, key, app=None, now=None):
         """ Split key into sid, uid and creation time. """
 
+        if app is None:
+            app = flask.current_app
+
         if not (isinstance(key, bytes) and self._key_min <= len(key) <= self._key_max):
             return None
 
@@ -357,7 +360,7 @@ class MailuSessionConfig:
         if now is None:
             now = int(time.time())
         created = int.from_bytes(created, byteorder='big')
-        if not created <= now <= created + self.app.config['PERMANENT_SESSION_LIFETIME']:
+        if not created <= now <= created + app.config['PERMANENT_SESSION_LIFETIME']:
             return None
 
         return (uid, sid, crt)
@@ -422,8 +425,8 @@ class MailuSessionExtension:
 
         count = 0
         for key in app.session_store.list():
-            if key.startswith('token-'):
-                if sessid := app.session_store.get(token):
+            if key.startswith(b'token-'):
+                if sessid := app.session_store.get(key):
                     if not app.session_config.parse_key(sessid, app, now=now):
                         app.session_store.delete(sessid)
                         app.session_store.delete(key)
@@ -451,7 +454,7 @@ class MailuSessionExtension:
 
         count = 0
         for key in app.session_store.list(prefix):
-            if key not in keep and not key.startswith('token-'):
+            if key not in keep and not key.startswith(b'token-'):
                 app.session_store.delete(key)
                 count += 1
 

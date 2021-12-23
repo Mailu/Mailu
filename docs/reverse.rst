@@ -221,6 +221,68 @@ Alternatively, you can define SANs in the Traefik static configuration using rou
 
 .. _`Traefik`: https://traefik.io/
 
+Linuxserver Swag reverse proxy
+------------------------------
+
+Another popular reverse proxy is Linuxserver Swag with built-in ``letsencrypt``. It can be placed in front of the Mailu front container and use with other docker-containers in ``docker-compose.yml``:
+
+Configuration steps:
+
+- Configure Linuxserver Swag reverse proxy as described on: https://docs.linuxserver.io/general/swag.
+- In the Swag volume directory ``config/nginx/proxy-confs/mailu.subdomain.conf``, copy ``mailu.subdomain.conf.sample`` to ``mailu.subdomain.conf``.
+- The default ``mailu.subdomain.conf`` configuration file forwards SSL port 443 to port 80 on subdomain ``mailu`` to Mailu ``front`` container.
+- Configure DNS A and AAAA records which should match with line ``server_name mailu.*;`` in ``mailu.subdomain.conf``.
+- Configure ``TLS_FLAVOR=mail-letsencrypt`` in ``mailu.env`` to use Mailu ``front`` container behind reverse proxies.
+- Remove ports 80 and 443 ``front`` container as this is now handled by the Swag reverse proxy.
+- Restart ``swag`` and ``front`` containers.
+
+Example ``docker-compose.yml`` with Swag reverse proxy:
+
+.. code-block:: yaml
+
+  services:
+    front:
+      image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}nginx:${MAILU_VERSION:-master}
+      container_name: mailu_nginx
+      restart: always
+      env_file: mailu.env
+      logging:
+        driver: json-file
+      ports:
+        #- "127.0.0.1:80:80"
+        #- "127.0.0.1:443:443"
+        - "127.0.0.1:25:25"
+        - "127.0.0.1:465:465"
+        - "127.0.0.1:587:587"
+        - "127.0.0.1:110:110"
+        - "127.0.0.1:995:995"
+        - "127.0.0.1:143:143"
+        - "127.0.0.1:993:993"
+      volumes:
+        - "${VOLUME_DIR}/mailu/certs:/certs"
+        - "${VOLUME_DIR}/mailu/overrides/nginx:/overrides:ro"
+
+    swag:
+      image: ghcr.io/linuxserver/swag
+      container_name: swag
+      restart: unless-stopped
+      ports:
+        - 80:80
+        - 443:443
+      cap_add:
+        - NET_ADMIN
+      environment:
+        - PUID=1000
+        - PGID=1000
+        - EMAIL=me@example.net
+        - URL=example.net
+        - SUBDOMAINS=wildcard
+        - VALIDATION=${SWAG_VALIDATION}
+        - DNSPLUGIN=${SWAG_DNSPLUGIN}
+        - TZ=Europe/Amsterdam
+      volumes:
+        - ${VOLUME_DIR}/swag/config:/config
+
 Override Mailu configuration
 ----------------------------
 

@@ -224,7 +224,7 @@ Alternatively, you can define SANs in the Traefik static configuration using rou
 Linuxserver Swag reverse proxy
 ------------------------------
 
-Another popular reverse proxy is Linuxserver Swag with built-in ``letsencrypt``. It can be placed in front of the Mailu front container and use with other docker-containers in ``docker-compose.yml``:
+Another popular reverse proxy is Linuxserver Swag with built-in ``letsencrypt``. It can be placed in front of the Mailu front container and used with other docker-containers in ``docker-compose.yml``:
 
 Configuration steps:
 
@@ -232,7 +232,17 @@ Configuration steps:
 - In the Swag volume directory ``config/nginx/proxy-confs/mailu.subdomain.conf``, copy ``mailu.subdomain.conf.sample`` to ``mailu.subdomain.conf``.
 - The default ``mailu.subdomain.conf`` configuration file forwards SSL port 443 to port 80 on subdomain ``mailu`` to Mailu ``front`` container.
 - Configure DNS A and AAAA records which should match with line ``server_name mailu.*;`` in ``mailu.subdomain.conf``.
-- Configure ``TLS_FLAVOR=mail-letsencrypt`` in ``mailu.env`` to use Mailu ``front`` container behind reverse proxies.
+- Configure ``mailu.env``:
+
+.. code-block:: bash
+
+  # Use Mailu front container behind reverse proxies.
+  TLS_FLAVOR=mail-letsencrypt
+  
+  REAL_IP_HEADER=X-Real-IP
+  REAL_IP_FROM=x.x.x.x,y.y.y.y.y
+  #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu. 
+
 - Remove ports 80 and 443 ``front`` container as this is now handled by the Swag reverse proxy.
 - Restart ``swag`` and ``front`` containers.
 

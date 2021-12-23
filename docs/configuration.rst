@@ -159,18 +159,25 @@ To create it manually, follow the specific deployment method documentation.
 
 To have the account created automatically, you just need to define a few environment variables:
 
+- ``INITIAL_ADMIN_ACCOUNT``: the admin username: The first part of the e-mail address before the @.
+- ``INITIAL_ADMIN_DOMAIN``: the domain appendix: Most probably identical to the ``DOMAIN`` variable.
+- ``INITIAL_ADMIN_PW``: the admin password.
+- ``INITIAL_ADMIN_MODE``: use one of the options below for configuring how the admin account must be created:
+  
+  - ``create``: (default) creates a new admin account and raises an exception when it already exists.
+  - ``ifmissing``: creates a new admin account when the admin account does not exist.
+  - ``update``: creates a new admin account when it does not exist, or update the password of an existing admin account.
+
+Note: It is recommended to set ``INITIAL_ADMIN_MODE`` to either ``update`` or ``ifmissing``. Leaving it with the default value will cause an error when the system is restarted.
+
+An example:
+
 .. code-block:: bash
 
-  INITIAL_ADMIN_ACCOUNT = ``root`` The first part of the e-mail address (ROOT@example.com)
-  INITIAL_ADMIN_DOMAIN = ``example.com`` the domain appendix. Most probably identical to the DOMAIN variable
-  INITIAL_ADMIN_PW = ``password`` the chosen password for the user
-
-Also, environment variable ``INITIAL_ADMIN_MODE`` defines how the code should behave when it will
-try to create the admin user:
-
-- ``create`` (default) Will try to create user and will raise an exception if present
-- ``ifmissing``: if user exists, nothing happens, else it will be created
-- ``update``: user is created or, if it exists, its password gets updated
+  INITIAL_ADMIN_ACCOUNT=me
+  INITIAL_ADMIN_DOMAIN=example.net
+  INITIAL_ADMIN_PW=password
+  INITIAL_ADMIN_MODE=ifmissing
 
 Depending on your particular deployment you most probably will want to change the default.
 

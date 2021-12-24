@@ -19,9 +19,10 @@ RUN pip3 install socrate==0.2.0
 RUN pip3 install "podop>0.2.5"
 
 # Image specific layers under this line
-RUN apk add --no-cache --virtual .build-deps gcc musl-dev python3-dev
-RUN pip3 install --no-binary :all: postfix-mta-sts-resolver==1.0.1
-RUN apk del .build-deps gcc musl-dev python3-dev
+# Building pycares from source requires py3-wheel and libffi-dev packages
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev python3-dev py3-wheel libffi-dev \
+  && pip3 install --no-binary :all: postfix-mta-sts-resolver==1.0.1 \
+  && apk del .build-deps
 
 RUN apk add --no-cache postfix postfix-pcre cyrus-sasl-login rsyslog logrotate
 

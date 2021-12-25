@@ -28,3 +28,4 @@ Other contributors:
  - [Dimitri Huisman](https://github.com/Diman0) - [Contributions](https://github.com/Mailu/Mailu/commits?author=Diman0)
  - [lub](https://github.com/lub) - [Contributions](https://github.com/Mailu/Mailu/commits?author=lub)
  - [Dario Ernst](https://github.com/Nebukadneza) - [Contributions](https://github.com/Mailu/Mailu/commits?author=Nebukadneza)
+ - [Florent Daigniere](https://github.com/nextgens) - [Contributions](https://github.com/Mailu/Mailu/commits?author=nextgens)

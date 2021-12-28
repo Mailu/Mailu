@@ -255,8 +255,7 @@ Database settings
 The admin service stores configurations in a database.
 
 - ``DB_FLAVOR``: the database type for mailu admin service. (``sqlite``, ``postgresql``, ``mysql``)
-- ``DB_HOST``: the database host for mailu admin service. (when not ``sqlite``)
-- ``DB_PORT``: the database port for mailu admin service. (when not ``sqlite``)
+- ``DB_HOST``: the database host for mailu admin service. For non-default ports use the notation `host:port`. (when not ``sqlite``)
 - ``DB_PW``: the database password for mailu admin service. (when not ``sqlite``)
 - ``DB_USER``: the database user for mailu admin service. (when not ``sqlite``)
 - ``DB_NAME``: the database name for mailu admin service. (when not ``sqlite``)
@@ -264,8 +263,7 @@ The admin service stores configurations in a database.
 The roundcube service stores configurations in a database.
 
 - ``ROUNDCUBE_DB_FLAVOR``: the database type for roundcube service. (``sqlite``, ``postgresql``, ``mysql``)
-- ``ROUNDCUBE_DB_HOST``: the database host for roundcube service. (when not ``sqlite``)
-- ``ROUNDCUBE_DB_PORT``: the database port for roundcube service. (when not ``sqlite``)
+- ``ROUNDCUBE_DB_HOST``: the database host for roundcube service. For non-default ports use the notation `host:port`. (when not ``sqlite``)
 - ``ROUNDCUBE_DB_PW``: the database password for roundcube service. (when not ``sqlite``)
 - ``ROUNDCUBE_DB_USER``: the database user for roundcube service. (when not ``sqlite``)
 - ``ROUNDCUBE_DB_NAME``: the database name for roundcube service. (when not ``sqlite``)

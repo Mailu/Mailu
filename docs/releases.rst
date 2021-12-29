@@ -140,6 +140,9 @@ For more information see the :ref:`configuration reference <reverse_proxy_header
 
 If you use Fail2Ban, you configure Fail2Ban to monitor failed logon attempts for the web-facing frontend (Admin/Webmail). See the :ref:`updated Fail2Ban documentation <Fail2Ban>` for more information.
 
+Please note that the shipped image for the PostgreSQL database is fully deprecated now. 
+To migrate to the official PostgreSQL image, you can follow our :ref:`migration guide <migrate_mailu_postgresql>`.
+
 
 Mailu 1.8 - 2021-08-7
 ---------------------

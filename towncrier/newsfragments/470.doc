@@ -1,4 +1,0 @@
-Document hardware requirements when using clamav. 
-Clamav requires **at least** 2GB of memory.
-This 2Gb does not entail any other software running on the box.
-So in total you require at least 3GB of memory and 1GB swap when antivirus is enabled.

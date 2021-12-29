@@ -36,12 +36,10 @@ html_context = {
     'github_user': 'mailu',
     'github_repo': 'mailu',
     'github_version': version,
-    'stable_version': '1.8',
+    'stable_version': '1.9',
     'versions': [
-        ('1.5', '/1.5/'),
-        ('1.6', '/1.6/'),
-        ('1.7', '/1.7/'),
         ('1.8', '/1.8/'),
+        ('1.9', '/1.9/'),
         ('master', '/master/')
     ],
     'conf_py_path': '/docs/'

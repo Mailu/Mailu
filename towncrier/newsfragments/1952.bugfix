@@ -1,3 +1,0 @@
-Webmail and Radicale (webdav) were not useable with domains with special characters such as umlauts.
-Webmail and radicale now use punycode for logging in.
-Punycode was not used in the HTTP headers. This resulted in illegal non-ASCII HTTP headers.

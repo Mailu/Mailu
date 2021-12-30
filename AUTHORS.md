@@ -29,3 +29,4 @@ Other contributors:
  - [lub](https://github.com/lub) - [Contributions](https://github.com/Mailu/Mailu/commits?author=lub)
  - [Dario Ernst](https://github.com/Nebukadneza) - [Contributions](https://github.com/Mailu/Mailu/commits?author=Nebukadneza)
  - [Florent Daigniere](https://github.com/nextgens) - [Contributions](https://github.com/Mailu/Mailu/commits?author=nextgens)
+ - [Alexander Graf](https://github.com/ghostwheel42) - [Contributions](https://github.com/Mailu/Mailu/commits?author=ghostwheel42)

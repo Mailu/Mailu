@@ -569,7 +569,7 @@ class User(Base, Email):
         """ verifies password against stored hash
             and updates hash if outdated
         """
-        if password == '':
+        if not password:
             return False
         cache_result = self._credential_cache.get(self.get_id())
         current_salt = self.password.split('$')[3] if len(self.password.split('$')) == 5 else None
@@ -588,7 +588,10 @@ class User(Base, Email):
         if reference.startswith(('{PBKDF2}', '{BLF-CRYPT}', '{SHA512-CRYPT}', '{SHA256-CRYPT}', '{MD5-CRYPT}', '{CRYPT}')):
             reference = reference.split('}', 1)[1]
 
-        result, new_hash = User.get_password_context().verify_and_update(password, reference)
+        try:
+            result, new_hash = User.get_password_context().verify_and_update(password, reference)
+        except ValueError:
+            return False
         if new_hash:
             self.password = new_hash
             db.session.add(self)

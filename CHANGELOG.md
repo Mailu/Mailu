@@ -1,29 +1,131 @@
 Changelog
 =========
 
+For full details see the [releases page](https://mailu.io/1.9/releases.html)
+
+Warning, the helm-chart repo is not in sync yet with the new Mailu 1.9 release. If you use helm-chart (kubernetes), we advise to stick to version 1.8. 
+
 Upgrade should run fine as long as you generate a new compose or stack
 configuration and upgrade your mailu.env.
 
-There are some changes to the configuration overrides. Override files are now mounted read-only into the containers.
-The Dovecot and Postfix overrides are moved in their own sub-directory.
-If there are local override files, they will need to be moved from overrides/ to overrides/dovecot and overrides/postfix/.
-See https://mailu.io/1.8/faq.html#how-can-i-override-settings for all the mappings.
+If you use a reverse proxy in front of Mailu, it is vital to configure the newly introduced env variables REAL_IP_HEADER and REAL_IP_FROM.
+These settings tell Mailu that the HTTP header with the remote client IP address from the reverse proxy can be trusted.
+For more information see the [configuration reference](https://mailu.io/1.9/configuration.html#advanced-settings).
 
 One major change for the docker compose file is that the antispam container needs a fixed hostname [#1837](https://github.com/Mailu/Mailu/issues/1837).
 This is handled when you regenerate the docker-compose file. A fixed hostname is required to retain rspamd history. 
-This is also handled in the helm-chart repo.
-
-Improvements have been made to protect again session-fixation attacks. 
-To be fully protected, it is required to change your SECRET_KEY in Mailu.env after upgrading. 
-A new SECRET_KEY is generated when you recreate your docker-compose.yml & mailu.env file via setup.mailu.io.
-
-The SECRET_KEY is an uppercase alphanumeric string of length 16. You can manually create such a string via
-```cat /dev/urandom | tr -dc 'A-Z0-9' | fold -w ${1:-16} | head -n 1```
 
 After changing mailu.env, it is required to recreate all containers for the changes to be propagated.
 
-Please note that the shipped image for PostgreSQL database is deprecated.
-We advise to switch to an external PostgreSQL database server.
+Please note that the shipped image for PostgreSQL database is fully deprecated now. To migrate to the official PostgreSQL image, you can follow our guide [here](https://mailu.io/master/database.html#mailu-postgresql)
+
+1.9.0 - 2021-12-28
+- Features: Make the rate limit apply to a subnet rather than a specific IP (/24 for v4 and /56 for v6) ([#116](https://github.com/Mailu/Mailu/issues/116))
+- Features: Add instructions on how to create DNS records for email client auto-configuration (RFC6186 style) ([#224](https://github.com/Mailu/Mailu/issues/224))
+- Features: Remove the Received header with PRIMARY_HOSTNAME [PUBLIC_IP] ([#466](https://github.com/Mailu/Mailu/issues/466))
+- Features: Centralize the authentication of webmails behind the admin interface ([#783](https://github.com/Mailu/Mailu/issues/783))
+- Features: Add sending quotas per user ([#1031](https://github.com/Mailu/Mailu/issues/1031))
+- Features: Allow specific users to send emails from any address using the WILDCARD_SENDERS setting ([#1096](https://github.com/Mailu/Mailu/issues/1096))
+- Features: Use semantic versioning for building releases.
+  - Add versioning (tagging) for branch x.y (1.8). E.g. 1.8.0, 1.8.1 etc.
+    - docker repo will contain x.y (latest) and x.y.z (pinned version) images.
+    - The X.Y.Z tag is incremented automatically. E.g. if 1.8.0 already exists, then the next merge on 1.8 will result in the new tag 1.8.1 being used.
+  - Make the version available in the image.
+    -  For X.Y and X.Y.Z write the version (X.Y.Z) into /version on the image and add a label with version=X.Y.Z
+  	  -  This means that the latest X.Y image shows the pinned version (X.Y.Z e.g. 1.8.1) it was based on. Via the tag X.Y.Z you can see the commit hash that triggered the built.
+    -  For master write the commit hash into /version on the image and add a label with version={commit hash}
+  -  Automatic releases. For x.y triggered builts (e.g. merge on 1.9) do a new github release for the pinned x.y.z (e.g. 1.9.2). 
+    -  Release shows a static message (see RELEASE_TEMPLATE.md) that explains how to reach the newsfragments folder and change the branch to the tag (x.y.z) mentioned in the release. Now you can get the changelog by reading all newsfragment files in this folder. ([#1182](https://github.com/Mailu/Mailu/issues/1182))
+- Features: Add a credential cache to speedup authentication requests. ([#1194](https://github.com/Mailu/Mailu/issues/1194))
+- Features: Introduces postfix logging via syslog with these features:
+  - stdout logging still enabled
+  - internal test request log messages (healthcheck) are filtered out by rsyslog
+  - optional logging to file via POSTFIX_LOG_FILE env variable
+  To use logging to file configure in mailu.env
+  - ``POSTFIX_LOG_FILE``: The file to log the mail log to ([#1441](https://github.com/Mailu/Mailu/issues/1441))
+- Features: Make smtp_tls_policy_maps easily configurable ([#1558](https://github.com/Mailu/Mailu/issues/1558))
+- Features: Implement a language selector for the admin interface. ([#1567](https://github.com/Mailu/Mailu/issues/1567))
+- Features: Add cli commands config-import and config-export ([#1604](https://github.com/Mailu/Mailu/issues/1604))
+- Features: Implement SECRET_KEY_FILE and DB_PW_FILE variables for usage with Docker secrets. ([#1607](https://github.com/Mailu/Mailu/issues/1607))
+- Features: Add possibility to enforce inbound STARTTLS via INBOUND_TLS_LEVEL=true ([#1610](https://github.com/Mailu/Mailu/issues/1610))
+- Features: Refactor the rate limiter to ensure that it performs as intented. ([#1612](https://github.com/Mailu/Mailu/issues/1612))
+- Features: Enable OCSP stapling for the http server within nginx. ([#1618](https://github.com/Mailu/Mailu/issues/1618))
+- Features: Enable support of all hash types passlib supports. ([#1662](https://github.com/Mailu/Mailu/issues/1662))
+- Features: Support configuring lz4 and zstd compression for dovecot. ([#1694](https://github.com/Mailu/Mailu/issues/1694))
+- Features: Switch to bcrypt_sha256, replace PASSWORD_SCHEME with CREDENTIAL_ROUNDS and dynamically update existing hashes on first login ([#1753](https://github.com/Mailu/Mailu/issues/1753))
+- Features: Implement AdminLTE 3 for the admin interface. ([#1764](https://github.com/Mailu/Mailu/issues/1764))
+- Features: Implement MTA-STS and DANE validation. Introduce DEFER_ON_TLS_ERROR (default: True) to harden or loosen the policy enforcement. ([#1798](https://github.com/Mailu/Mailu/issues/1798))
+- Features: Remove cyrus-sasl-plain as it's not packaged by alpine anymore. SASL-login is still available and used when relaying. ([#1851](https://github.com/Mailu/Mailu/issues/1851))
+- Features: Hebrew translation has been completed. ([#1873](https://github.com/Mailu/Mailu/issues/1873))
+- Features: Log authentication attempts on the admin portal ([#1926](https://github.com/Mailu/Mailu/issues/1926))
+- Features: AdminLTE3 design optimizations, asset compression and caching
+
+  - fixed copy of qemu-arm-static for alpine
+  - added 'set -eu' safeguard
+  - silenced npm update notification
+  - added color to webpack call
+  - changed Admin-LTE default blue
+  - AdminLTE 3 style tweaks
+  - localized datatables
+  - moved external javascript code to vendor.js
+  - added mailu logo
+  - moved all inline javascript to app.js
+  - added iframe display of rspamd page
+  - updated language-selector to display full language names and use post
+  - added fieldset to group and en/disable input fields
+  - added clipboard copy buttons
+  - cleaned external javascript imports
+  - pre-split first hostname for further use
+  - cache dns_* properties of domain object (immutable during runtime)
+  - fixed and splitted dns_dkim property of domain object (space missing)
+  - added autoconfig and tlsa properties to domain object
+  - suppressed extra vertical spacing in jinja2 templates
+  - improved accessibility for screen reader
+  - deleted unused/broken /user/forward route
+  - updated gunicorn to 20.1.0 to get rid of buffering error at startup
+  - switched webpack to production mode
+  - added css and javascript minimization
+  - added pre-compression of assets (gzip)
+  - removed obsolete dependencies
+  - switched from node-sass to dart-sass
+  - changed startup cleaning message from error to info
+  - move client config to "my account" section when logged in ([#1966](https://github.com/Mailu/Mailu/issues/1966))
+- Features: Remove Mailu PostgreSQL. It is fully deprecated. No images will be built anymore and it cannot be selected in the setup utility.
+  The roundcube database flavour (e.g. PostgreSQL or SQLite) can now be selected indepently of the Mailu (Admin) database flavour.
+  Fix bug #1838. ([#2069](https://github.com/Mailu/Mailu/issues/2069))
+- Bugfixes: RELAYNETS should be a comma separated list of networks ([#360](https://github.com/Mailu/Mailu/issues/360))
+- Bugfixes: Fix rate-limiting on /webdav/ ([#1194](https://github.com/Mailu/Mailu/issues/1194))
+- Bugfixes: Fixed fetchmail losing track of fetched emails upon container recreation. 
+  The relevant fetchmail files are now retained in the /data folder (in the fetchmail image).
+  See the docker-compose.yml file for the relevant volume mapping.
+  If you already had your own mapping, you must double check the volume mapping and take action. ([#1223](https://github.com/Mailu/Mailu/issues/1223))
+- Bugfixes: Ensure that the podop socket is always owned by the postfix user (wasn't the case when build using non-standard base images... typically for arm64) ([#1294](https://github.com/Mailu/Mailu/issues/1294))
+- Bugfixes: Fix "extract_host_port" function to support containers with custom / dynamic ports ([#1669](https://github.com/Mailu/Mailu/issues/1669))
+- Bugfixes: Fix CVE-2021-23240, CVE-2021-3156 and CVE-2021-23239 for postgresql
+  by force-upgrading sudo. ([#1760](https://github.com/Mailu/Mailu/issues/1760))
+- Bugfixes: Fix roundcube environment configuration for databases ([#1831](https://github.com/Mailu/Mailu/issues/1831))
+- Bugfixes: Alpine has removed support for btree and hash in postfix... please use lmdb instead ([#1917](https://github.com/Mailu/Mailu/issues/1917))
+- Bugfixes: Webmail and Radicale (webdav) were not useable with domains with special characters such as umlauts.
+  Webmail and radicale now use punycode for logging in.
+  Punycode was not used in the HTTP headers. This resulted in illegal non-ASCII HTTP headers. ([#1952](https://github.com/Mailu/Mailu/issues/1952))
+- Bugfixes: Ensure that we do not trust the source-ip address set in headers if REAL_IP_HEADER isn't set. If you are using Mailu behind a reverse proxy, please ensure that you do read the documentation. ([#1960](https://github.com/Mailu/Mailu/issues/1960))
+- Bugfixes: Reverse proxy documentation has been updated to reflect new security hardening from PR#1959.
+  If you do not set the configuration parameters in Mailu what reverse proxy header to trust,
+  then Mailu will not have access to the real ip address of the connecting client.
+  This means that rate limiting will not properly work. You can also not use fail2ban. 
+  It is very important to configure this when using a reverse proxy. ([#1962](https://github.com/Mailu/Mailu/issues/1962))
+- Bugfixes: Fixed roundcube sso login not working. ([#1990](https://github.com/Mailu/Mailu/issues/1990))
+- Bugfixes: The DB_PORT and ROUNDCUBE_DB_PORT environment variables were not actually used. They are removed from the documentation. For using different ports you can already use the notation host:port . ([#2073](https://github.com/Mailu/Mailu/issues/2073))
+- Bugfixes: Ensure that webmail tokens expire in sync with sessions ([#2080](https://github.com/Mailu/Mailu/issues/2080))
+- Bugfixes: Introduce SESSION_TIMEOUT (1h) and PERMANENT_SESSION_LIFETIME (30d) ([#2094](https://github.com/Mailu/Mailu/issues/2094))
+- Improved Documentation: Document hardware requirements when using clamav. 
+  Clamav requires **at least** 2GB of memory.
+  This 2Gb does not entail any other software running on the box.
+  So in total you require at least 3GB of memory and 1GB swap when antivirus is enabled. ([#470](https://github.com/Mailu/Mailu/issues/470))
+- Improved Documentation: Added documentation for how to switch the database back-end used by Mailu.
+  Added documentation for migrating from the deprecated Mailu PostgreSQL image to a different PostgreSQL database. ([#1037](https://github.com/Mailu/Mailu/issues/1037))
+- Improved Documentation: Add documentation for Traefik 2 in Reverse Proxy ([#1503](https://github.com/Mailu/Mailu/issues/1503))
+- Misc:  ([#1696](https://github.com/Mailu/Mailu/issues/1696), [#1712](https://github.com/Mailu/Mailu/issues/1712), [#1828](https://github.com/Mailu/Mailu/issues/1828), [#1830](https://github.com/Mailu/Mailu/issues/1830))
 
 
 1.8.0 - 2021-08-06

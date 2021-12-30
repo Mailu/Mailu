@@ -570,24 +570,32 @@ This will generate the DKIM and DMARC entries for you.
 
 *Issue reference:* `102`_.
 
+.. _Fail2Ban:
+
 Do you support Fail2Ban?
 ````````````````````````
 
 Fail2Ban is not included in Mailu. Fail2Ban needs to modify the host's IP tables in order to
 ban the addresses. We consider such a program should be run on the host system and not
 inside a container. The ``front`` container does use authentication rate limiting to slow
-down brute force attacks.
+down brute force attacks. The same applies to login attempts via the single sign on page.
 
-We *do* provide a possibility to export the logs from the ``front`` service to the host.
+We *do* provide a possibility to export the logs from the ``front`` service and ``Admin`` service to the host.
+The ``front`` container logs failed logon attempts on SMTP, IMAP and POP3. 
+The ``Admin``container logs failed logon attempt on the single sign on page.
 For this you need to set ``LOG_DRIVER=journald`` or ``syslog``, depending on the log
 manager of the host. You will need to setup the proper Regex in the Fail2Ban configuration.
-Below an example how to do so. Be aware that webmail authentication appears to come from the
-Docker network, so don't ban those addresses!
+Below an example how to do so. 
+
+If you use a reverse proxy in front of Mailu, it is vital to set the environment variables REAL_IP_HEADER and REAL_IP_FROM.
+Without these environment variables, Mailu will not trust the remote client IP passed on by the reverse proxy and as a result your reverse proxy will be banned. 
+See the :ref:`[configuration reference <reverse_proxy_headers>` for more information.
+
 
 Assuming you have a working Fail2Ban installation on the host running your Docker containers,
 follow these steps:
 
-1. In the mailu docker-compose set the logging driver of the front container to journald
+1. In the mailu docker-compose set the logging driver of the front container to journald; and set the tag to mailu-front
 
 .. code-block:: bash
 
@@ -621,7 +629,41 @@ follow these steps:
 
 The above will block flagged IPs for a week, you can of course change it to you needs.
 
-4. Add the /etc/fail2ban/action.d/docker-action.conf
+4. In the mailu docker-compose set the logging driver of the Admin container to journald; and set the tag to mailu-admin
+
+.. code-block:: bash
+  
+  logging:
+    driver: journald
+    options:
+      tag: mailu-admin
+
+5. Add the /etc/fail2ban/filter.d/bad-auth-sso.conf
+
+.. code-block:: bash
+
+  # Fail2Ban configuration file
+  [Definition]
+  failregex = .* Login failed for .+ from <HOST>.
+  ignoreregex =
+  journalmatch = CONTAINER_TAG=mailu-admin
+
+6. Add the /etc/fail2ban/jail.d/bad-auth-sso.conf
+
+.. code-block:: bash
+
+  [bad-auth-sso]
+  enabled = true
+  backend = systemd
+  filter = bad-auth-sso
+  bantime = 604800
+  findtime = 300
+  maxretry = 10
+  action = docker-action
+
+The above will block flagged IPs for a week, you can of course change it to you needs.
+
+7. Add the /etc/fail2ban/action.d/docker-action.conf
 
 .. code-block:: bash
 
@@ -643,7 +685,7 @@ The above will block flagged IPs for a week, you can of course change it to you 
 
 Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
 
-5. Configure and restart the Fail2Ban service
+8. Configure and restart the Fail2Ban service
 
 Make sure Fail2Ban is started after the Docker service by adding a partial override which appends this to the existing configuration.
 

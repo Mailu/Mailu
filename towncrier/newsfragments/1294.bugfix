@@ -1,1 +1,0 @@
-Ensure that the podop socket is always owned by the postfix user (wasn't the case when build using non-standard base images... typically for arm64)

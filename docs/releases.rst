@@ -1,6 +1,136 @@
 Release notes
 =============
 
+Mailu 1.9 - 2021-12-29
+----------------------
+
+Mailu 1.9 is available now. The helm-chart repo is not in sync yet with the new Mailu 1.9 release. If you use helm-chart (kubernetes), we advise to stick to version 1.8 for now. 
+See the section `Upgrading` for important information in regard to upgrading to Mailu 1.9.
+
+Highlights
+````````````````````````````````
+
+Quite a lot of new features have been implemented. Of these new features we'd like to highlight these:
+
+Security
+^^^^^^^^
+
+A far amount of work went in this release; In no particular order:
+
+- outbound SMTP connections from Mailu are now enjoying some protection against active attackers thanks to DANE and MTA-STS support. Specific policies can be configured for specific destinations thanks to ``tls_policy_maps`` and configuring your system to publish a policy has been documented in the FAQ.
+- outbound emails can now be rate-limited (to mitigate SPAM in case an account is taken over)
+- long term storage of passwords has been rethought to enable stronger protection against offline attackers (switch to iterated and salted SHA+bcrypt) while enabling much better performance (credential cache). Please encourage your users to use tokens where appropriate and keep in mind that existing hashes will be converted on first use to the new format.
+- session handling has been reworked from the grounds up: they have been switched from client side (cookies) to server-side, unified (SSO, expiry, lifetime) accross all web-facing applications and some mitigations against session fixation have been implemented.
+- rate limiting has seen many improvements: It is now deployed on **all** entry points (SMTP/IMAP/POP3/WEB/WEBMAIL) and configured to defeat both password bruteforces (thanks to a limit against total number of failed attempts against an account over a period) and password spraying (thanks to a limit for each client on the total number of non-existing accounts that can be queried). Exemption mechanisms have been put in place (device tokens, dynamic IP whitelists) to ensure that genuine clients and users won't be affected by default and the default configuration thought to fit most usecases.
+- if you use letsencrypt, Mailu is now configured to offer both RSA and ECC certificates to clients; It will OSCP stapple its replies where appropriate
+
+
+Updated Admin interface
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The Web Administration interface makes use of AdminLTE. The AdminLTE2 technology has been upgraded to AdminLTE3. This cost a lot of effort due to the changes between AdminLTE2 and AdminLTE3. 
+As a result the webpage looks more modern. All tables now have a filter and columns that can be sorted. If you have many users or domains, this will be a very welcome new feature!
+
+A language selector has been added. On the login page and in the Web Admin Interface, the language selector can be accessed in the top right. 
+
+
+Import/Export command on steroids
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The Mailu command line has been enhanced with the new config-export and config-import command.
+**Everything** that can be configured in the Mailu Web Administration Interface can now be exported and imported via yaml files.
+So via YAML files, you can now bulk configure a complete new installation, without the need to access the Mailu Web Administration Interface.
+
+It is also possible to create new users or import new users (with password hashes) using the config-import. 
+
+With this new command it is very easy to switch to a different database management system for the Mailu database. Simply dump your configuration to yaml file.
+After setting up your new Mailu system with the different DBMS, you can import the yaml file with all Mailu configuration.
+
+For more information, see the :ref:`Mailu command line <config-export>` page.
+
+
+New SSO login page
+^^^^^^^^^^^^^^^^^^
+
+A new single sign on login page is introduced which handles logins for the Mailu Web Administration Interface and webmail. It has enabled a drastic attack-surface reduction and will enable us to add support for two factor authentication in the future.
+
+All failed login attempts are now logged to the Admin service, significantly simplifying the deployment of solutions such as Fail2ban.
+
+See the :ref:`updated Fail2Ban documentation <Fail2Ban>` for more information.
+
+
+Semantic versioning
+^^^^^^^^^^^^^^^^^^^
+
+From Mailu 1.9, we will use semantic versioning. First we only had x.y (e.g. 1.9) releases. For every update to an existing version, we will create an additional x.y.z (e.g. 1.9.1) release.
+
+- The X.Y (1.9) tag will always feature the latest version.
+- The X.Y.Z (1.9.1) tag is a pinned version. This release is not updated. You can use this to update in a controlled manner. At a convenient time, you can choose to switch to a newer version (e.g 1.9.2). The X.Y.Z tag is incremented automatically when an update is pushed for the X.Y release.
+
+The images now also contain the release it was built for.
+
+- Every docker image will have a docker label with the version.
+- Every docker image will have the file /version with the same version information.
+- Master images will contain the commit hash that initiated the built of the image.
+- X.Y and X.Y.Z images will have the X.Y.Z version that triggered the built.
+
+On the github project we will automatically create releases for each X.Y.Z release. Via this release you can check what commit hash the tag is assigned to.
+
+With this improvement in our CI/CD workflow, it is possible to be notified when an update is released via github releases. It is also possible to use pinned versions to update in a controlled manner. 
+
+
+New Functionality & Improvements
+````````````````````````````````
+
+For a list of all the changes (including bug fixes) refer to `CHANGELOG.md` in the root folder of the Mailu github project. 
+
+A short summary of the new features:
+
+- Roundcube and Rainloop have been updated.
+- All dependencies have been updated to the latest security update
+- AdminLTE (used by Admin service) is updated to AdminLTE3.
+- Much improved rate limiting.
+
+  - Rate limiting small subnets instead of single IP addresses.
+  - Rate limiting for accounts that do not exist.
+  - Rate limiting for existing accounts (failed logon attempts).
+  - Device-tokens are introduced to ensure genuine users are not locked out
+
+- Domain details page is enhanced with DNS client auto-configuration (RFC6186) entries.
+- Centralize the authentication of webmails behind the admin interface.
+
+   - The new single sign on page opens up the possiblity to introduce 2 factor authentication in the future.
+
+- Add sending quotas per user (configured in mailu.env). This determines how many emails each user can send every day.
+- Allow specific users to send emails from any address using the WILDCARD_SENDERS setting (mailu.env.).
+- Use semantic versioning for building releases.
+- Internal improviments to improve performance of authentication requests.
+- Introduded a language selector for the Admin interface.
+- Add cli commands config-import and config-export for importing/exporting Mailu config via YAML.
+- Enable support of all hash types passlib supports.
+- Switch to bcrypt_sha256 (stronger hashing of passwords in Mailu database)/
+- Introduce MTA-STS and DANE validation.
+- Added Hebrew translation.
+- Log authentication attempts on the admin portal. Fail2ban can now be used to monitor login attempts on Admin/Webmail.
+- Remove Mailu PostgreSQL. 
+- Admin/Webmail sessions expire now. This can be tweakers via mailu.env.
+
+
+Upgrading
+`````````
+
+Upgrade should run fine as long as you generate a new compose or stack configuration and upgrade your mailu.env.
+
+If you use a reverse proxy in front of Mailu, it is vital to configure the newly introduced environment variables `REAL_IP_HEADER`` and `REAL_IP_FROM`.
+These settings tell Mailu that the HTTP header with the remote client IP address from the reverse proxy can be trusted.
+For more information see the :ref:`configuration reference <reverse_proxy_headers>`.
+
+If you use Fail2Ban, you configure Fail2Ban to monitor failed logon attempts for the web-facing frontend (Admin/Webmail). See the :ref:`updated Fail2Ban documentation <Fail2Ban>` for more information.
+
+Please note that the shipped image for the PostgreSQL database is fully deprecated now. 
+To migrate to the official PostgreSQL image, you can follow our :ref:`migration guide <migrate_mailu_postgresql>`.
+
+
 Mailu 1.8 - 2021-08-7
 ---------------------
 

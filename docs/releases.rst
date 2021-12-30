@@ -15,25 +15,15 @@ Quite a lot of new features have been implemented. Of these new features we'd li
 Security
 ^^^^^^^^
 
-The session management has been improved in the Mailu Admin interface and webmails.
-Sessions will automatically expire when the internet browser is closed.
-Measures have also been implemented to safe guard against attackers hijacking sessions (anti session fixation).
+A far amount of work went in this release; In no particular order:
 
-The rate limiting has seen many improvements. Rate limiting is used for SMTP/IMAP/POP3 login attempts and login attempts via the login page. We now have rate limiting on IP addresses and user accounts (email addresses)
+- outbound SMTP connections from Mailu are now enjoying some protection against active attackers thanks to DANE and MTA-STS support. Specific policies can be configured for specific destinations thanks to ``tls_policy_maps`` and configuring your system to publish a policy has been documented in the FAQ.
+- outbound emails can now be rate-limited (to mitigate SPAM in case an account is taken over)
+- long term storage of passwords has been rethought to enable stronger protection against offline attackers (switch to iterated and salted SHA+bcrypt) while enabling much better performance (credential cache). Please encourage your users to use tokens where appropriate and keep in mind that existing hashes will be converted on first use to the new format.
+- session handling has been reworked from the grounds up: they have been switched from client side (cookies) to server-side, unified (SSO, expiry, lifetime) accross all web-facing applications and some mitigations against session fixation have been implemented.
+- rate limiting has seen many improvements: It is now deployed on **all** entry points (SMTP/IMAP/POP3/WEB/WEBMAIL) and configured to defeat both password bruteforces (thanks to a limit against total number of failed attempts against an account over a period) and password spraying (thanks to a limit for each client on the total number of non-existing accounts that can be queried). Exemption mechanisms have been put in place (device tokens, dynamic IP whitelists) to ensure that genuine clients and users won't be affected by default and the default configuration thought to fit most usecases.
+- if you use letsencrypt, Mailu is now configured to offer both RSA and ECC certificates to clients; It will OSCP stapple its replies where appropriate
 
-- Rate limiting on IP
-
-  - IP failed authentication x amount times, regardless the target login account. 
-  
-  - Guessing email addresses also counts for this. E.g. trying to login for a non existing email address.
-
-- Rate limiting on user account
-
-  - Login attempts for this user failed x amount times. All IPs cannot login using this user when the rate limit is applied. This protects against botnets.
-
-  - Exemption based on device tokens. A successful login attempt awards the device with a token. This device token allows access even when the user account is rate limited. This functionality is handled automatically by Mailu.
-
-With this improved rate limiting in place, it is more difficult to attack Mailu systems. Of course it is still important to use strong passwords.
 
 Updated Admin interface
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -62,12 +52,9 @@ For more information, see the :ref:`Mailu command line <config-export>` page.
 New SSO login page
 ^^^^^^^^^^^^^^^^^^
 
-A new single sign on login page is introduced which handles logins for the Mailu Web Administration Interface and webmail.
+A new single sign on login page is introduced which handles logins for the Mailu Web Administration Interface and webmail. It has enabled a drastic attack-surface reduction and will enable us to add support for two factor authentication in the future.
 
-With a single SSO page that handles all logins for Mailu, it is possible to look into adding support for two factor authentication.
-
-All failed login attempts are logged to the Admin service. Fail2ban can be used to monitor these failed logon attempts and temporarily blacklist attackers.
-Now all login attempts can be monitored with Fail2Ban.
+All failed login attempts are now logged to the Admin service, significantly simplifying the deployment of solutions such as Fail2ban.
 
 See the :ref:`updated Fail2Ban documentation <Fail2Ban>` for more information.
 

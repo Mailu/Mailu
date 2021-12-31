@@ -1,0 +1,1 @@
+updated Dockerfile to alpine 3.14.3 to address several CVEs

@@ -1,3 +1,0 @@
-Make unbound work with ipv6
-Add a cache-min-ttl of 5minutes
-Enable qname minimisation (privacy)

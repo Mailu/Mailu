@@ -17,7 +17,7 @@ RUN set -eu \
  && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
  && apt install -y --no-install-recommends \
       python3 curl python3-pip git python3-multidict \
-      python3-jinja2 gpg tzdata \
+      python3-jinja2 gpg gpg-agent tzdata \
  && pip3 install socrate \
  && echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini \
  && echo "ServerSignature Off\nServerName roundcube" >> /etc/apache2/apache2.conf \

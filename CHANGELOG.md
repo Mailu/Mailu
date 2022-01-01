@@ -20,6 +20,32 @@ After changing mailu.env, it is required to recreate all containers for the chan
 Please note that the shipped image for PostgreSQL database is fully deprecated now. To migrate to the official PostgreSQL image, you can follow our guide [here](https://mailu.io/master/database.html#mailu-postgresql)
 
 1.9.0 - 2021-12-28
+- Features: Document how to setup client autoconfig using an override ([#224](https://github.com/Mailu/Mailu/issues/224))
+- Features: Add support for timezones ([#1154](https://github.com/Mailu/Mailu/issues/1154))
+- Features: Ensure that RCVD_NO_TLS_LAST doesn't add to the spam score (as TLS usage can't be determined) ([#1705](https://github.com/Mailu/Mailu/issues/1705))
+- Features: Add support for ECDSA certificates when letsencrypt is used. This means dropping compatibility for android < 4.1.1
+  Add LETSENCRYPT_SHORTCHAIN to your configuration to avoid sending ISRG Root X1 (this will break compatibility with android < 7.1.1)
+  Disable AUTH command on port 25
+  Disable TLS tickets, reconfigure the cache to improve Forward Secrecy
+  Prevent clear-text credentials from being sent to relays ([#1922](https://github.com/Mailu/Mailu/issues/1922))
+- Features: Improved the SSO page. Warning! The new endpoints /sso and /static are introduced.
+  These endpoints are now used for handling sign on requests and shared static files.
+  You may want to update your reverse proxy to proxy /sso and /static to Mailu (to the front service).
+  The example section of using a reverse proxy is updated with this information.
+   - New SSO page is used for logging in Admin or Webmail.
+   - Made SSO page available separately. SSO page can now be used without Admin accessible (ADMIN=false).
+   - Introduced stub /static which is used by all sites for accessing static files.
+   - Removed the /admin/ prefix to reduce complexity of routing with Mailu. Admin is accessible directly via /admin instead of /admin/ui
+  Note: Failed logon attempts are logged in the logs of admin. You can watch this with fail2ban. ([#1929](https://github.com/Mailu/Mailu/issues/1929))
+- Features: Make unbound work with ipv6
+  Add a cache-min-ttl of 5minutes
+  Enable qname minimisation (privacy) ([#1992](https://github.com/Mailu/Mailu/issues/1992))
+- Features: Disable the login page if SESSION_COOKIE_SECURE is incompatible with how Mailu is accessed as this seems to be a common misconfiguration. ([#1996](https://github.com/Mailu/Mailu/issues/1996))
+- Features: Derive a new subkey (from SECRET_KEY) for SRS ([#2002](https://github.com/Mailu/Mailu/issues/2002))
+- Features: allow sending emails as user+detail@domain.tld ([#2007](https://github.com/Mailu/Mailu/issues/2007))
+- Features: rspamd: get dkim keys via REST API instead of filesystem ([#2017](https://github.com/Mailu/Mailu/issues/2017))
+- Features: updated roundcube to 1.5 and carddav to 4.2.2 using php8 ([#2035](https://github.com/Mailu/Mailu/issues/2035))
+- Features: use dovecot-fts-xapian from alpine package ([#2072](https://github.com/Mailu/Mailu/issues/2072))
 - Features: Make the rate limit apply to a subnet rather than a specific IP (/24 for v4 and /56 for v6) ([#116](https://github.com/Mailu/Mailu/issues/116))
 - Features: Add instructions on how to create DNS records for email client auto-configuration (RFC6186 style) ([#224](https://github.com/Mailu/Mailu/issues/224))
 - Features: Remove the Received header with PRIMARY_HOSTNAME [PUBLIC_IP] ([#466](https://github.com/Mailu/Mailu/issues/466))
@@ -118,6 +144,13 @@ Please note that the shipped image for PostgreSQL database is fully deprecated n
 - Bugfixes: The DB_PORT and ROUNDCUBE_DB_PORT environment variables were not actually used. They are removed from the documentation. For using different ports you can already use the notation host:port . ([#2073](https://github.com/Mailu/Mailu/issues/2073))
 - Bugfixes: Ensure that webmail tokens expire in sync with sessions ([#2080](https://github.com/Mailu/Mailu/issues/2080))
 - Bugfixes: Introduce SESSION_TIMEOUT (1h) and PERMANENT_SESSION_LIFETIME (30d) ([#2094](https://github.com/Mailu/Mailu/issues/2094))
+- Bugfixes: Hide the login of the user in sent emails ([#1638](https://github.com/Mailu/Mailu/issues/1638))
+- Bugfixes: SSO login page to webmail did not work if WEB_WEBMAIL=/ was set. ([#2078](https://github.com/Mailu/Mailu/issues/2078))
+- Bugfixes: #2079 Webmail token check does not work if WEBMAIL_ADDRESS is set to a hostname.
+  #2081 Fix typo in nginx config for webmail port (10043 to 10143) ([#2079](https://github.com/Mailu/Mailu/issues/2079))
+- Bugfixes: Alias, relay and fetchmail lists in the admin interface were missing the edit button. ([#2093](https://github.com/Mailu/Mailu/issues/2093))
+- Bugfixes: Fix bug introduced by enhanced session management ([#2098](https://github.com/Mailu/Mailu/issues/2102))
+- Bugfixes: Fix build dependencies postfix-mta-sts-resolver. ([#2106](https://github.com/Mailu/Mailu/issues/2106))
 - Improved Documentation: Document hardware requirements when using clamav. 
   Clamav requires **at least** 2GB of memory.
   This 2Gb does not entail any other software running on the box.

@@ -1,1 +1,0 @@
-rspamd: get dkim keys via REST API instead of filesystem

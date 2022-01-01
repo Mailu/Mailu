@@ -1,5 +1,0 @@
-Add support for ECDSA certificates when letsencrypt is used. This means dropping compatibility for android < 4.1.1
-Add LETSENCRYPT_SHORTCHAIN to your configuration to avoid sending ISRG Root X1 (this will break compatibility with android < 7.1.1)
-Disable AUTH command on port 25
-Disable TLS tickets, reconfigure the cache to improve Forward Secrecy
-Prevent clear-text credentials from being sent to relays

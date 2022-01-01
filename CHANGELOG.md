@@ -320,6 +320,10 @@ After changing mailu.env, it is required to recreate all containers for the chan
 
 Please note that the shipped image for PostgreSQL database is fully deprecated now. To migrate to the official PostgreSQL image, you can follow our guide [here](https://mailu.io/master/database.html#mailu-postgresql)
 
+<<<<<<< HEAD
+=======
+1.9.0 - 2021-12-28
+>>>>>>> 0f0a2be7 (Update CHANGELOG.md with items that were not added by mistake.)
 - Features: Document how to setup client autoconfig using an override ([#224](https://github.com/Mailu/Mailu/issues/224))
 - Features: Add support for timezones ([#1154](https://github.com/Mailu/Mailu/issues/1154))
 - Features: Ensure that RCVD_NO_TLS_LAST doesn't add to the spam score (as TLS usage can't be determined) ([#1705](https://github.com/Mailu/Mailu/issues/1705))
@@ -451,7 +455,11 @@ Please note that the shipped image for PostgreSQL database is fully deprecated n
 - Bugfixes: Alias, relay and fetchmail lists in the admin interface were missing the edit button. ([#2093](https://github.com/Mailu/Mailu/issues/2093))
 - Bugfixes: Fix bug introduced by enhanced session management ([#2098](https://github.com/Mailu/Mailu/issues/2102))
 - Bugfixes: Fix build dependencies postfix-mta-sts-resolver. ([#2106](https://github.com/Mailu/Mailu/issues/2106))
+<<<<<<< HEAD
 - Improved Documentation: Document hardware requirements when using clamav.
+=======
+- Improved Documentation: Document hardware requirements when using clamav. 
+>>>>>>> 0f0a2be7 (Update CHANGELOG.md with items that were not added by mistake.)
   Clamav requires **at least** 2GB of memory.
   This 2Gb does not entail any other software running on the box.
   So in total you require at least 3GB of memory and 1GB swap when antivirus is enabled. ([#470](https://github.com/Mailu/Mailu/issues/470))

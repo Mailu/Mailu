@@ -15,7 +15,7 @@ Quite a lot of new features have been implemented. Of these new features we'd li
 Security
 ^^^^^^^^
 
-A far amount of work went in this release; In no particular order:
+A fair amount of work went in this release; In no particular order:
 
 - outbound SMTP connections from Mailu are now enjoying some protection against active attackers thanks to DANE and MTA-STS support. Specific policies can be configured for specific destinations thanks to ``tls_policy_maps`` and configuring your system to publish a policy has been documented in the FAQ.
 - outbound emails can now be rate-limited (to mitigate SPAM in case an account is taken over)

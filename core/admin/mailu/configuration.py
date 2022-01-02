@@ -63,6 +63,7 @@ DEFAULT_CONFIG = {
     'WEB_ADMIN': '/admin',
     'WEB_WEBMAIL': '/webmail',
     'WEBMAIL': 'none',
+    'WEBMAIL_ADDRESS': None,
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
     'LOGO_URL': None,

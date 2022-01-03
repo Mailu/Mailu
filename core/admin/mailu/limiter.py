@@ -52,6 +52,7 @@ class LimitWraperFactory(object):
             app.logger.warn(f'Authentication attempt from {ip} has been rate-limited.')
         return is_rate_limited
 
+<<<<<<< HEAD
     def rate_limit_ip(self, ip, username=None):
         limiter = self.get_limiter(app.config['AUTH_RATELIMIT_IP'], 'auth-ip')
         client_network = utils.extract_network_from_ip(ip)
@@ -59,6 +60,12 @@ class LimitWraperFactory(object):
             if username and self.storage.get(f'dedup-{client_network}-{username}') > 0:
                 return
             self.storage.incr(f'dedup-{client_network}-{username}', limits.parse(app.config['AUTH_RATELIMIT_IP']).GRANULARITY.seconds, True)
+=======
+    def rate_limit_ip(self, ip):
+        limiter = self.get_limiter(app.config["AUTH_RATELIMIT_IP"], 'auth-ip')
+        client_network = utils.extract_network_from_ip(ip)
+        if self.is_subject_to_rate_limits(ip):
+>>>>>>> 7f89a297 (Fix 2125)
             limiter.hit(client_network)
 
     def should_rate_limit_user(self, username, ip, device_cookie=None, device_cookie_name=None):

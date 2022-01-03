@@ -32,7 +32,7 @@ RUN apk add --no-cache \
 #     php7-pdo_sqlite Access to SQLite 3 databases
 RUN apk add --no-cache \
     nginx \
-    php7 php7-fpm php7-curl php7-iconv php7-json php7-xml php7-dom php7-openssl php7-pdo php7-pdo_sqlite \
+    php7 php7-fpm php7-curl php7-iconv php7-json php7-xml php7-simplexml php7-dom php7-openssl php7-pdo php7-pdo_sqlite \
  && rm /etc/nginx/http.d/default.conf \
  && rm /etc/php7/php-fpm.d/www.conf \
  && mkdir -p /run/nginx \

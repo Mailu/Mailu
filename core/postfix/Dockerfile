@@ -16,7 +16,9 @@ RUN apk add --no-cache \
 RUN pip3 install socrate==0.2.0
 
 # Shared layer between dovecot and postfix
-RUN pip3 install "podop>0.2.5"
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev python3-dev \
+  && pip3 install "podop>0.2.5" \
+  && apk del .build-deps
 
 # Image specific layers under this line
 # Building pycares from source requires py3-wheel and libffi-dev packages

@@ -53,11 +53,10 @@ class LimitWraperFactory(object):
         return is_rate_limited
 
     def rate_limit_ip(self, ip):
-        if ip != app.config['WEBMAIL_ADDRESS']:
-            limiter = self.get_limiter(app.config["AUTH_RATELIMIT_IP"], 'auth-ip')
-            client_network = utils.extract_network_from_ip(ip)
-            if self.is_subject_to_rate_limits(ip):
-                limiter.hit(client_network)
+        limiter = self.get_limiter(app.config["AUTH_RATELIMIT_IP"], 'auth-ip')
+        client_network = utils.extract_network_from_ip(ip)
+        if self.is_subject_to_rate_limits(ip):
+            limiter.hit(client_network)
 
     def should_rate_limit_user(self, username, ip, device_cookie=None, device_cookie_name=None):
         limiter = self.get_limiter(app.config["AUTH_RATELIMIT_USER"], 'auth-user')

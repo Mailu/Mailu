@@ -1,0 +1,1 @@
+Pin the root certificate differently for DANE. If you have setup a TLSA record following previous suggestion from Mailu please update it.

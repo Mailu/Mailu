@@ -49,9 +49,13 @@ services:
       - "{{ root }}/overrides/nginx:/overrides:ro"
     {% if resolver_enabled %}
 <<<<<<< HEAD
+<<<<<<< HEAD
     depends_on:
 =======
 >>>>>>> f4cb9de4 (enable the resolver everywhere)
+=======
+    depends_on:
+>>>>>>> 70ea2a5b (all containers)
       - resolver
     dns:
       - {{ dns }}
@@ -110,9 +114,12 @@ services:
     {% endif %}
     depends_on:
       - front
+<<<<<<< HEAD
     {% if tika_enabled %}
       - fts_attachments
     {% endif %}
+=======
+>>>>>>> 70ea2a5b (all containers)
     {% if resolver_enabled %}
       - resolver
     dns:
@@ -248,8 +255,17 @@ services:
         tag: mailu-webdav
     volumes:
       - "{{ root }}/dav:/data"
+<<<<<<< HEAD
     networks:
       - radicale
+=======
+    {% if resolver_enabled %}
+    depends_on:
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
+>>>>>>> 70ea2a5b (all containers)
   {% endif %}
 
   {% if fetchmail_enabled %}
@@ -290,7 +306,16 @@ services:
     networks:
       - webmail
     depends_on:
+<<<<<<< HEAD
       - front
+=======
+      - imap
+    {% if resolver_enabled %}
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
+>>>>>>> 70ea2a5b (all containers)
   {% endif %}
 
 networks:

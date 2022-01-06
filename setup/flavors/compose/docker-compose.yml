@@ -48,7 +48,10 @@ services:
       - "{{ root }}/certs:/certs"
       - "{{ root }}/overrides/nginx:/overrides:ro"
     {% if resolver_enabled %}
+<<<<<<< HEAD
     depends_on:
+=======
+>>>>>>> f4cb9de4 (enable the resolver everywhere)
       - resolver
     dns:
       - {{ dns }}

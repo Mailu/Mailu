@@ -45,6 +45,11 @@ services:
     depends_on:
       - redis
       - resolver
+<<<<<<< HEAD:tests/compose/api/docker-compose.yml
+=======
+    dns:
+      - 192.168.203.254
+>>>>>>> 8595893a (doh):tests/compose/rainloop/docker-compose.yml
 
   imap:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-local}

@@ -99,6 +99,7 @@ services:
     networks:
       - clamav
     volumes:
+<<<<<<< HEAD
       - "/mailu/filter/clamav:/var/lib/clamav"
     healthcheck:
       test: ["CMD-SHELL", "kill -0 `cat /tmp/clamd.pid` && kill -0 `cat /tmp/freshclam.pid`"]
@@ -106,6 +107,9 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+=======
+      - "/mailu/filter:/data"
+>>>>>>> 8595893a (doh)
 
   resolver:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-local}

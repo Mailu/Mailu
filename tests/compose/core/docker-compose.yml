@@ -40,8 +40,11 @@ services:
     volumes:
       - "/mailu/data:/data"
       - "/mailu/dkim:/dkim"
+    dns:
+      - 192.168.203.254
     depends_on:
       - redis
+      - resolver
 
   imap:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot:${PINNED_MAILU_VERSION:-local}
@@ -75,7 +78,13 @@ services:
 
   # Optional services
 
-
+  resolver:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-local}
+    env_file: mailu.env
+    restart: always
+    networks:
+      default:
+        ipv4_address: 192.168.203.254
 
   # Webmail
 

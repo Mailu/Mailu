@@ -33,8 +33,11 @@ services:
     volumes:
       - "{{ root }}/certs:/certs"
       - "{{ root }}/overrides/nginx:/overrides:ro"
+    {% if resolver_enabled %}
+      - resolver
+    dns:
+      - {{ dns }}
 
-  {% if resolver_enabled %}
   resolver:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
@@ -42,7 +45,7 @@ services:
     networks:
       default:
         ipv4_address: {{ dns }}
-  {% endif %}
+    {% endif %}
 
   admin:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-{{ version }}}
@@ -57,6 +60,11 @@ services:
       - "{{ root }}/dkim:/dkim"
     depends_on:
       - redis
+    {% if resolver_enabled %}
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
 
   imap:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-{{ version }}}

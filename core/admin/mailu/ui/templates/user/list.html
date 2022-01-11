@@ -16,8 +16,8 @@
 {%- call macros.table() %}
 <thead>
   <tr>
-    <th>{% trans %}Actions{% endtrans %}</th>
-    <th>{% trans %}User settings{% endtrans %}</th>
+    <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
+    <th data-orderable="false">{% trans %}User settings{% endtrans %}</th>
     <th>{% trans %}Email{% endtrans %}</th>
     <th>{% trans %}Features{% endtrans %}</th>
     <th>{% trans %}Quota{% endtrans %}</th>
@@ -39,14 +39,14 @@
       <a href="{{ url_for('.fetch_list', user_email=user.email) }}" title="{% trans %}Fetched accounts{% endtrans %}"><i class="fa fa-download"></i></a>&nbsp;
     </td>
     <td>{{ user }}</td>
-    <td>
+    <td data-ordered="{{ user.enable_imap*2 + user.enable_pop }}">
       {% if user.enable_imap %}<span class="badge bg-info">imap</span>{% endif %}
       {% if user.enable_pop %}<span class="badge bg-info">pop3</span>{% endif %}
     </td>
-    <td>{{ user.quota_bytes_used | filesizeformat }} / {{ (user.quota_bytes | filesizeformat) if user.quota_bytes else '∞' }}</td>
+    <td data-ordered="{{ user.quota_bytes_used }}">{{ user.quota_bytes_used | filesizeformat }} / {{ (user.quota_bytes | filesizeformat) if user.quota_bytes else '∞' }}</td>
     <td>{{ user.comment or '-' }}</td>
-    <td>{{ user.created_at | format_date }}</td>
-    <td>{{ user.updated_at | format_date }}</td>
+    <td data-ordered="{{ user.created_at or '0000-00-00' }}">{{ user.created_at | format_date }}</td>
+    <td data-ordered="{{ user.updated_at or '0000-00-00' }}">{{ user.updated_at | format_date }}</td>
   </tr>
   {%- endfor %}
 </tbody>

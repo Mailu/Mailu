@@ -43,6 +43,7 @@ def login():
                 destination = app.config['WEB_WEBMAIL']
         device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
         username = form.email.data
+<<<<<<< HEAD
         if not utils.is_app_token(form.pw.data):
             if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
                 flask.flash(_('Too many attempts from your IP (rate-limit)'), 'error')
@@ -50,6 +51,14 @@ def login():
             if utils.limiter.should_rate_limit_user(username, client_ip, device_cookie, device_cookie_username):
                 flask.flash(_('Too many attempts for this user (rate-limit)'), 'error')
                 return flask.render_template('login.html', form=form, fields=fields)
+=======
+        if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
+            flask.flash('Too many attempts from your IP (rate-limit)', 'error')
+            return flask.render_template('login.html', form=form, fields=fields)
+        if utils.limiter.should_rate_limit_user(username, client_ip, device_cookie, device_cookie_username):
+            flask.flash('Too many attempts for this user (rate-limit)', 'error')
+            return flask.render_template('login.html', form=form, fields=fields)
+>>>>>>> f809be39 (supply missing fields argument)
         user = models.User.login(username, form.pw.data)
         if user:
             flask.session.regenerate()

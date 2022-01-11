@@ -34,8 +34,13 @@
     <td>{{ alias }}</td>
     <td>{{ alias.destination|join(', ') or '-' }}</td>
     <td>{{ alias.comment or '' }}</td>
+<<<<<<< HEAD
     <td data-sort="{{ alias.created_at or '0000-00-00' }}">{{ alias.created_at | format_date }}</td>
     <td data-sort="{{ alias.updated_at or '0000-00-00' }}">{{ alias.updated_at | format_date }}</td>
+=======
+    <td data-ordered="{{ alias.created_at or '0000-00-00' }}">{{ alias.created_at | format_date }}</td>
+    <td data-ordered="{{ alias.updated_at or '0000-00-00' }}">{{ alias.updated_at | format_date }}</td>
+>>>>>>> 6218b363 (configure datatables via html5 data attributes)
   </tr>
   {%- endfor %}
 </tbody>

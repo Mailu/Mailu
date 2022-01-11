@@ -42,8 +42,13 @@
     <td>{{ fetch.folders | join(',') }}</td>
     <td>{{ fetch.last_check | format_datetime or '-' }}</td>
     <td>{{ fetch.error or '-' }}</td>
+<<<<<<< HEAD
     <td data-sort="{{ fetch.created_at or '0000-00-00' }}">{{ fetch.created_at | format_date }}</td>
     <td data-sort="{{ fetch.updated_at or '0000-00-00' }}">{{ fetch.updated_at | format_date }}</td>
+=======
+    <td data-ordered="{{ fetch.created_at or '0000-00-00' }}">{{ fetch.created_at | format_date }}</td>
+    <td data-ordered="{{ fetch.updated_at or '0000-00-00' }}">{{ fetch.updated_at | format_date }}</td>
+>>>>>>> 6218b363 (configure datatables via html5 data attributes)
   </tr>
   {%- endfor %}
 </tbody>

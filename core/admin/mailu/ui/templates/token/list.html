@@ -17,7 +17,10 @@
 <thead>
   <tr>
     <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
+<<<<<<< HEAD
     <th>{% trans %}ID{% endtrans %}</th>
+=======
+>>>>>>> 6218b363 (configure datatables via html5 data attributes)
     <th>{% trans %}Comment{% endtrans %}</th>
     <th>{% trans %}Authorized IP{% endtrans %}</th>
     <th>{% trans %}Created{% endtrans %}</th>
@@ -32,9 +35,15 @@
     </td>
     <td>{{ token.id }}</td>
     <td>{{ token.comment }}</td>
+<<<<<<< HEAD
     <td>{{ token.ip | join(', ') or "any" }}</td>
     <td data-sort="{{ token.created_at or '0000-00-00' }}">{{ token.created_at | format_date }}</td>
     <td data-sort="{{ token.updated_at or '0000-00-00' }}">{{ token.updated_at | format_date }}</td>
+=======
+    <td>{{ token.ip or "any" }}</td>
+    <td data-ordered="{{ token.created_at or '0000-00-00' }}">{{ token.created_at | format_date }}</td>
+    <td data-ordered="{{ token.updated_at or '0000-00-00' }}">{{ token.updated_at | format_date }}</td>
+>>>>>>> 6218b363 (configure datatables via html5 data attributes)
   </tr>
   {%- endfor %}
 </tbody>

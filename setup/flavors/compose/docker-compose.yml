@@ -13,6 +13,12 @@ services:
     restart: always
     volumes:
       - "{{ root }}/redis:/data"
+    {% if resolver_enabled %}
+    depends_on:
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
 
   # Core services
   front:
@@ -33,8 +39,12 @@ services:
     volumes:
       - "{{ root }}/certs:/certs"
       - "{{ root }}/overrides/nginx:/overrides:ro"
+    {% if resolver_enabled %}
+    depends_on:
+      - resolver
+    dns:
+      - {{ dns }}
 
-  {% if resolver_enabled %}
   resolver:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
@@ -42,7 +52,7 @@ services:
     networks:
       default:
         ipv4_address: {{ dns }}
-  {% endif %}
+    {% endif %}
 
   admin:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-{{ version }}}
@@ -57,6 +67,11 @@ services:
       - "{{ root }}/dkim:/dkim"
     depends_on:
       - redis
+    {% if resolver_enabled %}
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
 
   imap:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-{{ version }}}
@@ -67,6 +82,11 @@ services:
       - "{{ root }}/overrides/dovecot:/overrides:ro"
     depends_on:
       - front
+    {% if resolver_enabled %}
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
 
   smtp:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-{{ version }}}
@@ -122,6 +142,12 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/dav:/data"
+    {% if resolver_enabled %}
+    depends_on:
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
   {% endif %}
 
   {% if fetchmail_enabled %}
@@ -150,6 +176,11 @@ services:
       - "{{ root }}/overrides/{{ webmail_type }}:/overrides:ro"
     depends_on:
       - imap
+    {% if resolver_enabled %}
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
   {% endif %}
 
 networks:

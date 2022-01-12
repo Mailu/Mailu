@@ -40,10 +40,10 @@ avoid generic all-interfaces addresses like <code>0.0.0.0</code> or <code>::</co
   <input class="form-control" type="text" name="subnet6" required value="{{ subnet6 }}:beef::/64">
 </div>
 
-<p>The unbound resolver enables Mailu to do DNSsec verification, DNS root lookups and caching. This also helps the antispam service not to get blocked by the public or ISP DNS servers.</p>
+<p>The unbound resolver enables Mailu to do DNSSEC verification, DNS root lookups and caching. This also helps the antispam service not to get blocked by the public or ISP DNS servers.</p>
 <div class="form-check form-check-inline">
   <label class="form-check-label">
-    <input class="form-check-input" type="checkbox" name="resolver_enabled" value="true">
+    <input class="form-check-input" type="checkbox" name="resolver_enabled" value="true" checked>
     Enable unbound resolver
   </label>
 </div>

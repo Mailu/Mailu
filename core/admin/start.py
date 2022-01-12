@@ -54,12 +54,12 @@ def test_DNS():
             try:
                 result = resolver.query('example.org', dns.rdatatype.A, dns.rdataclass.IN, lifetime=10)
                 if not result.response.flags & dns.flags.AD:
-                    log.critical("Your DNS resolver at %s isn't doing DNSSEC validation; Please install unbound.", ns)
+                    log.critical("Your DNS resolver at %s isn't doing DNSSEC validation; Please use another resolver or enable unbound via https://setup.mailu.io.", ns)
                 else:
                     error = False
                     continue
             except Exception as e:
-                log.critical("Your DNS resolver at %s is not working (%s). Please install unbound.", ns, e);
+                log.critical("Your DNS resolver at %s is not working (%s). Please use another resolver or enable unbound via https://setup.mailu.io.", ns, e);
             time.sleep(5)
 
 test_DNS()

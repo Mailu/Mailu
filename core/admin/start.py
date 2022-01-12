@@ -49,17 +49,15 @@ def test_DNS():
     nameservers = resolver.nameservers
     for ns in nameservers:
         resolver.nameservers=[ns]
-        error = True
-        while error:
+        while True:
             try:
                 result = resolver.query('example.org', dns.rdatatype.A, dns.rdataclass.IN, lifetime=10)
-                if not result.response.flags & dns.flags.AD:
-                    log.critical("Your DNS resolver at %s isn't doing DNSSEC validation; Please use another resolver or enable unbound via https://setup.mailu.io.", ns)
-                else:
-                    error = False
-                    continue
             except Exception as e:
                 log.critical("Your DNS resolver at %s is not working (%s). Please use another resolver or enable unbound via https://setup.mailu.io.", ns, e);
+            elif result.response.flags & dns.flags.AD:
+                break
+            else:
+                log.critical("Your DNS resolver at %s isn't doing DNSSEC validation; Please use another resolver or enable unbound via https://setup.mailu.io.", ns)
             time.sleep(5)
 
 test_DNS()

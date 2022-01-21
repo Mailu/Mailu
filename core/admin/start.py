@@ -50,7 +50,11 @@ def test_DNS():
         resolver.nameservers=[ns]
         while True:
             try:
+<<<<<<< HEAD
                 result = resolver.resolve('example.org', dns.rdatatype.A, dns.rdataclass.IN, lifetime=10)
+=======
+                result = resolver.query('example.org.', dns.rdatatype.A, dns.rdataclass.IN, lifetime=10)
+>>>>>>> 32446f03 (Update start.py)
             except Exception as e:
                 log.critical("Your DNS resolver at %s is not working (%s). Please see https://mailu.io/master/faq.html#the-admin-container-won-t-start-and-its-log-says-critical-your-dns-resolver-isn-t-doing-dnssec-validation", ns, e)
             else:

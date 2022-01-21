@@ -324,7 +324,7 @@ class Domain(Base):
             hostnames = set(app.config['HOSTNAMES'].split(','))
             return any(
                 rset.exchange.to_text().rstrip('.') in hostnames
-                for rset in dns.resolver.query(self.name, 'MX')
+                for rset in dns.resolver.resolve(self.name, 'MX')
             )
         except dns.exception.DNSException:
             return False

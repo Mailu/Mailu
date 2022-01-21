@@ -35,7 +35,7 @@ def test_DNS():
         resolver.nameservers=[ns]
         while True:
             try:
-                result = resolver.query('example.org', dns.rdatatype.A, dns.rdataclass.IN, lifetime=10)
+                result = resolver.resolve('example.org', dns.rdatatype.A, dns.rdataclass.IN, lifetime=10)
             except Exception as e:
                 log.critical("Your DNS resolver at %s is not working (%s). Please use another resolver or enable unbound via https://setup.mailu.io.", ns, e);
             else:

@@ -1,0 +1,1 @@
+Fix CI/CD workflow. Tags were not set to the correct commit hash.

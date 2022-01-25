@@ -105,6 +105,7 @@ smtpd_sender_login_maps = ${podop}senderlogin
 
 # Restrictions for incoming SMTP, other restrictions are applied in master.cf
 smtpd_helo_required = yes
+smtp_helo_name = $mydomain
 
 check_ratelimit = check_sasl_access ${podop}senderrate
 

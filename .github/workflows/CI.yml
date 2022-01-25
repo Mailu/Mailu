@@ -26,7 +26,7 @@ concurrency: ci-${{ github.ref }}
 ################################################
 # Code block that is used as one liner.
 ##!/bin/bash
-#version=$( git tag --sort=version:refname --list "{{ env.MAILU_VERSION }}.*" | tail -1  )   )
+#version=$( git tag --sort=version:refname --list "{{ env.MAILU_VERSION }}.*" | tail -1  )
 #root_version=${version%.*}
 #patch_version=${version##*.}
 #if [ "$patch_version" == "" ]

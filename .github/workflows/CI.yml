@@ -654,8 +654,8 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' && env.PINNED_MAILU_VERSION != '' }}
         shell: bash     
         run: |
-          echo git tag ${{ env.PINNED_MAILU_VERSION }} $(/usr/bin/git log -1 --format='%H')
-          git tag ${{ env.PINNED_MAILU_VERSION }} $(/usr/bin/git log -1 --format='%H')
+          echo git tag ${{ env.PINNED_MAILU_VERSION }} $(/usr/bin/git rev-parse HEAD)
+          git tag ${{ env.PINNED_MAILU_VERSION }} $(/usr/bin/git rev-parse HEAD)
           git push origin ${{ env.PINNED_MAILU_VERSION }}
       - name: Create release for tag x.y.z.
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' && env.PINNED_MAILU_VERSION != '' }}

@@ -61,6 +61,6 @@ $config['mdn_use_from'] = true;
 
 // includes
 {%- for inc in INCLUDES %}
-include('{{ inc }}');
+include('/overrides/{{ inc }}');
 {%- endfor %}
 

@@ -28,6 +28,8 @@ The ``HOSTNAMES`` are all public hostnames for the mail server. Mailu supports
 a mail server with multiple hostnames. The first declared hostname is the main
 hostname and will be exposed over SMTP, IMAP, etc.
 
+  .. note:: Mailu uses the first domain from HOSTNAMES for HELO/EHLO. Matching HELO with sender hostname will increase your Spamassassin score.
+  
 The ``SUBNET`` defines the address range of the docker network used by Mailu.
 This should not conflict with any networks to which your system is connected.
 (Internal and external!). Normally this does not need to be changed,

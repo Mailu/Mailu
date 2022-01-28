@@ -1,0 +1,1 @@
+added note: Mailu uses the first domain from HOSTNAMES for HELO/EHLO. Matching HELO with sender hostname will increase your Spamassassin score.

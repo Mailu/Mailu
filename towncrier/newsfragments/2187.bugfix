@@ -1,3 +1,4 @@
-added missing `client_max_body_size 0;` in server directive of webmail rainloop
+added missing `client_max_body_size 0;` in rainloop nginx server directive of webmail rainloop
+added bugfix for client_max_body_size in front nginx conf when `MESSAGE_SIZE_LIMIT=0`
 - closes #2149
 - closes #2186

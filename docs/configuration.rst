@@ -69,6 +69,8 @@ The ``MESSAGE_SIZE_LIMIT`` is the maximum size of a single email. It should not
 be too low to avoid dropping legitimate emails and should not be too high to
 avoid filling the disks with large junk emails.
 
+.. note:: Albeit ``MESSAGE_SIZE_LIMIT=0`` (no limit) is possible technically, this likely won't be the case for your external recipients. Use with care.
+
 The ``MESSAGE_RATELIMIT`` (default: 200/day) is the maximum number of messages
 a single user can send. ``MESSAGE_RATELIMIT_EXEMPTION`` contains a comma delimited
 list of user email addresses that are exempted from any restriction.  Those

@@ -32,12 +32,22 @@ def user_create(domain_name):
             flask.flash('Email is already used', 'error')
         else:
             user = models.User(domain=domain)
-            form.populate_obj(user)
-            user.set_password(form.pw.data)
-            models.db.session.add(user)
-            models.db.session.commit()
-            user.send_welcome()
-            flask.flash('User %s created' % user)
+            password_set = False
+            if domain.password_complexity_enabled == True:
+                if user.check_password_complexity(form.pw.data) == True:
+                    password_set = True
+            else:
+                password_set = True
+
+            if password_set is True:
+                form.populate_obj(user)
+                user.set_password(form.pw.data)
+                models.db.session.add(user)
+                models.db.session.commit()
+                user.send_welcome()
+                flask.flash('User %s created' % user)
+            else:
+                flask.flash('User not created because the complexity password is too low', 'error')
             return flask.redirect(
                 flask.url_for('.user_list', domain_name=domain.name))
     return flask.render_template('user/create.html',
@@ -62,9 +72,20 @@ def user_edit(user_email):
     if form.validate_on_submit():
         form.populate_obj(user)
         if form.pw.data:
-            user.set_password(form.pw.data)
-        models.db.session.commit()
-        flask.flash('User %s updated' % user)
+            password_set = False
+            if user.domain.password_complexity_enabled == False:
+                password_set = True
+                user.set_password(form.pw.data)
+            else:
+                if user.check_password_complexity(form.pw.data) == True:
+                    password_set = True
+                    user.set_password(form.pw.data)
+        
+        if (not form.pw.data) or (form.pw.data and password_set is True):
+            models.db.session.commit()
+            flask.flash('User %s updated' % user)
+        else:
+            flask.flash('User %s not updated because the complexity password is too low' % user, 'error')
         return flask.redirect(
             flask.url_for('.user_list', domain_name=user.domain.name))
     return flask.render_template('user/edit.html', form=form, user=user,

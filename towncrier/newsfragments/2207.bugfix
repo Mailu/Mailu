@@ -1,0 +1,1 @@
+Will update /etc/nginx/nginx.conf and /etc/nginx/http.d/rainloop.conf in webmail container to support MESSAGE_SIZE_LIMIT

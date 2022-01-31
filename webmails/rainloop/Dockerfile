@@ -36,10 +36,11 @@ RUN apk add --no-cache \
  && rm /etc/nginx/http.d/default.conf \
  && rm /etc/php7/php-fpm.d/www.conf \
  && mkdir -p /run/nginx \
- && mkdir -p /var/www/rainloop
+ && mkdir -p /var/www/rainloop \
+ && mkdir -p /config
 
 # nginx / PHP config files
-COPY config/nginx-rainloop.conf /etc/nginx/http.d/rainloop.conf
+COPY config/nginx-rainloop.conf /config/nginx-rainloop.conf
 COPY config/php-rainloop.conf /etc/php7/php-fpm.d/rainloop.conf
 
 # Rainloop login

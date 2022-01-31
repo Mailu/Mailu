@@ -68,6 +68,7 @@ RUN apk add --no-cache \
  && apk del unzip
 
 COPY start.py /start.py
+COPY config.py /config.py
 
 EXPOSE 80/tcp
 VOLUME ["/data"]

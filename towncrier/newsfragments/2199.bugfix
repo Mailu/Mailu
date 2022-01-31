@@ -1,0 +1,1 @@
+Removed `ssl_trusted_certificate` configuration setting from nginx. Fixes an issue with nginx when letsencrypt or mail-letsencrypt is used.

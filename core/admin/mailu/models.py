@@ -4,6 +4,7 @@
 import os
 import smtplib
 import json
+import string
 
 from datetime import date
 from email.mime import text
@@ -16,10 +17,10 @@ import passlib.hash
 import passlib.registry
 import time
 import os
+import hmac
 import smtplib
 import idna
-import dns.resolver
-import dns.exception
+import dns
 
 from flask import current_app as app
 from sqlalchemy.ext import declarative
@@ -38,8 +39,6 @@ class IdnaDomain(db.TypeDecorator):
     """
 
     impl = db.String(80)
-    cache_ok = True
-    python_type = str
 
     def process_bind_param(self, value, dialect):
         """ encode unicode domain name to punycode """
@@ -49,18 +48,16 @@ class IdnaDomain(db.TypeDecorator):
         """ decode punycode domain name to unicode """
         return idna.decode(value)
 
+    python_type = str
+
 class IdnaEmail(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
 
     impl = db.String(255)
-    cache_ok = True
-    python_type = str
 
     def process_bind_param(self, value, dialect):
         """ encode unicode domain part of email address to punycode """
-        if not '@' in value:
-            raise ValueError('invalid email address (no "@")')
         localpart, domain_name = value.lower().rsplit('@', 1)
         if '@' in localpart:
             raise ValueError('email local part must not contain "@"')
@@ -71,13 +68,13 @@ class IdnaEmail(db.TypeDecorator):
         localpart, domain_name = value.rsplit('@', 1)
         return f'{localpart}@{idna.decode(domain_name)}'
 
+    python_type = str
+
 class CommaSeparatedList(db.TypeDecorator):
     """ Stores a list as a comma-separated string, compatible with Postfix.
     """
 
     impl = db.String
-    cache_ok = True
-    python_type = list
 
     def process_bind_param(self, value, dialect):
         """ join list of items to comma separated string """
@@ -92,13 +89,13 @@ class CommaSeparatedList(db.TypeDecorator):
         """ split comma separated string to list """
         return list(filter(bool, (item.strip() for item in value.split(',')))) if value else []
 
+    python_type = list
+
 class JSONEncoded(db.TypeDecorator):
     """ Represents an immutable structure as a json-encoded string.
     """
 
     impl = db.String
-    cache_ok = True
-    python_type = str
 
     def process_bind_param(self, value, dialect):
         """ encode data as json """
@@ -107,6 +104,8 @@ class JSONEncoded(db.TypeDecorator):
     def process_result_value(self, value, dialect):
         """ decode json to data """
         return json.loads(value) if value else None
+
+    python_type = str
 
 class Base(db.Model):
     """ Base class for all models
@@ -189,6 +188,8 @@ class Domain(Base):
     max_aliases = db.Column(db.Integer, nullable=False, default=-1)
     max_quota_bytes = db.Column(db.BigInteger, nullable=False, default=0)
     signup_enabled = db.Column(db.Boolean, nullable=False, default=False)
+    password_complexity_enabled = db.Column(db.Boolean, nullable=False, default=False)
+
 
     _dkim_key = None
     _dkim_key_on_disk = None
@@ -244,13 +245,6 @@ class Domain(Base):
             return f'_dmarc.{self.name}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
 
     @cached_property
-    def dns_dmarc_report(self):
-        """ return DMARC report record for mailu server """
-        if self.dkim_key:
-            domain = app.config['DOMAIN']
-            return f'{self.name}._report._dmarc.{domain}. 600 IN TXT "v=DMARC1"'
-
-    @cached_property
     def dns_autoconfig(self):
         """ return list of auto configuration records (RFC6186) """
         hostname = app.config['HOSTNAME']
@@ -276,7 +270,7 @@ class Domain(Base):
         hostname = app.config['HOSTNAME']
         if app.config['TLS_FLAVOR'] in ('letsencrypt', 'mail-letsencrypt'):
             # current ISRG Root X1 (RSA 4096, O = Internet Security Research Group, CN = ISRG Root X1) @20210902
-            return f'_25._tcp.{hostname}. 86400 IN TLSA 2 1 0 30820222300d06092a864886f70d01010105000382020f003082020a0282020100ade82473f41437f39b9e2b57281c87bedcb7df38908c6e3ce657a078f775c2a2fef56a6ef6004f28dbde68866c4493b6b163fd14126bbf1fd2ea319b217ed1333cba48f5dd79dfb3b8ff12f1219a4bc18a8671694a66666c8f7e3c70bfad292206f3e4c0e680aee24b8fb7997e94039fd347977c99482353e838ae4f0a6f832ed149578c8074b6da2fd0388d7b0370211b75f2303cfa8faeddda63abeb164fc28e114b7ecf0be8ffb5772ef4b27b4ae04c12250c708d0329a0e15324ec13d9ee19bf10b34a8c3f89a36151deac870794f46371ec2ee26f5b9881e1895c34796c76ef3b906279e6dba49a2f26c5d010e10eded9108e16fbb7f7a8f7c7e50207988f360895e7e237960d36759efb0e72b11d9bbc03f94905d881dd05b42ad641e9ac0176950a0fd8dfd5bd121f352f28176cd298c1a80964776e4737baceac595e689d7f72d689c50641293e593edd26f524c911a75aa34c401f46a199b5a73a516e863b9e7d72a712057859ed3e5178150b038f8dd02f05b23e7b4a1c4b730512fcc6eae050137c439374b3ca74e78e1f0108d030d45b7136b407bac130305c48b7823b98a67d608aa2a32982ccbabd83041ba2830341a1d605f11bc2b6f0a87c863b46a8482a88dc769a76bf1f6aa53d198feb38f364dec82b0d0a28fff7dbe21542d422d0275de179fe18e77088ad4ee6d98b3ac6dd27516effbc64f533434f0203010001'
+            return f'_25._tcp.{hostname}. 600 IN TLSA 2 1 1 0b9fa5a59eed715c26c1020c711b4f6ec42d58b0015e14337a39dad301c5afc3'
 
     @property
     def dkim_key(self):
@@ -324,7 +318,7 @@ class Domain(Base):
             hostnames = set(app.config['HOSTNAMES'].split(','))
             return any(
                 rset.exchange.to_text().rstrip('.') in hostnames
-                for rset in dns.resolver.resolve(self.name, 'MX')
+                for rset in dns.resolver.query(self.name, 'MX')
             )
         except dns.exception.DNSException:
             return False
@@ -550,13 +544,13 @@ class User(Base, Email):
         if cls._ctx:
             return cls._ctx
 
-        # compile schemes
-        # - skip scrypt (throws a warning if the native wheels aren't found)
-        # - skip plaintext schemes (will be misidentified)
-        schemes = [
-            scheme for scheme in passlib.registry.list_crypt_handlers()
-            if not (scheme == 'scrypt' or scheme.endswith('plaintext'))
-        ]
+        schemes = passlib.registry.list_crypt_handlers()
+        # scrypt throws a warning if the native wheels aren't found
+        schemes.remove('scrypt')
+        # we can't leave plaintext schemes as they will be misidentified
+        for scheme in schemes:
+            if scheme.endswith('plaintext'):
+                schemes.remove(scheme)
         cls._ctx = passlib.context.CryptContext(
             schemes=schemes,
             default='bcrypt_sha256',
@@ -565,12 +559,41 @@ class User(Base, Email):
         )
         return cls._ctx
 
+    def check_password_complexity(self, password):
+        """ verifies password complexity if enabled
+        """
+
+        complexity_count = 0
+
+        #check password length
+        if len(password) < 8:
+            return False
+
+        #check if lowercase are in password
+        if any([letter in password for letter in string.ascii_lowercase]):
+            complexity_count += 1
+
+        #check if uppercase are in password
+        if any([letter in password for letter in string.ascii_uppercase]):
+            complexity_count += 1
+
+        #check if digits are in password
+        if any([letter in password for letter in string.digits]):
+            complexity_count += 1
+
+        #check if special chars are in password
+        if any([letter in password for letter in string.punctuation]):
+            complexity_count += 1
+
+        if complexity_count >= 3:
+            return True
+
+        return False
+
     def check_password(self, password):
         """ verifies password against stored hash
             and updates hash if outdated
         """
-        if password == '':
-            return False
         cache_result = self._credential_cache.get(self.get_id())
         current_salt = self.password.split('$')[3] if len(self.password.split('$')) == 5 else None
         if cache_result and current_salt:
@@ -643,6 +666,15 @@ in clear-text regardless of the presence of the cache.
         """ login user when enabled and password is valid """
         user = cls.query.get(email)
         return user if (user and user.enabled and user.check_password(password)) else None
+
+    @classmethod
+    def get_temp_token(cls, email):
+        user = cls.query.get(email)
+        return hmac.new(app.temp_token_key, bytearray("{}|{}".format(time.strftime('%Y%m%d'), email), 'utf-8'), 'sha256').hexdigest() if (user and user.enabled) else None
+
+    def verify_temp_token(self, token):
+        return hmac.compare_digest(self.get_temp_token(self.email), token)
+
 
 
 class Alias(Base, Email):

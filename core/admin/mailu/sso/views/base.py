@@ -92,7 +92,7 @@ def proxy():
         flask.flash('Too many attempts for this user (rate-limit)', 'error')
         return flask.render_template('login.html', form=form, fields=fields)
 
-    if not (app.config['PROXY_SECRET'] in (None, '') or not app.config['PROXY_SECRET']) and app.config['PROXY_SECRET'] == secret and username != "":
+    if username and len(secret)>16 and app.config.get('PROXY_SECRET', "") == secret:
         user = models.User.get(flask.request.headers.get('X-Auth-Email'))
         if user:
             flask.session.regenerate()
@@ -119,9 +119,8 @@ def proxy():
                     flask.current_app.logger.info(f'Login succeeded by proxy created user: {username} from {client_ip}.')
                     return flask.render_template('login.html', form=form, fields=fields), payload_dict
             else:
-                utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)
+                utils.limiter.rate_limit_ip(client_ip)
                 flask.current_app.logger.warn(f'Login failed by proxy for {username} from {client_ip}.')
-                flask.flash('Auth by proxy failed - try to login by credentials', 'error')
     return flask.redirect(flask.url_for('.login'))
 
 @sso.route('/logout', methods=['GET'])

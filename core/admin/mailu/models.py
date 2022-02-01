@@ -189,6 +189,7 @@ class Domain(Base):
     max_aliases = db.Column(db.Integer, nullable=False, default=-1)
     max_quota_bytes = db.Column(db.BigInteger, nullable=False, default=0)
     signup_enabled = db.Column(db.Boolean, nullable=False, default=False)
+    password_complexity_enabled = db.Column(db.Boolean, nullable=False, default=False)
 
     _dkim_key = None
     _dkim_key_on_disk = None
@@ -564,6 +565,37 @@ class User(Base, Email):
             deprecated='auto'
         )
         return cls._ctx
+
+    def check_password_complexity(self, password):
+        """ verifies password complexity if enabled
+        """
+
+        complexity_count = 0
+
+        #check password length
+        if len(password) < 8:
+            return False
+
+        #check if lowercase are in password
+        if any([letter in password for letter in string.ascii_lowercase]):
+            complexity_count += 1
+
+        #check if uppercase are in password
+        if any([letter in password for letter in string.ascii_uppercase]):
+            complexity_count += 1
+
+        #check if digits are in password
+        if any([letter in password for letter in string.digits]):
+            complexity_count += 1
+
+        #check if special chars are in password
+        if any([letter in password for letter in string.punctuation]):
+            complexity_count += 1
+
+        if complexity_count >= 3:
+            return True
+
+        return False
 
     def check_password(self, password):
         """ verifies password against stored hash

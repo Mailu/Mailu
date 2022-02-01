@@ -5,11 +5,7 @@
       <div class="div-circle elevation-2"><i class="fa fa-user text-lg text-dark"></i></div>
     </div>
     <div class="info">
-      {%- if current_user.displayed_name %}
-      <a href="{{ url_for('.user_settings') }}" class="d-block">{{ current_user.displayed_name }}</a>
-      {% else %}
-      <a href="{{ url_for('.user_settings') }}" class="d-block">{{ current_user }}</a>
-      {%- endif %}
+      <a href="{{ url_for('.user_settings') }}" class="d-block">{{ current_user.displayed_name or current_user }}</a>
     </div>
   </div>
   {%- endif %}

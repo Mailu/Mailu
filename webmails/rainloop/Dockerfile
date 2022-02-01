@@ -39,9 +39,6 @@ RUN apk add --no-cache \
  && mkdir -p /var/www/rainloop \
  && mkdir -p /config
 
-# set client_max_body_size to 0 so it can be overriden in rainloop
-RUN sed -i -e 's/client_max_body_size 1m/client_max_body_size 0/' /etc/nginx/nginx.conf
-
 # nginx / PHP config files
 COPY config/nginx-rainloop.conf /config/nginx-rainloop.conf
 COPY config/php-rainloop.conf /etc/php7/php-fpm.d/rainloop.conf

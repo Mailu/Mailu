@@ -433,7 +433,7 @@ Mailu can serve an `XML file for autoconfiguration`_; To configure it you will n
    <useGlobalPreferredServer>true</useGlobalPreferredServer>
    </outgoingServer>
 
-   <documentation url=\"https://mailu.example.com/admin/ui/client\">
+   <documentation url=\"https://mailu.example.com/admin/client\">
    <descr lang=\"en\">Configure your email client</descr>
    </documentation>
    </emailProvider>

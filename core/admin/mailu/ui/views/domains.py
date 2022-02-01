@@ -18,18 +18,21 @@ def domain_list():
 def domain_create():
     form = forms.DomainForm()
     if form.validate_on_submit():
-        conflicting_domain = models.Domain.query.get(form.name.data)
-        conflicting_alternative = models.Alternative.query.get(form.name.data)
-        conflicting_relay = models.Relay.query.get(form.name.data)
-        if conflicting_domain or conflicting_alternative or conflicting_relay:
-            flask.flash('Domain %s is already used' % form.name.data, 'error')
+        if validators.domain(form.name.data) is True:
+            conflicting_domain = models.Domain.query.get(form.name.data)
+            conflicting_alternative = models.Alternative.query.get(form.name.data)
+            conflicting_relay = models.Relay.query.get(form.name.data)
+            if conflicting_domain or conflicting_alternative or conflicting_relay:
+                flask.flash('Domain %s is already used' % form.name.data, 'error')
+            else:
+                domain = models.Domain()
+                form.populate_obj(domain)    
+                models.db.session.add(domain)
+                models.db.session.commit()
+                flask.flash('Domain %s created' % domain)
         else:
-            domain = models.Domain()
-            form.populate_obj(domain)
-            models.db.session.add(domain)
-            models.db.session.commit()
-            flask.flash('Domain %s created' % domain)
-            return flask.redirect(flask.url_for('.domain_list'))
+            flask.flash('Domain %s is invalid' % form.name.data, 'error')
+        return flask.redirect(flask.url_for('.domain_list'))
     return flask.render_template('domain/create.html', form=form)
 
 

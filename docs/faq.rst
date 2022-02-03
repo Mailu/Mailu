@@ -664,6 +664,8 @@ The above will block flagged IPs for a week, you can of course change it to you 
 The above will block flagged IPs for a week, you can of course change it to you needs.
 
 7. Add the /etc/fail2ban/action.d/docker-action.conf
+  
+Option 1: Use plain iptables
 
 .. code-block:: bash
 
@@ -682,6 +684,33 @@ The above will block flagged IPs for a week, you can of course change it to you 
   actionban = iptables -I f2b-bad-auth 1 -s <ip> -j DROP
   
   actionunban = iptables -D f2b-bad-auth -s <ip> -j DROP
+
+Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
+
+Option 2:  Use ipset together with iptables
+IMPORTANT: You have to install ipset on the host system, eg. `apt-get install ipset` on a Debian/Ubuntu system.
+
+See ipset homepage for details on ipset, https://ipset.netfilter.org/.
+
+ipset and iptables provide one big advantage over just using iptables: This setup reduces the overall iptable rules.
+There is just one rule for the bad authentications and the IPs are within the ipset. 
+Specially in larger setups with a high amount of brute force attacks this comes in handy.
+Using iptables with ipset might reduce the system load in such attacks significantly.
+
+.. code-block:: bash
+
+  [Definition]
+
+  actionstart = actionstart = ipset --create f2b-bad-auth iphash
+                iptables -I DOCKER-USER -p tcp -m multiport --dports 1:1024 -m set --match-set f2b-bad-auth src -j DROP
+
+  actionstop = iptables -D DOCKER-USER -p tcp -m multiport --dports 1:1024 -m set --match-set f2b-bad-auth src -j DROP
+               ipset --destroy f2b-bad-auth
+
+
+  actionban = ipset --test f2b-bad-auth <ip> ||  ipset --add f2b-bad-auth <ip>
+
+  actionunban = ipset --test f2b-bad-auth <ip> && ipset --del f2b-bad-auth <ip>
 
 Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
 

@@ -1,11 +1,11 @@
 <div class="sidebar text-sm">
   {%- if current_user.is_authenticated %}
-  <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+  <div class="user-panel mt-3 pb-3 mb-3 d-flex" title="{{ current_user }}">
     <div class="image">
       <div class="div-circle elevation-2"><i class="fa fa-user text-lg text-dark"></i></div>
     </div>
     <div class="info">
-      <a href="{{ url_for('.user_settings') }}" class="d-block">{{ current_user }}</a>
+      <a href="{{ url_for('.user_settings') }}" class="d-block">{{ current_user.displayed_name or current_user }}</a>
     </div>
   </div>
   {%- endif %}

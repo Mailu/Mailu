@@ -72,6 +72,6 @@ DKIM/SPF & DMARC Entries
 Finally, you'll need to visit the admin dashboard (or use the cli) to regenerate your DMARC, SPF, and DKIM records.
 
 Once the DNS changes to your host have propogated (and if SSL / domain rules were setup correctly), visit your admin
-dashboard at https://example.com/admin/ui/domain/details/example.com. Click on `regenerate keys` and add the required
+dashboard at https://example.com/admin/domain/details/example.com. Click on `regenerate keys` and add the required
 records to your DNS provider. If you've enabled DKIM/SPF / DMARC and haven't added these entries, your mail might
 not get delivered.

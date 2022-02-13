@@ -1,0 +1,2 @@
+Configuring pwstore_scheme in carddav plugin with des_key because Mailu is incompatible with encrypted
+https://github.com/mstilkerich/rcmcarddav/blob/master/doc/ADMIN-SETTINGS.md#password-storing-scheme

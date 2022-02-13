@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "admin-lte": "^3.1.0",
+    "admin-lte": "<3.2.0",
     "babel-loader": "^8.2.2",
     "clipboard": "^2.0.8",
     "compression-webpack-plugin": "^8.0.1",

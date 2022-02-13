@@ -66,6 +66,7 @@ COPY mailu.php /var/www/html/plugins/mailu/mailu.php
 COPY php.ini /
 COPY config.inc.php /
 COPY start.py /
+COPY config.inc.carddav.php /var/www/html/plugins/carddav/config.inc.php
 
 EXPOSE 80/tcp
 VOLUME /data

@@ -673,9 +673,9 @@ Option 1: Use plain iptables
   
   actionstart = iptables -N f2b-bad-auth
                 iptables -A f2b-bad-auth -j RETURN
-                iptables -I DOCKER-USER -p tcp -m multiport --dports 1:1024 -j f2b-bad-auth
+                iptables -I DOCKER-USER -j f2b-bad-auth
   
-  actionstop = iptables -D DOCKER-USER -p tcp -m multiport --dports 1:1024 -j f2b-bad-auth
+  actionstop = iptables -D DOCKER-USER -j f2b-bad-auth
                iptables -F f2b-bad-auth
                iptables -X f2b-bad-auth
   
@@ -702,19 +702,19 @@ Using iptables with ipset might reduce the system load in such attacks significa
   [Definition]
 
   actionstart = actionstart = ipset --create f2b-bad-auth iphash
-                iptables -I DOCKER-USER -p tcp -m multiport --dports 1:1024 -m set --match-set f2b-bad-auth src -j DROP
+                iptables -I DOCKER-USER -m set --match-set f2b-bad-auth src -j DROP
 
-  actionstop = iptables -D DOCKER-USER -p tcp -m multiport --dports 1:1024 -m set --match-set f2b-bad-auth src -j DROP
+  actionstop = iptables -D DOCKER-USER -m set --match-set f2b-bad-auth src -j DROP
                ipset --destroy f2b-bad-auth
 
 
-  actionban = ipset --test f2b-bad-auth <ip> ||  ipset --add f2b-bad-auth <ip>
+  actionban = ipset add -exist f2b-bad-auth <ip>
 
-  actionunban = ipset --test f2b-bad-auth <ip> && ipset --del f2b-bad-auth <ip>
+  actionunban = ipset del -exist f2b-bad-auth <ip>
 
 Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
 
-8. Configure and restart the Fail2Ban service
+1. Configure and restart the Fail2Ban service
 
 Make sure Fail2Ban is started after the Docker service by adding a partial override which appends this to the existing configuration.
 

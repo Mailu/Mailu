@@ -73,7 +73,7 @@ COPY config.py /config.py
 EXPOSE 80/tcp
 VOLUME ["/data"]
 
-CMD php-fpm7 && /start.py
+CMD /start.py
 
 HEALTHCHECK CMD curl -f -L http://localhost/ || exit 1
 RUN echo $VERSION >> /version

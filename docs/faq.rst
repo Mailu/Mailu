@@ -261,7 +261,11 @@ correct syntax. The following file names will be taken as override configuration
    - All ``*.conf`` files in the ``nginx`` sub-directory.
    - ``proxy.conf`` in the ``nginx/dovecot`` sub-directory.
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
+<<<<<<< HEAD
 - `Roundcube`_ - All ``*.inc.php`` files in the ``roundcube`` sub directory.
+=======
+- Roundcube - All ``*.inc`` files in the ``roundcube`` sub directory.
+>>>>>>> 731a3741 (Update overrides faq for include roundcube)
 
 To override the root location (``/``) in Nginx ``WEBROOT_REDIRECT`` needs to be set to ``none`` in the env file (see :ref:`web settings <web_settings>`).
 

@@ -18,7 +18,7 @@ def domain_list():
 def domain_create():
     form = forms.DomainForm()
     if form.validate_on_submit():
-        if validators.domain(form.name.data) is True:
+        if validators.domain(form.name.data):
             conflicting_domain = models.Domain.query.get(form.name.data)
             conflicting_alternative = models.Alternative.query.get(form.name.data)
             conflicting_relay = models.Relay.query.get(form.name.data)

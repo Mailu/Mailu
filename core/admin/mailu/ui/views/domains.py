@@ -2,6 +2,7 @@ from mailu import models
 from mailu.ui import ui, forms, access
 from flask import current_app as app
 
+import validators
 import flask
 import flask_login
 import wtforms_components
@@ -26,13 +27,13 @@ def domain_create():
                 flask.flash('Domain %s is already used' % form.name.data, 'error')
             else:
                 domain = models.Domain()
-                form.populate_obj(domain)    
+                form.populate_obj(domain)
                 models.db.session.add(domain)
                 models.db.session.commit()
                 flask.flash('Domain %s created' % domain)
+                return flask.redirect(flask.url_for('.domain_list'))
         else:
             flask.flash('Domain %s is invalid' % form.name.data, 'error')
-        return flask.redirect(flask.url_for('.domain_list'))
     return flask.render_template('domain/create.html', form=form)
 
 

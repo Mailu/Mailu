@@ -66,7 +66,7 @@ Because the admin interface is served as ``/admin``, the Webmail as ``/webmail``
   server {
     # [...] here goes your standard configuration
 
-    location ~ ^/(admin|sso|static|webdav|webmail)/ {
+    location ~ ^/(admin|sso|static|webdav|webmail) {
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr
       proxy_pass https://localhost:8443;     
@@ -88,6 +88,8 @@ Because the admin interface is served as ``/admin``, the Webmail as ``/webmail``
       return 301 $scheme://$host/main_app;
     }
   }
+
+.. note:: Please don’t add a ``/`` at the end of the location pattern or all your redirects will fail with 404 because the ``/`` would be missing, and you would have to add it manually to move on
 
 .. code-block:: docker
   

@@ -28,7 +28,7 @@ def test_DNS():
     import time
     # DNS stub configured to do DNSSEC enabled queries
     resolver = dns.resolver.Resolver()
-    resolver.use_edns(0, 0, 1232)
+    resolver.use_edns(0, dns.flags.DO, 1232)
     resolver.flags = dns.flags.AD | dns.flags.RD
     nameservers = resolver.nameservers
     for ns in nameservers:

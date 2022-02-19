@@ -860,7 +860,11 @@ iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 25 -j SNAT --to <your mx i
 A user gets ``Sender address rejected: Access denied. Please check the`` ``message recipient […] and try again`` even though the sender is legitimate?
 ``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````
 
+<<<<<<< HEAD
 First, check if you are really sure the user is a legitimate sender, i.e. the registered user is authenticated successfully and own either the account or alias he/she is trying to send from. If you are really sure this is correct, then the user might try to erroneously send via port 25 instead of the designated SMTP client-ports. Port 25 is meant for server-to-server delivery, while users should use port 587 or 465.
+=======
+First, check if you are really sure the user is a legitimate sender, i.e. the registered user is authenticated successfully and own either the account or alias he/she is trying to send from. If you are really sure this is correct, then the user might try to errornously send via port 25 insteadof the designated SMTP client-ports. Port 25 is meant for server-to-server delivery, while users should use port 587 or 465.
+>>>>>>> d3e7ea53 (spell it out)
 
 The admin container won't start and its log says ``Critical: your DNS resolver isn't doing DNSSEC validation``
 ``````````````````````````````````````````````````````````````````````````````````````````````````````````````
@@ -875,6 +879,7 @@ We recommend that you run your own DNS resolver (enable unbound and update your 
 We have seen a fair amount of support requests related to the following:
 
 - dnsmasq won't forward DNSSEC results unless instructed to do so. If you are running openwrt or pi-hole, you do need to enable DNSSEC.
+<<<<<<< HEAD
 - systemd-resolve won't validate DNSSEC results unless instructed to do so. If you are using it you can check its configuration using ``systemd-resolve --status | grep DNSSEC``
 - `coredns has a bug`_ that we have now worked around
 - `netplan does not play nicely with docker` by default and may need to be configured to leave docker's network alone.
@@ -986,3 +991,8 @@ Below are the steps for writing the postfix (mail) logs to a log file on the fil
   if [ -d /run/systemd/system ]; then
       systemctl kill -s HUP rsyslog.service
   fi
+=======
+- `coredns has a bug`_ that we have now worked around
+
+.. _`coredns has a bug`: https://github.com/coredns/coredns/issues/5189
+>>>>>>> d3e7ea53 (spell it out)

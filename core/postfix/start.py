@@ -74,9 +74,10 @@ if os.path.exists("/overrides/mta-sts-daemon.yml"):
 else:
     conf.jinja("/conf/mta-sts-daemon.yml", os.environ, "/etc/mta-sts-daemon.yml")
 
-if not os.path.exists("/etc/postfix/tls_policy.map.lmdb"):
-    open("/etc/postfix/tls_policy.map", "a").close()
-    os.system("postmap /etc/postfix/tls_policy.map")
+for policy in ['tls_policy', 'transport']:
+    if not os.path.exists(f'/etc/postfix/{policy}.map.lmdb'):
+        open(f'/etc/postfix/{policy}.map', 'a').close()
+        os.system(f'postmap /etc/postfix/{policy}.map')
 
 if "RELAYUSER" in os.environ:
     path = "/etc/postfix/sasl_passwd"

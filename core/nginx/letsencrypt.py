@@ -43,6 +43,7 @@ command2 = [
 ]
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 def format_for_nginx(fullchain, output):
     """ We may want to strip ISRG Root X1 out
@@ -69,6 +70,8 @@ def add_DANE_pin(chain, output):
                 pem.write(line)
 
 >>>>>>> e4a32b55 (Send ISRG_X1 on port 25, make DANE pin that)
+=======
+>>>>>>> 0816cb94 (simplify as per ghostwheel42's suggestion)
 # Wait for nginx to start
 time.sleep(5)
 
@@ -102,6 +105,7 @@ while True:
 
     subprocess.call(command)
 <<<<<<< HEAD
+<<<<<<< HEAD
     subprocess.call(command2)
 =======
     format_for_nginx('/certs/letsencrypt/live/mailu/fullchain.pem', '/certs/letsencrypt/live/mailu/nginx-chain.pem')
@@ -110,4 +114,7 @@ while True:
     format_for_nginx('/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem', '/certs/letsencrypt/live/mailu-ecdsa/nginx-chain.pem')
     add_DANE_pin('/certs/letsencrypt/live/mailu-ecdsa/chain.pem', '/certs/letsencrypt/live/mailu-ecdsa/nginx-chain-DANE.pem')
 >>>>>>> e4a32b55 (Send ISRG_X1 on port 25, make DANE pin that)
+=======
+    subprocess.call(command2)
+>>>>>>> 0816cb94 (simplify as per ghostwheel42's suggestion)
     time.sleep(86400)

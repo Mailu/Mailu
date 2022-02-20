@@ -34,6 +34,24 @@ args["TLS"] = {
     "notls": None
 }[args["TLS_FLAVOR"]]
 
+def format_for_nginx(fullchain, output):
+    """ We may want to strip ISRG Root X1 out """
+    certs = []
+    with open(fullchain, 'r') as pem:
+        cert = ''
+        for line in pem:
+            cert += line
+            if '-----END CERTIFICATE-----' in line:
+                certs += [cert]
+                cert = ''
+    with open(output, 'w') as pem:
+        for cert in certs[:-1] if len(certs)>2 and os.getenv('LETSENCRYPT_SHORTCHAIN', default="False") else certs:
+            pem.write(cert)
+
+if args['TLS_FLAVOR'] in ['letsencrypt', 'mail-letsencrypt']:
+    format_for_nginx('/certs/letsencrypt/live/mailu/fullchain.pem', '/certs/letsencrypt/live/mailu/nginx-chain.pem')
+    format_for_nginx('/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem', '/certs/letsencrypt/live/mailu-ecdsa/nginx-chain.pem')
+
 if args["TLS"] and not all(os.path.exists(file_path) for file_path in args["TLS"]):
     print("Missing cert or key file, disabling TLS")
     args["TLS_ERROR"] = "yes"

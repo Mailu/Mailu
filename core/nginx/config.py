@@ -36,6 +36,8 @@ args["TLS"] = {
 
 def format_for_nginx(fullchain, output):
     """ We may want to strip ISRG Root X1 out """
+    if not os.path.exists(fullchain):
+        return
     certs = []
     with open(fullchain, 'r') as pem:
         cert = ''

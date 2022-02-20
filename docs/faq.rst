@@ -476,6 +476,20 @@ Any mail related connection is proxied by nginx. Therefore the SMTP Banner is al
 
 .. _`1368`: https://github.com/Mailu/Mailu/issues/1368
 
+My emails are getting rejected, I am being told to slow down, what can I do?
+````````````````````````````````````````````````````````````````````````````
+
+Some email operators insist that emails are delivered slowly. Mailu maintains two separate queues for such destinations: ``polite`` and ``turtle``. To enable them for some destination you can creating an override at ``overrides/postfix/transport.map`` as follow:
+
+.. code-block:: bash
+
+   yahoo.com   polite:
+   orange.fr   turtle:
+
+*Issue reference:* `2213`_.
+
+.. _`2213`: https://github.com/Mailu/Mailu/issues/2213
+
 My emails are getting defered, what can I do?
 `````````````````````````````````````````````
 

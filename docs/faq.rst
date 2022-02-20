@@ -486,6 +486,8 @@ Some email operators insist that emails are delivered slowly. Mailu maintains tw
    yahoo.com   polite:
    orange.fr   turtle:
 
+Re-starting the smtp container will be required for changes to take effect.
+
 *Issue reference:* `2213`_.
 
 .. _`2213`: https://github.com/Mailu/Mailu/issues/2213
@@ -502,7 +504,7 @@ If delivery to a specific domain fails because their DANE records are invalid or
    domain.example.com   may
    domain.example.org   encrypt
 
-The syntax and options are as described in `postfix's documentation`_. Re-creating the smtp container will be required for changes to take effect.
+The syntax and options are as described in `postfix's documentation`_. Re-starting the smtp container will be required for changes to take effect.
 
 .. _`postfix's documentation`: http://www.postfix.org/postconf.5.html#smtp_tls_policy_maps
 

@@ -83,4 +83,11 @@ $(document).ready(function() {
 			$("#ipv6").hide();
 		}
 	});
+	$("#unbound").change(function() {
+		if ($(this).is(":checked")) {
+			$("#unbound").hide();
+		} else {
+			$("#unbound").show();
+		}
+	});
 });

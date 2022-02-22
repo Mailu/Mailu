@@ -44,7 +44,11 @@ $(document).ready(function() {
 			$("#ipv6").hide();
 		}
 	});
+<<<<<<< HEAD
 	$("#resolver_enabled").change(function() {
+=======
+	$("#unbound").change(function() {
+>>>>>>> 0abbf2ba (untested but it should work)
 		if ($(this).is(":checked")) {
 			$("#unbound").hide();
 		} else {

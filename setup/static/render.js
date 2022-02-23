@@ -83,7 +83,7 @@ $(document).ready(function() {
 			$("#ipv6").hide();
 		}
 	});
-	$("#unbound").change(function() {
+	$("#resolver_enabled").change(function() {
 		if ($(this).is(":checked")) {
 			$("#unbound").hide();
 		} else {

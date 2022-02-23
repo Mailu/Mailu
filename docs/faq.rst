@@ -493,7 +493,7 @@ The syntax and options are as described in `postfix's documentation`_. Re-creati
 .. _`postfix's documentation`: http://www.postfix.org/postconf.5.html#smtp_tls_policy_maps
 
 403 - Access Denied Errors
----------------------------
+``````````````````````````
 
 While this may be due to several issues, check to make sure your ``DOMAIN=`` entry is the **first** entry in your ``HOSTNAMES=``.
 
@@ -864,4 +864,22 @@ iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 25 -j SNAT --to <your mx i
 
 A user gets ``Sender address rejected: Access denied. Please check the`` ``message recipient […] and try again`` even though the sender is legitimate?
 ``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````
+
 First, check if you are really sure the user is a legitimate sender, i.e. the registered user is authenticated successfully and own either the account or alias he/she is trying to send from. If you are really sure this is correct, then the user might try to errornously send via port 25 insteadof the designated SMTP client-ports. Port 25 is meant for server-to-server delivery, while users should use port 587 or 465.
+
+The admin container won't start and its log says ``Critical: your DNS resolver isn't doing DNSSEC validation``
+``````````````````````````````````````````````````````````````````````````````````````````````````````````````
+Since v1.9, Mailu requires a **validating** DNSSEC enabled DNS resolver. To check whether your DNS resolver (and its upstream) fits the requirements you can use the following command and see whether the **AD** flag is present in the reply:
+
+.. code-block:: bash
+
+  dig @<ip> +adflag example.org A
+
+We recommend that you run your own DNS resolver (enable unbound and update your docker-compose.yml when you update from older versions) instead of relying on publicly available ones. It's better security-wise (you don't have to trust them) and RBLs used by rspamd are known to rate-limit per source-ip address.
+
+We have seen a fair amount of support requests related to the following:
+
+- dnsmasq won't forward DNSSEC results unless instructed to do so. If you are running openwrt or pi-hole, you do need to enable DNSSEC.
+- `coredns has a bug`_ that we have now worked around
+
+.. _`coredns has a bug`: https://github.com/coredns/coredns/issues/5189

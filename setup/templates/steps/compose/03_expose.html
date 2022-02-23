@@ -40,12 +40,15 @@ avoid generic all-interfaces addresses like <code>0.0.0.0</code> or <code>::</co
   <input class="form-control" type="text" name="subnet6" required value="{{ subnet6 }}:beef::/64">
 </div>
 
-<p>The unbound resolver enables Mailu to do DNSSEC verification, DNS root lookups and caching. This also helps the antispam service not to get blocked by the public or ISP DNS servers.</p>
 <div class="form-check form-check-inline">
+  <p>The unbound resolver enables Mailu to do DNSSEC verification, DNS root lookups and caching. This also helps the antispam service not to get blocked by the public or ISP DNS servers.</p>
   <label class="form-check-label">
-    <input class="form-check-input" type="checkbox" name="resolver_enabled" value="true" checked>
-    Enable unbound resolver
+    <input class="form-check-input" type="checkbox" id="resolver_enabled" name="resolver_enabled" value="true" checked>
+    Enable an internal DNS resolver (unbound)
   </label>
+</div>
+<div class="form-group" id="unbound" style="display: none">
+	<p><span class="label label-danger">Read this:</span> Mailu requires a <b>validating, DNSSEC-enabled</b> DNS resolver</b> to function. Be sure to read our <a href="https://mailu.io/{{ version }}/faq.html#the-admin-container-won-t-start-and-its-log-says-critical-your-dns-resolver-isn-t-doing-dnssec-validation">FAQ entry</a> on the topic.</p>
 </div>
 
 <p>You server will be available under a main hostname but may expose multiple public

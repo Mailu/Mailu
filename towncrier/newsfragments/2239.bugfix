@@ -1,0 +1,1 @@
+Work around a bug in coredns: set the DO flag on our DNSSEC queries. Add a new FAQ entry to explain our DNSSEC requirements and ensure that our error message points to it.

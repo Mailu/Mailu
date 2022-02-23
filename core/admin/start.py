@@ -37,11 +37,11 @@ def test_DNS():
             try:
                 result = resolver.resolve('example.org', dns.rdatatype.A, dns.rdataclass.IN, lifetime=10)
             except Exception as e:
-                log.critical("Your DNS resolver at %s is not working (%s). Please see https://mailu.io/1.9/faq.html#the-admin-container-won-t-start-and-its-log-says-critical-your-dns-resolver-isn-t-doing-dnssec-validation", ns, e);
+                log.critical("Your DNS resolver at %s is not working (%s). Please see https://mailu.io/master/faq.html#the-admin-container-won-t-start-and-its-log-says-critical-your-dns-resolver-isn-t-doing-dnssec-validation", ns, e);
             else:
                 if result.response.flags & dns.flags.AD:
                     break
-                log.critical("Your DNS resolver at %s isn't doing DNSSEC validation; Please see https://mailu.io/1.9/faq.html#the-admin-container-won-t-start-and-its-log-says-critical-your-dns-resolver-isn-t-doing-dnssec-validation.", ns)
+                log.critical("Your DNS resolver at %s isn't doing DNSSEC validation; Please see https://mailu.io/master/faq.html#the-admin-container-won-t-start-and-its-log-says-critical-your-dns-resolver-isn-t-doing-dnssec-validation.", ns)
             time.sleep(5)
 
 test_DNS()

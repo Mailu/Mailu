@@ -45,10 +45,14 @@ $(document).ready(function() {
 		}
 	});
 <<<<<<< HEAD
+<<<<<<< HEAD
 	$("#resolver_enabled").change(function() {
 =======
 	$("#unbound").change(function() {
 >>>>>>> 0abbf2ba (untested but it should work)
+=======
+	$("#resolver_enabled").change(function() {
+>>>>>>> dfd5e441 (Fix resolver warning message not being displayed in setup.)
 		if ($(this).is(":checked")) {
 			$("#unbound").hide();
 		} else {

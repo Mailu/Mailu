@@ -28,7 +28,7 @@ def test_DNS():
     import time
     # DNS stub configured to do DNSSEC enabled queries
     resolver = dns.resolver.Resolver()
-    resolver.use_edns(0, 0, 1232)
+    resolver.use_edns(0, dns.flags.DO, 1232)
     resolver.flags = dns.flags.AD | dns.flags.RD
     nameservers = resolver.nameservers
     for ns in nameservers:
@@ -37,11 +37,11 @@ def test_DNS():
             try:
                 result = resolver.resolve('example.org', dns.rdatatype.A, dns.rdataclass.IN, lifetime=10)
             except Exception as e:
-                log.critical("Your DNS resolver at %s is not working (%s). Please use another resolver or enable unbound via https://setup.mailu.io.", ns, e);
+                log.critical("Your DNS resolver at %s is not working (%s). Please see https://mailu.io/master/faq.html#the-admin-container-won-t-start-and-its-log-says-critical-your-dns-resolver-isn-t-doing-dnssec-validation", ns, e);
             else:
                 if result.response.flags & dns.flags.AD:
                     break
-                log.critical("Your DNS resolver at %s isn't doing DNSSEC validation; Please use another resolver or enable unbound via https://setup.mailu.io.", ns)
+                log.critical("Your DNS resolver at %s isn't doing DNSSEC validation; Please see https://mailu.io/master/faq.html#the-admin-container-won-t-start-and-its-log-says-critical-your-dns-resolver-isn-t-doing-dnssec-validation.", ns)
             time.sleep(5)
 
 test_DNS()

@@ -38,17 +38,13 @@ def format_for_nginx(fullchain, output):
     """ We may want to strip ISRG Root X1 out """
     if not os.path.exists(fullchain):
         return
-    certs = []
+    split = '-----END CERTIFICATE-----\n'
     with open(fullchain, 'r') as pem:
-        cert = ''
-        for line in pem:
-            cert += line
-            if '-----END CERTIFICATE-----' in line:
-                certs += [cert]
-                cert = ''
+        certs = [f'{cert}{split}' for cert in pem.read().split(split) if cert]
+    if len(certs)>2 and os.getenv('LETSENCRYPT_SHORTCHAIN'):
+        del certs[-1]
     with open(output, 'w') as pem:
-        for cert in certs[:-1] if len(certs)>2 and os.getenv('LETSENCRYPT_SHORTCHAIN', default="False") else certs:
-            pem.write(cert)
+        pem.write(''.join(certs))
 
 if args['TLS_FLAVOR'] in ['letsencrypt', 'mail-letsencrypt']:
     format_for_nginx('/certs/letsencrypt/live/mailu/fullchain.pem', '/certs/letsencrypt/live/mailu/nginx-chain.pem')

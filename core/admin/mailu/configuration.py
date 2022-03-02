@@ -56,6 +56,8 @@ DEFAULT_CONFIG = {
     'MESSAGE_RATELIMIT': '200/day',
     'MESSAGE_RATELIMIT_EXEMPTION': '',
     'RECIPIENT_DELIMITER': '',
+    'REPLICATION': False,
+    'REPLICATION_TARGET': '',
     # Web settings
     'SITENAME': 'Mailu',
     'WEBSITE': 'https://mailu.io',
@@ -86,6 +88,7 @@ DEFAULT_CONFIG = {
     'HOST_WEBDAV': 'webdav:5232',
     'HOST_REDIS': 'redis',
     'HOST_FRONT': 'front',
+    'HOST_DSYNC': None,
     'SUBNET': '192.168.203.0/24',
     'SUBNET6': None,
     'POD_ADDRESS_RANGE': None
@@ -116,6 +119,8 @@ class ConfigManager:
             self.config[f'{key}_ADDRESS'] = self.get_host_address(key)
         if self.config['WEBMAIL'] != 'none':
             self.config['WEBMAIL_ADDRESS'] = self.get_host_address('WEBMAIL')
+        if self.config['REPLICATION'] and self.config['REPLICATION_TARGET'].startswith('tcp:'):
+            self.config['HOST_DSYNC'] = system.resolve_address(self.config['REPLICATION_TARGET'].split(":")[1])
 
     def __get_env(self, key, value):
         key_file = key + "_FILE"

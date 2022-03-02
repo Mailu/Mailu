@@ -119,6 +119,23 @@ the localpart for DMARC rua and ruf email addresses.
 Full-text search is enabled for IMAP is enabled by default. This feature can be disabled
 (e.g. for performance reasons) by setting the optional variable ``FULL_TEXT_SEARCH`` to ``off``.
 
+The `mail replication`_ feature in Dovecot is disabled by default. It can be enabled
+in a two-node Mailu setup by setting the optional variable ``REPLICATION`` to ``on``.
+
+.. _`mail replication`: https://doc.dovecot.org/configuration_manual/replication/
+
+The ``REPLICATION_TARGET`` is a mandatory setting when replication is enabled and
+points to the remote replication host in following format: ``tcp:HOST[:PORT]``.
+``Port`` defaults to ``REPLICATION_PORT`` when not specified.
+
+The ``REPLICATION_PORT`` is a mandatory setting when replication is enabled and
+defines the local listening port of the replicator. Don't forget to publish this
+container's port on both Mailu nodes to allow connectivity between them.
+
+The ``REPLICATION_SECRET`` is a mandatory setting when replication is enabled and
+defines the shared secret of the replicator. It must be identical on both Mailu
+nodes.
+
 .. _web_settings:
 
 Web settings

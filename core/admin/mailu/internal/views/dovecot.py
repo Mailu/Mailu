@@ -25,7 +25,8 @@ def dovecot_passdb_dict(user_email):
 @internal.route("/dovecot/userdb/")
 def dovecot_userdb_dict_list():
     return flask.jsonify([
-        user.email for user in models.User.query.all() if user.is_active
+        user.email for user in models.User.query.all()
+            if user.enabled and (user.enable_imap or user.enable_pop)
     ])
 
 

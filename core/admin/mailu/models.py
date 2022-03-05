@@ -636,7 +636,7 @@ in clear-text regardless of the presence of the cache.
     @classmethod
     def get(cls, email):
         """ find user object for email address """
-        '@' in email and return cls.query.get(email)
+        return cls.query.get(email)
 
     @classmethod
     def login(cls, email, password):

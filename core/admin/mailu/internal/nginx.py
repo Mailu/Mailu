@@ -95,6 +95,8 @@ def handle_authentication(headers):
             try:
                 user = models.User.query.get(user_email)
                 is_valid_user = True
+            except ValueError:
+                pass
             except sqlalchemy.exc.StatementError as exc:
                 exc = str(exc).split('\n', 1)[0]
                 app.logger.warn(f'Invalid user {user_email!r}: {exc}')

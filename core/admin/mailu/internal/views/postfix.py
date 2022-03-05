@@ -5,6 +5,7 @@ from flask import current_app as app
 import flask
 import idna
 import re
+import sqlalchemy.exc
 import srslib
 
 @internal.route("/postfix/dane/<domain_name>")
@@ -158,11 +159,13 @@ def postfix_sender_rate(sender):
 def postfix_sender_access(sender):
     """ Simply reject any sender that pretends to be from a local domain
     """
-    if not is_void_address(sender):
-        localpart, domain_name = models.Email.resolve_domain(sender)
-        return flask.jsonify("REJECT") if models.Domain.query.get(domain_name) else flask.abort(404)
-    else:
-        return flask.abort(404)
+    try:
+        if not is_void_address(sender):
+            localpart, domain_name = models.Email.resolve_domain(sender)
+            return flask.jsonify("REJECT") if models.Domain.query.get(domain_name) else flask.abort(404)
+    except sqlalchemy.exc.StatementError:
+        pass
+    return flask.abort(404)
 
 
 def is_void_address(email):

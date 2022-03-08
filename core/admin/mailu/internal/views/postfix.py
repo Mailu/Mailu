@@ -159,9 +159,9 @@ def postfix_sender_rate(sender):
 def postfix_sender_access(sender):
     """ Simply reject any sender that pretends to be from a local domain
     """
-    if '@' in email:
-        if email.startswith('<') and email.endswith('>'):
-            email = email[1:-1]
+    if '@' in sender:
+        if sender.startswith('<') and sender.endswith('>'):
+            sender = sender[1:-1]
         try:
             localpart, domain_name = models.Email.resolve_domain(sender)
             if models.Domain.query.get(domain_name):

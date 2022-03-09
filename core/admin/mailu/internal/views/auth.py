@@ -12,7 +12,7 @@ def nginx_authentication():
     """
     client_ip = flask.request.headers["Client-Ip"]
     headers = flask.request.headers
-    if headers["Auth-Port"] == '25':
+    if headers["Auth-Port"] == '25' and headers['Auth-Method'] != 'none':
         response = flask.Response()
         response.headers['Auth-Status'] = 'AUTH not supported'
         response.headers['Auth-Error-Code'] = '502 5.5.1'

@@ -145,51 +145,24 @@ Your mail service will be reachable for IMAP, POP3, SMTP and Webmail at the addr
 How to make IPv6 work?
 ``````````````````````
 
-Docker currently does not expose the IPv6 ports properly, as it does not interface with ``ip6tables``.
-Lets start with quoting everything that's wrong:
+Docker IPv6 interfacing with ``ip6tables``, which is required for proper IPv6 support, is currently considered experimental.
 
-  Unfortunately, initially Docker was not created with IPv6 in mind.
-  It was added later and, while it has come a long way, is still not as usable as one would want.
-  Much discussion is still going on as to how IPv6 should be used in a containerized world;
-  See the various GitHub issues linked below:
+You can enable experimental IPv6 support in docker via a custom ``/etc/docker/daemon.json`` file like this one:
 
-  - Giving each container a publicly routable address means all ports (even unexposed / unpublished ports) are suddenly
-    reachable by everyone, if no additional filtering is done
-    (`docker/docker#21614 <https://github.com/docker/docker/issues/21614>`_)
-  - By default, each container gets a random IPv6, making it impossible to do properly do DNS;
-    the alternative is to assign a specific IPv6 address to each container,
-    still an administrative hassle (`docker/docker#13481 <https://github.com/docker/docker/issues/13481>`_)
-  - Published ports won't work on IPv6, unless you have the userland proxy enabled
-    (which, for now, is enabled by default in Docker)
-  - The userland proxy, however, seems to be on its way out
-    (`docker/docker#14856 <https://github.com/docker/docker/issues/14856>`_) and has various issues, like:
+.. code-block:: json
 
-    - It can use a lot of RAM (`docker/docker#11185 <https://github.com/docker/docker/issues/11185>`_)
-    - Source IP addresses are rewritten, making it completely unusable for many purposes, e.g. mail servers
-      (`docker/docker#17666 <https://github.com/docker/docker/issues/17666>`_),
-      (`docker/libnetwork#1099 <https://github.com/docker/libnetwork/issues/1099>`_).
+  {
+      "ipv6": true,
+      "experimental": true,
+      "fixed-cidr-v6": "fd00:1234:abcd::/48",
+      "ip6tables": true
+  }
 
-  -- `Robbert Klarenbeek <https://github.com/robbertkl>`_ (docker-ipv6nat author)
+and enabling the IPv6 checkbox in the `setup utility`_.
 
-Okay, but I still want to use IPv6! Can I just use the installers IPv6 checkbox? **NO, YOU SHOULD NOT DO THAT!** Why you ask?
-Mailu has its own trusted IPv4 network, every container inside this network can use e.g. the SMTP container without further
-authentication. If you enabled IPv6 inside the setup assistant (and fixed the ports to also be exposed on IPv6) Docker will
-still rewrite any incoming IPv6 requests to an IPv4 address, *which is located inside the trusted network*. Therefore any
-incoming connection to the SMTP container will bypass the authentication stage by the front container regardless of your
-settings and causes an Open Relay. And you really don't want this!
+This setup however is not officially supported, and might result in unforeseen issues.
+With bad misconfiguration you might even cause your instance to become an Open Relay, you have been warned!
 
-So, how to make it work? Well, by using `docker-ipv6nat`_! This nifty container will set up ``ip6tables``,
-just as Docker would do for IPv4. We know that NAT-ing is not advised in IPv6,
-however exposing all containers to public network neither. The choice is ultimately yous.
-
-Mailu `setup utility`_ generates a safe IPv6 ULA subnet by default. So when you run the following command,
-Mailu will start to function on IPv6:
-
-.. code-block:: bash
-
-  docker run -d --restart=always -v /var/run/docker.sock:/var/run/docker.sock:ro --privileged --net=host robbertkl/ipv6nat
-
-.. _`docker-ipv6nat`: https://github.com/robbertkl/docker-ipv6nat
 .. _`setup utility`: https://setup.mailu.io
 
 How does Mailu scale up?

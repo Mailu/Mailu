@@ -55,7 +55,7 @@ test_DNS()
 start_command=" ".join([
     "gunicorn",
     f"--threads {str(os.cpu_count())}",
-    "-b :80",
+	"-b [::]:80",
     "--logger-class mailu.Logger",
     "--worker-tmp-dir /dev/shm",
     "--access-logfile -" if (log.root.level<=log.INFO) else "",

@@ -48,7 +48,7 @@ test_DNS()
 
 start_command="".join([
     "gunicorn --threads ", str(os.cpu_count()),
-    " -b :80 ",
+    " -b [::]:80 ",
     "--access-logfile - " if (log.root.level<=log.INFO) else "",
     "--error-logfile - ",
     "--preload ",

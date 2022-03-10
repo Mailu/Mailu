@@ -4,7 +4,7 @@ import os
 import time
 import subprocess
 
-hostnames = ','.join(set(os.environ['HOSTNAMES'].split(',')))
+hostnames = ','.join(set([host.strip() for host in os.environ['HOSTNAMES'].split(',')]))
 
 command = [
     "certbot",

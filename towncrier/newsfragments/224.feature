@@ -1,1 +1,1 @@
-Provide auto-configuration files (autodiscover, autoconfig & mobileconfig)
+Provide auto-configuration files (autodiscover, autoconfig & mobileconfig); Please update your DNS records

@@ -255,30 +255,21 @@ class Domain(Base):
         """ return list of auto configuration records (RFC6186) """
         hostname = app.config['HOSTNAME']
         protocols = [
-            ('autodiscover', 443),
+            ('imap', 143, 20),
+            ('pop3', 110, 20),
+            ('submission', 587, 20),
         ]
         if app.config['TLS_FLAVOR'] != 'notls':
             protocols.extend([
-                ('submission', 0),
-                ('submissions', 465),
-                ('imap', 0),
-                ('pop3', 0),
-                ('imaps', 993),
-                ('pop3s', 995),
-            ])
-        else:
-            protocols.extend([
-                ('submission', 587),
-                ('submissions', 0),
-                ('imap', 143),
-                ('pop3', 110),
-                ('imaps', 0),
-                ('pop3s', 0),
+                ('autodiscover', 443, 10),
+                ('submissions', 465, 20, 10),
+                ('imaps', 993, 10),
+                ('pop3s', 995, 10),
             ])
 
         return list([
-            f'_{proto}._tcp.{self.name}. 600 IN SRV 1 1 {port} {hostname}.'
-            for proto, port
+            f'_{proto}._tcp.{self.name}. 600 IN SRV {prio} 1 {port} {hostname}.'
+            for proto, port, prio
             in protocols
         ])
 

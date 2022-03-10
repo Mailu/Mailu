@@ -4,11 +4,7 @@ import os
 import time
 import subprocess
 
-hostnames = list(set(os.environ['HOSTNAMES'].split(',')))
-for hostname in hostnames:
-    if not hostname.startswith('autoconfig.'):
-        hostnames.append(f'autoconfig.{hostname}')
-hostnames = ','.join(set(hostnames))
+hostnames = ','.join(set(os.environ['HOSTNAMES'].split(',')))
 
 command = [
     "certbot",

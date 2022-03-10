@@ -258,6 +258,7 @@ class Domain(Base):
             ('submission', 587),
             ('imap', 143),
             ('pop3', 110),
+            ('autodiscover', 443),
         ]
         if app.config['TLS_FLAVOR'] != 'notls':
             protocols.extend([

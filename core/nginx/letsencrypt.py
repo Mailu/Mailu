@@ -4,10 +4,16 @@ import os
 import time
 import subprocess
 
+hostnames = list(set(os.environ['HOSTNAMES'].split(',')))
+for hostname in hostnames:
+    if not hostname.startswith('autoconfig.'):
+        hostnames.append(f'autoconfig.{hostname}')
+hostnames = ','.join(set(hostnames))
+
 command = [
     "certbot",
     "-n", "--agree-tos", # non-interactive
-    "-d", os.environ["HOSTNAMES"],
+    "-d", hostnames, "--expand", "--allow-subset-of-names",
     "-m", "{}@{}".format(os.environ["POSTMASTER"], os.environ["DOMAIN"]),
     "certonly", "--standalone",
     "--cert-name", "mailu",
@@ -20,7 +26,7 @@ command = [
 command2 = [
     "certbot",
     "-n", "--agree-tos", # non-interactive
-    "-d", os.environ["HOSTNAMES"],
+    "-d", hostnames, "--expand", "--allow-subset-of-names",
     "-m", "{}@{}".format(os.environ["POSTMASTER"], os.environ["DOMAIN"]),
     "certonly", "--standalone",
     "--cert-name", "mailu-ecdsa",

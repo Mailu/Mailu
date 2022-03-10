@@ -271,7 +271,7 @@ class Domain(Base):
             f'_{proto}._tcp.{self.name}. 600 IN SRV {prio} 1 {port} {hostname}.'
             for proto, port, prio
             in protocols
-        ])
+        ])+[f'autoconfig.{self.name}. 600 IN CNAME {hostname}.']
 
     @cached_property
     def dns_tlsa(self):

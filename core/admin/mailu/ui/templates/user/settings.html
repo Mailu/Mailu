@@ -18,6 +18,7 @@
 
   {%- call macros.card(title=_("Antispam")) %}
   {%- call macros.fieldset(field=form.spam_enabled, enabled=user.spam_enabled) %}
+  {{ macros.form_field(form.spam_mark_as_read) }}
   {{ macros.form_field(form.spam_threshold, step=1, max=100,
      prepend='<span class="input-group-text"><span id="spam_threshold_value"></span>&nbsp;/&nbsp;100</span>') }}
   {%- endcall %}

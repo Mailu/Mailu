@@ -40,7 +40,7 @@ def autoconfig_mozilla():
 </clientConfig>\r\n'''
     return flask.Response(xml, mimetype='text/xml', status=200)
 
-@internal.route("/autoconfig/microsoft")
+@internal.route("/autoconfig/microsoft", methods=['GET', 'POST'])
 def autoconfig_microsoft():
     # https://docs.microsoft.com/en-us/previous-versions/office/office-2010/cc511507(v=office.14)?redirectedfrom=MSDN#Anchor_3
     hostname = app.config['HOSTNAME']

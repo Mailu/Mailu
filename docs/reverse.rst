@@ -66,7 +66,7 @@ Because the admin interface is served as ``/admin``, the Webmail as ``/webmail``
   server {
     # [...] here goes your standard configuration
 
-    location ~ ^/(admin|sso|static|webdav|webmail|(apple\.)?mobileconfig|(\.well\-known/autoconfig/)?mail/|Autodiscover/Autodiscover.xml) {
+    location ~* ^/(admin|sso|static|webdav|webmail|(apple\.)?mobileconfig|(\.well\-known/autoconfig/)?mail/|Autodiscover/Autodiscover.xml) {
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr
       proxy_pass https://localhost:8443;     

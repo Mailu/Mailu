@@ -47,7 +47,7 @@ def autoconfig_microsoft_json():
         hostname = app.config['HOSTNAME']
         json = f'{"Protocol":"Autodiscoverv1","Url":"https://{hostname}/autodiscover/autodiscover.xml"}'
         return flask.Response(json, mimetype='application/json', status=200)
-    else
+    else:
         return flask.abort(404)
 
 @internal.route("/autoconfig/microsoft", methods=['GET', 'POST'])

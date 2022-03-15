@@ -45,8 +45,8 @@ def autoconfig_microsoft():
     # https://docs.microsoft.com/en-us/previous-versions/office/office-2010/cc511507(v=office.14)?redirectedfrom=MSDN#Anchor_3
     hostname = app.config['HOSTNAME']
     xml = f'''<?xml version=\"1.0\" encoding=\"utf-8\" ?>
-<Autodiscover xmlns=\"https://schemas.microsoft.com/exchange/autodiscover/responseschema/2006\">
-<Response xmlns=\"https://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a\">
+<Autodiscover xmlns=\"http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006\">
+<Response xmlns=\"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a\">
 <Account>
 <AccountType>email</AccountType>
 <Action>settings</Action>

@@ -40,6 +40,16 @@ def autoconfig_mozilla():
 </clientConfig>\r\n'''
     return flask.Response(xml, mimetype='text/xml', status=200)
 
+@internal.route("/autoconfig/microsoft.json")
+def autoconfig_microsoft_json():
+    proto = flask.request.args.get('Protocol', 'Autodiscoverv1')
+    if proto == 'Autodiscoverv1':
+        hostname = app.config['HOSTNAME']
+        json = f'{"Protocol":"Autodiscoverv1","Url":"https://{hostname}/autodiscover/autodiscover.xml"}'
+        return flask.Response(json, mimetype='application/json', status=200)
+    else
+        return flask.abort(404)
+
 @internal.route("/autoconfig/microsoft", methods=['GET', 'POST'])
 def autoconfig_microsoft():
     # https://docs.microsoft.com/en-us/previous-versions/office/office-2010/cc511507(v=office.14)?redirectedfrom=MSDN#Anchor_3

@@ -56,31 +56,29 @@ def autoconfig_microsoft():
     hostname = app.config['HOSTNAME']
     xml = f'''<?xml version=\"1.0\" encoding=\"utf-8\" ?>
 <Autodiscover xmlns=\"http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006\">
-<Response xmlns=\"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a\">
-<Account>
-<AccountType>email</AccountType>
-<Action>settings</Action>
-<Protocol>
-<Type>IMAP</Type>
-<Server>{hostname}</Server>
-<Port>993</Port>
-<DomainRequired>on</DomainRequired>
-<SPA>off</SPA>
-<SSL>on</SSL>
-<AuthRequired>on</AuthRequired>
-</Protocol>
-<Protocol>
-<Type>SMTP</Type>
-<Server>{hostname}</Server>
-<Port>465</Port>
-<DomainRequired>on</DomainRequired>
-<SPA>off</SPA>
-<SSL>on</SSL>
-<AuthRequired>on</AuthRequired>
-</Protocol>
-</Account>
-</Response>
-</Autodiscover>\r\n'''
+    <Response xmlns=\"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a\">
+        <Account>
+        <AccountType>email</AccountType>
+        <Action>settings</Action>
+        <Protocol>
+            <Type>IMAP</Type>
+            <Server>{hostname}</Server>
+            <Port>993</Port>
+            <DomainRequired>on</DomainRequired>
+            <SPA>off</SPA>
+            <Encryption>TLS</Encryption>
+        </Protocol>
+        <Protocol>
+            <Type>SMTP</Type>
+            <Server>{hostname}</Server>
+            <Port>465</Port>
+            <DomainRequired>on</DomainRequired>
+            <SPA>off</SPA>
+            <Encryption>TLS</Encryption>
+            </Protocol>
+        </Account>
+    </Response>
+</Autodiscover>'''
     return flask.Response(xml, mimetype='text/xml', status=200)
 
 @internal.route("/autoconfig/apple")

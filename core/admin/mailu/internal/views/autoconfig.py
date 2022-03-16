@@ -64,7 +64,7 @@ def autoconfig_microsoft():
         email = xml['Autodiscover']['Request']['EMailAddress']
         xml = f'''<?xml version=\"1.0\" encoding=\"utf-8\" ?>
     <Autodiscover xmlns=\"http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006\">
-        <Response xmlns="{schema}">
+        <Response xmlns=\"{schema}\">
             <Account>
             <AccountType>email</AccountType>
             <Action>settings</Action>

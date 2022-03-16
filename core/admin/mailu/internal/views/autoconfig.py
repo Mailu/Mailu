@@ -2,6 +2,7 @@ from mailu.internal import internal
 
 from flask import current_app as app
 import flask
+import xmltodict
 
 @internal.route("/autoconfig/mozilla")
 def autoconfig_mozilla():
@@ -50,36 +51,48 @@ def autoconfig_microsoft_json():
     else:
         return flask.abort(404)
 
-@internal.route("/autoconfig/microsoft", methods=['GET', 'POST'])
+@internal.route("/autoconfig/microsoft", methods=['POST'])
 def autoconfig_microsoft():
     # https://docs.microsoft.com/en-us/previous-versions/office/office-2010/cc511507(v=office.14)?redirectedfrom=MSDN#Anchor_3
     hostname = app.config['HOSTNAME']
-    xml = f'''<?xml version=\"1.0\" encoding=\"utf-8\" ?>
-<Autodiscover xmlns=\"http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006\">
-    <Response xmlns=\"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a\">
-        <Account>
-        <AccountType>email</AccountType>
-        <Action>settings</Action>
-        <Protocol>
-            <Type>IMAP</Type>
-            <Server>{hostname}</Server>
-            <Port>993</Port>
-            <DomainRequired>on</DomainRequired>
-            <SPA>off</SPA>
-            <Encryption>TLS</Encryption>
-        </Protocol>
-        <Protocol>
-            <Type>SMTP</Type>
-            <Server>{hostname}</Server>
-            <Port>465</Port>
-            <DomainRequired>on</DomainRequired>
-            <SPA>off</SPA>
-            <Encryption>TLS</Encryption>
+    try:
+        xmlRequest = (flask.request.data).decode("utf-8")
+        xml = xmltodict.parse(xmlRequest[xmlRequest.find('<'):xmlRequest.rfind('>')+1])
+        schema = xml['Autodiscover']['Request']['AcceptableResponseSchema']
+        if schema != 'http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a':
+            return flask.abort(404)
+        email = xml['Autodiscover']['Request']['EMailAddress']
+        xml = f'''<?xml version=\"1.0\" encoding=\"utf-8\" ?>
+    <Autodiscover xmlns=\"http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006\">
+        <Response xmlns="{schema}">
+            <Account>
+            <AccountType>email</AccountType>
+            <Action>settings</Action>
+            <Protocol>
+                <Type>IMAP</Type>
+                <Server>{hostname}</Server>
+                <Port>993</Port>
+                <LoginName>{email}</LoginName>
+                <DomainRequired>on</DomainRequired>
+                <SPA>off</SPA>
+                <SSL>on</SSL>
             </Protocol>
-        </Account>
-    </Response>
-</Autodiscover>'''
-    return flask.Response(xml, mimetype='text/xml', status=200)
+            <Protocol>
+                <Type>SMTP</Type>
+                <Server>{hostname}</Server>
+                <Port>465</Port>
+                <LoginName>{email}</LoginName>
+                <DomainRequired>on</DomainRequired>
+                <SPA>off</SPA>
+                <SSL>on</SSL>
+                </Protocol>
+            </Account>
+        </Response>
+    </Autodiscover>'''
+        return flask.Response(xml, mimetype='text/xml', status=200)
+    except:
+        pass
+    return flask.abort(400)
 
 @internal.route("/autoconfig/apple")
 def autoconfig_apple():

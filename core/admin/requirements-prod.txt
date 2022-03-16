@@ -73,3 +73,4 @@ webencodings==0.5.1
 Werkzeug==2.0.2
 WTForms==2.3.3
 WTForms-Components==0.10.5
+xmltodict==0.12.0

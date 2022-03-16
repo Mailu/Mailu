@@ -45,8 +45,8 @@ def autoconfig_microsoft_json():
     proto = flask.request.args.get('Protocol', 'Autodiscoverv1')
     if proto == 'Autodiscoverv1':
         hostname = app.config['HOSTNAME']
-        json = f'{"Protocol":"Autodiscoverv1","Url":"https://{hostname}/autodiscover/autodiscover.xml"}'
-        return flask.Response(json, mimetype='application/json', status=200)
+        json = f'"Protocol":"Autodiscoverv1","Url":"https://{hostname}/autodiscover/autodiscover.xml"'
+        return flask.Response('{'+json+'}', mimetype='application/json', status=200)
     else:
         return flask.abort(404)
 

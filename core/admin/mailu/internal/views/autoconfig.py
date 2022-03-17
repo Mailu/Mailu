@@ -8,15 +8,15 @@ import xmltodict
 def autoconfig_mozilla():
     # https://wiki.mozilla.org/Thunderbird:Autoconfiguration:ConfigFileFormat
     hostname = app.config['HOSTNAME']
-    xml = f'''<?xml version=\"1.0\"?>
-<clientConfig version=\"1.1\">
-<emailProvider id=\"%EMAILDOMAIN%\">
+    xml = f'''<?xml version="1.0"?>
+<clientConfig version="1.1">
+<emailProvider id="%EMAILDOMAIN%">
 <domain>%EMAILDOMAIN%</domain>
 
 <displayName>Email</displayName>
 <displayShortName>Email</displayShortName>
 
-<incomingServer type=\"imap\">
+<incomingServer type="imap">
 <hostname>{hostname}</hostname>
 <port>993</port>
 <socketType>SSL</socketType>
@@ -24,7 +24,7 @@ def autoconfig_mozilla():
 <authentication>password-cleartext</authentication>
 </incomingServer>
 
-<outgoingServer type=\"smtp\">
+<outgoingServer type="smtp">
 <hostname>{hostname}</hostname>
 <port>465</port>
 <socketType>SSL</socketType>
@@ -34,8 +34,8 @@ def autoconfig_mozilla():
 <useGlobalPreferredServer>true</useGlobalPreferredServer>
 </outgoingServer>
 
-<documentation url=\"https://{hostname}/admin/client\">
-<descr lang=\"en\">Configure your email client</descr>
+<documentation url="https://{hostname}/admin/client">
+<descr lang="en">Configure your email client</descr>
 </documentation>
 </emailProvider>
 </clientConfig>\r\n'''
@@ -62,9 +62,9 @@ def autoconfig_microsoft():
         if schema != 'http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a':
             return flask.abort(404)
         email = xml['Autodiscover']['Request']['EMailAddress']
-        xml = f'''<?xml version=\"1.0\" encoding=\"utf-8\" ?>
-    <Autodiscover xmlns=\"http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006\">
-        <Response xmlns=\"{schema}\">
+        xml = f'''<?xml version="1.0" encoding="utf-8" ?>
+    <Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006">
+        <Response xmlns="{schema}">
             <Account>
             <AccountType>email</AccountType>
             <Action>settings</Action>
@@ -98,10 +98,10 @@ def autoconfig_apple():
     # https://developer.apple.com/business/documentation/Configuration-Profile-Reference.pdf
     hostname = app.config['HOSTNAME']
     sitename = app.config['SITENAME']
-    xml = f'''<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"
-\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
+    xml = f'''<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+"http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
 <dict>
 <key>PayloadContent</key>
 <array>

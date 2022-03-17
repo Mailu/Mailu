@@ -189,7 +189,7 @@ Mailu must also be configured with the information what header is used by the re
 .. code-block:: docker
   
   #mailu.env file
-  REAL_IP_HEADER=X-Real-IP
+  REAL_IP_HEADER=X-Real-Ip
   REAL_IP_FROM=x.x.x.x,y.y.y.y.y
   #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu. 
 

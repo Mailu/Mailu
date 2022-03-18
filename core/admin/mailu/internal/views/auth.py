@@ -32,7 +32,7 @@ def nginx_authentication():
     for key, value in headers.items():
         response.headers[key] = str(value)
     is_valid_user = False
-    if response.headers.get("Auth-User-Exists"):
+    if response.headers.get("Auth-User-Exists") == "True":
         username = response.headers["Auth-User"]
         if utils.limiter.should_rate_limit_user(username, client_ip):
             # FIXME could be done before handle_authentication()

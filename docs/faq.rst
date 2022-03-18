@@ -527,7 +527,7 @@ These issues are typically caused by four scenarios:
 #. Certificates expired;
 #. When ``TLS_FLAVOR=letsencrypt``, it might be that the *certbot* script is not capable of
    obtaining the certificates for your domain. See `letsencrypt issues`_
-#. When ``TLS_FLAVOR=certs``, certificates are supposed to be copied to ``/mailu/certs``.
+#. When ``TLS_FLAVOR=cert``, certificates are supposed to be copied to ``/mailu/certs``.
    Using an external ``letsencrypt`` program, it tends to happen people copy the whole
    ``letsencrypt/live`` directory containing symlinks. Symlinks do not resolve inside the
    container and therefore it breaks the TLS implementation.

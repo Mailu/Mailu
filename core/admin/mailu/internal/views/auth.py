@@ -35,11 +35,15 @@ def nginx_authentication():
         response.headers[key] = str(value)
     is_valid_user = False
 <<<<<<< HEAD
+<<<<<<< HEAD
     username = response.headers.get('Auth-User', None)
     if response.headers.get("Auth-User-Exists") == "True":
         if not is_from_webmail and not is_app_token and utils.limiter.should_rate_limit_user(username, client_ip):
 =======
     if response.headers.get("Auth-User-Exists")=="True":
+=======
+    if response.headers.get("Auth-User-Exists") == "True":
+>>>>>>> 630a4e9b (Update auth.py)
         username = response.headers["Auth-User"]
         if utils.limiter.should_rate_limit_user(username, client_ip):
 >>>>>>> 8775dc5b (Fixing AUTH_RATELIMIT_IP not working on imap/pop3/smtp)

@@ -52,10 +52,15 @@ def test_DNS():
 
 test_DNS()
 
+bind_addr = ":80"
+if os.environ.get("SUBNET6") is not None:
+    # If SUBNET6 is defined, gunicorn must listen on IPv6 as well as IPv4
+    bind_addr = "[::]:80"
+
 start_command=" ".join([
     "gunicorn",
     f"--threads {str(os.cpu_count())}",
-	"-b [::]:80",
+	"-b", bind_addr,
     "--logger-class mailu.Logger",
     "--worker-tmp-dir /dev/shm",
     "--access-logfile -" if (log.root.level<=log.INFO) else "",

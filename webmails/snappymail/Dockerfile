@@ -88,5 +88,5 @@ VOLUME ["/data"]
 
 CMD /start.py
 
-HEALTHCHECK CMD curl -f -L http://localhost/ || exit 1
+HEALTHCHECK CMD curl -f -L http://localhost/health || exit 1
 RUN echo $VERSION >> /version

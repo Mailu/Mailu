@@ -39,16 +39,16 @@ Postfix configuration overrides.
 
 RSpamD configuration overrides.
 
-#### Rainloop
+#### Snappymail
 
 - Old path: `/mailu/webmail/_data_/_default_/storage` (part of `/mailu/webmail` mountpoint, shared with Roundcube)
-- New path: `/mailu/config/rainloop`
+- New path: `/mailu/config/snappymail`
 
 User specific configs. The remaining files under the old `/mailu/webmail` don't need to be persistent. Except for `AddressBook.sqlite`, see `/mailu/data`.
 
 #### Roundcube
 
-- Old path: `/mailu/webmail/gpg` (part of `/mailu/webmail` mountpoint, shared with Rainloop)
+- Old path: `/mailu/webmail/gpg` (part of `/mailu/webmail` mountpoint, shared with Snappymail)
 - New path: `/mailu/config/roundcube/gpg`
 
 User configured GPG keys.
@@ -108,10 +108,10 @@ This move is needed in order to be able to mount the directory without exposing 
 
 Storage of Bayes and Fuzzy learning SQLite databases and caches. As future optimization we should look into moving all this into Redis.
 
-#### Rainloop
+#### SnappyMail
 
 - Old path: `/mailu/webmail/_data_/_default_/AddressBook.sqlite` (part of `/mailu/webmail` mountpoint, shared with Roundcube)
-- New path: `/mailu/data/rainloop/AddressBook.sqlite` (mount on `rainloop` directory)
+- New path: `/mailu/data/snappymail/AddressBook.sqlite` (mount on `snappymail` directory)
 
 Addressbook SQLite file. For future replicated deployments this might better be configured to use an external DB.
 
@@ -119,7 +119,7 @@ For this modification, the `AddressBook.sqlite` will need to be moved to a diffe
 
 #### Roundcube
 
-- Old path: `/mailu/webmail/roundcube.db` (part of `/mailu/webmail` mountpoint, shared with Rainloop)
+- Old path: `/mailu/webmail/roundcube.db` (part of `/mailu/webmail` mountpoint, shared with SnappyMail)
 - New path: `/mailu/data/roundcube/roundcube.db` (mount on `roundcube` directory)
 
 User settings SQLite database file for roundcube. For future replicated deployments this might better be configured to use an external DB.
@@ -163,7 +163,7 @@ The final layout of the Mailu filesystem will look like:
 ├── config
 │   ├── dovecot
 │   ├── postfix
-│   ├── rainloop
+│   ├── snappymail
 │   ├── redis
 │   ├── roundcube
 │   │   └── gpg
@@ -173,7 +173,7 @@ The final layout of the Mailu filesystem will look like:
 │       └── dkim
 ├── data
 │   ├── admin
-│   ├── rainloop
+│   ├── snappymail
 │   ├── roundcube
 │   └── rspamd
 ├── local

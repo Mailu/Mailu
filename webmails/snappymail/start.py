@@ -27,7 +27,7 @@ conf.jinja("/defaults/php.ini", os.environ, "/etc/php7/php.ini")
 os.system("php-fpm7")
 
 os.system("chown -R nginx:nginx /data")
-os.system("chmod -R a+rX /var/www/rainloop/")
+os.system("chmod -R a+rX /var/www/webmail/")
 
 subprocess.call(["/config.py"])
 os.execv("/usr/sbin/nginx", ["nginx", "-g", "daemon off;"])

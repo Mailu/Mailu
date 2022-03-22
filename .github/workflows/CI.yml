@@ -110,7 +110,7 @@ jobs:
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
         run: docker-compose -f tests/build.yml build
       - name: Save all docker images
-        run: docker save ${{ env.DOCKER_ORG }}/admin ${{ env.DOCKER_ORG }}/clamav ${{ env.DOCKER_ORG }}/docs ${{ env.DOCKER_ORG }}/dovecot ${{ env.DOCKER_ORG }}/fetchmail ${{ env.DOCKER_ORG }}/nginx ${{ env.DOCKER_ORG }}/none ${{ env.DOCKER_ORG }}/postfix ${{ env.DOCKER_ORG }}/radicale ${{ env.DOCKER_ORG }}/rainloop ${{ env.DOCKER_ORG }}/roundcube ${{ env.DOCKER_ORG }}/rspamd ${{ env.DOCKER_ORG }}/setup ${{ env.DOCKER_ORG }}/traefik-certdumper ${{ env.DOCKER_ORG }}/unbound -o /images/images.tar.gz
+        run: docker save ${{ env.DOCKER_ORG }}/admin ${{ env.DOCKER_ORG }}/clamav ${{ env.DOCKER_ORG }}/docs ${{ env.DOCKER_ORG }}/dovecot ${{ env.DOCKER_ORG }}/fetchmail ${{ env.DOCKER_ORG }}/nginx ${{ env.DOCKER_ORG }}/none ${{ env.DOCKER_ORG }}/postfix ${{ env.DOCKER_ORG }}/radicale ${{ env.DOCKER_ORG }}/snappymail ${{ env.DOCKER_ORG }}/roundcube ${{ env.DOCKER_ORG }}/rspamd ${{ env.DOCKER_ORG }}/setup ${{ env.DOCKER_ORG }}/traefik-certdumper ${{ env.DOCKER_ORG }}/unbound -o /images/images.tar.gz
 
   test-core:
     name: Perform core tests
@@ -328,8 +328,8 @@ jobs:
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
-  test-rainloop:
-    name: Perform rainloop tests
+  test-snappymail:
+    name: Perform snappymail tests
     runs-on: ubuntu-latest
     needs:
       - build
@@ -393,8 +393,8 @@ jobs:
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
-      - name: Test rainloop
-        run: python tests/compose/test.py rainloop 2
+      - name: Test snappymail
+        run: python tests/compose/test.py snappymail 2
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
@@ -552,7 +552,7 @@ jobs:
       - test-core
       - test-fetchmail
       - test-filters
-      - test-rainloop
+      - test-snappymail
       - test-roundcube
       - test-webdav
     steps:

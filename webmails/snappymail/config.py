@@ -10,6 +10,6 @@ args = os.environ.copy()
 log.basicConfig(stream=sys.stderr, level=args.get("LOG_LEVEL", "WARNING"))
 
 # Build final configuration paths
-conf.jinja("/config/nginx-rainloop.conf", args, "/etc/nginx/http.d/rainloop.conf")
+conf.jinja("/config/nginx-snappymail.conf", args, "/etc/nginx/http.d/snappymail.conf")
 if os.path.exists("/var/run/nginx.pid"):
     os.system("nginx -s reload")

@@ -12,7 +12,7 @@ the security implications caused by such an increase of attack surface.<p>
   <label>Enable Web email client (and path to the Web email client)</label>
   <br/>
   <select class="btn btn-primary dropdown-toggle" name="webmail_type" id="webmail">
-  	{% for webmailtype in ["none", "roundcube", "rainloop"] %}
+  	{% for webmailtype in ["none", "roundcube", "snappymail"] %}
   	<option value="{{ webmailtype }}" >{{ webmailtype }}</option>
   	{% endfor %}
   </select>

@@ -396,58 +396,6 @@ Mailu can serve an `MTA-STS policy`_; To configure it you will need to:
 .. _`1798`: https://github.com/Mailu/Mailu/issues/1798
 .. _`MTA-STS policy`: https://datatracker.ietf.org/doc/html/rfc8461
 
-How do I setup client autoconfiguration?
-````````````````````````````````````````
-
-Mailu can serve an `XML file for autoconfiguration`_; To configure it you will need to:
-
-1. add ``autoconfig.example.com`` to the ``HOSTNAMES`` configuration variable (and ensure that a valid SSL certificate is available for it; this may mean restarting your smtp container)
-
-2. configure an override with the policy itself; for example, your ``overrides/nginx/autoconfiguration.conf`` could read:
-
-.. code-block:: bash
-
-   location ^~ /mail/config-v1.1.xml {
-   return 200 "<?xml version=\"1.0\"?>
-   <clientConfig version=\"1.1\">
-   <emailProvider id=\"%EMAILDOMAIN%\">
-   <domain>%EMAILDOMAIN%</domain>
-
-   <displayName>Email</displayName>
-   <displayShortName>Email</displayShortName>
-
-   <incomingServer type=\"imap\">
-   <hostname>mailu.example.com</hostname>
-   <port>993</port>
-   <socketType>SSL</socketType>
-   <username>%EMAILADDRESS%</username>
-   <authentication>password-cleartext</authentication>
-   </incomingServer>
-
-   <outgoingServer type=\"smtp\">
-   <hostname>mailu.example.com</hostname>
-   <port>465</port>
-   <socketType>SSL</socketType>
-   <username>%EMAILADDRESS%</username>
-   <authentication>password-cleartext</authentication>
-   <addThisServer>true</addThisServer>
-   <useGlobalPreferredServer>true</useGlobalPreferredServer>
-   </outgoingServer>
-
-   <documentation url=\"https://mailu.example.com/admin/client\">
-   <descr lang=\"en\">Configure your email client</descr>
-   </documentation>
-   </emailProvider>
-   </clientConfig>\r\n";
-   }
-
-3. setup the appropriate DNS/CNAME record (``autoconfig.example.com`` -> ``mailu.example.com``).
-
-*issue reference:* `224`_.
-
-.. _`224`: https://github.com/Mailu/Mailu/issues/224
-.. _`XML file for autoconfiguration`: https://wiki.mozilla.org/Thunderbird:Autoconfiguration:ConfigFileFormat
-
 Technical issues
 ----------------
 

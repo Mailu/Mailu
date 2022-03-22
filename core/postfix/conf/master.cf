@@ -15,6 +15,22 @@ outclean  unix n       -       n       -       0       cleanup
   -o header_checks=pcre:/etc/postfix/outclean_header_filter.cf
   -o nested_header_checks=
 
+# Polite policy
+polite      unix  -       -       n       -       -       smtp
+  -o syslog_name=postfix-polite
+  -o polite_destination_concurrency_limit=3
+  -o polite_destination_rate_delay=0
+  -o polite_destination_recipient_limit=20
+  -o polite_destination_concurrency_failed_cohort_limit=10
+
+# Turtle policy
+turtle      unix  -       -       n       -       -       smtp
+  -o syslog_name=postfix-turtle
+  -o turtle_destination_concurrency_limit=1
+  -o turtle_destination_rate_delay=1
+  -o turtle_destination_recipient_limit=5
+  -o turtle_destination_concurrency_failed_cohort_limit=10
+
 # Internal postfix services
 pickup    unix  n       -       n       60      1       pickup
 cleanup   unix  n       -       n       -       0       cleanup

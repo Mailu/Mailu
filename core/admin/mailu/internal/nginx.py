@@ -93,12 +93,12 @@ def handle_authentication(headers):
             app.logger.warn(f'Received undecodable user/password from nginx: {raw_user_email!r}/{raw_password!r}')
         else:
             try:
-                user = models.User.query.get(user_email)
-                is_valid_user = True
+                user = models.User.query.get(user_email) if '@' in user_email else None
             except sqlalchemy.exc.StatementError as exc:
                 exc = str(exc).split('\n', 1)[0]
                 app.logger.warn(f'Invalid user {user_email!r}: {exc}')
             else:
+                is_valid_user = user is not None
                 ip = urllib.parse.unquote(headers["Client-Ip"])
                 if check_credentials(user, password, ip, protocol, headers["Auth-Port"]):
                     server, port = get_server(headers["Auth-Protocol"], True)

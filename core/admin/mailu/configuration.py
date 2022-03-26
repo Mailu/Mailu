@@ -44,6 +44,7 @@ DEFAULT_CONFIG = {
     'AUTH_RATELIMIT_EXEMPTION': '',
     'AUTH_RATELIMIT_EXEMPTION_LENGTH': 86400,
     'DISABLE_STATISTICS': False,
+    'REAL_IP_HEADER': '',
     # Mail settings
     'DMARC_RUA': None,
     'DMARC_RUF': None,
@@ -163,6 +164,7 @@ class ConfigManager:
         self.config['MESSAGE_RATELIMIT_EXEMPTION'] = set([s for s in self.config['MESSAGE_RATELIMIT_EXEMPTION'].lower().replace(' ', '').split(',') if s])
         self.config['HOSTNAMES'] = ','.join(hostnames)
         self.config['HOSTNAME'] = hostnames[0]
+        self.config['REAL_IP_HEADER'] = set(ipaddress.ip_network(cidr, False) for cidr in (cidr.strip() for cidr in self.config['REAL_IP_HEADER'].split(',')) if cidr)
 
         # update the app config
         app.config.update(self.config)

@@ -11,8 +11,8 @@ import sqlalchemy.exc
 def nginx_authentication():
     """ Main authentication endpoint for Nginx email server
     """
-    client_ip = flask.request.headers["Client-Ip"]
     headers = flask.request.headers
+    client_ip = nginx.extract_client_ip(headers)
     if headers["Auth-Port"] == '25' and headers['Auth-Method'] == 'plain':
         response = flask.Response()
         response.headers['Auth-Status'] = 'AUTH not supported'

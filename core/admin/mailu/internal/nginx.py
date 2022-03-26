@@ -82,13 +82,13 @@ def handle_authentication(headers):
         # be ASCII and are generally considered ISO8859-1. However when passing
         # the password, nginx does not transcode the input UTF string, thus
         # we need to manually decode.
+        ip = extract_client_ip(headers)
         raw_user_email = urllib.parse.unquote(headers["Auth-User"])
         raw_password = urllib.parse.unquote(headers["Auth-Pass"])
         user_email = 'invalid'
         try:
             user_email = raw_user_email.encode("iso8859-1").decode("utf8")
-            password = raw_password.encode("iso8859-1").decode("utf8")
-            ip = urllib.parse.unquote(headers["Client-Ip"])
+            password = raw_password.encode("iso8859-1").decode("utf8")            
         except:
             app.logger.warn(f'Received undecodable user/password from nginx: {raw_user_email!r}/{raw_password!r}')
         else:
@@ -99,7 +99,6 @@ def handle_authentication(headers):
                 app.logger.warn(f'Invalid user {user_email!r}: {exc}')
             else:
                 is_valid_user = user is not None
-                ip = urllib.parse.unquote(headers["Client-Ip"])
                 if check_credentials(user, password, ip, protocol, headers["Auth-Port"]):
                     server, port = get_server(headers["Auth-Protocol"], True)
                     return {
@@ -148,6 +147,15 @@ def get_server(protocol, authenticated=False):
         # hostname is not an ip address - so we need to resolve it
         hostname = resolve_hostname(hostname)
     return hostname, port
+
+def extract_client_ip(headers):
+    # Check if client_ip is in REAL_IP_HEADER 
+    # try to get client ip from headers["Proxy-Protocol-Addr"]
+    client_ip_raw = urllib.parse.unquote(headers["Client-Ip"])
+    client_ip = ipaddress.ip_address(client_ip_raw)
+    if any(client_ip in cidr for cidr in app.config['REAL_IP_HEADER']) and "Proxy-Protocol-Addr" in headers:
+        return urllib.parse.unquote(headers["Proxy-Protocol-Addr"])
+    return client_ip_raw
 
 @tenacity.retry(stop=tenacity.stop_after_attempt(100),
                 wait=tenacity.wait_random(min=2, max=5))

@@ -88,7 +88,7 @@ def handle_authentication(headers):
         user_email = 'invalid'
         try:
             user_email = raw_user_email.encode("iso8859-1").decode("utf8")
-            password = raw_password.encode("iso8859-1").decode("utf8")            
+            password = raw_password.encode("iso8859-1").decode("utf8")
         except:
             app.logger.warn(f'Received undecodable user/password from nginx: {raw_user_email!r}/{raw_password!r}')
         else:
@@ -149,7 +149,15 @@ def get_server(protocol, authenticated=False):
     return hostname, port
 
 def extract_client_ip(headers):
-    # Check if client_ip is in REAL_IP_HEADER 
+    app.logger.warn(f'Printing headers')
+    for key, value in headers:
+        app.logger.warn(f'headers[{key!r}]: {value!r}')
+
+    app.logger.warn(f'Printing REAL_IP_HEADER')
+    for cidr in app.config['REAL_IP_HEADER']:
+        app.logger.warn(f'{str(cidr)!r}')
+
+    # Check if client_ip is in REAL_IP_HEADER
     # try to get client ip from headers["Proxy-Protocol-Addr"]
     client_ip_raw = urllib.parse.unquote(headers["Client-Ip"])
     client_ip = ipaddress.ip_address(client_ip_raw)

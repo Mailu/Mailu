@@ -6,7 +6,10 @@ import flask
 import flask_login
 import base64
 import sqlalchemy.exc
+<<<<<<< HEAD
 import urllib
+=======
+>>>>>>> fc892649 (admin: graceful fail on user fetch in basic auth)
 
 @internal.route("/auth/email")
 def nginx_authentication():
@@ -105,13 +108,21 @@ def basic_authentication():
             exc = str(exc).split('\n', 1)[0]
             app.logger.warn(f'Invalid user {user_email!r}: {exc}')
         else:
+<<<<<<< HEAD
             if user is not None and nginx.check_credentials(user, password.decode('utf-8'), client_ip, "web", flask.request.headers.get('X-Real-Port', None), user_email):
+=======
+            if user is not None and nginx.check_credentials(user, password.decode('utf-8'), client_ip, "web"):
+>>>>>>> fc892649 (admin: graceful fail on user fetch in basic auth)
                 response = flask.Response()
                 response.headers["X-User"] = models.IdnaEmail.process_bind_param(flask_login, user.email, "")
                 utils.limiter.exempt_ip_from_ratelimits(client_ip)
                 return response
             # We failed check_credentials
+<<<<<<< HEAD
             utils.limiter.rate_limit_user(user_email, client_ip) if user else utils.limiter.rate_limit_ip(client_ip, user_email)
+=======
+            utils.limiter.rate_limit_user(user_email, client_ip) if user else utils.limiter.rate_limit_ip(client_ip)
+>>>>>>> fc892649 (admin: graceful fail on user fetch in basic auth)
     response = flask.Response(status=401)
     response.headers["WWW-Authenticate"] = 'Basic realm="Login Required"'
     return response

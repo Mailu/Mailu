@@ -1,3 +1,4 @@
+.. _reverse_proxy:
 Using an external reverse proxy
 ===============================
 

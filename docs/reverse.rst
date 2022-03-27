@@ -1,3 +1,5 @@
+.. _reverse_proxy:
+
 Using an external reverse proxy
 ===============================
 
@@ -13,7 +15,7 @@ There are basically three options, from the most to the least recommended one:
 
 All options will require that you modify the ``docker-compose.yml`` and ``mailu.env`` file.
 
-Mailu must also be configured with the information what header is used by the reverse proxy for passing the remote client IP. 
+Mailu must also be configured with the information what header is used by the reverse proxy for passing the remote client IP.
 This is configured in the mailu.env file. See the :ref:`configuration reference <reverse_proxy_headers>` for more information.
 
 Have Mailu Web frontend listen locally
@@ -57,8 +59,8 @@ Then on your own frontend, point to these local ports. In practice, you only nee
   #mailu.env file
   REAL_IP_HEADER=X-Real-IP
   REAL_IP_FROM=x.x.x.x,y.y.y.y.y
-  #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu. 
-  
+  #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu.
+
 Because the admin interface is served as ``/admin``, the Webmail as ``/webmail``, the single sign on page as ``/sso``, webdav as ``/webdav``, the client-autoconfiguration and the static files endpoint as ``/static``, you may also want to use a single virtual host and serve other applications (still Nginx):
 
 .. code-block:: nginx
@@ -69,7 +71,7 @@ Because the admin interface is served as ``/admin``, the Webmail as ``/webmail``
     location ~* ^/(admin|sso|static|webdav|webmail|(apple\.)?mobileconfig|(\.well\-known/autoconfig/)?mail/|Autodiscover/Autodiscover) {
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr
-      proxy_pass https://localhost:8443;     
+      proxy_pass https://localhost:8443;
     }
 
     location /main_app {
@@ -92,11 +94,11 @@ Because the admin interface is served as ``/admin``, the Webmail as ``/webmail``
 .. note:: Please don’t add a ``/`` at the end of the location pattern or all your redirects will fail with 404 because the ``/`` would be missing, and you would have to add it manually to move on
 
 .. code-block:: docker
-  
+
   #mailu.env file
   REAL_IP_HEADER=X-Real-IP
   REAL_IP_FROM=x.x.x.x,y.y.y.y.y
-  #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu. 
+  #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu.
 
 Finally, you might want to serve the admin interface on a separate virtual host but not expose the admin container directly (have your own HTTPS virtual hosts on top of Mailu, one public for the Webmail and one internal for administration for instance).
 
@@ -135,7 +137,7 @@ Here is an example configuration :
   #mailu.env file
   REAL_IP_HEADER=X-Real-IP
   REAL_IP_FROM=x.x.x.x,y.y.y.y.y
-  #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu. 
+  #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu.
 
 Depending on how you access the front server, you might want to add a ``proxy_redirect`` directive to your ``location`` blocks:
 
@@ -154,7 +156,7 @@ Traefik as reverse proxy
 As such, many may wish to integrate Mailu into a system which already uses Traefik as its sole ingress/reverse-proxy.
 
 As the ``mailu/front`` container uses Nginx not only for ``HTTP`` forwarding, but also for the mail-protocols like ``SMTP``, ``IMAP``, etc, we need to keep this
-container around even when using another ``HTTP`` reverse-proxy. Furthermore, Traefik is neither able to forward non-HTTP, nor can it easily forward HTTPS-to-HTTPS. 
+container around even when using another ``HTTP`` reverse-proxy. Furthermore, Traefik is neither able to forward non-HTTP, nor can it easily forward HTTPS-to-HTTPS.
 This, however, means 3 things:
 
 - ``mailu/front`` needs to listen internally on ``HTTP`` rather than ``HTTPS``
@@ -187,11 +189,11 @@ To support that use-case, Traefik can request ``SANs`` for your domain. The conf
 Mailu must also be configured with the information what header is used by the reverse proxy for passing the remote client IP.  This is configured in mailu.env:
 
 .. code-block:: docker
-  
+
   #mailu.env file
   REAL_IP_HEADER=X-Real-Ip
   REAL_IP_FROM=x.x.x.x,y.y.y.y.y
-  #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu. 
+  #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu.
 
 For more information see the :ref:`configuration reference <reverse_proxy_headers>` for more information.
 

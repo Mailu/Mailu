@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 # syntax=docker/dockerfile-upstream:1.4.3
+=======
+# First stage to build assets
+ARG DISTRO=alpine:3.14.5
+ARG ARCH=""
+>>>>>>> a54a7841 (Update alpine-linux to 3.14.5 - Zlib security FIX)
 
 # admin image
 FROM base

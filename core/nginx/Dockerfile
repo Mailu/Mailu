@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # syntax=docker/dockerfile-upstream:1.4.3
 
 # build static assets (intermediate)
@@ -13,6 +14,10 @@ RUN set -euxo pipefail \
 # nginx image
 FROM base
 
+=======
+ARG DISTRO=alpine:3.14.5
+FROM $DISTRO
+>>>>>>> a54a7841 (Update alpine-linux to 3.14.5 - Zlib security FIX)
 ARG VERSION
 LABEL version=$VERSION
 

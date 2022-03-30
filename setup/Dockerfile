@@ -1,9 +1,16 @@
+<<<<<<< HEAD
 # syntax=docker/dockerfile-upstream:1.4.3
 
 # setup image
 FROM base
 
 ARG VERSION=local
+=======
+ARG DISTRO=alpine:3.14.5
+FROM $DISTRO
+ARG VERSION
+ENV TZ Etc/UTC
+>>>>>>> a54a7841 (Update alpine-linux to 3.14.5 - Zlib security FIX)
 LABEL version=$VERSION
 
 COPY flavors /data/flavors

@@ -1,0 +1,1 @@
+update alpine linux docker image to version 3.14.5 which includes a security fix for zlib’s CVE-2018-25032.

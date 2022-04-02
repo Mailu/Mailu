@@ -1,9 +1,5 @@
 # First stage to build assets
-<<<<<<< HEAD
-ARG DISTRO=alpine:3.14.2
-=======
 ARG DISTRO=alpine:3.14.5
->>>>>>> a54a7841 (Update alpine-linux to 3.14.5 - Zlib security FIX)
 ARG ARCH=""
 
 FROM ${ARCH}node:16 as assets

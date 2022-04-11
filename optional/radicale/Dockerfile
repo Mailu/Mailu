@@ -13,7 +13,7 @@ RUN apk add --no-cache \
 
 # Image specific layers under this line
 RUN apk add --no-cache curl \
- && pip3 install radicale~=3.0
+ && pip3 install pytz radicale~=3.0
 
 
 COPY radicale.conf /radicale.conf

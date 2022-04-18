@@ -25,8 +25,7 @@ def start_podop():
     url = "http://" + os.environ["ADMIN_ADDRESS"] + ":8080/internal/postfix/"
 =======
     os.setuid(getpwnam('postfix').pw_uid)
-    if not os.path.exists('/dev/shm/postfix'):
-        os.mkdir('/dev/shm/postfix',mode=0o700)
+    os.makedirs('/dev/shm/postfix',mode=0o700, exist_ok=True)
     url = "http://" + os.environ["ADMIN_ADDRESS"] + "/internal/postfix/"
 >>>>>>> f1952d0e (Update start.py)
     # TODO: Remove verbosity setting from Podop?

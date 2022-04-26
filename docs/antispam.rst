@@ -43,6 +43,8 @@ Rspamd rejects non-compliant email messages and email messages that contain viru
       
    66% (10/15) is less than 80%, so the email is classified as ham. This email message will go to the inbox folder. If the user wants email messages with a score of 10 (66%) to be classified as spam, then the user defined spam filter tolerance can be lowered to 65% in the administration web interface.
    
+   The default spam filter tolerance used for new users can be configured using the environment variable ``DEFAULT_SPAM_THRESHOLD``. See also: :ref:`_advanced_cfg`.
+
 .. image:: assets/screenshots/SpamFiltering.png
 
 The location in the administration web interface where the spam filter and spam filter tolerance can be configured.

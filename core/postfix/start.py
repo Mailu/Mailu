@@ -52,6 +52,10 @@ os.environ['DEFER_ON_TLS_ERROR'] = os.environ['DEFER_ON_TLS_ERROR'] if 'DEFER_ON
 if 'RELAYNETS' in os.environ:
     os.environ["RELAYNETS"] = re.sub(r'([0-9a-fA-F]+:[0-9a-fA-F:]+)/', '[\\1]/', os.environ["RELAYNETS"])
 
+# Postfix requires IPv6 addresses to be wrapped in square brackets
+if 'RELAYNETS' in os.environ:
+    os.environ["RELAYNETS"] = re.sub(r'([0-9a-fA-F]+:[0-9a-fA-F:]+)/', '[\\1]/', os.environ["RELAYNETS"])
+
 for postfix_file in glob.glob("/conf/*.cf"):
     conf.jinja(postfix_file, os.environ, os.path.join("/etc/postfix", os.path.basename(postfix_file)))
 

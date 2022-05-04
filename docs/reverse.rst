@@ -49,7 +49,7 @@ Then on your own frontend, point to these local ports. In practice, you only nee
 
     location / {
       proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr
+      proxy_set_header X-Real-IP $remote_addr;
       proxy_pass https://localhost:8443;
     }
   }
@@ -113,7 +113,7 @@ Here is an example configuration :
 
     location /webmail {
       proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr
+      proxy_set_header X-Real-IP $remote_addr;
       proxy_pass https://localhost:8443/webmail;
     }
   }
@@ -125,7 +125,7 @@ Here is an example configuration :
 
     location /admin {
       proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr
+      proxy_set_header X-Real-IP $remote_addr;
       proxy_pass https://localhost:8443/admin;
       proxy_set_header Host $http_host;
     }

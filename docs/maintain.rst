@@ -14,9 +14,15 @@ simply pull the latest images and recreate the containers :
 
 .. code-block:: bash
 
+<<<<<<< HEAD
   docker compose pull
   docker compose down
   docker compose up -d
+=======
+  docker-compose pull
+  docker-compose down
+  docker-compose up -d
+>>>>>>> e80bcfbf (Clarify that upgrades require a container restart)
 
 Monitoring the mail server
 --------------------------

@@ -617,7 +617,7 @@ jobs:
       - name: Deploy built docker images
         env:
           DOCKER_UN: ${{ secrets.DOCKER_LOGIN }}
-          DOCKER_PW: ${{ secrets.Docker_Password }}
+          DOCKER_PW: ${{ secrets.Docker_PASSWORD }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}

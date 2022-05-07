@@ -3,8 +3,6 @@ Changelog
 
 For full details see the [releases page](https://mailu.io/1.9/releases.html)
 
-Warning, the helm-chart repo is not in sync yet with the new Mailu 1.9 release. If you use helm-chart (kubernetes), we advise to stick to version 1.8. 
-
 Upgrade should run fine as long as you generate a new compose or stack
 configuration and upgrade your mailu.env.
 

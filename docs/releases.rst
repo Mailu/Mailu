@@ -4,8 +4,8 @@ Release notes
 Mailu 1.9 - 2021-12-29
 ----------------------
 
-Mailu 1.9 is available now. The helm-chart repo is not in sync yet with the new Mailu 1.9 release. If you use helm-chart (kubernetes), we advise to stick to version 1.8 for now. 
-See the section `Upgrading` for important information in regard to upgrading to Mailu 1.9.
+Mailu 1.9 is available now.
+Please see the section `Upgrading` for important information in regard to upgrading to Mailu 1.9.
 
 Highlights
 ````````````````````````````````

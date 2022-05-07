@@ -15,6 +15,7 @@ simply pull the latest images and recreate the containers :
 .. code-block:: bash
 
   docker-compose pull
+  docker-compose down
   docker-compose up -d
 
 Monitoring the mail server

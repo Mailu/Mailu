@@ -99,9 +99,9 @@ jobs:
         run: docker-compose -v
       - name: Login docker
         env:
-          DOCKER_UN: ${{ env.DOCKER_LOGIN }}
-          DOCKER_PW: ${{ env.DOCKER_PASSWORD }}
-          DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          DOCKER_UN: ${{ secrets.DOCKER_LOGIN }}
+          DOCKER_PW: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
         run: echo "$DOCKER_PW" | docker login --username $DOCKER_UN --password-stdin
       - name: Build all docker images
         env:
@@ -616,9 +616,9 @@ jobs:
         run: docker load -i /images/images.tar.gz
       - name: Deploy built docker images
         env:
-          DOCKER_UN: ${{ env.DOCKER_LOGIN }}
-          DOCKER_PW: ${{ env.DOCKER_PASSWORD }}
-          DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          DOCKER_UN: ${{ secrets.DOCKER_LOGIN }}
+          DOCKER_PW: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           BRANCH: ${{ env.BRANCH }}

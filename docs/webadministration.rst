@@ -292,6 +292,10 @@ This page is only accessible for global administrators. On the edit page, the gl
   If your Admin GUI is available to the public internet, this means your Mailu installation basically becomes a free email provider.
   Use this option with care!
 
+* Alias delegation API. When this field is not empty, aliases are dynamically resolved by the external API filled out, inplace of postfix maps.
+  This field intends to be a reliable API URL. Address localpart to resolve is accessible through ``{}``. The API should return a valid destination address with code 200. You probably would like to add a token to authenticate against the remote API.
+  For example: ``https://account.foo.bar/user/{}/email?token=xxxxxxx``
+
 * Comment. Description for the domain. This description is visible on the parent domains list page.
 
 Delete
@@ -387,6 +391,8 @@ The following options are available when adding an alias:
 
 * Comment. A description for the alias. This description is visible on the Alias list page.
 
+.. note:: This page is not visible if Alias delegation API is set for domain
+
 
 Managers
 ````````
@@ -423,6 +429,10 @@ This page is only accessible for global administrators. Via this page a new doma
   Obviously this menu item is only visible when signed out. On the Signup page a user can create an email account.
   If your Admin GUI is available to the public internet, this means your Mailu installation basically becomes a free email provider.
   Use this option with care!
+
+* Alias delegation API. When this field is not empty, aliases are dynamically resolved by the external API filled out, inplace of postfix maps.
+  This field intends to be a reliable API URL, address localpart to resolve is accessible through ``{}``, the API should return a valid destination address with code 200. You probably would like to add a token to authenticate against the remote API.
+  For example: ``https://account.foo.bar/user/{}/email?token=xxxxxxx``
 
 * Comment. Description for the domain. This description is visible on the parent domains list page.
 

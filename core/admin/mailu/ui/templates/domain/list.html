@@ -36,7 +36,9 @@
     </td>
     <td>
       <a href="{{ url_for('.user_list', domain_name=domain.name) }}" title="{% trans %}Users{% endtrans %}"><i class="far fa-envelope"></i></a>&nbsp;
+      {%- if not domain.alias_delegation_api %}
       <a href="{{ url_for('.alias_list', domain_name=domain.name) }}" title="{% trans %}Aliases{% endtrans %}"><i class="fa fa-at"></i></a>&nbsp;
+      {%- endif %}
       <a href="{{ url_for('.manager_list', domain_name=domain.name) }}" title="{% trans %}Managers{% endtrans %}"><i class="fa fa-user"></i></a>&nbsp;
       {%- if current_user.global_admin %}
       <a href="{{ url_for('.alternative_list', domain_name=domain.name) }}" title="{% trans %}Alternatives{% endtrans %}"><i class="fa fa-asterisk"></i></a>&nbsp;
@@ -44,7 +46,11 @@
     </td>
     <td>{{ domain.name }}</td>
     <td>{{ domain.users | count }} / {{ '∞' if domain.max_users == -1 else domain.max_users }}</td>
+    {%- if domain.alias_delegation_api %}
+    <td>{% trans %}API{% endtrans %}</td>
+    {%- else %}
     <td>{{ domain.aliases | count }} / {{ '∞' if domain.max_aliases == -1 else domain.max_aliases }}</td>
+    {%- endif %}
     <td>{{ domain.comment or '' }}</td>
     <td>{{ domain.created_at | format_date }}</td>
     <td>{{ domain.updated_at | format_date }}</td>

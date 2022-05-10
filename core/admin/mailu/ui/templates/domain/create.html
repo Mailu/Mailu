@@ -13,6 +13,7 @@
   {{ macros.form_field(form.max_quota_bytes, step=10**9, max=50*10**9, data_infinity="true",
       prepend='<span class="input-group-text"><span id="max_quota_bytes_value"></span>&nbsp;GB</span>') }}
   {{ macros.form_field(form.signup_enabled) }}
+  {{ macros.form_field(form.alias_delegation_api) }}
   {{ macros.form_field(form.comment) }}
   {{ macros.form_field(form.submit) }}
 </form>

@@ -17,6 +17,7 @@ import passlib.registry
 import time
 import os
 import smtplib
+import requests
 import idna
 import dns.resolver
 import dns.exception
@@ -189,6 +190,7 @@ class Domain(Base):
     max_aliases = db.Column(db.Integer, nullable=False, default=-1)
     max_quota_bytes = db.Column(db.BigInteger, nullable=False, default=0)
     signup_enabled = db.Column(db.Boolean, nullable=False, default=False)
+    alias_delegation_api = db.Column(db.String(255))
 
     _dkim_key = None
     _dkim_key_on_disk = None
@@ -321,6 +323,11 @@ class Domain(Base):
                 return True
         return False
 
+    def delegate_alias(self, localpart):
+        """query alias to delegation API """
+        req = requests.get(self.alias_delegation_api.format(localpart))
+        return req.json() if req.status_code == 200 else []
+
     def check_mx(self):
         """ checks if MX record for domain points to mailu host """
         try:
@@ -442,6 +449,10 @@ class Email(object):
         delim = os.environ.get('RECIPIENT_DELIMITER')
         if delim in localpart:
             localpart_stripped = localpart.rsplit(delim, 1)[0]
+
+        domain = Domain.query.get(domain_name)
+        if domain and domain.alias_delegation_api:
+            return domain.delegate_alias(localpart)
 
         user = User.query.get(f'{localpart}@{domain_name}')
         if not user and localpart_stripped:

@@ -51,6 +51,7 @@ class DomainForm(flask_wtf.FlaskForm):
     max_quota_bytes = fields_.IntegerSliderField(_('Maximum user quota'), default=0)
     signup_enabled = fields.BooleanField(_('Enable sign-up'), default=False)
     comment = fields.StringField(_('Comment'))
+    alias_delegation_api = fields.StringField(_('Alias delegation API'))
     submit = fields.SubmitField(_('Save'))
 
 

@@ -101,7 +101,7 @@ jobs:
         env:
           DOCKER_UN: ${{ secrets.DOCKER_LOGIN }}
           DOCKER_PW: ${{ secrets.DOCKER_PASSWORD }}
-          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
         run: echo "$DOCKER_PW" | docker login --username $DOCKER_UN --password-stdin
       - name: Build all docker images
         env:

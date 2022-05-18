@@ -1,0 +1,1 @@
+Disable the built-in nginx resolver for traffic going through the mail plugin. This will silence errors about DNS resolution when the connecting host has no rDNS.

@@ -65,16 +65,10 @@ COPY defaults/default.ini /defaults/default.ini
 # Install Snappymail from source
 ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.13.4/snappymail-2.13.4.zip
 
-RUN apk add --no-cache \
-      curl unzip \
- && cd /var/www/webmail \
- && curl -L -O ${SNAPPYMAIL_URL} \
- && unzip -q *.zip \
- && rm -f *.zip \
- && find . -type d -exec chmod 755 {} \; \
- && find . -type f -exec chmod 644 {} \; \
- && chown -R nginx:nginx /var/www/webmail \
- && apk del unzip
+RUN cd /var/www/webmail \
+ && busybox wget ${SNAPPYMAIL_URL} -O - |busybox unzip -
+ && chmod -R u+w,a+rX /var/www/webmail \
+ && chown -R nginx:nginx /var/www/webmail
 
 # SnappyMail login
 COPY login/include.php /var/www/webmail/include.php

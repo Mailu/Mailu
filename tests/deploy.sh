@@ -3,7 +3,7 @@
 # Skip deploy for staging branch
 [ "$BRANCH" = "staging" ] && exit 0
 
-docker login -u $DOCKER_UN -p $DOCKER_PW
+docker login -u $DOCKER_UN -p $DOCKER_PW docker.io
 
 if [ "$BRANCH" = "testing" ]
 then

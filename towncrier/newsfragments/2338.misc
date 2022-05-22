@@ -1,0 +1,1 @@
+Don't send the `X-XSS-Protection` http header anymore. 

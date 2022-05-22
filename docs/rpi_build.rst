@@ -17,8 +17,8 @@ Adjustments
 ``build_arm.sh`` uses some variables passed as ``build-arg`` to docker-compose:
 
 - ``ALPINE_VER``: version of ALPINE to use
-- ``DISTRO``: is the main distro used. Dockerfiles are set on Alpine 3.10, and
-  build script overrides for ``balenalib/rpi-alpine:3.10``
+- ``DISTRO``: is the main distro used. Dockerfiles are set on Alpine 3.14, and
+  build script overrides for ``balenalib/rpi-alpine:3.14``
 - ``QEMU``: Used by webmails dockerfiles. It will add ``qemu-arm-static`` only
   if ``QEMU`` is set to ``arm``
 - ``ARCH``: Architecture to use for ``admin``, and ``webmails`` as their images

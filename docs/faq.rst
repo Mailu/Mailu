@@ -396,58 +396,6 @@ Mailu can serve an `MTA-STS policy`_; To configure it you will need to:
 .. _`1798`: https://github.com/Mailu/Mailu/issues/1798
 .. _`MTA-STS policy`: https://datatracker.ietf.org/doc/html/rfc8461
 
-How do I setup client autoconfiguration?
-````````````````````````````````````````
-
-Mailu can serve an `XML file for autoconfiguration`_; To configure it you will need to:
-
-1. add ``autoconfig.example.com`` to the ``HOSTNAMES`` configuration variable (and ensure that a valid SSL certificate is available for it; this may mean restarting your smtp container)
-
-2. configure an override with the policy itself; for example, your ``overrides/nginx/autoconfiguration.conf`` could read:
-
-.. code-block:: bash
-
-   location ^~ /mail/config-v1.1.xml {
-   return 200 "<?xml version=\"1.0\"?>
-   <clientConfig version=\"1.1\">
-   <emailProvider id=\"%EMAILDOMAIN%\">
-   <domain>%EMAILDOMAIN%</domain>
-
-   <displayName>Email</displayName>
-   <displayShortName>Email</displayShortName>
-
-   <incomingServer type=\"imap\">
-   <hostname>mailu.example.com</hostname>
-   <port>993</port>
-   <socketType>SSL</socketType>
-   <username>%EMAILADDRESS%</username>
-   <authentication>password-cleartext</authentication>
-   </incomingServer>
-
-   <outgoingServer type=\"smtp\">
-   <hostname>mailu.example.com</hostname>
-   <port>465</port>
-   <socketType>SSL</socketType>
-   <username>%EMAILADDRESS%</username>
-   <authentication>password-cleartext</authentication>
-   <addThisServer>true</addThisServer>
-   <useGlobalPreferredServer>true</useGlobalPreferredServer>
-   </outgoingServer>
-
-   <documentation url=\"https://mailu.example.com/admin/client\">
-   <descr lang=\"en\">Configure your email client</descr>
-   </documentation>
-   </emailProvider>
-   </clientConfig>\r\n";
-   }
-
-3. setup the appropriate DNS/CNAME record (``autoconfig.example.com`` -> ``mailu.example.com``).
-
-*issue reference:* `224`_.
-
-.. _`224`: https://github.com/Mailu/Mailu/issues/224
-.. _`XML file for autoconfiguration`: https://wiki.mozilla.org/Thunderbird:Autoconfiguration:ConfigFileFormat
-
 Technical issues
 ----------------
 
@@ -476,6 +424,22 @@ Any mail related connection is proxied by nginx. Therefore the SMTP Banner is al
 
 .. _`1368`: https://github.com/Mailu/Mailu/issues/1368
 
+My emails are getting rejected, I am being told to slow down, what can I do?
+````````````````````````````````````````````````````````````````````````````
+
+Some email operators insist that emails are delivered slowly. Mailu maintains two separate queues for such destinations: ``polite`` and ``turtle``. To enable them for some destination you can creating an override at ``overrides/postfix/transport.map`` as follow:
+
+.. code-block:: bash
+
+   yahoo.com   polite:
+   orange.fr   turtle:
+
+Re-starting the smtp container will be required for changes to take effect.
+
+*Issue reference:* `2213`_.
+
+.. _`2213`: https://github.com/Mailu/Mailu/issues/2213
+
 My emails are getting defered, what can I do?
 `````````````````````````````````````````````
 
@@ -488,7 +452,7 @@ If delivery to a specific domain fails because their DANE records are invalid or
    domain.example.com   may
    domain.example.org   encrypt
 
-The syntax and options are as described in `postfix's documentation`_. Re-creating the smtp container will be required for changes to take effect.
+The syntax and options are as described in `postfix's documentation`_. Re-starting the smtp container will be required for changes to take effect.
 
 .. _`postfix's documentation`: http://www.postfix.org/postconf.5.html#smtp_tls_policy_maps
 
@@ -511,7 +475,7 @@ These issues are typically caused by four scenarios:
 #. Certificates expired;
 #. When ``TLS_FLAVOR=letsencrypt``, it might be that the *certbot* script is not capable of
    obtaining the certificates for your domain. See `letsencrypt issues`_
-#. When ``TLS_FLAVOR=certs``, certificates are supposed to be copied to ``/mailu/certs``.
+#. When ``TLS_FLAVOR=cert``, certificates are supposed to be copied to ``/mailu/certs``.
    Using an external ``letsencrypt`` program, it tends to happen people copy the whole
    ``letsencrypt/live`` directory containing symlinks. Symlinks do not resolve inside the
    container and therefore it breaks the TLS implementation.

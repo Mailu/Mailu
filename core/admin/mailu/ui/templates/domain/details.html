@@ -60,7 +60,7 @@
 </tr>
 {%- endif %}
 <tr>
-  <th>{% trans %}DNS client auto-configuration (RFC6186) entries{% endtrans %}</th>
+  <th>{% trans %}DNS client auto-configuration entries{% endtrans %}</th>
   <td>{{ macros.clip("dns_autoconfig") }}<pre id="dns_autoconfig" class="pre-config border bg-light">
 {%- for line in domain.dns_autoconfig %}
 {{ line }}

@@ -1,0 +1,1 @@
+Fixed AUTH_RATELIMIT_IP not working on imap/pop3/smtp.

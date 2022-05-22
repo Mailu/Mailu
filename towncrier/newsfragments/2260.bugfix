@@ -1,0 +1,1 @@
+Fix a bug where rspamd may trigger HFILTER_HOSTNAME_UNKNOWN if part of the delivery chain was using ipv6

@@ -80,7 +80,7 @@ virtual_mailbox_maps = ${podop}mailbox
 
 # Mails are transported if required, then forwarded to Dovecot for delivery
 relay_domains = ${podop}transport
-transport_maps = ${podop}transport
+transport_maps = lmdb:/etc/postfix/transport.map, ${podop}transport
 virtual_transport = lmtp:inet:{{ LMTP_ADDRESS }}
 
 # Sender and recipient canonical maps, mostly for SRS

@@ -3,10 +3,7 @@ Changelog
 
 For full details see the [releases page](https://mailu.io/1.9/releases.html)
 
-Warning, the helm-chart repo is not in sync yet with the new Mailu 1.9 release. If you use helm-chart (kubernetes), we advise to stick to version 1.8. 
-
-Upgrade should run fine as long as you generate a new compose or stack
-configuration and upgrade your mailu.env.
+Upgrade should run fine as long as you generate a new compose or stack configuration and upgrade your mailu.env. Please note that once you have upgraded to 1.9 you won't be able to roll-back to earlier versions without resetting user passwords.
 
 If you use a reverse proxy in front of Mailu, it is vital to configure the newly introduced env variables REAL_IP_HEADER and REAL_IP_FROM.
 These settings tell Mailu that the HTTP header with the remote client IP address from the reverse proxy can be trusted.

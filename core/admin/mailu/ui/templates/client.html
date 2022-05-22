@@ -9,6 +9,7 @@
 {%- endblock %}
 
 {%- block content %}
+<div>If you use an Apple device, <a href="/apple.mobileconfig">click here to autoconfigure it.</a></div>
 {%- call macros.table(title=_("Incoming mail"), datatable=False) %}
   <tbody>
     <tr>
@@ -17,7 +18,7 @@
     </tr>
     <tr>
       <th>{% trans %}TCP port{% endtrans %}</th>
-      <td>{{ "143" if config["TLS_FLAVOR"] == "notls" else "993 (TLS) or 143 (STARTTLS)" }}</td>
+      <td>{{ "143" if config["TLS_FLAVOR"] == "notls" else "993 (TLS)" }}</td>
     </tr>
     <tr>
       <th>{% trans %}Server name{% endtrans %}</th>
@@ -42,7 +43,7 @@
     </tr>
     <tr>
       <th>{% trans %}TCP port{% endtrans %}</th>
-      <td>{{ "25" if config["TLS_FLAVOR"] == "notls" else "465 (TLS) or 587 (STARTTLS)" }}</td>
+      <td>{{ "25" if config["TLS_FLAVOR"] == "notls" else "465 (TLS)" }}</td>
     </tr>
     <tr>
       <th>{% trans %}Server name{% endtrans %}</th>

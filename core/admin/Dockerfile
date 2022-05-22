@@ -1,5 +1,5 @@
 # First stage to build assets
-ARG DISTRO=alpine:3.14.3
+ARG DISTRO=alpine:3.14.5
 ARG ARCH=""
 
 FROM ${ARCH}node:16 as assets
@@ -13,7 +13,7 @@ COPY webpack.config.js ./
 COPY assets ./assets
 RUN set -eu \
  && sed -i 's/#007bff/#55a5d9/' node_modules/admin-lte/build/scss/_bootstrap-variables.scss \
- && for l in ca da de:de_de en:en-gb es:es_es eu fr:fr_fr he hu is it:it_it ja nb_NO:no_nb nl:nl_nl pl pt:pt_pt ru sv:sv_se zh; do \
+ && for l in ca da de:de-DE en:en-GB es:es-ES eu fr:fr-FR he hu is it:it-IT ja nb_NO:no-NB nl:nl-NL pl pt:pt-PT ru sv:sv-SE zh; do \
       cp node_modules/datatables.net-plugins/i18n/${l#*:}.json assets/${l%:*}.json; \
     done \
  && node_modules/.bin/webpack-cli --color

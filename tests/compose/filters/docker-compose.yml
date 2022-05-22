@@ -85,7 +85,7 @@ services:
       - "/mailu/filter:/data"
 
   resolver:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${PINNED_MAILU_VERSION:-local}
     env_file: mailu.env
     restart: always
     networks:

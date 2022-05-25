@@ -207,7 +207,7 @@ def config_update(verbose=False, delete_objects=False):
                             'enable_imap', 'enable_pop', 'forward_enabled',
                             'forward_destination', 'reply_enabled',
                             'reply_subject', 'reply_body', 'displayed_name',
-                            'spam_enabled', 'email', 'spam_threshold')
+                            'spam_enabled', 'spam_mark_as_read', 'email', 'spam_threshold')
     for user_config in users:
         if verbose:
             print(str(user_config))

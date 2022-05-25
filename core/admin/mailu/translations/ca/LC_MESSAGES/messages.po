@@ -1,4 +1,4 @@
-# Translations template for PROJECT.
+# Catalan translations for PROJECT.
 # Copyright (C) 2018 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
@@ -7,253 +7,296 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-04-22 12:10+0200\n"
+"POT-Creation-Date: 2022-05-22 18:47+0200\n"
 "PO-Revision-Date: 2021-03-04 18:46+0000\n"
 "Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
-"Language-Team: Catalan <https://translate.tedomum.net/projects/mailu/admin/"
-"ca/>\n"
 "Language: ca\n"
+"Language-Team: Catalan "
+"<https://translate.tedomum.net/projects/mailu/admin/ca/>\n"
+"Plural-Forms: nplurals=2; plural=n != 1\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.0.1\n"
-"Generated-By: Babel 2.5.3\n"
+"Generated-By: Babel 2.3.4\n"
 
-#: mailu/ui/forms.py:32
-msgid "Invalid email address."
-msgstr ""
-
-#: mailu/ui/forms.py:36
-msgid "Confirm"
-msgstr "Confirmeu"
-
-#: mailu/ui/forms.py:40 mailu/ui/forms.py:77
+#: mailu/sso/forms.py:8 mailu/ui/forms.py:79
 msgid "E-mail"
 msgstr "Correu"
 
-#: mailu/ui/forms.py:41 mailu/ui/forms.py:78 mailu/ui/forms.py:90
-#: mailu/ui/forms.py:109 mailu/ui/forms.py:162
-#: mailu/ui/templates/client.html:32 mailu/ui/templates/client.html:59
+#: mailu/sso/forms.py:9 mailu/ui/forms.py:80 mailu/ui/forms.py:93
+#: mailu/ui/forms.py:112 mailu/ui/forms.py:166
+#: mailu/ui/templates/client.html:32 mailu/ui/templates/client.html:57
 msgid "Password"
 msgstr "Contrasenya"
 
-#: mailu/ui/forms.py:42 mailu/ui/templates/login.html:4
-#: mailu/ui/templates/sidebar.html:111
+#: mailu/sso/forms.py:10 mailu/sso/forms.py:11 mailu/sso/templates/login.html:4
+#: mailu/ui/templates/sidebar.html:142
 msgid "Sign in"
 msgstr "Entreu"
 
-#: mailu/ui/forms.py:46 mailu/ui/forms.py:56
-#: mailu/ui/templates/domain/details.html:27
-#: mailu/ui/templates/domain/list.html:18 mailu/ui/templates/relay/list.html:17
-msgid "Domain name"
-msgstr "Nom de domini"
+#: mailu/sso/templates/base_sso.html:8 mailu/ui/templates/base.html:8
+msgid "Admin page for"
+msgstr ""
 
-#: mailu/ui/forms.py:47
-msgid "Maximum user count"
-msgstr "Nombre màxim d'usuaris"
+#: mailu/sso/templates/base_sso.html:19 mailu/ui/templates/base.html:19
+msgid "toggle sidebar"
+msgstr ""
 
-#: mailu/ui/forms.py:48
-msgid "Maximum alias count"
-msgstr "Nombre màxim d'àlies"
+#: mailu/sso/templates/base_sso.html:37 mailu/ui/templates/base.html:37
+msgid "change language"
+msgstr ""
 
-#: mailu/ui/forms.py:49
-msgid "Maximum user quota"
-msgstr "Espai màxim per usuari"
+#: mailu/sso/templates/sidebar_sso.html:4 mailu/ui/templates/sidebar.html:94
+msgid "Go to"
+msgstr "Aneu a"
 
-#: mailu/ui/forms.py:50
-msgid "Enable sign-up"
-msgstr "Activeu el registre"
+#: mailu/sso/templates/sidebar_sso.html:9 mailu/ui/templates/client.html:4
+#: mailu/ui/templates/sidebar.html:50 mailu/ui/templates/sidebar.html:107
+msgid "Client setup"
+msgstr "Ajustos del client"
 
-#: mailu/ui/forms.py:51 mailu/ui/forms.py:72 mailu/ui/forms.py:83
-#: mailu/ui/forms.py:128 mailu/ui/forms.py:140
-#: mailu/ui/templates/alias/list.html:21 mailu/ui/templates/domain/list.html:21
-#: mailu/ui/templates/relay/list.html:19 mailu/ui/templates/token/list.html:19
-#: mailu/ui/templates/user/list.html:23
-msgid "Comment"
-msgstr "Comentari"
+#: mailu/sso/templates/sidebar_sso.html:16 mailu/ui/templates/sidebar.html:114
+msgid "Website"
+msgstr "Lloc web"
 
-#: mailu/ui/forms.py:52 mailu/ui/forms.py:61 mailu/ui/forms.py:66
-#: mailu/ui/forms.py:73 mailu/ui/forms.py:132 mailu/ui/forms.py:141
-msgid "Create"
-msgstr "Creeu"
+#: mailu/sso/templates/sidebar_sso.html:22 mailu/ui/templates/sidebar.html:120
+msgid "Help"
+msgstr "Ajuda"
 
-#: mailu/ui/forms.py:57
-msgid "Initial admin"
-msgstr "Admin inicial"
+#: mailu/sso/templates/sidebar_sso.html:35
+#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:127
+msgid "Register a domain"
+msgstr "Registreu un domini"
 
-#: mailu/ui/forms.py:58
-msgid "Admin password"
-msgstr "Contrasenya d'admin"
-
-#: mailu/ui/forms.py:59 mailu/ui/forms.py:79 mailu/ui/forms.py:91
-msgid "Confirm password"
-msgstr "Confirmeu la contrasenya"
-
-#: mailu/ui/forms.py:65
-msgid "Alternative name"
-msgstr "Nom alternatiu"
-
-#: mailu/ui/forms.py:70
-msgid "Relayed domain name"
-msgstr "Nom de domini llegat (relayed)"
-
-#: mailu/ui/forms.py:71 mailu/ui/templates/relay/list.html:18
-msgid "Remote host"
-msgstr "Amfitrió remot"
-
-#: mailu/ui/forms.py:80 mailu/ui/templates/user/list.html:22
-#: mailu/ui/templates/user/signup_domain.html:16
-msgid "Quota"
-msgstr "Espai"
-
-#: mailu/ui/forms.py:81
-msgid "Allow IMAP access"
-msgstr "Permeteu accés IMAP"
-
-#: mailu/ui/forms.py:82
-msgid "Allow POP3 access"
-msgstr "Permeteu accés POP3"
-
-#: mailu/ui/forms.py:84
-msgid "Enabled"
-msgstr "Activat"
-
-#: mailu/ui/forms.py:85
-msgid "Save"
-msgstr "Desa"
-
-#: mailu/ui/forms.py:89
-msgid "Email address"
-msgstr "Adreça email"
-
-#: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
-#: mailu/ui/templates/user/signup.html:4
+#: mailu/sso/templates/sidebar_sso.html:49 mailu/ui/forms.py:95
+#: mailu/ui/templates/sidebar.html:149 mailu/ui/templates/user/signup.html:4
 #: mailu/ui/templates/user/signup_domain.html:4
 msgid "Sign up"
 msgstr "Registreu-vos"
 
-#: mailu/ui/forms.py:97
+#: mailu/ui/forms.py:33 mailu/ui/forms.py:36
+msgid "Invalid email address."
+msgstr ""
+
+#: mailu/ui/forms.py:45
+msgid "Confirm"
+msgstr "Confirmeu"
+
+#: mailu/ui/forms.py:48 mailu/ui/forms.py:58
+#: mailu/ui/templates/domain/details.html:26
+#: mailu/ui/templates/domain/list.html:19 mailu/ui/templates/relay/list.html:18
+msgid "Domain name"
+msgstr "Nom de domini"
+
+#: mailu/ui/forms.py:49
+msgid "Maximum user count"
+msgstr "Nombre màxim d'usuaris"
+
+#: mailu/ui/forms.py:50
+msgid "Maximum alias count"
+msgstr "Nombre màxim d'àlies"
+
+#: mailu/ui/forms.py:51
+msgid "Maximum user quota"
+msgstr "Espai màxim per usuari"
+
+#: mailu/ui/forms.py:52
+msgid "Enable sign-up"
+msgstr "Activeu el registre"
+
+#: mailu/ui/forms.py:53 mailu/ui/forms.py:74 mailu/ui/forms.py:86
+#: mailu/ui/forms.py:132 mailu/ui/forms.py:144
+#: mailu/ui/templates/alias/list.html:22 mailu/ui/templates/domain/list.html:22
+#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:20
+#: mailu/ui/templates/user/list.html:24
+msgid "Comment"
+msgstr "Comentari"
+
+#: mailu/ui/forms.py:54 mailu/ui/forms.py:68 mailu/ui/forms.py:75
+#: mailu/ui/forms.py:88 mailu/ui/forms.py:136 mailu/ui/forms.py:145
+msgid "Save"
+msgstr "Desa"
+
+#: mailu/ui/forms.py:59
+msgid "Initial admin"
+msgstr "Admin inicial"
+
+#: mailu/ui/forms.py:60
+msgid "Admin password"
+msgstr "Contrasenya d'admin"
+
+#: mailu/ui/forms.py:61 mailu/ui/forms.py:81 mailu/ui/forms.py:94
+msgid "Confirm password"
+msgstr "Confirmeu la contrasenya"
+
+#: mailu/ui/forms.py:63
+msgid "Create"
+msgstr "Creeu"
+
+#: mailu/ui/forms.py:67
+msgid "Alternative name"
+msgstr "Nom alternatiu"
+
+#: mailu/ui/forms.py:72
+msgid "Relayed domain name"
+msgstr "Nom de domini llegat (relayed)"
+
+#: mailu/ui/forms.py:73 mailu/ui/templates/relay/list.html:19
+msgid "Remote host"
+msgstr "Amfitrió remot"
+
+#: mailu/ui/forms.py:82 mailu/ui/templates/user/list.html:23
+#: mailu/ui/templates/user/signup_domain.html:16
+msgid "Quota"
+msgstr "Espai"
+
+#: mailu/ui/forms.py:83
+msgid "Allow IMAP access"
+msgstr "Permeteu accés IMAP"
+
+#: mailu/ui/forms.py:84
+msgid "Allow POP3 access"
+msgstr "Permeteu accés POP3"
+
+#: mailu/ui/forms.py:85 mailu/ui/forms.py:101
+#: mailu/ui/templates/user/settings.html:15
 msgid "Displayed name"
 msgstr "Nom per mostrar"
 
-#: mailu/ui/forms.py:98
+#: mailu/ui/forms.py:87
+msgid "Enabled"
+msgstr "Activat"
+
+#: mailu/ui/forms.py:92
+msgid "Email address"
+msgstr "Adreça email"
+
+#: mailu/ui/forms.py:102
 msgid "Enable spam filter"
 msgstr "Activeu filtre spam"
 
-#: mailu/ui/forms.py:99
+#: mailu/ui/forms.py:103
+msgid "Enable marking spam mails as read"
+msgstr ""
+
+#: mailu/ui/forms.py:104
 msgid "Spam filter tolerance"
 msgstr "Tolerància del filtre d'spam"
 
-#: mailu/ui/forms.py:100
+#: mailu/ui/forms.py:105
 msgid "Enable forwarding"
 msgstr "Activeu el reenviament"
 
-#: mailu/ui/forms.py:101
+#: mailu/ui/forms.py:106
 msgid "Keep a copy of the emails"
 msgstr "Mantigueu una còpia dels correus"
 
-#: mailu/ui/forms.py:103 mailu/ui/forms.py:139
-#: mailu/ui/templates/alias/list.html:20
+#: mailu/ui/forms.py:107 mailu/ui/forms.py:143
+#: mailu/ui/templates/alias/list.html:21
 msgid "Destination"
 msgstr "Destinació"
 
-#: mailu/ui/forms.py:105
+#: mailu/ui/forms.py:108
 msgid "Save settings"
 msgstr "Desa ajustos"
 
-#: mailu/ui/forms.py:110
+#: mailu/ui/forms.py:113
 msgid "Password check"
 msgstr "Comproveu la contrasenya"
 
-#: mailu/ui/forms.py:111 mailu/ui/templates/sidebar.html:16
+#: mailu/ui/forms.py:114 mailu/ui/templates/sidebar.html:25
 msgid "Update password"
 msgstr "Canvieu la contrasenya"
 
-#: mailu/ui/forms.py:115
+#: mailu/ui/forms.py:118
 msgid "Enable automatic reply"
 msgstr "Activeu la resposta automàtica"
 
-#: mailu/ui/forms.py:116
+#: mailu/ui/forms.py:119
 msgid "Reply subject"
 msgstr "Tema de la resposta"
 
-#: mailu/ui/forms.py:117
+#: mailu/ui/forms.py:120
 msgid "Reply body"
 msgstr "Missatge de resposta"
 
-#: mailu/ui/forms.py:119
+#: mailu/ui/forms.py:122
+msgid "Start of vacation"
+msgstr ""
+
+#: mailu/ui/forms.py:123
 msgid "End of vacation"
 msgstr "Tornada de vacances"
 
-#: mailu/ui/forms.py:120
+#: mailu/ui/forms.py:124
 msgid "Update"
 msgstr "Actualitzeu"
 
-#: mailu/ui/forms.py:125
+#: mailu/ui/forms.py:129
 msgid "Your token (write it down, as it will never be displayed again)"
 msgstr "Token personal (apunteu-lo perquè no es mostrarà de nou)"
 
-#: mailu/ui/forms.py:130 mailu/ui/templates/token/list.html:20
+#: mailu/ui/forms.py:134 mailu/ui/templates/token/list.html:21
 msgid "Authorized IP"
 msgstr "IP autoritzada"
 
-#: mailu/ui/forms.py:136
+#: mailu/ui/forms.py:140
 msgid "Alias"
 msgstr "Àlies"
 
-#: mailu/ui/forms.py:138
+#: mailu/ui/forms.py:142
 msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"
 msgstr ""
-"Feu servir sintaxi tipus SQL (ex. per seleccionar tots els àlies catch-all)"
+"Feu servir sintaxi tipus SQL (ex. per seleccionar tots els àlies catch-"
+"all)"
 
-#: mailu/ui/forms.py:145
+#: mailu/ui/forms.py:149
 msgid "Admin email"
 msgstr "Adreça d'admin"
 
-#: mailu/ui/forms.py:146 mailu/ui/forms.py:151 mailu/ui/forms.py:164
+#: mailu/ui/forms.py:150 mailu/ui/forms.py:155 mailu/ui/forms.py:168
 msgid "Submit"
 msgstr "Envia"
 
-#: mailu/ui/forms.py:150
+#: mailu/ui/forms.py:154
 msgid "Manager email"
 msgstr "Adreça de gestor"
 
-#: mailu/ui/forms.py:155
+#: mailu/ui/forms.py:159
 msgid "Protocol"
 msgstr "Protocol"
 
-#: mailu/ui/forms.py:158
+#: mailu/ui/forms.py:162
 msgid "Hostname or IP"
 msgstr "Nom d'amfitrio o IP"
 
-#: mailu/ui/forms.py:159 mailu/ui/templates/client.html:20
-#: mailu/ui/templates/client.html:47
+#: mailu/ui/forms.py:163 mailu/ui/templates/client.html:20
+#: mailu/ui/templates/client.html:45
 msgid "TCP port"
 msgstr "Port TCP"
 
-#: mailu/ui/forms.py:160
+#: mailu/ui/forms.py:164
 msgid "Enable TLS"
 msgstr "Activeu TLS"
 
-#: mailu/ui/forms.py:161 mailu/ui/templates/client.html:28
-#: mailu/ui/templates/client.html:55 mailu/ui/templates/fetch/list.html:20
+#: mailu/ui/forms.py:165 mailu/ui/templates/client.html:28
+#: mailu/ui/templates/client.html:53 mailu/ui/templates/fetch/list.html:21
 msgid "Username"
 msgstr "Nom d'usuari"
 
-#: mailu/ui/forms.py:163
+#: mailu/ui/forms.py:167
 msgid "Keep emails on the server"
 msgstr "Mantén els correus al servidor"
 
-#: mailu/ui/forms.py:168
+#: mailu/ui/forms.py:172
 msgid "Announcement subject"
 msgstr "Tema de la notificació"
 
-#: mailu/ui/forms.py:170
+#: mailu/ui/forms.py:174
 msgid "Announcement body"
 msgstr "Missatge de la notificació"
 
-#: mailu/ui/forms.py:172
+#: mailu/ui/forms.py:176
 msgid "Send"
 msgstr "Envia"
 
@@ -261,17 +304,34 @@ msgstr "Envia"
 msgid "Public announcement"
 msgstr "Notificació pública"
 
-#: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:82
-msgid "Client setup"
-msgstr "Ajustos del client"
+#: mailu/ui/templates/antispam.html:4 mailu/ui/templates/sidebar.html:80
+#: mailu/ui/templates/user/settings.html:19
+msgid "Antispam"
+msgstr "Antispam"
 
-#: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
+#: mailu/ui/templates/antispam.html:8
+msgid "RSPAMD status page"
+msgstr ""
+
+#: mailu/ui/templates/client.html:8
+msgid "configure your email client"
+msgstr ""
+
+#: mailu/ui/templates/client.html:13
+msgid "Incoming mail"
+msgstr ""
+
+#: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:41
 msgid "Mail protocol"
 msgstr "Protocol de correu"
 
-#: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
+#: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:49
 msgid "Server name"
 msgstr "Nom de servidor"
+
+#: mailu/ui/templates/client.html:38
+msgid "Outgoing mail"
+msgstr ""
 
 #: mailu/ui/templates/confirm.html:4
 msgid "Confirm action"
@@ -290,72 +350,56 @@ msgstr "Error de Docker"
 msgid "An error occurred while talking to the Docker server."
 msgstr "Hi ha hagut un error de comunicació amb el servidor Docker."
 
-#: mailu/ui/templates/login.html:8
-msgid "to access the administration tools"
-msgstr "per accedir a les eines d'administració"
+#: mailu/ui/templates/macros.html:129
+msgid "copy to clipboard"
+msgstr ""
 
-#: mailu/ui/templates/sidebar.html:11 mailu/ui/templates/user/list.html:34
+#: mailu/ui/templates/sidebar.html:15
+msgid "My account"
+msgstr ""
+
+#: mailu/ui/templates/sidebar.html:19 mailu/ui/templates/user/list.html:37
 msgid "Settings"
 msgstr "Ajustos"
 
-#: mailu/ui/templates/sidebar.html:21 mailu/ui/templates/user/list.html:35
+#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/user/list.html:38
 msgid "Auto-reply"
 msgstr "Resposta automàtica"
 
-#: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:26
-#: mailu/ui/templates/user/list.html:36
+#: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:37
+#: mailu/ui/templates/user/list.html:39
 msgid "Fetched accounts"
 msgstr "Comptes vinculats"
 
-#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/token/list.html:4
+#: mailu/ui/templates/sidebar.html:43 mailu/ui/templates/token/list.html:4
 msgid "Authentication tokens"
 msgstr "Tokens d'autenticació"
 
-#: mailu/ui/templates/sidebar.html:35
+#: mailu/ui/templates/sidebar.html:56
 msgid "Administration"
 msgstr "Administració"
 
-#: mailu/ui/templates/sidebar.html:44
+#: mailu/ui/templates/sidebar.html:62
 msgid "Announcement"
 msgstr "Notificació"
 
-#: mailu/ui/templates/sidebar.html:49
+#: mailu/ui/templates/sidebar.html:68
 msgid "Administrators"
 msgstr "Administradors"
 
-#: mailu/ui/templates/sidebar.html:54
+#: mailu/ui/templates/sidebar.html:74
 msgid "Relayed domains"
 msgstr "Dominis traspassats"
 
-#: mailu/ui/templates/sidebar.html:59 mailu/ui/templates/user/settings.html:15
-msgid "Antispam"
-msgstr "Antispam"
-
-#: mailu/ui/templates/sidebar.html:66
+#: mailu/ui/templates/sidebar.html:88
 msgid "Mail domains"
 msgstr "Dominis de correu"
 
-#: mailu/ui/templates/sidebar.html:72
-msgid "Go to"
-msgstr "Aneu a"
-
-#: mailu/ui/templates/sidebar.html:76
+#: mailu/ui/templates/sidebar.html:99
 msgid "Webmail"
 msgstr "Correu web"
 
-#: mailu/ui/templates/sidebar.html:87
-msgid "Website"
-msgstr "Lloc web"
-
-#: mailu/ui/templates/sidebar.html:92
-msgid "Help"
-msgstr "Ajuda"
-
-#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
-msgid "Register a domain"
-msgstr "Registreu un domini"
-
-#: mailu/ui/templates/sidebar.html:105
+#: mailu/ui/templates/sidebar.html:135
 msgid "Sign out"
 msgstr "Eixiu"
 
@@ -375,26 +419,26 @@ msgstr "Administradors globals"
 msgid "Add administrator"
 msgstr "Afegiu un administrador"
 
-#: mailu/ui/templates/admin/list.html:16 mailu/ui/templates/alias/list.html:18
-#: mailu/ui/templates/alternative/list.html:18
-#: mailu/ui/templates/domain/list.html:16 mailu/ui/templates/fetch/list.html:18
-#: mailu/ui/templates/manager/list.html:18
-#: mailu/ui/templates/relay/list.html:16 mailu/ui/templates/token/list.html:18
-#: mailu/ui/templates/user/list.html:18
+#: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
+#: mailu/ui/templates/alternative/list.html:19
+#: mailu/ui/templates/domain/list.html:17 mailu/ui/templates/fetch/list.html:19
+#: mailu/ui/templates/manager/list.html:19
+#: mailu/ui/templates/relay/list.html:17 mailu/ui/templates/token/list.html:19
+#: mailu/ui/templates/user/list.html:19
 msgid "Actions"
 msgstr "Accions"
 
-#: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
-#: mailu/ui/templates/manager/list.html:19 mailu/ui/templates/user/list.html:20
+#: mailu/ui/templates/admin/list.html:18 mailu/ui/templates/alias/list.html:20
+#: mailu/ui/templates/manager/list.html:20 mailu/ui/templates/user/list.html:21
 msgid "Email"
 msgstr "Correu"
 
-#: mailu/ui/templates/admin/list.html:22 mailu/ui/templates/alias/list.html:29
-#: mailu/ui/templates/alternative/list.html:25
-#: mailu/ui/templates/domain/list.html:31 mailu/ui/templates/fetch/list.html:31
-#: mailu/ui/templates/manager/list.html:24
-#: mailu/ui/templates/relay/list.html:27 mailu/ui/templates/token/list.html:26
-#: mailu/ui/templates/user/list.html:31
+#: mailu/ui/templates/admin/list.html:25 mailu/ui/templates/alias/list.html:32
+#: mailu/ui/templates/alternative/list.html:29
+#: mailu/ui/templates/domain/list.html:34 mailu/ui/templates/fetch/list.html:34
+#: mailu/ui/templates/manager/list.html:27
+#: mailu/ui/templates/relay/list.html:30 mailu/ui/templates/token/list.html:30
+#: mailu/ui/templates/user/list.html:34
 msgid "Delete"
 msgstr "Esborra"
 
@@ -414,23 +458,25 @@ msgstr "Llista d'àlies"
 msgid "Add alias"
 msgstr "Afegiu àlies"
 
-#: mailu/ui/templates/alias/list.html:22
-#: mailu/ui/templates/alternative/list.html:20
-#: mailu/ui/templates/domain/list.html:22 mailu/ui/templates/fetch/list.html:24
-#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:21
-#: mailu/ui/templates/user/list.html:24
+#: mailu/ui/templates/alias/list.html:23
+#: mailu/ui/templates/alternative/list.html:21
+#: mailu/ui/templates/domain/list.html:23 mailu/ui/templates/fetch/list.html:25
+#: mailu/ui/templates/relay/list.html:21 mailu/ui/templates/token/list.html:22
+#: mailu/ui/templates/user/list.html:25
 msgid "Created"
 msgstr "Creat"
 
-#: mailu/ui/templates/alias/list.html:23 mailu/ui/templates/domain/list.html:23
-#: mailu/ui/templates/fetch/list.html:25 mailu/ui/templates/relay/list.html:21
-#: mailu/ui/templates/user/list.html:25
+#: mailu/ui/templates/alias/list.html:24
+#: mailu/ui/templates/alternative/list.html:22
+#: mailu/ui/templates/domain/list.html:24 mailu/ui/templates/fetch/list.html:26
+#: mailu/ui/templates/relay/list.html:22 mailu/ui/templates/token/list.html:23
+#: mailu/ui/templates/user/list.html:26
 msgid "Last edit"
 msgstr "Última edició"
 
-#: mailu/ui/templates/alias/list.html:28 mailu/ui/templates/domain/list.html:30
-#: mailu/ui/templates/fetch/list.html:30 mailu/ui/templates/relay/list.html:26
-#: mailu/ui/templates/user/list.html:30
+#: mailu/ui/templates/alias/list.html:31 mailu/ui/templates/domain/list.html:33
+#: mailu/ui/templates/fetch/list.html:33 mailu/ui/templates/relay/list.html:29
+#: mailu/ui/templates/user/list.html:33
 msgid "Edit"
 msgstr "Edita"
 
@@ -446,7 +492,7 @@ msgstr "Llista de dominis alternatius"
 msgid "Add alternative"
 msgstr "Afegiu alternativa"
 
-#: mailu/ui/templates/alternative/list.html:19
+#: mailu/ui/templates/alternative/list.html:20
 msgid "Name"
 msgstr "Nom"
 
@@ -467,25 +513,33 @@ msgstr "Regenereu les claus"
 msgid "Generate keys"
 msgstr "Genereu claus"
 
-#: mailu/ui/templates/domain/details.html:31
+#: mailu/ui/templates/domain/details.html:30
 msgid "DNS MX entry"
 msgstr "Entrada DNS MX"
 
-#: mailu/ui/templates/domain/details.html:35
+#: mailu/ui/templates/domain/details.html:34
 msgid "DNS SPF entries"
 msgstr "Entrada DNS SPF"
 
-#: mailu/ui/templates/domain/details.html:42
+#: mailu/ui/templates/domain/details.html:40
 msgid "DKIM public key"
 msgstr "Clau pública DKIM"
 
-#: mailu/ui/templates/domain/details.html:46
+#: mailu/ui/templates/domain/details.html:44
 msgid "DNS DKIM entry"
 msgstr "Entrada DNS DKIM"
 
-#: mailu/ui/templates/domain/details.html:50
+#: mailu/ui/templates/domain/details.html:48
 msgid "DNS DMARC entry"
 msgstr "Entrada DNS DMARC"
+
+#: mailu/ui/templates/domain/details.html:58
+msgid "DNS TLSA entry"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:63
+msgid "DNS client auto-configuration entries"
+msgstr ""
 
 #: mailu/ui/templates/domain/edit.html:4
 msgid "Edit domain"
@@ -495,35 +549,35 @@ msgstr "Edita domini"
 msgid "Domain list"
 msgstr "Llista de dominis"
 
-#: mailu/ui/templates/domain/list.html:17
+#: mailu/ui/templates/domain/list.html:18
 msgid "Manage"
 msgstr "Gestioneu"
 
-#: mailu/ui/templates/domain/list.html:19
+#: mailu/ui/templates/domain/list.html:20
 msgid "Mailbox count"
 msgstr "Nombre de bústies"
 
-#: mailu/ui/templates/domain/list.html:20
+#: mailu/ui/templates/domain/list.html:21
 msgid "Alias count"
 msgstr "Nombre d'àlies"
 
-#: mailu/ui/templates/domain/list.html:28
+#: mailu/ui/templates/domain/list.html:31
 msgid "Details"
 msgstr "Detalls"
 
-#: mailu/ui/templates/domain/list.html:35
+#: mailu/ui/templates/domain/list.html:38
 msgid "Users"
 msgstr "Usuaris"
 
-#: mailu/ui/templates/domain/list.html:36
+#: mailu/ui/templates/domain/list.html:39
 msgid "Aliases"
 msgstr "Àlies"
 
-#: mailu/ui/templates/domain/list.html:37
+#: mailu/ui/templates/domain/list.html:40
 msgid "Managers"
 msgstr "Gestors"
 
-#: mailu/ui/templates/domain/list.html:39
+#: mailu/ui/templates/domain/list.html:42
 msgid "Alternatives"
 msgstr "Alternatives"
 
@@ -533,8 +587,8 @@ msgid ""
 "    domain zone so that the domain <code>MX</code> points to this server"
 msgstr ""
 "Per a registrar un nou domini, heu de configurar la \n"
-"    zona de dominis per tal que el domini <code>MX</code> apunte a aquest "
-"servidor"
+"    zona de dominis per tal que el domini <code>MX</code> apunte a aquest"
+" servidor"
 
 #: mailu/ui/templates/domain/signup.html:18
 msgid ""
@@ -547,10 +601,10 @@ msgid ""
 "    expires."
 msgstr ""
 "Si no sabeu configurar un registre  <code>MX</code> a la zona DNS,\n"
-"contacteu amb el vostre proveïdor o administrador de DNS. Per favor, espereu "
-"\n"
-"uns quants minuts despres d'ajustar el registre <code>MX</code> perquè la "
-"caixet \n"
+"contacteu amb el vostre proveïdor o administrador de DNS. Per favor, "
+"espereu \n"
+"uns quants minuts despres d'ajustar el registre <code>MX</code> perquè la"
+" caixet \n"
 "del servidor local expire."
 
 #: mailu/ui/templates/fetch/create.html:4
@@ -565,23 +619,27 @@ msgstr "Actualitzeu compte extern"
 msgid "Add an account"
 msgstr "Afegiu un compte"
 
-#: mailu/ui/templates/fetch/list.html:19
+#: mailu/ui/templates/fetch/list.html:20
 msgid "Endpoint"
 msgstr "Endpoint"
 
-#: mailu/ui/templates/fetch/list.html:21
+#: mailu/ui/templates/fetch/list.html:22
 msgid "Keep emails"
 msgstr "Mantingueu els correus"
 
-#: mailu/ui/templates/fetch/list.html:22
+#: mailu/ui/templates/fetch/list.html:23
 msgid "Last check"
 msgstr "Última comprovació"
 
-#: mailu/ui/templates/fetch/list.html:35
+#: mailu/ui/templates/fetch/list.html:24
+msgid "Status"
+msgstr ""
+
+#: mailu/ui/templates/fetch/list.html:38
 msgid "yes"
 msgstr "sí"
 
-#: mailu/ui/templates/fetch/list.html:35
+#: mailu/ui/templates/fetch/list.html:38
 msgid "no"
 msgstr "no"
 
@@ -629,17 +687,13 @@ msgstr "Nou usuari"
 msgid "General"
 msgstr "General"
 
-#: mailu/ui/templates/user/create.html:22
+#: mailu/ui/templates/user/create.html:23
 msgid "Features and quotas"
 msgstr "Funcions i espai"
 
 #: mailu/ui/templates/user/edit.html:4
 msgid "Edit user"
 msgstr "Edita usuari"
-
-#: mailu/ui/templates/user/forward.html:4
-msgid "Forward emails"
-msgstr "Reenvia correus"
 
 #: mailu/ui/templates/user/list.html:4
 msgid "User list"
@@ -649,11 +703,11 @@ msgstr "Llista d'usuaris"
 msgid "Add user"
 msgstr "Afegiu usuari"
 
-#: mailu/ui/templates/user/list.html:19 mailu/ui/templates/user/settings.html:4
+#: mailu/ui/templates/user/list.html:20 mailu/ui/templates/user/settings.html:4
 msgid "User settings"
 msgstr "Ajustos d'usuari"
 
-#: mailu/ui/templates/user/list.html:21
+#: mailu/ui/templates/user/list.html:22
 msgid "Features"
 msgstr "Característiques"
 
@@ -665,7 +719,7 @@ msgstr "Canvieu la contrasenya"
 msgid "Automatic reply"
 msgstr "Resposta automàtica"
 
-#: mailu/ui/templates/user/settings.html:22
+#: mailu/ui/templates/user/settings.html:27
 msgid "Auto-forward"
 msgstr "Auto-reenviament"
 
@@ -680,3 +734,10 @@ msgstr "Nom de domini"
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
 msgstr "Ranures lliures"
+
+#~ msgid "to access the administration tools"
+#~ msgstr "per accedir a les eines d'administració"
+
+#~ msgid "Forward emails"
+#~ msgstr "Reenvia correus"
+

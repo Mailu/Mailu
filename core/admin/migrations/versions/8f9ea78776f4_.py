@@ -15,7 +15,7 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.add_column('user', sa.Column('spam_mark_as_read', sa.Boolean(), nullable=False))
+    op.add_column('user', sa.Column('spam_mark_as_read', sa.Boolean(), nullable=False, server_default=sa.sql.expression.false()))
 
 def downgrade():
     op.drop_column('user', 'spam_mark_as_read')

@@ -21,6 +21,7 @@ RUN set -eu \
  && pip3 install socrate \
  && echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini \
  && echo "ServerSignature Off\nServerName roundcube" >> /etc/apache2/apache2.conf \
+ && sed -i 's,LogFormat "%h \(.*\) combined,Logformat "%a \1 combined,' /etc/apache2/apache2.conf \
  && sed -i 's,CustomLog.*combined$,\0 "'"expr=!(%{HTTP_USER_AGENT}=='health'\&\&(-R '127.0.0.1/8' || -R '::1'))"'",' /etc/apache2/sites-available/000-default.conf \
 \
  && mark="$(apt-mark showmanual)" \
@@ -56,7 +57,7 @@ RUN set -eu \
  && chown -R root:root . \
  && chown www-data:www-data logs temp \
  && chmod -R a+rX . \
- && a2enmod rewrite deflate expires headers \
+ && a2enmod rewrite deflate expires headers remoteip \
  && echo date.timezone=${TZ} > /usr/local/etc/php/conf.d/timezone.ini \
  && rm -rf plugins/{autologon,example_addressbook,http_authentication,krb_authentication,new_user_identity,password,redundant_attachments,squirrelmail_usercopy,userinfo,virtuser_file,virtuser_query}
 
@@ -65,6 +66,7 @@ RUN set -eu \
 COPY mailu.php /var/www/html/plugins/mailu/mailu.php
 COPY php.ini /
 COPY config.inc.php /
+COPY remoteip.conf /
 COPY start.py /
 COPY config.inc.carddav.php /var/www/html/plugins/carddav/config.inc.php
 

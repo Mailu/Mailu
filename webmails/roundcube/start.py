@@ -72,6 +72,10 @@ conf.jinja("/config.inc.php", context, "/var/www/html/config/config.inc.php")
 # create dirs
 os.system("mkdir -p /data/gpg")
 
+# configure apache2
+conf.jinja("/remoteip.conf", context, "/etc/apache2/conf-available/remoteip.conf")
+os.system("a2enconf remoteip")
+
 print("Initializing database")
 try:
     result = subprocess.check_output(["/var/www/html/bin/initdb.sh", "--dir", "/var/www/html/SQL"],

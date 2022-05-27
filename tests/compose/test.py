@@ -93,6 +93,7 @@ print(subprocess.check_output("echo " + docker_password + " | docker login " + d
 print()
 sleep()
 print()
+sys.stdout.flush()
 print(subprocess.check_output("docker-compose -f " + compose_file + " up -d", shell=True).decode())
 print()
 sleep()

@@ -4,7 +4,7 @@
 [ "$BRANCH" = "staging" ] && exit 0
 
 docker logout
-echo "$DOCKER_PW" | docker login --username $DOCKER_UN --password-stdin
+echo "$DOCKER_PW" | docker login $DOCKER_REGISTRY --username $DOCKER_UN --password-stdin
 
 if [ "$BRANCH" = "testing" ]
 then

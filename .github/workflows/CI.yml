@@ -23,7 +23,7 @@ concurrency: ci-${{ github.ref }}
 # DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
 #    The docker repository for test images. Only used for the branch TESTING (BORS try).
 # DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-#    The docker-compatible registry for deployment of docker images.
+#    The docker-compatible registry for deployment of docker images. Must end with a '/'
 # Add the above secrets to your github repo to determine where the images will be pushed.
 ################################################
 # Code block that is used as one liner.

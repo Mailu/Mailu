@@ -112,6 +112,7 @@ following are additional parameters that could be defined for users:
 * reply_body
 * displayed_name
 * spam_enabled
+* spam_mark_as_read
 * spam_threshold
 
 Alias
@@ -293,6 +294,7 @@ This is a complete YAML template with all additional parameters that can be defi
       reply_startdate: '1900-01-01'
       reply_subject: ''
       spam_enabled: true
+      spam_mark_as_read: true
       spam_threshold: 80
       tokens:
         - id: 1

@@ -21,7 +21,9 @@ if header :index 2 :matches "Received" "from * by * for <*>; *"
 {% if user.spam_enabled %}
 if spamtest :percent :value "gt" :comparator "i;ascii-numeric" "{{ user.spam_threshold }}"
 {
+  {% if user.spam_mark_as_read %}
   setflag "\\seen";
+  {% endif %}
   fileinto :create "Junk";
   stop;
 }

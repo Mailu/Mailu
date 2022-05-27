@@ -102,12 +102,14 @@ jobs:
           DOCKER_UN: ${{ secrets.DOCKER_LOGIN }}
           DOCKER_PW: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
-        run: echo "$DOCKER_PW" | docker login --username $DOCKER_UN --password-stdin
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+        run: echo "$DOCKER_PW" | docker login $DOCKER_REGISTRY --username $DOCKER_UN --password-stdin
       - name: Build all docker images
         env:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
         run: docker-compose -f tests/build.yml build
       - name: Save all docker images
         run: docker save ${{ env.DOCKER_ORG }}/admin ${{ env.DOCKER_ORG }}/clamav ${{ env.DOCKER_ORG }}/docs ${{ env.DOCKER_ORG }}/dovecot ${{ env.DOCKER_ORG }}/fetchmail ${{ env.DOCKER_ORG }}/nginx ${{ env.DOCKER_ORG }}/none ${{ env.DOCKER_ORG }}/postfix ${{ env.DOCKER_ORG }}/radicale ${{ env.DOCKER_ORG }}/rainloop ${{ env.DOCKER_ORG }}/roundcube ${{ env.DOCKER_ORG }}/rspamd ${{ env.DOCKER_ORG }}/setup ${{ env.DOCKER_ORG }}/traefik-certdumper ${{ env.DOCKER_ORG }}/unbound -o /images/images.tar.gz
@@ -183,6 +185,7 @@ jobs:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
 
   test-fetchmail:
     name: Perform fetchmail tests
@@ -255,6 +258,7 @@ jobs:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
 
   test-filters:
     name: Perform filter tests
@@ -327,6 +331,7 @@ jobs:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
 
   test-rainloop:
     name: Perform rainloop tests
@@ -399,6 +404,7 @@ jobs:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
 
   test-roundcube:
     name: Perform roundcube tests
@@ -471,6 +477,7 @@ jobs:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
 
   test-webdav:
     name: Perform webdav tests
@@ -543,6 +550,7 @@ jobs:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
 
   deploy:
     name: Deploy images
@@ -619,6 +627,7 @@ jobs:
           DOCKER_UN: ${{ secrets.DOCKER_LOGIN }}
           DOCKER_PW: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           BRANCH: ${{ env.BRANCH }}

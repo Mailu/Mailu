@@ -34,6 +34,8 @@ from itsdangerous.encoding import want_bytes
 from werkzeug.datastructures import CallbackDict
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from keycloak import KeycloakOpenID
+
 # Login configuration
 login = flask_login.LoginManager()
 login.login_view = "sso.login"
@@ -115,6 +117,27 @@ class PrefixMiddleware(object):
         app.wsgi_app = self
 
 proxy = PrefixMiddleware()
+
+class KeycloakClient:
+    "Verifies user credentials for nginx mail authentication using Keycloak service"
+
+    def init_app(self, app):
+        self.app = app
+        self.keycloak_openid = KeycloakOpenID(server_url=app.config["KEYCLOAK_URL"],
+                    client_id=app.config["KEYCLOAK_CLIENT_ID"],
+                    realm_name=app.config["KEYCLOAK_REALM"],
+                    client_secret_key=app.config["KEYCLOAK_CLIENT_SECRET"])
+    
+    def get_token(self, username, password):
+        return self.keycloak_openid.token(username, password)
+
+    def logout(self, token):
+        self.keycloak_openid.logout(token['refresh_token'])
+
+    def get_user_info(self, token):
+        return self.keycloak_openid.userinfo(token['access_token'])
+
+keycloak_client = KeycloakClient()
 
 
 # Data migrate

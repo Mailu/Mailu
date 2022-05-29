@@ -516,6 +516,9 @@ class User(Base, Email):
     is_active = True
     is_anonymous = False
 
+    #Keycloak attributes
+    keycloak_token = None
+
     def get_id(self):
         """ return users email address """
         return self.email
@@ -615,6 +618,9 @@ in clear-text regardless of the presence of the cache.
             @password: plain text password to encrypt (or, if raw is True: the hash itself)
         """
         self.password = password if raw else User.get_password_context().hash(password)
+
+    def set_display_name(self, display_name):
+        self.displayed_name = display_name
 
     def get_managed_domains(self):
         """ return list of domains this user can manage """

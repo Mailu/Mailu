@@ -8,6 +8,8 @@ import socket
 import sqlalchemy.exc
 import tenacity
 
+db = models.db
+
 SUPPORTED_AUTH_METHODS = ["none", "plain"]
 
 
@@ -27,7 +29,37 @@ STATUSES = {
     }),
 }
 
-def check_credentials(user, password, ip, protocol=None, auth_port=None):
+def check_credentials(user_email, password, ip, protocol=None, auth_port=None):
+    try:
+        user = models.User.query.get(user_email) if '@' in user_email else None
+    except sqlalchemy.exc.StatementError as exc:
+        exc = str(exc).split('\n', 1)[0]
+        app.logger.warn(f'Invalid user {user_email!r}: {exc}')
+    else:
+        if utils.keycloak_client is not None:
+            token = utils.keycloak_client.get_token(user_email, password)
+            if token is None:
+                user = None
+            else:
+                    user_info = utils.keycloak_client.get_user_info(token)
+                                
+                    if user is None:
+                        email = user_email.split("@", 1)
+                        domain_name = email[1]
+                        domain = models.Domain.query.get(domain_name)
+                        if not domain:
+                            domain = models.Domain(name=domain_name)
+                            db.session.add(domain)
+                            user = models.User(
+                                localpart=email[0],
+                                domain=domain,
+                                global_admin=False
+                            )
+                            user.set_display_name(user_info.name)
+                            db.session.add(user)
+                            db.session.commit()
+                        user = models.User.query.get(user_email)
+                    user.keycloak_token = token 
     if not user or not user.enabled or (protocol == "imap" and not user.enable_imap) or (protocol == "pop3" and not user.enable_pop):
         return False
     is_ok = False
@@ -92,12 +124,7 @@ def handle_authentication(headers):
         except:
             app.logger.warn(f'Received undecodable user/password from nginx: {raw_user_email!r}/{raw_password!r}')
         else:
-            try:
-                user = models.User.query.get(user_email) if '@' in user_email else None
-            except sqlalchemy.exc.StatementError as exc:
-                exc = str(exc).split('\n', 1)[0]
-                app.logger.warn(f'Invalid user {user_email!r}: {exc}')
-            else:
+            
                 is_valid_user = user is not None
                 ip = urllib.parse.unquote(headers["Client-Ip"])
                 if check_credentials(user, password, ip, protocol, headers["Auth-Port"]):

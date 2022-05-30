@@ -8,6 +8,8 @@ with an easily setup, easily maintained and full-featured mail server while
 not shipping proprietary software nor unrelated features often found in
 popular groupware.
 
+This fork is extended by an OpenID Connect implementation for Keycloak to enable user session handling (single sign-on) and authentication by Keycloak itself or LDAP services connected to Keycloak. The fork is maintained by [Heviat](https://heviat.com), a German cloud computing company based in Potsdam. Feel free to contribute to this repository!
+
 Most of the documentation is available on our [Website](https://mailu.io),
 you can also [try our demo server](https://mailu.io/master/demo.html)
 before setting up your own, and come [talk to us on Matrix](https://matrix.to/#/#mailu:tedomum.net).

@@ -15,7 +15,7 @@ LABEL version=$VERSION
 RUN set -eu \
  && apt update \
  && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
- && apt install -y --no-install-recommends \
+ && apt-get install -y --no-install-recommends \
       python3 curl python3-pip git python3-multidict \
       python3-jinja2 gpg gpg-agent tzdata \
  && pip3 install socrate \
@@ -24,7 +24,7 @@ RUN set -eu \
  && sed -i 's,CustomLog.*combined$,\0 "'"expr=!(%{HTTP_USER_AGENT}=='health'\&\&(-R '127.0.0.1/8' || -R '::1'))"'",' /etc/apache2/sites-available/000-default.conf \
 \
  && mark="$(apt-mark showmanual)" \
- && apt install -y --no-install-recommends \
+ && apt-get install -y --no-install-recommends \
       libfreetype6-dev libicu-dev libjpeg62-turbo-dev libldap2-dev libmagickwand-dev \
       libpng-dev libpq-dev libsqlite3-dev libzip-dev libpspell-dev libonig-dev \
  && ln -s php.ini-production /usr/local/etc/php/php.ini \

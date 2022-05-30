@@ -13,7 +13,7 @@ ENV TZ Etc/UTC
 LABEL version=$VERSION
 
 RUN set -eu \
- && apt update \
+ && apt-get update \
  && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
  && apt-get install -y --no-install-recommends \
       python3 curl python3-pip git python3-multidict \

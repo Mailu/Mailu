@@ -123,6 +123,9 @@ proxy = PrefixMiddleware()
 class KeycloakClient:
     "Verifies user credentials for nginx mail authentication using Keycloak service"
 
+    def __init__(self):
+        self.enabled = False
+
     def init_app(self, app):
         self.app = app
         self.keycloak_openid = KeycloakOpenID(server_url=app.config["KEYCLOAK_URL"],

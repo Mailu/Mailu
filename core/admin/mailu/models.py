@@ -29,6 +29,7 @@ from werkzeug.utils import cached_property
 
 from mailu import dkim, utils
 
+from keycloak import KeycloakGetError
 
 db = flask_sqlalchemy.SQLAlchemy()
 
@@ -573,11 +574,28 @@ class User(Base, Email):
         return cls._ctx
 
     def check_password(self, password):
+        return self.check_password(self, password, False)
+
+    def check_password(self, password, redirect):
         """ verifies password against stored hash
             and updates hash if outdated
         """
         if password == '':
             return False
+        
+        if utils.keycloak_client is not None:
+            if self.keycloak_token is None:
+                try:
+                    self.keycloak_token = utils.keycloak_client.get_token(self.email, password)
+                except KeycloakGetError:
+                    return self.check_password_legacy(password)
+                else:
+                    return True
+            return utils.keycloak_client.introspect(self.keycloak_token).active
+        else:
+            return self.check_password_legacy(password)
+
+    def check_password_legacy(self, password):
         cache_result = self._credential_cache.get(self.get_id())
         current_salt = self.password.split('$')[3] if len(self.password.split('$')) == 5 else None
         if cache_result and current_salt:
@@ -612,6 +630,7 @@ in clear-text regardless of the presence of the cache.
             """
             self._credential_cache[self.get_id()] = (self.password.split('$')[3], passlib.hash.pbkdf2_sha256.using(rounds=1).hash(password))
         return result
+        
 
     def set_password(self, password, raw=False):
         """ Set password for user
@@ -654,6 +673,9 @@ in clear-text regardless of the presence of the cache.
         user = cls.query.get(email)
         return user if (user and user.enabled and user.check_password(password)) else None
 
+    def logout(self):
+        if self.keycloak_token is not None:
+            utils.keycloak_client.logout(self.keycloak_token)
 
 class Alias(Base, Email):
     """ An alias is an email address that redirects to some destination.

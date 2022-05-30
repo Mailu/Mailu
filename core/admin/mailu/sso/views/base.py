@@ -51,6 +51,7 @@ def login():
 @sso.route('/logout', methods=['GET'])
 @access.authenticated
 def logout():
+    flask_login.current_user.logout()
     flask_login.logout_user()
     flask.session.destroy()
     return flask.redirect(flask.url_for('.login'))

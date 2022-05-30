@@ -35,6 +35,8 @@ from werkzeug.datastructures import CallbackDict
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from keycloak import KeycloakOpenID
+from oic.oic import Client
+from oic.utils.authn.client import CLIENT_AUTHN_METHOD
 
 # Login configuration
 login = flask_login.LoginManager()
@@ -137,7 +139,19 @@ class KeycloakClient:
     def get_user_info(self, token):
         return self.keycloak_openid.userinfo(token['access_token'])
 
+    def introspect(self, token):
+        return self.keycloak_openid.introspect(token['access_token'])
+
 keycloak_client = KeycloakClient()
+
+#class OicClient:
+#    "Redirects users to OpenID Provider if configured"
+#
+#    def init_app(self, app):
+#        self.app = app
+#        self.client = Client(client_authn_method=CLIENT_AUTHN_METHOD)
+
+# oic_client
 
 
 # Data migrate

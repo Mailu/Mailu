@@ -44,6 +44,12 @@ DEFAULT_CONFIG = {
     'AUTH_RATELIMIT_EXEMPTION': '',
     'AUTH_RATELIMIT_EXEMPTION_LENGTH': 86400,
     'DISABLE_STATISTICS': False,
+    # Keycloak server settings
+    'KEYCLOAK_ENABLED': False,
+    'KEYCLOAK_URL': 'https://localhost:8080',
+    'KEYCLOAK_REALM': 'mailu',
+    'KEYCLOAK_CLIENT_ID': 'mailu',
+    'KEYCLOAK_CLIENT_SECRET': 'secret',
     # Mail settings
     'DMARC_RUA': None,
     'DMARC_RUF': None,

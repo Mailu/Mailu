@@ -75,4 +75,4 @@ WTForms==2.3.3
 WTForms-Components==0.10.5
 xmltodict==0.12.0
 oic==1.4.0
-python-keyloak==1.1.1
+python-keycloak==1.1.1

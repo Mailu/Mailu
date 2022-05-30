@@ -583,7 +583,7 @@ class User(Base, Email):
         if password == '':
             return False
         
-        if utils.keycloak_client is not None:
+        if utils.keycloak_client.is_enabled() :
             if self.keycloak_token is None:
                 try:
                     self.keycloak_token = utils.keycloak_client.get_token(self.email, password)

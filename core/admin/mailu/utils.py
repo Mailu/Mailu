@@ -129,6 +129,7 @@ class KeycloakClient:
                     client_id=app.config["KEYCLOAK_CLIENT_ID"],
                     realm_name=app.config["KEYCLOAK_REALM"],
                     client_secret_key=app.config["KEYCLOAK_CLIENT_SECRET"])
+        self.enabled = True
     
     def get_token(self, username, password):
         return self.keycloak_openid.token(username, password)
@@ -141,6 +142,9 @@ class KeycloakClient:
 
     def introspect(self, token):
         return self.keycloak_openid.introspect(token['access_token'])
+
+    def is_enabled(self):
+        return self.enabled == True
 
 keycloak_client = KeycloakClient()
 

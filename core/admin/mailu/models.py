@@ -484,7 +484,7 @@ class User(Base, Email):
 
     domain = db.relationship(Domain,
         backref=db.backref('users', cascade='all, delete-orphan'))
-    password = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(255), nullable=True)
     quota_bytes = db.Column(db.BigInteger, nullable=False, default=10**9)
     quota_bytes_used = db.Column(db.BigInteger, nullable=False, default=0)
     global_admin = db.Column(db.Boolean, nullable=False, default=False)
@@ -513,9 +513,9 @@ class User(Base, Email):
     spam_threshold = db.Column(db.Integer, nullable=False, default=80)
 
     # Flask-login attributes
-    is_authenticated = True
     is_active = True
     is_anonymous = False
+    authenticated = True #Flask attribute would be is_authenticated but we needed to overrride this attribute for Keycloak checks
 
     #Keycloak attributes
     keycloak_token = None
@@ -551,6 +551,18 @@ class User(Base, Email):
             app.config["MESSAGE_RATELIMIT"], "sender", self.email
         )
 
+    @property
+    def is_authenticated(self):
+        if self.keycloak_token is None:
+            return self.authenticated
+        else:
+            return utils.keycloak_client.introspect(self.keycloak_token).active
+
+    @is_authenticated.setter
+    def is_authenticated(self, value):
+       if self.keycloak_token is None:
+           self.authenticated = value
+
     @classmethod
     def get_password_context(cls):
         """ create password context for hashing and verification
@@ -580,11 +592,11 @@ class User(Base, Email):
         if password == '':
             return False
         
-        if utils.keycloak_client.is_enabled() :
+        if utils.keycloak_client.is_enabled():
             if self.keycloak_token is None:
                 try:
                     self.keycloak_token = utils.keycloak_client.get_token(self.email, password)
-                except KeycloakGetError:
+                except:
                     return self.check_password_legacy(password)
                 else:
                     return True
@@ -593,6 +605,8 @@ class User(Base, Email):
             return self.check_password_legacy(password)
 
     def check_password_legacy(self, password):
+        if self.password is None:
+            return False
         cache_result = self._credential_cache.get(self.get_id())
         current_salt = self.password.split('$')[3] if len(self.password.split('$')) == 5 else None
         if cache_result and current_salt:

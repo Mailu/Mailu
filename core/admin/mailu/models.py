@@ -556,7 +556,7 @@ class User(Base, Email):
         if self.keycloak_token is None:
             return self.authenticated
         else:
-            return utils.keycloak_client.introspect(self.keycloak_token).active
+            return utils.keycloak_client.introspect(self.keycloak_token)['active'] == True
 
     @is_authenticated.setter
     def is_authenticated(self, value):

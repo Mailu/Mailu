@@ -554,19 +554,20 @@ class User(Base, Email):
     @property
     def is_authenticated(self):
         print('GETTER')
+        app.logger.warn('GETTER')
         if self.keycloak_token is None:
             return self._authenticated
         else:
-            print('GETTER:', self.keycloak_token)
+            app.logger.warn('GETTER: %r', self.keycloak_token)
             return utils.keycloak_client.introspect(self.keycloak_token)['active'] == True
 
     @is_authenticated.setter
     def is_authenticated(self, value):
-        print('AUTHENTICATED:', value)
+        app.logger.warn('AUTHENTICATED: %s', value)
         if self.keycloak_token is None:
            self._authenticated = value
         else:
-            print('SETTER:', self.keycloak_token)
+            app.logger.warn('SETTER: %r', self.keycloak_token)
 
     @classmethod
     def get_password_context(cls):

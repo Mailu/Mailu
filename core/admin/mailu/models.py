@@ -515,7 +515,7 @@ class User(Base, Email):
     # Flask-login attributes
     is_active = True
     is_anonymous = False
-    authenticated = True #Flask attribute would be is_authenticated but we needed to overrride this attribute for Keycloak checks
+    _authenticated = True #Flask attribute would be is_authenticated but we needed to overrride this attribute for Keycloak checks
 
     #Keycloak attributes
     keycloak_token = None
@@ -553,15 +553,18 @@ class User(Base, Email):
 
     @property
     def is_authenticated(self):
+        print('GETTER: ' + self.keycloak_token)
         if self.keycloak_token is None:
-            return self.authenticated
+            return self._authenticated
         else:
             return utils.keycloak_client.introspect(self.keycloak_token)['active'] == True
 
     @is_authenticated.setter
     def is_authenticated(self, value):
-       if self.keycloak_token is None:
-           self.authenticated = value
+        print('SETTER: ' + self.keycloak_token)
+        print('AUTHENTICATED: ' + value)
+        if self.keycloak_token is None:
+           self._authenticated = value
 
     @classmethod
     def get_password_context(cls):

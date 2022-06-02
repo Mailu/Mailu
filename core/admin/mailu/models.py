@@ -21,7 +21,7 @@ import idna
 import dns.resolver
 import dns.exception
 
-from flask import current_app as app
+from flask import current_app as app, session
 from sqlalchemy.ext import declarative
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
@@ -517,12 +517,13 @@ class User(Base, Email):
     is_anonymous = False
     _authenticated = True #Flask attribute would be is_authenticated but we needed to overrride this attribute for Keycloak checks
 
-    #Keycloak attributes
-    keycloak_token = None
-
     def get_id(self):
         """ return users email address """
         return self.email
+
+    @property
+    def keycloak_token(self):
+        return session.get('keycloak_token')
 
     @property
     def destination(self):
@@ -601,7 +602,7 @@ class User(Base, Email):
         if utils.keycloak_client.is_enabled():
             if self.keycloak_token is None:
                 try:
-                    self.keycloak_token = utils.keycloak_client.get_token(self.email, password)
+                    session['keycloak_token'] = utils.keycloak_client.get_token(self.email, password)
                 except:
                     return self.check_password_legacy(password)
                 else:

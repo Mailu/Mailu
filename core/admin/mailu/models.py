@@ -559,7 +559,10 @@ class User(Base, Email):
             return self._authenticated
         else:
             app.logger.warn('GETTER: %r', self.keycloak_token)
-            return utils.keycloak_client.introspect(self.keycloak_token)['active'] == True
+            success = utils.keycloak_client.introspect(self.keycloak_token)['active'] == True
+            if not success:
+                session.pop('keycloak_token', None)
+            return success
 
     @is_authenticated.setter
     def is_authenticated(self, value):
@@ -607,7 +610,7 @@ class User(Base, Email):
                     return self.check_password_legacy(password)
                 else:
                     return True
-            return utils.keycloak_client.introspect(self.keycloak_token).active
+            return utils.keycloak_client.introspect(self.keycloak_token)['active']
         else:
             return self.check_password_legacy(password)
 
@@ -694,6 +697,7 @@ in clear-text regardless of the presence of the cache.
     def logout(self):
         if 'keycloak_token' in session:
             utils.keycloak_client.logout(self.keycloak_token)
+            session.pop('keycloak_token', None)
 
 class Alias(Base, Email):
     """ An alias is an email address that redirects to some destination.

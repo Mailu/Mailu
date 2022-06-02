@@ -523,7 +523,7 @@ class User(Base, Email):
 
     @property
     def keycloak_token(self):
-        return session.get('keycloak_token')
+        return session['keycloak_token']
 
     @property
     def destination(self):
@@ -554,7 +554,6 @@ class User(Base, Email):
 
     @property
     def is_authenticated(self):
-        print('GETTER')
         app.logger.warn('GETTER')
         if 'keycloak_token' not in session:
             return self._authenticated
@@ -602,8 +601,9 @@ class User(Base, Email):
         if utils.keycloak_client.is_enabled():
             if 'keycloak_token' not in session:
                 try:
+                    app.logger.warn(session)
                     session['keycloak_token'] = utils.keycloak_client.get_token(self.email, password)
-                except:
+                except: 
                     return self.check_password_legacy(password)
                 else:
                     return True

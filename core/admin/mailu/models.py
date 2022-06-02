@@ -556,7 +556,7 @@ class User(Base, Email):
     def is_authenticated(self):
         print('GETTER')
         app.logger.warn('GETTER')
-        if self.keycloak_token is None:
+        if 'keycloak_token' not in session:
             return self._authenticated
         else:
             app.logger.warn('GETTER: %r', self.keycloak_token)
@@ -565,7 +565,7 @@ class User(Base, Email):
     @is_authenticated.setter
     def is_authenticated(self, value):
         app.logger.warn('AUTHENTICATED: %s', value)
-        if self.keycloak_token is None:
+        if 'keycloak_token' not in session:
            self._authenticated = value
         else:
             app.logger.warn('SETTER: %r', self.keycloak_token)
@@ -600,7 +600,7 @@ class User(Base, Email):
             return False
         
         if utils.keycloak_client.is_enabled():
-            if self.keycloak_token is None:
+            if 'keycloak_token' not in session:
                 try:
                     session['keycloak_token'] = utils.keycloak_client.get_token(self.email, password)
                 except:
@@ -692,7 +692,7 @@ in clear-text regardless of the presence of the cache.
         return user if (user and user.enabled and user.check_password(password)) else None
 
     def logout(self):
-        if self.keycloak_token is not None:
+        if 'keycloak_token' in session:
             utils.keycloak_client.logout(self.keycloak_token)
 
 class Alias(Base, Email):

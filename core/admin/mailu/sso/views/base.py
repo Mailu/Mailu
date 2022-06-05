@@ -4,6 +4,7 @@ from mailu.sso import sso, forms
 from mailu.ui import access
 
 from flask import current_app as app
+from flask import session
 import flask
 import flask_login
 
@@ -46,7 +47,7 @@ def login():
             utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)
             flask.current_app.logger.warn(f'Login failed for {username} from {client_ip}.')
             flask.flash('Wrong e-mail or password', 'error')
-    return flask.render_template('login.html', form=form, fields=fields)
+    return flask.render_template('login.html', form=form, fields=fields, openId=app.config['OIDC_ENABLED'], openIdEndpoint=utils.oic_client.get_redirect_url())
 
 @sso.route('/logout', methods=['GET'])
 @access.authenticated
@@ -55,4 +56,32 @@ def logout():
     flask_login.logout_user()
     flask.session.destroy()
     return flask.redirect(flask.url_for('.login'))
+
+@sso.route('/auth', methods=['GET'])
+def auth():
+    form = forms.LoginForm()
+    form.submitAdmin.label.text = form.submitAdmin.label.text + ' Admin'
+    form.submitWebmail.label.text = form.submitWebmail.label.text + ' Webmail'
+    fields = []
+    if str(app.config["WEBMAIL"]).upper() != "NONE":
+        fields.append(form.submitWebmail)
+    if str(app.config["ADMIN"]).upper() != "FALSE":
+        fields.append(form.submitAdmin)
+    fields = [fields]
+    device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
+    username = utils.oic_client.exchange_code(flask.request.query_string.decode())
+    if username is not None:
+        user = models.User.get(username)
+        client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
+        flask.session.regenerate()
+        flask_login.login_user(user)
+        response = flask.redirect(app.config['WEB_ADMIN'])
+        response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
+        flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')
+        return response
+    else:
+        utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)
+        flask.current_app.logger.warn(f'Login failed for {username} from {client_ip}.')
+        flask.flash('Wrong e-mail or password', 'error')
+    return flask.render_template('login.html', form=form, fields=fields, openId=app.config['OIDC_ENABLED'], openIdEndpoint=utils.oic_client.get_redirect_url())
 

@@ -28,6 +28,8 @@ import flask_babel
 import ipaddress
 import redis
 
+from flask import session
+
 from datetime import datetime, timedelta
 from flask.sessions import SessionMixin, SessionInterface
 from itsdangerous.encoding import want_bytes
@@ -37,6 +39,9 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from keycloak import KeycloakOpenID
 from oic.oic import Client
 from oic.utils.authn.client import CLIENT_AUTHN_METHOD
+from oic import rndstr
+from oic.oic.message import AuthorizationResponse, AccessTokenResponse
+
 
 # Login configuration
 login = flask_login.LoginManager()
@@ -151,14 +156,60 @@ class KeycloakClient:
 
 keycloak_client = KeycloakClient()
 
-#class OicClient:
-#    "Redirects users to OpenID Provider if configured"
-#
-#    def init_app(self, app):
-#        self.app = app
-#        self.client = Client(client_authn_method=CLIENT_AUTHN_METHOD)
+class OicClient:
+    "Redirects users to OpenID Provider if configured"
 
-# oic_client
+    def __init__(self):
+        self.app = None
+        self.client = None
+        self.registration_response = None
+        
+
+    def init_app(self, app):
+        self.app = app
+        self.client = Client(client_authn_method=CLIENT_AUTHN_METHOD)
+        provider_info = self.client.provider_config(app.config['OIDC_PROVIDER_INFO_URL'])
+        args = {
+            "redirect_uris": [ 'https://' + app.config['HOSTNAME'] + '/sso/auth' ],
+            "contacts": [ app.config['OIDC_CLIENT_CONTACT'] ]
+        }
+        self.registration_response = self.client.register(provider_info["registration_endpoint"], registration_token=app.config['OIDC_CLIENT_REGISTER_TOKEN'], **args)
+    
+    def get_redirect_url(self):
+        session["state"] = rndstr()
+        session["nonce"] = rndstr()
+        args = {
+            "client_id": self.client.client_id,
+            "response_type": "code",
+            "scope": ["openid"],
+            "nonce": session["nonce"],
+            "redirect_uri": self.client.registration_response["redirect_uris"][0],
+            "state": session["state"]
+        }
+
+        auth_req = self.client.construct_AuthorizationRequest(request_args=args)
+        login_url = auth_req.request(self.client.authorization_endpoint)
+        return login_url
+    
+    def exchange_code(self, query):
+        aresp = self.client.parse_response(AuthorizationResponse, info=query,
+                                sformat="urlencoded")
+        if not (aresp["state"] == session["state"]):
+            return None
+        args = {
+            "code": aresp["code"]
+        }
+        response = self.client.do_access_token_request(state=aresp["state"],
+            request_args=args,
+            authn_method="client_secret_basic")
+        if response is not AccessTokenResponse:
+            return None
+        session["keycloak_token"] = response
+        user_response = self.client.do_user_info_request(
+            access_token=response['access_token'])
+        return user_response['username']
+
+oic_client = OicClient()
 
 
 # Data migrate

@@ -50,6 +50,11 @@ DEFAULT_CONFIG = {
     'KEYCLOAK_REALM': 'mailu',
     'KEYCLOAK_CLIENT_ID': 'mailu',
     'KEYCLOAK_CLIENT_SECRET': 'secret',
+    # OpenID Connect settings
+    'OIDC_ENABLED': False,
+    'OIDC_PROVIDER_INFO_URL': 'https://localhost/info',
+    'OIDC_CLIENT_CONTACT': 'admin@localhost',
+    'OIDC_CLIENT_REGISTER_TOKEN': 'secret',
     # Mail settings
     'DMARC_RUA': None,
     'DMARC_RUF': None,

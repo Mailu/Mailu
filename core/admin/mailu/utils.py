@@ -28,7 +28,7 @@ import flask_babel
 import ipaddress
 import redis
 
-from flask import session
+from flask import session as f_session
 
 from datetime import datetime, timedelta
 from flask.sessions import SessionMixin, SessionInterface
@@ -176,15 +176,15 @@ class OicClient:
         self.registration_response = self.client.register(provider_info["registration_endpoint"], registration_token=app.config['OIDC_CLIENT_REGISTER_TOKEN'], **args)
     
     def get_redirect_url(self):
-        session["state"] = rndstr()
-        session["nonce"] = rndstr()
+        f_session["state"] = rndstr()
+        f_session["nonce"] = rndstr()
         args = {
             "client_id": self.client.client_id,
             "response_type": "code",
             "scope": ["openid"],
-            "nonce": session["nonce"],
+            "nonce": f_session["nonce"],
             "redirect_uri": self.client.registration_response["redirect_uris"][0],
-            "state": session["state"]
+            "state": f_session["state"]
         }
 
         auth_req = self.client.construct_AuthorizationRequest(request_args=args)
@@ -194,7 +194,7 @@ class OicClient:
     def exchange_code(self, query):
         aresp = self.client.parse_response(AuthorizationResponse, info=query,
                                 sformat="urlencoded")
-        if not (aresp["state"] == session["state"]):
+        if not (aresp["state"] == f_session["state"]):
             return None
         args = {
             "code": aresp["code"]
@@ -204,7 +204,7 @@ class OicClient:
             authn_method="client_secret_basic")
         if response is not AccessTokenResponse:
             return None
-        session["keycloak_token"] = response
+        f_session["keycloak_token"] = response
         user_response = self.client.do_user_info_request(
             access_token=response['access_token'])
         return user_response['username']

@@ -173,6 +173,7 @@ class OicClient:
             "redirect_uris": [ 'https://' + app.config['HOSTNAME'] + '/sso/auth' ],
             "contacts": [ app.config['OIDC_CLIENT_CONTACT'] ]
         }
+        app.logger.warn('REGISTER TOKEN: %s', app.config['OIDC_CLIENT_REGISTER_TOKEN'])
         self.registration_response = self.client.register(provider_info["registration_endpoint"], registration_token=app.config['OIDC_CLIENT_REGISTER_TOKEN'], **args)
     
     def get_redirect_url(self):

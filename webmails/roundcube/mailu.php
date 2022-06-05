@@ -5,6 +5,7 @@ class mailu extends rcube_plugin
 
   function init()
   {
+    $this->include_script('mailu.js');
     $this->add_hook('startup', array($this, 'startup'));
     $this->add_hook('authenticate', array($this, 'authenticate'));
     $this->add_hook('login_after', array($this, 'login'));

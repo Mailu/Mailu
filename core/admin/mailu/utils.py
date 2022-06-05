@@ -176,6 +176,8 @@ class OicClient:
         self.registration_response = self.client.register(provider_info["registration_endpoint"], registration_token=app.config['OIDC_CLIENT_REGISTER_TOKEN'], **args)
     
     def get_redirect_url(self):
+        if not app.config['OIDC_ENABLED']:
+            return None
         f_session["state"] = rndstr()
         f_session["nonce"] = rndstr()
         args = {

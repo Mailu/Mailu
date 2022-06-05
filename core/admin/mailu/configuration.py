@@ -53,8 +53,8 @@ DEFAULT_CONFIG = {
     # OpenID Connect settings
     'OIDC_ENABLED': False,
     'OIDC_PROVIDER_INFO_URL': 'https://localhost/info',
-    'OIDC_CLIENT_CONTACT': 'admin@localhost',
-    'OIDC_CLIENT_REGISTER_TOKEN': 'secret',
+    'OIDC_CLIENT_ID': 'mailu',
+    'OIDC_CLIENT_SECRET': 'secret',
     # Mail settings
     'DMARC_RUA': None,
     'DMARC_RUF': None,

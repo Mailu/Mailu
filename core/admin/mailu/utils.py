@@ -40,7 +40,7 @@ from keycloak import KeycloakOpenID
 from oic.oic import Client
 from oic.utils.authn.client import CLIENT_AUTHN_METHOD
 from oic import rndstr
-from oic.oic.message import AuthorizationResponse, AccessTokenResponse
+from oic.oic.message import AuthorizationResponse, AccessTokenResponse, RegistrationResponse
 
 
 # Login configuration
@@ -168,13 +168,10 @@ class OicClient:
     def init_app(self, app):
         self.app = app
         self.client = Client(client_authn_method=CLIENT_AUTHN_METHOD)
-        provider_info = self.client.provider_config(app.config['OIDC_PROVIDER_INFO_URL'])
-        args = {
-            "redirect_uris": [ 'https://' + app.config['HOSTNAME'] + '/sso/auth' ],
-            "contacts": [ app.config['OIDC_CLIENT_CONTACT'] ]
-        }
-        app.logger.warn('REGISTER TOKEN: %s', app.config['OIDC_CLIENT_REGISTER_TOKEN'])
-        self.registration_response = self.client.register(provider_info["registration_endpoint"], registration_token=app.config['OIDC_CLIENT_REGISTER_TOKEN'], **args)
+        self.client.provider_config(app.config['OIDC_PROVIDER_INFO_URL'])
+        info = {"client_id": app.config['OIDC_CLIENT_ID'], "client_secret": app.config['OIDC_CLIENT_SECRET']}
+        client_reg = RegistrationResponse(**info)
+        self.client.store_registration_info(client_reg)
     
     def get_redirect_url(self):
         if not app.config['OIDC_ENABLED']:

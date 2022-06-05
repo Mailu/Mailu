@@ -63,6 +63,7 @@ RUN set -eu \
 # enable database_attachments (and memcache?)
 
 COPY mailu.php /var/www/html/plugins/mailu/mailu.php
+COPY mailu.js /var/www/html/plugins/mailu/mailu.js
 COPY php.ini /
 COPY config.inc.php /
 COPY start.py /

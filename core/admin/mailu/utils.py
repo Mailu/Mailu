@@ -195,8 +195,8 @@ class OicClient:
         aresp = self.client.parse_response(AuthorizationResponse, info=query, sformat="urlencoded")
         self.app.logger.warn("ARESP: %s", aresp)
         self.app.logger.warn("SESSION: %s", f_session)
-        if not (aresp["state"] == f_session["state"]):
-            return None
+        #if not ("state" in f_session and aresp["state"] == f_session["state"]):
+        #    return None
         args = {
             "code": aresp["code"]
         }
@@ -208,7 +208,7 @@ class OicClient:
         f_session["keycloak_token"] = response
         user_response = self.client.do_user_info_request(
             access_token=response['access_token'])
-        return user_response['username']
+        return user_response['username'], response
 
 oic_client = OicClient()
 

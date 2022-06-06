@@ -69,12 +69,13 @@ def auth():
         fields.append(form.submitAdmin)
     fields = [fields]
     device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
-    username = utils.oic_client.exchange_code(flask.request.query_string.decode())
+    (username, keycloak_token) = utils.oic_client.exchange_code(flask.request.query_string.decode())
     if username is not None:
         user = models.User.get(username)
         client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
         flask.session.regenerate()
         flask_login.login_user(user)
+        flask.session["keycloak_token"] = keycloak_token
         response = flask.redirect(app.config['WEB_ADMIN'])
         response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
         flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')

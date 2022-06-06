@@ -194,6 +194,7 @@ class OicClient:
     def exchange_code(self, query):
         aresp = self.client.parse_response(AuthorizationResponse, info=query,
                                 sformat="urlencoded")
+        self.app.logger.warn("ARESP: %s", aresp)
         if not (aresp["state"] == f_session["state"]):
             return None
         args = {

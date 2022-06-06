@@ -8,7 +8,7 @@
   {{ macros.form_fields(fields, label=False, class="btn btn-default") }}
 </form>
 {% if openId %}
-  <a href="{{ openIdEndpoint }}" class="btn btn-default">OpenID Connect</a>
+  <a href="{{ openIdEndpoint }}" class="btn btn-primary">OpenID Connect</a>
 {% endif %}
 {%- endcall %}
 {%- endblock %}

@@ -204,6 +204,7 @@ class OicClient:
             request_args=args,
             authn_method="client_secret_basic")
         if response is not AccessTokenResponse:
+            self.app.logger.warn("RESPONSE: %s", response)
             return None
         user_response = self.client.do_user_info_request(
             access_token=response['access_token'])

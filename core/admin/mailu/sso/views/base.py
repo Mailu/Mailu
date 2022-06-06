@@ -69,7 +69,7 @@ def auth():
         fields.append(form.submitAdmin)
     fields = [fields]
     device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
-    username = utils.oic_client.exchange_code(flask.request.query_string.decode())
+    username = utils.oic_client.exchange_code(flask.request.query_string)
     if username is not None:
         user = models.User.get(username)
         client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)

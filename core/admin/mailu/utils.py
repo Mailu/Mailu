@@ -183,7 +183,7 @@ class OicClient:
             "response_type": "code",
             "scope": ["openid"],
             "nonce": f_session["nonce"],
-            "redirect_uri": self.client.registration_response["redirect_uris"][0],
+            "redirect_uri": "https://" + self.app.config['HOSTNAME'] + '/sso/auth',
             "state": f_session["state"]
         }
 

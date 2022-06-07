@@ -12,7 +12,7 @@ project = 'Mailu'
 copyright = '2018, Mailu authors'
 author = 'Mailu authors'
 version = release = os.environ.get('VERSION', 'master')
-language = None
+language = 'en'
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'Dockerfile', 'docker-compose.yml']
 pygments_style = 'sphinx'
 todo_include_todos = False

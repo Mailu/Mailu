@@ -40,7 +40,7 @@ from keycloak import KeycloakOpenID
 from oic.oic import Client
 from oic.utils.authn.client import CLIENT_AUTHN_METHOD
 from oic import rndstr
-from oic.oic.message import AuthorizationResponse, AccessTokenResponse, RegistrationResponse
+from oic.oic.message import AuthorizationResponse, RegistrationResponse
 
 
 # Login configuration
@@ -202,10 +202,10 @@ class OicClient:
             request_args=args,
             authn_method="client_secret_basic")
         if 'access_token' not in response:
-            return None
+            return None, None
         user_response = self.client.do_user_info_request(
             access_token=response['access_token'])
-        return user_response['username'], response
+        return user_response['email'], response
 
 oic_client = OicClient()
 

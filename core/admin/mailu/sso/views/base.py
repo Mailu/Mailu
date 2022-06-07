@@ -72,6 +72,9 @@ def auth():
     username, keycloak_token = utils.oic_client.exchange_code(flask.request.query_string.decode())
     if username is not None:
         user = models.User.get(username)
+        if user is None: # It is possible that the user never logged into Mailu with his OpenID account
+            user = models.User.create(username) # Create user with no password to enable OpenID and Keycloak-only authentication
+
         client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
         flask.session.regenerate()
         flask_login.login_user(user)

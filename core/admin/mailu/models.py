@@ -687,6 +687,24 @@ in clear-text regardless of the presence of the cache.
     def get(cls, email):
         """ find user object for email address """
         return cls.query.get(email)
+        
+    @classmethod
+    def create(cls, email, password=None):
+        email = email.split('@', 1)
+        domain = Domain.query.get(email[1])
+        if not domain:
+            domain = Domain(name=email[1])
+            db.session.add(domain)
+        user = User(
+            localpart=email[0],
+            domain=domain,
+            global_admin=False
+        )
+        if password is not None:
+            user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        return user
 
     @classmethod
     def login(cls, email, password):

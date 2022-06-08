@@ -68,6 +68,7 @@ context["SESSION_TIMEOUT_MINUTES"] = max(int(env.get("SESSION_TIMEOUT", "3600"))
 # create config files
 conf.jinja("/php.ini", context, "/usr/local/etc/php/conf.d/roundcube.ini")
 conf.jinja("/config.inc.php", context, "/var/www/html/config/config.inc.php")
+conf.jinja("/mailu.js", context, "/var/www/html/plugins/mailu/mailu.js")
 
 # create dirs
 os.system("mkdir -p /data/gpg")

@@ -484,7 +484,7 @@ class User(Base, Email):
 
     domain = db.relationship(Domain,
         backref=db.backref('users', cascade='all, delete-orphan'))
-    password = db.Column(db.String(255), nullable=False, default=('ldap' if app.config['KEYCLOAK_ENABLED'] else None))
+    password = db.Column(db.String(255), nullable=False)
     quota_bytes = db.Column(db.BigInteger, nullable=False, default=10**9)
     quota_bytes_used = db.Column(db.BigInteger, nullable=False, default=0)
     global_admin = db.Column(db.Boolean, nullable=False, default=False)
@@ -684,7 +684,7 @@ in clear-text regardless of the presence of the cache.
         return cls.query.get(email)
         
     @classmethod
-    def create(cls, email, password=None):
+    def create(cls, email, password='ldap'):
         email = email.split('@', 1)
         domain = Domain.query.get(email[1])
         if not domain:
@@ -695,8 +695,7 @@ in clear-text regardless of the presence of the cache.
             domain=domain,
             global_admin=False
         )
-        if password is not None:
-            user.set_password(password)
+        user.set_password(password)
         db.session.add(user)
         db.session.commit()
         return user

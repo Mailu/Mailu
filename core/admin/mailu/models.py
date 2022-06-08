@@ -484,7 +484,7 @@ class User(Base, Email):
 
     domain = db.relationship(Domain,
         backref=db.backref('users', cascade='all, delete-orphan'))
-    password = db.Column(db.String(255), nullable=True)
+    password = db.Column(db.String(255), nullable=False, default=('ldap' if app.config['KEYCLOAK_ENABLED'] else None))
     quota_bytes = db.Column(db.BigInteger, nullable=False, default=10**9)
     quota_bytes_used = db.Column(db.BigInteger, nullable=False, default=0)
     global_admin = db.Column(db.Boolean, nullable=False, default=False)
@@ -554,11 +554,9 @@ class User(Base, Email):
 
     @property
     def is_authenticated(self):
-        app.logger.warn('GETTER')
         if 'keycloak_token' not in session:
             return self._authenticated
         else:
-            app.logger.warn('GETTER: %r', self.keycloak_token)
             success = utils.keycloak_client.introspect(self.keycloak_token)['active'] == True
             if not success:
                 session.pop('keycloak_token', None)
@@ -566,11 +564,8 @@ class User(Base, Email):
 
     @is_authenticated.setter
     def is_authenticated(self, value):
-        app.logger.warn('AUTHENTICATED: %s', value)
         if 'keycloak_token' not in session:
            self._authenticated = value
-        else:
-            app.logger.warn('SETTER: %r', self.keycloak_token)
 
     @classmethod
     def get_password_context(cls):

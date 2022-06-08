@@ -75,6 +75,7 @@ DEFAULT_CONFIG = {
     'SESSION_COOKIE_SECURE': True,
     'CREDENTIAL_ROUNDS': 12,
     'TZ': 'Etc/UTC',
+    'DEFAULT_SPAM_THRESHOLD': 80,
     # Host settings
     'HOST_IMAP': 'imap',
     'HOST_LMTP': 'imap:2525',
@@ -163,6 +164,7 @@ class ConfigManager:
         self.config['MESSAGE_RATELIMIT_EXEMPTION'] = set([s for s in self.config['MESSAGE_RATELIMIT_EXEMPTION'].lower().replace(' ', '').split(',') if s])
         self.config['HOSTNAMES'] = ','.join(hostnames)
         self.config['HOSTNAME'] = hostnames[0]
+        self.config['DEFAULT_SPAM_THRESHOLD'] = int(self.config['DEFAULT_SPAM_THRESHOLD'])
 
         # update the app config
         app.config.update(self.config)

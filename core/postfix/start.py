@@ -6,6 +6,7 @@ import shutil
 import multiprocessing
 import logging as log
 import sys
+import re
 
 from podop import run_server
 from pwd import getpwnam
@@ -49,6 +50,10 @@ os.environ["ANTISPAM_MILTER_ADDRESS"] = system.get_host_address_from_environment
 os.environ["LMTP_ADDRESS"] = system.get_host_address_from_environment("LMTP", "imap:2525")
 os.environ["POSTFIX_LOG_SYSLOG"] = os.environ.get("POSTFIX_LOG_SYSLOG","local")
 os.environ["POSTFIX_LOG_FILE"] = os.environ.get("POSTFIX_LOG_FILE", "")
+
+# Postfix requires IPv6 addresses to be wrapped in square brackets
+if 'RELAYNETS' in os.environ:
+    os.environ["RELAYNETS"] = re.sub(r'([0-9a-fA-F]+:[0-9a-fA-F:]+)/', '[\\1]/', os.environ["RELAYNETS"])
 
 for postfix_file in glob.glob("/conf/*.cf"):
     conf.jinja(postfix_file, os.environ, os.path.join("/etc/postfix", os.path.basename(postfix_file)))

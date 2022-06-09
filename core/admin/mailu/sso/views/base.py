@@ -77,12 +77,12 @@ def auth():
 
         client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
         flask.session.regenerate()
-        flask_login.login_user(user)
         keycloak_token = { # Minimize session data
             "access_token": token_response['access_token'],
             "refresh_token": token_response['refresh_token']
         }
         flask.session["keycloak_token"] = keycloak_token
+        flask_login.login_user(user)
         response = flask.redirect(app.config['WEB_ADMIN'])
         response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
         flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')

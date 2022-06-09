@@ -557,10 +557,12 @@ class User(Base, Email):
         if 'keycloak_token' not in session:
             return self._authenticated
         else:
-            success = utils.keycloak_client.introspect(self.keycloak_token)['active'] == True
-            if not success:
+            token = utils.keycloak_client.check_validity(self.keycloak_token)
+            if token is None:
                 session.pop('keycloak_token', None)
-            return success
+                return False
+            session['keycloak_token'] = token
+            return True
 
     @is_authenticated.setter
     def is_authenticated(self, value):

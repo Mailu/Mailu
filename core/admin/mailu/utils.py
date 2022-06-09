@@ -148,8 +148,15 @@ class KeycloakClient:
     def get_user_info(self, token):
         return self.keycloak_openid.userinfo(token['access_token'])
 
-    def introspect(self, token):
-        return self.keycloak_openid.introspect(token['access_token'])
+    def check_validity(self, token):
+        response = self.keycloak_openid.introspect(token['access_token'])
+        if ('active' in response and response['active'] == False) or 'active' not in response:
+            response = self.keycloak_openid.refresh_token(token['refresh_token'])
+            if 'access_token' in response:
+                return response
+            return None
+        return token
+
 
     def is_enabled(self):
         return self.enabled == True

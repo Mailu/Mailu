@@ -1,3 +1,4 @@
+from multiprocessing.spawn import is_forking
 from mailu import models, utils
 from flask import current_app as app
 
@@ -44,6 +45,7 @@ def check_credentials(user, password, ip, protocol=None, auth_port=None):
                     break
     if not is_ok and user.check_password(password):
         is_ok = True
+    app.logger.warn('IS OK: %s', is_ok)
     return is_ok
 
 def handle_authentication(headers):

@@ -39,13 +39,15 @@ def check_credentials(user, password, ip, protocol=None, auth_port=None):
     # All tokens are 32 characters hex lowercase
     if not is_ok and len(password) == 32:
         for token in user.tokens:
+            app.logger.warn('STEP x')
             if (token.check_password(password) and
                 (not token.ip or token.ip == ip)):
                     is_ok = True
                     break
     if not is_ok and user.check_password(password):
+        app.logger.warn('STEP 0')
         is_ok = True
-    app.logger.warn('IS OK: %s', is_ok)
+    app.logger.warn('STEP 1: %s', is_ok)
     return is_ok
 
 def handle_authentication(headers):
@@ -104,6 +106,7 @@ def handle_authentication(headers):
                 ip = urllib.parse.unquote(headers["Client-Ip"])
                 if check_credentials(user, password, ip, protocol, headers["Auth-Port"]):
                     server, port = get_server(headers["Auth-Protocol"], True)
+                    app.logger.warn('STEP 2')
                     return {
                         "Auth-Status": "OK",
                         "Auth-Server": server,
@@ -111,6 +114,7 @@ def handle_authentication(headers):
                         "Auth-User-Exists": is_valid_user,
                         "Auth-Port": port
                     }
+        app.logger.warn('STEP 3')
         status, code = get_status(protocol, "authentication")
         return {
             "Auth-Status": status,

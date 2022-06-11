@@ -190,7 +190,7 @@ class OicClient:
             "response_type": "code",
             "scope": ["openid"],
             "nonce": f_session["nonce"],
-            "redirect_uri": "https://" + self.app.config['HOSTNAME'] + "/sso/auth",
+            "redirect_uri": "https://" + self.app.config['HOSTNAME'] + "/sso/login",
             "state": f_session["state"]
         }
 

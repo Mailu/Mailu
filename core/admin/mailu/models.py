@@ -554,6 +554,7 @@ class User(Base, Email):
 
     @property
     def is_authenticated(self):
+        app.logger.warn('SESSION 6: %s', session)
         if 'keycloak_token' not in session:
             return self._authenticated
         else:

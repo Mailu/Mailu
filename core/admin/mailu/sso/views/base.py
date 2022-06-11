@@ -24,13 +24,17 @@ def login():
                 "access_token": token_response['access_token'],
                 "refresh_token": token_response['refresh_token']
             }
+            app.logger.warn('SESSION 1: %s', session)
             flask.session["keycloak_token"] = keycloak_token
+            app.logger.warn('SESSION 2: %s', session)
             flask.session.regenerate()
+            app.logger.warn('SESSION 3: %s', session)
             flask_login.login_user(user)
+            app.logger.warn('SESSION 4: %s', session)
             response = flask.redirect(app.config['WEB_ADMIN'])
             response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
             flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')
-            app.logger.warn('REDIRECT')
+            app.logger.warn('SESSION 5: %s', session)
             return response
         else:
             utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)

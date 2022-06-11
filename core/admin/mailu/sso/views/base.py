@@ -10,18 +10,6 @@ import flask_login
 
 @sso.route('/login', methods=['GET', 'POST'])
 def login():
-    client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
-    form = forms.LoginForm()
-    form.submitAdmin.label.text = form.submitAdmin.label.text + ' Admin'
-    form.submitWebmail.label.text = form.submitWebmail.label.text + ' Webmail'
-
-    fields = []
-    if str(app.config["WEBMAIL"]).upper() != "NONE":
-        fields.append(form.submitWebmail)
-    if str(app.config["ADMIN"]).upper() != "FALSE":
-        fields.append(form.submitAdmin)
-    fields = [fields]
-
     device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
 
     if 'code' in flask.request.args:
@@ -48,6 +36,18 @@ def login():
             utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)
             flask.current_app.logger.warn(f'Login failed for {username} from {client_ip}.')
             flask.flash('Wrong e-mail or password', 'error')
+            
+    client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
+    form = forms.LoginForm()
+    form.submitAdmin.label.text = form.submitAdmin.label.text + ' Admin'
+    form.submitWebmail.label.text = form.submitWebmail.label.text + ' Webmail'
+
+    fields = []
+    if str(app.config["WEBMAIL"]).upper() != "NONE":
+        fields.append(form.submitWebmail)
+    if str(app.config["ADMIN"]).upper() != "FALSE":
+        fields.append(form.submitAdmin)
+    fields = [fields]
 
     if form.validate_on_submit():
         if form.submitAdmin.data:

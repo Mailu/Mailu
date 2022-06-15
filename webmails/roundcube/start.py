@@ -72,9 +72,8 @@ conf.jinja("/config.inc.php", context, "/var/www/html/config/config.inc.php")
 # create dirs
 os.system("mkdir -p /data/gpg")
 
-# configure apache2
-conf.jinja("/remoteip.conf", context, "/etc/apache2/conf-available/remoteip.conf")
-os.system("a2enconf remoteip")
+# disable access log for VirtualHosts that don't define their own logfile
+os.system("a2disconf other-vhosts-access-log")
 
 print("Initializing database")
 try:

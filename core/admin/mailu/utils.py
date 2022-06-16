@@ -49,6 +49,7 @@ login.login_view = "sso.login"
 
 @login.unauthorized_handler
 def handle_needs_login():
+    app.logger.warn('SESSION 7: %s', f_session)
     """ redirect unauthorized requests to login page """
     return flask.redirect(
         flask.url_for('sso.login')

@@ -1,11 +1,45 @@
 from werkzeug.utils import redirect
 from mailu import models, utils
-from mailu.sso import sso, forms
+from mailu.sso import sso, forms, oauth
 from mailu.ui import access
 
 from flask import current_app as app
 import flask
 import flask_login
+import requests
+
+
+@sso.route('/login_oidc')
+def login_oidc():
+    redirect_uri = flask.url_for('sso.auth', _external=True, _scheme='https')
+    return oauth.keycloak.authorize_redirect(redirect_uri)
+
+
+@sso.route('/auth')
+def auth():
+    client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
+    tokenResponse = oauth.keycloak.authorize_access_token()
+
+    app.logger.info(str(tokenResponse))
+    idToken = oauth.keycloak.parse_id_token(tokenResponse, nonce=None)
+
+    if idToken:
+        flask.session['oidc_user'] = idToken
+        flask.session['oidc_tokenResponse'] = tokenResponse
+        if str(idToken['email_verified']).upper() == "TRUE":
+            user = models.User.login_oidc(idToken['email'])  # Should probably also allow to get emails from attributes or similar
+            if user:
+                flask.session.regenerate()
+                flask_login.login_user(user)
+                if str(app.config["ADMIN"]).upper() != "FALSE":
+                    response = flask.redirect(app.config['WEB_ADMIN'])
+                else:
+                    response = flask.redirect(app.config['WEB_WEBMAIL'])
+                response.set_cookie('rate_limit', utils.limiter.device_cookie(idToken['email']), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
+                flask.current_app.logger.info(f'OIDC login succeeded for {idToken["email"]} from {client_ip}.')
+                return response
+    return 'Unauthorized'
+
 
 @sso.route('/login', methods=['GET', 'POST'])
 def login():
@@ -52,6 +86,17 @@ def login():
 @access.authenticated
 def logout():
     flask_login.logout_user()
+    tokenResponse = flask.session.get('oidc_tokenResponse')
+    if tokenResponse is not None:
+        refreshToken = tokenResponse['refresh_token']
+        endSessionEndpoint = f'{app.config["OIDC_ISSUER"]}/protocol/openid-connect/logout'
+
+        # Logs you out of the SSO
+        requests.post(endSessionEndpoint, data={
+            'client_id': app.config['OIDC_CLIENTID'],
+            'client_secret': app.config['OIDC_CLIENTSECRET'],
+            'refresh_token': refreshToken,
+            })
     flask.session.destroy()
     return flask.redirect(flask.url_for('.login'))
 

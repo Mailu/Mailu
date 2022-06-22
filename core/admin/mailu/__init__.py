@@ -8,6 +8,9 @@ from mailu import utils, debug, models, manage, configuration
 
 import hmac
 
+from authlib.integrations.flask_client import OAuth
+oauth = OAuth()
+
 def create_app_from_config(config):
     """ Create a new application based on the given configuration
     """
@@ -71,6 +74,20 @@ def create_app_from_config(config):
     app.register_blueprint(ui.ui, url_prefix=app.config['WEB_ADMIN'])
     app.register_blueprint(internal.internal, url_prefix='/internal')
     app.register_blueprint(sso.sso, url_prefix='/sso')
+
+    if str(app.config['OIDC']).upper() == 'TRUE':
+        oauth.init_app(app)
+        oauth.register(
+                name='keycloak',
+                client_id=app.config['OIDC_CLIENTID'],
+                client_secret=app.config['OIDC_CLIENTSECRET'],
+                server_metadata_url=f'{app.config["OIDC_ISSUER"]}/.well-known/openid-configuration',
+                client_kwargs={
+                    'scope': 'openid email profile',
+                    'code_challenge_method': 'S256'
+                },
+        )
+
     return app
 
 

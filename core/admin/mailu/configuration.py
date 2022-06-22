@@ -88,7 +88,12 @@ DEFAULT_CONFIG = {
     'HOST_FRONT': 'front',
     'SUBNET': '192.168.203.0/24',
     'SUBNET6': None,
-    'POD_ADDRESS_RANGE': None
+    'POD_ADDRESS_RANGE': None,
+    # OIDC settings
+    'OIDC': False,
+    'OIDC_ISSUER': '',
+    'OIDC_CLIENTID': '',
+    'OIDC_CLIENTSECRET': ''
 }
 
 class ConfigManager:

@@ -648,6 +648,11 @@ in clear-text regardless of the presence of the cache.
         user = cls.query.get(email)
         return user if (user and user.enabled and user.check_password(password)) else None
 
+    def login_oidc(cls, email):
+        """ login user when enabled and authenticated with oidc """
+        user = cls.query.get(email)
+        return user if (user and user.enabled) else None
+
 
 class Alias(Base, Email):
     """ An alias is an email address that redirects to some destination.

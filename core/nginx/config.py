@@ -2,6 +2,7 @@
 
 import os
 import logging as log
+import ipaddress
 import sys
 from socrate import system, conf
 
@@ -12,7 +13,11 @@ log.basicConfig(stream=sys.stderr, level=args.get("LOG_LEVEL", "WARNING"))
 # Get the first DNS server
 with open("/etc/resolv.conf") as handle:
     content = handle.read().split()
-    args["RESOLVER"] = content[content.index("nameserver") + 1]
+    resolver = ipaddress.ip_address(content[content.index("nameserver") + 1])
+    if isinstance(resolver, ipaddress.IPv6Address):
+        args["RESOLVER"] = f"[{resolver}]"
+    else:
+        args["RESOLVER"] = str(resolver)
 
 args["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
 args["ANTISPAM_WEBUI_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM_WEBUI", "antispam:11334")

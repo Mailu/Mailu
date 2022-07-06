@@ -1,7 +1,9 @@
+
 msgid ""
 msgstr ""
 "Project-Id-Version:  Mailu\n"
-"POT-Creation-Date: 2021-02-05 16:34+0100\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2022-05-22 18:47+0200\n"
 "PO-Revision-Date: 2020-02-17 20:23+0000\n"
 "Last-Translator: Marcin Siennicki <marcin@siennicki.eu>\n"
 "Language: pl\n"
@@ -12,7 +14,62 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.3.4\n"
+
+#: mailu/sso/forms.py:8 mailu/ui/forms.py:79
+msgid "E-mail"
+msgstr "E-mail"
+
+#: mailu/sso/forms.py:9 mailu/ui/forms.py:80 mailu/ui/forms.py:93
+#: mailu/ui/forms.py:112 mailu/ui/forms.py:166
+#: mailu/ui/templates/client.html:32 mailu/ui/templates/client.html:57
+msgid "Password"
+msgstr "Hasło"
+
+#: mailu/sso/forms.py:10 mailu/sso/forms.py:11 mailu/sso/templates/login.html:4
+#: mailu/ui/templates/sidebar.html:142
+msgid "Sign in"
+msgstr "Zaloguj"
+
+#: mailu/sso/templates/base_sso.html:8 mailu/ui/templates/base.html:8
+msgid "Admin page for"
+msgstr ""
+
+#: mailu/sso/templates/base_sso.html:19 mailu/ui/templates/base.html:19
+msgid "toggle sidebar"
+msgstr ""
+
+#: mailu/sso/templates/base_sso.html:37 mailu/ui/templates/base.html:37
+msgid "change language"
+msgstr ""
+
+#: mailu/sso/templates/sidebar_sso.html:4 mailu/ui/templates/sidebar.html:94
+msgid "Go to"
+msgstr "Przejdź do"
+
+#: mailu/sso/templates/sidebar_sso.html:9 mailu/ui/templates/client.html:4
+#: mailu/ui/templates/sidebar.html:50 mailu/ui/templates/sidebar.html:107
+msgid "Client setup"
+msgstr "Konfiguracja klienta"
+
+#: mailu/sso/templates/sidebar_sso.html:16 mailu/ui/templates/sidebar.html:114
+msgid "Website"
+msgstr "Strona internetowa"
+
+#: mailu/sso/templates/sidebar_sso.html:22 mailu/ui/templates/sidebar.html:120
+msgid "Help"
+msgstr "Pomoc"
+
+#: mailu/sso/templates/sidebar_sso.html:35
+#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:127
+msgid "Register a domain"
+msgstr "Zarejestruj domenę"
+
+#: mailu/sso/templates/sidebar_sso.html:49 mailu/ui/forms.py:95
+#: mailu/ui/templates/sidebar.html:149 mailu/ui/templates/user/signup.html:4
+#: mailu/ui/templates/user/signup_domain.html:4
+msgid "Sign up"
+msgstr "Utwórz konto"
 
 #: mailu/ui/forms.py:33 mailu/ui/forms.py:36
 msgid "Invalid email address."
@@ -22,237 +79,220 @@ msgstr "Nieprawidłowy adres e-mail."
 msgid "Confirm"
 msgstr "Zatwierdź"
 
-#: mailu/ui/forms.py:49 mailu/ui/forms.py:86
-msgid "E-mail"
-msgstr "E-mail"
-
-#: mailu/ui/forms.py:50 mailu/ui/forms.py:87 mailu/ui/forms.py:100
-#: mailu/ui/forms.py:118 mailu/ui/forms.py:172
-#: mailu/ui/templates/client.html:32 mailu/ui/templates/client.html:59
-msgid "Password"
-msgstr "Hasło"
-
-#: mailu/ui/forms.py:51 mailu/ui/templates/login.html:4
-#: mailu/ui/templates/sidebar.html:108
-msgid "Sign in"
-msgstr "Zaloguj"
-
-#: mailu/ui/forms.py:55 mailu/ui/forms.py:65
-#: mailu/ui/templates/domain/details.html:27
-#: mailu/ui/templates/domain/list.html:18 mailu/ui/templates/relay/list.html:17
+#: mailu/ui/forms.py:48 mailu/ui/forms.py:58
+#: mailu/ui/templates/domain/details.html:26
+#: mailu/ui/templates/domain/list.html:19 mailu/ui/templates/relay/list.html:18
 msgid "Domain name"
 msgstr "Nazwa domeny"
 
-#: mailu/ui/forms.py:56
+#: mailu/ui/forms.py:49
 msgid "Maximum user count"
 msgstr "Maksymalna liczba użytkowników"
 
-#: mailu/ui/forms.py:57
+#: mailu/ui/forms.py:50
 msgid "Maximum alias count"
 msgstr "Maksymalna liczba aliasów"
 
-#: mailu/ui/forms.py:58
+#: mailu/ui/forms.py:51
 msgid "Maximum user quota"
 msgstr "Maksymalny przydział użytkownika"
 
-#: mailu/ui/forms.py:59
+#: mailu/ui/forms.py:52
 msgid "Enable sign-up"
 msgstr "Włącz rejestrację"
 
-#: mailu/ui/forms.py:60 mailu/ui/forms.py:81 mailu/ui/forms.py:93
-#: mailu/ui/forms.py:138 mailu/ui/forms.py:150
-#: mailu/ui/templates/alias/list.html:21 mailu/ui/templates/domain/list.html:21
-#: mailu/ui/templates/relay/list.html:19 mailu/ui/templates/token/list.html:19
-#: mailu/ui/templates/user/list.html:23
+#: mailu/ui/forms.py:53 mailu/ui/forms.py:74 mailu/ui/forms.py:86
+#: mailu/ui/forms.py:132 mailu/ui/forms.py:144
+#: mailu/ui/templates/alias/list.html:22 mailu/ui/templates/domain/list.html:22
+#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:20
+#: mailu/ui/templates/user/list.html:24
 msgid "Comment"
 msgstr "Komentarz"
 
-#: mailu/ui/forms.py:61 mailu/ui/forms.py:75 mailu/ui/forms.py:82
-#: mailu/ui/forms.py:95 mailu/ui/forms.py:142 mailu/ui/forms.py:151
+#: mailu/ui/forms.py:54 mailu/ui/forms.py:68 mailu/ui/forms.py:75
+#: mailu/ui/forms.py:88 mailu/ui/forms.py:136 mailu/ui/forms.py:145
 msgid "Save"
 msgstr "Zapisz"
 
-#: mailu/ui/forms.py:66
+#: mailu/ui/forms.py:59
 msgid "Initial admin"
 msgstr "Początkowy administrator"
 
-#: mailu/ui/forms.py:67
+#: mailu/ui/forms.py:60
 msgid "Admin password"
 msgstr "Hasło administratora"
 
-#: mailu/ui/forms.py:68 mailu/ui/forms.py:88 mailu/ui/forms.py:101
+#: mailu/ui/forms.py:61 mailu/ui/forms.py:81 mailu/ui/forms.py:94
 msgid "Confirm password"
 msgstr "Potwierdź hasło"
 
-#: mailu/ui/forms.py:70
+#: mailu/ui/forms.py:63
 msgid "Create"
 msgstr "Utwórz"
 
-#: mailu/ui/forms.py:74
+#: mailu/ui/forms.py:67
 msgid "Alternative name"
 msgstr "Alternatywna nazwa"
 
-#: mailu/ui/forms.py:79
+#: mailu/ui/forms.py:72
 msgid "Relayed domain name"
 msgstr "Domeny przekierowywane"
 
-#: mailu/ui/forms.py:80 mailu/ui/templates/relay/list.html:18
+#: mailu/ui/forms.py:73 mailu/ui/templates/relay/list.html:19
 msgid "Remote host"
 msgstr "Zdalny host"
 
-#: mailu/ui/forms.py:89 mailu/ui/templates/user/list.html:22
+#: mailu/ui/forms.py:82 mailu/ui/templates/user/list.html:23
 #: mailu/ui/templates/user/signup_domain.html:16
 msgid "Quota"
 msgstr "Maksymalna przestrzeń na dysku"
 
-#: mailu/ui/forms.py:90
+#: mailu/ui/forms.py:83
 msgid "Allow IMAP access"
 msgstr "Zezwalaj na dostęp przez protokół IMAP"
 
-#: mailu/ui/forms.py:91
+#: mailu/ui/forms.py:84
 msgid "Allow POP3 access"
 msgstr "Zezwalaj na dostęp przez protokół POP3"
 
-#: mailu/ui/forms.py:92 mailu/ui/forms.py:108
+#: mailu/ui/forms.py:85 mailu/ui/forms.py:101
 #: mailu/ui/templates/user/settings.html:15
 msgid "Displayed name"
 msgstr "Nazwa wyświetlana"
 
-#: mailu/ui/forms.py:94
+#: mailu/ui/forms.py:87
 msgid "Enabled"
 msgstr "Włączone"
 
-#: mailu/ui/forms.py:99
+#: mailu/ui/forms.py:92
 msgid "Email address"
 msgstr "Adres e-mail"
 
-#: mailu/ui/forms.py:102 mailu/ui/templates/sidebar.html:114
-#: mailu/ui/templates/user/signup.html:4
-#: mailu/ui/templates/user/signup_domain.html:4
-msgid "Sign up"
-msgstr "Utwórz konto"
-
-#: mailu/ui/forms.py:109
+#: mailu/ui/forms.py:102
 msgid "Enable spam filter"
 msgstr "Włącz filtr antyspamowy"
 
-#: mailu/ui/forms.py:110
+#: mailu/ui/forms.py:103
+msgid "Enable marking spam mails as read"
+msgstr ""
+
+#: mailu/ui/forms.py:104
 msgid "Spam filter tolerance"
 msgstr "Tolerancja filtra spamu"
 
-#: mailu/ui/forms.py:111
+#: mailu/ui/forms.py:105
 msgid "Enable forwarding"
 msgstr "Włącz przekierowanie poczty"
 
-#: mailu/ui/forms.py:112
+#: mailu/ui/forms.py:106
 msgid "Keep a copy of the emails"
 msgstr "Przechowuj kopię wiadomości"
 
-#: mailu/ui/forms.py:113 mailu/ui/forms.py:149
-#: mailu/ui/templates/alias/list.html:20
+#: mailu/ui/forms.py:107 mailu/ui/forms.py:143
+#: mailu/ui/templates/alias/list.html:21
 msgid "Destination"
 msgstr "Adres docelowy"
 
-#: mailu/ui/forms.py:114
+#: mailu/ui/forms.py:108
 msgid "Save settings"
 msgstr "Zapisz ustawienia"
 
-#: mailu/ui/forms.py:119
+#: mailu/ui/forms.py:113
 msgid "Password check"
 msgstr "Powtórz hasło"
 
-#: mailu/ui/forms.py:120 mailu/ui/templates/sidebar.html:16
+#: mailu/ui/forms.py:114 mailu/ui/templates/sidebar.html:25
 msgid "Update password"
 msgstr "Zaktualizuj hasło"
 
-#: mailu/ui/forms.py:124
+#: mailu/ui/forms.py:118
 msgid "Enable automatic reply"
 msgstr "Włącz automatyczną odpowiedź"
 
-#: mailu/ui/forms.py:125
+#: mailu/ui/forms.py:119
 msgid "Reply subject"
 msgstr "Temat odpowiedzi"
 
-#: mailu/ui/forms.py:126
+#: mailu/ui/forms.py:120
 msgid "Reply body"
 msgstr "Treść odpowiedzi"
 
-#: mailu/ui/forms.py:128
+#: mailu/ui/forms.py:122
 #, fuzzy
 msgid "Start of vacation"
 msgstr "Rozpoczęcie nieobecności"
 
-#: mailu/ui/forms.py:129
+#: mailu/ui/forms.py:123
 msgid "End of vacation"
 msgstr "Koniec nieobecności"
 
-#: mailu/ui/forms.py:130
+#: mailu/ui/forms.py:124
 msgid "Update"
 msgstr "Aktualizuj"
 
-#: mailu/ui/forms.py:135
+#: mailu/ui/forms.py:129
 msgid "Your token (write it down, as it will never be displayed again)"
 msgstr "Twój token (zapisz go, ponieważ nigdy więcej nie będzie wyświetlany)"
 
-#: mailu/ui/forms.py:140 mailu/ui/templates/token/list.html:20
+#: mailu/ui/forms.py:134 mailu/ui/templates/token/list.html:21
 msgid "Authorized IP"
 msgstr "Autoryzowany adres IP"
 
-#: mailu/ui/forms.py:146
+#: mailu/ui/forms.py:140
 msgid "Alias"
 msgstr "Alias"
 
-#: mailu/ui/forms.py:148
+#: mailu/ui/forms.py:142
 msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"
 msgstr "Używaj składni SQL LIKE (np. do adresów catch-all)"
 
-#: mailu/ui/forms.py:155
+#: mailu/ui/forms.py:149
 msgid "Admin email"
 msgstr "E-mail administratora"
 
-#: mailu/ui/forms.py:156 mailu/ui/forms.py:161 mailu/ui/forms.py:174
+#: mailu/ui/forms.py:150 mailu/ui/forms.py:155 mailu/ui/forms.py:168
 msgid "Submit"
 msgstr "Prześlij"
 
-#: mailu/ui/forms.py:160
+#: mailu/ui/forms.py:154
 msgid "Manager email"
 msgstr "E-mail menedżera"
 
-#: mailu/ui/forms.py:165
+#: mailu/ui/forms.py:159
 msgid "Protocol"
 msgstr "Protokół"
 
-#: mailu/ui/forms.py:168
+#: mailu/ui/forms.py:162
 msgid "Hostname or IP"
 msgstr "Nazwa hosta lub adres IP"
 
-#: mailu/ui/forms.py:169 mailu/ui/templates/client.html:20
-#: mailu/ui/templates/client.html:47
+#: mailu/ui/forms.py:163 mailu/ui/templates/client.html:20
+#: mailu/ui/templates/client.html:45
 msgid "TCP port"
 msgstr "Port TCP"
 
-#: mailu/ui/forms.py:170
+#: mailu/ui/forms.py:164
 msgid "Enable TLS"
 msgstr "Włącz TLS"
 
-#: mailu/ui/forms.py:171 mailu/ui/templates/client.html:28
-#: mailu/ui/templates/client.html:55 mailu/ui/templates/fetch/list.html:20
+#: mailu/ui/forms.py:165 mailu/ui/templates/client.html:28
+#: mailu/ui/templates/client.html:53 mailu/ui/templates/fetch/list.html:21
 msgid "Username"
 msgstr "Nazwa użytkownika"
 
-#: mailu/ui/forms.py:173
+#: mailu/ui/forms.py:167
 msgid "Keep emails on the server"
 msgstr "Przechowuj wiadomości na serwerze"
 
-#: mailu/ui/forms.py:178
+#: mailu/ui/forms.py:172
 msgid "Announcement subject"
 msgstr "Temat ogłoszenia"
 
-#: mailu/ui/forms.py:180
+#: mailu/ui/forms.py:174
 msgid "Announcement body"
 msgstr "Treść ogłoszenia"
 
-#: mailu/ui/forms.py:182
+#: mailu/ui/forms.py:176
 msgid "Send"
 msgstr "Wyślij"
 
@@ -260,17 +300,34 @@ msgstr "Wyślij"
 msgid "Public announcement"
 msgstr "Publiczne ogłoszenie"
 
-#: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:79
-msgid "Client setup"
-msgstr "Konfiguracja klienta"
+#: mailu/ui/templates/antispam.html:4 mailu/ui/templates/sidebar.html:80
+#: mailu/ui/templates/user/settings.html:19
+msgid "Antispam"
+msgstr "Filtr antyspamowy"
 
-#: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
+#: mailu/ui/templates/antispam.html:8
+msgid "RSPAMD status page"
+msgstr ""
+
+#: mailu/ui/templates/client.html:8
+msgid "configure your email client"
+msgstr ""
+
+#: mailu/ui/templates/client.html:13
+msgid "Incoming mail"
+msgstr ""
+
+#: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:41
 msgid "Mail protocol"
 msgstr "Protokół poczty"
 
-#: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
+#: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:49
 msgid "Server name"
 msgstr "Nazwa serwera"
+
+#: mailu/ui/templates/client.html:38
+msgid "Outgoing mail"
+msgstr ""
 
 #: mailu/ui/templates/confirm.html:4
 msgid "Confirm action"
@@ -291,77 +348,57 @@ msgstr "Błąd Dockera"
 msgid "An error occurred while talking to the Docker server."
 msgstr "Wystąpił błąd komunikacji z serwerem Dockera."
 
-#: mailu/ui/templates/login.html:8
-msgid "to access the administration tools"
-msgstr "aby uzyskać dostęp do narzędzi administracyjnych"
+#: mailu/ui/templates/macros.html:129
+msgid "copy to clipboard"
+msgstr ""
 
-#: mailu/ui/templates/sidebar.html:8
+#: mailu/ui/templates/sidebar.html:15
 #, fuzzy
 msgid "My account"
 msgstr "Dodaj konto"
 
-#: mailu/ui/templates/sidebar.html:11 mailu/ui/templates/user/list.html:34
+#: mailu/ui/templates/sidebar.html:19 mailu/ui/templates/user/list.html:37
 msgid "Settings"
 msgstr "Ustawienia"
 
-#: mailu/ui/templates/sidebar.html:21 mailu/ui/templates/user/list.html:35
+#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/user/list.html:38
 msgid "Auto-reply"
 msgstr "Automatyczna odpowiedź"
 
-#: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:26
-#: mailu/ui/templates/user/list.html:36
+#: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:37
+#: mailu/ui/templates/user/list.html:39
 msgid "Fetched accounts"
 msgstr "Zewnętrzne konta e-mail"
 
-#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/token/list.html:4
+#: mailu/ui/templates/sidebar.html:43 mailu/ui/templates/token/list.html:4
 msgid "Authentication tokens"
 msgstr "Tokeny uwierzytelnienia"
 
-#: mailu/ui/templates/sidebar.html:36
+#: mailu/ui/templates/sidebar.html:56
 msgid "Administration"
 msgstr "Administracja"
 
-#: mailu/ui/templates/sidebar.html:41
+#: mailu/ui/templates/sidebar.html:62
 msgid "Announcement"
 msgstr "Ogłoszenie"
 
-#: mailu/ui/templates/sidebar.html:46
+#: mailu/ui/templates/sidebar.html:68
 msgid "Administrators"
 msgstr "Administratorzy"
 
-#: mailu/ui/templates/sidebar.html:51
+#: mailu/ui/templates/sidebar.html:74
 msgid "Relayed domains"
 msgstr "Domeny przekierowywane"
 
-#: mailu/ui/templates/sidebar.html:56 mailu/ui/templates/user/settings.html:19
-msgid "Antispam"
-msgstr "Filtr antyspamowy"
-
-#: mailu/ui/templates/sidebar.html:63
+#: mailu/ui/templates/sidebar.html:88
 msgid "Mail domains"
 msgstr "Domeny pocztowe"
 
-#: mailu/ui/templates/sidebar.html:69
-msgid "Go to"
-msgstr "Przejdź do"
-
-#: mailu/ui/templates/sidebar.html:73
+#: mailu/ui/templates/sidebar.html:99
 msgid "Webmail"
 msgstr "Twoja poczta"
 
-#: mailu/ui/templates/sidebar.html:84
-msgid "Website"
-msgstr "Strona internetowa"
-
-#: mailu/ui/templates/sidebar.html:89
-msgid "Help"
-msgstr "Pomoc"
-
-#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:95
-msgid "Register a domain"
-msgstr "Zarejestruj domenę"
-
-#: mailu/ui/templates/sidebar.html:102
+#: mailu/ui/templates/sidebar.html:135
 msgid "Sign out"
 msgstr "Wyloguj"
 
@@ -381,26 +418,26 @@ msgstr "Administratorzy globalni"
 msgid "Add administrator"
 msgstr "Dodaj administratora"
 
-#: mailu/ui/templates/admin/list.html:16 mailu/ui/templates/alias/list.html:18
-#: mailu/ui/templates/alternative/list.html:18
-#: mailu/ui/templates/domain/list.html:16 mailu/ui/templates/fetch/list.html:18
-#: mailu/ui/templates/manager/list.html:18
-#: mailu/ui/templates/relay/list.html:16 mailu/ui/templates/token/list.html:18
-#: mailu/ui/templates/user/list.html:18
+#: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
+#: mailu/ui/templates/alternative/list.html:19
+#: mailu/ui/templates/domain/list.html:17 mailu/ui/templates/fetch/list.html:19
+#: mailu/ui/templates/manager/list.html:19
+#: mailu/ui/templates/relay/list.html:17 mailu/ui/templates/token/list.html:19
+#: mailu/ui/templates/user/list.html:19
 msgid "Actions"
 msgstr "Czynności"
 
-#: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
-#: mailu/ui/templates/manager/list.html:19 mailu/ui/templates/user/list.html:20
+#: mailu/ui/templates/admin/list.html:18 mailu/ui/templates/alias/list.html:20
+#: mailu/ui/templates/manager/list.html:20 mailu/ui/templates/user/list.html:21
 msgid "Email"
 msgstr "E-mail"
 
-#: mailu/ui/templates/admin/list.html:22 mailu/ui/templates/alias/list.html:29
-#: mailu/ui/templates/alternative/list.html:25
-#: mailu/ui/templates/domain/list.html:31 mailu/ui/templates/fetch/list.html:31
-#: mailu/ui/templates/manager/list.html:24
-#: mailu/ui/templates/relay/list.html:27 mailu/ui/templates/token/list.html:26
-#: mailu/ui/templates/user/list.html:31
+#: mailu/ui/templates/admin/list.html:25 mailu/ui/templates/alias/list.html:32
+#: mailu/ui/templates/alternative/list.html:29
+#: mailu/ui/templates/domain/list.html:34 mailu/ui/templates/fetch/list.html:34
+#: mailu/ui/templates/manager/list.html:27
+#: mailu/ui/templates/relay/list.html:30 mailu/ui/templates/token/list.html:30
+#: mailu/ui/templates/user/list.html:34
 msgid "Delete"
 msgstr "Usuń"
 
@@ -420,23 +457,25 @@ msgstr "Lista aliasów"
 msgid "Add alias"
 msgstr "Dodaj alias"
 
-#: mailu/ui/templates/alias/list.html:22
-#: mailu/ui/templates/alternative/list.html:20
-#: mailu/ui/templates/domain/list.html:22 mailu/ui/templates/fetch/list.html:24
-#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:21
-#: mailu/ui/templates/user/list.html:24
+#: mailu/ui/templates/alias/list.html:23
+#: mailu/ui/templates/alternative/list.html:21
+#: mailu/ui/templates/domain/list.html:23 mailu/ui/templates/fetch/list.html:25
+#: mailu/ui/templates/relay/list.html:21 mailu/ui/templates/token/list.html:22
+#: mailu/ui/templates/user/list.html:25
 msgid "Created"
 msgstr "Utworzono"
 
-#: mailu/ui/templates/alias/list.html:23 mailu/ui/templates/domain/list.html:23
-#: mailu/ui/templates/fetch/list.html:25 mailu/ui/templates/relay/list.html:21
-#: mailu/ui/templates/user/list.html:25
+#: mailu/ui/templates/alias/list.html:24
+#: mailu/ui/templates/alternative/list.html:22
+#: mailu/ui/templates/domain/list.html:24 mailu/ui/templates/fetch/list.html:26
+#: mailu/ui/templates/relay/list.html:22 mailu/ui/templates/token/list.html:23
+#: mailu/ui/templates/user/list.html:26
 msgid "Last edit"
 msgstr "Ostatnia edycja"
 
-#: mailu/ui/templates/alias/list.html:28 mailu/ui/templates/domain/list.html:30
-#: mailu/ui/templates/fetch/list.html:30 mailu/ui/templates/relay/list.html:26
-#: mailu/ui/templates/user/list.html:30
+#: mailu/ui/templates/alias/list.html:31 mailu/ui/templates/domain/list.html:33
+#: mailu/ui/templates/fetch/list.html:33 mailu/ui/templates/relay/list.html:29
+#: mailu/ui/templates/user/list.html:33
 msgid "Edit"
 msgstr "Edytuj"
 
@@ -452,7 +491,7 @@ msgstr "Alternatywna lista domen"
 msgid "Add alternative"
 msgstr "Dodaj alternatywę"
 
-#: mailu/ui/templates/alternative/list.html:19
+#: mailu/ui/templates/alternative/list.html:20
 msgid "Name"
 msgstr "Nazwa"
 
@@ -473,25 +512,33 @@ msgstr "Wygeneruj ponownie klucze"
 msgid "Generate keys"
 msgstr "Wygeneruj klucze"
 
-#: mailu/ui/templates/domain/details.html:31
+#: mailu/ui/templates/domain/details.html:30
 msgid "DNS MX entry"
 msgstr "Wpis MX DNS"
 
-#: mailu/ui/templates/domain/details.html:35
+#: mailu/ui/templates/domain/details.html:34
 msgid "DNS SPF entries"
 msgstr "Wpisy SPF DNS"
 
-#: mailu/ui/templates/domain/details.html:41
+#: mailu/ui/templates/domain/details.html:40
 msgid "DKIM public key"
 msgstr "Publiczny klucz DKIM"
 
-#: mailu/ui/templates/domain/details.html:45
+#: mailu/ui/templates/domain/details.html:44
 msgid "DNS DKIM entry"
 msgstr "Wpis DKIM DNS"
 
-#: mailu/ui/templates/domain/details.html:49
+#: mailu/ui/templates/domain/details.html:48
 msgid "DNS DMARC entry"
 msgstr "Wpis DMARC DNS"
+
+#: mailu/ui/templates/domain/details.html:58
+msgid "DNS TLSA entry"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:63
+msgid "DNS client auto-configuration entries"
+msgstr ""
 
 #: mailu/ui/templates/domain/edit.html:4
 msgid "Edit domain"
@@ -501,35 +548,35 @@ msgstr "Edytuj domenę"
 msgid "Domain list"
 msgstr "Lista domen"
 
-#: mailu/ui/templates/domain/list.html:17
+#: mailu/ui/templates/domain/list.html:18
 msgid "Manage"
 msgstr "Zarządzaj"
 
-#: mailu/ui/templates/domain/list.html:19
+#: mailu/ui/templates/domain/list.html:20
 msgid "Mailbox count"
 msgstr "Liczba skrzynek pocztowych"
 
-#: mailu/ui/templates/domain/list.html:20
+#: mailu/ui/templates/domain/list.html:21
 msgid "Alias count"
 msgstr "Liczba aliasów"
 
-#: mailu/ui/templates/domain/list.html:28
+#: mailu/ui/templates/domain/list.html:31
 msgid "Details"
 msgstr "Szczegóły"
 
-#: mailu/ui/templates/domain/list.html:35
+#: mailu/ui/templates/domain/list.html:38
 msgid "Users"
 msgstr "Użytkownicy"
 
-#: mailu/ui/templates/domain/list.html:36
+#: mailu/ui/templates/domain/list.html:39
 msgid "Aliases"
 msgstr "Aliasy"
 
-#: mailu/ui/templates/domain/list.html:37
+#: mailu/ui/templates/domain/list.html:40
 msgid "Managers"
 msgstr "Menedżerowie"
 
-#: mailu/ui/templates/domain/list.html:39
+#: mailu/ui/templates/domain/list.html:42
 msgid "Alternatives"
 msgstr "Alternatywy"
 
@@ -570,27 +617,27 @@ msgstr "Zaktualizuj konto"
 msgid "Add an account"
 msgstr "Dodaj konto"
 
-#: mailu/ui/templates/fetch/list.html:19
+#: mailu/ui/templates/fetch/list.html:20
 msgid "Endpoint"
 msgstr "Serwer"
 
-#: mailu/ui/templates/fetch/list.html:21
+#: mailu/ui/templates/fetch/list.html:22
 msgid "Keep emails"
 msgstr "Przechowuj wiadomości"
 
-#: mailu/ui/templates/fetch/list.html:22
+#: mailu/ui/templates/fetch/list.html:23
 msgid "Last check"
 msgstr "Ostatnie sprawdzenie"
 
-#: mailu/ui/templates/fetch/list.html:23
+#: mailu/ui/templates/fetch/list.html:24
 msgid "Status"
 msgstr "Stan"
 
-#: mailu/ui/templates/fetch/list.html:35
+#: mailu/ui/templates/fetch/list.html:38
 msgid "yes"
 msgstr "Tak"
 
-#: mailu/ui/templates/fetch/list.html:35
+#: mailu/ui/templates/fetch/list.html:38
 msgid "no"
 msgstr "Nie"
 
@@ -647,10 +694,6 @@ msgstr "Funkcje i limity"
 msgid "Edit user"
 msgstr "Edytuj użytkownika"
 
-#: mailu/ui/templates/user/forward.html:4
-msgid "Forward emails"
-msgstr "Przekieruj wiadomości e-mail"
-
 #: mailu/ui/templates/user/list.html:4
 msgid "User list"
 msgstr "Lista użytkowników"
@@ -659,11 +702,11 @@ msgstr "Lista użytkowników"
 msgid "Add user"
 msgstr "Dodaj użytkownika"
 
-#: mailu/ui/templates/user/list.html:19 mailu/ui/templates/user/settings.html:4
+#: mailu/ui/templates/user/list.html:20 mailu/ui/templates/user/settings.html:4
 msgid "User settings"
 msgstr "Ustawienia użytkownika"
 
-#: mailu/ui/templates/user/list.html:21
+#: mailu/ui/templates/user/list.html:22
 msgid "Features"
 msgstr "Funkcje"
 
@@ -675,7 +718,7 @@ msgstr "Zmiana hasła"
 msgid "Automatic reply"
 msgstr "Automatyczna odpowiedź"
 
-#: mailu/ui/templates/user/settings.html:26
+#: mailu/ui/templates/user/settings.html:27
 msgid "Auto-forward"
 msgstr "Automatyczne przekierowanie"
 
@@ -726,4 +769,10 @@ msgstr "Dostępne miejsca"
 
 #~ msgid "General settings"
 #~ msgstr "Ustawienia ogólne"
+
+#~ msgid "to access the administration tools"
+#~ msgstr "aby uzyskać dostęp do narzędzi administracyjnych"
+
+#~ msgid "Forward emails"
+#~ msgstr "Przekieruj wiadomości e-mail"
 

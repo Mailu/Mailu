@@ -255,20 +255,23 @@ class Domain(Base):
         """ return list of auto configuration records (RFC6186) """
         hostname = app.config['HOSTNAME']
         protocols = [
-            ('submission', 587),
-            ('imap', 143),
-            ('pop3', 110),
+            ('imap', 143, 20),
+            ('pop3', 110, 20),
+            ('submission', 587, 20),
         ]
         if app.config['TLS_FLAVOR'] != 'notls':
             protocols.extend([
-                ('imaps', 993),
-                ('pop3s', 995),
+                ('autodiscover', 443, 10),
+                ('submissions', 465, 10),
+                ('imaps', 993, 10),
+                ('pop3s', 995, 10),
             ])
-        return list([
-            f'_{proto}._tcp.{self.name}. 600 IN SRV 1 1 {port} {hostname}.'
-            for proto, port
+
+        return [
+            f'_{proto}._tcp.{self.name}. 600 IN SRV {prio} 1 {port} {hostname}.'
+            for proto, port, prio
             in protocols
-        ])
+        ]+[f'autoconfig.{self.name}. 600 IN CNAME {hostname}.']
 
     @cached_property
     def dns_tlsa(self):
@@ -505,6 +508,7 @@ class User(Base, Email):
     # Settings
     displayed_name = db.Column(db.String(160), nullable=False, default='')
     spam_enabled = db.Column(db.Boolean, nullable=False, default=True)
+    spam_mark_as_read = db.Column(db.Boolean, nullable=False, default=True)
     spam_threshold = db.Column(db.Integer, nullable=False, default=80)
 
     # Flask-login attributes

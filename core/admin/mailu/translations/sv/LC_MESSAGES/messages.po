@@ -1,184 +1,338 @@
+
 msgid ""
 msgstr ""
-"Project-Id-Version: Mailu\n"
+"Project-Id-Version:  Mailu\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2022-05-22 18:47+0200\n"
 "PO-Revision-Date: 2021-03-04 18:46+0000\n"
 "Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
-"Language-Team: Swedish <https://translate.tedomum.net/projects/mailu/admin/"
-"sv/>\n"
 "Language: sv\n"
+"Language-Team: Swedish "
+"<https://translate.tedomum.net/projects/mailu/admin/sv/>\n"
+"Plural-Forms: nplurals=2; plural=n != 1\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.0.1\n"
+"Generated-By: Babel 2.3.4\n"
 
-#: mailu/ui/forms.py:32
-msgid "Invalid email address."
-msgstr "Ogiltig adress"
-
-#: mailu/ui/forms.py:36
-msgid "Confirm"
-msgstr "Bekräfta"
-
-#: mailu/ui/forms.py:40 mailu/ui/forms.py:77
+#: mailu/sso/forms.py:8 mailu/ui/forms.py:79
 msgid "E-mail"
 msgstr "E-post"
 
-#: mailu/ui/forms.py:41 mailu/ui/forms.py:78 mailu/ui/forms.py:90
-#: mailu/ui/forms.py:109 mailu/ui/forms.py:162
-#: mailu/ui/templates/client.html:32 mailu/ui/templates/client.html:59
+#: mailu/sso/forms.py:9 mailu/ui/forms.py:80 mailu/ui/forms.py:93
+#: mailu/ui/forms.py:112 mailu/ui/forms.py:166
+#: mailu/ui/templates/client.html:32 mailu/ui/templates/client.html:57
 msgid "Password"
 msgstr "Lösenord"
 
-#: mailu/ui/forms.py:42 mailu/ui/templates/login.html:4
-#: mailu/ui/templates/sidebar.html:111
+#: mailu/sso/forms.py:10 mailu/sso/forms.py:11 mailu/sso/templates/login.html:4
+#: mailu/ui/templates/sidebar.html:142
 msgid "Sign in"
 msgstr "Logga in"
 
-#: mailu/ui/forms.py:46 mailu/ui/forms.py:56
-#: mailu/ui/templates/domain/details.html:27
-#: mailu/ui/templates/domain/list.html:18 mailu/ui/templates/relay/list.html:17
+#: mailu/sso/templates/base_sso.html:8 mailu/ui/templates/base.html:8
+msgid "Admin page for"
+msgstr ""
+
+#: mailu/sso/templates/base_sso.html:19 mailu/ui/templates/base.html:19
+msgid "toggle sidebar"
+msgstr ""
+
+#: mailu/sso/templates/base_sso.html:37 mailu/ui/templates/base.html:37
+msgid "change language"
+msgstr ""
+
+#: mailu/sso/templates/sidebar_sso.html:4 mailu/ui/templates/sidebar.html:94
+msgid "Go to"
+msgstr "Gå till"
+
+#: mailu/sso/templates/sidebar_sso.html:9 mailu/ui/templates/client.html:4
+#: mailu/ui/templates/sidebar.html:50 mailu/ui/templates/sidebar.html:107
+msgid "Client setup"
+msgstr ""
+
+#: mailu/sso/templates/sidebar_sso.html:16 mailu/ui/templates/sidebar.html:114
+msgid "Website"
+msgstr "Websida"
+
+#: mailu/sso/templates/sidebar_sso.html:22 mailu/ui/templates/sidebar.html:120
+msgid "Help"
+msgstr "Hjälp"
+
+#: mailu/sso/templates/sidebar_sso.html:35
+#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:127
+msgid "Register a domain"
+msgstr ""
+
+#: mailu/sso/templates/sidebar_sso.html:49 mailu/ui/forms.py:95
+#: mailu/ui/templates/sidebar.html:149 mailu/ui/templates/user/signup.html:4
+#: mailu/ui/templates/user/signup_domain.html:4
+msgid "Sign up"
+msgstr ""
+
+#: mailu/ui/forms.py:33 mailu/ui/forms.py:36
+msgid "Invalid email address."
+msgstr "Ogiltig adress"
+
+#: mailu/ui/forms.py:45
+msgid "Confirm"
+msgstr "Bekräfta"
+
+#: mailu/ui/forms.py:48 mailu/ui/forms.py:58
+#: mailu/ui/templates/domain/details.html:26
+#: mailu/ui/templates/domain/list.html:19 mailu/ui/templates/relay/list.html:18
 msgid "Domain name"
 msgstr "Domännamn"
 
-#: mailu/ui/forms.py:47
+#: mailu/ui/forms.py:49
 msgid "Maximum user count"
 msgstr "Max antal användare"
 
-#: mailu/ui/forms.py:48
+#: mailu/ui/forms.py:50
 msgid "Maximum alias count"
 msgstr "Max antal alias"
 
-#: mailu/ui/forms.py:51 mailu/ui/forms.py:72 mailu/ui/forms.py:83
-#: mailu/ui/forms.py:128 mailu/ui/forms.py:140
-#: mailu/ui/templates/alias/list.html:21 mailu/ui/templates/domain/list.html:21
-#: mailu/ui/templates/relay/list.html:19 mailu/ui/templates/token/list.html:19
-#: mailu/ui/templates/user/list.html:23
+#: mailu/ui/forms.py:51
+msgid "Maximum user quota"
+msgstr "Max användar-quota"
+
+#: mailu/ui/forms.py:52
+msgid "Enable sign-up"
+msgstr ""
+
+#: mailu/ui/forms.py:53 mailu/ui/forms.py:74 mailu/ui/forms.py:86
+#: mailu/ui/forms.py:132 mailu/ui/forms.py:144
+#: mailu/ui/templates/alias/list.html:22 mailu/ui/templates/domain/list.html:22
+#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:20
+#: mailu/ui/templates/user/list.html:24
 msgid "Comment"
 msgstr "Kommentar"
 
-#: mailu/ui/forms.py:52 mailu/ui/forms.py:61 mailu/ui/forms.py:66
-#: mailu/ui/forms.py:73 mailu/ui/forms.py:132 mailu/ui/forms.py:141
-msgid "Create"
-msgstr "Skapa"
+#: mailu/ui/forms.py:54 mailu/ui/forms.py:68 mailu/ui/forms.py:75
+#: mailu/ui/forms.py:88 mailu/ui/forms.py:136 mailu/ui/forms.py:145
+msgid "Save"
+msgstr "Spara"
 
-#: mailu/ui/forms.py:59 mailu/ui/forms.py:79 mailu/ui/forms.py:91
+#: mailu/ui/forms.py:59
+msgid "Initial admin"
+msgstr ""
+
+#: mailu/ui/forms.py:60
+msgid "Admin password"
+msgstr ""
+
+#: mailu/ui/forms.py:61 mailu/ui/forms.py:81 mailu/ui/forms.py:94
 msgid "Confirm password"
 msgstr "Bekräfta lösenord"
 
-#: mailu/ui/forms.py:80 mailu/ui/templates/user/list.html:22
+#: mailu/ui/forms.py:63
+msgid "Create"
+msgstr "Skapa"
+
+#: mailu/ui/forms.py:67
+msgid "Alternative name"
+msgstr "Aleternativt namn"
+
+#: mailu/ui/forms.py:72
+msgid "Relayed domain name"
+msgstr "Reläade domännamn"
+
+#: mailu/ui/forms.py:73 mailu/ui/templates/relay/list.html:19
+msgid "Remote host"
+msgstr "Server"
+
+#: mailu/ui/forms.py:82 mailu/ui/templates/user/list.html:23
 #: mailu/ui/templates/user/signup_domain.html:16
 msgid "Quota"
 msgstr "Quota"
 
-#: mailu/ui/forms.py:81
+#: mailu/ui/forms.py:83
 msgid "Allow IMAP access"
 msgstr "Tillåt IMAP"
 
-#: mailu/ui/forms.py:82
+#: mailu/ui/forms.py:84
 msgid "Allow POP3 access"
 msgstr "Tillåt POP3"
 
-#: mailu/ui/forms.py:85
-msgid "Save"
-msgstr "Spara"
-
-#: mailu/ui/forms.py:97
+#: mailu/ui/forms.py:85 mailu/ui/forms.py:101
+#: mailu/ui/templates/user/settings.html:15
 msgid "Displayed name"
 msgstr "Visat namn"
 
-#: mailu/ui/forms.py:98
+#: mailu/ui/forms.py:87
+msgid "Enabled"
+msgstr ""
+
+#: mailu/ui/forms.py:92
+msgid "Email address"
+msgstr ""
+
+#: mailu/ui/forms.py:102
 msgid "Enable spam filter"
 msgstr "Aktivera spamfilter"
 
-#: mailu/ui/forms.py:80
-msgid "Spam filter threshold"
-msgstr "Spamfilter gräns"
+#: mailu/ui/forms.py:103
+msgid "Enable marking spam mails as read"
+msgstr ""
+
+#: mailu/ui/forms.py:104
+msgid "Spam filter tolerance"
+msgstr ""
 
 #: mailu/ui/forms.py:105
-msgid "Save settings"
-msgstr "Spara inställningar"
-
-#: mailu/ui/forms.py:110
-msgid "Password check"
-msgstr "Lösenordskoll"
-
-#: mailu/ui/forms.py:111 mailu/ui/templates/sidebar.html:16
-msgid "Update password"
-msgstr "Uppdatera lösenord"
-
-#: mailu/ui/forms.py:100
 msgid "Enable forwarding"
 msgstr "Aktivera vidarebefordring"
 
-#: mailu/ui/forms.py:103 mailu/ui/forms.py:139
-#: mailu/ui/templates/alias/list.html:20
+#: mailu/ui/forms.py:106
+msgid "Keep a copy of the emails"
+msgstr "Behåll en kopia av e-posten"
+
+#: mailu/ui/forms.py:107 mailu/ui/forms.py:143
+#: mailu/ui/templates/alias/list.html:21
 msgid "Destination"
 msgstr "Destination"
 
-#: mailu/ui/forms.py:120
-msgid "Update"
-msgstr "Uppdatera"
+#: mailu/ui/forms.py:108
+msgid "Save settings"
+msgstr "Spara inställningar"
 
-#: mailu/ui/forms.py:115
+#: mailu/ui/forms.py:113
+msgid "Password check"
+msgstr "Lösenordskoll"
+
+#: mailu/ui/forms.py:114 mailu/ui/templates/sidebar.html:25
+msgid "Update password"
+msgstr "Uppdatera lösenord"
+
+#: mailu/ui/forms.py:118
 msgid "Enable automatic reply"
 msgstr "Aktivera autosvar"
 
-#: mailu/ui/forms.py:116
+#: mailu/ui/forms.py:119
 msgid "Reply subject"
 msgstr "Svar ämne"
 
-#: mailu/ui/forms.py:117
+#: mailu/ui/forms.py:120
 msgid "Reply body"
 msgstr "Svar meddelande"
 
-#: mailu/ui/forms.py:136
+#: mailu/ui/forms.py:122
+msgid "Start of vacation"
+msgstr ""
+
+#: mailu/ui/forms.py:123
+msgid "End of vacation"
+msgstr ""
+
+#: mailu/ui/forms.py:124
+msgid "Update"
+msgstr "Uppdatera"
+
+#: mailu/ui/forms.py:129
+msgid "Your token (write it down, as it will never be displayed again)"
+msgstr "Din token (notera, eftersom den inte kommer att visas igen)"
+
+#: mailu/ui/forms.py:134 mailu/ui/templates/token/list.html:21
+msgid "Authorized IP"
+msgstr "Autentiserat IP"
+
+#: mailu/ui/forms.py:140
 msgid "Alias"
 msgstr "Alias"
 
-#: mailu/ui/forms.py:138
+#: mailu/ui/forms.py:142
 msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"
 msgstr "Använd SQL-liknande syntax (t.ex. för catch-all alias)"
 
-#: mailu/ui/forms.py:145
+#: mailu/ui/forms.py:149
 msgid "Admin email"
 msgstr "Admin e-post"
 
-#: mailu/ui/forms.py:146 mailu/ui/forms.py:151 mailu/ui/forms.py:164
+#: mailu/ui/forms.py:150 mailu/ui/forms.py:155 mailu/ui/forms.py:168
 msgid "Submit"
 msgstr "Skicka in"
 
-#: mailu/ui/forms.py:150
+#: mailu/ui/forms.py:154
 msgid "Manager email"
 msgstr "Manager e-post"
 
-#: mailu/ui/forms.py:155
+#: mailu/ui/forms.py:159
 msgid "Protocol"
 msgstr "Protokoll"
 
-#: mailu/ui/forms.py:158
+#: mailu/ui/forms.py:162
 msgid "Hostname or IP"
 msgstr "Hostnamn eller IP"
 
-#: mailu/ui/forms.py:159 mailu/ui/templates/client.html:20
-#: mailu/ui/templates/client.html:47
+#: mailu/ui/forms.py:163 mailu/ui/templates/client.html:20
+#: mailu/ui/templates/client.html:45
 msgid "TCP port"
 msgstr "TCP port"
 
-#: mailu/ui/forms.py:160
+#: mailu/ui/forms.py:164
 msgid "Enable TLS"
 msgstr "Aktivera TLS"
 
-#: mailu/ui/forms.py:161 mailu/ui/templates/client.html:28
-#: mailu/ui/templates/client.html:55 mailu/ui/templates/fetch/list.html:20
+#: mailu/ui/forms.py:165 mailu/ui/templates/client.html:28
+#: mailu/ui/templates/client.html:53 mailu/ui/templates/fetch/list.html:21
 msgid "Username"
 msgstr "Användarnamn"
+
+#: mailu/ui/forms.py:167
+msgid "Keep emails on the server"
+msgstr "Behåll e-post på servern"
+
+#: mailu/ui/forms.py:172
+msgid "Announcement subject"
+msgstr "Publikt meddelande ämne"
+
+#: mailu/ui/forms.py:174
+msgid "Announcement body"
+msgstr "Publikt meddelande"
+
+#: mailu/ui/forms.py:176
+msgid "Send"
+msgstr "Skicka"
+
+#: mailu/ui/templates/announcement.html:4
+msgid "Public announcement"
+msgstr "Publikt meddelande"
+
+#: mailu/ui/templates/antispam.html:4 mailu/ui/templates/sidebar.html:80
+#: mailu/ui/templates/user/settings.html:19
+msgid "Antispam"
+msgstr "Antispam"
+
+#: mailu/ui/templates/antispam.html:8
+msgid "RSPAMD status page"
+msgstr ""
+
+#: mailu/ui/templates/client.html:8
+msgid "configure your email client"
+msgstr ""
+
+#: mailu/ui/templates/client.html:13
+msgid "Incoming mail"
+msgstr ""
+
+#: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:41
+msgid "Mail protocol"
+msgstr ""
+
+#: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:49
+msgid "Server name"
+msgstr ""
+
+#: mailu/ui/templates/client.html:38
+msgid "Outgoing mail"
+msgstr ""
 
 #: mailu/ui/templates/confirm.html:4
 msgid "Confirm action"
 msgstr "Bekräfta"
 
 #: mailu/ui/templates/confirm.html:13
+#, python-format
 msgid "You are about to %(action)s. Please confirm your action."
 msgstr "Du håller på att %(action)s. Vänligen bekräfta."
 
@@ -190,82 +344,58 @@ msgstr "Docker fel"
 msgid "An error occurred while talking to the Docker server."
 msgstr "Ett fel inträffade vid kommunikation med Docker."
 
-#: mailu/admin/templates/login.html:6
-msgid "Your account"
-msgstr "Ditt konto"
-
-#: mailu/ui/templates/login.html:8
-msgid "to access the administration tools"
-msgstr "att komma åt administrationsverktygen"
-
-#: mailu/ui/templates/services.html:4 mailu/ui/templates/sidebar.html:39
-msgid "Services status"
+#: mailu/ui/templates/macros.html:129
+msgid "copy to clipboard"
 msgstr ""
 
-#: mailu/ui/templates/services.html:10
-msgid "Service"
-msgstr ""
-
-#: mailu/ui/templates/fetch/list.html:23 mailu/ui/templates/services.html:11
-msgid "Status"
-msgstr ""
-
-#: mailu/ui/templates/services.html:12
-msgid "PID"
-msgstr ""
-
-#: mailu/ui/templates/services.html:13
-msgid "Image"
-msgstr ""
-
-#: mailu/ui/templates/services.html:14
-msgid "Started"
-msgstr ""
-
-#: mailu/ui/templates/services.html:15
-msgid "Last update"
-msgstr ""
-
-#: mailu/ui/templates/sidebar.html:8
+#: mailu/ui/templates/sidebar.html:15
 msgid "My account"
 msgstr "Mitt konto"
 
-#: mailu/ui/templates/sidebar.html:11 mailu/ui/templates/user/list.html:34
+#: mailu/ui/templates/sidebar.html:19 mailu/ui/templates/user/list.html:37
 msgid "Settings"
 msgstr "Inställningar"
 
-#: mailu/ui/templates/user/settings.html:22
-msgid "Auto-forward"
-msgstr "Auto-forward"
-
-#: mailu/ui/templates/sidebar.html:21 mailu/ui/templates/user/list.html:35
+#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/user/list.html:38
 msgid "Auto-reply"
 msgstr "Autosvar"
 
-#: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:26
-#: mailu/ui/templates/user/list.html:36
+#: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:37
+#: mailu/ui/templates/user/list.html:39
 msgid "Fetched accounts"
 msgstr "Hämtade konton"
 
-#: mailu/ui/templates/sidebar.html:105
-msgid "Sign out"
-msgstr "Logga ut"
+#: mailu/ui/templates/sidebar.html:43 mailu/ui/templates/token/list.html:4
+msgid "Authentication tokens"
+msgstr "Autentiserade tokens"
 
-#: mailu/ui/templates/sidebar.html:35
+#: mailu/ui/templates/sidebar.html:56
 msgid "Administration"
 msgstr "Administration"
 
-#: mailu/ui/templates/sidebar.html:49
+#: mailu/ui/templates/sidebar.html:62
+msgid "Announcement"
+msgstr "Meddelande"
+
+#: mailu/ui/templates/sidebar.html:68
 msgid "Administrators"
 msgstr "Administratörer"
 
-#: mailu/ui/templates/sidebar.html:66
+#: mailu/ui/templates/sidebar.html:74
+msgid "Relayed domains"
+msgstr "Reläade domäner"
+
+#: mailu/ui/templates/sidebar.html:88
 msgid "Mail domains"
 msgstr "Domäner"
 
-#: mailu/ui/templates/sidebar.html:92
-msgid "Help"
-msgstr "Hjälp"
+#: mailu/ui/templates/sidebar.html:99
+msgid "Webmail"
+msgstr "Webmail"
+
+#: mailu/ui/templates/sidebar.html:135
+msgid "Sign out"
+msgstr "Logga ut"
 
 #: mailu/ui/templates/working.html:4
 msgid "We are still working on this feature!"
@@ -283,26 +413,26 @@ msgstr "Globala administratörer"
 msgid "Add administrator"
 msgstr "Lägg till administratör"
 
-#: mailu/ui/templates/admin/list.html:16 mailu/ui/templates/alias/list.html:18
-#: mailu/ui/templates/alternative/list.html:18
-#: mailu/ui/templates/domain/list.html:16 mailu/ui/templates/fetch/list.html:18
-#: mailu/ui/templates/manager/list.html:18
-#: mailu/ui/templates/relay/list.html:16 mailu/ui/templates/token/list.html:18
-#: mailu/ui/templates/user/list.html:18
+#: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
+#: mailu/ui/templates/alternative/list.html:19
+#: mailu/ui/templates/domain/list.html:17 mailu/ui/templates/fetch/list.html:19
+#: mailu/ui/templates/manager/list.html:19
+#: mailu/ui/templates/relay/list.html:17 mailu/ui/templates/token/list.html:19
+#: mailu/ui/templates/user/list.html:19
 msgid "Actions"
 msgstr "Handling"
 
-#: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
-#: mailu/ui/templates/manager/list.html:19 mailu/ui/templates/user/list.html:20
+#: mailu/ui/templates/admin/list.html:18 mailu/ui/templates/alias/list.html:20
+#: mailu/ui/templates/manager/list.html:20 mailu/ui/templates/user/list.html:21
 msgid "Email"
 msgstr "E-post"
 
-#: mailu/ui/templates/admin/list.html:22 mailu/ui/templates/alias/list.html:29
-#: mailu/ui/templates/alternative/list.html:25
-#: mailu/ui/templates/domain/list.html:31 mailu/ui/templates/fetch/list.html:31
-#: mailu/ui/templates/manager/list.html:24
-#: mailu/ui/templates/relay/list.html:27 mailu/ui/templates/token/list.html:26
-#: mailu/ui/templates/user/list.html:31
+#: mailu/ui/templates/admin/list.html:25 mailu/ui/templates/alias/list.html:32
+#: mailu/ui/templates/alternative/list.html:29
+#: mailu/ui/templates/domain/list.html:34 mailu/ui/templates/fetch/list.html:34
+#: mailu/ui/templates/manager/list.html:27
+#: mailu/ui/templates/relay/list.html:30 mailu/ui/templates/token/list.html:30
+#: mailu/ui/templates/user/list.html:34
 msgid "Delete"
 msgstr "Radera"
 
@@ -322,25 +452,43 @@ msgstr "Alias-lista"
 msgid "Add alias"
 msgstr "Skapa alias"
 
-#: mailu/ui/templates/alias/list.html:22
-#: mailu/ui/templates/alternative/list.html:20
-#: mailu/ui/templates/domain/list.html:22 mailu/ui/templates/fetch/list.html:24
-#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:21
-#: mailu/ui/templates/user/list.html:24
+#: mailu/ui/templates/alias/list.html:23
+#: mailu/ui/templates/alternative/list.html:21
+#: mailu/ui/templates/domain/list.html:23 mailu/ui/templates/fetch/list.html:25
+#: mailu/ui/templates/relay/list.html:21 mailu/ui/templates/token/list.html:22
+#: mailu/ui/templates/user/list.html:25
 msgid "Created"
 msgstr "Skapad"
 
-#: mailu/ui/templates/alias/list.html:23 mailu/ui/templates/domain/list.html:23
-#: mailu/ui/templates/fetch/list.html:25 mailu/ui/templates/relay/list.html:21
-#: mailu/ui/templates/user/list.html:25
+#: mailu/ui/templates/alias/list.html:24
+#: mailu/ui/templates/alternative/list.html:22
+#: mailu/ui/templates/domain/list.html:24 mailu/ui/templates/fetch/list.html:26
+#: mailu/ui/templates/relay/list.html:22 mailu/ui/templates/token/list.html:23
+#: mailu/ui/templates/user/list.html:26
 msgid "Last edit"
 msgstr "Senast redigerad"
 
-#: mailu/ui/templates/alias/list.html:28 mailu/ui/templates/domain/list.html:30
-#: mailu/ui/templates/fetch/list.html:30 mailu/ui/templates/relay/list.html:26
-#: mailu/ui/templates/user/list.html:30
+#: mailu/ui/templates/alias/list.html:31 mailu/ui/templates/domain/list.html:33
+#: mailu/ui/templates/fetch/list.html:33 mailu/ui/templates/relay/list.html:29
+#: mailu/ui/templates/user/list.html:33
 msgid "Edit"
 msgstr "Redigera"
+
+#: mailu/ui/templates/alternative/create.html:4
+msgid "Create alternative domain"
+msgstr "Skapa alternativ domän"
+
+#: mailu/ui/templates/alternative/list.html:4
+msgid "Alternative domain list"
+msgstr "Alternativa domäner"
+
+#: mailu/ui/templates/alternative/list.html:12
+msgid "Add alternative"
+msgstr "Lägg till alternativ"
+
+#: mailu/ui/templates/alternative/list.html:20
+msgid "Name"
+msgstr "Namn"
 
 #: mailu/ui/templates/domain/create.html:4
 #: mailu/ui/templates/domain/list.html:9
@@ -355,25 +503,37 @@ msgstr "Domändetaljer"
 msgid "Regenerate keys"
 msgstr "Generera nycklar"
 
-#: mailu/ui/templates/domain/details.html:31
+#: mailu/ui/templates/domain/details.html:17
+msgid "Generate keys"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:30
 msgid "DNS MX entry"
 msgstr "DNS MX post"
 
-#: mailu/ui/templates/domain/details.html:35
+#: mailu/ui/templates/domain/details.html:34
 msgid "DNS SPF entries"
 msgstr "DNS SPF post"
 
-#: mailu/ui/templates/domain/details.html:42
+#: mailu/ui/templates/domain/details.html:40
 msgid "DKIM public key"
 msgstr "Publik DKIM-nyckel"
 
-#: mailu/ui/templates/domain/details.html:46
+#: mailu/ui/templates/domain/details.html:44
 msgid "DNS DKIM entry"
 msgstr "DNS DKIM post"
 
-#: mailu/ui/templates/domain/details.html:50
+#: mailu/ui/templates/domain/details.html:48
 msgid "DNS DMARC entry"
 msgstr "DNS DMARC post"
+
+#: mailu/ui/templates/domain/details.html:58
+msgid "DNS TLSA entry"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:63
+msgid "DNS client auto-configuration entries"
+msgstr ""
 
 #: mailu/ui/templates/domain/edit.html:4
 msgid "Edit domain"
@@ -383,33 +543,54 @@ msgstr "Redigera domän"
 msgid "Domain list"
 msgstr "Domänlista"
 
-#: mailu/ui/templates/domain/list.html:17
+#: mailu/ui/templates/domain/list.html:18
 msgid "Manage"
 msgstr "Managera"
 
-#: mailu/ui/templates/domain/list.html:19
+#: mailu/ui/templates/domain/list.html:20
 msgid "Mailbox count"
 msgstr "Antal mailboxar"
 
-#: mailu/ui/templates/domain/list.html:20
+#: mailu/ui/templates/domain/list.html:21
 msgid "Alias count"
 msgstr "Antal alias"
 
-#: mailu/ui/templates/domain/list.html:28
+#: mailu/ui/templates/domain/list.html:31
 msgid "Details"
 msgstr "Detaljer"
 
-#: mailu/ui/templates/domain/list.html:35
+#: mailu/ui/templates/domain/list.html:38
 msgid "Users"
 msgstr "Användare"
 
-#: mailu/ui/templates/domain/list.html:36
+#: mailu/ui/templates/domain/list.html:39
 msgid "Aliases"
 msgstr "Alias"
 
-#: mailu/ui/templates/domain/list.html:37
+#: mailu/ui/templates/domain/list.html:40
 msgid "Managers"
 msgstr "Managers"
+
+#: mailu/ui/templates/domain/list.html:42
+msgid "Alternatives"
+msgstr "Alternativ"
+
+#: mailu/ui/templates/domain/signup.html:13
+msgid ""
+"In order to register a new domain, you must first setup the\n"
+"    domain zone so that the domain <code>MX</code> points to this server"
+msgstr ""
+
+#: mailu/ui/templates/domain/signup.html:18
+msgid ""
+"If you do not know how to setup an <code>MX</code> record for your DNS "
+"zone,\n"
+"    please contact your DNS provider or administrator. Also, please wait "
+"a\n"
+"    couple minutes after the <code>MX</code> is set so the local server "
+"cache\n"
+"    expires."
+msgstr ""
 
 #: mailu/ui/templates/fetch/create.html:4
 msgid "Add a fetched account"
@@ -423,13 +604,29 @@ msgstr "Uppdatera ett hämtat konto"
 msgid "Add an account"
 msgstr "Lägg till ett konto"
 
-#: mailu/ui/templates/fetch/list.html:19
+#: mailu/ui/templates/fetch/list.html:20
 msgid "Endpoint"
 msgstr "Slutpunkt"
 
 #: mailu/ui/templates/fetch/list.html:22
+msgid "Keep emails"
+msgstr "Behåll e-posten"
+
+#: mailu/ui/templates/fetch/list.html:23
 msgid "Last check"
 msgstr "Senaste koll"
+
+#: mailu/ui/templates/fetch/list.html:24
+msgid "Status"
+msgstr ""
+
+#: mailu/ui/templates/fetch/list.html:38
+msgid "yes"
+msgstr "ja"
+
+#: mailu/ui/templates/fetch/list.html:38
+msgid "no"
+msgstr "nej"
 
 #: mailu/ui/templates/manager/create.html:4
 msgid "Add a manager"
@@ -442,126 +639,6 @@ msgstr "Managerlista"
 #: mailu/ui/templates/manager/list.html:12
 msgid "Add manager"
 msgstr "Skapa manager"
-
-#: mailu/ui/forms.py:168
-msgid "Announcement subject"
-msgstr "Publikt meddelande ämne"
-
-#: mailu/ui/forms.py:170
-msgid "Announcement body"
-msgstr "Publikt meddelande"
-
-#: mailu/ui/forms.py:172
-msgid "Send"
-msgstr "Skicka"
-
-#: mailu/ui/templates/announcement.html:4
-msgid "Public announcement"
-msgstr "Publikt meddelande"
-
-#: mailu/ui/templates/announcement.html:8
-msgid "from"
-msgstr "från"
-
-#: mailu/ui/templates/sidebar.html:44
-msgid "Announcement"
-msgstr "Meddelande"
-
-#: mailu/ui/templates/user/create.html:4
-msgid "New user"
-msgstr "Ny användare"
-
-#: mailu/ui/templates/user/edit.html:4
-msgid "Edit user"
-msgstr "Redigera användare"
-
-#: mailu/ui/templates/user/forward.html:4
-msgid "Forward emails"
-msgstr "Vidarebefordra e-post"
-
-#: mailu/ui/templates/user/list.html:4
-msgid "User list"
-msgstr "Användarlista"
-
-#: mailu/ui/templates/user/list.html:12
-msgid "Add user"
-msgstr "Lägg till användare"
-
-#: mailu/ui/templates/user/list.html:19 mailu/ui/templates/user/settings.html:4
-msgid "User settings"
-msgstr "Användarinställningar"
-
-#: mailu/ui/templates/user/list.html:21
-msgid "Features"
-msgstr "Funktioner"
-
-#: mailu/ui/templates/user/password.html:4
-msgid "Password update"
-msgstr "Uppdatera lösenord"
-
-#: mailu/ui/templates/user/reply.html:4
-msgid "Automatic reply"
-msgstr "Automatiskt svar"
-
-#: mailu/ui/forms.py:49
-msgid "Maximum user quota"
-msgstr "Max användar-quota"
-
-#: mailu/ui/forms.py:101
-msgid "Keep a copy of the emails"
-msgstr "Behåll en kopia av e-posten"
-
-#: mailu/ui/forms.py:163
-msgid "Keep emails on the server"
-msgstr "Behåll e-post på servern"
-
-#: mailu/ui/templates/fetch/list.html:21
-msgid "Keep emails"
-msgstr "Behåll e-posten"
-
-#: mailu/ui/templates/fetch/list.html:35
-msgid "yes"
-msgstr "ja"
-
-#: mailu/ui/templates/fetch/list.html:35
-msgid "no"
-msgstr "nej"
-
-#: mailu/ui/forms.py:65
-msgid "Alternative name"
-msgstr "Aleternativt namn"
-
-#: mailu/ui/forms.py:70
-msgid "Relayed domain name"
-msgstr "Reläade domännamn"
-
-#: mailu/ui/forms.py:71 mailu/ui/templates/relay/list.html:18
-msgid "Remote host"
-msgstr "Server"
-
-#: mailu/ui/templates/sidebar.html:54
-msgid "Relayed domains"
-msgstr "Reläade domäner"
-
-#: mailu/ui/templates/alternative/create.html:4
-msgid "Create alternative domain"
-msgstr "Skapa alternativ domän"
-
-#: mailu/ui/templates/alternative/list.html:4
-msgid "Alternative domain list"
-msgstr "Alternativa domäner"
-
-#: mailu/ui/templates/alternative/list.html:12
-msgid "Add alternative"
-msgstr "Lägg till alternativ"
-
-#: mailu/ui/templates/alternative/list.html:19
-msgid "Name"
-msgstr "Namn"
-
-#: mailu/ui/templates/domain/list.html:39
-msgid "Alternatives"
-msgstr "Alternativ"
 
 #: mailu/ui/templates/relay/create.html:4
 msgid "New relay domain"
@@ -579,30 +656,6 @@ msgstr "Reläade domäner"
 msgid "New relayed domain"
 msgstr "Ny reläad domän"
 
-#: mailu/ui/forms.py:125
-msgid "Your token (write it down, as it will never be displayed again)"
-msgstr "Din token (notera, eftersom den inte kommer att visas igen)"
-
-#: mailu/ui/forms.py:130 mailu/ui/templates/token/list.html:20
-msgid "Authorized IP"
-msgstr "Autentiserat IP"
-
-#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/token/list.html:4
-msgid "Authentication tokens"
-msgstr "Autentiserade tokens"
-
-#: mailu/ui/templates/sidebar.html:72
-msgid "Go to"
-msgstr "Gå till"
-
-#: mailu/ui/templates/sidebar.html:76
-msgid "Webmail"
-msgstr "Webmail"
-
-#: mailu/ui/templates/sidebar.html:87
-msgid "Website"
-msgstr "Websida"
-
 #: mailu/ui/templates/token/create.html:4
 msgid "Create an authentication token"
 msgstr "Skapa en autentiseringstoken"
@@ -611,87 +664,49 @@ msgstr "Skapa en autentiseringstoken"
 msgid "New token"
 msgstr "Ny token"
 
+#: mailu/ui/templates/user/create.html:4
+msgid "New user"
+msgstr "Ny användare"
+
 #: mailu/ui/templates/user/create.html:15
 msgid "General"
 msgstr "Allmänt"
 
-#: mailu/ui/templates/user/create.html:22
+#: mailu/ui/templates/user/create.html:23
 msgid "Features and quotas"
 msgstr "Funktioner och quota"
 
-#: mailu/ui/templates/user/settings.html:14
-msgid "General settings"
-msgstr "Allmäna inställningar"
+#: mailu/ui/templates/user/edit.html:4
+msgid "Edit user"
+msgstr "Redigera användare"
 
-#: mailu/ui/templates/sidebar.html:59 mailu/ui/templates/user/settings.html:15
-msgid "Antispam"
-msgstr "Antispam"
+#: mailu/ui/templates/user/list.html:4
+msgid "User list"
+msgstr "Användarlista"
 
-#: mailu/ui/forms.py:99
-msgid "Spam filter tolerance"
-msgstr ""
+#: mailu/ui/templates/user/list.html:12
+msgid "Add user"
+msgstr "Lägg till användare"
 
-#: mailu/ui/forms.py:50
-msgid "Enable sign-up"
-msgstr ""
+#: mailu/ui/templates/user/list.html:20 mailu/ui/templates/user/settings.html:4
+msgid "User settings"
+msgstr "Användarinställningar"
 
-#: mailu/ui/forms.py:57
-msgid "Initial admin"
-msgstr ""
+#: mailu/ui/templates/user/list.html:22
+msgid "Features"
+msgstr "Funktioner"
 
-#: mailu/ui/forms.py:58
-msgid "Admin password"
-msgstr ""
+#: mailu/ui/templates/user/password.html:4
+msgid "Password update"
+msgstr "Uppdatera lösenord"
 
-#: mailu/ui/forms.py:84
-msgid "Enabled"
-msgstr ""
+#: mailu/ui/templates/user/reply.html:4
+msgid "Automatic reply"
+msgstr "Automatiskt svar"
 
-#: mailu/ui/forms.py:89
-msgid "Email address"
-msgstr ""
-
-#: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
-#: mailu/ui/templates/user/signup.html:4
-#: mailu/ui/templates/user/signup_domain.html:4
-msgid "Sign up"
-msgstr ""
-
-#: mailu/ui/forms.py:119
-msgid "End of vacation"
-msgstr ""
-
-#: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:82
-msgid "Client setup"
-msgstr ""
-
-#: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
-msgid "Mail protocol"
-msgstr ""
-
-#: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
-msgid "Server name"
-msgstr ""
-
-#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
-msgid "Register a domain"
-msgstr ""
-
-#: mailu/ui/templates/domain/details.html:17
-msgid "Generate keys"
-msgstr ""
-
-#: mailu/ui/templates/domain/signup.html:13
-msgid "In order to register a new domain, you must first setup the\n"
-"    domain zone so that the domain <code>MX</code> points to this server"
-msgstr ""
-
-#: mailu/ui/templates/domain/signup.html:18
-msgid "If you do not know how to setup an <code>MX</code> record for your DNS zone,\n"
-"    please contact your DNS provider or administrator. Also, please wait a\n"
-"    couple minutes after the <code>MX</code> is set so the local server cache\n"
-"    expires."
-msgstr ""
+#: mailu/ui/templates/user/settings.html:27
+msgid "Auto-forward"
+msgstr "Auto-forward"
 
 #: mailu/ui/templates/user/signup_domain.html:8
 msgid "pick a domain for the new account"
@@ -704,3 +719,40 @@ msgstr ""
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
 msgstr ""
+
+#~ msgid "Spam filter threshold"
+#~ msgstr "Spamfilter gräns"
+
+#~ msgid "Your account"
+#~ msgstr "Ditt konto"
+
+#~ msgid "to access the administration tools"
+#~ msgstr "att komma åt administrationsverktygen"
+
+#~ msgid "Services status"
+#~ msgstr ""
+
+#~ msgid "Service"
+#~ msgstr ""
+
+#~ msgid "PID"
+#~ msgstr ""
+
+#~ msgid "Image"
+#~ msgstr ""
+
+#~ msgid "Started"
+#~ msgstr ""
+
+#~ msgid "Last update"
+#~ msgstr ""
+
+#~ msgid "from"
+#~ msgstr "från"
+
+#~ msgid "Forward emails"
+#~ msgstr "Vidarebefordra e-post"
+
+#~ msgid "General settings"
+#~ msgstr "Allmäna inställningar"
+

@@ -4,10 +4,12 @@ import os
 import time
 import subprocess
 
+hostnames = ','.join(set(host.strip() for host in os.environ['HOSTNAMES'].split(',')))
+
 command = [
     "certbot",
     "-n", "--agree-tos", # non-interactive
-    "-d", os.environ["HOSTNAMES"],
+    "-d", hostnames, "--expand", "--allow-subset-of-names",
     "-m", "{}@{}".format(os.environ["POSTMASTER"], os.environ["DOMAIN"]),
     "certonly", "--standalone",
     "--cert-name", "mailu",
@@ -20,7 +22,7 @@ command = [
 command2 = [
     "certbot",
     "-n", "--agree-tos", # non-interactive
-    "-d", os.environ["HOSTNAMES"],
+    "-d", hostnames, "--expand", "--allow-subset-of-names",
     "-m", "{}@{}".format(os.environ["POSTMASTER"], os.environ["DOMAIN"]),
     "certonly", "--standalone",
     "--cert-name", "mailu-ecdsa",

@@ -29,5 +29,5 @@ Update information files
 If you added a feature or fixed a bug or committed anything that is worth mentionning
 for the next upgrade, add it in the ``CHANGELOG.md`` file.
 
-Also, if you would like to be mentionned by name or add a comment in ``AUTHORS.md``,
+Also, if you would like to be mentioned by name or add a comment in ``AUTHORS.md``,
 feel free to do so.

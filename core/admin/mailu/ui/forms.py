@@ -100,6 +100,7 @@ class UserSignupFormCaptcha(UserSignupForm):
 class UserSettingsForm(flask_wtf.FlaskForm):
     displayed_name = fields.StringField(_('Displayed name'))
     spam_enabled = fields.BooleanField(_('Enable spam filter'))
+    spam_mark_as_read = fields.BooleanField(_('Enable marking spam mails as read'))
     spam_threshold = fields_.IntegerSliderField(_('Spam filter tolerance'))
     forward_enabled = fields.BooleanField(_('Enable forwarding'))
     forward_keep = fields.BooleanField(_('Keep a copy of the emails'))

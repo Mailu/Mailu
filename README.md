@@ -17,7 +17,7 @@ Features
 
 Main features include:
 
-- **Standard email server**, IMAP and IMAP+, SMTP and Submission
+- **Standard email server**, IMAP and IMAP+, SMTP and Submission with autoconfiguration profiles for clients
 - **Advanced email features**, aliases, domain aliases, custom routing
 - **Web access**, multiple Webmails and administration interface
 - **User features**, aliases, auto-reply, auto-forward, fetched accounts

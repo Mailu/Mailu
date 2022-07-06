@@ -1,4 +1,4 @@
-# Translations template for PROJECT.
+# Danish translations for PROJECT.
 # Copyright (C) 2018 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
@@ -7,252 +7,294 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-04-22 12:10+0200\n"
+"POT-Creation-Date: 2022-05-22 18:47+0200\n"
 "PO-Revision-Date: 2020-01-14 18:22+0000\n"
 "Last-Translator: Torben Jensen <tedomum@tjb.dk>\n"
-"Language-Team: Danish <https://translate.tedomum.net/projects/mailu/admin/da/"
-">\n"
 "Language: da\n"
+"Language-Team: Danish "
+"<https://translate.tedomum.net/projects/mailu/admin/da/>\n"
+"Plural-Forms: nplurals=2; plural=n != 1\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.3\n"
-"Generated-By: Babel 2.5.3\n"
+"Generated-By: Babel 2.3.4\n"
 
-#: mailu/ui/forms.py:32
-msgid "Invalid email address."
-msgstr "Ugyldig email adresse."
-
-#: mailu/ui/forms.py:36
-msgid "Confirm"
-msgstr "Godkend"
-
-#: mailu/ui/forms.py:40 mailu/ui/forms.py:77
+#: mailu/sso/forms.py:8 mailu/ui/forms.py:79
 msgid "E-mail"
 msgstr "E-mail"
 
-#: mailu/ui/forms.py:41 mailu/ui/forms.py:78 mailu/ui/forms.py:90
-#: mailu/ui/forms.py:109 mailu/ui/forms.py:162
-#: mailu/ui/templates/client.html:32 mailu/ui/templates/client.html:59
+#: mailu/sso/forms.py:9 mailu/ui/forms.py:80 mailu/ui/forms.py:93
+#: mailu/ui/forms.py:112 mailu/ui/forms.py:166
+#: mailu/ui/templates/client.html:32 mailu/ui/templates/client.html:57
 msgid "Password"
 msgstr "Adgangskode"
 
-#: mailu/ui/forms.py:42 mailu/ui/templates/login.html:4
-#: mailu/ui/templates/sidebar.html:111
+#: mailu/sso/forms.py:10 mailu/sso/forms.py:11 mailu/sso/templates/login.html:4
+#: mailu/ui/templates/sidebar.html:142
 msgid "Sign in"
 msgstr "Log ind"
 
-#: mailu/ui/forms.py:46 mailu/ui/forms.py:56
-#: mailu/ui/templates/domain/details.html:27
-#: mailu/ui/templates/domain/list.html:18 mailu/ui/templates/relay/list.html:17
-msgid "Domain name"
-msgstr "Domænenavn"
-
-#: mailu/ui/forms.py:47
-msgid "Maximum user count"
-msgstr "Maksimum antal brugere"
-
-#: mailu/ui/forms.py:48
-msgid "Maximum alias count"
-msgstr "Maksimum antal aliaser"
-
-#: mailu/ui/forms.py:49
-msgid "Maximum user quota"
-msgstr "Maksimum bruger kvota"
-
-#: mailu/ui/forms.py:50
-msgid "Enable sign-up"
-msgstr "Tillad brugeroprettelse"
-
-#: mailu/ui/forms.py:51 mailu/ui/forms.py:72 mailu/ui/forms.py:83
-#: mailu/ui/forms.py:128 mailu/ui/forms.py:140
-#: mailu/ui/templates/alias/list.html:21 mailu/ui/templates/domain/list.html:21
-#: mailu/ui/templates/relay/list.html:19 mailu/ui/templates/token/list.html:19
-#: mailu/ui/templates/user/list.html:23
-msgid "Comment"
-msgstr "Kommentér"
-
-#: mailu/ui/forms.py:52 mailu/ui/forms.py:61 mailu/ui/forms.py:66
-#: mailu/ui/forms.py:73 mailu/ui/forms.py:132 mailu/ui/forms.py:141
-msgid "Create"
-msgstr "Opret"
-
-#: mailu/ui/forms.py:57
-msgid "Initial admin"
-msgstr "Initiél administrator"
-
-#: mailu/ui/forms.py:58
-msgid "Admin password"
-msgstr "Administrator adgangskode"
-
-#: mailu/ui/forms.py:59 mailu/ui/forms.py:79 mailu/ui/forms.py:91
-msgid "Confirm password"
-msgstr "Gentag adgangskode"
-
-#: mailu/ui/forms.py:65
-msgid "Alternative name"
-msgstr "Alternativt navn"
-
-#: mailu/ui/forms.py:70
-msgid "Relayed domain name"
+#: mailu/sso/templates/base_sso.html:8 mailu/ui/templates/base.html:8
+msgid "Admin page for"
 msgstr ""
 
-#: mailu/ui/forms.py:71 mailu/ui/templates/relay/list.html:18
-msgid "Remote host"
-msgstr "Fjernhost"
+#: mailu/sso/templates/base_sso.html:19 mailu/ui/templates/base.html:19
+msgid "toggle sidebar"
+msgstr ""
 
-#: mailu/ui/forms.py:80 mailu/ui/templates/user/list.html:22
-#: mailu/ui/templates/user/signup_domain.html:16
-msgid "Quota"
-msgstr "Kvota"
+#: mailu/sso/templates/base_sso.html:37 mailu/ui/templates/base.html:37
+msgid "change language"
+msgstr ""
 
-#: mailu/ui/forms.py:81
-msgid "Allow IMAP access"
-msgstr "Tillad IMAP adgang"
+#: mailu/sso/templates/sidebar_sso.html:4 mailu/ui/templates/sidebar.html:94
+msgid "Go to"
+msgstr "Gå til"
 
-#: mailu/ui/forms.py:82
-msgid "Allow POP3 access"
-msgstr "Tillad POP3 adgang"
+#: mailu/sso/templates/sidebar_sso.html:9 mailu/ui/templates/client.html:4
+#: mailu/ui/templates/sidebar.html:50 mailu/ui/templates/sidebar.html:107
+msgid "Client setup"
+msgstr "Klient opsætning"
 
-#: mailu/ui/forms.py:84
-msgid "Enabled"
-msgstr "Aktiveret"
+#: mailu/sso/templates/sidebar_sso.html:16 mailu/ui/templates/sidebar.html:114
+msgid "Website"
+msgstr "Webside"
 
-#: mailu/ui/forms.py:85
-msgid "Save"
-msgstr "Gem"
+#: mailu/sso/templates/sidebar_sso.html:22 mailu/ui/templates/sidebar.html:120
+msgid "Help"
+msgstr "Hjælp"
 
-#: mailu/ui/forms.py:89
-msgid "Email address"
-msgstr "E-mail adresse"
+#: mailu/sso/templates/sidebar_sso.html:35
+#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:127
+msgid "Register a domain"
+msgstr "Registrer et domæne"
 
-#: mailu/ui/forms.py:93 mailu/ui/templates/sidebar.html:117
-#: mailu/ui/templates/user/signup.html:4
+#: mailu/sso/templates/sidebar_sso.html:49 mailu/ui/forms.py:95
+#: mailu/ui/templates/sidebar.html:149 mailu/ui/templates/user/signup.html:4
 #: mailu/ui/templates/user/signup_domain.html:4
 msgid "Sign up"
 msgstr "Tilmeld"
 
-#: mailu/ui/forms.py:97
+#: mailu/ui/forms.py:33 mailu/ui/forms.py:36
+msgid "Invalid email address."
+msgstr "Ugyldig email adresse."
+
+#: mailu/ui/forms.py:45
+msgid "Confirm"
+msgstr "Godkend"
+
+#: mailu/ui/forms.py:48 mailu/ui/forms.py:58
+#: mailu/ui/templates/domain/details.html:26
+#: mailu/ui/templates/domain/list.html:19 mailu/ui/templates/relay/list.html:18
+msgid "Domain name"
+msgstr "Domænenavn"
+
+#: mailu/ui/forms.py:49
+msgid "Maximum user count"
+msgstr "Maksimum antal brugere"
+
+#: mailu/ui/forms.py:50
+msgid "Maximum alias count"
+msgstr "Maksimum antal aliaser"
+
+#: mailu/ui/forms.py:51
+msgid "Maximum user quota"
+msgstr "Maksimum bruger kvota"
+
+#: mailu/ui/forms.py:52
+msgid "Enable sign-up"
+msgstr "Tillad brugeroprettelse"
+
+#: mailu/ui/forms.py:53 mailu/ui/forms.py:74 mailu/ui/forms.py:86
+#: mailu/ui/forms.py:132 mailu/ui/forms.py:144
+#: mailu/ui/templates/alias/list.html:22 mailu/ui/templates/domain/list.html:22
+#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:20
+#: mailu/ui/templates/user/list.html:24
+msgid "Comment"
+msgstr "Kommentér"
+
+#: mailu/ui/forms.py:54 mailu/ui/forms.py:68 mailu/ui/forms.py:75
+#: mailu/ui/forms.py:88 mailu/ui/forms.py:136 mailu/ui/forms.py:145
+msgid "Save"
+msgstr "Gem"
+
+#: mailu/ui/forms.py:59
+msgid "Initial admin"
+msgstr "Initiél administrator"
+
+#: mailu/ui/forms.py:60
+msgid "Admin password"
+msgstr "Administrator adgangskode"
+
+#: mailu/ui/forms.py:61 mailu/ui/forms.py:81 mailu/ui/forms.py:94
+msgid "Confirm password"
+msgstr "Gentag adgangskode"
+
+#: mailu/ui/forms.py:63
+msgid "Create"
+msgstr "Opret"
+
+#: mailu/ui/forms.py:67
+msgid "Alternative name"
+msgstr "Alternativt navn"
+
+#: mailu/ui/forms.py:72
+msgid "Relayed domain name"
+msgstr ""
+
+#: mailu/ui/forms.py:73 mailu/ui/templates/relay/list.html:19
+msgid "Remote host"
+msgstr "Fjernhost"
+
+#: mailu/ui/forms.py:82 mailu/ui/templates/user/list.html:23
+#: mailu/ui/templates/user/signup_domain.html:16
+msgid "Quota"
+msgstr "Kvota"
+
+#: mailu/ui/forms.py:83
+msgid "Allow IMAP access"
+msgstr "Tillad IMAP adgang"
+
+#: mailu/ui/forms.py:84
+msgid "Allow POP3 access"
+msgstr "Tillad POP3 adgang"
+
+#: mailu/ui/forms.py:85 mailu/ui/forms.py:101
+#: mailu/ui/templates/user/settings.html:15
 msgid "Displayed name"
 msgstr "Vist navn"
 
-#: mailu/ui/forms.py:98
+#: mailu/ui/forms.py:87
+msgid "Enabled"
+msgstr "Aktiveret"
+
+#: mailu/ui/forms.py:92
+msgid "Email address"
+msgstr "E-mail adresse"
+
+#: mailu/ui/forms.py:102
 msgid "Enable spam filter"
 msgstr "Aktivér spamfilter"
 
-#: mailu/ui/forms.py:99
+#: mailu/ui/forms.py:103
+msgid "Enable marking spam mails as read"
+msgstr ""
+
+#: mailu/ui/forms.py:104
 msgid "Spam filter tolerance"
 msgstr "Spamfilter følsomhed"
 
-#: mailu/ui/forms.py:100
+#: mailu/ui/forms.py:105
 msgid "Enable forwarding"
 msgstr "Aktiver videresendelse"
 
-#: mailu/ui/forms.py:101
+#: mailu/ui/forms.py:106
 msgid "Keep a copy of the emails"
 msgstr "Behold kopi af e-mailsne"
 
-#: mailu/ui/forms.py:103 mailu/ui/forms.py:139
-#: mailu/ui/templates/alias/list.html:20
+#: mailu/ui/forms.py:107 mailu/ui/forms.py:143
+#: mailu/ui/templates/alias/list.html:21
 msgid "Destination"
 msgstr "Modtager"
 
-#: mailu/ui/forms.py:105
+#: mailu/ui/forms.py:108
 msgid "Save settings"
 msgstr "Gem indstillinger"
 
-#: mailu/ui/forms.py:110
+#: mailu/ui/forms.py:113
 msgid "Password check"
 msgstr "Adgangskode tjek"
 
-#: mailu/ui/forms.py:111 mailu/ui/templates/sidebar.html:16
+#: mailu/ui/forms.py:114 mailu/ui/templates/sidebar.html:25
 msgid "Update password"
 msgstr "Opdatér adgangskode"
 
-#: mailu/ui/forms.py:115
+#: mailu/ui/forms.py:118
 msgid "Enable automatic reply"
 msgstr "Aktivér automatisk svar"
 
-#: mailu/ui/forms.py:116
+#: mailu/ui/forms.py:119
 msgid "Reply subject"
 msgstr "Svaremne"
 
-#: mailu/ui/forms.py:117
+#: mailu/ui/forms.py:120
 msgid "Reply body"
 msgstr "Svartekst"
 
-#: mailu/ui/forms.py:119
+#: mailu/ui/forms.py:122
+msgid "Start of vacation"
+msgstr ""
+
+#: mailu/ui/forms.py:123
 msgid "End of vacation"
 msgstr "Sidste feriedag"
 
-#: mailu/ui/forms.py:120
+#: mailu/ui/forms.py:124
 msgid "Update"
 msgstr "Opdater"
 
-#: mailu/ui/forms.py:125
+#: mailu/ui/forms.py:129
 msgid "Your token (write it down, as it will never be displayed again)"
 msgstr "Din token (skriv den ned, da den ikke bliver vist igen)"
 
-#: mailu/ui/forms.py:130 mailu/ui/templates/token/list.html:20
+#: mailu/ui/forms.py:134 mailu/ui/templates/token/list.html:21
 msgid "Authorized IP"
 msgstr "Godkendt IP"
 
-#: mailu/ui/forms.py:136
+#: mailu/ui/forms.py:140
 msgid "Alias"
 msgstr "Alias"
 
-#: mailu/ui/forms.py:138
+#: mailu/ui/forms.py:142
 msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"
 msgstr "Brug SQL LIKE syntaks (f.eks. til catch-all aliaser)"
 
-#: mailu/ui/forms.py:145
+#: mailu/ui/forms.py:149
 msgid "Admin email"
 msgstr "Administrator e-mail"
 
-#: mailu/ui/forms.py:146 mailu/ui/forms.py:151 mailu/ui/forms.py:164
+#: mailu/ui/forms.py:150 mailu/ui/forms.py:155 mailu/ui/forms.py:168
 msgid "Submit"
 msgstr "Send"
 
-#: mailu/ui/forms.py:150
+#: mailu/ui/forms.py:154
 msgid "Manager email"
 msgstr "Manager e-mail"
 
-#: mailu/ui/forms.py:155
+#: mailu/ui/forms.py:159
 msgid "Protocol"
 msgstr "Protokol"
 
-#: mailu/ui/forms.py:158
+#: mailu/ui/forms.py:162
 msgid "Hostname or IP"
 msgstr "Værtsnavn eller IP"
 
-#: mailu/ui/forms.py:159 mailu/ui/templates/client.html:20
-#: mailu/ui/templates/client.html:47
+#: mailu/ui/forms.py:163 mailu/ui/templates/client.html:20
+#: mailu/ui/templates/client.html:45
 msgid "TCP port"
 msgstr "TCP port"
 
-#: mailu/ui/forms.py:160
+#: mailu/ui/forms.py:164
 msgid "Enable TLS"
 msgstr "Aktivér TLS"
 
-#: mailu/ui/forms.py:161 mailu/ui/templates/client.html:28
-#: mailu/ui/templates/client.html:55 mailu/ui/templates/fetch/list.html:20
+#: mailu/ui/forms.py:165 mailu/ui/templates/client.html:28
+#: mailu/ui/templates/client.html:53 mailu/ui/templates/fetch/list.html:21
 msgid "Username"
 msgstr "Brugernavn"
 
-#: mailu/ui/forms.py:163
+#: mailu/ui/forms.py:167
 msgid "Keep emails on the server"
 msgstr "Gem e-mails på serveren"
 
-#: mailu/ui/forms.py:168
+#: mailu/ui/forms.py:172
 msgid "Announcement subject"
 msgstr ""
 
-#: mailu/ui/forms.py:170
+#: mailu/ui/forms.py:174
 msgid "Announcement body"
 msgstr ""
 
-#: mailu/ui/forms.py:172
+#: mailu/ui/forms.py:176
 msgid "Send"
 msgstr "Send"
 
@@ -260,17 +302,34 @@ msgstr "Send"
 msgid "Public announcement"
 msgstr ""
 
-#: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:82
-msgid "Client setup"
-msgstr "Klient opsætning"
+#: mailu/ui/templates/antispam.html:4 mailu/ui/templates/sidebar.html:80
+#: mailu/ui/templates/user/settings.html:19
+msgid "Antispam"
+msgstr "Antispam"
 
-#: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:43
+#: mailu/ui/templates/antispam.html:8
+msgid "RSPAMD status page"
+msgstr ""
+
+#: mailu/ui/templates/client.html:8
+msgid "configure your email client"
+msgstr ""
+
+#: mailu/ui/templates/client.html:13
+msgid "Incoming mail"
+msgstr ""
+
+#: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:41
 msgid "Mail protocol"
 msgstr "Mail protokol"
 
-#: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:51
+#: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:49
 msgid "Server name"
 msgstr "Servernavn"
+
+#: mailu/ui/templates/client.html:38
+msgid "Outgoing mail"
+msgstr ""
 
 #: mailu/ui/templates/confirm.html:4
 msgid "Confirm action"
@@ -289,72 +348,56 @@ msgstr "Docker fejl"
 msgid "An error occurred while talking to the Docker server."
 msgstr "Der opstod en fejl i kommunikationen med Docker serveren."
 
-#: mailu/ui/templates/login.html:8
-msgid "to access the administration tools"
-msgstr "for at tilgå de administrative værktøjer"
+#: mailu/ui/templates/macros.html:129
+msgid "copy to clipboard"
+msgstr ""
 
-#: mailu/ui/templates/sidebar.html:11 mailu/ui/templates/user/list.html:34
+#: mailu/ui/templates/sidebar.html:15
+msgid "My account"
+msgstr ""
+
+#: mailu/ui/templates/sidebar.html:19 mailu/ui/templates/user/list.html:37
 msgid "Settings"
 msgstr "Indstillinger"
 
-#: mailu/ui/templates/sidebar.html:21 mailu/ui/templates/user/list.html:35
+#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/user/list.html:38
 msgid "Auto-reply"
 msgstr "Auto-svar"
 
-#: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:26
-#: mailu/ui/templates/user/list.html:36
+#: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:37
+#: mailu/ui/templates/user/list.html:39
 msgid "Fetched accounts"
 msgstr "Hentede konti"
 
-#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/token/list.html:4
+#: mailu/ui/templates/sidebar.html:43 mailu/ui/templates/token/list.html:4
 msgid "Authentication tokens"
 msgstr "Godkendelsestokens"
 
-#: mailu/ui/templates/sidebar.html:35
+#: mailu/ui/templates/sidebar.html:56
 msgid "Administration"
 msgstr "Administration"
 
-#: mailu/ui/templates/sidebar.html:44
+#: mailu/ui/templates/sidebar.html:62
 msgid "Announcement"
 msgstr ""
 
-#: mailu/ui/templates/sidebar.html:49
+#: mailu/ui/templates/sidebar.html:68
 msgid "Administrators"
 msgstr "Administratorer"
 
-#: mailu/ui/templates/sidebar.html:54
+#: mailu/ui/templates/sidebar.html:74
 msgid "Relayed domains"
 msgstr "Uddelegerede domæner"
 
-#: mailu/ui/templates/sidebar.html:59 mailu/ui/templates/user/settings.html:15
-msgid "Antispam"
-msgstr "Antispam"
-
-#: mailu/ui/templates/sidebar.html:66
+#: mailu/ui/templates/sidebar.html:88
 msgid "Mail domains"
 msgstr "Maildomæner"
 
-#: mailu/ui/templates/sidebar.html:72
-msgid "Go to"
-msgstr "Gå til"
-
-#: mailu/ui/templates/sidebar.html:76
+#: mailu/ui/templates/sidebar.html:99
 msgid "Webmail"
 msgstr "Webmail"
 
-#: mailu/ui/templates/sidebar.html:87
-msgid "Website"
-msgstr "Webside"
-
-#: mailu/ui/templates/sidebar.html:92
-msgid "Help"
-msgstr "Hjælp"
-
-#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:98
-msgid "Register a domain"
-msgstr "Registrer et domæne"
-
-#: mailu/ui/templates/sidebar.html:105
+#: mailu/ui/templates/sidebar.html:135
 msgid "Sign out"
 msgstr "Log ud"
 
@@ -374,26 +417,26 @@ msgstr "Globale administratorer"
 msgid "Add administrator"
 msgstr "Tilføj administrator"
 
-#: mailu/ui/templates/admin/list.html:16 mailu/ui/templates/alias/list.html:18
-#: mailu/ui/templates/alternative/list.html:18
-#: mailu/ui/templates/domain/list.html:16 mailu/ui/templates/fetch/list.html:18
-#: mailu/ui/templates/manager/list.html:18
-#: mailu/ui/templates/relay/list.html:16 mailu/ui/templates/token/list.html:18
-#: mailu/ui/templates/user/list.html:18
+#: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
+#: mailu/ui/templates/alternative/list.html:19
+#: mailu/ui/templates/domain/list.html:17 mailu/ui/templates/fetch/list.html:19
+#: mailu/ui/templates/manager/list.html:19
+#: mailu/ui/templates/relay/list.html:17 mailu/ui/templates/token/list.html:19
+#: mailu/ui/templates/user/list.html:19
 msgid "Actions"
 msgstr "Handlinger"
 
-#: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
-#: mailu/ui/templates/manager/list.html:19 mailu/ui/templates/user/list.html:20
+#: mailu/ui/templates/admin/list.html:18 mailu/ui/templates/alias/list.html:20
+#: mailu/ui/templates/manager/list.html:20 mailu/ui/templates/user/list.html:21
 msgid "Email"
 msgstr "E-mail"
 
-#: mailu/ui/templates/admin/list.html:22 mailu/ui/templates/alias/list.html:29
-#: mailu/ui/templates/alternative/list.html:25
-#: mailu/ui/templates/domain/list.html:31 mailu/ui/templates/fetch/list.html:31
-#: mailu/ui/templates/manager/list.html:24
-#: mailu/ui/templates/relay/list.html:27 mailu/ui/templates/token/list.html:26
-#: mailu/ui/templates/user/list.html:31
+#: mailu/ui/templates/admin/list.html:25 mailu/ui/templates/alias/list.html:32
+#: mailu/ui/templates/alternative/list.html:29
+#: mailu/ui/templates/domain/list.html:34 mailu/ui/templates/fetch/list.html:34
+#: mailu/ui/templates/manager/list.html:27
+#: mailu/ui/templates/relay/list.html:30 mailu/ui/templates/token/list.html:30
+#: mailu/ui/templates/user/list.html:34
 msgid "Delete"
 msgstr "Slet"
 
@@ -413,23 +456,25 @@ msgstr "Alias liste"
 msgid "Add alias"
 msgstr "Tilføj alias"
 
-#: mailu/ui/templates/alias/list.html:22
-#: mailu/ui/templates/alternative/list.html:20
-#: mailu/ui/templates/domain/list.html:22 mailu/ui/templates/fetch/list.html:24
-#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:21
-#: mailu/ui/templates/user/list.html:24
+#: mailu/ui/templates/alias/list.html:23
+#: mailu/ui/templates/alternative/list.html:21
+#: mailu/ui/templates/domain/list.html:23 mailu/ui/templates/fetch/list.html:25
+#: mailu/ui/templates/relay/list.html:21 mailu/ui/templates/token/list.html:22
+#: mailu/ui/templates/user/list.html:25
 msgid "Created"
 msgstr "Oprettet"
 
-#: mailu/ui/templates/alias/list.html:23 mailu/ui/templates/domain/list.html:23
-#: mailu/ui/templates/fetch/list.html:25 mailu/ui/templates/relay/list.html:21
-#: mailu/ui/templates/user/list.html:25
+#: mailu/ui/templates/alias/list.html:24
+#: mailu/ui/templates/alternative/list.html:22
+#: mailu/ui/templates/domain/list.html:24 mailu/ui/templates/fetch/list.html:26
+#: mailu/ui/templates/relay/list.html:22 mailu/ui/templates/token/list.html:23
+#: mailu/ui/templates/user/list.html:26
 msgid "Last edit"
 msgstr "Sidst redigeret"
 
-#: mailu/ui/templates/alias/list.html:28 mailu/ui/templates/domain/list.html:30
-#: mailu/ui/templates/fetch/list.html:30 mailu/ui/templates/relay/list.html:26
-#: mailu/ui/templates/user/list.html:30
+#: mailu/ui/templates/alias/list.html:31 mailu/ui/templates/domain/list.html:33
+#: mailu/ui/templates/fetch/list.html:33 mailu/ui/templates/relay/list.html:29
+#: mailu/ui/templates/user/list.html:33
 msgid "Edit"
 msgstr "Rediger"
 
@@ -445,7 +490,7 @@ msgstr "Alternativ domæneliste"
 msgid "Add alternative"
 msgstr "Tilføj alternativ"
 
-#: mailu/ui/templates/alternative/list.html:19
+#: mailu/ui/templates/alternative/list.html:20
 msgid "Name"
 msgstr "Navn"
 
@@ -466,25 +511,33 @@ msgstr "Forny nøgler"
 msgid "Generate keys"
 msgstr "Opret nøgler"
 
-#: mailu/ui/templates/domain/details.html:31
+#: mailu/ui/templates/domain/details.html:30
 msgid "DNS MX entry"
 msgstr "MX DNS post"
 
-#: mailu/ui/templates/domain/details.html:35
+#: mailu/ui/templates/domain/details.html:34
 msgid "DNS SPF entries"
 msgstr "SPF DNS poster"
 
-#: mailu/ui/templates/domain/details.html:42
+#: mailu/ui/templates/domain/details.html:40
 msgid "DKIM public key"
 msgstr "DKIM offentlig nøgle"
 
-#: mailu/ui/templates/domain/details.html:46
+#: mailu/ui/templates/domain/details.html:44
 msgid "DNS DKIM entry"
 msgstr "DKIM DNS post"
 
-#: mailu/ui/templates/domain/details.html:50
+#: mailu/ui/templates/domain/details.html:48
 msgid "DNS DMARC entry"
 msgstr "DMARC DNS post"
+
+#: mailu/ui/templates/domain/details.html:58
+msgid "DNS TLSA entry"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:63
+msgid "DNS client auto-configuration entries"
+msgstr ""
 
 #: mailu/ui/templates/domain/edit.html:4
 msgid "Edit domain"
@@ -494,35 +547,35 @@ msgstr "Rediger domæne"
 msgid "Domain list"
 msgstr "Domæneliste"
 
-#: mailu/ui/templates/domain/list.html:17
+#: mailu/ui/templates/domain/list.html:18
 msgid "Manage"
 msgstr "Administrér"
 
-#: mailu/ui/templates/domain/list.html:19
+#: mailu/ui/templates/domain/list.html:20
 msgid "Mailbox count"
 msgstr "Antal mailkonti"
 
-#: mailu/ui/templates/domain/list.html:20
+#: mailu/ui/templates/domain/list.html:21
 msgid "Alias count"
 msgstr "Antal alias"
 
-#: mailu/ui/templates/domain/list.html:28
+#: mailu/ui/templates/domain/list.html:31
 msgid "Details"
 msgstr "Detaljer"
 
-#: mailu/ui/templates/domain/list.html:35
+#: mailu/ui/templates/domain/list.html:38
 msgid "Users"
 msgstr "Brugere"
 
-#: mailu/ui/templates/domain/list.html:36
+#: mailu/ui/templates/domain/list.html:39
 msgid "Aliases"
 msgstr "Alias"
 
-#: mailu/ui/templates/domain/list.html:37
+#: mailu/ui/templates/domain/list.html:40
 msgid "Managers"
 msgstr "Bestyrere"
 
-#: mailu/ui/templates/domain/list.html:39
+#: mailu/ui/templates/domain/list.html:42
 msgid "Alternatives"
 msgstr "Alternativer"
 
@@ -555,23 +608,27 @@ msgstr "Rediger en hentet konto"
 msgid "Add an account"
 msgstr "Tilføj en konto"
 
-#: mailu/ui/templates/fetch/list.html:19
+#: mailu/ui/templates/fetch/list.html:20
 msgid "Endpoint"
 msgstr ""
 
-#: mailu/ui/templates/fetch/list.html:21
+#: mailu/ui/templates/fetch/list.html:22
 msgid "Keep emails"
 msgstr "Behold e-mails"
 
-#: mailu/ui/templates/fetch/list.html:22
+#: mailu/ui/templates/fetch/list.html:23
 msgid "Last check"
 msgstr "Sidst tjekket"
 
-#: mailu/ui/templates/fetch/list.html:35
+#: mailu/ui/templates/fetch/list.html:24
+msgid "Status"
+msgstr ""
+
+#: mailu/ui/templates/fetch/list.html:38
 msgid "yes"
 msgstr "ja"
 
-#: mailu/ui/templates/fetch/list.html:35
+#: mailu/ui/templates/fetch/list.html:38
 msgid "no"
 msgstr "nej"
 
@@ -619,16 +676,12 @@ msgstr ""
 msgid "General"
 msgstr ""
 
-#: mailu/ui/templates/user/create.html:22
+#: mailu/ui/templates/user/create.html:23
 msgid "Features and quotas"
 msgstr ""
 
 #: mailu/ui/templates/user/edit.html:4
 msgid "Edit user"
-msgstr ""
-
-#: mailu/ui/templates/user/forward.html:4
-msgid "Forward emails"
 msgstr ""
 
 #: mailu/ui/templates/user/list.html:4
@@ -639,11 +692,11 @@ msgstr ""
 msgid "Add user"
 msgstr ""
 
-#: mailu/ui/templates/user/list.html:19 mailu/ui/templates/user/settings.html:4
+#: mailu/ui/templates/user/list.html:20 mailu/ui/templates/user/settings.html:4
 msgid "User settings"
 msgstr ""
 
-#: mailu/ui/templates/user/list.html:21
+#: mailu/ui/templates/user/list.html:22
 msgid "Features"
 msgstr ""
 
@@ -655,7 +708,7 @@ msgstr ""
 msgid "Automatic reply"
 msgstr ""
 
-#: mailu/ui/templates/user/settings.html:22
+#: mailu/ui/templates/user/settings.html:27
 msgid "Auto-forward"
 msgstr ""
 
@@ -670,3 +723,10 @@ msgstr ""
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
 msgstr "Tilgængelige pladser"
+
+#~ msgid "to access the administration tools"
+#~ msgstr "for at tilgå de administrative værktøjer"
+
+#~ msgid "Forward emails"
+#~ msgstr ""
+

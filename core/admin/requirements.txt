@@ -25,3 +25,4 @@ srslib
 marshmallow
 flask-marshmallow
 marshmallow-sqlalchemy
+xmltodict

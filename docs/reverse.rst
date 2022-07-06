@@ -47,7 +47,7 @@ Then on your own frontend, point to these local ports. In practice, you only nee
 
     location / {
       proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr
+      proxy_set_header X-Real-IP $remote_addr;
       proxy_pass https://localhost:8443;
     }
   }
@@ -59,16 +59,16 @@ Then on your own frontend, point to these local ports. In practice, you only nee
   REAL_IP_FROM=x.x.x.x,y.y.y.y.y
   #x.x.x.x,y.y.y.y.y is the static IP address your reverse proxy uses for connecting to Mailu. 
   
-Because the admin interface is served as ``/admin``, the Webmail as ``/webmail``, the single sign on page as ``/sso``, webdav as ``/webdav`` and the static files endpoint as ``/static``, you may also want to use a single virtual host and serve other applications (still Nginx):
+Because the admin interface is served as ``/admin``, the Webmail as ``/webmail``, the single sign on page as ``/sso``, webdav as ``/webdav``, the client-autoconfiguration and the static files endpoint as ``/static``, you may also want to use a single virtual host and serve other applications (still Nginx):
 
 .. code-block:: nginx
 
   server {
     # [...] here goes your standard configuration
 
-    location ~ ^/(admin|sso|static|webdav|webmail) {
+    location ~* ^/(admin|sso|static|webdav|webmail|(apple\.)?mobileconfig|(\.well\-known/autoconfig/)?mail/|Autodiscover/Autodiscover) {
       proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr
+      proxy_set_header X-Real-IP $remote_addr;
       proxy_pass https://localhost:8443;     
     }
 
@@ -111,7 +111,7 @@ Here is an example configuration :
 
     location /webmail {
       proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr
+      proxy_set_header X-Real-IP $remote_addr;
       proxy_pass https://localhost:8443/webmail;
     }
   }
@@ -123,7 +123,7 @@ Here is an example configuration :
 
     location /admin {
       proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr
+      proxy_set_header X-Real-IP $remote_addr;
       proxy_pass https://localhost:8443/admin;
       proxy_set_header Host $http_host;
     }

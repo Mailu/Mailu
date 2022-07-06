@@ -43,7 +43,7 @@ RUN apk add --no-cache \
 #     zip               php7-zip
 #php7-curl php7-iconv php7-json php7-xml php7-simplexml php7-dom php7-openssl php7-pdo php7-pdo_sqlite php7-mbstring \
 RUN apk add --no-cache \
-    nginx \
+    nginx curl \
     php7 php7-fpm php7-mbstring php7-zip php7-json php7-xml php7-simplexml \
     php7-dom php7-curl php7-exif gd php7-gd php7-iconv php7-intl php7-openssl \
     php7-pdo_sqlite php7-pdo php7-sodium libsodium php7-tidy php7-pecl-uuid \
@@ -66,7 +66,7 @@ COPY defaults/default.ini /defaults/default.ini
 ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.13.4/snappymail-2.13.4.zip
 
 RUN cd /var/www/webmail \
- && busybox wget ${SNAPPYMAIL_URL} -O - |busybox unzip -
+ && busybox wget ${SNAPPYMAIL_URL} -O - | busybox unzip - \
  && chmod -R u+w,a+rX /var/www/webmail \
  && chown -R nginx:nginx /var/www/webmail
 
@@ -82,5 +82,5 @@ VOLUME ["/data"]
 
 CMD /start.py
 
-HEALTHCHECK CMD curl -f -L http://localhost/health || exit 1
+HEALTHCHECK CMD curl -f -L http://localhost/ping || exit 1
 RUN echo $VERSION >> /version

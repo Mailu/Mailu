@@ -21,7 +21,7 @@ RUN set -eu \
  && pip3 install socrate \
  && echo date.timezone=UTC > /usr/local/etc/php/conf.d/timezone.ini \
  && echo "ServerSignature Off\nServerName roundcube" >> /etc/apache2/apache2.conf \
- && sed -i 's,CustomLog.*combined$,\0 "'"expr=!(%{HTTP_USER_AGENT}=='health'\&\&(-R '127.0.0.1/8' || -R '::1'))"'",' /etc/apache2/sites-available/000-default.conf \
+ && sed -i '/CustomLog.*combined$/d' /etc/apache2/sites-available/000-default.conf \
 \
  && mark="$(apt-mark showmanual)" \
  && apt-get install -y --no-install-recommends \

@@ -72,6 +72,9 @@ conf.jinja("/config.inc.php", context, "/var/www/html/config/config.inc.php")
 # create dirs
 os.system("mkdir -p /data/gpg")
 
+# disable access log for VirtualHosts that don't define their own logfile
+os.system("a2disconf other-vhosts-access-log")
+
 print("Initializing database")
 try:
     result = subprocess.check_output(["/var/www/html/bin/initdb.sh", "--dir", "/var/www/html/SQL"],

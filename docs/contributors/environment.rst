@@ -106,26 +106,29 @@ The development environment is quite similar to the production one.
 Building images
 ```````````````
 
-We supply a separate ``test/build.yml`` file for convenience.
+We supply a separate ``test/build.hcl`` file for convenience.
 After cloning the git repository to your workstation, you can build the images:
 
 .. code-block:: bash
 
   cd Mailu
-  docker-compose -f tests/build.yml build
+  docker buildx bake -f tests/build.hcl --load
 
-The ``build.yml`` file has two variables:
+The ``build.hcl`` file has three variables:
 
 #. ``$DOCKER_ORG``: First part of the image tag. Defaults to *mailu* and needs to be changed
    only  when pushing to your own Docker hub account.
-#. ``$VERSION``: Last part of the image tag. Defaults to *local* to differentiate from pulled
+#. ``$MAILU_VERSION``: Last part of the image tag. Defaults to *local* to differentiate from pulled
    images.
+#. ``$MAILU_PINNED_VERSION``: Last part of the image tag for x.y.z images. Defaults to *local* to differentiate from pulled
+   images.
+
 
 To re-build only specific containers at a later time.
 
 .. code-block:: bash
 
-  docker-compose -f tests/build.yml build admin webdav
+  docker buildx bake -f tests/build.hcl admin webdav
 
 If you have to push the images to Docker Hub for testing in Docker Swarm or a remote
 host, you have to define ``DOCKER_ORG`` (usually your Docker user-name) and login to
@@ -137,15 +140,15 @@ the hub.
   Username: Foo
   Password: Bar
   export DOCKER_ORG="Foo"
-  export VERSION="feat-extra-app"
-  docker-compose -f tests/build.yml build
-  docker-compose -f tests/build.yml push
+  export MAILU_VERSION="feat-extra-app"
+  export MAILU_PINNED_VERSION="feat-extra-app"
+  docker buildx bake -f tests/build.hcl --push
 
 Running containers
 ``````````````````
 
 To run the newly created images: ``cd`` to your project directory. Edit ``.env`` to set
-``VERSION`` to the same value as used during the build, which defaults to ``local``.
+``VERSION`` to the same value as used during the build (for MAILU_VERSION), which defaults to ``local``.
 After that you can run:
 
 .. code-block:: bash
@@ -277,7 +280,7 @@ Merge conflicts
 Before proceeding, check the PR page in the bottom. It should not indicate a merge conflict.
 If there are merge conflicts, you have 2 options:
 
-#. Do a review "request changes" and ask the author to resolve the merge conflict. 
+#. Do a review "request changes" and ask the author to resolve the merge conflict.
 #. Solve the merge conflict yourself on Github, using the web editor.
 
 If it can't be done in the web editor, go for option 1. Unless you want to go through the trouble of

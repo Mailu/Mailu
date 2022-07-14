@@ -1,0 +1,9 @@
+Switch from docker build to buildx for CI/CD.
+- The main workflow file has been optimised and simplified.
+- Images are built in parallel when building locally resulting in faster build times.
+- The github action workflow is about 50% faster.
+- Arm images are built as well. These images are not tested due to restrictions of github actions (no arm runners). The tags of the images have -arm appended to it.
+- Arm images can also be built locally.
+- Reusable workflow is introduced for building, testing and deploying the images.
+  This allows the workflow to be reused for other purposes in the future.
+- Workflow can be manually triggered. This allows forked Mailu projects to also use the workflow for building images.

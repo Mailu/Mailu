@@ -1,0 +1,355 @@
+name: build-test-deploy
+on:
+  workflow_call:
+    inputs:
+      architecture:
+        description: 'The architecture of the images that will be build.'
+        required: false
+        default: 'linux/amd64'
+        type: string
+      mailu_version:
+        description: 'The main version that is build. E.g. master or x.y.'
+        required: true
+        type: string
+      pinned_mailu_version:
+        description: 'The specific version that is build. E.g. commit hash or x.y.z.'
+        required: true
+        type: string
+      docker_org:
+        description: 'The docker organisation where the images are pushed to.'
+        required: true
+        type: string
+      branch:
+        description: 'The branch that triggered this workflow.'
+        required: true
+        type: string
+      deploy:
+        description: Deploy to docker hub. Happens for all branches but staging. Use string true or false.
+        default: true
+        required: false
+        type: string
+      release:
+        description: Tag and create the github release. Use string true or false.
+        default: false
+        required: false
+        type: string
+
+  workflow_dispatch:
+    inputs:
+      architecture:
+        description: 'The architecture of the images that will be build.'
+        required: false
+        default: 'linux/amd64'
+        type: string
+      mailu_version:
+        description: 'The main version that is build. E.g. master or x.y.'
+        required: true
+        type: string
+      pinned_mailu_version:
+        description: 'The specific version that is build. E.g. commit hash or x.y.z.'
+        required: true
+        type: string
+      docker_org:
+        description: 'The docker organisation where the images are pushed to.'
+        required: true
+        type: string
+      branch:
+        description: 'The branch that triggered this workflow.'
+        required: true
+        type: string
+      deploy:
+        description: Deploy to docker hub. Happens for all branches but staging
+        default: true
+        required: false
+        type: boolean
+      release:
+        description: 'Tag and create the github release. Only happens for branch x.y (release branch)'
+        default: false
+        required: false
+        type: boolean
+env:
+  HCL_FILE: ./tests/build.hcl
+
+jobs:
+# This job calculates what images must be build. It reads the build.hcl file and then outputs all targets (images) in it.
+# This is used by the next build job.
+  targets:
+    name: create targets
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.targets.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Create matrix
+        id: targets
+        run: |
+          echo ::set-output name=matrix::$(docker buildx bake -f ${{env.HCL_FILE}} --print | jq -cr '.group.default.targets')
+      - name: Show matrix
+        run: |
+          echo ${{ steps.targets.outputs.matrix }}
+
+# This job builds all the images. The build cache is stored in the github actions cache.
+# In further jobs, this cache is used to quickly rebuild the images.
+  build:
+    name: Build images
+    needs:
+      - targets
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJson(needs.targets.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    permissions:
+     contents: read
+     packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Retrieve global variables
+        shell: bash
+        run: |
+          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - uses: crazy-max/ghaction-github-runtime@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.Docker_Login }}
+          password: ${{ secrets.Docker_Password }}
+      - name: Build all docker images
+        env:
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+        uses: docker/bake-action@v2
+        with:
+          files: ${{env.HCL_FILE}}
+          targets: ${{ matrix.target }}
+          load: false
+          push: false
+          set: |
+            *.cache-from=type=gha,scope=build-${{ matrix.target }}
+            *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
+            *.platform=${{ inputs.architecture }}
+
+# This job runs all the tests.
+  tests:
+    name: tests
+    if: inputs.architecture == 'linux/amd64'
+    runs-on: ubuntu-latest
+    permissions:
+     contents: read
+     packages: read
+    needs:
+      - targets
+      - build
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ["core", "fetchmail", "filters", "rainloop", "roundcube", "webdav"]
+        time: ["2"]
+        include:
+          - target: "filters"
+            time: "3"
+        exclude:
+          - target: "filters"
+            time: "2"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Retrieve global variables
+        shell: bash
+        run: |
+          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - uses: crazy-max/ghaction-github-runtime@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.Docker_Login }}
+          password: ${{ secrets.Docker_Password }}
+      - name: Build docker images for testing from cache
+        env:
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+        uses: docker/bake-action@v2
+        with:
+          files: ${{env.HCL_FILE}}
+          load: true
+          push: false
+          set: |
+            *.cache-from=type=gha,scope=build-docs
+            *.cache-from=type=gha,scope=build-setup
+            *.cache-from=type=gha,scope=build-admin
+            *.cache-from=type=gha,scope=build-antispam
+            *.cache-from=type=gha,scope=build-front
+            *.cache-from=type=gha,scope=build-imap
+            *.cache-from=type=gha,scope=build-smtp
+            *.cache-from=type=gha,scope=build-rainloop
+            *.cache-from=type=gha,scope=build-roundcube
+            *.cache-from=type=gha,scope=build-antivirus
+            *.cache-from=type=gha,scope=build-fetchmail
+            *.cache-from=type=gha,scope=build-resolver
+            *.cache-from=type=gha,scope=build-traefik-certdumper
+            *.cache-from=type=gha,scope=build-webdav
+            *.platform=${{ inputs.architecture }}
+      - name: Install python packages
+        run: python3 -m pip install -r tests/requirements.txt
+      - name: Copy all certs
+        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
+      - name: Test ${{ matrix.target }}
+        run: python tests/compose/test.py ${{ matrix.target }} ${{ matrix.time }}
+        env:
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+
+# This job deploys the docker images to the docker repository. The build.hcl file contains logic that determines what tags are pushed.
+# E.g. for master only the :master and :latest tags are pushed.
+  deploy:
+    name: Deploy images
+    # Deploying is not required for staging
+    if: inputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - tests
+    steps:
+      - uses: actions/checkout@v3
+      - name: Retrieve global variables
+        shell: bash
+        run: |
+          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - uses: crazy-max/ghaction-github-runtime@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.Docker_Login }}
+          password: ${{ secrets.Docker_Password }}
+      - name: Deploy images to docker hub. Build.hcl contains the logic for the tags that are pushed.
+        env:
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+        uses: docker/bake-action@v2
+        with:
+          files: ${{env.HCL_FILE}}
+          push: true
+          set: |
+            *.cache-from=type=gha,scope=build-docs
+            *.cache-from=type=gha,scope=build-setup
+            *.cache-from=type=gha,scope=build-admin
+            *.cache-from=type=gha,scope=build-antispam
+            *.cache-from=type=gha,scope=build-front
+            *.cache-from=type=gha,scope=build-imap
+            *.cache-from=type=gha,scope=build-smtp
+            *.cache-from=type=gha,scope=build-rainloop
+            *.cache-from=type=gha,scope=build-roundcube
+            *.cache-from=type=gha,scope=build-antivirus
+            *.cache-from=type=gha,scope=build-fetchmail
+            *.cache-from=type=gha,scope=build-resolver
+            *.cache-from=type=gha,scope=build-traefik-certdumper
+            *.cache-from=type=gha,scope=build-webdav
+            *.platform=${{ inputs.architecture }}
+
+  deploy-arm:
+    name: Deploy images for arm
+    # Deploying is not required for staging
+    if: inputs.deploy == 'true' && inputs.architecture != 'linux/amd64'
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Retrieve global variables
+        shell: bash
+        run: |
+          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - uses: crazy-max/ghaction-github-runtime@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.Docker_Login }}
+          password: ${{ secrets.Docker_Password }}
+      - name: Deploy images to docker hub. Build.hcl contains the logic for the tags that are pushed.
+        env:
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+        uses: docker/bake-action@v2
+        with:
+          files: ${{env.HCL_FILE}}
+          push: true
+          set: |
+            *.cache-from=type=gha,scope=build-docs
+            *.cache-from=type=gha,scope=build-setup
+            *.cache-from=type=gha,scope=build-admin
+            *.cache-from=type=gha,scope=build-antispam
+            *.cache-from=type=gha,scope=build-front
+            *.cache-from=type=gha,scope=build-imap
+            *.cache-from=type=gha,scope=build-smtp
+            *.cache-from=type=gha,scope=build-rainloop
+            *.cache-from=type=gha,scope=build-roundcube
+            *.cache-from=type=gha,scope=build-antivirus
+            *.cache-from=type=gha,scope=build-fetchmail
+            *.cache-from=type=gha,scope=build-resolver
+            *.cache-from=type=gha,scope=build-traefik-certdumper
+            *.cache-from=type=gha,scope=build-webdav
+            *.platform=${{ inputs.architecture }}
+
+#This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.
+  tag-release:
+    if: inputs.release == 'true'
+    runs-on: ubuntu-latest
+    needs:
+      - deploy
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
+      - name: Retrieve global variables
+        shell: bash
+        run: |
+          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Create tag for branch x.y.
+        shell: bash
+        run: |
+          echo git tag ${{ env.PINNED_MAILU_VERSION }} $(/usr/bin/git rev-parse HEAD)
+          git tag ${{ env.PINNED_MAILU_VERSION }} $(/usr/bin/git rev-parse HEAD)
+          git push origin ${{ env.PINNED_MAILU_VERSION }}
+      - name: Create release for tag x.y.z.
+        uses: ncipollo/release-action@v1
+        with:
+          bodyFile: "RELEASE_TEMPLATE.md"
+          tag: ${{ env.PINNED_MAILU_VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}

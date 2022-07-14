@@ -60,7 +60,7 @@ the version of Mailu that you are running.
     dns
     reverse
     database
-    rpi_build
+    arm_images
 
 .. toctree::
     :maxdepth: 2

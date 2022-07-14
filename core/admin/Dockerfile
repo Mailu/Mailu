@@ -1,8 +1,7 @@
 # First stage to build assets
 ARG DISTRO=alpine:3.14.5
-ARG ARCH=""
 
-FROM ${ARCH}node:16 as assets
+FROM node:16-alpine3.16 as assets
 
 COPY package.json ./
 RUN set -eu \
@@ -22,7 +21,6 @@ RUN set -eu \
 # Actual application
 FROM $DISTRO
 ARG VERSION
-COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 
 ENV TZ Etc/UTC
 

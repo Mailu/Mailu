@@ -45,10 +45,12 @@ It offers the following configuration options:
 Access the web administration interface
 ---------------------------------------
 
-The admin GUI is by default accessed via the URL `https://<my domain>/admin`, when it's enabled in the setup utility or by manually setting `ADMIN=true` in `mailu.env`.
+The admin GUI is by default accessed via the URL `https://<my domain>/admin`, when it's enabled in the setup utility 
+or by manually setting `ADMIN=true` in `mailu.env`.
 To login the admin GUI enter the email address and password of an user.
 
-Only global administrator users have access to all configuration settings and the Rspamd webgui. Other users will be presented with settings for only their account, and domains they are managers of.
+Only global administrator users have access to all configuration settings and the Rspamd webgui. Other users will be 
+presented with settings for only their account, and domains they are managers of.
 To create a user who is a global administrator for a new installation, the Mailu.env file can be adapted.
 For more information see the section 'Admin account - automatic creation' in :ref:`the configuration reference <admin_account>`.
 

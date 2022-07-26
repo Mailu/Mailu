@@ -80,8 +80,8 @@ In ``pg_hba.conf`` there should be a line like this:
 
   host    mailu           mailu           <mailu_host>/32            md5
 
-Note that this example is the bare-minimum to get Mailu working. It goes without saying that
-the database admin will have to setup his own means of backups and TLS encrypted connections.
+Note that this example is the bare-minimum to get Mailu working. Additional work needs to be 
+done by the database admin to setup their own means of backups and TLS encrypted connections.
 
 Nowadays it is recommended to use the official PostgreSQL image from the PostgreSQL community. The repository is located `here <https://hub.docker.com/_/postgres>`_.
 
@@ -91,9 +91,11 @@ Mailu PostgreSQL
 ----------------
 
 Mailu optionally came with a pre-configured PostgreSQL image which was deprecated in Mailu 1.8.
-Since Mailu 1.9 it is removed from Mailu. The following section describes how to move to a different PostgreSQL image for novice administrators. The official PostgreSQL image (Postgres) will be used.
+Since Mailu 1.9 it is removed from Mailu. The following section describes how to move to a different 
+PostgreSQL image for novice administrators. The official PostgreSQL image (Postgres) will be used.
 
-A Mailu deployment with the Mailu PostgreSQL image, only used PostgreSQL for the Admin container (Web administration interface). Roundcube used SQLite as database back-end.
+A Mailu deployment with the Mailu PostgreSQL image, will only use PostgreSQL for the Admin container 
+(Web administration interface). Roundcube uses SQLite as database back-end.
 Mailu uses the following configuration for connecting to the database:
 
 - Database host: 'database'
@@ -206,4 +208,4 @@ Optionally you can remove left-over files which were used by the old database:
 
 .. note::
    Roundcube does not offer a migration tool for moving from SQLite to PostgreSQL.
-   In case roundcube is used, then in the setup utility SQLite can be chosen as database back end for roundcube.
+   Incase roundcube is used, the Mailu setup utility can be used to specify SQLite for the roundcube database backend.

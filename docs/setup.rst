@@ -25,8 +25,8 @@ You are free to choose any operating system that runs Docker (>= 1.11),
 then chose between various flavors including Docker Compose, Kubernetes
 and Rancher.
 
-Compose is the most tested flavor and should be used by any unexperimented
-user. Make sure you complete the requirements for the flavor you chose.
+Compose is the most tested flavor and should be the choice for less experienced
+users. Make sure you complete the requirements for the flavor you chose.
 
 You should also have at least a DNS hostname and a DNS name for receiving
 emails. Some instructions are provided on the matter in the article

@@ -111,6 +111,4 @@ Else, if you don't go with the automatic way, you need to manually create the ad
 This will create a user named ``me@example.net`` with password ``password`` and administration privileges.
 Connect to the Web admin interface and change the password to a strong one.
 
-  .. note:: It is vitally important that either a user with the same email as ``POSTMASTER`` 
-in your ``mailu.env`` exists, or you remember to create an alias with this name after you log in. 
-All kinds of strange errors will occur as a result of not doing so!
+  .. note:: It is vitally important that either a user with the same email as ``POSTMASTER`` in your ``mailu.env`` exists, or you remember to create an alias with this name after you log in. All kinds of strange errors will occur as a result of not doing so!

@@ -72,7 +72,7 @@ A Mailu container should provide one service and run one type of process only.
 A new Webmail should be in a separate container, a new antivirus or a new
 antispam should be in a separate container.
 
-A container is developped as a single directory under the proper category in
+A container is developed as a single directory under the proper category in
 the main repository, the only exception being service containers that should
 only use official Docker images. Categories are:
 

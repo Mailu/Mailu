@@ -17,7 +17,7 @@ structuring choices, the following were quite challenging:
 
  - Mailu is based on containers (plural) so that any part can be reused
    in separate projects and that updating or swapping any component does
-   not require alterations others.
+   not require changing other ones.
  - Mailu offers mail and does not bloat the default setup.
    Additional features are available but not required.
  - Mailu has a central front container that routes all HTTP and mail

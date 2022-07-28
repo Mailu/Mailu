@@ -72,10 +72,10 @@ services:
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
-  rainloop:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rainloop:${PINNED_MAILU_VERSION:-local}
+  snappymail:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}snappymail:${PINNED_MAILU_VERSION:-local}
     build:
-      context: ../webmails/rainloop
+      context: ../webmails/snappymail
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 

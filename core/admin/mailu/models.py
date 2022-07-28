@@ -439,10 +439,15 @@ class Email(object):
         localpart_stripped = None
         stripped_alias = None
 
-        delim = os.environ.get('RECIPIENT_DELIMITER')
-        if delim in localpart:
-            localpart_stripped = localpart.rsplit(delim, 1)[0]
+        if delims := os.environ.get('RECIPIENT_DELIMITER'):
+            try:
+                pos = next(i for i, c in enumerate(localpart) if c in delims)
+            except StopIteration:
+                pass
+            else:
+                localpart_stripped = localpart[:pos]
 
+        # is localpart@domain_name or localpart_stripped@domain_name an user?
         user = User.query.get(f'{localpart}@{domain_name}')
         if not user and localpart_stripped:
             user = User.query.get(f'{localpart_stripped}@{domain_name}')
@@ -450,19 +455,18 @@ class Email(object):
         if user:
             email = f'{localpart}@{domain_name}'
 
-            if user.forward_enabled:
-                destination = user.forward_destination
-                if user.forward_keep or ignore_forward_keep:
-                    destination.append(email)
-            else:
-                destination = [email]
+            if not user.forward_enabled:
+                return [email]
 
+            destination = user.forward_destination
+            if user.forward_keep or ignore_forward_keep:
+                destination.append(email)
             return destination
 
-        pure_alias = Alias.resolve(localpart, domain_name)
-
-        if pure_alias and not pure_alias.wildcard:
-            return pure_alias.destination
+        # is localpart, domain_name or localpart_stripped@domain_name an alias?
+        if pure_alias := Alias.resolve(localpart, domain_name):
+            if not pure_alias.wildcard:
+                return pure_alias.destination
 
         if stripped_alias := Alias.resolve(localpart_stripped, domain_name):
             return stripped_alias.destination

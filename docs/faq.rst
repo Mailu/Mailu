@@ -217,14 +217,14 @@ Therefore it is advised to create backups on a regular base!
 A backup MX can be configured as **failover**. For this you need a separate server running
 Mailu. On that server, your domains will need to be setup as "Relayed domains", pointing
 to you mainr server. MX records for the mail domains with a higher priority number will have
-to point to this server. Please be aware that a backup MX can act as a `spam magnet`_.
+to point to this server. Please be aware that a backup MX can act as a `spam magnet`_ (archive.org).
 
 For **service** HA, please see: `How does Mailu scale up?`_
 
 
 *Issue reference:* `177`_, `591`_.
 
-.. _`spam magnet`: https://blog.zensoftware.co.uk/2012/07/02/why-we-tend-to-recommend-not-having-a-secondary-mx-these-days/ (archive.org)
+.. _`spam magnet`: https://web.archive.org/web/20130131032707/https://blog.zensoftware.co.uk/2012/07/02/why-we-tend-to-recommend-not-having-a-secondary-mx-these-days/ 
 
 Does Mailu run on Rancher?
 ``````````````````````````

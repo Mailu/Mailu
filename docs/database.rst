@@ -208,4 +208,4 @@ Optionally you can remove left-over files which were used by the old database:
 
 .. note::
    Roundcube does not offer a migration tool for moving from SQLite to PostgreSQL.
-   Incase roundcube is used, the Mailu setup utility can be used to specify SQLite for the roundcube database backend.
+   In case roundcube is used, the Mailu setup utility can be used to specify SQLite for the roundcube database backend.

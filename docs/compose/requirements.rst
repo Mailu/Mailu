@@ -23,7 +23,7 @@ the latest Linux kernel. The minimal required memory and swap are:
 Pick a distribution
 -------------------
 
-The mail server runs as a set of Docker containers, so is it almost operating 
+The mail server runs as a set of Docker containers, so it is almost operating 
 system agnostic as long as a fairly recent Linux kernel is running and 
 the Docker API (>= 1.11) is available.
 

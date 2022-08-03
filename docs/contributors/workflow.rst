@@ -17,7 +17,7 @@ Commits
 
 This is a community project, thus commits should be readable enough for any of
 the contributors to guess the content by simply reading the comment or find a
-proper commit when one knows what he is looking for.
+proper commit when one knows what they are looking for.
 
 Usual standards remain: write english comments, single line short comments and
 additional multiline if required (keep in mind that the most important piece
@@ -32,7 +32,7 @@ master directly if you find this appropriate. Still, keep in mind that:
 - a git email or a pull request should address a single feature a bug,
   so keep your branches as tidy as possible;
 - this is a small project with a limited number of forks and active threads
-  on Github, so one might want to look at your fork and find the branch you
+  on Github, so someone might want to look at your fork and find the branch you
   are using to implement a specific feature; to avoid any hassle, we suggest
   that you use branch names prefixed with ``feat-`` or ``fix-`` and followed
   either by the name of the Github issue or a short and meaningful name.
@@ -76,7 +76,7 @@ Forked projects
 ---------------
 
 If you find yourself forking the project for a specific independant purpose
-(commercial use, different phylosophy or incompatible point of view), we would
+(commercial use, different philosophy or incompatible point of view), we would
 be glad if you let us know so that we can list interesting known forks and
 their specific features (and backport some of them if your implementation
 is free as well).

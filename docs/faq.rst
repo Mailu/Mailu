@@ -10,7 +10,7 @@ Where to ask questions?
 ```````````````````````
 
 First, please read this FAQ to check if your question is listed here.
-Simple questions best fit in our `Matrix`_ room.
+Simple questions are best asked in our `Matrix`_ room.
 For more complex questions, you can always open a `new issue`_ on GitHub.
 We actively monitor the issues list.
 
@@ -18,14 +18,14 @@ We actively monitor the issues list.
 My installation is broken!
 ``````````````````````````
 
-We're sorry to hear that. Please check for common mistakes and troubleshooting
+We are sorry to hear that. Please check for common mistakes and troubleshooting
 advice in the `Technical issues`_ section of this page.
 
 I think I found a bug!
 ``````````````````````
 
-If you did not manage to solve the issue using this FAQ and there is not any 
-`open issues`_ describing the same problem, you can continue to open a
+If you did not manage to solve the issue using this FAQ and there are not any 
+`open issues`_ describing the same problem, you can open a
 `new issue`_ on GitHub.
 
 I want a new feature or enhancement!
@@ -46,7 +46,7 @@ If you can't find anything similar, you can open a `new issue`_.
 Please also share (where applicable):
 
 - Use case: how does this improve the project?
-- Any research done on the subject. Perhaps some links to upstream website,
+- Any research done on the subject. Perhaps some links to upstream websites,
   reference implementations etc.
 
 Why does my feature/bug take so long to solve?
@@ -179,7 +179,7 @@ incoming connection to the SMTP container will bypass the authentication stage b
 settings and causes an Open Relay. And you really don't want this!
 
 So, how to make it work? Well, by using `docker-ipv6nat`_! This nifty container will set up ``ip6tables``,
-just as Docker would do for IPv4. We know that nat-ing is not advised in IPv6,
+just as Docker would do for IPv4. We know that NAT-ing is not advised in IPv6,
 however exposing all containers to public network neither. The choice is ultimately yous.
 
 Mailu `setup utility`_ generates a safe IPv6 ULA subnet by default. So when you run the following command,
@@ -211,26 +211,26 @@ For making the **storage** highly available, all sorts of techniques can be used
 - btrfs in raid configuration
 - Distributed network filesystems such as GlusterFS or CEPH
 
-Note that no storage HA solution can protect against incidental deletes or file corruptions.
+Note that no storage HA solution can protect against accidental deletes or file corruptions.
 Therefore it is advised to create backups on a regular base!
 
 A backup MX can be configured as **failover**. For this you need a separate server running
 Mailu. On that server, your domains will need to be setup as "Relayed domains", pointing
-to you main server. MX records for the mail domains with a higher priority number will have
-to point to this server. Please be aware that a backup MX can act as a `spam magnet`_.
+to you mainr server. MX records for the mail domains with a higher priority number will have
+to point to this server. Please be aware that a backup MX can act as a `spam magnet`_ (archive.org).
 
 For **service** HA, please see: `How does Mailu scale up?`_
 
 
 *Issue reference:* `177`_, `591`_.
 
-.. _`spam magnet`: https://blog.zensoftware.co.uk/2012/07/02/why-we-tend-to-recommend-not-having-a-secondary-mx-these-days/
+.. _`spam magnet`: https://web.archive.org/web/20130131032707/https://blog.zensoftware.co.uk/2012/07/02/why-we-tend-to-recommend-not-having-a-secondary-mx-these-days/ 
 
 Does Mailu run on Rancher?
 ``````````````````````````
 
 There is a rancher catalog for Mailu in the `Mailu/Rancher`_ repository. The user group for Rancher is small,
-so we cannot promise any support on this when you're heading into trouble. See the repository README for more details.
+so we cannot promise any support on this when you are heading into trouble. See the repository README for more details.
 
 *Issue reference:* `125`_.
 
@@ -296,7 +296,7 @@ I want to integrate Nextcloud 15 (and newer) with Mailu
   
 
 If a domain name (e.g. example.com) is specified, then this makes sure that only users from this domain will be allowed to login.
-After successfull login the domain part will be striped and the rest used as username in Nextcloud. e.g. 'username@example.com' will be 'username' in Nextcloud. Disable this behaviour by changing true (the fifth parameter) to false. 
+After successfull login the domain part will be stripped and the rest used as username in Nextcloud. e.g. 'username@example.com' will be 'username' in Nextcloud. Disable this behaviour by changing true (the fifth parameter) to false. 
 
 *Issue reference:* `575`_.
 
@@ -476,7 +476,7 @@ These issues are typically caused by four scenarios:
 #. When ``TLS_FLAVOR=letsencrypt``, it might be that the *certbot* script is not capable of
    obtaining the certificates for your domain. See `letsencrypt issues`_
 #. When ``TLS_FLAVOR=cert``, certificates are supposed to be copied to ``/mailu/certs``.
-   Using an external ``letsencrypt`` program, it tends to happen people copy the whole
+   Using an external ``letsencrypt`` program, it tends to happen when people copy the whole
    ``letsencrypt/live`` directory containing symlinks. Symlinks do not resolve inside the
    container and therefore it breaks the TLS implementation.
 
@@ -728,7 +728,7 @@ In any case, using a dedicated DNS server will improve the performance of your m
 
 Can I learn ham/spam messages from an already existing mailbox?
 ```````````````````````````````````````````````````````````````
-Mailu is supporting automatic spam learning for messages moved to the Junk mailbox. Any email moved from the Junk Folder will learnt as ham. 
+Mailu supports automatic spam learning for messages moved to the Junk mailbox. Any email moved from the Junk Folder will learnt as ham. 
 
 If you already have an existing mailbox and want Mailu to learn them all as ham messages, you might run rspamc from within the dovecot container:
 
@@ -779,7 +779,7 @@ Detailed instructions can be found at https://docs.docker.com/compose/install/
 
 *Issue reference:* `853`_.
 
-Why are still spam mails being discarded?
+Why are spam mails being discarded?
 `````````````````````````````````````````
 
 Disabling antispam in the user settings actually disables automatic classification of messages as spam and stops moving them to the `junk` folder. It does not stop spam scanning and filtering.
@@ -793,9 +793,9 @@ Why is SPF failing while properly setup?
 
 Very often, SPF failure is related to Mailu sending emails with a different IP address than the one configured in the env file.
 
-This is mostly due to using a separate IP address for Mailu and still having masquerading nat setup for Docker, which results in a different outbound IP address. You can simply check the email headers on the receiving side to confirm this.
+This is mostly due to using a separate IP address for Mailu and still having masquerading NAT setup for Docker, which results in a different outbound IP address. You can simply check the email headers on the receiving side to confirm this.
 
-If you wish to explicitely nat Mailu outbound traffic, it is usually easy to source-nat outgoing SMTP traffic using iptables :
+If you wish to explicitely NAT Mailu outbound traffic, it is usually easy to source-NAT outgoing SMTP traffic using iptables :
 
 ```
 iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 25 -j SNAT --to <your mx ip>
@@ -829,7 +829,7 @@ iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 25 -j SNAT --to <your mx i
 A user gets ``Sender address rejected: Access denied. Please check the`` ``message recipient […] and try again`` even though the sender is legitimate?
 ``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````
 
-First, check if you are really sure the user is a legitimate sender, i.e. the registered user is authenticated successfully and own either the account or alias he/she is trying to send from. If you are really sure this is correct, then the user might try to errornously send via port 25 insteadof the designated SMTP client-ports. Port 25 is meant for server-to-server delivery, while users should use port 587 or 465.
+First, check if you are really sure the user is a legitimate sender, i.e. the registered user is authenticated successfully and own either the account or alias he/she is trying to send from. If you are really sure this is correct, then the user might try to erroneously send via port 25 instead of the designated SMTP client-ports. Port 25 is meant for server-to-server delivery, while users should use port 587 or 465.
 
 The admin container won't start and its log says ``Critical: your DNS resolver isn't doing DNSSEC validation``
 ``````````````````````````````````````````````````````````````````````````````````````````````````````````````

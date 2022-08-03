@@ -176,7 +176,7 @@ Finally, if you need to install packages inside the containers for debugging:
 Reviewing
 ---------
 
-Members of the **Mailu/contributors** team leave reviews to open PR's.
+Members of the **Mailu/contributors** team leave reviews on open PR's.
 In the case of a PR from a fellow team member, a single review is enough
 to initiate merging. In all other cases, two approving reviews are required.
 There is also a possibility to set the ``review/need2`` to require a second review.
@@ -245,8 +245,8 @@ feel free to write a comment with ``bors retry``.
 
   The command "git checkout -qf <hash>" failed and exited with 128 during .
 
-Please wait a few minutes to do so, not to interfere with other builds.
-Also, don't abuse this command if anything else went wrong,
+Please wait a few minutes to do so, so as not to interfere with other builds.
+Also, don't abuse this command if anything else goes wrong,
 the author needs to try to fix it instead!
 
 Reviewing by git
@@ -289,7 +289,7 @@ importing the branch into your fork, do the merge and send a PR to the repositor
 Merge the PR locally
 ```````````````````````
 
-When someone sends a PR, you need merge his PR into master locally. This example will put you in a
+When someone sends a PR, you need merge their PR into master locally. This example will put you in a
 "detached head" state and do the merge in that state. Any commits done in this state will be lost
 forever when you checkout a "normal" branch. This is exactly what we want, as we do not want to mess
 with our repositories. This is just a test run.

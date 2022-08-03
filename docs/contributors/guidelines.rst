@@ -34,7 +34,7 @@ dependent on them.
 
 Examples of features we will not include in Mailu are: calendars, documents and
 file sharing, full-sized groupware, instant messaging, password management. If
-you want and success in connecting those to Mailu and want to share, please
+you want these features, have success in connecting them to Mailu and want to share, please
 write some useful documentation for others to do the same.
 
 What behavior is tolerated
@@ -72,7 +72,7 @@ A Mailu container should provide one service and run one type of process only.
 A new Webmail should be in a separate container, a new antivirus or a new
 antispam should be in a separate container.
 
-A container is developped as a singled directory under the proper category in
+A container is developed as a single directory under the proper category in
 the main repository, the only exception being service containers that should
 only use official Docker images. Categories are:
 
@@ -80,7 +80,7 @@ only use official Docker images. Categories are:
 - optional, for optional components
 - webmail, for webmails
 
-A container image name must explicitely state the technology being used.
+A container image name must explicitly state the technology being used.
 Container versions are synchronized and all containers are always built at
 once. The service name associated in the Compose file or Kubernetes configuration
 should match the container image name.
@@ -96,7 +96,7 @@ The `socrate` Python package should include relevant functions for container
 lifecycle management.
 
 Anything that is not static, i.e. able to change at runtime, either due to
-configuration in the admin ui or user behavior, should take advantage of the
+configuration in the admin UI or user behavior, should take advantage of the
 admin API. The `podop` package binds mail specific sofware (Postfix and Dovecot
 at the moment) to the admin API, other containers should use specific API calls.
 
@@ -166,7 +166,7 @@ How should configuration be overridden
 Some containers support configuration override. For this feature, we should
 ideally look for conditional configuration inclusion in the configuration syntax
 and use it. If the tool supports multiple methods of overrides, we should use
-the one that supports overriding the more configuration.
+the one that supports overriding the most configuration.
 
 In case the tool does not support conditional inclusion, we can add the
 override logic in the `start.py` script.

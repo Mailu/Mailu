@@ -10,7 +10,7 @@ RUN apk add --no-cache \
     python3 py3-pip git bash py3-multidict tzdata \
   && pip3 install --upgrade pip
 
-# Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, rainloop, roundcube
+# Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, snappymail, roundcube
 RUN pip3 install socrate==0.2.0
 
 # Image specific layers under this line

@@ -23,16 +23,16 @@ the latest Linux kernel. The minimal required memory and swap are:
 Pick a distribution
 -------------------
 
-The mail server runs as a set of Docker containers. It is thus almost agnostic
-of the underlying operating system as long as a fairly recent Linux kernel is
-running and the Docker API (>= 1.11) is available.
+The mail server runs as a set of Docker containers, so it is almost operating 
+system agnostic as long as a fairly recent Linux kernel is running and 
+the Docker API (>= 1.11) is available.
 
 Because most of our tests run on Debian Jessie and Debian Stretch, we recommend
 one of these for the base system. Mailu should however be able to run on
 any of the `officially supported distributions`_.
 
 For the purpose of this guide, all examples are based on Debian Stretch. The
-differences with other system will hardly be noticeable however.
+differences with other system will however hardly be noticeable.
 
 .. _`officially supported distributions`: https://docs.docker.com/engine/installation/
 
@@ -59,10 +59,9 @@ Mailu uses Docker port forwarding from the host to make services
 available to external users. First, your host should have a public IP address
 configured (see ``/etc/network/interfaces``) or your router should
 forward connections to its internal IP address. Due to spam problems and
-reputation services, it
-is highly recommended that you use a dedicated IP address for your mail server
-and that you have a dedicated hostname with forward and reverse DNS entries
-for this IP address.
+reputation services, it is highly recommended that you use a dedicated IP 
+address for your mail server and that you have a dedicated hostname 
+with forward and reverse DNS entries for this IP address.
 
 Also, your host must not listen on ports ``25``, ``80``, ``110``, ``143``,
 ``443``, ``465``, ``587``, ``993`` or ``995`` as these are used by Mailu

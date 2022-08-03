@@ -65,7 +65,8 @@ You can find those addresses by running the following:
           TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
 If the address is not configured directly (NAT) on any of the network interfaces or if
-you would simply like the server to listen on all interfaces, use ``0.0.0.0`` and ``::``. Note that running in this mode is not supported and can lead to `issues`_.
+you would simply like the server to listen on all interfaces, use ``0.0.0.0`` and ``::``. 
+Note that running in this mode is not supported and can lead to `issues`_.
 
 .. _issues: https://github.com/Mailu/Mailu/issues/641
 
@@ -107,6 +108,7 @@ Else, if you don't go with the automatic way, you need to manually create the ad
 
   docker-compose exec admin flask mailu admin me example.net 'password'
 
-This will create a user named ``me@example.net`` with password ``password`` and administration privileges. Connect to the Web admin interface and change the password to a strong one.
+This will create a user named ``me@example.net`` with password ``password`` and administration privileges.
+Connect to the Web admin interface and change the password to a strong one.
 
   .. note:: It is vitally important that either a user with the same email as ``POSTMASTER`` in your ``mailu.env`` exists, or you remember to create an alias with this name after you log in. All kinds of strange errors will occur as a result of not doing so!

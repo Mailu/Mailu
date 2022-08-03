@@ -8,7 +8,7 @@ How does spam filtering work in Mailu?
 
 Mailu uses Rspamd for spam filtering. Rspamd is a Fast, free and open-source spam filtering system.
 
-Rspamd rejects non-compliant email messages and email messages that contain virusses. In Mailu Rspamd uses a scoring scale from 0 to 15. The following values are the default values, and can be changed inside the Rspamd webgui under the tab configuration:
+Rspamd rejects non-compliant email messages and email messages that contain virusses. In Mailu Rspamd uses a scoring scale from 0 to 15. The following values are the default values, and can be changed inside the Rspamd WebUI under the tab configuration:
 
 * Email messages with a score of 15 or higher will be rejected.
 
@@ -52,7 +52,7 @@ The location in the administration web interface where the spam filter and spam 
 Can I learn ham/spam messages from an already existing mailbox?
 ---------------------------------------------------------------
 
-Mailu supports automatic spam learning for email messages moved to the Junk Folder. Any email messages moved to the Junk Folder will be re-learned as spam, any email moved from the Junk Folder to any other folder (but the thrash folder) will be re-learned as ham.
+Mailu supports automatic spam learning for email messages moved to the Junk Folder. Any email messages moved to the Junk Folder will be re-learned as spam, any email moved from the Junk Folder to any other folder (but the trash folder) will be re-learned as ham.
 
 If you already have an existing mailbox and want Mailu to learn them all as ham messages, you might run rspamc from within the dovecot container:
 

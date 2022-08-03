@@ -152,7 +152,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ["core", "fetchmail", "filters", "rainloop", "roundcube", "webdav"]
+        target: ["core", "fetchmail", "filters", "snappymail", "roundcube", "webdav"]
         time: ["2"]
         include:
           - target: "filters"
@@ -197,7 +197,7 @@ jobs:
             *.cache-from=type=gha,scope=build-front
             *.cache-from=type=gha,scope=build-imap
             *.cache-from=type=gha,scope=build-smtp
-            *.cache-from=type=gha,scope=build-rainloop
+            *.cache-from=type=gha,scope=build-snappymail
             *.cache-from=type=gha,scope=build-roundcube
             *.cache-from=type=gha,scope=build-antivirus
             *.cache-from=type=gha,scope=build-fetchmail
@@ -262,7 +262,7 @@ jobs:
             *.cache-from=type=gha,scope=build-front
             *.cache-from=type=gha,scope=build-imap
             *.cache-from=type=gha,scope=build-smtp
-            *.cache-from=type=gha,scope=build-rainloop
+            *.cache-from=type=gha,scope=build-snappymail
             *.cache-from=type=gha,scope=build-roundcube
             *.cache-from=type=gha,scope=build-antivirus
             *.cache-from=type=gha,scope=build-fetchmail
@@ -314,7 +314,7 @@ jobs:
             *.cache-from=type=gha,scope=build-front
             *.cache-from=type=gha,scope=build-imap
             *.cache-from=type=gha,scope=build-smtp
-            *.cache-from=type=gha,scope=build-rainloop
+            *.cache-from=type=gha,scope=build-snappymail
             *.cache-from=type=gha,scope=build-roundcube
             *.cache-from=type=gha,scope=build-antivirus
             *.cache-from=type=gha,scope=build-fetchmail

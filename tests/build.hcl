@@ -36,7 +36,7 @@ group "default" {
     "imap",
     "smtp",
 
-    "rainloop",
+    "snappymail",
     "roundcube",
 
     "antivirus",
@@ -139,10 +139,10 @@ target "smtp" {
 # -----------------------------------------------------------------------------------------
 # Webmail images
 # -----------------------------------------------------------------------------------------
-target "rainloop" {
+target "snappymail" {
   inherits = ["defaults"]
-  context="webmails/rainloop"
-  tags = tag("rainloop")
+  context="webmails/snappymail"
+  tags = tag("snappymail")
 }
 
 target "roundcube" {

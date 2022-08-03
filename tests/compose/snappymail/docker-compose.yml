@@ -88,7 +88,7 @@ services:
 
   # Webmail
   webmail:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}snappymail:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}snappymail:${MAILU_VERSION:-local}
     restart: always
     env_file: mailu.env
     volumes:

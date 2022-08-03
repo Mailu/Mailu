@@ -49,7 +49,7 @@ jobs:
         if: env.BRANCH != 'testing'
         shell: bash
         run: |
-          echo "MAILU_VERSION=${{ env.BRANCH }}-arm" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
           echo "DOCKER_ORG_DERIVED=${{ env.DOCKER_ORG }}" >> $GITHUB_ENV
           echo "DEPLOY=true" >> $GITHUB_ENV
           echo "RELEASE=false" >> $GITHUB_ENV
@@ -57,7 +57,7 @@ jobs:
         if: env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master'
         shell: bash
         run: |
-          version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version-arm" >> $GITHUB_ENV
+          version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
           echo "RELEASE=true" >> $GITHUB_ENV
           echo "DEPLOY=true" >> $GITHUB_ENV
           echo "RELEASE=true" >> $GITHUB_ENV
@@ -67,7 +67,7 @@ jobs:
         env:
           GITHUB_SHA: ${{ env.GITHUB_SHA }}
         run: |
-          echo "PINNED_MAILU_VERSION=$GITHUB_SHA-arm" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
           echo "DEPLOY=true" >> $GITHUB_ENV
           echo "RELEASE=false" >> $GITHUB_ENV
 
@@ -77,8 +77,8 @@ jobs:
     uses: ./.github/workflows/build_test_deploy.yml
     with:
       architecture: 'linux/arm64,linux/arm/v7'
-      mailu_version: ${{needs.derive-variables.outputs.MAILU_VERSION}}
-      pinned_mailu_version: ${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}
+      mailu_version: ${{needs.derive-variables.outputs.MAILU_VERSION}}-arm
+      pinned_mailu_version: ${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}-arm
       docker_org: ${{needs.derive-variables.outputs.DOCKER_ORG}}
       branch: ${{needs.derive-variables.outputs.BRANCH}}
       deploy: ${{needs.derive-variables.outputs.DEPLOY}}

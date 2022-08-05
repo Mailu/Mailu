@@ -302,7 +302,7 @@ This is a complete YAML template with all additional parameters that can be defi
           ip: 192.168.1.1
           password: '$5$rounds=1$...'
 
-  aliases:
+  alias:
     - email: email@example.com
       comment: ''
       destination:

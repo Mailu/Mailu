@@ -243,25 +243,10 @@ Refer to the Traefik documentation for more details.
 Override Mailu configuration
 ----------------------------
 
-If you do not have the resources for running a separate reverse proxy, you could override Mailu reverse proxy configuration by using a Docker volume.
-Simply store your configuration file (Nginx format), in ``/mailu/overrides/nginx.conf`` for instance.
-All *.conf files will be included in the main server block of Mailu in nginx which listens on port 80/443.
+If you do not have the resources for running a separate reverse proxy, you could override Mailu reverse proxy configuration by using :ref:`an override<override-label>`.
+Simply store your configuration file (Nginx format), in ``/mailu/overrides/nginx.conf``.
+All ``*.conf`` files will be included in the main server block of Mailu in nginx which listens on port 80/443.
 Add location blocks for any services that must be proxied.
-
-Then modify your ``docker-compose.yml`` file and change the ``front`` section to add a mount:
-
-.. code-block:: nginx
-
-  front:
-    build: nginx
-    image: mailu/nginx:$VERSION
-    restart: always
-    env_file: .env
-    ports:
-      [...]
-    volumes:
-      - "$ROOT/certs:/certs"
-      - "$ROOT/overrides/nginx:/overrides"
 
 You can also download the example configuration files:
 

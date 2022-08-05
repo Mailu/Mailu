@@ -1,0 +1,5 @@
+Remove the misleading text in mailu.env that zstd and lz4 are supported for dovecot mail compression.
+Zstd and lz4 are not supported. The reason is that the alpine project does not compile this
+into the dovecot package.
+Users who want this funcionality, can kindly request the alpine project to compile dovecot
+with lz4&zstd support.

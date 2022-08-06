@@ -1,0 +1,2 @@
+The MESSAGE_SIZE_LIMIT is also used for the clamav configuration (MaxScanSize, MaxFileSize).
+This resolves the situation where MESSAGE_SIZE_LIMIT was set higher than the hard-coded values in the clamav configuration.

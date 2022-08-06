@@ -13,7 +13,9 @@ RUN apk add --no-cache \
 # Image specific layers under this line
 RUN apk add --no-cache clamav rsyslog wget clamav-libunrar
 
-COPY conf /etc/clamav
+RUN pip3 install socrate==0.2.0
+
+COPY conf /conf
 COPY start.py /start.py
 COPY health.sh /health.sh
 

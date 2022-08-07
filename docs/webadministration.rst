@@ -160,6 +160,29 @@ You can add a fetched account by clicking on the `Add an account` button on the 
 Click the submit button to apply settings. With the default polling interval, fetchmail will start polling the email account after 10 minutes.
 
 
+Relay accounts
+----------------
+
+On the `relay accounts` page you can configure email accounts over which email messages will be sent if they use the relay mail address as sending email.
+
+You can add a relay account by clicking on the `Add an account` button on the top right of the page. To add an relay account, the following settings must be configured:
+
+* Relay mail address. The mail address which should be relayed over the server.
+
+* Hostname or IP. The hostname or IP address of the relay email server.
+
+* TCP port. The TCP port the relay email server listens on. Common ports are 465 (SMTPS with TLS), 587 (SMTP with STARTTLS), 25 (Default SMPT port).
+
+* Enable TLS. Tick this setting if the email server requires TLS/SSL instead of STARTTLS.
+
+* Username. The user name for logging in to the relay email server. Normally this is the email address or the email address' local-part (the part before @).
+
+* Password. The password for logging in to the relay email server.
+
+Click the submit button to apply settings. When pressing the submit button an actual login to the relay server ist tried to prevent the use of invalid mail accounts.
+Please be patiant as antispam rules can defer the login.
+
+
 Authentication tokens
 ---------------------
 

@@ -1157,6 +1157,20 @@ class FetchSchema(BaseSchema):
 
 
 @mapped
+class UserRelaySchema(BaseSchema):
+    """ Marshmallow schema for Fetch model """
+    class Meta:
+        """ Schema config """
+        model = models.UserRelay
+        load_instance = True
+
+        sibling = True
+        hide_by_context = {
+            ('secrets',): {'password'},
+        }
+
+
+@mapped
 class UserSchema(BaseSchema):
     """ Marshmallow schema for User model """
     class Meta:
@@ -1179,7 +1193,7 @@ class UserSchema(BaseSchema):
     email = fields.String(required=True)
     tokens = fields.Nested(TokenSchema, many=True)
     fetches = fields.Nested(FetchSchema, many=True)
-
+    user_relays = fields.Nested(UserRelaySchema, many=True)
     password = PasswordField(required=True, metadata={'model': models.User})
     hash_password = fields.Boolean(load_only=True, missing=False)
 

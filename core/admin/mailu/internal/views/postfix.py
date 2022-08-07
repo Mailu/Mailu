@@ -180,3 +180,46 @@ def idna_encode(addresses):
         for (localpart, domain) in
         (address.rsplit("@", 1) for address in addresses)
     ]
+
+@internal.route("/postfix/sender/relay/host/<path:sender>")
+def postfix_sender_relay_host(sender):
+    """ Look for sender dependent relay hosts
+    """
+    if '@' in sender:
+        if sender.startswith('<') and sender.endswith('>'):
+            sender = sender[1:-1]
+        try:
+            if user_relay := models.UserRelay.query.filter_by(relay_mail=sender).first():
+                return flask.jsonify(f'{user_relay.host}:{user_relay.port}')
+        except sqlalchemy.exc.StatementError:
+            pass
+    return flask.abort(404)
+
+@internal.route("/postfix/sender/relay/auth/<path:sender>")
+def postfix_sender_relay_auth(sender):
+    """ Get authentication for relay mail addresses
+    """
+    if '@' in sender:
+        if sender.startswith('<') and sender.endswith('>'):
+            sender = sender[1:-1]
+        try:
+            if user_relay := models.UserRelay.query.filter_by(relay_mail=sender).first():
+                return flask.jsonify(f'{user_relay.username}:{user_relay.password}')
+        except sqlalchemy.exc.StatementError:
+            pass
+    return flask.abort(404)
+
+@internal.route("/postfix/sender/relay/login/<path:sender>")
+def postfix_sender_relay_login(sender):
+    """ Return users who are allowed to send mail for user dependent
+        relay addresses
+    """
+    if '@' in sender:
+        if sender.startswith('<') and sender.endswith('>'):
+            sender = sender[1:-1]
+        try:
+            if user_relay := models.UserRelay.query.filter_by(relay_mail=sender).first():
+                return flask.jsonify(f'{user_relay.user_email}')
+        except sqlalchemy.exc.StatementError:
+            pass
+    return flask.abort(404)

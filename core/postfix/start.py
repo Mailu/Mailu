@@ -29,7 +29,10 @@ def start_podop():
         ("sendermap", "url", url + "sender/map/§"),
         ("senderaccess", "url", url + "sender/access/§"),
         ("senderlogin", "url", url + "sender/login/§"),
-        ("senderrate", "url", url + "sender/rate/§")
+        ("senderrate", "url", url + "sender/rate/§"),
+        ("senderrelayhostmap", "url", url + "sender/relay/host/§"),
+        ("senderrelayauth", "url", url + "sender/relay/auth/§"),
+        ("senderrelaylogin", "url", url + "sender/relay/login/§")
     ])
 
 def start_mta_sts_daemon():

@@ -1,0 +1,45 @@
+{%- extends "base.html" %}
+
+{%- block title %}
+{% trans %}Relay accounts{% endtrans %}
+{%- endblock %}
+
+{%- block subtitle %}
+{{ user }}
+{%- endblock %}
+
+{%- block main_action %}
+<a class="btn btn-primary float-right" href="{{ url_for('.user_relay_create', user_email=user.email) }}">{% trans %}Add an account{% endtrans %}</a>
+{%- endblock %}
+
+{%- block content %}
+{%- call macros.table() %}
+<thead>
+  <tr>
+    <th>{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}Relay Mail{% endtrans %}</th>
+    <th>{% trans %}Endpoint{% endtrans %}</th>
+    <th>{% trans %}TLS{% endtrans %}</th>
+    <th>{% trans %}Username{% endtrans %}</th>
+    <th>{% trans %}Created{% endtrans %}</th>
+    <th>{% trans %}Last edit{% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
+  {%- for relay in user.user_relays %}
+  <tr>
+    <td>
+      <a href="{{ url_for('.user_relay_edit', user_relay_id=relay.id) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil-alt"></i></a>&nbsp;
+      <a href="{{ url_for('.user_relay_delete', user_relay_id=relay.id) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+    </td>
+    <td>{{ relay.relay_mail }}</td>
+    <td>{{ relay.host }}:{{ relay.port }}</td>
+    <td>{{ relay.tls }}</td>
+    <td>{{ relay.username }}</td>
+    <td>{{ relay.created_at | format_date }}</td>
+    <td>{{ relay.updated_at | format_date }}</td>
+  </tr>
+  {%- endfor %}
+</tbody>
+{%- endcall %}
+{%- endblock %}

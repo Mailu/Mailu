@@ -25,14 +25,14 @@ podop = socketmap:unix:/tmp/podop.socket:
 # Only accept virtual emails
 mydestination =
 
-# Relayhost if any is configured
+# Relayhost if any is configured and sender dependent relay
 relayhost = {{ RELAYHOST }}
-{% if RELAYUSER %}
 smtp_sasl_auth_enable = yes
-smtp_sasl_password_maps = lmdb:/etc/postfix/sasl_passwd
+smtp_sasl_password_maps = ${podop}senderrelayauth{% if RELAYUSER %}, lmdb:/etc/postfix/sasl_passwd{% endif %}
 smtp_sasl_security_options = noanonymous, noplaintext
 smtp_sasl_tls_security_options = noanonymous
-{% endif %}
+smtp_sender_dependent_authentication = yes
+sender_dependent_relayhost_maps = ${podop}senderrelayhostmap
 
 # Recipient delimiter for extended addresses
 recipient_delimiter = {{ RECIPIENT_DELIMITER }}
@@ -100,8 +100,10 @@ lmtp_host_lookup = native
 # Delay all rejects until all information can be logged
 smtpd_delay_reject = yes
 
-# Allowed senders are: the user or one of the alias destinations
-smtpd_sender_login_maps = ${podop}senderlogin
+# Allowed senders are: the user or one of the alias destinations and user
+# dependent relay addresses. These relay adresses are disjoint from senderlogin
+# addresses --> no unionmap needed at this point
+smtpd_sender_login_maps = ${podop}senderlogin, ${podop}senderrelaylogin
 
 # Restrictions for incoming SMTP, other restrictions are applied in master.cf
 smtpd_helo_required = yes

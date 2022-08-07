@@ -776,6 +776,32 @@ class Fetch(Base):
         )
 
 
+class UserRelay(Base):
+    """ A Relayed account is a remote POP/IMAP account bound to a local
+    account. The bound account is allowed to send from this mail address
+    and the mails are relayed through the server and account.
+    """
+
+    __tablename__ = 'user_relay'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_email = db.Column(db.String(255), db.ForeignKey(User.email),
+        nullable=False)
+    relay_mail = db.Column(db.String(255), nullable=False, unique=True)
+    user = db.relationship(User,
+        backref=db.backref('user_relays', cascade='all, delete-orphan'))
+    host = db.Column(db.String(255), nullable=False)
+    port = db.Column(db.Integer, nullable=False)
+    tls = db.Column(db.Boolean, nullable=False)
+    username = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+
+    def __repr__(self):
+        return (
+            f'<UserRelay #{self.id}: //{self.username}@{self.host}:{self.port}>'
+        )
+
+
 class MailuConfig:
     """ Class which joins whole Mailu config for dumping
         and loading

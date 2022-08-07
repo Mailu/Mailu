@@ -38,6 +38,12 @@
         </a>
       </li>
       <li class="nav-item" role="none">
+        <a href="{{ url_for('.user_relay_list') }}" class="nav-link" role="menuitem">
+          <i class="nav-icon fas fa-download"></i>
+          <p>{% trans %}Relay accounts{% endtrans %}</p>
+        </a>
+      </li>
+      <li class="nav-item" role="none">
         <a href="{{ url_for('.token_list') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fas fa-ticket-alt"></i>
           <p>{% trans %}Authentication tokens{% endtrans %}</p>

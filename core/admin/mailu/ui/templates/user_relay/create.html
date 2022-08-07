@@ -1,0 +1,23 @@
+{%- extends "base.html" %}
+
+{%- block title %}
+{% trans %}Add a relay account{% endtrans %}
+{%- endblock %}
+
+{%- block subtitle %}
+{{ user }}
+{%- endblock %}
+
+{%- block content %}
+{%- call macros.card() %}
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {{ macros.form_field(form.relay_mail) }}
+  {{ macros.form_fields((form.host, form.port)) }}
+  {{ macros.form_field(form.tls) }}
+  {{ macros.form_field(form.username) }}
+  {{ macros.form_field(form.password) }}
+  {{ macros.form_field(form.submit) }}
+</form>
+{%- endcall %}
+{%- endblock %}

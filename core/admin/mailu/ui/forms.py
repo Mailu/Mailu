@@ -168,6 +168,16 @@ class FetchForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Submit'))
 
 
+class UserRelayForm(flask_wtf.FlaskForm):
+    relay_mail = fields.StringField(_('Relay mail address'), [validators.Email()])
+    host = fields.StringField(_('Hostname or IP'), [validators.DataRequired()])
+    port = fields.IntegerField(_('TCP port'), [validators.DataRequired(), validators.NumberRange(min=0, max=65535)])
+    tls = fields.BooleanField(_('Enable TLS'))
+    username = fields.StringField(_('Username'), [validators.DataRequired()])
+    password = fields.PasswordField(_('Password'))
+    submit = fields.SubmitField(_('Submit'))
+
+
 class AnnouncementForm(flask_wtf.FlaskForm):
     announcement_subject = fields.StringField(_('Announcement subject'),
         [validators.DataRequired()])

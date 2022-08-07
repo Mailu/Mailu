@@ -17,6 +17,14 @@
   {{ macros.form_field(form.tls) }}
   {{ macros.form_field(form.username) }}
   {{ macros.form_field(form.password) }}
+  <p>{% trans %}When pressing the submit button an actual login
+    to the relay server ist tried. Please be patiant as antispam
+    rules can defer the login.{% endtrans %}
+  </p>
+  <p>{% trans %}If the error "SSL: WRONG_VERSION_NUMBER" is shown
+    and TLS is activated check the port. The default port for 
+    encryptet mail transport is 465.{% endtrans %}
+  </p>
   {{ macros.form_field(form.submit) }}
 </form>
 {%- endcall %}

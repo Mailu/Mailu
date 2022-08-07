@@ -15,6 +15,7 @@ import dns.rdataclass
 
 import hmac
 import secrets
+import smtplib
 import time
 
 from multiprocessing import Value
@@ -507,3 +508,23 @@ def gen_temp_token(email, session):
             app.config['PERMANENT_SESSION_LIFETIME'],
     )
     return token
+
+def login_to_mailserver(server, port, tls, username, password):
+    try:
+        smtp_connection = False
+        if tls:
+            smtp_connection = smtplib.SMTP_SSL(server, port or smtplib.SMTP_SSL_PORT)
+        else:
+            smtp_connection = smtplib.SMTP(server, port or smtplib.SMTP_PORT)
+        ehlo_answer = smtp_connection.ehlo('Login test from Mailu')
+        if not tls and ehlo_answer[0] == 250 and 'starttls' in str(ehlo_answer[1]).lower():
+            smtp_connection.starttls()
+        login = smtp_connection.login(username, password)
+        if login[0] != 235:
+            return False, login
+    except Exception as e:
+        return False, e
+    finally:
+        if smtp_connection:
+            smtp_connection.quit()
+    return True, login

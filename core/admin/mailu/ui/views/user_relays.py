@@ -1,7 +1,5 @@
-from mailu import models
+from mailu import models, utils
 from mailu.ui import ui, forms, access
-
-import smtplib
 
 import flask
 import flask_login
@@ -32,11 +30,17 @@ def user_relay_create(user_email):
         else:
             user_relay = models.UserRelay(user=user)
             form.populate_obj(user_relay)
-            models.db.session.add(user_relay)
-            models.db.session.commit()
-            flask.flash('User relay configuration created')
-            return flask.redirect(
-                flask.url_for('.user_relay_list', user_email=user.email))
+            login_successful, login_message = utils.login_to_mailserver(form.host.data, form.port.data,
+                                                                        form.tls.data, form.username.data,
+                                                                        form.password.data)
+            if login_successful:
+                models.db.session.add(user_relay)
+                models.db.session.commit()
+                flask.flash('Login successfull. User relay configuration created')
+                return flask.redirect(
+                    flask.url_for('.user_relay_list', user_email=user.email))
+            else:
+                flask.flash('Error validating server and login: %s' % str(login_message), 'error')
     return flask.render_template('user_relay/create.html', form=form)
 
 
@@ -52,11 +56,17 @@ def user_relay_edit(user_relay_id):
         else:
             if not form.password.data:
                 form.password.data = user_relay.password
-            form.populate_obj(user_relay)
-            models.db.session.commit()
-            flask.flash('User relay configuration updated')
-            return flask.redirect(
-                flask.url_for('.user_relay_list', user_email=user_relay.user.email))
+            login_successful, login_message = utils.login_to_mailserver(form.host.data, form.port.data,
+                                                                        form.tls.data, form.username.data,
+                                                                        form.password.data)
+            if login_successful:
+                form.populate_obj(user_relay)
+                models.db.session.commit()
+                flask.flash('Login successfull. User relay configuration updated')
+                return flask.redirect(
+                    flask.url_for('.user_relay_list', user_email=user_relay.user.email))
+            else:
+                flask.flash('Error validating server and login: %s' % str(login_message), 'error')
     return flask.render_template('user_relay/edit.html',
         form=form, user_relay=user_relay)
 

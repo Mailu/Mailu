@@ -58,7 +58,7 @@ def health_checks(deadline):
 
     if exit_code == 0:
         return True
-    elif exit_code != 0 and deadline > datetime.datetime.now().timestamp():
+    elif exit_code != 0 and deadline < datetime.datetime.now().timestamp():
         stop(exit_code)
 
 def print_logs():

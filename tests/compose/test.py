@@ -6,6 +6,7 @@ from xmlrpc.client import DateTime
 import docker
 from colorama import Fore, Style
 import subprocess
+import calendar
 
 # Declare variables for service name and sleep time
 test_name=sys.argv[1]
@@ -57,7 +58,7 @@ def health_checks(deadline):
 
     if exit_code == 0:
         return True
-    elif exit_code != 0 and deadline > datetime.datetime.now():
+    elif exit_code != 0 and deadline > datetime.datetime.now().timestamp():
         stop(exit_code)
 
 def print_logs():
@@ -86,6 +87,7 @@ def hooks():
 # Start up containers
 sys.stdout.flush()
 deadline=datetime.datetime.now()+datetime.timedelta(minutes=timeout)
+deadline=calendar.timegm(deadline.timetuple())
 print(subprocess.check_output("docker-compose -f " + compose_file + " up -d", shell=True).decode())
 print()
 print(Fore.LIGHTMAGENTA_EX + "Sleeping for 10s" + Style.RESET_ALL)

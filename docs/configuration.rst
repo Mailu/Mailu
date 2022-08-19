@@ -62,6 +62,8 @@ there is a good way to disable rate limiting altogether.
 The ``TLS_FLAVOR`` sets how Mailu handles TLS connections. Setting this value to
 ``notls`` will cause Mailu not to server any web content! More on :ref:`tls_flavor`.
 
+The ``DEFAULT_SPAM_THRESHOLD`` (default: 80) is the default spam tolerance used when creating a new user.
+
 Mail settings
 -------------
 
@@ -163,7 +165,7 @@ To have the account created automatically, you just need to define a few environ
 - ``INITIAL_ADMIN_DOMAIN``: the domain appendix: Most probably identical to the ``DOMAIN`` variable.
 - ``INITIAL_ADMIN_PW``: the admin password.
 - ``INITIAL_ADMIN_MODE``: use one of the options below for configuring how the admin account must be created:
-  
+
   - ``create``: (default) creates a new admin account and raises an exception when it already exists.
   - ``ifmissing``: creates a new admin account when the admin account does not exist.
   - ``update``: creates a new admin account when it does not exist, or update the password of an existing admin account.
@@ -210,8 +212,6 @@ The ``REAL_IP_HEADER`` (default: unset) and ``REAL_IP_FROM`` (default: unset) se
 The ``TZ`` sets the timezone Mailu will use. The timezone naming convention usually uses a ``Region/City`` format. See `TZ database name`_  for a list of valid timezones This defaults to ``Etc/UTC``. Warning: if you are observing different timestamps in your log files you should change your hosts timezone to UTC instead of changing TZ to your local timezone. Using UTC allows easy log correlation with remote MTAs.
 
 .. _`TZ database name`: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-
-The ``DEFAULT_SPAM_THRESHOLD`` (default: 80) setting is the default spam tolerance used when creating a new user.
 
 Antivirus settings
 ------------------

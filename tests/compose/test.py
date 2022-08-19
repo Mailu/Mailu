@@ -56,7 +56,7 @@ def health_checks(deadline):
 
     if exit_code == 0:
         return True
-    else if exit_code != 0 and deadline > datetime.now():
+    elif exit_code != 0 and deadline > datetime.now():
         stop(exit_code)
 
 def print_logs():

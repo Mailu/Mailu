@@ -161,23 +161,6 @@ def postfix_sender_rate(sender):
 def postfix_sender_access(sender):
     """ Simply reject any sender that pretends to be from a local domain
     """
-<<<<<<< HEAD
-    if not is_void_address(sender):
-        localpart, domain_name = models.Email.resolve_domain(sender)
-        return flask.jsonify("REJECT") if models.Domain.query.get(domain_name) else flask.abort(404)
-    else:
-        return flask.abort(404)
-
-
-def is_void_address(email):
-    '''True if the email is void (null) email address.
-    '''
-    if email.startswith('<') and email.endswith('>'):
-        email = email[1:-1]
-    # Some MTAs use things like '<MAILER-DAEMON>' instead of '<>'; so let's
-    # consider void any such thing.
-    return '@' not in email
-=======
     if '@' in sender:
         if sender.startswith('<') and sender.endswith('>'):
             sender = sender[1:-1]
@@ -196,4 +179,3 @@ def idna_encode(addresses):
         for (localpart, domain) in
         (address.rsplit("@", 1) for address in addresses)
     ]
->>>>>>> c478e26d (Encode domain part of email addresses before returning.)

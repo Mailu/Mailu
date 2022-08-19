@@ -2,6 +2,7 @@ import sys
 import os
 import time
 import datetime
+from xmlrpc.client import DateTime
 import docker
 from colorama import Fore, Style
 import subprocess
@@ -56,7 +57,7 @@ def health_checks(deadline):
 
     if exit_code == 0:
         return True
-    elif exit_code != 0 and deadline > datetime.now():
+    elif exit_code != 0 and deadline > datetime.datetime.now():
         stop(exit_code)
 
 def print_logs():
@@ -84,7 +85,7 @@ def hooks():
 
 # Start up containers
 sys.stdout.flush()
-deadline=datetime.now()+datetime.timedelta(minutes=timeout)
+deadline=datetime.datetime.now()+datetime.timedelta(minutes=timeout)
 print(subprocess.check_output("docker-compose -f " + compose_file + " up -d", shell=True).decode())
 print()
 print(Fore.LIGHTMAGENTA_EX + "Sleeping for 10s" + Style.RESET_ALL)

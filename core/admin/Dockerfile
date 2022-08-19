@@ -36,10 +36,9 @@ WORKDIR /app
 
 COPY requirements-prod.txt requirements.txt
 RUN set -eu \
- && apk add --no-cache libressl curl \
+ && apk add --no-cache libressl curl postgresql-libs mariadb-connector-c \
  && pip install --no-cache-dir --extra-index-url=https://www.piwheels.org/simple -r requirements.txt --only-binary=:all: --no-binary=Flask-bootstrap,PyYAML,SQLAlchemy \
- || ( apk add --no-cache postgresql-libs mariadb-connector-c \
- && apk add --no-cache --virtual build-dep libressl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev cargo \
+ || ( apk add --no-cache --virtual build-dep libressl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev cargo \
  && pip install --upgrade pip \
  && pip install -r requirements.txt \
  && apk del --no-cache build-dep )

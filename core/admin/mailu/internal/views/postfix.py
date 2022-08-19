@@ -32,8 +32,9 @@ def postfix_alias_map(alias):
     localpart, domain_name = models.Email.resolve_domain(alias)
     if localpart is None:
         return flask.jsonify(domain_name)
-    destination = models.Email.resolve_destination(localpart, domain_name)
-    return flask.jsonify(",".join(destination)) if destination else flask.abort(404)
+    if destinations := models.Email.resolve_destination(localpart, domain_name):
+        return flask.jsonify(",".join(idna_encode(destinations)))
+    return flask.abort(404)
 
 @internal.route("/postfix/transport/<path:email>")
 def postfix_transport(email):
@@ -141,9 +142,11 @@ def postfix_sender_login(sender):
     if localpart is None:
         return flask.jsonify(",".join(wildcard_senders)) if wildcard_senders else flask.abort(404)
     localpart = localpart[:next((i for i, ch in enumerate(localpart) if ch in flask.current_app.config.get('RECIPIENT_DELIMITER')), None)]
-    destination = models.Email.resolve_destination(localpart, domain_name, True)
-    destination = [*destination, *wildcard_senders] if destination else [*wildcard_senders]
-    return flask.jsonify(",".join(destination)) if destination else flask.abort(404)
+    destinations = models.Email.resolve_destination(localpart, domain_name, True) or []
+    destinations.extend(wildcard_senders)
+    if destinations:
+        return flask.jsonify(",".join(idna_encode(destinations)))
+    return flask.abort(404)
 
 @internal.route("/postfix/sender/rate/<path:sender>")
 def postfix_sender_rate(sender):
@@ -158,18 +161,21 @@ def postfix_sender_rate(sender):
 def postfix_sender_access(sender):
     """ Simply reject any sender that pretends to be from a local domain
     """
-    if not is_void_address(sender):
-        localpart, domain_name = models.Email.resolve_domain(sender)
-        return flask.jsonify("REJECT") if models.Domain.query.get(domain_name) else flask.abort(404)
-    else:
-        return flask.abort(404)
+    if '@' in sender:
+        if sender.startswith('<') and sender.endswith('>'):
+            sender = sender[1:-1]
+        try:
+            localpart, domain_name = models.Email.resolve_domain(sender)
+            if models.Domain.query.get(domain_name):
+                return flask.jsonify("REJECT")
+        except sqlalchemy.exc.StatementError:
+            pass
+    return flask.abort(404)
 
-
-def is_void_address(email):
-    '''True if the email is void (null) email address.
-    '''
-    if email.startswith('<') and email.endswith('>'):
-        email = email[1:-1]
-    # Some MTAs use things like '<MAILER-DAEMON>' instead of '<>'; so let's
-    # consider void any such thing.
-    return '@' not in email
+# idna encode domain part of each address in list of addresses
+def idna_encode(addresses):
+    return [
+        f"{localpart}@{idna.encode(domain).decode('ascii')}"
+        for (localpart, domain) in
+        (address.rsplit("@", 1) for address in addresses)
+    ]

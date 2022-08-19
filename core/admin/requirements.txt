@@ -19,7 +19,7 @@ PyOpenSSL
 Pygments
 dnspython
 tenacity
-mysqlclient
+mysql-connector-python
 idna
 srslib
 marshmallow

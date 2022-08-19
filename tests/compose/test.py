@@ -1,6 +1,7 @@
 import sys
 import os
 import time
+import datetime
 import docker
 from colorama import Fore, Style
 import subprocess
@@ -22,12 +23,7 @@ def stop(exit_code):
     print(subprocess.check_output("docker-compose -f " + compose_file + " down", shell=True).decode())
     sys.exit(exit_code)
 
-# Sleep for a defined amount of time
-def sleep():
-    print(Fore.LIGHTMAGENTA_EX + "Sleeping for " + str(timeout) + "m" + Style.RESET_ALL)
-    time.sleep(timeout*60)
-
-def health_checks():
+def health_checks(deadline):
     exit_code = 0
     #Iterating trough all containers dictionary
     for container in client.containers(all=True):
@@ -58,7 +54,9 @@ def health_checks():
         #Adding the generated dictionary to a list
         containers.append(containers_dict)
 
-    if exit_code != 0:
+    if exit_code == 0:
+        return True
+    else if exit_code != 0 and deadline > datetime.now():
         stop(exit_code)
 
 def print_logs():
@@ -86,14 +84,19 @@ def hooks():
 
 # Start up containers
 sys.stdout.flush()
+deadline=datetime.now()+datetime.timedelta(minutes=timeout)
 print(subprocess.check_output("docker-compose -f " + compose_file + " up -d", shell=True).decode())
 print()
-sleep()
+print(Fore.LIGHTMAGENTA_EX + "Sleeping for 10s" + Style.RESET_ALL)
+time.sleep(10)
 print()
 sys.stdout.flush()
 print(subprocess.check_output("docker ps -a", shell=True).decode())
 print()
-health_checks()
+while not health_checks(deadline):
+    print(Fore.LIGHTMAGENTA_EX + "Sleeping for 10s" + Style.RESET_ALL)
+    sys.stdout.flush()
+    time.sleep(10)
 print()
 hooks()
 print()

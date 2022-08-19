@@ -19,7 +19,7 @@ Prepare the environment
 
 Mailu images are designed to work on x86 or equivalent hardware, so it
 should run on pretty much any cloud server as long as enough power is
-provided. For non x86 machines, see :ref:`rpi_build`
+provided. For non x86 machines, see :ref:`arm_images`
 
 You are free to choose any operating system that runs Docker (>= 1.11),
 then chose between various flavors including Docker Compose, Kubernetes

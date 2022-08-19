@@ -1,12 +1,6 @@
 # NOTE: only add qemu-arm-static if building for arm
-ARG ARCH=""
-ARG QEMU=other
-FROM ${ARCH}php:8.0-apache as build_arm
-ONBUILD COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
-FROM ${ARCH}php:8.0-apache as build_other
+FROM php:8.0-apache
 
-
-FROM build_${QEMU}
 ARG VERSION
 ENV TZ Etc/UTC
 

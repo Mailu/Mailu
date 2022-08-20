@@ -1,0 +1,1 @@
+Roundcube overrides now also include .inc.php files. Only .inc.php should be used moving forward.

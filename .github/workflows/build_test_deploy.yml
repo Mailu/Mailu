@@ -135,7 +135,7 @@ jobs:
           push: false
           set: |
             *.cache-from=type=gha,scope=build-${{ matrix.target }}
-            *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
+            *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=min
             *.platform=${{ inputs.architecture }}
 
 # This job runs all the tests.

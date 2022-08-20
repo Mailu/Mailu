@@ -134,8 +134,7 @@ jobs:
           load: false
           push: false
           set: |
-            *.cache-from=type=gha,scope=build-${{ matrix.target }}
-            *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=min
+            *.cache-to=type=gha,scope=build-${{ matrix.target }}-${{ github.ref }},mode=min
             *.platform=${{ inputs.architecture }}
 
 # This job runs all the tests.
@@ -190,20 +189,20 @@ jobs:
           load: true
           push: false
           set: |
-            *.cache-from=type=gha,scope=build-docs
-            *.cache-from=type=gha,scope=build-setup
-            *.cache-from=type=gha,scope=build-admin
-            *.cache-from=type=gha,scope=build-antispam
-            *.cache-from=type=gha,scope=build-front
-            *.cache-from=type=gha,scope=build-imap
-            *.cache-from=type=gha,scope=build-smtp
-            *.cache-from=type=gha,scope=build-snappymail
-            *.cache-from=type=gha,scope=build-roundcube
-            *.cache-from=type=gha,scope=build-antivirus
-            *.cache-from=type=gha,scope=build-fetchmail
-            *.cache-from=type=gha,scope=build-resolver
-            *.cache-from=type=gha,scope=build-traefik-certdumper
-            *.cache-from=type=gha,scope=build-webdav
+            *.cache-from=type=gha,scope=build-docs-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-setup-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-admin-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-antispam-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-front-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-imap-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-smtp-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-snappymail-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-roundcube-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-antivirus-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-fetchmail-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-resolver-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-traefik-certdumper-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-webdav-${{ github.ref }}
             *.platform=${{ inputs.architecture }}
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
@@ -255,20 +254,20 @@ jobs:
           files: ${{env.HCL_FILE}}
           push: true
           set: |
-            *.cache-from=type=gha,scope=build-docs
-            *.cache-from=type=gha,scope=build-setup
-            *.cache-from=type=gha,scope=build-admin
-            *.cache-from=type=gha,scope=build-antispam
-            *.cache-from=type=gha,scope=build-front
-            *.cache-from=type=gha,scope=build-imap
-            *.cache-from=type=gha,scope=build-smtp
-            *.cache-from=type=gha,scope=build-snappymail
-            *.cache-from=type=gha,scope=build-roundcube
-            *.cache-from=type=gha,scope=build-antivirus
-            *.cache-from=type=gha,scope=build-fetchmail
-            *.cache-from=type=gha,scope=build-resolver
-            *.cache-from=type=gha,scope=build-traefik-certdumper
-            *.cache-from=type=gha,scope=build-webdav
+            *.cache-from=type=gha,scope=build-docs-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-setup-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-admin-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-antispam-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-front-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-imap-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-smtp-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-snappymail-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-roundcube-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-antivirus-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-fetchmail-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-resolver-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-traefik-certdumper-${{ github.ref }}
+            *.cache-from=type=gha,scope=build-webdav-${{ github.ref }}
             *.platform=${{ inputs.architecture }}
 
   deploy-arm:

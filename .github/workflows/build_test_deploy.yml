@@ -134,8 +134,7 @@ jobs:
           load: false
           push: false
           set: |
-            *.cache-from=type=gha,scope=build-${{ matrix.target }}
-            *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=min
+            *.cache-to=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-${{ matrix.target }}-build,mode=min
             *.platform=${{ inputs.architecture }}
 
 # This job runs all the tests.
@@ -190,20 +189,20 @@ jobs:
           load: true
           push: false
           set: |
-            *.cache-from=type=gha,scope=build-docs
-            *.cache-from=type=gha,scope=build-setup
-            *.cache-from=type=gha,scope=build-admin
-            *.cache-from=type=gha,scope=build-antispam
-            *.cache-from=type=gha,scope=build-front
-            *.cache-from=type=gha,scope=build-imap
-            *.cache-from=type=gha,scope=build-smtp
-            *.cache-from=type=gha,scope=build-snappymail
-            *.cache-from=type=gha,scope=build-roundcube
-            *.cache-from=type=gha,scope=build-antivirus
-            *.cache-from=type=gha,scope=build-fetchmail
-            *.cache-from=type=gha,scope=build-resolver
-            *.cache-from=type=gha,scope=build-traefik-certdumper
-            *.cache-from=type=gha,scope=build-webdav
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-docs-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-setup-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-admin-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-antispam-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-front-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-imap-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-smtp-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-snappymail-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-roundcube-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-antivirus-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-fetchmail-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-resolver-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-traefik-certdumper-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-webdav-build
             *.platform=${{ inputs.architecture }}
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
@@ -255,20 +254,20 @@ jobs:
           files: ${{env.HCL_FILE}}
           push: true
           set: |
-            *.cache-from=type=gha,scope=build-docs
-            *.cache-from=type=gha,scope=build-setup
-            *.cache-from=type=gha,scope=build-admin
-            *.cache-from=type=gha,scope=build-antispam
-            *.cache-from=type=gha,scope=build-front
-            *.cache-from=type=gha,scope=build-imap
-            *.cache-from=type=gha,scope=build-smtp
-            *.cache-from=type=gha,scope=build-snappymail
-            *.cache-from=type=gha,scope=build-roundcube
-            *.cache-from=type=gha,scope=build-antivirus
-            *.cache-from=type=gha,scope=build-fetchmail
-            *.cache-from=type=gha,scope=build-resolver
-            *.cache-from=type=gha,scope=build-traefik-certdumper
-            *.cache-from=type=gha,scope=build-webdav
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-docs-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-setup-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-admin-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-antispam-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-front-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-imap-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-smtp-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-snappymail-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-roundcube-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-antivirus-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-fetchmail-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-resolver-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-traefik-certdumper-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-webdav-build
             *.platform=${{ inputs.architecture }}
 
   deploy-arm:
@@ -307,20 +306,20 @@ jobs:
           files: ${{env.HCL_FILE}}
           push: true
           set: |
-            *.cache-from=type=gha,scope=build-docs
-            *.cache-from=type=gha,scope=build-setup
-            *.cache-from=type=gha,scope=build-admin
-            *.cache-from=type=gha,scope=build-antispam
-            *.cache-from=type=gha,scope=build-front
-            *.cache-from=type=gha,scope=build-imap
-            *.cache-from=type=gha,scope=build-smtp
-            *.cache-from=type=gha,scope=build-snappymail
-            *.cache-from=type=gha,scope=build-roundcube
-            *.cache-from=type=gha,scope=build-antivirus
-            *.cache-from=type=gha,scope=build-fetchmail
-            *.cache-from=type=gha,scope=build-resolver
-            *.cache-from=type=gha,scope=build-traefik-certdumper
-            *.cache-from=type=gha,scope=build-webdav
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-docs-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-setup-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-admin-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-antispam-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-front-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-imap-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-smtp-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-snappymail-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-roundcube-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-antivirus-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-fetchmail-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-resolver-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-traefik-certdumper-build
+            *.cache-from=type=gha,scope=${{ github.run_id }}-${{ github.ref }}-webdav-build
             *.platform=${{ inputs.architecture }}
 
 #This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.

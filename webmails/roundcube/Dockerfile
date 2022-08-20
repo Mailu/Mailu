@@ -1,4 +1,3 @@
-# NOTE: only add qemu-arm-static if building for arm
 FROM php:8.0-apache
 
 ARG VERSION

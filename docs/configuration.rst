@@ -332,7 +332,7 @@ If ``ROUNDCUBE_PLUGINS`` is not set the following plugins are enabled by default
 
 To disable all plugins just set ``ROUNDCUBE_PLUGINS`` to ``mailu``.
 
-To configure a plugin add php files named ``*.inc`` to roundcube's :ref:`override section <override-label>`.
+To configure a plugin add php files named ``*.inc.php`` to roundcube's :ref:`override section <override-label>`.
 
 Mail log settings
 -----------------

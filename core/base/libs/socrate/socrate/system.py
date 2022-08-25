@@ -1,7 +1,7 @@
 import socket
 import tenacity
 from os import environ
-
+import logging as log
 
 @tenacity.retry(stop=tenacity.stop_after_attempt(100),
                 wait=tenacity.wait_random(min=2, max=5))
@@ -9,7 +9,11 @@ def resolve_hostname(hostname):
     """ This function uses system DNS to resolve a hostname.
     It is capable of retrying in case the host is not immediately available
     """
-    return socket.gethostbyname(hostname)
+    try:
+        return socket.gethostbyname(hostname)
+    except Exception as e:
+        log.warn("Unable to lookup '%s': %s",hostname,e)
+        raise e
 
 
 def resolve_address(address):

@@ -17,7 +17,7 @@ def resolve_hostname(hostname):
 
 
 def resolve_address(address):
-    """ This function is identical to ``resolve_host`` but also supports
+    """ This function is identical to ``resolve_hostname`` but also supports
     resolving an address, i.e. including a port.
     """
     hostname, *rest = address.rsplit(":", 1)

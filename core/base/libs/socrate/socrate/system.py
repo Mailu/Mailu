@@ -10,7 +10,7 @@ def resolve_hostname(hostname):
     It is capable of retrying in case the host is not immediately available
     """
     try:
-        return socket.gethostbyname(hostname)
+        return sorted(socket.getaddrinfo(hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM, 0, socket.AI_PASSIVE), key=lambda s:s[0])[0][4][0]
     except Exception as e:
         log.warn("Unable to lookup '%s': %s",hostname,e)
         raise e
@@ -22,6 +22,8 @@ def resolve_address(address):
     """
     hostname, *rest = address.rsplit(":", 1)
     ip_address = resolve_hostname(hostname)
+    if ":" in ip_address:
+        ip_address = "[{}]".format(ip_address)
     return ip_address + "".join(":" + port for port in rest)
 
 

@@ -167,7 +167,7 @@ def user_signup(domain_name=None):
         form = forms.UserSignupFormCaptcha()
 
     if form.validate_on_submit():
-        if domain.has_email(form.localpart.data):
+        if domain.has_email(form.localpart.data) or models.Alias.resolve(form.localpart.data, domain_name):
             flask.flash('Email is already used', 'error')
         else:
             flask.session.regenerate()

@@ -1,0 +1,1 @@
+Switch from mysqlclient to mysql-connector explicitely

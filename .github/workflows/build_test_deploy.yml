@@ -92,7 +92,8 @@ jobs:
 # This job builds all the images. The build cache is stored in the github actions cache.
 # In further jobs, this cache is used to quickly rebuild the images.
   build:
-    name: Build images
+    name: Build images for linux/amd64
+    if: inputs.architecture == 'linux/amd64'
     needs:
       - targets
     strategy:
@@ -100,6 +101,63 @@ jobs:
       matrix:
         target: ${{ fromJson(needs.targets.outputs.matrix) }}
     runs-on: ubuntu-latest
+    permissions:
+     contents: read
+     packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Retrieve global variables
+        shell: bash
+        run: |
+          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Configure actions/cache@v3 action for storing build cache in the /tmp/cache folder
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/${{ matrix.target }}
+          key: ${{ github.ref }}-${{ inputs.mailu_version }}-${{ matrix.target }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ github.ref }}-${{ inputs.mailu_version }}-${{ matrix.target }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - uses: crazy-max/ghaction-github-runtime@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.Docker_Login }}
+          password: ${{ secrets.Docker_Password }}
+      - name: Build all docker images
+        env:
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+        uses: docker/bake-action@v2
+        with:
+          files: ${{env.HCL_FILE}}
+          targets: ${{ matrix.target }}
+          load: false
+          push: false
+          set: |
+            *.cache-from=type=local,src=/tmp/cache/${{ matrix.target }}
+            *.cache-to=type=local,dest=/tmp/cache/${{ matrix.target }},mode=max
+            *.platform=${{ inputs.architecture }}
+
+# This job builds all the images. The build cache is stored in the github actions cache.
+# In further jobs, this cache is used to quickly rebuild the images.
+  build-arm:
+    name: Build images for ARM64 & ARM/V7
+    if: inputs.architecture != 'linux/amd64'
+    needs:
+      - targets
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJson(needs.targets.outputs.matrix) }}
+    runs-on: self-hosted
     permissions:
      contents: read
      packages: write
@@ -424,7 +482,7 @@ jobs:
     if: inputs.deploy == 'true' && inputs.architecture != 'linux/amd64'
     runs-on: ubuntu-latest
     needs:
-      - build
+      - build-arm
     steps:
       - uses: actions/checkout@v3
       - name: Retrieve global variables

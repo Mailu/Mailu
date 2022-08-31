@@ -480,7 +480,7 @@ jobs:
     name: Deploy images for arm
     # Deploying is not required for staging
     if: inputs.deploy == 'true' && inputs.architecture != 'linux/amd64'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - build-arm
     steps:

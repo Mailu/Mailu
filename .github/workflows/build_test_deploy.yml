@@ -113,10 +113,10 @@ jobs:
           echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
           echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
-      - name: Configure actions/cache@v3 action for storing build cache in the /tmp/cache folder
+      - name: Configure actions/cache@v3 action for storing build cache in the ${{ runner.temp }}/cache folder
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/${{ matrix.target }}
+          path: ${{ runner.temp }}/cache/${{ matrix.target }}
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-${{ matrix.target }}-${{ github.run_id }}
           restore-keys: |
             ${{ github.ref }}-${{ inputs.mailu_version }}-${{ matrix.target }}
@@ -142,8 +142,8 @@ jobs:
           load: false
           push: false
           set: |
-            *.cache-from=type=local,src=/tmp/cache/${{ matrix.target }}
-            *.cache-to=type=local,dest=/tmp/cache/${{ matrix.target }},mode=max
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/${{ matrix.target }}
+            *.cache-to=type=local,dest=${{ runner.temp }}/cache/${{ matrix.target }},mode=max
             *.platform=${{ inputs.architecture }}
 
 # This job builds all the images. The build cache is stored in the github actions cache.
@@ -170,10 +170,10 @@ jobs:
           echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
           echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
-      - name: Configure actions/cache@v3 action for storing build cache in the /tmp/cache folder
+      - name: Configure actions/cache@v3 action for storing build cache in the ${{ runner.temp }}/cache folder
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/${{ matrix.target }}
+          path: ${{ runner.temp }}/cache/${{ matrix.target }}
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-${{ matrix.target }}-${{ github.run_id }}
           restore-keys: |
             ${{ github.ref }}-${{ inputs.mailu_version }}-${{ matrix.target }}
@@ -199,8 +199,8 @@ jobs:
           load: false
           push: false
           set: |
-            *.cache-from=type=local,src=/tmp/cache/${{ matrix.target }}
-            *.cache-to=type=local,dest=/tmp/cache/${{ matrix.target }},mode=max
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/${{ matrix.target }}
+            *.cache-to=type=local,dest=${{ runner.temp }}/cache/${{ matrix.target }},mode=max
             *.platform=${{ inputs.architecture }}
 
 # This job runs all the tests.
@@ -237,72 +237,72 @@ jobs:
       - name: Configure /cache for image docs
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/docs
+          path: ${{ runner.temp }}/cache/docs
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-docs-${{ github.run_id }}
       - name: Configure /cache for image setup
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/setup
+          path: ${{ runner.temp }}/cache/setup
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-setup-${{ github.run_id }}
       - name: Configure /cache for image admin
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/admin
+          path: ${{ runner.temp }}/cache/admin
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-admin-${{ github.run_id }}
       - name: Configure /cache for image antispam
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/antispam
+          path: ${{ runner.temp }}/cache/antispam
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-antispam-${{ github.run_id }}
       - name: Configure /cache for image front
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/front
+          path: ${{ runner.temp }}/cache/front
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-front-${{ github.run_id }}
       - name: Configure /cache for image imap
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/imap
+          path: ${{ runner.temp }}/cache/imap
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-imap-${{ github.run_id }}
       - name: Configure /cache for image smtp
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/smtp
+          path: ${{ runner.temp }}/cache/smtp
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-smtp-${{ github.run_id }}
       - name: Configure /cache for image snappymail
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/snappymail
+          path: ${{ runner.temp }}/cache/snappymail
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-snappymail-${{ github.run_id }}
       - name: Configure /cache for image roundcube
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/roundcube
+          path: ${{ runner.temp }}/cache/roundcube
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-roundcube-${{ github.run_id }}
       - name: Configure /cache for image antivirus
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/antivirus
+          path: ${{ runner.temp }}/cache/antivirus
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-antivirus-${{ github.run_id }}
       - name: Configure /cache for image fetchmail
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/fetchmail
+          path: ${{ runner.temp }}/cache/fetchmail
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-fetchmail-${{ github.run_id }}
       - name: Configure /cache for image resolver
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/resolver
+          path: ${{ runner.temp }}/cache/resolver
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-resolver-${{ github.run_id }}
       - name: Configure /cache for image traefik-certdumper
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/traefik-certdumper
+          path: ${{ runner.temp }}/cache/traefik-certdumper
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-traefik-certdumper-${{ github.run_id }}
       - name: Configure /cache for image webdav
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/webdav
+          path: ${{ runner.temp }}/cache/webdav
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-webdav-${{ github.run_id }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -325,20 +325,20 @@ jobs:
           load: true
           push: false
           set: |
-            *.cache-from=type=local,src=/tmp/cache/docs
-            *.cache-from=type=local,src=/tmp/cache/setup
-            *.cache-from=type=local,src=/tmp/cache/admin
-            *.cache-from=type=local,src=/tmp/cache/antispam
-            *.cache-from=type=local,src=/tmp/cache/front
-            *.cache-from=type=local,src=/tmp/cache/imap
-            *.cache-from=type=local,src=/tmp/cache/smtp
-            *.cache-from=type=local,src=/tmp/cache/snappymail
-            *.cache-from=type=local,src=/tmp/cache/roundcube
-            *.cache-from=type=local,src=/tmp/cache/antivirus
-            *.cache-from=type=local,src=/tmp/cache/fetchmail
-            *.cache-from=type=local,src=/tmp/cache/resolver
-            *.cache-from=type=local,src=/tmp/cache/traefik-certdumper
-            *.cache-from=type=local,src=/tmp/cache/webdav
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/docs
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/setup
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/admin
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/antispam
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/front
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/imap
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/smtp
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/snappymail
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/roundcube
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/antivirus
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/fetchmail
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/resolver
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/traefik-certdumper
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/webdav
             *.platform=${{ inputs.architecture }}
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
@@ -373,72 +373,72 @@ jobs:
       - name: Configure /cache for image docs
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/docs
+          path: ${{ runner.temp }}/cache/docs
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-docs-${{ github.run_id }}
       - name: Configure /cache for image setup
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/setup
+          path: ${{ runner.temp }}/cache/setup
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-setup-${{ github.run_id }}
       - name: Configure /cache for image admin
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/admin
+          path: ${{ runner.temp }}/cache/admin
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-admin-${{ github.run_id }}
       - name: Configure /cache for image antispam
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/antispam
+          path: ${{ runner.temp }}/cache/antispam
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-antispam-${{ github.run_id }}
       - name: Configure /cache for image front
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/front
+          path: ${{ runner.temp }}/cache/front
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-front-${{ github.run_id }}
       - name: Configure /cache for image imap
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/imap
+          path: ${{ runner.temp }}/cache/imap
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-imap-${{ github.run_id }}
       - name: Configure /cache for image smtp
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/smtp
+          path: ${{ runner.temp }}/cache/smtp
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-smtp-${{ github.run_id }}
       - name: Configure /cache for image snappymail
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/snappymail
+          path: ${{ runner.temp }}/cache/snappymail
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-snappymail-${{ github.run_id }}
       - name: Configure /cache for image roundcube
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/roundcube
+          path: ${{ runner.temp }}/cache/roundcube
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-roundcube-${{ github.run_id }}
       - name: Configure /cache for image antivirus
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/antivirus
+          path: ${{ runner.temp }}/cache/antivirus
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-antivirus-${{ github.run_id }}
       - name: Configure /cache for image fetchmail
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/fetchmail
+          path: ${{ runner.temp }}/cache/fetchmail
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-fetchmail-${{ github.run_id }}
       - name: Configure /cache for image resolver
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/resolver
+          path: ${{ runner.temp }}/cache/resolver
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-resolver-${{ github.run_id }}
       - name: Configure /cache for image traefik-certdumper
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/traefik-certdumper
+          path: ${{ runner.temp }}/cache/traefik-certdumper
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-traefik-certdumper-${{ github.run_id }}
       - name: Configure /cache for image webdav
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/webdav
+          path: ${{ runner.temp }}/cache/webdav
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-webdav-${{ github.run_id }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -460,20 +460,20 @@ jobs:
           files: ${{env.HCL_FILE}}
           push: true
           set: |
-            *.cache-from=type=local,src=/tmp/cache/docs
-            *.cache-from=type=local,src=/tmp/cache/setup
-            *.cache-from=type=local,src=/tmp/cache/admin
-            *.cache-from=type=local,src=/tmp/cache/antispam
-            *.cache-from=type=local,src=/tmp/cache/front
-            *.cache-from=type=local,src=/tmp/cache/imap
-            *.cache-from=type=local,src=/tmp/cache/smtp
-            *.cache-from=type=local,src=/tmp/cache/snappymail
-            *.cache-from=type=local,src=/tmp/cache/roundcube
-            *.cache-from=type=local,src=/tmp/cache/antivirus
-            *.cache-from=type=local,src=/tmp/cache/fetchmail
-            *.cache-from=type=local,src=/tmp/cache/resolver
-            *.cache-from=type=local,src=/tmp/cache/traefik-certdumper
-            *.cache-from=type=local,src=/tmp/cache/webdav
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/docs
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/setup
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/admin
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/antispam
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/front
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/imap
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/smtp
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/snappymail
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/roundcube
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/antivirus
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/fetchmail
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/resolver
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/traefik-certdumper
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/webdav
             *.platform=${{ inputs.architecture }}
 
   deploy-arm:
@@ -495,72 +495,72 @@ jobs:
       - name: Configure /cache for image docs
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/docs
+          path: ${{ runner.temp }}/cache/docs
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-docs-${{ github.run_id }}
       - name: Configure /cache for image setup
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/setup
+          path: ${{ runner.temp }}/cache/setup
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-setup-${{ github.run_id }}
       - name: Configure /cache for image admin
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/admin
+          path: ${{ runner.temp }}/cache/admin
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-admin-${{ github.run_id }}
       - name: Configure /cache for image antispam
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/antispam
+          path: ${{ runner.temp }}/cache/antispam
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-antispam-${{ github.run_id }}
       - name: Configure /cache for image front
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/front
+          path: ${{ runner.temp }}/cache/front
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-front-${{ github.run_id }}
       - name: Configure /cache for image imap
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/imap
+          path: ${{ runner.temp }}/cache/imap
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-imap-${{ github.run_id }}
       - name: Configure /cache for image smtp
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/smtp
+          path: ${{ runner.temp }}/cache/smtp
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-smtp-${{ github.run_id }}
       - name: Configure /cache for image snappymail
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/snappymail
+          path: ${{ runner.temp }}/cache/snappymail
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-snappymail-${{ github.run_id }}
       - name: Configure /cache for image roundcube
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/roundcube
+          path: ${{ runner.temp }}/cache/roundcube
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-roundcube-${{ github.run_id }}
       - name: Configure /cache for image antivirus
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/antivirus
+          path: ${{ runner.temp }}/cache/antivirus
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-antivirus-${{ github.run_id }}
       - name: Configure /cache for image fetchmail
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/fetchmail
+          path: ${{ runner.temp }}/cache/fetchmail
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-fetchmail-${{ github.run_id }}
       - name: Configure /cache for image resolver
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/resolver
+          path: ${{ runner.temp }}/cache/resolver
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-resolver-${{ github.run_id }}
       - name: Configure /cache for image traefik-certdumper
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/traefik-certdumper
+          path: ${{ runner.temp }}/cache/traefik-certdumper
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-traefik-certdumper-${{ github.run_id }}
       - name: Configure /cache for image webdav
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/webdav
+          path: ${{ runner.temp }}/cache/webdav
           key: ${{ github.ref }}-${{ inputs.mailu_version }}-webdav-${{ github.run_id }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -582,20 +582,20 @@ jobs:
           files: ${{env.HCL_FILE}}
           push: true
           set: |
-            *.cache-from=type=local,src=/tmp/cache/docs
-            *.cache-from=type=local,src=/tmp/cache/setup
-            *.cache-from=type=local,src=/tmp/cache/admin
-            *.cache-from=type=local,src=/tmp/cache/antispam
-            *.cache-from=type=local,src=/tmp/cache/front
-            *.cache-from=type=local,src=/tmp/cache/imap
-            *.cache-from=type=local,src=/tmp/cache/smtp
-            *.cache-from=type=local,src=/tmp/cache/snappymail
-            *.cache-from=type=local,src=/tmp/cache/roundcube
-            *.cache-from=type=local,src=/tmp/cache/antivirus
-            *.cache-from=type=local,src=/tmp/cache/fetchmail
-            *.cache-from=type=local,src=/tmp/cache/resolver
-            *.cache-from=type=local,src=/tmp/cache/traefik-certdumper
-            *.cache-from=type=local,src=/tmp/cache/webdav
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/docs
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/setup
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/admin
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/antispam
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/front
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/imap
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/smtp
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/snappymail
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/roundcube
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/antivirus
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/fetchmail
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/resolver
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/traefik-certdumper
+            *.cache-from=type=local,src=${{ runner.temp }}/cache/webdav
             *.platform=${{ inputs.architecture }}
 
 #This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.

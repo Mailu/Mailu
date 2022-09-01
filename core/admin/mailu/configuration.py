@@ -87,8 +87,7 @@ DEFAULT_CONFIG = {
     'HOST_REDIS': 'redis',
     'HOST_FRONT': 'front',
     'SUBNET': '192.168.203.0/24',
-    'SUBNET6': None,
-    'POD_ADDRESS_RANGE': None
+    'SUBNET6': None
 }
 
 class ConfigManager:

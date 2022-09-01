@@ -62,7 +62,7 @@ On this example, we are using:
 - the default ingress mode.
 
 ### Allow authentification with the mesh routing
-In order to allow every (front & webmail) container to access the other services, we will use the variable POD_ADDRESS_RANGE.
+In order to allow every (front & webmail) container to access the other services, we will use the variable SUBNET.
 
 Let's create the mailu_default network:
 ```bash
@@ -70,8 +70,8 @@ core@coreos-01 ~ $ docker network create -d overlay --attachable mailu_default
 core@coreos-01 ~ $ docker network inspect mailu_default | grep Subnet
                     "Subnet": "10.0.1.0/24",
 ```
-In the docker-compose.yml file, we will then use POD_ADDRESS_RANGE = 10.0.1.0/24 
-In fact, imap & smtp logs doesn't show the IPs from the front(s) container(s), but the IP of  "mailu_default-endpoint". So it is sufficient to set POD_ADDRESS_RANGE to this specific ip (which can be found by inspecting mailu_default network). The issue is that this endpoint is created while the stack is created, I did'nt figure a way to determine this IP before the stack creation...
+In the docker-compose.yml file, we will then use SUBNET = 10.0.1.0/24 
+In fact, imap & smtp logs doesn't show the IPs from the front(s) container(s), but the IP of  "mailu_default-endpoint". So it is sufficient to set SUBNET to this specific ip (which can be found by inspecting mailu_default network). The issue is that this endpoint is created while the stack is created, I did'nt figure a way to determine this IP before the stack creation...
 
 ### Limitation with the ingress mode
 With the default ingress mode, the front(s) container(s) will see origin IP(s) all being 10.255.0.x (which is the ingress-endpoint, can be found by inspecting the ingress network)
@@ -90,7 +90,7 @@ As a side effect of this ingress mode "feature", make sure that the ingress subn
 
 ## Scalability
 - smtp and imap are scalable
-- front and webmail are scalable (pending POD_ADDRESS_RANGE is used), although the let's encrypt magic might not like it (race condidtion ? or risk to be banned by let's encrypt server if too many front containers attemps to renew the certs at the same time) 
+- front and webmail are scalable (pending SUBNET is used), although the let's encrypt magic might not like it (race condidtion ? or risk to be banned by let's encrypt server if too many front containers attemps to renew the certs at the same time) 
 - redis, antispam, antivirus, fetchmail, admin, webdav have not been tested (hence replicas=1 in the following docker-compose.yml file)
 
 ## Variable substitution and docker-compose.yml
@@ -176,7 +176,7 @@ services:
     restart: always
     env_file: .env
     environment:
-      - POD_ADDRESS_RANGE=10.0.1.0/24
+      - SUBNET=10.0.1.0/24
     volumes:
 #      - "$ROOT/overrides:/overrides"
       - type: volume
@@ -192,7 +192,7 @@ services:
     restart: always
     env_file: .env
     environment:
-      - POD_ADDRESS_RANGE=10.0.1.0/24
+      - SUBNET=10.0.1.0/24
     depends_on:
       - front
     volumes:
@@ -240,7 +240,7 @@ services:
     restart: always
     env_file: .env
     environment:
-      - POD_ADDRESS_RANGE=10.0.1.0/24
+      - SUBNET=10.0.1.0/24
     volumes:
 #      - "$ROOT/data:/data"
       - type: volume

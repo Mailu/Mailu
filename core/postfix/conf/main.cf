@@ -39,7 +39,7 @@ recipient_delimiter = {{ RECIPIENT_DELIMITER }}
 
 # Only the front server is allowed to perform xclient
 # In kubernetes and Docker swarm, such address cannot be determined using the hostname. Allow for the whole Mailu subnet instead.
-smtpd_authorized_xclient_hosts={{ POD_ADDRESS_RANGE or SUBNET }}
+smtpd_authorized_xclient_hosts={{ SUBNET }}
 
 ###############
 # TLS

@@ -736,6 +736,7 @@ If you already have an existing mailbox and want Mailu to learn them all as ham 
 .. code-block:: bash
 
   rspamc -h antispam:11334 -P mailu -f 13 fuzzy_add /mail/user\@example.com/.Ham_Learn/cur/
+  rspamc -h antispam:11334 -P mailu learn_ham /mail/user\@example.com/.Ham_Learn/cur/
 
 This should learn every file located in the ``Ham_Learn`` folder from user@example.com 
 
@@ -744,6 +745,7 @@ Likewise, to lean all messages within the folder ``Spam_Learn`` as spam messages
 .. code-block:: bash
 
   rspamc -h antispam:11334 -P mailu -f 11 fuzzy_add /mail/user\@example.com/.Spam_Learn/cur/
+  rspamc -h antispam:11334 -P mailu learn_spam /mail/user\@example.com/.Spam_Learn/cur/
 
 *Issue reference:* `1438`_.
 

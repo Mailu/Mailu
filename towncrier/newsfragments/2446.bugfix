@@ -1,0 +1,1 @@
+Enable rspamd's autolearn feature to ensure that its bayes classifier has enough HAM to make it usable. Previously the bayes module would never work unless some HAM had been learnt manually.

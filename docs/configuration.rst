@@ -215,6 +215,8 @@ The ``LETSENCRYPT_SHORTCHAIN`` (default: False) setting controls whether we send
 ISRG Root X1 certificate in TLS handshakes. This is required for `android handsets older than 7.1.1` 
 but slows down the performance of modern devices.
 
+The ``TLS_PERMISSIVE`` (default: true) setting controls whether ciphers and protocols offered on port 25 for STARTTLS are optimized for maximum compatibility. We **strongly recommend** that you do **not** change this setting on the basis that any encryption beats no encryption. If you are subject to compliance requirements and are not afraid of loosing emails as a result of artificially reducing compatibility, set it to 'false'. Keep in mind that servers that are running a software stack old enough to not be compatible with the current TLS requirements will either a) deliver in plaintext b) bounce emails c) silently drop emails; modern servers will benefit from various downgrade protections (DOWNGRD, RFC7507) making the security argument mostly a moot point.
+
 .. _`android handsets older than 7.1.1`: https://community.letsencrypt.org/t/production-chain-changes/150739
 
 .. _reverse_proxy_headers:

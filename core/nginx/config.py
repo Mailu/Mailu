@@ -9,6 +9,8 @@ args = os.environ.copy()
 
 log.basicConfig(stream=sys.stderr, level=args.get("LOG_LEVEL", "WARNING"))
 
+args['TLS_PERMISSIVE'] = str(args.get('TLS_PERMISSIVE')).lower() not in ('false', 'no')
+
 # Get the first DNS server
 with open("/etc/resolv.conf") as handle:
     content = handle.read().split()

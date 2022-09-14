@@ -74,6 +74,7 @@ DEFAULT_CONFIG = {
     'PERMANENT_SESSION_LIFETIME': 30*24*3600,
     'SESSION_COOKIE_SECURE': True,
     'CREDENTIAL_ROUNDS': 12,
+    'TLS_PERMISSIVE': True,
     'TZ': 'Etc/UTC',
     # Host settings
     'HOST_IMAP': 'imap',

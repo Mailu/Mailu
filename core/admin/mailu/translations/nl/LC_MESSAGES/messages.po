@@ -31,7 +31,7 @@ msgstr "Aanmelden"
 
 #: mailu/sso/templates/base_sso.html:8 mailu/ui/templates/base.html:8
 msgid "Admin page for"
-msgstr ""
+msgstr "Admin pagina voor"
 
 #: mailu/sso/templates/base_sso.html:19 mailu/ui/templates/base.html:19
 msgid "toggle sidebar"
@@ -39,7 +39,7 @@ msgstr ""
 
 #: mailu/sso/templates/base_sso.html:37 mailu/ui/templates/base.html:37
 msgid "change language"
-msgstr ""
+msgstr "kies taal"
 
 #: mailu/sso/templates/sidebar_sso.html:4 mailu/ui/templates/sidebar.html:94
 msgid "Go to"
@@ -172,7 +172,7 @@ msgstr "Spamfilter inschakelen"
 
 #: mailu/ui/forms.py:103
 msgid "Enable marking spam mails as read"
-msgstr ""
+msgstr "Markeer spam als gelezen"
 
 #: mailu/ui/forms.py:104
 msgid "Spam filter tolerance"
@@ -217,7 +217,7 @@ msgstr "Antwoord bericht"
 
 #: mailu/ui/forms.py:122
 msgid "Start of vacation"
-msgstr ""
+msgstr "Begin van vakantie"
 
 #: mailu/ui/forms.py:123
 msgid "End of vacation"
@@ -304,15 +304,15 @@ msgstr "Anti-spam"
 
 #: mailu/ui/templates/antispam.html:8
 msgid "RSPAMD status page"
-msgstr ""
+msgstr "RSPAMD stauts pagina"
 
 #: mailu/ui/templates/client.html:8
 msgid "configure your email client"
-msgstr ""
+msgstr "configureer je email client"
 
 #: mailu/ui/templates/client.html:13
 msgid "Incoming mail"
-msgstr ""
+msgstr "Inkomende mail"
 
 #: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:41
 msgid "Mail protocol"
@@ -324,7 +324,7 @@ msgstr "Server naam"
 
 #: mailu/ui/templates/client.html:38
 msgid "Outgoing mail"
-msgstr ""
+msgstr "Uitgaande mail"
 
 #: mailu/ui/templates/confirm.html:4
 msgid "Confirm action"
@@ -345,7 +345,7 @@ msgstr "Er is een fout opgetreden tijdens het communiceren met de Docker server.
 
 #: mailu/ui/templates/macros.html:129
 msgid "copy to clipboard"
-msgstr ""
+msgstr "kopieer naar klembord"
 
 #: mailu/ui/templates/sidebar.html:15
 msgid "My account"
@@ -528,11 +528,11 @@ msgstr "DNS DMARC-record"
 
 #: mailu/ui/templates/domain/details.html:58
 msgid "DNS TLSA entry"
-msgstr ""
+msgstr "DNS TLSA-record"
 
 #: mailu/ui/templates/domain/details.html:63
 msgid "DNS client auto-configuration entries"
-msgstr ""
+msgstr "DNS client auto-configuratie records"
 
 #: mailu/ui/templates/domain/edit.html:4
 msgid "Edit domain"

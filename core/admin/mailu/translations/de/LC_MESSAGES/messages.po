@@ -218,7 +218,7 @@ msgstr "Text"
 
 #: mailu/ui/forms.py:122
 msgid "Start of vacation"
-msgstr ""
+msgstr "Beginn der Abwesenheit"
 
 #: mailu/ui/forms.py:123
 msgid "End of vacation"

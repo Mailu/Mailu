@@ -304,7 +304,7 @@ msgstr "Anti-spam"
 
 #: mailu/ui/templates/antispam.html:8
 msgid "RSPAMD status page"
-msgstr "RSPAMD stauts pagina"
+msgstr "RSPAMD status pagina"
 
 #: mailu/ui/templates/client.html:8
 msgid "configure your email client"

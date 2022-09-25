@@ -74,8 +74,8 @@ def create_app_from_config(config):
     app.register_blueprint(ui.ui, url_prefix=app.config['WEB_ADMIN'])
     app.register_blueprint(internal.internal, url_prefix='/internal')
     app.register_blueprint(sso.sso, url_prefix='/sso')
-    if app.config.get('API'):
-        api.register(app)
+    if app.config.get('API_TOKEN'):
+        api.register(app, web_api=app.config.get('WEB_API'))
     return app
 
 

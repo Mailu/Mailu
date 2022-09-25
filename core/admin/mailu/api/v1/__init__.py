@@ -1,14 +1,28 @@
 from flask import Blueprint
 from flask_restx import Api, fields
 
+
 VERSION = 1.0
+api_token = None
 
 blueprint = Blueprint(f'api_v{int(VERSION)}', __name__)
+
+authorization = {
+    'apikey': {
+        'type': 'apiKey',
+        'in': 'query',
+        'name': 'api_token'
+    }
+}
+
 
 api = Api(
     blueprint, version=f'{VERSION:.1f}',
     title='Mailu API', default_label='Mailu',
-    validate=True
+    validate=True,
+    authorizations=authorization,
+    security='apikey',
+    doc='/swaggerui/'
 )
 
 response_fields = api.model('Response', {
@@ -25,3 +39,6 @@ error_fields = api.model('Error', {
 })
 
 from . import domains
+from . import alias
+from . import relay
+from . import user

@@ -1,7 +1,7 @@
 Mailu command line
 ==================
 
-Managing users and aliases can be done from CLI using commands:
+Managing domains, users and aliases can be done from CLI using the commands:
 
 * alias
 * alias-delete

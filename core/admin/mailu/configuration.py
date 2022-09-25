@@ -71,6 +71,9 @@ DEFAULT_CONFIG = {
     'LOGO_BACKGROUND': None,
     'API': False,
     # Advanced settings
+    'API' : 'false',
+    'WEB_API' : '/api',
+    'API_TOKEN': None,
     'LOG_LEVEL': 'WARNING',
     'SESSION_KEY_BITS': 128,
     'SESSION_TIMEOUT': 3600,

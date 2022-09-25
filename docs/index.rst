@@ -70,6 +70,7 @@ the version of Mailu that you are running.
     webadministration
     antispam
     cli
+    api
 
 .. toctree::
     :maxdepth: 2

@@ -25,6 +25,7 @@ from flask import current_app as app
 from sqlalchemy.ext import declarative
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm.attributes import flag_modified
 from werkzeug.utils import cached_property
 
 from mailu import dkim, utils
@@ -982,3 +983,13 @@ class MailuConfig:
     alias = MailuCollection(Alias)
     relay = MailuCollection(Relay)
     config = MailuCollection(Config)
+
+
+@db.event.listens_for(User, 'before_update')
+def receive_before_update(mapper, connection, target):
+    """ Mark updated_at as modified, but keep the old date when updating the quota_bytes_used
+    """
+    insp = db.inspect(target)
+    quota_bytes_used_changed, _, _ = insp.attrs.quota_bytes_used.history
+    if quota_bytes_used_changed:
+        flag_modified(target, 'updated_at')

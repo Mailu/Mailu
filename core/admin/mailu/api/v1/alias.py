@@ -7,17 +7,16 @@ db = models.db
 
 alias = api.namespace('alias', description='Alias operations')
 
-alias_fields = api.model('Alias', {
-    'email': fields.String(description='the alias email address', example='user@example.com', required=True),
-    'comment': fields.String(description='a comment'),
-    'destination': fields.List(fields.String(description='alias email address', example='user@example.com', required=True)),
-    'wildcard': fields.Boolean(description='enable SQL Like wildcard syntax')
-})
-
-alias_fields_update = api.model('AliasUpdate', {
+alias_fields_update = alias.model('AliasUpdate', {
     'comment': fields.String(description='a comment'),
     'destination': fields.List(fields.String(description='alias email address', example='user@example.com')),
     'wildcard': fields.Boolean(description='enable SQL Like wildcard syntax')
+})
+
+alias_fields = alias.inherit('Alias',alias_fields_update, {
+  'email': fields.String(description='the alias email address', example='user@example.com', required=True),
+  'destination': fields.List(fields.String(description='alias email address', example='user@example.com', required=True)),
+
 })
 
 

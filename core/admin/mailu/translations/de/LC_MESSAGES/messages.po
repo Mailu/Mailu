@@ -53,7 +53,7 @@ msgstr "Client Einrichtung"
 
 #: mailu/sso/templates/sidebar_sso.html:16 mailu/ui/templates/sidebar.html:114
 msgid "Website"
-msgstr "mailu.io"
+msgstr "Webseite"
 
 #: mailu/sso/templates/sidebar_sso.html:22 mailu/ui/templates/sidebar.html:120
 msgid "Help"
@@ -309,7 +309,7 @@ msgstr "RSPAMD Statusseite"
 
 #: mailu/ui/templates/client.html:8
 msgid "configure your email client"
-msgstr "iInformationen zur Einrichtung Ihres Email-Clients"
+msgstr "Informationen zur Einrichtung Ihres Email-Clients"
 
 #: mailu/ui/templates/client.html:13
 msgid "Incoming mail"

@@ -79,6 +79,19 @@ function "tag" {
 #-----------------------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------------------
+# Base images
+# -----------------------------------------------------------------------------------------
+target "base" {
+  inherits = ["defaults"]
+  context="core/base"
+}
+
+target "assets" {
+  inherits = ["defaults"]
+  context="core/admin/assets"
+}
+
+# -----------------------------------------------------------------------------------------
 # Documentation and setup images
 # -----------------------------------------------------------------------------------------
 target "docs" {
@@ -103,36 +116,55 @@ target "setup" {
 target "none" {
   inherits = ["defaults"]
   context="core/none"
+  contexts= {
+    base = "target:base"
+  }
   tags = tag("none")
 }
 
 target "admin" {
   inherits = ["defaults"]
   context="core/admin"
+  contexts= {
+    base = "target:base"
+    assets = "target:assets"
+  }
   tags = tag("admin")
 }
 
 target "antispam" {
   inherits = ["defaults"]
   context="core/rspamd"
+  contexts= {
+    base = "target:base"
+  }
   tags = tag("rspamd")
 }
 
 target "front" {
   inherits = ["defaults"]
   context="core/nginx"
+  contexts= {
+    base = "target:base"
+  }
   tags = tag("nginx")
 }
 
 target "imap" {
   inherits = ["defaults"]
   context="core/dovecot"
+  contexts= {
+    base = "target:base"
+  }
   tags = tag("dovecot")
 }
 
 target "smtp" {
   inherits = ["defaults"]
   context="core/postfix"
+  contexts= {
+    base = "target:base"
+  }
   tags = tag("postfix")
 }
 

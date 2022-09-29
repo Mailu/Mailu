@@ -21,7 +21,7 @@ COPY migrations ./migrations
 COPY start.py /start.py
 COPY audit.py /audit.py
 
-COPY --from=assets static ./mailu/static
+COPY --from=assets /work/static ./mailu/static
 
 RUN echo $VERSION >> /version
 

@@ -35,7 +35,7 @@ msgstr "Admin pagina voor"
 
 #: mailu/sso/templates/base_sso.html:19 mailu/ui/templates/base.html:19
 msgid "toggle sidebar"
-msgstr ""
+msgstr "Zijbalk in/uitklappen"
 
 #: mailu/sso/templates/base_sso.html:37 mailu/ui/templates/base.html:37
 msgid "change language"

@@ -32,15 +32,15 @@ msgstr "Anmelden"
 
 #: mailu/sso/templates/base_sso.html:8 mailu/ui/templates/base.html:8
 msgid "Admin page for"
-msgstr ""
+msgstr "Administration für"
 
 #: mailu/sso/templates/base_sso.html:19 mailu/ui/templates/base.html:19
 msgid "toggle sidebar"
-msgstr ""
+msgstr "Seitenleiste ein-/ausklapen"
 
 #: mailu/sso/templates/base_sso.html:37 mailu/ui/templates/base.html:37
 msgid "change language"
-msgstr ""
+msgstr "Sprachauswahl"
 
 #: mailu/sso/templates/sidebar_sso.html:4 mailu/ui/templates/sidebar.html:94
 msgid "Go to"
@@ -53,7 +53,7 @@ msgstr "Client Einrichtung"
 
 #: mailu/sso/templates/sidebar_sso.html:16 mailu/ui/templates/sidebar.html:114
 msgid "Website"
-msgstr "Website"
+msgstr "Webseite"
 
 #: mailu/sso/templates/sidebar_sso.html:22 mailu/ui/templates/sidebar.html:120
 msgid "Help"
@@ -173,7 +173,7 @@ msgstr "Spamfilter aktivieren"
 
 #: mailu/ui/forms.py:103
 msgid "Enable marking spam mails as read"
-msgstr ""
+msgstr "Spam automatisch als gelesen markieren"
 
 #: mailu/ui/forms.py:104
 msgid "Spam filter tolerance"
@@ -218,7 +218,7 @@ msgstr "Text"
 
 #: mailu/ui/forms.py:122
 msgid "Start of vacation"
-msgstr ""
+msgstr "Beginn der Abwesenheit"
 
 #: mailu/ui/forms.py:123
 msgid "End of vacation"
@@ -305,15 +305,15 @@ msgstr "Antispam"
 
 #: mailu/ui/templates/antispam.html:8
 msgid "RSPAMD status page"
-msgstr ""
+msgstr "RSPAMD Statusseite"
 
 #: mailu/ui/templates/client.html:8
 msgid "configure your email client"
-msgstr ""
+msgstr "Informationen zur Einrichtung Ihres Email-Clients"
 
 #: mailu/ui/templates/client.html:13
 msgid "Incoming mail"
-msgstr ""
+msgstr "E-Mail-Empfang"
 
 #: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:41
 msgid "Mail protocol"
@@ -325,7 +325,7 @@ msgstr "Servername"
 
 #: mailu/ui/templates/client.html:38
 msgid "Outgoing mail"
-msgstr ""
+msgstr "E-Mail-Versand"
 
 #: mailu/ui/templates/confirm.html:4
 msgid "Confirm action"
@@ -348,7 +348,7 @@ msgstr ""
 
 #: mailu/ui/templates/macros.html:129
 msgid "copy to clipboard"
-msgstr ""
+msgstr "In Zwischenablage kopieren"
 
 #: mailu/ui/templates/sidebar.html:15
 msgid "My account"
@@ -531,11 +531,11 @@ msgstr "DNS DMARC Eintrag"
 
 #: mailu/ui/templates/domain/details.html:58
 msgid "DNS TLSA entry"
-msgstr ""
+msgstr "DNS TLSA Eintrag"
 
 #: mailu/ui/templates/domain/details.html:63
 msgid "DNS client auto-configuration entries"
-msgstr ""
+msgstr "DNS Einträge für die automatische Client-Konfiguration"
 
 #: mailu/ui/templates/domain/edit.html:4
 msgid "Edit domain"

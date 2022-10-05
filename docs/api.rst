@@ -8,9 +8,9 @@ can also be configured via the API.
 The Mailu API is disabled by default. It can be enabled and configured via
 the settings:
 
-* `API`
-* `WEB_API`
-* `API_TOKEN`
+* ```API```
+* ``WEB_API``
+* ```API_TOKEN```
 
 For more information see the section :ref:`Advanced configuration <advanced_settings>`
 in the configuration reference.
@@ -27,3 +27,5 @@ In-built SwaggerUI
 ------------------
 The Mailu API comes with an in-built SwaggerUI. It is a web client that allows
 anyone to visualize and interact with the Mailu API.
+
+It is accessible via the URL: https://myserver/api/v1/swaggerui

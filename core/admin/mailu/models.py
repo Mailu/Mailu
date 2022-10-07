@@ -155,6 +155,10 @@ class Base(db.Model):
             self.__hashed = id(self) if primary is None else hash(primary)
         return self.__hashed
 
+    def flag_updated_at_as_modified(self):
+        """ Mark updated_at as modified, but keep the old date when updating the model"""
+        flag_modified(self, 'updated_at')
+
 
 # Many-to-many association table for domain managers
 managers = db.Table('manager', Base.metadata,
@@ -983,13 +987,3 @@ class MailuConfig:
     alias = MailuCollection(Alias)
     relay = MailuCollection(Relay)
     config = MailuCollection(Config)
-
-
-@db.event.listens_for(User, 'before_update')
-def receive_before_update(mapper, connection, target):
-    """ Mark updated_at as modified, but keep the old date when updating the quota_bytes_used
-    """
-    insp = db.inspect(target)
-    quota_bytes_used_changed, _, _ = insp.attrs.quota_bytes_used.history
-    if quota_bytes_used_changed:
-        flag_modified(target, 'updated_at')

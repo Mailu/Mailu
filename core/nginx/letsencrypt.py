@@ -13,6 +13,7 @@ command = [
     "--cert-name", "mailu",
     "--preferred-challenges", "http", "--http-01-port", "8008",
     "--keep-until-expiring",
+    "--allow-subset-of-names",
     "--renew-with-new-domains",
     "--config-dir", "/certs/letsencrypt",
     "--post-hook", "/config.py"
@@ -26,6 +27,7 @@ command2 = [
     "--cert-name", "mailu-ecdsa",
     "--preferred-challenges", "http", "--http-01-port", "8008",
     "--keep-until-expiring",
+    "--allow-subset-of-names",
     "--key-type", "ecdsa",
     "--renew-with-new-domains",
     "--config-dir", "/certs/letsencrypt",

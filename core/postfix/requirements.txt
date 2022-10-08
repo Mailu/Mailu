@@ -1,0 +1,3 @@
+podop==0.2.5
+postfix-mta-sts-resolver==1.1.4
+socrate==0.2.0

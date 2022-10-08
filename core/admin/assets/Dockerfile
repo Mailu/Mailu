@@ -4,7 +4,7 @@ FROM node:16-alpine3.16
 
 WORKDIR /work
 
-COPY content /work
+COPY content/ ./
 
 RUN set -euxo pipefail \
  && npm config set update-notifier false \
@@ -14,4 +14,3 @@ RUN set -euxo pipefail \
       cp node_modules/datatables.net-plugins/i18n/${l#*:}.json assets/${l%:*}.json; \
     done \
  && node_modules/.bin/webpack-cli --color
-

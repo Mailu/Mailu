@@ -1,0 +1,2 @@
+socrate==0.2.0
+watchdog==2.1.9

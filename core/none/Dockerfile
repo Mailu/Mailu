@@ -1,12 +1,12 @@
 # syntax=docker/dockerfile-upstream:1.4.3
-# This is an idle image to dynamically replace any component if disabled.
 
+# idle image (to dynamically replace any disabled component)
 FROM base
 
 ARG VERSION=local
 LABEL version=$VERSION
 
-RUN echo $VERSION >> /version
+RUN echo $VERSION >/version
 
 HEALTHCHECK CMD true
 

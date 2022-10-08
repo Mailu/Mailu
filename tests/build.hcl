@@ -83,12 +83,16 @@ function "tag" {
 # -----------------------------------------------------------------------------------------
 target "base" {
   inherits = ["defaults"]
-  context="core/base"
+  context = "core/base/"
+  contexts = {
+    core = "core/"
+    optional = "optional/"
+  }
 }
 
 target "assets" {
   inherits = ["defaults"]
-  context="core/admin/assets"
+  context = "core/admin/assets/"
 }
 
 # -----------------------------------------------------------------------------------------
@@ -96,7 +100,7 @@ target "assets" {
 # -----------------------------------------------------------------------------------------
 target "docs" {
   inherits = ["defaults"]
-  context = "docs"
+  context = "docs/"
   tags = tag("docs")
   args = {
     version = "${MAILU_VERSION}"
@@ -106,7 +110,7 @@ target "docs" {
 
 target "setup" {
   inherits = ["defaults"]
-  context="setup"
+  context = "setup/"
   tags = tag("setup")
 }
 
@@ -115,8 +119,8 @@ target "setup" {
 # -----------------------------------------------------------------------------------------
 target "none" {
   inherits = ["defaults"]
-  context="core/none"
-  contexts= {
+  context = "core/none/"
+  contexts = {
     base = "target:base"
   }
   tags = tag("none")
@@ -124,8 +128,8 @@ target "none" {
 
 target "admin" {
   inherits = ["defaults"]
-  context="core/admin"
-  contexts= {
+  context = "core/admin/"
+  contexts = {
     base = "target:base"
     assets = "target:assets"
   }
@@ -134,8 +138,8 @@ target "admin" {
 
 target "antispam" {
   inherits = ["defaults"]
-  context="core/rspamd"
-  contexts= {
+  context = "core/rspamd/"
+  contexts = {
     base = "target:base"
   }
   tags = tag("rspamd")
@@ -143,8 +147,8 @@ target "antispam" {
 
 target "front" {
   inherits = ["defaults"]
-  context="core/nginx"
-  contexts= {
+  context = "core/nginx/"
+  contexts = {
     base = "target:base"
   }
   tags = tag("nginx")
@@ -152,8 +156,8 @@ target "front" {
 
 target "imap" {
   inherits = ["defaults"]
-  context="core/dovecot"
-  contexts= {
+  context = "core/dovecot/"
+  contexts = {
     base = "target:base"
   }
   tags = tag("dovecot")
@@ -161,8 +165,8 @@ target "imap" {
 
 target "smtp" {
   inherits = ["defaults"]
-  context="core/postfix"
-  contexts= {
+  context = "core/postfix/"
+  contexts = {
     base = "target:base"
   }
   tags = tag("postfix")
@@ -173,13 +177,13 @@ target "smtp" {
 # -----------------------------------------------------------------------------------------
 target "snappymail" {
   inherits = ["defaults"]
-  context="webmails/snappymail"
+  context = "webmails/snappymail/"
   tags = tag("snappymail")
 }
 
 target "roundcube" {
   inherits = ["defaults"]
-  context="webmails/roundcube"
+  context = "webmails/roundcube/"
   tags = tag("roundcube")
 }
 
@@ -188,30 +192,42 @@ target "roundcube" {
 # -----------------------------------------------------------------------------------------
 target "antivirus" {
   inherits = ["defaults"]
-  context="optional/clamav"
+  context = "optional/clamav/"
+  contexts = {
+    base = "target:base"
+  }
   tags = tag("clamav")
 }
 
 target "fetchmail" {
   inherits = ["defaults"]
-  context="optional/fetchmail"
+  context = "optional/fetchmail/"
+  contexts = {
+    base = "target:base"
+  }
   tags = tag("fetchmail")
 }
 
 target "resolver" {
   inherits = ["defaults"]
-  context="optional/unbound"
+  context = "optional/unbound/"
+  contexts = {
+    base = "target:base"
+  }
   tags = tag("unbound")
 }
 
 target "traefik-certdumper" {
   inherits = ["defaults"]
-  context="optional/traefik-certdumper"
+  context = "optional/traefik-certdumper/"
   tags = tag("traefik-certdumper")
 }
 
 target "webdav" {
   inherits = ["defaults"]
-  context="optional/radicale"
+  context = "optional/radicale/"
+  contexts = {
+    base = "target:base"
+  }
   tags = tag("radicale")
 }

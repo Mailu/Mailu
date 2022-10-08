@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """
 Certificate watcher which reloads nginx or reconfigures it, depending on what
 happens to externally supplied certificates. Only executed by start.py in case

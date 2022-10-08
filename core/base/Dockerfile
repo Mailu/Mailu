@@ -1,30 +1,57 @@
 # syntax=docker/dockerfile-upstream:1.4.3
 
+# base system image (intermediate)
 ARG DISTRO=alpine:3.14.5
-FROM $DISTRO
+FROM $DISTRO as system
 
 ENV TZ Etc/UTC
 ENV LANG C.UTF-8
 
-# TODO: use intermediate image to build virtual env
-
 RUN set -euxo pipefail \
- && adduser -s /bin/bash -Dh /app -k /var/empty -u 1000 -g mailu app \
- && apk add --no-cache bash ca-certificates tzdata python3 py3-pip py3-wheel \
- && pip3 install --no-cache-dir --upgrade pip
+  ; adduser -s /bin/bash -Dh /app -k /var/empty -u 1000 -g mailu app \
+  ; apk add --no-cache bash ca-certificates python3 tzdata
 
 WORKDIR /app
 
-COPY libs libs/
+CMD /bin/bash
 
-# TODO: work in virtual env (see above)
-# && python3 -m venv . \
+
+# build virtual env (intermediate)
+FROM system as build
+
+ENV VIRTUAL_ENV=/app/venv
+
 RUN set -euxo pipefail \
- && pip3 install --no-cache-dir -r libs/requirements.txt --only-binary=:all: \
- || ( apk add --no-cache --virtual .build-deps gcc musl-dev python3-dev \
-      && pip3 install --no-cache-dir -r libs/requirements.txt \
-      && apk del --no-cache .build-deps )
+  ; apk add --no-cache py3-pip \
+  ; python3 -m venv ${VIRTUAL_ENV} \
+  ; venv/bin/pip install --no-cache-dir --upgrade --no-warn-script-location pip wheel
 
-# TODO: clean image (or use intermediate - see above)
-# && bin/pip uninstall -y pip distribute setuptools wheel \
-# && rm -rf /tmp/* /root/.cache/pip
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
+
+COPY libs/ libs/
+COPY --from=core ./ core/
+COPY --from=optional ./ optional/
+
+RUN set -euxo pipefail \
+  ; grep -hEv '(podop|socrate)==' core/*/requirements.txt optional/*/requirements.txt \
+    | sort -u >libs/requirements.txt \
+\
+  ; venv/bin/pip install --no-cache-dir -r libs/requirements.txt \
+ || ( \
+      apk add --no-cache --virtual .build-deps \
+        build-base cargo gcc libffi-dev libressl-dev mariadb-connector-c-dev \
+        musl-dev postgresql-dev python3-dev \
+       ; venv/bin/pip install --no-cache-dir -r libs/requirements.txt \
+       ; apk del .build-deps \
+  ) \
+\
+  ; venv/bin/pip freeze > venv/requirements.txt
+
+
+# base mailu image
+FROM system
+
+COPY --from=build /app/venv/ /app/venv/
+
+ENV VIRTUAL_ENV=/app/venv
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"

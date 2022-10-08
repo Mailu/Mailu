@@ -1,0 +1,1 @@
+Ensure that Mailu keeps working even if it can't obtain a certificate from letsencrypt for one of the HOSTNAMES

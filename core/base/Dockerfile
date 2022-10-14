@@ -22,28 +22,32 @@ CMD /bin/bash
 # build virtual env (intermediate)
 FROM system as build
 
+ARG MAILU_ENV=prod
+
 ENV VIRTUAL_ENV=/app/venv
 
-COPY requirements-*.txt ./
+COPY requirements-build.txt ./
 
 RUN set -euxo pipefail \
   ; apk add --no-cache py3-pip \
   ; python3 -m venv ${VIRTUAL_ENV} \
-  ; ${VIRTUAL_ENV}/bin/pip install --no-cache-dir -r requirements-build.txt
+  ; ${VIRTUAL_ENV}/bin/pip install --no-cache-dir -r requirements-build.txt \
+  ; apk del py3-pip
 
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 
+COPY requirements-${MAILU_ENV}.txt ./
 COPY libs/ libs/
 
 RUN set -euxo pipefail \
-  ; pip install --no-cache-dir -r requirements-prod.txt \
+  ; pip install -r requirements-${MAILU_ENV}.txt \
  || ( \
       apk add --no-cache --virtual .build-deps \
-          build-base cargo gcc libffi-dev libressl-dev mariadb-connector-c-dev \
-          musl-dev postgresql-dev python3-dev \
-    ; pip install --no-cache-dir -r requirements-prod.txt \
+          build-base gcc libffi-dev python3-dev \
+    ; pip install -r requirements-${MAILU_ENV}.txt \
     ; apk del .build-deps \
-  )
+    ) \
+  ; rm -rf /root/.cache /tmp/*.pem
 
 
 # base mailu image

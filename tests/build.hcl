@@ -84,10 +84,6 @@ function "tag" {
 target "base" {
   inherits = ["defaults"]
   context = "core/base/"
-  contexts = {
-    core = "core/"
-    optional = "optional/"
-  }
 }
 
 target "assets" {

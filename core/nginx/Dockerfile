@@ -17,7 +17,7 @@ ARG VERSION
 LABEL version=$VERSION
 
 RUN set -euxo pipefail \
-  ; apk add --no-cache certbot curl nginx nginx-mod-mail openssl
+  ; apk add --no-cache certbot nginx nginx-mod-mail openssl
 
 COPY conf/ /conf/
 COPY --from=static /static/ /static/

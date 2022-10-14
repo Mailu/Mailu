@@ -12,7 +12,7 @@ ARG MAILU_GID=1000
 RUN set -euxo pipefail \
   ; addgroup -Sg ${MAILU_GID} mailu \
   ; adduser -Sg ${MAILU_UID} -G mailu -h /app -g "mailu app" -s /bin/bash mailu \
-  ; apk add --no-cache bash ca-certificates python3 tzdata
+  ; apk add --no-cache bash ca-certificates curl python3 tzdata
 
 WORKDIR /app
 

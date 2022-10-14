@@ -7,7 +7,7 @@ ARG VERSION=local
 LABEL version=$VERSION
 
 RUN set -euxo pipefail \
-  ; apk add --no-cache curl libressl mariadb-connector-c postgresql-libs
+  ; apk add --no-cache libressl mariadb-connector-c postgresql-libs
 
 COPY mailu/ ./mailu/
 RUN set -euxo pipefail \

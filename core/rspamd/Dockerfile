@@ -7,7 +7,7 @@ ARG VERSION=local
 LABEL version=$VERSION
 
 RUN set -euxo pipefail \
-  ; apk add --no-cache curl rspamd rspamd-controller rspamd-fuzzy rspamd-proxy \
+  ; apk add --no-cache rspamd rspamd-controller rspamd-fuzzy rspamd-proxy \
   ; mkdir /run/rspamd
 
 COPY conf/ /conf/

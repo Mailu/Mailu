@@ -6,9 +6,6 @@ FROM base
 ARG VERSION=local
 LABEL version=$VERSION
 
-RUN set -euxo pipefail \
-  ; apk add --no-cache curl
-
 COPY radicale.conf /
 
 RUN echo $VERSION >/version

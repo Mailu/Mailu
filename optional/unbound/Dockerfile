@@ -7,11 +7,10 @@ ARG VERSION=local
 LABEL version=$VERSION
 
 RUN set -euxo pipefail \
-  ; apk add --no-cache bind-tools curl unbound \
+  ; apk add --no-cache bind-tools unbound \
   ; curl -so /etc/unbound/root.hints https://www.internic.net/domain/named.cache \
   ; chown root:unbound /etc/unbound \
   ; chmod 775 /etc/unbound \
-  ; apk del --no-cache curl \
   ; /usr/sbin/unbound-anchor -a /etc/unbound/trusted-key.key || true
 
 COPY unbound.conf /

@@ -9,16 +9,16 @@ LABEL version=$VERSION
 RUN set -euxo pipefail \
   ; apk add --no-cache libressl mariadb-connector-c postgresql-libs
 
-COPY mailu/ ./mailu/
-RUN set -euxo pipefail \
-  ; venv/bin/pybabel compile -d mailu/translations
-
-COPY migrations/ ./migrations/
+COPY --from=assets /work/static/ ./mailu/static/
 
 COPY audit.py /
 COPY start.py /
 
-COPY --from=assets /work/static/ ./mailu/static/
+COPY migrations/ ./migrations/
+
+COPY mailu/ ./mailu/
+RUN set -euxo pipefail \
+  ; venv/bin/pybabel compile -d mailu/translations
 
 RUN echo $VERSION >/version
 
@@ -27,5 +27,5 @@ HEALTHCHECK CMD curl -skfLo /dev/null http://localhost/sso/login?next=ui.index
 
 VOLUME ["/data","/dkim"]
 
-ENV FLASK_APP mailu
+ENV FLASK_APP=mailu
 CMD /start.py

@@ -27,7 +27,6 @@ def start_podop():
         ("mailbox", "url", url + "mailbox/§"),
         ("recipientmap", "url", url + "recipient/map/§"),
         ("sendermap", "url", url + "sender/map/§"),
-        ("senderaccess", "url", url + "sender/access/§"),
         ("senderlogin", "url", url + "sender/login/§"),
         ("senderrate", "url", url + "sender/rate/§")
     ])

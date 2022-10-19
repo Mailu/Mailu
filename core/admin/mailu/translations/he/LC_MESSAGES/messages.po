@@ -658,7 +658,7 @@ msgid "New relay domain"
 msgstr "שם תחום מועבר"
 
 #: mailu/ui/templates/relay/edit.html:4
-msgid "Edit relayd domain"
+msgid "Edit relayed domain"
 msgstr "עריכת שמות תחום מועברים"
 
 #: mailu/ui/templates/relay/list.html:4

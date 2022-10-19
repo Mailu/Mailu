@@ -38,7 +38,7 @@ Although the above situation is less-likely to occur on a stable (local) network
 
 -- @muhlemmer, 17th of January 2019.
 
-## Prequisites
+## Prerequisites
 
 ### Swarm
 
@@ -66,7 +66,7 @@ mzrm9nbdggsfz4sgq6dhs5i6n     flying-dutchman     Ready               Active    
 ```
 
 ### Volume definition
-For data persistance (the Mailu services might be launched/relaunched on any of the swarm nodes), we need to have Mailu data stored in a manner accessible by every manager or worker in the swarm.
+For data persistence (the Mailu services might be launched/relaunched on any of the swarm nodes), we need to have Mailu data stored in a manner accessible by every manager or worker in the swarm.
 
 Hereafter we will assume that "Mailu Data" is available on every node at "$ROOT" (GlusterFS and nfs shares have been successfully used).
 
@@ -290,7 +290,7 @@ core@coreos-01 ~ $ docker service logs -f mailu_fetchmail
 ```
 
 ## Remove the stack
-Run the follwoing command:
+Run the following command:
 ```bash
 core@coreos-01 ~ $ docker stack rm mailu
 ```

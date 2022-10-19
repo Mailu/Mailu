@@ -968,7 +968,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
                                 ) from exc
                     # sort list of new values
                     data[key] = sorted(new_value)
-                    # log backref modification not catched by modify hook
+                    # log backref modification not caught by modify hook
                     if isinstance(self.fields[key], RelatedList):
                         if callback := self.context.get('callback'):
                             before = {str(v) for v in getattr(instance, key)}

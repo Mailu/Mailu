@@ -659,7 +659,7 @@ msgstr "Nowa domena do przekierowania"
 
 #: mailu/ui/templates/relay/edit.html:4
 #, fuzzy
-msgid "Edit relayd domain"
+msgid "Edit relayed domain"
 msgstr "Edycja domeny"
 
 #: mailu/ui/templates/relay/list.html:4

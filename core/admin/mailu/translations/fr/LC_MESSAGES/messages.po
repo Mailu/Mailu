@@ -653,7 +653,7 @@ msgid "New relay domain"
 msgstr "Nouveau domaine relayé"
 
 #: mailu/ui/templates/relay/edit.html:4
-msgid "Edit relayd domain"
+msgid "Edit relayed domain"
 msgstr "Modifier le domaine relayé"
 
 #: mailu/ui/templates/relay/list.html:4

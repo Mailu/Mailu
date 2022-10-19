@@ -29,7 +29,7 @@ $config['managesieve_usetls'] = false;
 
 // We access the IMAP and SMTP servers locally with internal names, SSL
 // will obviously fail but this sounds better than allowing insecure login
-// from the outter world
+// from the outer world
 $ssl_no_check = array(
  'ssl' => array(
      'verify_peer' => false,

@@ -472,7 +472,7 @@ class MailuSessionExtension:
                 redis.StrictRedis().from_url(app.config['SESSION_STORAGE_URL'])
             )
 
-            # clean expired sessions oonce on first use in case lifetime was changed
+            # clean expired sessions once on first use in case lifetime was changed
             def cleaner():
                 with cleaned.get_lock():
                     if not cleaned.value:

@@ -649,7 +649,7 @@ msgid "New relay domain"
 msgstr "Igorritako domeinu berria"
 
 #: mailu/ui/templates/relay/edit.html:4
-msgid "Edit relayd domain"
+msgid "Edit relayed domain"
 msgstr "Editatu igorritako domeinua"
 
 #: mailu/ui/templates/relay/list.html:4

@@ -8,7 +8,7 @@ How does spam filtering work in Mailu?
 
 Mailu uses Rspamd for spam filtering. Rspamd is a Fast, free and open-source spam filtering system.
 
-Rspamd rejects non-compliant email messages and email messages that contain virusses. In Mailu Rspamd uses a scoring scale from 0 to 15. The following values are the default values, and can be changed inside the Rspamd WebUI under the tab configuration:
+Rspamd rejects non-compliant email messages and email messages that contain viruses. In Mailu Rspamd uses a scoring scale from 0 to 15. The following values are the default values, and can be changed inside the Rspamd WebUI under the tab configuration:
 
 * Email messages with a score of 15 or higher will be rejected.
 

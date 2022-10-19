@@ -652,7 +652,7 @@ msgid "New relay domain"
 msgstr "Új továbbító tartomány"
 
 #: mailu/ui/templates/relay/edit.html:4
-msgid "Edit relayd domain"
+msgid "Edit relayed domain"
 msgstr "Továbbított tartomány szerkesztése"
 
 #: mailu/ui/templates/relay/list.html:4

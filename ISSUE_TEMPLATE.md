@@ -6,7 +6,7 @@ To be able to help you best, we need some more information.
 ## Before you open your issue
 - [ ] Check if no issue or pull-request for this already exists.
 - [ ] Check [documentation](https://mailu.io/master/) and [FAQ](https://mailu.io/master/faq.html). (Tip, use the search function on the documentation page)
-- [ ] You understand `Mailu` is made by volunteers in their **free time** — be conscise, civil and accept that delays can occur.
+- [ ] You understand `Mailu` is made by volunteers in their **free time** — be concise, civil and accept that delays can occur.
 - [ ] The title of the issue should be short and simple. It should contain specific terms related to the actual issue. Be specific while writing the title.
 
 ## Environment & Versions

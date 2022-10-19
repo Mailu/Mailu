@@ -99,13 +99,13 @@ A short summary of the new features:
 - Domain details page is enhanced with DNS client auto-configuration (RFC6186) entries.
 - Centralize the authentication of webmails behind the admin interface.
 
-   - The new single sign on page opens up the possiblity to introduce 2 factor authentication in the future.
+   - The new single sign on page opens up the possibility to introduce 2 factor authentication in the future.
 
 - Add sending quotas per user (configured in mailu.env). This determines how many emails each user can send every day.
 - Allow specific users to send emails from any address using the WILDCARD_SENDERS setting (mailu.env.).
 - Use semantic versioning for building releases.
-- Internal improviments to improve performance of authentication requests.
-- Introduded a language selector for the Admin interface.
+- Internal improvements to improve performance of authentication requests.
+- Introduced a language selector for the Admin interface.
 - Add cli commands config-import and config-export for importing/exporting Mailu config via YAML.
 - Enable support of all hash types passlib supports.
 - Switch to bcrypt_sha256 (stronger hashing of passwords in Mailu database)/
@@ -274,7 +274,7 @@ Other changes include software updates with some new features in Rainloop
 Back-end
 ````````
 
-One of the big tasks was upgradig to latest Alpine (3.10), which is now finished.
+One of the big tasks was upgrading to latest Alpine (3.10), which is now finished.
 Also, a lot was improved about the environment variables meant to provide
 specific hosts in custom setups.
 
@@ -434,7 +434,7 @@ and bug fixes.
 
 **If you are upgrading**, please go through the setup guide and download the
 latest ``docker-compose.yml`` and ``.env``, then update them with your
-sepcific settings, because more than 50% of these templates was rewritten.
+specific settings, because more than 50% of these templates was rewritten.
 You should then be able to pull and start your new e-mail stack with
 no issue, simply remove orphaned container, since some were renamed and others
 were removed (e.g. rmilter):
@@ -522,7 +522,7 @@ When creating an alias, one may now enable the "SQL LIKE" syntax then use
 standard SQL wildcards ``%`` and ``_`` to specify matches for a given alias.
 For instance :
 
-- ``%@domain.tld`` will match any uncatched email sent to that domain (catch-all)
+- ``%@domain.tld`` will match any uncaught email sent to that domain (catch-all)
 - ``support-%@domain.tld`` will match any email sent to an address starting with
   ``support-``
 - ``_@domain.tld`` will match any email sent to a one-character address

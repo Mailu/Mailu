@@ -439,7 +439,7 @@ jobs:
           echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
           echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
-       - name: Configure /cache for image docs
+      - name: Configure /cache for image docs
         uses: actions/cache@v3
         with:
           path: ${{ runner.temp }}/cache/docs

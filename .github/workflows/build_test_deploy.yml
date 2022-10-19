@@ -111,9 +111,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ runner.temp }}/cache/base
-          key: mailu-base-${{ inputs.architecture }}-hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt')-${{ github.run_id }}
+          key: mailu-base-${{ inputs.architecture }}-${{ hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }}-${{ github.run_id }}
           restore-keys: |
-            mailu-base-${{ inputs.architecture }}-hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt')
+            mailu-base-${{ inputs.architecture }}-${{hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
@@ -169,9 +169,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ runner.temp }}/cache/base
-          key: mailu-base-${{ inputs.architecture }}-hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt')-${{ github.run_id }}
+          key: mailu-base-${{ inputs.architecture }}-${{ hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }}-${{ github.run_id }}
           restore-keys: |
-            mailu-base-${{ inputs.architecture }}-hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt')
+            mailu-base-${{ inputs.architecture }}-${{ hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }}
       - name: Configure actions/cache@v3 action for storing build cache in the ${{ runner.temp }}/cache folder
         uses: actions/cache@v3
         with:
@@ -235,9 +235,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ runner.temp }}/cache/base
-          key: mailu-base-${{ inputs.architecture }}-hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt')-${{ github.run_id }}
+          key: mailu-base-${{ inputs.architecture }}-${{ hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }}-${{ github.run_id }}
           restore-keys: |
-            mailu-base-${{ inputs.architecture }}-hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt')
+            mailu-base-${{ inputs.architecture }}-${{ hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }}
       - name: Configure actions/cache@v3 action for storing build cache in the ${{ runner.temp }}/cache folder
         uses: actions/cache@v3
         with:

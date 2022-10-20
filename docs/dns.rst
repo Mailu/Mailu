@@ -52,7 +52,7 @@ Note that both point to the same mail server hostname, which is unique to your s
 Reverse DNS entries
 -------------------
 
-For a mail system, it's higly recommended to set up reverse DNS as well. That means, if your hostname
+For a mail system, it's highly recommended to set up reverse DNS as well. That means, if your hostname
 ``mail.mydomain.com`` resolves to ``a.b.c.d``, the IP ``a.b.c.d`` should also resolve back to the same hostname.
 
 You can verify this with
@@ -71,7 +71,7 @@ DKIM/SPF & DMARC Entries
 
 Finally, you'll need to visit the admin dashboard (or use the cli) to regenerate your DMARC, SPF, and DKIM records.
 
-Once the DNS changes to your host have propogated (and if SSL / domain rules were setup correctly), visit your admin
+Once the DNS changes to your host have propagated (and if SSL / domain rules were setup correctly), visit your admin
 dashboard at https://example.com/admin/domain/details/example.com. Click on `regenerate keys` and add the required
 records to your DNS provider. If you've enabled DKIM/SPF / DMARC and haven't added these entries, your mail might
 not get delivered.

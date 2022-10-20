@@ -83,7 +83,7 @@ try:
 except subprocess.CalledProcessError as exc:
     err = exc.stdout.decode()
     if "already exists" in err:
-        print("Already initialzed")
+        print("Already initialized")
     else:
         print(err)
         exit(3)

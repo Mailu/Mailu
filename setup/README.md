@@ -2,8 +2,8 @@
 (Everything will go under setup/ directory - using Kubernetes flavor as example)
 
 Until this point, the app is working as it follows:
-- when accesing the setup page it will display the flavors selection step (`templates/steps/flavor.html`)
-- after you choose your desired flavor it will iterare over the files in the flavor directory and building the page
+- when accessing the setup page it will display the flavors selection step (`templates/steps/flavor.html`)
+- after you choose your desired flavor it will iterate over the files in the flavor directory and building the page
   (`templates/steps/config.html is general for all flavors`)
 - when you complete all required fields and press "Setup Mailu" button it will redirect you to the setup page (`flavors/choosen-flavor/setup.html`)
 
@@ -29,7 +29,7 @@ In the example below the string entered in the input field is stored in the vari
 <input type="text" name="var_test">
 ```
 
-In order to use the variable furter you use it like `{{ var_test }}`
+In order to use the variable further you use it like `{{ var_test }}`
 
 In the setup page (`flavors/kubernetes/setup.html`) you can add steps by importing macros
 

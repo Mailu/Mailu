@@ -92,7 +92,7 @@ about setting up a proper Docker install. Default configuration should be
 suited for Mailu.
 
 Additionally, you must install ``docker-compose`` by following the instructions
-from the `Docker website`_ if you plan on using the CompComposesoe flavor. Compose is a
+from the `Docker website`_ if you plan on using the Compose flavor. Compose is a
 management tool for Docker, especially suited for multiple containers systems
 like Mailu.
 

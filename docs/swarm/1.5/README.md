@@ -1,6 +1,6 @@
 # Install Mailu on a docker swarm
 
-## Prequisites
+## Prerequisites
 
 ### Swarm
 
@@ -28,7 +28,7 @@ mzrm9nbdggsfz4sgq6dhs5i6n     flying-dutchman     Ready               Active    
 ```
 
 ### Volume definition
-For data persistance (the Mailu services might be launched/relaunched on any of the swarm nodes), we need to have Mailu data stored in a manner accessible by every manager or worker in the swarm.
+For data persistence (the Mailu services might be launched/relaunched on any of the swarm nodes), we need to have Mailu data stored in a manner accessible by every manager or worker in the swarm.
 Hereafter we will use a NFS share:
 ```bash
 core@coreos-01 ~ $ showmount -e 192.168.0.30
@@ -358,7 +358,7 @@ tbu8ppgsdffj        mailu_fetchmail.1   mailu/fetchmail:1.5   coreos-01         
 ```
 
 ### Remove the stack
-Run the follwoing command:
+Run the following command:
 ```bash
 core@coreos-01 ~ $ docker stack rm mailu
 ```

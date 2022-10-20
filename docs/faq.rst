@@ -71,11 +71,11 @@ We thank you for your understanding and patience.
 I would like to donate (for a feature)
 ``````````````````````````````````````
 
-We maintain a `Communtity Bridge`_ project through which you can donate.
+We maintain a `Community Bridge`_ project through which you can donate.
 This budget will be used to pay for development of features, mentorship and hopefully future events.
 Contributing companies or individuals can be paid from this budget to support their development efforts.
 
-We are also looking into GitHub's integrated sponorship program for individual contributors.
+We are also looking into GitHub's integrated sponsorship program for individual contributors.
 Once those become available, we will add them to the project.
 
 Please click the |sponsor| button on top of our GitHub Page for current possibilities.
@@ -92,7 +92,7 @@ Please click the |sponsor| button on top of our GitHub Page for current possibil
 .. _`Enhancement issues`: https://github.com/Mailu/Mailu/issues?q=is%3Aissue+is%3Aopen+label%3Atype%2Fenhancement
 .. _`Feature request issues`: https://github.com/Mailu/Mailu/issues?q=is%3Aopen+is%3Aissue+label%3Atype%2Ffeature
 .. _`GitHub`: https://github.com/Mailu/Mailu
-.. _`Communtity Bridge`: https://funding.communitybridge.org/projects/mailu
+.. _`Community Bridge`: https://funding.communitybridge.org/projects/mailu
 
 Deployment related
 ------------------
@@ -216,7 +216,7 @@ Therefore it is advised to create backups on a regular base!
 
 A backup MX can be configured as **failover**. For this you need a separate server running
 Mailu. On that server, your domains will need to be setup as "Relayed domains", pointing
-to you mainr server. MX records for the mail domains with a higher priority number will have
+to you main server. MX records for the mail domains with a higher priority number will have
 to point to this server. Please be aware that a backup MX can act as a `spam magnet`_ (archive.org).
 
 For **service** HA, please see: `How does Mailu scale up?`_
@@ -296,7 +296,7 @@ I want to integrate Nextcloud 15 (and newer) with Mailu
   
 
 If a domain name (e.g. example.com) is specified, then this makes sure that only users from this domain will be allowed to login.
-After successfull login the domain part will be stripped and the rest used as username in Nextcloud. e.g. 'username@example.com' will be 'username' in Nextcloud. Disable this behaviour by changing true (the fifth parameter) to false. 
+After successfull login the domain part will be stripped and the rest used as username in Nextcloud. e.g. 'username@example.com' will be 'username' in Nextcloud. Disable this behaviour by changing true (the fifth parameter) to false.
 
 *Issue reference:* `575`_.
 
@@ -798,7 +798,7 @@ Very often, SPF failure is related to Mailu sending emails with a different IP a
 
 This is mostly due to using a separate IP address for Mailu and still having masquerading NAT setup for Docker, which results in a different outbound IP address. You can simply check the email headers on the receiving side to confirm this.
 
-If you wish to explicitely NAT Mailu outbound traffic, it is usually easy to source-NAT outgoing SMTP traffic using iptables :
+If you wish to explicitly NAT Mailu outbound traffic, it is usually easy to source-NAT outgoing SMTP traffic using iptables :
 
 ```
 iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 25 -j SNAT --to <your mx ip>

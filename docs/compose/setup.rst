@@ -41,7 +41,7 @@ values:
 .. note::
 
   When using *Letsencrypt!* you have to make sure that the DNS ``A`` and ``AAAA`` records for the
-  all hostnames mentioned in the ``HOSTNAMES`` variable match with the ip adresses of you server.
+  all hostnames mentioned in the ``HOSTNAMES`` variable match with the ip addresses of you server.
   Or else certificate generation will fail! See also: :ref:`dns_setup`.
 
 Bind address

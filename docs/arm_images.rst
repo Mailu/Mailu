@@ -31,7 +31,7 @@ all images from the mailu docker repository.
 
 Build manually
 --------------
-It is possible to build the images manually. There are two possiblities for this.
+It is possible to build the images manually. There are two possibilities for this.
 
 Github actions
 ``````````````

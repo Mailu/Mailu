@@ -660,7 +660,7 @@ msgid "New relay domain"
 msgstr "Nou domini llegat (relayed)"
 
 #: mailu/ui/templates/relay/edit.html:4
-msgid "Edit relayd domain"
+msgid "Edit relayed domain"
 msgstr "Editeu domini llegat (relayed)"
 
 #: mailu/ui/templates/relay/list.html:4

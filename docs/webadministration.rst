@@ -327,7 +327,7 @@ This page also shows an overview of the following settings of an user:
 
 * Sending Quota. The sending quota is the limit of messages a single user can send per day. 
 
-* Comment. A desription for the user. 
+* Comment. A description for the user.
 
 * Created. Date when the user was created.
 

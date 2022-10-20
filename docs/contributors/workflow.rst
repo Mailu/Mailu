@@ -75,7 +75,7 @@ Supported file extensions are:
 Forked projects
 ---------------
 
-If you find yourself forking the project for a specific independant purpose
+If you find yourself forking the project for a specific independent purpose
 (commercial use, different philosophy or incompatible point of view), we would
 be glad if you let us know so that we can list interesting known forks and
 their specific features (and backport some of them if your implementation

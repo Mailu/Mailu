@@ -649,7 +649,7 @@ msgid "New relay domain"
 msgstr "リレードメイン名を追加"
 
 #: mailu/ui/templates/relay/edit.html:4
-msgid "Edit relayd domain"
+msgid "Edit relayed domain"
 msgstr "リレードメイン名を編集"
 
 #: mailu/ui/templates/relay/list.html:4

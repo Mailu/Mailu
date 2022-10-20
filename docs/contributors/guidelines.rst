@@ -25,7 +25,7 @@ What features should be included
 
 Mailu is a mail server. That said, mail works in an ecosystem and we should set
 clear boundaries on what Mailu is and what it is not. Beyond mail, we include
-features that mail is dependent on in some way, not the other way aroud.
+features that mail is dependent on in some way, not the other way around.
 
 For instance, we include contact management and a dav service for synchronizing
 contacts, because sending mail is made easier with manageable contacts. We do
@@ -97,7 +97,7 @@ lifecycle management.
 
 Anything that is not static, i.e. able to change at runtime, either due to
 configuration in the admin UI or user behavior, should take advantage of the
-admin API. The `podop` package binds mail specific sofware (Postfix and Dovecot
+admin API. The `podop` package binds mail specific software (Postfix and Dovecot
 at the moment) to the admin API, other containers should use specific API calls.
 
 What traffic should go through the nginx container
@@ -155,7 +155,7 @@ Should we use default configuration
 Some tools ship with default configuration, that handles the standard behavior.
 Using this configuration is prone to later changes and unexpected side effects.
 We should always provide all required configuration, including the base files,
-and not rely on default configuration files froms the distribution.
+and not rely on default configuration files from the distribution.
 
 For that reason, in case the tool looks for specific files and include them
 automatically, we should overwrite them or delete them.

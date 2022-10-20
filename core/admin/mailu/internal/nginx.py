@@ -142,7 +142,7 @@ def get_server(protocol, authenticated=False):
         else:
             hostname, port = extract_host_port(app.config['SMTP_ADDRESS'], 25)
     try:
-        # test if hostname is already resolved to an ip adddress
+        # test if hostname is already resolved to an ip address
         ipaddress.ip_address(hostname)
     except:
         # hostname is not an ip address - so we need to resolve it

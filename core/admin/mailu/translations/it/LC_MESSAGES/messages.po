@@ -655,7 +655,7 @@ msgid "New relay domain"
 msgstr "Nuovo dominio affidato"
 
 #: mailu/ui/templates/relay/edit.html:4
-msgid "Edit relayd domain"
+msgid "Edit relayed domain"
 msgstr "Editare dominio affidato"
 
 #: mailu/ui/templates/relay/list.html:4

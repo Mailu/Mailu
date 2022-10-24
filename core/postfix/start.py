@@ -91,6 +91,10 @@ if "RELAYUSER" in os.environ:
 
 # Configure and start local rsyslog server
 conf.jinja("/conf/rsyslog.conf", os.environ, "/etc/rsyslog.conf")
+try:
+    os.unlink("/var/run/rsyslogd.pid")
+except FileNotFoundError:
+    pass
 os.system("/usr/sbin/rsyslogd -niNONE &")
 # Configure logrotate and start crond
 if os.environ["POSTFIX_LOG_FILE"] != "":

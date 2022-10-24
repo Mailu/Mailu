@@ -28,5 +28,4 @@ def rspamd_dkim_key(domain_name):
 
 @internal.route("/rspamd/local_domains", methods=['GET'])
 def rspamd_local_domains():
-    domains = set(models.Domain.query.all() + models.Alternative.query.all())
-    return '\n'.join(map(str,domains))
+    return '\n'.join(domain[0] for domain in models.Domain.query.with_entities(models.Domain.name).all() + models.Alternative.query.with_entities(models.Alternative.name).all())

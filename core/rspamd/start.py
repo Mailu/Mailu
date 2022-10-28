@@ -30,7 +30,7 @@ while True:
             break
     except:
         pass
-    print("Admin is not up just yet, retrying in 1 second")
+    log.warning("Admin is not up just yet, retrying in 1 second")
 
 # Run rspamd
 os.execv("/usr/sbin/rspamd", ["rspamd", "-i", "-f"])

@@ -32,7 +32,7 @@ RUN set -euxo pipefail \
   ; apk add --no-cache py3-pip \
   ; python3 -m venv ${VIRTUAL_ENV} \
   ; ${VIRTUAL_ENV}/bin/pip install --no-cache-dir -r requirements-build.txt \
-  ; apk del py3-pip
+  ; apk del -r py3-pip
 
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 
@@ -40,13 +40,12 @@ COPY requirements-${MAILU_ENV}.txt ./
 COPY libs/ libs/
 
 RUN set -euxo pipefail \
+  ; machine="$(uname -m)"; deps="" \
+  ; [[ "${machine}" == arm* || "${machine}" == aarch64 ]] && deps="${deps} build-base gcc libffi-dev python3-dev" \
+  ; [[ "${machine}" == armv7* ]] && deps="${deps} cargo libressl-dev mariadb-connector-c-dev postgresql-dev" \
+  ; [[ "${deps}" ]] && apk add --virtual .build-deps ${deps} \
   ; pip install -r requirements-${MAILU_ENV}.txt \
- || ( \
-      apk add --no-cache --virtual .build-deps \
-          build-base gcc libffi-dev python3-dev \
-    ; pip install -r requirements-${MAILU_ENV}.txt \
-    ; apk del .build-deps \
-    ) \
+  ; apk -e info -q .build-deps && apk del -r .build-deps \
   ; rm -rf /root/.cache /tmp/*.pem
 
 

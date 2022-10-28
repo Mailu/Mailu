@@ -155,7 +155,7 @@ class Base(db.Model):
             self.__hashed = id(self) if primary is None else hash(primary)
         return self.__hashed
 
-    def flag_updated_at_as_modified(self):
+    def dont_change_updated_at(self):
         """ Mark updated_at as modified, but keep the old date when updating the model"""
         flag_modified(self, 'updated_at')
 

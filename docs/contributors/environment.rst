@@ -312,35 +312,6 @@ The following must be done on every PR or after every new commit to an existing 
 If git opens a editor for a commit message just save and exit as-is. If you have a merge conflict,
 see above and do the complete procedure from ``git fetch`` onward again.
 
-Web administration
-------------------
-
-The administration Web interface requires a proper dev environment that can easily be setup using
-``virtualenv`` (make sure you are using Python 3) :
-
-.. code-block:: bash
-
-  cd core/admin
-  virtualenv .
-  source bin/activate
-  pip install -r requirements.txt
-
-You can then export the path to the development database (use four slashes for absolute path):
-
-.. code-block:: bash
-
-  export SQLALCHEMY_DATABASE_URI=sqlite:///path/to/dev.db
-
-And finally run the server with debug enabled:
-
-.. code-block:: bash
-
-  python run.py
-
-Any change to the files will automatically restart the Web server and reload the files.
-
-When using the development environment, a debugging toolbar is displayed on the right side
-of the screen, that you can open to access query details, internal variables, etc.
 
 Documentation
 -------------

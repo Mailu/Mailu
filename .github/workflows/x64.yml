@@ -82,7 +82,7 @@ jobs:
           echo "PINNED_MAILU_VERSION=staging" >> $GITHUB_ENV
           echo "DEPLOY=false" >> $GITHUB_ENV
           echo "RELEASE=false" >> $GITHUB_ENV
-      - name: Derive PINNED_MAILU_VERSION for staging for master
+      - name: Derive PINNED_MAILU_VERSION for master
         if: env.BRANCH == 'master'
         shell: bash
         env:

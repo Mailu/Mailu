@@ -1,19 +1,24 @@
+aiodns==3.0.0
+aiohttp==3.8.3
+aiosignal==1.2.0
 alembic==1.7.4
 appdirs==1.4.4
+async-timeout==4.0.2
+attrs==22.1.0
 Babel==2.9.1
 bcrypt==3.2.0
 blinker==1.4
 CacheControl==0.12.9
 certifi==2021.10.8
-# cffi==1.15.0
+cffi==1.15.1
 chardet==4.0.0
+charset-normalizer==2.0.12
 click==8.0.3
 colorama==0.4.4
 contextlib2==21.6.0
 cryptography==35.0.0
 decorator==5.1.0
-# distlib==0.3.1
-# distro==1.5.0
+defusedxml==0.7.1
 dnspython==2.1.0
 dominate==2.6.0
 email-validator==1.1.3
@@ -28,6 +33,7 @@ Flask-Migrate==3.1.0
 Flask-Script==2.0.6
 Flask-SQLAlchemy==2.5.1
 Flask-WTF==0.15.1
+frozenlist==1.3.1
 greenlet==1.1.2
 gunicorn==20.1.0
 html5lib==1.1
@@ -38,31 +44,34 @@ itsdangerous==2.0.1
 Jinja2==3.0.2
 limits==1.5.1
 lockfile==0.12.2
-Mako==1.1.5
+Mako==1.2.3
 MarkupSafe==2.0.1
 marshmallow==3.14.0
 marshmallow-sqlalchemy==0.26.1
 msgpack==1.0.2
-# mysqlclient==2.0.3
+multidict==6.0.2
 mysql-connector-python==8.0.25
 ordered-set==4.0.2
-# packaging==20.9
 passlib==1.7.4
-# pep517==0.10.0
+podop @ file:///app/libs/podop
+postfix-mta-sts-resolver==1.0.1
 progress==1.6
-#psycopg2==2.9.1
+protobuf==4.21.7
 psycopg2-binary==2.9.3
+pycares==4.2.2
 pycparser==2.20
 Pygments==2.10.0
 pyOpenSSL==21.0.0
 pyparsing==3.0.4
+python-dateutil==2.8.2
 pytz==2021.3
 PyYAML==6.0
+Radicale==3.1.8
 redis==3.5.3
 requests==2.26.0
 retrying==1.3.3
-# six==1.15.0
-socrate==0.2.0
+six==1.16.0
+socrate @ file:///app/libs/socrate
 SQLAlchemy==1.4.26
 srslib==0.1.4
 tabulate==0.8.9
@@ -71,8 +80,11 @@ toml==0.10.2
 urllib3==1.26.7
 validators==0.18.2
 visitor==0.1.3
+vobject==0.9.6.1
+watchdog==2.1.9
 webencodings==0.5.1
 Werkzeug==2.0.2
 WTForms==2.3.3
 WTForms-Components==0.10.5
 xmltodict==0.12.0
+yarl==1.8.1

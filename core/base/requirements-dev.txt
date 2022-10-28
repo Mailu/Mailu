@@ -1,0 +1,53 @@
+# core/base
+libs/podop
+libs/socrate
+
+# core/admin
+alembic
+Babel
+click
+dnspython
+Flask
+Flask-Babel
+Flask-Bootstrap
+Flask-DebugToolbar
+Flask-Login
+flask-marshmallow
+Flask-Migrate
+Flask-SQLAlchemy
+Flask-WTF
+gunicorn
+idna
+itsdangerous
+limits
+marshmallow
+marshmallow-sqlalchemy
+mysql-connector-python
+passlib
+psycopg2-binary
+Pygments
+pyOpenSSL
+PyYAML
+redis
+SQLAlchemy
+srslib
+tabulate
+tenacity
+validators
+Werkzeug
+WTForms
+WTForms-Components
+xmltodict
+
+# core/nginx
+watchdog
+
+# core/postfix
+postfix-mta-sts-resolver
+
+# optional/fetchmail
+requests
+
+# optional/radicale
+radicale
+

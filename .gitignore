@@ -1,5 +1,5 @@
-*.pyc
-*.mo
+**/*.pyc
+**/*.mo
 __pycache__
 pip-selfcheck.json
 /core/admin/lib*

@@ -61,7 +61,7 @@ jobs:
           echo "RELEASE=true" >> $GITHUB_ENV
           echo "DEPLOY=true" >> $GITHUB_ENV
           echo "RELEASE=true" >> $GITHUB_ENV
-      - name: Derive PINNED_MAILU_VERSION for staging for master
+      - name: Derive PINNED_MAILU_VERSION for master
         if: env.BRANCH == 'master'
         shell: bash
         env:

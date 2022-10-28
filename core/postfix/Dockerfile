@@ -1,40 +1,22 @@
-ARG DISTRO=alpine:3.14.5
+# syntax=docker/dockerfile-upstream:1.4.3
 
-FROM $DISTRO
-ARG VERSION
+# postfix image
+FROM base
 
-ENV TZ Etc/UTC
-
+ARG VERSION=local
 LABEL version=$VERSION
 
-# python3 shared with most images
-RUN apk add --no-cache \
-    python3 py3-pip git bash py3-multidict py3-yarl tzdata \
-  && pip3 install --upgrade pip
+RUN set -euxo pipefail \
+  ; apk add --no-cache cyrus-sasl-login logrotate postfix postfix-pcre rsyslog
 
-# Shared layer between nginx, dovecot, postfix, postgresql, rspamd, unbound, snappymail, roundcube
-RUN pip3 install socrate==0.2.0
+COPY conf/ /conf/
+COPY start.py /
 
-# Shared layer between dovecot and postfix
-RUN apk add --no-cache --virtual .build-deps gcc musl-dev python3-dev \
-  && pip3 install "podop>0.2.5" \
-  && apk del .build-deps
-
-# Image specific layers under this line
-# Building pycares from source requires py3-wheel and libffi-dev packages
-RUN pip install --no-cache-dir --only-binary=:all: postfix-mta-sts-resolver==1.0.1 || (apk add --no-cache --virtual .build-deps gcc musl-dev python3-dev py3-wheel libffi-dev \
-  && pip3 install postfix-mta-sts-resolver==1.0.1 \
-  && apk del .build-deps )
-
-RUN apk add --no-cache postfix postfix-pcre cyrus-sasl-login rsyslog logrotate
-
-COPY conf /conf
-COPY start.py /start.py
+RUN echo $VERSION >/version
 
 EXPOSE 25/tcp 10025/tcp
+HEALTHCHECK --start-period=350s CMD echo QUIT|nc localhost 25|grep "220 .* ESMTP Postfix"
+
 VOLUME ["/queue"]
 
 CMD /start.py
-
-HEALTHCHECK --start-period=350s CMD echo QUIT|nc localhost 25|grep "220 .* ESMTP Postfix"
-RUN echo $VERSION >> /version

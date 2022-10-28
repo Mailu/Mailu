@@ -1,6 +1,14 @@
-# This is an idle image to dynamically replace any component if disabled.
+# syntax=docker/dockerfile-upstream:1.4.3
 
-ARG DISTRO=alpine:3.14.5
-FROM $DISTRO
+# idle image (to dynamically replace any disabled component)
+FROM base
 
-CMD sleep 1000000d
+ARG VERSION=local
+LABEL version=$VERSION
+
+RUN echo $VERSION >/version
+
+HEALTHCHECK CMD true
+
+USER app
+CMD ["/bin/bash", "-c", "sleep infinity"]

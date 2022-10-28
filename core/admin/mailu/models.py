@@ -25,6 +25,7 @@ from flask import current_app as app
 from sqlalchemy.ext import declarative
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm.attributes import flag_modified
 from werkzeug.utils import cached_property
 
 from mailu import dkim, utils
@@ -153,6 +154,10 @@ class Base(db.Model):
             primary = getattr(self, self.__table__.primary_key.columns.values()[0].name)
             self.__hashed = id(self) if primary is None else hash(primary)
         return self.__hashed
+
+    def dont_change_updated_at(self):
+        """ Mark updated_at as modified, but keep the old date when updating the model"""
+        flag_modified(self, 'updated_at')
 
 
 # Many-to-many association table for domain managers

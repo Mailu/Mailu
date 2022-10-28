@@ -27,6 +27,7 @@ def fetch_done(fetch_id):
     fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
     fetch.last_check = datetime.datetime.now()
     fetch.error_message = str(flask.request.get_json())
+    fetch.dont_change_updated_at()
     models.db.session.add(fetch)
     models.db.session.commit()
     return ""

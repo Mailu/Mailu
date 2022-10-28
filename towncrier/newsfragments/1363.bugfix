@@ -1,0 +1,1 @@
+Do not update the updated_at field of the User model when quota_bytes_used is updated

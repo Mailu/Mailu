@@ -75,10 +75,10 @@ class DictProtocol(asyncio.Protocol):
         logging.debug("Client {}.{} type {}, user {}, dict {}".format(
             self.major, self.minor, self.value_type, self.user, dict_name))
 
-    async def process_lookup(self, key):
+    async def process_lookup(self, key, user=None):
         """ Process a dict lookup message
         """
-        logging.debug("Looking up {}".format(key))
+        logging.debug("Looking up {} for {}".format(key, user))
         # Priv and shared keys are handled slighlty differently
         key_type, key = key.decode("utf8").split("/", 1)
         try:
@@ -95,7 +95,7 @@ class DictProtocol(asyncio.Protocol):
         except KeyError:
             return self.reply(b"N")
 
-    def process_begin(self, transaction_id):
+    def process_begin(self, transaction_id, user=None):
         """ Process a dict begin message
         """
         self.transactions[transaction_id] = {}

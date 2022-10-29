@@ -85,7 +85,7 @@ class DictProtocol(asyncio.Protocol):
         key_type, key = key.decode("utf8").split("/", 1)
         try:
             result = await self.dict.get(
-                key, ns=((user if user else self.user) if key_type == "priv" else None)
+                key, ns=((user.decode("utf8") if user else self.user) if key_type == "priv" else None)
             )
             if type(result) is str:
                 response = result.encode("utf8")
@@ -101,7 +101,7 @@ class DictProtocol(asyncio.Protocol):
         """ Process a dict begin message
         """
         self.transactions[transaction_id] = {}
-        self.transactions_user[transaction_id] = user if user else self.user
+        self.transactions_user[transaction_id] = user.decode("utf8") if user else self.user
 
     def process_set(self, transaction_id, key, value):
         """ Process a dict set message

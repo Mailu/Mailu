@@ -63,6 +63,8 @@ there is a good way to disable rate limiting altogether.
 The ``TLS_FLAVOR`` sets how Mailu handles TLS connections. Setting this value to
 ``notls`` will cause Mailu not to serve any web content! More on :ref:`tls_flavor`.
 
+The ``DEFAULT_SPAM_THRESHOLD`` (default: 80) is the default spam tolerance used when creating a new user.
+
 Mail settings
 -------------
 
@@ -168,7 +170,7 @@ To have the account created automatically, you just need to define a few environ
 - ``INITIAL_ADMIN_DOMAIN``: the domain appendix: Most probably identical to the ``DOMAIN`` variable.
 - ``INITIAL_ADMIN_PW``: the admin password.
 - ``INITIAL_ADMIN_MODE``: use one of the options below for configuring how the admin account must be created:
-  
+
   - ``create``: (default) creates a new admin account and raises an exception when it already exists.
   - ``ifmissing``: creates a new admin account when the admin account does not exist.
   - ``update``: creates a new admin account when it does not exist, or update the password of an existing admin account.
@@ -186,6 +188,8 @@ An example:
   INITIAL_ADMIN_MODE=ifmissing
 
 Depending on your particular deployment you most probably will want to change the default.
+
+.. _advanced_cfg:
 
 Advanced settings
 -----------------

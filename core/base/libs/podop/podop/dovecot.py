@@ -156,8 +156,8 @@ class DictProtocol(asyncio.Protocol):
         return await self.reply(b"O", transaction_id)
 
     async def reply(self, command, *args):
-        logging.debug("Replying {} with {}".format(command, args))
         async with self.transport_lock:
+            logging.debug("Replying {} with {}".format(command, args))
             self.transport.write(command)
             self.transport.write(b"\t".join(map(tabescape, args)))
             if end:

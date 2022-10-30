@@ -95,7 +95,6 @@ class DictProtocol(asyncio.Protocol):
                 response = result
             else:
                 response = json.dumps(result).encode("ascii")
-            logging.debug("Replying {}".format(key))
             return await (self.reply(b"O", orig_key, response) if is_iter else self.reply(b"O", response))
         except KeyError:
             return await self.reply(b"N")

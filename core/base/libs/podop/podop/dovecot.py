@@ -77,7 +77,7 @@ class DictProtocol(asyncio.Protocol):
         logging.debug("Client {}.{} type {}, user {}, dict {}".format(
             self.major, self.minor, self.value_type, self.user, dict_name))
 
-    async def process_lookup(self, key, user=None):
+    async def process_lookup(self, key, user=None, is_iter=False):
         """ Process a dict lookup message
         """
         logging.debug("Looking up {} for {}".format(key, user))
@@ -93,9 +93,32 @@ class DictProtocol(asyncio.Protocol):
                 response = result
             else:
                 response = json.dumps(result).encode("ascii")
-            return self.reply(b"O", response)
+            logging.debug("Replying {}".format(key))
+            return self.reply(b"O", (key_type+'/'+key).encode("utf8"), response, end=True) if is_iter else self.reply(b"O", response)
         except KeyError:
             return self.reply(b"N")
+
+    async def process_iterate(self, flags, max_rows, path, user=None):
+        """ Process an iterate command
+        """
+        logging.debug("Iterate flags {} max_rows {} on {} for {}".format(flags, max_rows, path, user))
+        # Priv and shared keys are handled slighlty differently
+        key_type, key = path.decode("utf8").split("/", 1)
+        max_rows = int(max_rows.decode("utf-8"))
+        flags = int(flags.decode("utf-8"))
+        if flags != 0: # not implemented
+            return self.reply(b"F")
+        try:
+            result = await self.dict.iter(key)
+            logging.debug("Found {} entries: {}".format(len(result), result))
+            returned_results = 0
+            for k in result:
+                if max_rows == 0 or returned_results < max_rows:
+                    await self.process_lookup((path.decode("utf8")+k).encode("utf8"), user, is_iter=True)
+                    returned_results += 1
+            return self.reply(b"\n") # ITER_FINISHED
+        except KeyError:
+            return self.reply(b"F")
 
     def process_begin(self, transaction_id, user=None):
         """ Process a dict begin message
@@ -126,11 +149,12 @@ class DictProtocol(asyncio.Protocol):
         del self.transactions_user[transaction_id]
         return self.reply(b"O", transaction_id)
 
-    def reply(self, command, *args):
+    def reply(self, command, *args, end=True):
         logging.debug("Replying {} with {}".format(command, args))
         self.transport.write(command)
         self.transport.write(b"\t".join(map(tabescape, args)))
-        self.transport.write(b"\n")
+        if end:
+            self.transport.write(b"\n")
 
     @classmethod
     def factory(cls, table_map):
@@ -141,6 +165,7 @@ class DictProtocol(asyncio.Protocol):
     COMMANDS = {
         ord("H"): process_hello,
         ord("L"): process_lookup,
+        ord("I"): process_iterate,
         ord("B"): process_begin,
         ord("C"): process_commit,
         ord("S"): process_set

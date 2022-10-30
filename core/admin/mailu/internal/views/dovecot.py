@@ -19,6 +19,11 @@ def dovecot_passdb_dict(user_email):
         "allow_nets": ",".join(allow_nets)
     })
 
+@internal.route("/dovecot/userdb/")
+def dovecot_userdb_dict_list():
+    return flask.jsonify([
+        user[0] for user in models.User.query.filter(models.User.enabled.is_(True)).with_entities(models.User.email).all()
+    ])
 
 @internal.route("/dovecot/userdb/<path:user_email>")
 def dovecot_userdb_dict(user_email):

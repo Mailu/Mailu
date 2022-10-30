@@ -118,7 +118,9 @@ class DictProtocol(asyncio.Protocol):
                     break
                 rows.append(self.process_lookup((path.decode("utf8")+k).encode("utf8"), user, is_iter=True))
             await asyncio.gather(*rows)
-            return await self.reply(b"\n") # ITER_FINISHED
+            async with self.transport_lock:
+                self.transport.write(b"\n") # ITER_FINISHED
+            return
         except KeyError:
             return await self.reply(b"F")
         except Exception as e:
@@ -160,8 +162,7 @@ class DictProtocol(asyncio.Protocol):
             logging.debug("Replying {} with {}".format(command, args))
             self.transport.write(command)
             self.transport.write(b"\t".join(map(tabescape, args)))
-            if end:
-                self.transport.write(b"\n")
+            self.transport.write(b"\n")
 
     @classmethod
     def factory(cls, table_map):

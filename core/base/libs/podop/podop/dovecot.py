@@ -82,6 +82,7 @@ class DictProtocol(asyncio.Protocol):
         """ Process a dict lookup message
         """
         logging.debug("Looking up {} for {}".format(key, user))
+        orig_key = key
         # Priv and shared keys are handled slighlty differently
         key_type, key = key.decode("utf8").split("/", 1)
         try:
@@ -95,7 +96,7 @@ class DictProtocol(asyncio.Protocol):
             else:
                 response = json.dumps(result).encode("ascii")
             logging.debug("Replying {}".format(key))
-            return await (self.reply(b"O", (key_type+'/'+key).encode("utf8"), response) if is_iter else self.reply(b"O", response))
+            return await (self.reply(b"O", orig_key, response) if is_iter else self.reply(b"O", response))
         except KeyError:
             return await self.reply(b"N")
 
@@ -113,11 +114,10 @@ class DictProtocol(asyncio.Protocol):
         try:
             result = await self.dict.iter(key)
             logging.debug("Found {} entries: {}".format(len(result), result))
-            returned_results = 0
-            for k in result:
-                if max_rows == 0 or returned_results < max_rows:
-                    rows.append(self.process_lookup((path.decode("utf8")+k).encode("utf8"), user, is_iter=True))
-                    returned_results += 1
+            for i,k in enumerate(result):
+                if max_rows > 0 and max_rows >= i:
+                    break
+                rows.append(self.process_lookup((path.decode("utf8")+k).encode("utf8"), user, is_iter=True))
             await asyncio.gather(*rows)
             return await self.reply(b"\n") # ITER_FINISHED
         except KeyError:

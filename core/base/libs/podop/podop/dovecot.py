@@ -95,7 +95,7 @@ class DictProtocol(asyncio.Protocol):
             else:
                 response = json.dumps(result).encode("ascii")
             logging.debug("Replying {}".format(key))
-            return await (self.reply(b"O", (key_type+'/'+key).encode("utf8"), response, end=True) if is_iter else self.reply(b"O", response))
+            return await (self.reply(b"O", (key_type+'/'+key).encode("utf8"), response) if is_iter else self.reply(b"O", response))
         except KeyError:
             return await self.reply(b"N")
 
@@ -156,7 +156,7 @@ class DictProtocol(asyncio.Protocol):
         del self.transactions_user[transaction_id]
         return await self.reply(b"O", transaction_id)
 
-    async def reply(self, command, *args, end=True):
+    async def reply(self, command, *args):
         logging.debug("Replying {} with {}".format(command, args))
         async with self.transport_lock:
             self.transport.write(command)

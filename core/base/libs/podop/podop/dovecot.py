@@ -123,9 +123,9 @@ class DictProtocol(asyncio.Protocol):
         except KeyError:
             return await self.reply(b"F")
         except Exception as e:
-            logging.error(f"Got {e}, cancelling remaining tasks")
             for task in rows:
                 task.cancel()
+            raise e
 
     def process_begin(self, transaction_id, user=None):
         """ Process a dict begin message

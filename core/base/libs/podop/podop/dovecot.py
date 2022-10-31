@@ -114,7 +114,7 @@ class DictProtocol(asyncio.Protocol):
             result = await self.dict.iter(key)
             logging.debug("Found {} entries: {}".format(len(result), result))
             for i,k in enumerate(result):
-                if max_rows > 0 and max_rows >= i:
+                if max_rows > 0 and i >= max_rows:
                     break
                 rows.append(self.process_lookup((path.decode("utf8")+k).encode("utf8"), user, is_iter=True))
             await asyncio.gather(*rows)

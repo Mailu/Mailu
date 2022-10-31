@@ -28,6 +28,10 @@ def user_create(domain_name):
         form.quota_bytes.validators = [
             wtforms.validators.NumberRange(max=domain.max_quota_bytes)]
     if form.validate_on_submit():
+        if len(form.pw.data) < 8:
+            flask.flash("This password is too short.", "error")
+            return flask.render_template('user/create.html',
+                domain=domain, form=form)
         breaches = int(form.pwned.data)
         if breaches > 0:
             flask.flash(f"This password appears in {breaches} data breaches! Please change it.", "error")
@@ -65,6 +69,10 @@ def user_edit(user_email):
         form.quota_bytes.validators = [
             wtforms.validators.NumberRange(max=max_quota_bytes)]
     if form.validate_on_submit():
+        if len(form.pw.data) < 8:
+            flask.flash("This password is too short.", "error")
+            return flask.render_template('user/edit.html', form=form, user=user,
+                domain=user.domain, max_quota_bytes=max_quota_bytes)
         breaches = int(form.pwned.data)
         if breaches > 0:
             flask.flash(f"This password appears in {breaches} data breaches! Please change it.", "error")
@@ -129,6 +137,9 @@ def user_password(user_email):
         if form.pw.data != form.pw2.data:
             flask.flash('Passwords do not match', 'error')
         else:
+            if len(form.pw.data) < 8:
+                flask.flash("This password is too short.", "error")
+                return flask.render_template('user/password.html', form=form, user=user)
             breaches = int(form.pwned.data)
             if breaches > 0:
                 flask.flash(f"This password appears in {breaches} data breaches! Please change it.", "error")
@@ -184,6 +195,9 @@ def user_signup(domain_name=None):
         if domain.has_email(form.localpart.data) or models.Alias.resolve(form.localpart.data, domain_name):
             flask.flash('Email is already used', 'error')
         else:
+            if len(form.pw.data) < 8:
+                flask.flash("This password is too short.", "error")
+                return flask.render_template('user/signup.html', domain=domain, form=form)
             breaches = int(form.pwned.data)
             if breaches > 0:
                 flask.flash(f"This password appears in {breaches} data breaches! Please change it.", "error")

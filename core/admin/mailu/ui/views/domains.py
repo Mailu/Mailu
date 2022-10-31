@@ -93,6 +93,10 @@ def domain_signup(domain_name=None):
         del form.pw
         del form.pw2
     if form.validate_on_submit():
+        breaches = int(form.pwned.data)
+        if breaches > 0:
+            flask.flash(f"This password appears in {breaches} data breaches! Please change it.", "error")
+            return flask.render_template('domain/signup.html', form=form)
         conflicting_domain = models.Domain.query.get(form.name.data)
         conflicting_alternative = models.Alternative.query.get(form.name.data)
         conflicting_relay = models.Relay.query.get(form.name.data)

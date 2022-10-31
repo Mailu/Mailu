@@ -59,6 +59,7 @@ class DomainSignupForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('Initial admin'), [validators.DataRequired()])
     pw = fields.PasswordField(_('Admin password'), [validators.DataRequired()])
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
+    pwned = fields.HiddenField(label='',default=-1)
     captcha = flask_wtf.RecaptchaField()
     submit = fields.SubmitField(_('Create'))
 
@@ -79,6 +80,7 @@ class UserForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('E-mail'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
     pw = fields.PasswordField(_('Password'))
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
+    pwned = fields.HiddenField(label='',default=-1)
     quota_bytes = fields_.IntegerSliderField(_('Quota'), default=10**9)
     enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)
     enable_pop = fields.BooleanField(_('Allow POP3 access'), default=True)
@@ -92,6 +94,7 @@ class UserSignupForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('Email address'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
+    pwned = fields.HiddenField(label='',default=-1)
     submit = fields.SubmitField(_('Sign up'))
 
 class UserSignupFormCaptcha(UserSignupForm):
@@ -111,6 +114,7 @@ class UserSettingsForm(flask_wtf.FlaskForm):
 class UserPasswordForm(flask_wtf.FlaskForm):
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
     pw2 = fields.PasswordField(_('Password check'), [validators.DataRequired()])
+    pwned = fields.HiddenField(label='',default=-1)
     submit = fields.SubmitField(_('Update password'))
 
 

@@ -27,9 +27,9 @@ def dovecot_userdb_dict_list():
 
 @internal.route("/dovecot/userdb/<path:user_email>")
 def dovecot_userdb_dict(user_email):
-    user = models.User.query.get(user_email) or flask.abort(404)
+    quota = models.User.query.filter(models.User.email==email).with_entities(models.User.quota_bytes).one_or_none() or flask.abort(404)
     return flask.jsonify({
-        "quota_rule": "*:bytes={}".format(user.quota_bytes)
+        "quota_rule": "*:bytes="+quota[0])
     })
 
 

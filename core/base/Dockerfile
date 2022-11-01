@@ -41,8 +41,7 @@ COPY requirements-${MAILU_ENV}.txt ./
 COPY libs/ libs/
 
 RUN set -euxo pipefail \
-  ; machine="$(uname -m)"; deps="" \
-  ; [[ "${machine}" == arm* || "${machine}" == aarch64 || "${machine}" == x86_64 ]] && deps="${deps} build-base gcc libffi-dev python3-dev" \
+  ; machine="$(uname -m)"; deps="build-base gcc libffi-dev python3-dev" \
   ; [[ "${machine}" == armv7* ]] && deps="${deps} cargo git libressl-dev mariadb-connector-c-dev postgresql-dev" \
   ; [[ "${deps}" ]] && apk add --virtual .build-deps ${deps} \
   ; [[ "${machine}" == armv7* ]] && mkdir -p /root/.cargo/registry/index && git clone --bare https://github.com/rust-lang/crates.io-index.git /root/.cargo/registry/index/github.com-1285ae84e5963aae \

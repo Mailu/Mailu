@@ -91,7 +91,7 @@ jobs:
 
 ## This job builds the base image. The base image is used by all other images.
   build-base-image-x64:
-    name: Build base image
+    name: Build base image x64
     if: inputs.architecture == 'linux/amd64'
     needs:
       - targets
@@ -119,6 +119,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.Docker_Login }}
+          password: ${{ secrets.Docker_Password }}
       - name: Helper to convert docker org to lowercase
         id: string
         uses: ASzc/change-string-case-action@v2
@@ -142,7 +147,7 @@ jobs:
 
 ## This job builds the base image. The base image is used by all other images.
   build-base-image-arm:
-    name: Build base image
+    name: Build base image arm
     if: inputs.architecture != 'linux/amd64'
     needs:
       - targets
@@ -170,6 +175,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.Docker_Login }}
+          password: ${{ secrets.Docker_Password }}
       - name: Helper to convert docker org to lowercase
         id: string
         uses: ASzc/change-string-case-action@v2
@@ -227,6 +237,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.Docker_Login }}
+          password: ${{ secrets.Docker_Password }}
       - name: Helper to convert docker org to lowercase
         id: string
         uses: ASzc/change-string-case-action@v2
@@ -285,6 +300,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.Docker_Login }}
+          password: ${{ secrets.Docker_Password }}
       - name: Helper to convert docker org to lowercase
         id: string
         uses: ASzc/change-string-case-action@v2

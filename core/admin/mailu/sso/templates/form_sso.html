@@ -8,5 +8,8 @@
   {{ macros.form_field(form.pw) }}
   {{ macros.form_fields(fields, label=False, class="btn btn-default") }}
 </form>
+{% if openId %}
+  <a href="{{ openIdEndpoint }}" class="btn btn-primary">{{ config["OIDC_BUTTON_NAME"] }}</a>
+{% endif %}
 {%- endcall %}
 {%- endblock %}

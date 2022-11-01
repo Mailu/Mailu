@@ -76,3 +76,4 @@ WTForms==3.0.1
 WTForms-Components==0.10.5
 xmltodict==0.13.0
 yarl==1.8.1
+oic==1.4.0

@@ -27,6 +27,8 @@ def create_app_from_config(config):
     utils.login.user_loader(models.User.get)
     utils.proxy.init_app(app)
     utils.migrate.init_app(app, models.db)
+    if app.config["OIDC_ENABLED"]:
+        utils.oic_client.init_app(app)
 
     app.device_cookie_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('DEVICE_COOKIE_KEY', 'utf-8'), 'sha256').digest()
     app.temp_token_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('WEBMAIL_TEMP_TOKEN_KEY', 'utf-8'), 'sha256').digest()

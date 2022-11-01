@@ -19,8 +19,9 @@ import smtplib
 import idna
 import dns.resolver
 import dns.exception
+import flask_login
 
-from flask import current_app as app
+from flask import current_app as app, session
 from sqlalchemy.ext import declarative
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
@@ -526,13 +527,17 @@ class User(Base, Email):
     spam_threshold = db.Column(db.Integer, nullable=False, default=lambda:int(app.config.get("DEFAULT_SPAM_THRESHOLD", 80)))
 
     # Flask-login attributes
-    is_authenticated = True
     is_active = True
     is_anonymous = False
+    _authenticated = True #Flask attribute would be is_authenticated but we needed to overrride this attribute for OpenID checks
 
     def get_id(self):
         """ return users email address """
         return self.email
+
+    @property
+    def openid_token(self):
+        return session['openid_token']
 
     @property
     def destination(self):
@@ -561,6 +566,24 @@ class User(Base, Email):
             app.config["MESSAGE_RATELIMIT"], "sender", self.email
         )
 
+    @property
+    def is_authenticated(self):
+        if 'openid_token' not in session:
+            return self._authenticated
+        else:
+            token = utils.oic_client.check_validity(self.openid_token)
+            if token is None:
+                flask_login.logout_user()
+                session.destroy()
+                return False
+            session['openid_token'] = token
+            return True
+
+    @is_authenticated.setter
+    def is_authenticated(self, value):
+        if 'openid_token' not in session:
+            self._authenticated = value
+
     @classmethod
     def get_password_context(cls):
         """ create password context for hashing and verification
@@ -588,6 +611,25 @@ class User(Base, Email):
             and updates hash if outdated
         """
         if password == '':
+            return False
+        
+        if utils.oic_client.is_enabled():
+            if 'openid_token' not in session:
+                try:
+                    openid_token = utils.oic_client.get_token(self.email, password)
+                    if openid_token is None:
+                        return self.check_password_legacy(password)
+                    session['openid_token'] = openid_token
+                except: 
+                    return self.check_password_legacy(password)
+                else:
+                    return True
+            return self.is_authenticated()
+        else:
+            return self.check_password_legacy(password)
+
+    def check_password_legacy(self, password):
+        if self.password is None or self.password == "openid":
             return False
         cache_result = self._credential_cache.get(self.get_id())
         current_salt = self.password.split('$')[3] if len(self.password.split('$')) == 5 else None
@@ -630,6 +672,9 @@ in clear-text regardless of the presence of the cache.
         """
         self.password = password if raw else User.get_password_context().hash(password)
 
+    def set_display_name(self, display_name):
+        self.displayed_name = display_name
+
     def get_managed_domains(self):
         """ return list of domains this user can manage """
         if self.global_admin:
@@ -655,6 +700,28 @@ in clear-text regardless of the presence of the cache.
     def get(cls, email):
         """ find user object for email address """
         return cls.query.get(email)
+
+    @classmethod
+    def create(cls, email, password='openid'):
+        email = email.split('@', 1)
+        domain = Domain.query.get(email[1])
+        if not domain:
+            domain = Domain(name=email[1])
+            db.session.add(domain)
+        user = User(
+            localpart=email[0],
+            domain=domain,
+            global_admin=False
+        )
+        
+        if password == 'openid':
+            user.set_password(password, True)
+        else:
+            user.set_password(password)
+        
+        db.session.add(user)
+        db.session.commit()
+        return user
 
     @classmethod
     def login(cls, email, password):

@@ -300,7 +300,7 @@ jobs:
           files: ${{env.HCL_FILE}}
           targets: ${{ matrix.target }}
           load: false
-          push: false
+          push: true
           set: |
             *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache-arm
             *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache-arm,mode=max

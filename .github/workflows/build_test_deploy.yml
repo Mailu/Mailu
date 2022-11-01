@@ -89,9 +89,10 @@ jobs:
         run: |
           echo ${{ steps.targets.outputs.matrix }}
 
-## This job buils the base image. The base image is used by all other images.
-  build-base-image:
+## This job builds the base image. The base image is used by all other images.
+  build-base-image-x64:
     name: Build base image
+    if: inputs.architecture == 'linux/amd64'
     needs:
       - targets
     runs-on: ubuntu-latest
@@ -139,14 +140,64 @@ jobs:
             *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/base:${{ hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }},mode=max
             *.platform=${{ inputs.architecture }}
 
+## This job builds the base image. The base image is used by all other images.
+  build-base-image-arm:
+    name: Build base image
+    if: inputs.architecture != 'linux/amd64'
+    needs:
+      - targets
+    runs-on: self-hosted
+    permissions:
+     contents: read
+     packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Retrieve global variables
+        shell: bash
+        run: |
+          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - uses: crazy-max/ghaction-github-runtime@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Helper to convert docker org to lowercase
+        id: string
+        uses: ASzc/change-string-case-action@v2
+        with:
+          string: ${{ github.repository_owner }}
+      - name: Build all docker images
+        env:
+          DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+        uses: docker/bake-action@v2
+        with:
+          files: ${{env.HCL_FILE}}
+          targets: base
+          load: false
+          push: false
+          set: |
+            *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/base:${{ hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }}-arm
+            *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/base:${{ hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }}-arm,mode=max
+            *.platform=${{ inputs.architecture }}
+
 # This job builds all the images. The build cache is stored in the github actions cache.
 # In further jobs, this cache is used to quickly rebuild the images.
   build:
     name: Build images for linux/amd64
     if: inputs.architecture == 'linux/amd64'
     needs:
-      - targets
-      - build-base-image
+      - build-base-image-x64
     strategy:
       fail-fast: false
       matrix:
@@ -203,8 +254,7 @@ jobs:
     name: Build images for ARM64 & ARM/V7
     if: inputs.architecture != 'linux/amd64'
     needs:
-      - targets
-      - build-base-image
+      - build-base-image-arm
     strategy:
       fail-fast: false
       matrix:
@@ -264,7 +314,6 @@ jobs:
      contents: read
      packages: read
     needs:
-      - targets
       - build
     strategy:
       fail-fast: false
@@ -319,7 +368,6 @@ jobs:
     if: inputs.deploy == 'true'
     runs-on: ubuntu-latest
     needs:
-      - build
       - tests
     strategy:
       fail-fast: false

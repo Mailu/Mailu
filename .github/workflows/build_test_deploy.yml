@@ -197,6 +197,7 @@ jobs:
     name: Build images for linux/amd64
     if: inputs.architecture == 'linux/amd64'
     needs:
+      - targets
       - build-base-image-x64
     strategy:
       fail-fast: false
@@ -254,6 +255,7 @@ jobs:
     name: Build images for ARM64 & ARM/V7
     if: inputs.architecture != 'linux/amd64'
     needs:
+      - targets
       - build-base-image-arm
     strategy:
       fail-fast: false

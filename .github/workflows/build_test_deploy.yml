@@ -253,7 +253,6 @@ jobs:
             *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache-arm
             *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache-arm,mode=max
             *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/base:${{ hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }}-arm
-            *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/base:${{ hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }}-arm,mode=max
             *.platform=${{ inputs.architecture }}
 
 # This job runs all the tests.

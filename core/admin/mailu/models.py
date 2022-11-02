@@ -546,8 +546,8 @@ class User(Base, Email):
         now = date.today()
         return (
             self.reply_enabled and
-            self.reply_startdate < now and
-            self.reply_enddate > now
+            self.reply_startdate <= now and
+            self.reply_enddate >= now
         )
 
     @property

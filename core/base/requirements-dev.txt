@@ -5,6 +5,7 @@ libs/socrate
 # core/admin
 alembic
 Babel
+bcrypt
 click
 dnspython
 Flask

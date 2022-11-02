@@ -123,8 +123,8 @@ class UserReplyForm(flask_wtf.FlaskForm):
     reply_subject = fields.StringField(_('Reply subject'))
     reply_body = fields.StringField(_('Reply body'),
         widget=widgets.TextArea())
-    reply_startdate = fields.html5.DateField(_('Start of vacation'))
-    reply_enddate = fields.html5.DateField(_('End of vacation'))
+    reply_startdate = fields.DateField(_('Start of vacation'))
+    reply_enddate = fields.DateField(_('End of vacation'))
     submit = fields.SubmitField(_('Update'))
 
 

@@ -1,4 +1,4 @@
-from mailu import models
+from mailu import models, utils
 from mailu.ui import ui, forms, access
 from flask import current_app as app
 
@@ -93,12 +93,8 @@ def domain_signup(domain_name=None):
         del form.pw
         del form.pw2
     if form.validate_on_submit():
-        if not flask_login.current_user.is_authenticated and len(form.pw.data) < 8:
-            flask.flash("This password is too short.", "error")
-            return flask.render_template('domain/signup.html', form=form)
-        breaches = int(form.pwned.data)
-        if breaches > 0:
-            flask.flash(f"This password appears in {breaches} data breaches! Please change it.", "error")
+        if msg := utils.isBadOrPwned(form):
+            flask.flash(msg, "error")
             return flask.render_template('domain/signup.html', form=form)
         conflicting_domain = models.Domain.query.get(form.name.data)
         conflicting_alternative = models.Alternative.query.get(form.name.data)

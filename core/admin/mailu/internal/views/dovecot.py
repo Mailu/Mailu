@@ -29,7 +29,7 @@ def dovecot_userdb_dict_list():
 def dovecot_userdb_dict(user_email):
     quota = models.User.query.filter(models.User.email==email).with_entities(models.User.quota_bytes).one_or_none() or flask.abort(404)
     return flask.jsonify({
-        "quota_rule": "*:bytes="+quota[0])
+        "quota_rule": "*:bytes="+quota[0]
     })
 
 

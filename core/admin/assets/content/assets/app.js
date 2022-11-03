@@ -133,7 +133,7 @@ $('document').ready(function() {
         $("#pw").closest("form").submit(function(event){
             if($("#pwned").value > -1) {return;};
             event.preventDefault();
-            hibpCheck($("#pw").value)
+            hibpCheck($("#pw").value);
             event.trigger();
         });
     }

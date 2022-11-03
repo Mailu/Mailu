@@ -5,6 +5,7 @@ from flask import current_app as app
 import flask
 import socket
 import os
+import sqlalchemy.exc
 
 @internal.route("/dovecot/passdb/<path:user_email>")
 def dovecot_passdb_dict(user_email):
@@ -29,7 +30,7 @@ def dovecot_userdb_dict_list():
 def dovecot_userdb_dict(user_email):
     try:
         quota = models.User.query.filter(models.User.email==user_email).with_entities(models.User.quota_bytes).one_or_none() or flask.abort(404)
-    except ValueError:
+    except sqlalchemy.exc.StatementError as exc:
         flask.abort(404)
     return flask.jsonify({
         "quota_rule": f"*:bytes={quota[0]}"

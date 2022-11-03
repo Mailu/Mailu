@@ -34,7 +34,7 @@
         <ul class="navbar-nav ml-auto">
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
-              <i class="fas fa-language text-xl" aria-hidden="true" title="{% trans %}change language{% endtrans %}"></i><span class="sr-only">Language</span>
+              <i class="fas fa-language text-xl" aria-hidden="true" title="{% trans %}change language{% endtrans %}"></i><span class="sr-only">{% trans %}change language{% endtrans %}</span>
               <span class="badge badge-primary navbar-badge">{{ session['language'] }}</span></a>
             <div class="dropdown-menu dropdown-menu-right p-0" id="mailu-languages">
             {%- for locale in config.translations.values() %}

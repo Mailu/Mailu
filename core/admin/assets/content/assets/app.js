@@ -129,7 +129,13 @@ $('document').ready(function() {
         $("#pw").change(function(){
             hibpCheck($("#pw").value);
             return true;
-        })
+        });
+        $("#pw").closest("form").submit(function(event){
+            if($("#pwned").value > -1) {return;};
+            event.preventDefault();
+            hibpCheck($("#pw").value)
+            event.trigger();
+        });
     }
 
 });

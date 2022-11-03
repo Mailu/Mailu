@@ -38,7 +38,7 @@ function hibpCheck(pwd){
             for(index in resp){
                 // Check if the line matches the rest of the hash
                 if(resp[index].substring(0, 35) == hashSub){
-                    var val = resp[index].split(":")[1]
+                    const val = resp[index].split(":")[1]
                     if (val > 0) {
                         $("#pwned").value = val;
 		    }
@@ -126,8 +126,8 @@ $('document').ready(function() {
     }
 
     if (window.isSecureContext) {
-        $("#HIBPpw").change(function(){
-            hibpCheck($("#HIBPpw").value);
+        $("#pw").change(function(){
+            hibpCheck($("#pw").value);
             return true;
         })
     }

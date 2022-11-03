@@ -36,10 +36,14 @@
             <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
               <i class="fas fa-language text-xl" aria-hidden="true" title="{% trans %}change language{% endtrans %}"></i><span class="sr-only">{% trans %}change language{% endtrans %}</span>
 <<<<<<< HEAD
+<<<<<<< HEAD
               <span class="badge badge-primary navbar-badge">{{ get_locale() }}</span></a>
 =======
               <span class="badge badge-primary navbar-badge">{{ session['language'] }}</span></a>
 >>>>>>> 2778641e (Fix screen reader title of language selector)
+=======
+              <span class="badge badge-primary navbar-badge">{{ get_locale() }}</span></a>
+>>>>>>> af6cf5fd (Fix language selector without session)
             <div class="dropdown-menu dropdown-menu-right p-0" id="mailu-languages">
             {%- for locale in config.translations.values() %}
               <a class="dropdown-item{% if locale|string() == session['language'] %} active{% endif %}" href="{{ url_for('.set_language', language=locale) }}">{{ locale.get_language_name().title() }}</a>

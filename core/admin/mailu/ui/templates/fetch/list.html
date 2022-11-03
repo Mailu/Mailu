@@ -35,7 +35,7 @@
     </td>
     <td>{{ fetch.protocol }}{{ 's' if fetch.tls else '' }}://{{ fetch.host }}:{{ fetch.port }}</td>
     <td>{{ fetch.username }}</td>
-    <td>{% if fetch.keep %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
+    <td data-ordered="{{ fetch.keep }}">{% if fetch.keep %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
     <td>{{ fetch.last_check | format_datetime or '-' }}</td>
     <td>{{ fetch.error or '-' }}</td>
     <td data-ordered="{{ fetch.created_at or '0000-00-00' }}">{{ fetch.created_at | format_date }}</td>

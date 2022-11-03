@@ -36,6 +36,12 @@
         </a>
       </li>
     {%- endif %}
+      <li class="nav-item" role="none">
+        <a href="{{ url_for('sso.login') }}" class="nav-link" role="menuitem">
+          <i class="nav-icon fas fa-sign-in-alt"></i>
+          <p>{% trans %}Sign in{% endtrans %}</p>
+        </a>
+      </li>
     {#-
       User self-registration is only available when
        - Admin is available

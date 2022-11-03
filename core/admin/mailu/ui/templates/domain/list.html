@@ -20,6 +20,7 @@
     <th>{% trans %}Mailbox count{% endtrans %}</th>
     <th>{% trans %}Alias count{% endtrans %}</th>
     <th>{% trans %}Comment{% endtrans %}</th>
+    <th>{% trans %}Enable sign-up{% endtrans %}</th>
     <th>{% trans %}Created{% endtrans %}</th>
     <th>{% trans %}Last edit{% endtrans %}</th>
   </tr>
@@ -46,6 +47,7 @@
     <td data-order="{{ domain.users | count }}">{{ domain.users | count }} / {{ '∞' if domain.max_users == -1 else domain.max_users }}</td>
     <td data-order="{{ domain.aliases | count }}">{{ domain.aliases | count }} / {{ '∞' if domain.max_aliases == -1 else domain.max_aliases }}</td>
     <td>{{ domain.comment or '' }}</td>
+    <td data-ordered="{{ domain.signup_enabled }}">{% if domain.signup_enabled %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
     <td data-order="{{ domain.created_at or '0000-00-00' }}">{{ domain.created_at | format_date }}</td>
     <td data-order="{{ domain.updated_at or '0000-00-00' }}">{{ domain.updated_at | format_date }}</td>
   </tr>

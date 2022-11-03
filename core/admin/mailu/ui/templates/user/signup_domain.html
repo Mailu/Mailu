@@ -11,6 +11,9 @@
 {%- block content %}
 {%- call macros.table(order='[[1,"asc"]]') %}
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2a4402cd (Fix datatable for list fo sign-up domains)
 <thead>
   <tr>
     <th>{% trans %}Domain{% endtrans %}</th>
@@ -19,6 +22,7 @@
   </tr>
 </thead>
 <tbody>
+<<<<<<< HEAD
 {%- for domain_name, domain in available_domains.items() %}
 <tr>
   <td><a href="{{ url_for('.user_signup', domain_name=domain_name) }}">{{ domain_name }}</a></td>
@@ -30,6 +34,8 @@
   <th>{% trans %}Available slots{% endtrans %}</th>
   <th>{% trans %}Quota{% endtrans %}</th>
 </tr>
+=======
+>>>>>>> 2a4402cd (Fix datatable for list fo sign-up domains)
 {%- for domain_name, domain in available_domains.items() %}
 <tr>
   <td><a href="{{ url_for('.user_signup', domain_name=domain_name) }}">{{ domain_name }}</a></td>

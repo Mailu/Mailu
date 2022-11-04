@@ -4,7 +4,7 @@ import logo from './mailu.png';
 import modules from "./*.json";
 
 // Inspired from https://github.com/mehdibo/hibp-js/blob/master/hibp.js
-function sha1(string){
+function sha1(string) {
     var buffer = new TextEncoder("utf-8").encode(string);
     return crypto.subtle.digest("SHA-1", buffer).then(function (buffer) {
         // Get the hex code
@@ -12,12 +12,12 @@ function sha1(string){
         var view = new DataView(buffer);
         for (var i = 0; i < view.byteLength; i += 4) {
             // Using getUint32 reduces the number of iterations needed (we process 4 bytes each time)
-            var value = view.getUint32(i)
+            var value = view.getUint32(i);
             // toString(16) will give the hex representation of the number without padding
-            var stringValue = value.toString(16)
+            var stringValue = value.toString(16);
             // We use concatenation and slice for padding
-            var padding = '00000000'
-            var paddedValue = (padding + stringValue).slice(-padding.length)
+            var padding = '00000000';
+            var paddedValue = (padding + stringValue).slice(-padding.length);
             hexCodes.push(paddedValue);
         }
         // Join all the hex strings into one
@@ -25,30 +25,30 @@ function sha1(string){
     });
 }
 
-function hibpCheck(pwd){
+function hibpCheck(pwd) {
     // We hash the pwd first
     sha1(pwd).then(function(hash){
         // We send the first 5 chars of the hash to hibp's API
         const req = new XMLHttpRequest();
+        req.open('GET', 'https://api.pwnedpasswords.com/range/'+hash.substr(0, 5));
+        req.setRequestHeader('Add-Padding', 'true');
         req.addEventListener("load", function(){
             // When we get back a response from the server
             // We create an array of lines and loop through them
-            const resp = this.responseText.split('\n');
+            const lines = this.responseText.split("\n");
             const hashSub = hash.slice(5).toUpperCase();
-            for(index in resp){
+            for (var i in lines){
                 // Check if the line matches the rest of the hash
-                if(resp[index].substring(0, 35) == hashSub){
-                    const val = resp[index].split(":")[1]
+                if (lines[i].substring(0, 35) == hashSub){
+                    const val = parseInt(lines[i].trimEnd("\r").split(":")[1]);
                     if (val > 0) {
-                        $("#pwned").value = val;
-		    }
+                        $("#pwned").val(val);
+                    }
                     return; // If found no need to continue the loop
                 }
             }
-	    $("#pwned").value = 0;
+            $("#pwned").val(0);
         });
-        req.open('GET', 'https://api.pwnedpasswords.com/range/'+hash.substr(0, 5));
-	req.setRequestHeader('Add-Padding', 'true');
         req.send();
     });
 }
@@ -126,15 +126,16 @@ $('document').ready(function() {
     }
 
     if (window.isSecureContext) {
-        $("#pw").change(function(){
-            hibpCheck($("#pw").value);
+        $("#pw").on("change paste", function(){
+            hibpCheck($(this).val());
             return true;
         });
         $("#pw").closest("form").submit(function(event){
-            if($("#pwned").value > -1) {return;};
-            event.preventDefault();
-            hibpCheck($("#pw").value);
-            event.trigger();
+            if (parseInt($("#pwned").val()) < 0) {
+                event.preventDefault();
+                hibpCheck($("#pw").val());
+                event.trigger();
+            }
         });
     }
 

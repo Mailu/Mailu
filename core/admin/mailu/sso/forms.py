@@ -7,6 +7,6 @@ class LoginForm(flask_wtf.FlaskForm):
         csrf = False
     email = fields.StringField(_('E-mail'), [validators.Email(), validators.DataRequired()])
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
-    pwned = fields.HiddenField(label='',default=-1)
+    pwned = fields.HiddenField(label='', default=-1)
     submitWebmail = fields.SubmitField(_('Sign in'))
     submitAdmin = fields.SubmitField(_('Sign in'))

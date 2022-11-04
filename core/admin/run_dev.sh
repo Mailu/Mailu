@@ -47,13 +47,10 @@ cp -r "${base}"/libs .
 sed -E '/^#/d;s:^FROM system$:FROM system AS base:' "${base}/Dockerfile" >Dockerfile
 
 # assets
-cp -r "${assets}/content" .
+cp "${assets}/package.json" .
+cp -r "${assets}/assets/" .
+awk '/new compress/{f=1}!f{print}/}),/{f=0}' <"${assets}/webpack.config.js" >webpack.config.js
 sed -E '/^#/d;s:^(FROM [^ ]+$):\1 AS assets:' "${assets}/Dockerfile" >>Dockerfile
-
-cat >>Dockerfile <<EOF
-RUN set -euxo pipefail \
-  ; rm -f /work/static/*.gz
-EOF
 
 # admin
 sed -E '/^#/d;/^(COPY|EXPOSE|HEALTHCHECK|VOLUME|CMD) /d; s:^(.* )[^ ]*pybabel[^\\]*(.*):\1true \2:' "${admin}/Dockerfile" >>Dockerfile
@@ -107,8 +104,8 @@ for vol in audit.py start.py mailu/ migrations/; do
     volumes+=( --volume "${admin}/${vol}:/app/${vol}" )
 done
 
-for file in "${assets}/content/assets"/*; do
-    [[ "${file}" == */vendor.js ]] && continue
+for file in "${assets}/assets"/*; do
+    [[ ! -f "${file}" || "${file}" == */vendor.js ]] && continue
     volumes+=( --volume "${file}:/app/static/${file/*\//}" )
 done
 

@@ -3,6 +3,7 @@
 {%- block content %}
 {%- call macros.card() %}
 <form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
   {{ macros.form_field(form.email) }}
   {{ macros.form_field(form.pw) }}
   {{ macros.form_fields(fields, label=False, class="btn btn-default") }}

@@ -11,11 +11,16 @@ DEV_PROFILE="${DEV_PROFILE:-false}"
 
 ### MAIN
 
+docker="$(command -v podman || command -v docker || echo false)"
+[[ "${docker}" == "false" ]] && {
+	echo "Sorry, you'll need podman or docker to run this."
+	exit 1
+}
+
 here="$(realpath "$(pwd)/${0%/*}")"
 cd "${here}"
 
-docker="$(command -v podman || command -v docker || echo echo docker)"
-
+# TODO: use /tmp/... folder
 [[ -d dev ]] && rm -rf dev
 mkdir -p dev/data || exit 1
 
@@ -36,6 +41,12 @@ EOF
 # admin
 sed -E '/^#/d;/^(COPY|EXPOSE|HEALTHCHECK|VOLUME|CMD) /d; s:^(.* )[^ ]*pybabel[^\\]*(.*):\1true \2:' Dockerfile >> dev/Dockerfile
 
+DEV_URI="http://"
+[[ "${DEV_PORT}" == *:* ]] || DEV_URI="${DEV_URI}localhost:"
+DEV_URI="${DEV_URI}${DEV_PORT}/admin/ui/"
+
+MSG="\\n======================================================================\\nUI is found here: ${DEV_URI}\\nLog in with: admin@example.com and password admin if this is a new DB.\\n======================================================================\\n"
+
 cat >> dev/Dockerfile <<EOF
 COPY --from=assets /work/static/ ./static/
 
@@ -45,6 +56,7 @@ RUN set -euxo pipefail \
 
 ENV FLASK_ENV=development
 ENV MEMORY_SESSIONS=true
+ENV SESSION_COOKIE_SECURE=false
 
 ENV DEBUG=true
 ENV DEBUG_PROFILE=${DEV_PROFILE}
@@ -58,14 +70,15 @@ ENV SMTP_ADDRESS="127.0.0.1"
 ENV REDIS_ADDRESS="127.0.0.1"
 ENV WEBMAIL_ADDRESS="127.0.0.1"
 
-CMD ["/bin/bash", "-c", "flask db upgrade && flask run --host=0.0.0.0 --port=8080"]
+CMD ["/bin/bash", "-c", "flask db upgrade &>/dev/null && flask mailu admin admin example.com admin --mode ifmissing >/dev/null && echo -e '${MSG}' 1>&2 && flask run --host=0.0.0.0 --port=8080"]
 EOF
 
 # TODO: re-compile assets on change?
 # TODO: re-run babel on change?
 
 # build
-${docker} build --tag "${DEV_NAME}:latest" dev/
+chmod -R u+rwX,go+rX dev/
+"${docker}" build --tag "${DEV_NAME}:latest" dev/
 
 # run
 args=( --rm -it --name "${DEV_NAME}" --publish "${DEV_PORT}:8080" --volume "${here}/dev/data/:/data/" )
@@ -78,6 +91,6 @@ for file in "${here}"/assets/content/assets/*; do
 	args+=( --volume "${file}:/app/static/${file/*\//}" )
 done
 
-${docker} run "${args[@]}" "${DEV_NAME}"
+"${docker}" run "${args[@]}" "${DEV_NAME}"
 
 # TODO: remove dev folder?

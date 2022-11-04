@@ -13,6 +13,8 @@ DEFAULT_CONFIG = {
     'RATELIMIT_STORAGE_URL': '',
     'QUOTA_STORAGE_URL': '',
     'DEBUG': False,
+    'DEBUG_PROFILER': False,
+    'DEBUG_ASSETS': '',
     'DOMAIN_REGISTRATION': False,
     'TEMPLATES_AUTO_RELOAD': True,
     'MEMORY_SESSIONS': False,

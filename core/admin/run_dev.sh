@@ -4,10 +4,10 @@ set -euxo pipefail
 
 ### CONFIG
 
-DEV_PORT="${DEV_PORT:-8080}"
 DEV_NAME="${DEV_NAME:-mailu-dev}"
-DEV_PROFILE="${DEV_PROFILE:-false}"
-
+DEV_PROFILER="${DEV_PROFILER:-false}"
+DEV_LISTEN="${DEV_LISTEN:-127.0.0.1:8080}"
+[[ "${DEV_LISTEN}" == *:* ]] || DEV_LISTEN="127.0.0.1:${DEV_LISTEN}"
 
 ### MAIN
 
@@ -41,11 +41,7 @@ EOF
 # admin
 sed -E '/^#/d;/^(COPY|EXPOSE|HEALTHCHECK|VOLUME|CMD) /d; s:^(.* )[^ ]*pybabel[^\\]*(.*):\1true \2:' Dockerfile >> dev/Dockerfile
 
-DEV_URI="http://"
-[[ "${DEV_PORT}" == *:* ]] || DEV_URI="${DEV_URI}localhost:"
-DEV_URI="${DEV_URI}${DEV_PORT}/admin/ui/"
-
-MSG="\\n======================================================================\\nUI is found here: ${DEV_URI}\\nLog in with: admin@example.com and password admin if this is a new DB.\\n======================================================================\\n"
+MSG="\\n======================================================================\\nUI can be found here: http://${DEV_LISTEN}/sso/login\\nLog in with: admin@example.com and password admin if this is a new DB.\\n======================================================================\\n"
 
 cat >> dev/Dockerfile <<EOF
 COPY --from=assets /work/static/ ./static/
@@ -60,7 +56,7 @@ ENV RATELIMIT_STORAGE_URL="memory://"
 ENV SESSION_COOKIE_SECURE=false
 
 ENV DEBUG=true
-ENV DEBUG_PROFILE=${DEV_PROFILE}
+ENV DEBUG_PROFILER=${DEV_PROFILER}
 ENV DEBUG_ASSETS=/app/static
 ENV DEBUG_TB_ENABLED=true
 
@@ -82,7 +78,7 @@ chmod -R u+rwX,go+rX dev/
 "${docker}" build --tag "${DEV_NAME}:latest" dev/
 
 # run
-args=( --rm -it --name "${DEV_NAME}" --publish "${DEV_PORT}:8080" --volume "${here}/dev/data/:/data/" )
+args=( --rm -it --name "${DEV_NAME}" --publish "${DEV_LISTEN}:8080" --volume "${here}/dev/data/:/data/" )
 for vol in audit.py start.py mailu/ migrations/; do
 	args+=( --volume "${here}/${vol}:/app/${vol}" )
 done

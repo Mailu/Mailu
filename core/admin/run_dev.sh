@@ -56,6 +56,7 @@ RUN set -euxo pipefail \
 
 ENV FLASK_ENV=development
 ENV MEMORY_SESSIONS=true
+ENV RATELIMIT_STORAGE_URL="memory://"
 ENV SESSION_COOKIE_SECURE=false
 
 ENV DEBUG=true

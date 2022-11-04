@@ -470,6 +470,7 @@ jobs:
           docker buildx imagetools create \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:${{ env.MAILU_VERSION }} \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:$pinned_mailu_version \
+            --tag ${{ inputs.docker_org }}/${{ matrix.target }}:latest \
             ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}
 
 #This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.

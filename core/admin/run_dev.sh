@@ -93,12 +93,7 @@ cat Dockerfile
 # gather volumes to map into container
 volumes=()
 
-if [[ -n "${DEV_DB}" ]]; then
-    volumes+=( --volume "${DEV_DB}:/data/main.db" )
-else
-    mkdir -p "data"
-    volumes=( --volume "${tmp}/data/:/data/" )
-fi
+[[ -n "${DEV_DB}" ]] && volumes+=( --volume "${DEV_DB}:/data/main.db" )
 
 for vol in audit.py start.py mailu/ migrations/; do
     volumes+=( --volume "${admin}/${vol}:/app/${vol}" )
@@ -113,12 +108,20 @@ done
 cat <<EOF
 
 =============================================================================
+The "${DEV_NAME}" container was built using this configuration:
+
 DEV_NAME="${DEV_NAME}"
 DEV_DB="${DEV_DB}"
 DEV_PROFILER="${DEV_PROFILER}"
 DEV_LISTEN="${DEV_LISTEN}"
 DEV_ADMIN="${DEV_ADMIN}"
 DEV_PASSWORD="${DEV_PASSWORD}"
+=============================================================================
+
+=============================================================================
+You can start the container later using this commandline:
+
+${docker/*\/} run --rm -it --name "${DEV_NAME}" --publish ${DEV_LISTEN}:8080$(printf " %q" "${volumes[@]}") "${DEV_NAME}"
 =============================================================================
 
 =============================================================================

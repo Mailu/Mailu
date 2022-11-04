@@ -102,8 +102,8 @@ support or e.g. mismatching TLS versions to deliver emails to Mailu.
 
 .. _fetchmail:
 
-When ``FETCHMAIL_ENABLED`` is set to ``True``, the fetchmail functionality is shown in the admin interface.
-The container itself still needs to be deployed manually. As fetchmail is optional, ``FETCHMAIL_ENABLED`` defaults to ``False``.
+When ``FETCHMAIL_ENABLED`` is set to ``True``, the fetchmail functionality is enabled in the admin interface.
+The container itself still needs to be deployed manually. ``FETCHMAIL_ENABLED`` defaults to ``True``.
 
 The ``FETCHMAIL_DELAY`` is a delay (in seconds) for the fetchmail service to
 go and fetch new email if available. Do not use too short delays if you do not

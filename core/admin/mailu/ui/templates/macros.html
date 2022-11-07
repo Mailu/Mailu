@@ -60,9 +60,7 @@
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {%- for field in form %}
-    {%- if bootstrap_is_hidden_field(field) %}
-      {{ field() }}
-    {%- else %}
+    {%- if not bootstrap_is_hidden_field(field) %}
       {{ form_field(field) }}
     {%- endif %}
   {%- endfor %}

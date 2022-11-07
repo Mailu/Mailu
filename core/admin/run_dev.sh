@@ -87,7 +87,6 @@ EOF
 
 # build
 chmod -R u+rwX,go+rX .
-cat Dockerfile
 "${docker}" build --tag "${DEV_NAME}:latest" .
 
 # gather volumes to map into container

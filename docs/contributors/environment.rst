@@ -313,6 +313,48 @@ If git opens a editor for a commit message just save and exit as-is. If you have
 see above and do the complete procedure from ``git fetch`` onward again.
 
 
+Web administration development
+------------------------------
+
+The administration web interface requires a proper dev environment that can easily
+be setup using the ``run_dev.sh`` shell script. You need ``docker`` or ``podman``
+to run it. It will create a local webserver listening at port 8080:
+
+.. code-block:: bash
+
+  cd core/admin
+  ./run_dev.sh
+  pip install -r requirements.txt
+  [...]
+  =============================================================================
+  The "mailu-dev" container was built using this configuration:
+
+  DEV_NAME="mailu-dev"
+  DEV_DB=""
+  DEV_PROFILER="false"
+  DEV_LISTEN="127.0.0.1:8080"
+  DEV_ADMIN="admin@example.com"
+  DEV_PASSWORD="letmein"
+  =============================================================================
+  [...]
+  =============================================================================
+  The Mailu UI can be found here: http://127.0.0.1:8080/sso/login
+  You can log in with user admin@example.com and password letmein
+  =============================================================================
+
+The container will use an empty database and a default user/password unless you
+specify a database file to use by setting ``$DEV_DB``.
+
+.. code-block:: bash
+
+  DEV_DB="/path/to/dev.db" ./run_dev.sh
+
+Any change to the files will automatically restart the Web server and reload the files.
+
+When using the development environment, a debugging toolbar is displayed on the right
+side of the screen, where you can access query details, internal variables, etc.
+
+
 Documentation
 -------------
 

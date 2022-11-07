@@ -76,7 +76,7 @@ jobs:
       - derive-variables
     uses: ./.github/workflows/build_test_deploy.yml
     with:
-      architecture: 'linux/arm64,linux/arm/v7'
+      architecture: 'linux/arm64/v8,linux/arm/v7'
       mailu_version: ${{needs.derive-variables.outputs.MAILU_VERSION}}-arm
       pinned_mailu_version: ${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}-arm
       docker_org: ${{needs.derive-variables.outputs.DOCKER_ORG}}

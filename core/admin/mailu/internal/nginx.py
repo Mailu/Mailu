@@ -1,12 +1,11 @@
 from mailu import models, utils
 from flask import current_app as app
+from socrate import system
 
 import re
 import urllib
 import ipaddress
-import socket
 import sqlalchemy.exc
-import tenacity
 
 SUPPORTED_AUTH_METHODS = ["none", "plain"]
 
@@ -146,13 +145,5 @@ def get_server(protocol, authenticated=False):
         ipaddress.ip_address(hostname)
     except:
         # hostname is not an ip address - so we need to resolve it
-        hostname = resolve_hostname(hostname)
+        hostname = system.resolve_hostname(hostname)
     return hostname, port
-
-@tenacity.retry(stop=tenacity.stop_after_attempt(100),
-                wait=tenacity.wait_random(min=2, max=5))
-def resolve_hostname(hostname):
-    """ This function uses system DNS to resolve a hostname.
-    It is capable of retrying in case the host is not immediately available
-    """
-    return socket.gethostbyname(hostname)

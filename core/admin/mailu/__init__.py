@@ -44,8 +44,10 @@ def create_app_from_config(config):
     # Initialize debugging tools
     if app.config.get("DEBUG"):
         debug.toolbar.init_app(app)
-        # TODO: add a specific configuration variable for profiling
-        # debug.profiler.init_app(app)
+    if app.config.get("DEBUG_PROFILER"):
+        debug.profiler.init_app(app)
+    if assets := app.config.get('DEBUG_ASSETS'):
+        app.static_folder = assets
 
     # Inject the default variables in the Jinja parser
     # TODO: move this to blueprints when needed

@@ -10,7 +10,7 @@ DEV_PROFILER="${DEV_PROFILER:-false}"
 DEV_LISTEN="${DEV_LISTEN:-127.0.0.1:8080}"
 [[ "${DEV_LISTEN}" == *:* ]] || DEV_LISTEN="127.0.0.1:${DEV_LISTEN}"
 DEV_ADMIN="${DEV_ADMIN:-admin@example.com}"
-DEV_PASSWORD="${DEV_PASSWORD:-admin}"
+DEV_PASSWORD="${DEV_PASSWORD:-letmein}"
 
 ### MAIN
 

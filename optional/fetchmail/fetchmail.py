@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import distutils.util
+
 import time
 import os
 import tempfile

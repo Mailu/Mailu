@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+import distutils.util
 import time
 import os
 import tempfile
@@ -96,5 +96,9 @@ def run(debug):
 if __name__ == "__main__":
     while True:
         time.sleep(int(os.environ.get("FETCHMAIL_DELAY", 60)))
+
+        if not os.environ.get("FETCHMAIL_ENABLED", 'True') in ('True', 'true'):
+            continue
+
         run(os.environ.get("DEBUG", None) == "True")
         sys.stdout.flush()

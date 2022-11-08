@@ -13,10 +13,10 @@
 {%- endblock %}
 
 {%- block content %}
-{%- call macros.table() %}
+{%- call macros.table(order='[[2,"asc"]]') %}
 <thead>
   <tr>
-    <th>{% trans %}Actions{% endtrans %}</th>
+    <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
     <th>{% trans %}Email{% endtrans %}</th>
   </tr>
 </thead>

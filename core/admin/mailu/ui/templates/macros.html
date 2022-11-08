@@ -86,7 +86,7 @@
 </div>
 {%- endmacro %}
 
-{%- macro table(title=None, theme="primary", datatable=True) %}
+{%- macro table(title=None, theme="primary", datatable=True, order=None) %}
 <div class="row">
   <div class="col-lg-12">
     <div class="card card-outline card-{{ theme }}">
@@ -96,7 +96,7 @@
       </div>
       {%- endif %}
       <div class="card-body">
-        <table class="table table-bordered{% if datatable %} dataTable{% endif %}">
+        <table class="table table-bordered{% if datatable %} dataTable{% endif %}" data-order="{{ order or '[]' | e }}">
           {{- caller() }}
         </table>
       </div>

@@ -9,7 +9,6 @@
 {%- endblock %}
 
 {%- block content %}
-<div>If you use an Apple device, <a href="/apple.mobileconfig">click here to autoconfigure it.</a></div>
 {%- call macros.table(title=_("Incoming mail"), datatable=False) %}
   <tbody>
     <tr>
@@ -59,4 +58,8 @@
     </tr>
   </tbody>
 {%- endcall %}
+<blockquote>
+  {% trans %}If you use an Apple device,{% endtrans %}
+  <a href="/apple.mobileconfig">{% trans %}click here to autoconfigure it.{% endtrans %}</a>
+</blockquote>
 {%- endblock %}

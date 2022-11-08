@@ -1,7 +1,7 @@
 {%- import "macros.html" as macros %}
 {%- import "bootstrap/utils.html" as utils %}
 <!doctype html>
-<html lang="{{ session['language'] }}" data-static="/static/">
+<html lang="{{ get_locale() }}" data-static="/static/">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -34,8 +34,8 @@
         <ul class="navbar-nav ml-auto">
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
-              <i class="fas fa-language text-xl" aria-hidden="true" title="{% trans %}change language{% endtrans %}"></i><span class="sr-only">Language</span>
-              <span class="badge badge-primary navbar-badge">{{ session['language'] }}</span></a>
+              <i class="fas fa-language text-xl" aria-hidden="true" title="{% trans %}change language{% endtrans %}"></i><span class="sr-only">{% trans %}change language{% endtrans %}</span>
+              <span class="badge badge-primary navbar-badge">{{ get_locale() }}</span></a>
             <div class="dropdown-menu dropdown-menu-right p-0" id="mailu-languages">
             {%- for locale in config.translations.values() %}
               <a class="dropdown-item{% if locale|string() == session['language'] %} active{% endif %}" href="{{ url_for('.set_language', language=locale) }}">{{ locale.get_language_name().title() }}</a>

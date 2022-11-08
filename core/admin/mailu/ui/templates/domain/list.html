@@ -51,6 +51,7 @@
     <td data-sort="{{ domain.max_quota_bytes }}">{{ (domain.max_quota_bytes | filesizeformat) if domain.max_quota_bytes else '∞' }}</td>
     <td>{{ domain.comment or '' }}</td>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <td data-sort="{{ domain.signup_enabled }}">{% if domain.signup_enabled %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
 =======
     <td>{{ domain.comment or '' }}</td>
@@ -58,6 +59,9 @@
 =======
     <td data-ordered="{{ domain.signup_enabled }}">{% if domain.signup_enabled %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
 >>>>>>> 4776094e (Configure datatables on missing tables, add sign in button to sso page.)
+=======
+    <td data-sort="{{ domain.signup_enabled }}">{% if domain.signup_enabled %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
+>>>>>>> e0d2432c (Rename data-ordered to data-sort)
     <td data-order="{{ domain.created_at or '0000-00-00' }}">{{ domain.created_at | format_date }}</td>
     <td data-order="{{ domain.updated_at or '0000-00-00' }}">{{ domain.updated_at | format_date }}</td>
   </tr>

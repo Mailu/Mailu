@@ -30,12 +30,17 @@
     </td>
     <td>{{ alternative }}</td>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <td data-sort="{{ alternative.created_at or '0000-00-00' }}">{{ alternative.created_at | format_date }}</td>
     <td data-sort="{{ alternative.updated_at or '0000-00-00' }}">{{ alternative.updated_at | format_date }}</td>
 =======
     <td data-ordered="{{ alternative.created_at or '0000-00-00' }}">{{ alternative.created_at | format_date }}</td>
     <td data-ordered="{{ alternative.updated_at or '0000-00-00' }}">{{ alternative.updated_at | format_date }}</td>
 >>>>>>> 6218b363 (configure datatables via html5 data attributes)
+=======
+    <td data-sort="{{ alternative.created_at or '0000-00-00' }}">{{ alternative.created_at | format_date }}</td>
+    <td data-sort="{{ alternative.updated_at or '0000-00-00' }}">{{ alternative.updated_at | format_date }}</td>
+>>>>>>> e0d2432c (Rename data-ordered to data-sort)
   </tr>
   {%- endfor %}
 </tbody>

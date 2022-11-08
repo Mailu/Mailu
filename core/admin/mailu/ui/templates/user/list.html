@@ -41,6 +41,7 @@
     </td>
     <td>{{ user }}</td>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <td data-sort="{{ user.allow_spoofing*4 + user.enable_imap*2 + user.enable_pop }}">
       {% if user.enable_imap %}<span class="badge bg-primary">imap</span>{% endif %}
       {% if user.enable_pop %}<span class="badge bg-secondary">pop3</span>{% endif %}
@@ -52,14 +53,22 @@
     <td data-sort="{{ user.updated_at or '0000-00-00' }}">{{ user.updated_at | format_date }}</td>
 =======
     <td data-ordered="{{ user.enable_imap*2 + user.enable_pop }}">
+=======
+    <td data-sort="{{ user.enable_imap*2 + user.enable_pop }}">
+>>>>>>> e0d2432c (Rename data-ordered to data-sort)
       {% if user.enable_imap %}<span class="badge bg-info">imap</span>{% endif %}
       {% if user.enable_pop %}<span class="badge bg-info">pop3</span>{% endif %}
     </td>
-    <td data-ordered="{{ user.quota_bytes_used }}">{{ user.quota_bytes_used | filesizeformat }} / {{ (user.quota_bytes | filesizeformat) if user.quota_bytes else '∞' }}</td>
+    <td data-sort="{{ user.quota_bytes_used }}">{{ user.quota_bytes_used | filesizeformat }} / {{ (user.quota_bytes | filesizeformat) if user.quota_bytes else '∞' }}</td>
     <td>{{ user.comment or '-' }}</td>
+<<<<<<< HEAD
     <td data-ordered="{{ user.created_at or '0000-00-00' }}">{{ user.created_at | format_date }}</td>
     <td data-ordered="{{ user.updated_at or '0000-00-00' }}">{{ user.updated_at | format_date }}</td>
 >>>>>>> 6218b363 (configure datatables via html5 data attributes)
+=======
+    <td data-sort="{{ user.created_at or '0000-00-00' }}">{{ user.created_at | format_date }}</td>
+    <td data-sort="{{ user.updated_at or '0000-00-00' }}">{{ user.updated_at | format_date }}</td>
+>>>>>>> e0d2432c (Rename data-ordered to data-sort)
   </tr>
   {%- endfor %}
 </tbody>

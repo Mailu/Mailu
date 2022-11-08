@@ -40,7 +40,9 @@ def login():
             flask_login.login_user(user)
             response = flask.redirect(destination)
             response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
-            flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')
+            flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip} pwned={form.pwned.data}.')
+            if msg := utils.isBadOrPwned(form):
+                flask.flash(msg, "error")
             return response
         else:
             utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)

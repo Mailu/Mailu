@@ -1,4 +1,4 @@
-from mailu import models
+from mailu import models, utils
 from mailu.ui import ui, forms, access
 from flask import current_app as app
 
@@ -93,6 +93,9 @@ def domain_signup(domain_name=None):
         del form.pw
         del form.pw2
     if form.validate_on_submit():
+        if msg := utils.isBadOrPwned(form):
+            flask.flash(msg, "error")
+            return flask.render_template('domain/signup.html', form=form)
         conflicting_domain = models.Domain.query.get(form.name.data)
         conflicting_alternative = models.Alternative.query.get(form.name.data)
         conflicting_relay = models.Relay.query.get(form.name.data)

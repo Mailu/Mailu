@@ -16,7 +16,7 @@
 {%- call macros.table() %}
 <thead>
   <tr>
-    <th>{% trans %}Actions{% endtrans %}</th>
+    <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
     <th>{% trans %}Comment{% endtrans %}</th>
     <th>{% trans %}Authorized IP{% endtrans %}</th>
     <th>{% trans %}Created{% endtrans %}</th>
@@ -31,8 +31,8 @@
     </td>
     <td>{{ token.comment }}</td>
     <td>{{ token.ip or "any" }}</td>
-    <td>{{ token.created_at | format_date }}</td>
-    <td>{{ token.updated_at | format_date }}</td>
+    <td data-sort="{{ token.created_at or '0000-00-00' }}">{{ token.created_at | format_date }}</td>
+    <td data-sort="{{ token.updated_at or '0000-00-00' }}">{{ token.updated_at | format_date }}</td>
   </tr>
   {%- endfor %}
 </tbody>

@@ -16,7 +16,7 @@
 {%- call macros.table() %}
 <thead>
   <tr>
-    <th>{% trans %}Actions{% endtrans %}</th>
+    <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
     <th>{% trans %}Email{% endtrans %}</th>
     <th>{% trans %}Destination{% endtrans %}</th>
     <th>{% trans %}Comment{% endtrans %}</th>
@@ -34,8 +34,8 @@
     <td>{{ alias }}</td>
     <td>{{ alias.destination|join(', ') or '-' }}</td>
     <td>{{ alias.comment or '' }}</td>
-    <td>{{ alias.created_at | format_date }}</td>
-    <td>{{ alias.updated_at | format_date }}</td>
+    <td data-sort="{{ alias.created_at or '0000-00-00' }}">{{ alias.created_at | format_date }}</td>
+    <td data-sort="{{ alias.updated_at or '0000-00-00' }}">{{ alias.updated_at | format_date }}</td>
   </tr>
   {%- endfor %}
 </tbody>

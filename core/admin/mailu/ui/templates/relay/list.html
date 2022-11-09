@@ -11,10 +11,10 @@
 {%- endblock %}
 
 {%- block content %}
-{%- call macros.table() %}
+{%- call macros.table(order='[[1,"asc"]]') %}
 <thead>
   <tr>
-    <th>{% trans %}Actions{% endtrans %}</th>
+    <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
     <th>{% trans %}Domain name{% endtrans %}</th>
     <th>{% trans %}Remote host{% endtrans %}</th>
     <th>{% trans %}Comment{% endtrans %}</th>
@@ -32,8 +32,8 @@
     <td>{{ relay.name }}</td>
     <td>{{ relay.smtp or '-' }}</td>
     <td>{{ relay.comment or '' }}</td>
-    <td>{{ relay.created_at | format_date }}</td>
-    <td>{{ relay.updated_at | format_date }}</td>
+    <td data-sort="{{ relay.created_at or '0000-00-00' }}">{{ relay.created_at | format_date }}</td>
+    <td data-sort="{{ relay.updated_at or '0000-00-00' }}">{{ relay.updated_at | format_date }}</td>
   </tr>
   {%- endfor %}
 </tbody>

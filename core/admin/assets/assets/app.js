@@ -132,9 +132,7 @@ $('document').ready(function() {
         });
         $("#pw").closest("form").submit(function(event){
             if (parseInt($("#pwned").val()) < 0) {
-                event.preventDefault();
                 hibpCheck($("#pw").val());
-                event.trigger();
             }
         });
     }

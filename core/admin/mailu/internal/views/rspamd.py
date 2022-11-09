@@ -25,3 +25,7 @@ def rspamd_dkim_key(domain_name):
                 }
             )
     return flask.jsonify({'data': {'selectors': selectors}})
+
+@internal.route("/rspamd/local_domains", methods=['GET'])
+def rspamd_local_domains():
+    return '\n'.join(domain[0] for domain in models.Domain.query.with_entities(models.Domain.name).all() + models.Alternative.query.with_entities(models.Alternative.name).all())

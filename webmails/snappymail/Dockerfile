@@ -1,18 +1,10 @@
-ARG ARCH=""
+# syntax=docker/dockerfile-upstream:1.4.3
 
-# NOTE: only add file if building for arm
-FROM ${ARCH}alpine:3.14
+#snappymail image
+FROM base
+
 ARG VERSION
-ONBUILD COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
-
-ENV TZ Etc/UTC
-
 LABEL version=$VERSION
-
-# Shared later between dovecot postfix nginx rspamd snappymail and roundloop
-RUN apk add --no-cache \
-    python3 py3-pip tzdata \
- && pip3 install socrate==0.2.0
 
 #  https://github.com/the-djmaze/snappymail/wiki/Installation-instructions#requirements
 #  SnappyMail:
@@ -20,7 +12,7 @@ RUN apk add --no-cache \
 #
 #     mbstring          php7-mbstring
 #     Zlib              built-in OR php7-zip????
-#     json              php7-json
+#     json              php7-json > php8-json is built-in php8 in alpine
 #     libxml            php7-xml
 #     dom               php7-dom
 
@@ -44,18 +36,18 @@ RUN apk add --no-cache \
 #php7-curl php7-iconv php7-json php7-xml php7-simplexml php7-dom php7-openssl php7-pdo php7-pdo_sqlite php7-mbstring \
 RUN apk add --no-cache \
     nginx curl \
-    php7 php7-fpm php7-mbstring php7-zip php7-json php7-xml php7-simplexml \
-    php7-dom php7-curl php7-exif gd php7-gd php7-iconv php7-intl php7-openssl \
-    php7-pdo_sqlite php7-pdo php7-sodium libsodium php7-tidy php7-pecl-uuid \
+    php8 php8-fpm php8-mbstring php8-zip php8-xml php8-simplexml \
+    php8-dom php8-curl php8-exif gd php8-gd php8-iconv php8-intl php8-openssl \
+    php8-pdo_sqlite php8-pdo php8-sodium libsodium php8-tidy php8-pecl-uuid \
  && rm /etc/nginx/http.d/default.conf \
- && rm /etc/php7/php-fpm.d/www.conf \
+ && rm /etc/php8/php-fpm.d/www.conf \
  && mkdir -p /run/nginx \
  && mkdir -p /var/www/webmail \
  && mkdir -p /config
 
 # nginx / PHP config files
 COPY config/nginx-snappymail.conf /config/nginx-snappymail.conf
-COPY config/php-snappymail.conf /etc/php7/php-fpm.d/snappymail.conf
+COPY config/php-snappymail.conf /etc/php8/php-fpm.d/snappymail.conf
 
 # Parsed and moved at startup
 COPY defaults/php.ini /defaults/php.ini
@@ -74,7 +66,7 @@ RUN cd /var/www/webmail \
 COPY login/include.php /var/www/webmail/include.php
 COPY login/sso.php /var/www/webmail/sso.php
 
-COPY start.py /start.py
+COPY start.py /
 COPY config.py /config.py
 
 EXPOSE 80/tcp

@@ -1,11 +1,12 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import os
 import logging
 import sys
-from socrate import conf
 import subprocess
 import hmac
+
+from socrate import conf
 
 env = os.environ
 
@@ -51,7 +52,7 @@ context['SECRET_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray('ROUN
 
 # roundcube plugins
 # (using "dict" because it is ordered and "set" is not)
-plugins = dict((p, None) for p in env.get("ROUNDCUBE_PLUGINS", "").replace(" ", "").split(",") if p and os.path.isdir(os.path.join("/var/www/html/plugins", p)))
+plugins = dict((p, None) for p in env.get("ROUNDCUBE_PLUGINS", "").replace(" ", "").split(",") if p and os.path.isdir(os.path.join("/var/www/webmail/plugins", p)))
 if plugins:
     plugins["mailu"] = None
 else:
@@ -60,52 +61,56 @@ else:
 context["PLUGINS"] = ",".join(f"'{p}'" for p in plugins)
 
 # add overrides
-context["INCLUDES"] = sorted(inc for inc in os.listdir("/overrides") if inc.endswith((".inc", ".inc.php"))) if os.path.isdir("/overrides") else []
+context["INCLUDES"] = sorted(inc for inc in os.listdir("/overrides") if inc.endswith(".inc")) if os.path.isdir("/overrides") else []
 
 # calculate variables for config file
 context["SESSION_TIMEOUT_MINUTES"] = max(int(env.get("SESSION_TIMEOUT", "3600")) // 60, 1)
 
 # create config files
-conf.jinja("/php.ini", context, "/usr/local/etc/php/conf.d/roundcube.ini")
-conf.jinja("/config.inc.php", context, "/var/www/html/config/config.inc.php")
+conf.jinja("/conf/php.ini", context, "/etc/php8/php.ini")
+conf.jinja("/conf/config.inc.php", context, "/var/www/webmail/config/config.inc.php")
 
 # create dirs
 os.system("mkdir -p /data/gpg")
 
-# disable access log for VirtualHosts that don't define their own logfile
-os.system("a2disconf other-vhosts-access-log")
-
 print("Initializing database")
 try:
-    result = subprocess.check_output(["/var/www/html/bin/initdb.sh", "--dir", "/var/www/html/SQL"],
+    result = subprocess.check_output(["/var/www/webmail/bin/initdb.sh", "--dir", "/var/www/webmail/SQL"],
                                      stderr=subprocess.STDOUT)
     print(result.decode())
 except subprocess.CalledProcessError as exc:
     err = exc.stdout.decode()
     if "already exists" in err:
-        print("Already initialized")
+        print("Already initialzed")
     else:
         print(err)
         exit(3)
 
 print("Upgrading database")
 try:
-    subprocess.check_call(["/var/www/html/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT)
+    subprocess.check_call(["/var/www/webmail/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT)
 except subprocess.CalledProcessError as exc:
     exit(4)
 else:
     print("Cleaning database")
     try:
-        subprocess.check_call(["/var/www/html/bin/cleandb.sh"], stderr=subprocess.STDOUT)
+        subprocess.check_call(["/var/www/webmail/bin/cleandb.sh"], stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as exc:
         exit(5)
 
 # setup permissions
-os.system("chown -R www-data:www-data /data")
+os.system("chown -R nginx:nginx /data")
+os.system("chmod -R a+rX /var/www/webmail/")
+
+# Configure nginx
+conf.jinja("/conf/nginx-roundcube.conf", context, "/etc/nginx/http.d/roundcube.conf")
+if os.path.exists("/var/run/nginx.pid"):
+    os.system("nginx -s reload")
 
 # clean env
 [env.pop(key, None) for key in env.keys() if key == "SECRET_KEY" or key.startswith("ROUNDCUBE_")]
 
-# run apache
-os.execve("/usr/local/bin/apache2-foreground", ["apache2-foreground"], env)
+# run nginx
+os.system("php-fpm8")
+os.execv("/usr/sbin/nginx", ["nginx", "-g", "daemon off;"])
 

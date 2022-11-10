@@ -43,7 +43,7 @@ COPY config/config.inc.php /conf/config.inc.php
 COPY login/mailu.php /var/www/webmail/plugins/mailu/mailu.php
 COPY config/config.inc.carddav.php /var/www/webmail/plugins/carddav/config.inc.php
 
-COPY start.py /
+COPY start.py /start.py
 
 EXPOSE 80/tcp
 VOLUME /data

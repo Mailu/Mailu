@@ -9,12 +9,13 @@ LABEL version=$VERSION
 RUN set -euxo pipefail \
   ; apk add --no-cache \
     nginx gpg gpg-agent \
-    php8 php8-fpm php8-mbstring php8-zip php8-xml php8-simplexml \
-    php8-dom php8-curl php8-exif gd php8-gd php8-iconv php8-intl php8-openssl \
-    php8-pdo_sqlite php8-pdo_mysql php8-pdo_pgsql php8-pdo php8-sodium libsodium php8-tidy php8-pecl-uuid \
-    php8-pspell php8-pecl-imagick php8-opcache php8-session php8-sockets php8-fileinfo \
+    php81 php81-fpm php81-mbstring php81-zip php81-xml php81-simplexml \
+    php81-dom php81-curl php81-exif gd php81-gd php81-iconv php81-intl php81-openssl \
+    php81-pdo_sqlite php81-pdo_mysql php81-pdo_pgsql php81-pdo php81-sodium libsodium php81-tidy php81-pecl-uuid \
+    php81-pspell php81-pecl-imagick php81-opcache php81-session php81-sockets php81-fileinfo \
   ; rm /etc/nginx/http.d/default.conf \
-  ; rm /etc/php8/php-fpm.d/www.conf \
+  ; rm /etc/php81/php-fpm.d/www.conf \
+  ; ln -s /usr/bin/php81 /usr/bin/php \
   ; mkdir -p /run/nginx \
   ; mkdir -p /conf
 
@@ -37,14 +38,14 @@ RUN set -euxo pipefail \
 
 
 # nginx / PHP config files
-COPY config/nginx-roundcube.conf /conf/nginx-roundcube.conf
-COPY config/php-roundcube.conf /etc/php8/php-fpm.d/roundcube.conf
-COPY config/php.ini /conf/php.ini
-COPY config/config.inc.php /conf/config.inc.php
-COPY login/mailu.php /var/www/webmail/plugins/mailu/mailu.php
+COPY config/nginx-roundcube.conf /conf/
+COPY config/php-roundcube.conf /etc/php81/php-fpm.d/roundcube.conf
+COPY config/php.ini /conf/
+COPY config/config.inc.php /conf/
+COPY login/mailu.php /var/www/webmail/plugins/mailu/
 COPY config/config.inc.carddav.php /var/www/webmail/plugins/carddav/config.inc.php
 
-COPY start.py /start.py
+COPY start.py /
 
 EXPOSE 80/tcp
 VOLUME /data

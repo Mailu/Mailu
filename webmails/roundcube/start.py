@@ -67,7 +67,7 @@ context["INCLUDES"] = sorted(inc for inc in os.listdir("/overrides") if inc.ends
 context["SESSION_TIMEOUT_MINUTES"] = max(int(env.get("SESSION_TIMEOUT", "3600")) // 60, 1)
 
 # create config files
-conf.jinja("/conf/php.ini", context, "/etc/php8/php.ini")
+conf.jinja("/conf/php.ini", context, "/etc/php81/php.ini")
 conf.jinja("/conf/config.inc.php", context, "/var/www/webmail/config/config.inc.php")
 
 # create dirs
@@ -111,6 +111,6 @@ if os.path.exists("/var/run/nginx.pid"):
 [env.pop(key, None) for key in env.keys() if key == "SECRET_KEY" or key.startswith("ROUNDCUBE_")]
 
 # run nginx
-os.system("php-fpm8")
+os.system("php-fpm81")
 os.execv("/usr/sbin/nginx", ["nginx", "-g", "daemon off;"])
 

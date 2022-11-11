@@ -1,8 +1,9 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import os
 import logging as log
 import sys
+
 from socrate import system, conf
 
 args = os.environ.copy()

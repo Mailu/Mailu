@@ -1,10 +1,11 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import os
 import shutil
 import logging as log
 import sys
 import subprocess
+
 from socrate import system, conf
 
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
@@ -22,9 +23,9 @@ os.makedirs(base + "configs", exist_ok=True)
 
 conf.jinja("/defaults/default.ini", os.environ, "/data/_data_/_default_/domains/default.ini")
 conf.jinja("/defaults/application.ini", os.environ, "/data/_data_/_default_/configs/application.ini")
-conf.jinja("/defaults/php.ini", os.environ, "/etc/php7/php.ini")
+conf.jinja("/defaults/php.ini", os.environ, "/etc/php81/php.ini")
 # Start the fastcgi process manager now that config files have been adjusted
-os.system("php-fpm7")
+os.system("php-fpm81")
 
 os.system("chown -R nginx:nginx /data")
 os.system("chmod -R a+rX /var/www/webmail/")

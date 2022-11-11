@@ -174,12 +174,18 @@ target "smtp" {
 target "snappymail" {
   inherits = ["defaults"]
   context = "webmails/snappymail/"
+  contexts = {
+    base = "target:base"
+  }
   tags = tag("snappymail")
 }
 
 target "roundcube" {
   inherits = ["defaults"]
   context = "webmails/roundcube/"
+  contexts = {
+    base = "target:base"
+  }
   tags = tag("roundcube")
 }
 

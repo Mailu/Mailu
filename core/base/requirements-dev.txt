@@ -5,6 +5,7 @@ libs/socrate
 # core/admin
 alembic
 Babel
+bcrypt
 click
 dnspython
 Flask
@@ -14,7 +15,7 @@ Flask-DebugToolbar
 Flask-Login
 flask-marshmallow
 Flask-Migrate
-Flask-SQLAlchemy
+Flask-SQLAlchemy<3
 Flask-WTF
 gunicorn
 idna

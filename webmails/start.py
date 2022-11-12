@@ -18,8 +18,8 @@ context = {}
 context.update(env)
 
 context["MAX_FILESIZE"] = str(int(int(env.get("MESSAGE_SIZE_LIMIT", "50000000")) * 0.66 / 1048576))
-context["FRONT_ADDRESS"] = system.resolve_address(os.environ.get("HOST_FRONT", "front"))
-context["IMAP_ADDRESS"] = system.resolve_address(os.environ.get("HOST_IMAP", "imap"))
+context["FRONT_ADDRESS"] = system.get_host_address_from_environment("FRONT", "front")
+context["IMAP_ADDRESS"] = system.get_host_address_from_environment("IMAP", "imap")
 
 db_flavor = env.get("ROUNDCUBE_DB_FLAVOR", "sqlite")
 if db_flavor == "sqlite":

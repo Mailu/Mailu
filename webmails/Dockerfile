@@ -5,6 +5,9 @@ FROM base
 ARG VERSION
 LABEL version=$VERSION
 
+COPY snappymail/pubkey.asc /tmp/snappymail.asc
+COPY roundcube/pubkey.asc /tmp/roundcube.asc
+
 RUN set -euxo pipefail \
   ; apk add --no-cache \
     nginx gpg gpg-agent \
@@ -16,6 +19,8 @@ RUN set -euxo pipefail \
   ; rm /etc/nginx/http.d/default.conf \
   ; rm /etc/php81/php-fpm.d/www.conf \
   ; ln -s /usr/bin/php81 /usr/bin/php \
+  ; gpg --import /tmp/snappymail.asc \
+  ; gpg --import /tmp/roundcube.asc \
   ; mkdir -p /run/nginx \
   ; mkdir -p /conf
 
@@ -25,7 +30,10 @@ ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v4.4
 
 RUN set -euxo pipefail \
   ; cd /var/www \
-  ; curl -sL ${ROUNDCUBE_URL} | tar xz \
+  ; curl -sLo /dev/shm/roundcube.tgz ${ROUNDCUBE_URL} \
+  ; curl -sLo /dev/shm/roundcube.tgz.asc ${ROUNDCUBE_URL}.asc \
+  ; gpg --status-fd 1 --verify /dev/shm/roundcube.tgz.asc \
+  ; tar xzf /dev/shm/roundcube.tgz \
   ; curl -sL ${CARDDAV_URL} | tar xz \
   ; mv roundcubemail-* roundcube \
   ; mkdir -p /var/www/roundcube/config \
@@ -48,7 +56,10 @@ ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2
 RUN set -euxo pipefail \
   ; mkdir  /var/www/snappymail \
   ; cd /var/www/snappymail \
-  ; curl -sL  ${SNAPPYMAIL_URL} | tar xz \
+  ; curl -sLo /dev/shm/snappymail.tgz  ${SNAPPYMAIL_URL} \
+  ; curl -sLo /dev/shm/snappymail.tgz.asc  ${SNAPPYMAIL_URL}.asc \
+  ; gpg --status-fd 1 --verify /dev/shm/snappymail.tgz.asc \
+  ; tar xzf /dev/shm/snappymail.tgz \
   ; chmod -R u+w,a+rX /var/www/snappymail \
   ; chown -R nginx:nginx /var/www/snappymail
 

@@ -1,6 +1,5 @@
 # syntax=docker/dockerfile-upstream:1.4.3
 
-#roundcube image
 FROM base
 
 ARG VERSION
@@ -19,6 +18,7 @@ RUN set -euxo pipefail \
   ; mkdir -p /run/nginx \
   ; mkdir -p /conf
 
+# roundcube
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.5.3/roundcubemail-1.5.3-complete.tar.gz
 ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v4.4.3/carddav-v4.4.3.tar.gz
 
@@ -26,26 +26,44 @@ RUN set -euxo pipefail \
   ; cd /var/www \
   ; curl -sL ${ROUNDCUBE_URL} | tar xz \
   ; curl -sL ${CARDDAV_URL} | tar xz \
-  ; mv roundcubemail-* webmail \
-  ; mkdir -p /var/www/webmail/config \
-  ; mv carddav webmail/plugins/ \
-  ; cd webmail \
+  ; mv roundcubemail-* roundcube \
+  ; mkdir -p /var/www/roundcube/config \
+  ; mv carddav roundcube/plugins/ \
+  ; cd roundcube \
   ; rm -rf CHANGELOG.md SECURITY.md INSTALL LICENSE README.md UPGRADING composer.json-dist installer composer.* \
-  ; ln -sf index.php /var/www/webmail/sso.php \
-  ; chmod -R u+w,a+rX /var/www/webmail \
-  ; chown -R nginx:nginx /var/www/webmail \
+  ; ln -sf index.php /var/www/roundcube/sso.php \
+  ; chmod -R u+w,a+rX /var/www/roundcube \
+  ; chown -R nginx:nginx /var/www/roundcube \
   ; rm -rf plugins/{autologon,example_addressbook,http_authentication,krb_authentication,new_user_identity,password,redundant_attachments,squirrelmail_usercopy,userinfo,virtuser_file,virtuser_query}
 
+COPY roundcube/config/config.inc.php /conf/
+COPY roundcube/login/mailu.php /var/www/roundcube/plugins/mailu/
+COPY roundcube/config/config.inc.carddav.php /var/www/roundcube/plugins/carddav/config.inc.php
 
-# nginx / PHP config files
-COPY config/nginx-roundcube.conf /conf/
-COPY config/php-roundcube.conf /etc/php81/php-fpm.d/roundcube.conf
-COPY config/php.ini /conf/
-COPY config/config.inc.php /conf/
-COPY login/mailu.php /var/www/webmail/plugins/mailu/
-COPY config/config.inc.carddav.php /var/www/webmail/plugins/carddav/config.inc.php
+# snappymail
 
+ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.21.0/snappymail-2.21.0.tar.gz
+
+RUN set -euxo pipefail \
+  ; mkdir  /var/www/snappymail \
+  ; cd /var/www/snappymail \
+  ; curl -sL  ${SNAPPYMAIL_URL} | tar xz \
+  ; chmod -R u+w,a+rX /var/www/snappymail \
+  ; chown -R nginx:nginx /var/www/snappymail
+
+# SnappyMail login
+COPY snappymail/login/include.php /var/www/snappymail/
+COPY snappymail/login/sso.php /var/www/snappymail/
+
+# Parsed and moved at startup
+COPY snappymail/defaults/application.ini /defaults/
+COPY snappymail/defaults/default.json /defaults/
+
+# common
 COPY start.py /
+COPY php.ini /defaults/
+COPY php-webmail.conf /etc/php81/php-fpm.d/php-webmail.conf
+COPY nginx-webmail.conf /conf/
 
 EXPOSE 80/tcp
 VOLUME /data

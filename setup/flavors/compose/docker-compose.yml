@@ -168,7 +168,7 @@ services:
   # Webmail
   {% if webmail_type != 'none' %}
   webmail:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}{{ webmail_type }}:${MAILU_VERSION:-{{ version }}}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
     volumes:

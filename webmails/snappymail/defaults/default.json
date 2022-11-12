@@ -1,0 +1,50 @@
+{
+    "name": "*",
+    "IMAP": {
+        "host": "{{ FRONT_ADDRESS }}",
+        "port": 10143,
+        "secure": 0,
+        "shortLogin": false,
+        "ssl": {
+            "verify_peer": false,
+            "verify_peer_name": false,
+            "allow_self_signed": false,
+            "SNI_enabled": true,
+            "disable_compression": true,
+            "security_level": 1
+        }
+    },
+    "SMTP": {
+        "host": "{{ FRONT_ADDRESS }}",
+        "port": 10025,
+        "secure": 0,
+        "shortLogin": false,
+        "ssl": {
+            "verify_peer": false,
+            "verify_peer_name": false,
+            "allow_self_signed": false,
+            "SNI_enabled": true,
+            "disable_compression": true,
+            "security_level": 1
+        },
+        "useAuth": true,
+        "setSender": false,
+        "usePhpMail": false
+    },
+    "Sieve": {
+        "host": "{{ IMAP_ADDRESS }}",
+        "port": 4190,
+        "secure": 0,
+        "shortLogin": false,
+        "ssl": {
+            "verify_peer": false,
+            "verify_peer_name": false,
+            "allow_self_signed": false,
+            "SNI_enabled": true,
+            "disable_compression": true,
+            "security_level": 1
+        },
+        "enabled": true
+    },
+    "whiteList": ""
+}

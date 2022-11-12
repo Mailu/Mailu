@@ -12,6 +12,7 @@ RUN set -euxo pipefail \
     php81-dom php81-curl php81-exif gd php81-gd php81-iconv php81-intl php81-openssl \
     php81-pdo_sqlite php81-pdo_mysql php81-pdo_pgsql php81-pdo php81-sodium libsodium php81-tidy php81-pecl-uuid \
     php81-pspell php81-pecl-imagick php81-opcache php81-session php81-sockets php81-fileinfo \
+    aspell-uk aspell-ru aspell-fr aspell-de aspell-en \
   ; rm /etc/nginx/http.d/default.conf \
   ; rm /etc/php81/php-fpm.d/www.conf \
   ; ln -s /usr/bin/php81 /usr/bin/php \

@@ -18,13 +18,6 @@ class mailu extends rcube_plugin
       $args['action'] = 'login';
     }
 
-    $ua = $_SERVER['HTTP_USER_AGENT'];
-    $ra = $_SERVER['REMOTE_ADDR'];
-    if ($ua == 'health' and ($ra == '127.0.0.1' or $ra == '::1')) {
-      print('OK');
-      exit();
-    }
-
     return $args;
   }
 

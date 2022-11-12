@@ -40,7 +40,7 @@ RUN set -euxo pipefail \
   ; mv carddav roundcube/plugins/ \
   ; cd roundcube \
   ; rm -rf CHANGELOG.md SECURITY.md INSTALL LICENSE README.md UPGRADING composer.json-dist installer composer.* \
-  ; ln -sf index.php /var/www/roundcube/sso.php \
+  ; ln -sf index.php /var/www/roundcube/public_html/sso.php \
   ; chmod -R u+w,a+rX /var/www/roundcube \
   ; chown -R nginx:nginx /var/www/roundcube \
   ; rm -rf plugins/{autologon,example_addressbook,http_authentication,krb_authentication,new_user_identity,password,redundant_attachments,squirrelmail_usercopy,userinfo,virtuser_file,virtuser_query}

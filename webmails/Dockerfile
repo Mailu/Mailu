@@ -41,9 +41,6 @@ RUN set -euxo pipefail \
   ; cd roundcube \
   ; rm -rf CHANGELOG.md SECURITY.md INSTALL LICENSE README.md UPGRADING composer.json-dist installer composer.* \
   ; ln -sf index.php /var/www/roundcube/public_html/sso.php \
-  ; chown -R root:root /var/www/roundcube/ \
-  ; chown -R mailu:mailu /var/www/roundcube/temp /var/www/roundcube/logs \
-  ; chmod -R a+rX /var/www/roundcube \
   ; rm -rf plugins/{autologon,example_addressbook,http_authentication,krb_authentication,new_user_identity,password,redundant_attachments,squirrelmail_usercopy,userinfo,virtuser_file,virtuser_query}
 
 COPY roundcube/config/config.inc.php /conf/
@@ -60,9 +57,7 @@ RUN set -euxo pipefail \
   ; curl -sLo /dev/shm/snappymail.tgz  ${SNAPPYMAIL_URL} \
   ; curl -sLo /dev/shm/snappymail.tgz.asc  ${SNAPPYMAIL_URL}.asc \
   ; gpg --status-fd 1 --verify /dev/shm/snappymail.tgz.asc \
-  ; tar xzf /dev/shm/snappymail.tgz \
-  ; chmod -R a+rX /var/www/snappymail \
-  ; chown -R root:root /var/www/snappymail
+  ; tar xzf /dev/shm/snappymail.tgz
 
 # SnappyMail login
 COPY snappymail/login/include.php /var/www/snappymail/
@@ -71,6 +66,15 @@ COPY snappymail/login/sso.php /var/www/snappymail/
 # Parsed and moved at startup
 COPY snappymail/defaults/application.ini /defaults/
 COPY snappymail/defaults/default.json /defaults/
+
+# set perms
+RUN set -euxo pipefail \
+  ; chmod -R a+rX /var/www/snappymail \
+  ; chown -R root:root /var/www/snappymail \
+  ; chown -R mailu:mailu /var/www/snappymail/data \
+  ; chown -R root:root /var/www/roundcube/ \
+  ; chown -R mailu:mailu /var/www/roundcube/temp /var/www/roundcube/logs \
+  ; chmod -R a+rX /var/www/roundcube
 
 # common
 COPY start.py /

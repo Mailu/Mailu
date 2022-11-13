@@ -8,9 +8,9 @@ can also be configured via the API.
 The Mailu API is disabled by default. It can be enabled and configured via
 the settings:
 
-* ```API```
+* ``API``
 * ``WEB_API``
-* ```API_TOKEN```
+* ``API_TOKEN``
 
 For more information see the section :ref:`Advanced configuration <advanced_settings>`
 in the configuration reference.

@@ -26,6 +26,8 @@ def fetch_create(user_email):
     if form.validate_on_submit():
         fetch = models.Fetch(user=user)
         form.populate_obj(fetch)
+        if form.folders.data:
+            fetch.folders = form.folders.data.replace(' ','').split(',')
         models.db.session.add(fetch)
         models.db.session.commit()
         flask.flash('Fetch configuration created')
@@ -43,6 +45,8 @@ def fetch_edit(fetch_id):
         if not form.password.data:
             form.password.data = fetch.password
         form.populate_obj(fetch)
+        if form.folders.data:
+            fetch.folders = form.folders.data.replace(' ','').split(',')
         models.db.session.commit()
         flask.flash('Fetch configuration updated')
         return flask.redirect(

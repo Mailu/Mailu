@@ -20,6 +20,8 @@
     <th>{% trans %}Endpoint{% endtrans %}</th>
     <th>{% trans %}Username{% endtrans %}</th>
     <th>{% trans %}Keep emails{% endtrans %}</th>
+    <th>{% trans %}Rescan emails{% endtrans %}</th>
+    <th>{% trans %}Folders{% endtrans %}</th>
     <th>{% trans %}Last check{% endtrans %}</th>
     <th>{% trans %}Status{% endtrans %}</th>
     <th>{% trans %}Created{% endtrans %}</th>
@@ -36,6 +38,8 @@
     <td>{{ fetch.protocol }}{{ 's' if fetch.tls else '' }}://{{ fetch.host }}:{{ fetch.port }}</td>
     <td>{{ fetch.username }}</td>
     <td data-sort="{{ fetch.keep }}">{% if fetch.keep %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
+    <td data-sort="{{ fetch.scan }}">{% if fetch.scan %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
+    <td>{% for folder in fetch.folders %}{{ folder }},{% endfor %}</td>
     <td>{{ fetch.last_check | format_datetime or '-' }}</td>
     <td>{{ fetch.error or '-' }}</td>
     <td data-sort="{{ fetch.created_at or '0000-00-00' }}">{{ fetch.created_at | format_date }}</td>

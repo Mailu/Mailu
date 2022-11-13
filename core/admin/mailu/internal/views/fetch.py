@@ -12,10 +12,12 @@ def fetch_list():
             "id": fetch.id,
             "tls": fetch.tls,
             "keep": fetch.keep,
+            "scan": fetch.scan,
             "user_email": fetch.user_email,
             "protocol": fetch.protocol,
             "host": fetch.host,
             "port": fetch.port,
+            "folders": fetch.folders,
             "username": fetch.username,
             "password": fetch.password
         } for fetch in models.Fetch.query.all()

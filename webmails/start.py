@@ -110,8 +110,7 @@ conf.jinja("/defaults/application.ini", context, "/data/_data_/_default_/configs
 conf.jinja("/defaults/php.ini", context, "/etc/php81/php.ini")
 
 # setup permissions
-os.system("chown -R nginx:nginx /data /var/www")
-os.system("chmod -R a+rX /var/www/")
+os.system("chown -R mailu:mailu /data")
 
 # Configure nginx
 conf.jinja("/conf/nginx-webmail.conf", context, "/etc/nginx/http.d/webmail.conf")

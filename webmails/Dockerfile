@@ -41,8 +41,9 @@ RUN set -euxo pipefail \
   ; cd roundcube \
   ; rm -rf CHANGELOG.md SECURITY.md INSTALL LICENSE README.md UPGRADING composer.json-dist installer composer.* \
   ; ln -sf index.php /var/www/roundcube/public_html/sso.php \
-  ; chmod -R u+w,a+rX /var/www/roundcube \
-  ; chown -R nginx:nginx /var/www/roundcube \
+  ; chown -R root:root /var/www/roundcube/ \
+  ; chown -R mailu:mailu /var/www/roundcube/temp /var/www/roundcube/logs \
+  ; chmod -R a+rX /var/www/roundcube \
   ; rm -rf plugins/{autologon,example_addressbook,http_authentication,krb_authentication,new_user_identity,password,redundant_attachments,squirrelmail_usercopy,userinfo,virtuser_file,virtuser_query}
 
 COPY roundcube/config/config.inc.php /conf/
@@ -60,8 +61,8 @@ RUN set -euxo pipefail \
   ; curl -sLo /dev/shm/snappymail.tgz.asc  ${SNAPPYMAIL_URL}.asc \
   ; gpg --status-fd 1 --verify /dev/shm/snappymail.tgz.asc \
   ; tar xzf /dev/shm/snappymail.tgz \
-  ; chmod -R u+w,a+rX /var/www/snappymail \
-  ; chown -R nginx:nginx /var/www/snappymail
+  ; chmod -R a+rX /var/www/snappymail \
+  ; chown -R root:root /var/www/snappymail
 
 # SnappyMail login
 COPY snappymail/login/include.php /var/www/snappymail/

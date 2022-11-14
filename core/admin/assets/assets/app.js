@@ -1,8 +1,3 @@
-require('./app.css');
-
-import logo from './mailu.png';
-import modules from "./*.json";
-
 // Inspired from https://github.com/mehdibo/hibp-js/blob/master/hibp.js
 function sha1(string) {
     var buffer = new TextEncoder("utf-8").encode(string);

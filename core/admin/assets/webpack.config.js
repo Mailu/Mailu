@@ -9,7 +9,7 @@ module.exports = {
     mode: 'production',
     entry: {
         app: {
-            import: './assets/app.js',
+            import: ['./assets/app.css', './assets/mailu.png', './assets/app.js'],
             dependOn: 'vendor',
         },
         vendor: './assets/vendor.js',

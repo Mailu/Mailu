@@ -103,8 +103,8 @@ def run(debug):
                         user_info in error_message):
                     print(error_message)
             finally:
-                requests.post("http://" + os.environ["ADMIN_ADDRESS"] + "/internal/fetch/{}".format(fetch["id"]),
-                    json=error_message.split("\n")[0]
+                requests.post("http://{}/internal/fetch/{}".format(os.environ['ADMIN_ADDRESS'],fetch['id']),
+                    json=error_message.split('\n')[0]
                 )
     except Exception:
         traceback.print_exc()

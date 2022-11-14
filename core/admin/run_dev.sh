@@ -68,12 +68,12 @@ ENV \
     FLASK_ENV="development" \
     MEMORY_SESSIONS="true" \
     RATELIMIT_STORAGE_URL="memory://" \
-    SESSION_COOKIE_SECURE="false" \
     \
     DEBUG="true" \
     DEBUG_PROFILER="${DEV_PROFILER}" \
     DEBUG_ASSETS="/app/static" \
     DEBUG_TB_ENABLED="true" \
+    DEBUG_TB_INTERCEPT_REDIRECTS=False \
     \
     IMAP_ADDRESS="127.0.0.1" \
     POP3_ADDRESS="127.0.0.1" \

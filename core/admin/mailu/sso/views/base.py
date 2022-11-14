@@ -39,7 +39,7 @@ def login():
             flask.session.regenerate()
             flask_login.login_user(user)
             response = flask.redirect(destination)
-            response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
+            response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=False if app.config['TLS_FLAVOR'] == 'notls' else app.config['SESSION_COOKIE_SECURE'], httponly=True)
             flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip} pwned={form.pwned.data}.')
             if msg := utils.isBadOrPwned(form):
                 flask.flash(msg, "error")

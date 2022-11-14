@@ -1,4 +1,4 @@
-from mailu import models
+from mailu import models, utils
 from mailu.ui import ui, forms, access
 
 import flask
@@ -23,6 +23,7 @@ def fetch_create(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     form = forms.FetchForm()
     form.password.validators = [wtforms.validators.DataRequired()]
+    utils.formatCSVField(form.folders)
     if form.validate_on_submit():
         fetch = models.Fetch(user=user)
         form.populate_obj(fetch)
@@ -41,6 +42,7 @@ def fetch_create(user_email):
 def fetch_edit(fetch_id):
     fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
     form = forms.FetchForm(obj=fetch)
+    utils.formatCSVField(form.folders)
     if form.validate_on_submit():
         if not form.password.data:
             form.password.data = fetch.password

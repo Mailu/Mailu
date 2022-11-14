@@ -7,15 +7,3 @@
 {%- block subtitle %}
 {{ user }}
 {%- endblock %}
-
-{%- block folders %}
-<div class="form-group">
-    <div class="row">
-      <div class="col-lg-12 col-xs-12 ">
-
-    <label for="folders">Folders to fetch on the server</label>
-      <input class="form-control" id="folders" name="folders" type="text" value="{{ form.folders.data|join(',') }}">
-      </div>
-    </div>
-  </div>
-{%- endblock %}

@@ -99,11 +99,7 @@ def user_settings(user_email):
     user_email_or_current = user_email or flask_login.current_user.email
     user = models.User.query.get(user_email_or_current) or flask.abort(404)
     form = forms.UserSettingsForm(obj=user)
-    if isinstance(form.forward_destination.data,str):
-        data = form.forward_destination.data.replace(" ","").split(",")
-    else:
-        data = form.forward_destination.data
-    form.forward_destination.data = ", ".join(data)
+    utils.formatCSVField(form.forward_destination)
     if form.validate_on_submit():
         form.forward_destination.data = form.forward_destination.data.replace(" ","").split(",")
         form.populate_obj(user)

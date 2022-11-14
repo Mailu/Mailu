@@ -25,9 +25,7 @@
   {%- call macros.card(title="Settings") %}
   {{ macros.form_field(form.keep) }}
   {{ macros.form_field(form.scan) }}
-{%- block folders %}
   {{ macros.form_field(form.folders) }}
-{%- endblock %}
   {%- endcall %}
 
   {{ macros.form_field(form.submit) }}

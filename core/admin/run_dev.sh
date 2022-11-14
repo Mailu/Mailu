@@ -73,7 +73,6 @@ ENV \
     DEBUG_PROFILER="${DEV_PROFILER}" \
     DEBUG_ASSETS="/app/static" \
     DEBUG_TB_ENABLED="true" \
-    DEBUG_TB_INTERCEPT_REDIRECTS=False \
     \
     IMAP_ADDRESS="127.0.0.1" \
     POP3_ADDRESS="127.0.0.1" \
@@ -82,7 +81,7 @@ ENV \
     REDIS_ADDRESS="127.0.0.1" \
     WEBMAIL_ADDRESS="127.0.0.1"
 
-CMD ["/bin/bash", "-c", "flask db upgrade &>/dev/null && flask mailu admin '${DEV_ADMIN/@*}' '${DEV_ADMIN#*@}' '${DEV_PASSWORD}' --mode ifmissing >/dev/null; flask --debugger run --host=0.0.0.0 --port=8080"]
+CMD ["/bin/bash", "-c", "flask db upgrade &>/dev/null && flask mailu admin '${DEV_ADMIN/@*}' '${DEV_ADMIN#*@}' '${DEV_PASSWORD}' --mode ifmissing >/dev/null; flask --debug run --host=0.0.0.0 --port=8080"]
 EOF
 
 # build

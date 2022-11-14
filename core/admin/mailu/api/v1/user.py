@@ -9,44 +9,6 @@ db = models.db
 
 user = api.namespace('user', description='User operations')
 
-"""
-base_model = {
-    'comment': fields.String(description='A description for the user. This description is shown on the Users page', example='my comment'),
-    'quota_bytes': fields.Integer(description='The maximum quota for the user’s email box in bytes', example='1000000000'),
-    'global_admin': fields.Boolean(description='Make the user a global administrator'),
-    'enabled': fields.Boolean(description='Enable the user. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail'),
-    'enable_imap': fields.Boolean(description='Allow email retrieval via IMAP'),
-    'enable_pop': fields.Boolean(description='Allow email retrieval via POP3'),
-    'forward_enabled': fields.Boolean(description='Enable auto forwarding'),
-    'forward_destination': fields.List(fields.String(description='Email address to forward emails to'), example='Other@example.com'),
-    'forward_keep': fields.Boolean(description='Keep a copy of the forwarded email in the inbox'),
-    'reply_enabled': fields.Boolean(description='Enable automatic replies. This is also known as out of office (ooo) or out of facility (oof) replies'),
-    'reply_subject': fields.String(description='Optional subject for the automatic reply', example='Out of office'),
-    'reply_body': fields.String(description='The body of the automatic reply email', example='Hello, I am out of office. I will respond when I am back.'),
-    'reply_startdate': fields.Date(description='Start date for automatic replies in YYYY-MM-DD format.', example='2022-02-10'),
-    'reply_enddate': fields.Date(description='End date for automatic replies in YYYY-MM-DD format.', example='2022-02-22'),
-    'displayed_name': fields.String(description='The display name of the user within the Admin GUI', example='John Doe'),
-    'spam_enabled': fields.Boolean(description='Enable the spam filter'),
-    'spam_mark_as_read': fields.Boolean(description='Enable marking spam mails as read'),
-    'spam_threshold': fields.Integer(description='The user defined spam filter tolerance', example='80'),
-}
-
-user_fields_get = api.model('UserGet', {
-    'email': fields.String(description='The email address of the user', example='John.Doe@example.com', attribute='_email'),
-    'password': fields.String(description='PBKDF2-HMAC-SHA256 based password of the user. For more info see passlib.hash.pbkdf2_sha256', example='$pbkdf2-sha256$1$.6UI/S.nXIk8jcbdHx3Fhg$98jZicV16ODfEsEZeYPGHU3kbrUrvUEXOPimVSQDD44'),
-
-}.update(base_model))
-
-user_fields_post = api.model('UserCreate', {
-    'email': fields.String(description='The email address of the user', example='John.Doe@example.com', attribute='_email', required=True),
-    'raw_password': fields.String(description='The raw (plain text) password of the user. Mailu will hash the password using PBKDF2-HMAC-SHA256', example='secret', required=True),
-}.update(base_model))
-
-user_fields_put = api.model('UserUpdate', {
-    'raw_password': fields.String(description='The raw (plain text) password of the user. Mailu will hash the password using PBKDF2-HMAC-SHA256', example='secret'),
-}.update(base_model))
-"""
-
 user_fields_get = api.model('UserGet', {
     'email': fields.String(description='The email address of the user', example='John.Doe@example.com', attribute='_email'),
     'password': fields.String(description='PBKDF2-HMAC-SHA256 based password of the user. For more info see passlib.hash.pbkdf2_sha256', example='$pbkdf2-sha256$1$.6UI/S.nXIk8jcbdHx3Fhg$98jZicV16ODfEsEZeYPGHU3kbrUrvUEXOPimVSQDD44'),

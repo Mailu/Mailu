@@ -48,7 +48,7 @@ sed -E '/^#/d;s:^FROM system$:FROM system AS base:' "${base}/Dockerfile" >Docker
 
 # assets
 cp "${assets}/package.json" .
-cp -r "${assets}/assets/" .
+cp -r "${assets}/assets" ./assets
 awk '/new compress/{f=1}!f{print}/}),/{f=0}' <"${assets}/webpack.config.js" >webpack.config.js
 sed -E '/^#/d;s:^(FROM [^ ]+$):\1 AS assets:' "${assets}/Dockerfile" >>Dockerfile
 
@@ -65,7 +65,7 @@ RUN set -euxo pipefail \
   ; ln -s /app/start.py /
 
 ENV \
-    FLASK_ENV="development" \
+    FLASK_DEBUG="true" \
     MEMORY_SESSIONS="true" \
     RATELIMIT_STORAGE_URL="memory://" \
     \
@@ -82,7 +82,7 @@ ENV \
     REDIS_ADDRESS="127.0.0.1" \
     WEBMAIL_ADDRESS="127.0.0.1"
 
-CMD ["/bin/bash", "-c", "flask db upgrade &>/dev/null && flask mailu admin '${DEV_ADMIN/@*}' '${DEV_ADMIN#*@}' '${DEV_PASSWORD}' --mode ifmissing >/dev/null && flask run --host=0.0.0.0 --port=8080"]
+CMD ["/bin/bash", "-c", "flask db upgrade &>/dev/null && flask mailu admin '${DEV_ADMIN/@*}' '${DEV_ADMIN#*@}' '${DEV_PASSWORD}' --mode ifmissing >/dev/null; flask --debug run --host=0.0.0.0 --port=8080"]
 EOF
 
 # build

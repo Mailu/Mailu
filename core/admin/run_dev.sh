@@ -68,6 +68,7 @@ ENV \
     FLASK_DEBUG="true" \
     MEMORY_SESSIONS="true" \
     RATELIMIT_STORAGE_URL="memory://" \
+    SESSION_COOKIE_SECURE="false" \
     \
     DEBUG="true" \
     DEBUG_PROFILER="${DEV_PROFILER}" \

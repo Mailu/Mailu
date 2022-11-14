@@ -14,11 +14,17 @@ RUN set -euxo pipefail \
   ; adduser -Sg ${MAILU_UID} -G mailu -h /app -g "mailu app" -s /bin/bash mailu \
   ; apk add --no-cache bash ca-certificates curl python3 tzdata \
   ; machine="$(uname -m)" \
-  ; ( [[ "${machine}" == x86_64 ]] || \
-      [[ "${machine}" == armv8* ]] || \
-      [[ "${machine}" == aarch64 ]] ) && \
-    echo "Installing hardened-malloc" && \
-    apk add --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc
+  ; if [[ "${machine}" == x86_64 || "${machine}" == armv8* || "${machine}" == aarch64 ]] \
+  ; then \
+      echo "Installing hardened-malloc" \
+  ;   apk add --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc \
+  ; else \
+      echo "Faking the install of hardened-malloc" \
+  ;   cp /lib/ld-musl-${machine}.so.1 /usr/lib/libhardened_malloc.so \
+  ;   touch /usr/lib/libhardened_malloc.so.faked \
+  ; fi
+
+ENV LD_PRELOAD=/usr/lib/libhardened_malloc.so
 
 WORKDIR /app
 

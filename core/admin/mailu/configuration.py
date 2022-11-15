@@ -73,7 +73,7 @@ DEFAULT_CONFIG = {
     'SESSION_KEY_BITS': 128,
     'SESSION_TIMEOUT': 3600,
     'PERMANENT_SESSION_LIFETIME': 30*24*3600,
-    'SESSION_COOKIE_SECURE': False,
+    'SESSION_COOKIE_SECURE': None,
     'CREDENTIAL_ROUNDS': 12,
     'TLS_PERMISSIVE': True,
     'TZ': 'Etc/UTC',
@@ -156,8 +156,8 @@ class ConfigManager:
         self.config['SESSION_STORAGE_URL'] = f'redis://{self.config["REDIS_ADDRESS"]}/3'
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
-        if self.config['TLS_FLAVOR'] != 'notls' and not self.config['SESSION_COOKIE_SECURE']:
-            self.config['SESSION_COOKIE_SECURE'] = True
+        if self.config['SESSION_COOKIE_SECURE'] is None:
+            self.config['SESSION_COOKIE_SECURE'] = self.config['TLS_FLAVOR'] != 'notls'
         self.config['SESSION_PERMANENT'] = True
         self.config['SESSION_TIMEOUT'] = int(self.config['SESSION_TIMEOUT'])
         self.config['PERMANENT_SESSION_LIFETIME'] = int(self.config['PERMANENT_SESSION_LIFETIME'])

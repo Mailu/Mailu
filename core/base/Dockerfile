@@ -17,7 +17,7 @@ RUN set -euxo pipefail \
   ; if [[ "${machine}" == x86_64 || "${machine}" == armv8* || "${machine}" == aarch64 ]] \
   ; then \
       echo "Installing hardened-malloc" \
-  ;   apk add --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc \
+  ;   apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc \
   ; else \
       echo "Faking the install of hardened-malloc" \
   ;   cp /lib/ld-musl-${machine}.so.1 /usr/lib/libhardened_malloc.so \

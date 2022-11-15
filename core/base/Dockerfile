@@ -18,10 +18,6 @@ RUN set -euxo pipefail \
   ; then \
       echo "Installing hardened-malloc" \
   ;   apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc \
-  ; else \
-      echo "Faking the install of hardened-malloc" \
-  ;   cp /lib/ld-musl-${machine}.so.1 /usr/lib/libhardened_malloc.so \
-  ;   touch /usr/lib/libhardened_malloc.so.faked \
   ; fi
 
 ENV LD_PRELOAD=/usr/lib/libhardened_malloc.so

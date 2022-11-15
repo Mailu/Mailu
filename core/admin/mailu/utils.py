@@ -408,7 +408,7 @@ class MailuSessionInterface(SessionInterface):
                 httponly=self.get_cookie_httponly(app),
                 domain=self.get_cookie_domain(app),
                 path=self.get_cookie_path(app),
-                secure=False if app.config['TLS_FLAVOR'] == 'notls' else self.get_cookie_secure(app),
+                secure=self.get_cookie_secure(app),
                 samesite=self.get_cookie_samesite(app)
             )
 

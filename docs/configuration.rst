@@ -287,6 +287,10 @@ The admin service stores configurations in a database.
 - ``DB_USER``: the database user for mailu admin service. (when not ``sqlite``)
 - ``DB_NAME``: the database name for mailu admin service. (when not ``sqlite``)
 
+Alternatively, if you need more control, you can use a `DB URL`_ : do not set any of the ``DB_`` settings and set ``SQLALCHEMY_DATABASE_URI`` instead.
+
+.. _`DB URL`: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls
+
 The roundcube service stores configurations in a database.
 
 - ``ROUNDCUBE_DB_FLAVOR``: the database type for roundcube service. (``sqlite``, ``postgresql``, ``mysql``)

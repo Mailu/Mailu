@@ -12,7 +12,15 @@ ARG MAILU_GID=1000
 RUN set -euxo pipefail \
   ; addgroup -Sg ${MAILU_GID} mailu \
   ; adduser -Sg ${MAILU_UID} -G mailu -h /app -g "mailu app" -s /bin/bash mailu \
-  ; apk add --no-cache bash ca-certificates curl python3 tzdata
+  ; apk add --no-cache bash ca-certificates curl python3 tzdata \
+  ; machine="$(uname -m)" \
+  ; if [[ "${machine}" == x86_64 || "${machine}" == armv8* || "${machine}" == aarch64 ]] \
+  ; then \
+      echo "Installing hardened-malloc" \
+  ;   apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc \
+  ; fi
+
+ENV LD_PRELOAD=/usr/lib/libhardened_malloc.so
 
 WORKDIR /app
 

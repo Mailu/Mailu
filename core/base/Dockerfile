@@ -42,6 +42,10 @@ RUN set -euxo pipefail \
   ; rm -f /tmp/*.pem
 
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
+ENV CXXFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security"
+ENV CFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security"
+ENV CPPFLAGS="-Wdate-time -D_FORTIFY_SOURCE=2"
+ENV LDFLAGS="-Wl,-z,relro"
 
 COPY requirements-${MAILU_DEPS}.txt ./
 COPY libs/ libs/

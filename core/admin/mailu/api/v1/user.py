@@ -11,13 +11,12 @@ user = api.namespace('user', description='User operations')
 
 user_fields_get = api.model('UserGet', {
     'email': fields.String(description='The email address of the user', example='John.Doe@example.com', attribute='_email'),
-    'password': fields.String(description='PBKDF2-HMAC-SHA256 based password of the user. For more info see passlib.hash.pbkdf2_sha256', example='$pbkdf2-sha256$1$.6UI/S.nXIk8jcbdHx3Fhg$98jZicV16ODfEsEZeYPGHU3kbrUrvUEXOPimVSQDD44'),
-
+    'password': fields.String(description="Hash of the user's password; Example='$bcrypt-sha256$v=2,t=2b,r=12$fmsAdJbYAD1gGQIE5nfJq.$zLkQUEs2XZfTpAEpcix/1k5UTNPm0jO'"),
 })
 
 user_fields_post = api.model('UserCreate', {
     'email': fields.String(description='The email address of the user', example='John.Doe@example.com', attribute='_email', required=True),
-    'raw_password': fields.String(description='The raw (plain text) password of the user. Mailu will hash the password using PBKDF2-HMAC-SHA256', example='secret', required=True),
+    'raw_password': fields.String(description='The raw (plain text) password of the user. Mailu will hash the password using BCRYPT-SHA256', example='secret', required=True),
     'comment': fields.String(description='A description for the user. This description is shown on the Users page', example='my comment'),
     'quota_bytes': fields.Integer(description='The maximum quota for the user’s email box in bytes', example='1000000000'),
     'global_admin': fields.Boolean(description='Make the user a global administrator'),
@@ -39,7 +38,7 @@ user_fields_post = api.model('UserCreate', {
 })
 
 user_fields_put = api.model('UserUpdate', {
-    'raw_password': fields.String(description='The raw (plain text) password of the user. Mailu will hash the password using PBKDF2-HMAC-SHA256', example='secret'),
+    'raw_password': fields.String(description='The raw (plain text) password of the user. Mailu will hash the password using BCRYPT-SHA256', example='secret'),
     'comment': fields.String(description='A description for the user. This description is shown on the Users page', example='my comment'),
     'quota_bytes': fields.Integer(description='The maximum quota for the user’s email box in bytes', example='1000000000'),
     'global_admin': fields.Boolean(description='Make the user a global administrator'),

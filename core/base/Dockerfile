@@ -8,19 +8,21 @@ ENV TZ=Etc/UTC LANG=C.UTF-8
 
 ARG MAILU_UID=1000
 ARG MAILU_GID=1000
+ARG TARGETPLATFORM
 
 RUN set -euxo pipefail \
   ; addgroup -Sg ${MAILU_GID} mailu \
   ; adduser -Sg ${MAILU_UID} -G mailu -h /app -g "mailu app" -s /bin/bash mailu \
   ; apk add --no-cache bash ca-certificates curl python3 tzdata \
   ; machine="$(uname -m)" \
-  ; if [[ "${machine}" == x86_64 || "${machine}" == armv8* || "${machine}" == aarch64 ]] \
-  ; then \
-      echo "Installing hardened-malloc" \
-  ;   apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc \
-  ; fi
+  ; [[ "${TARGETPLATFORM}" != linux/arm/v7 && \( "${machine}" == x86_64 || "${machine}" == armv8* || "${machine}" == aarch64 \) ]] \
+    && apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc
 
 ENV LD_PRELOAD=/usr/lib/libhardened_malloc.so
+ENV CXXFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security -pie -fPIE"
+ENV CFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security -pie -fPIE"
+ENV CPPFLAGS="-Wdate-time -D_FORTIFY_SOURCE=2 -pie -fPIE"
+ENV LDFLAGS="-Wl,-z,relro"
 
 WORKDIR /app
 

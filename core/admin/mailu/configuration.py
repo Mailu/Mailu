@@ -18,13 +18,14 @@ DEFAULT_CONFIG = {
     'DOMAIN_REGISTRATION': False,
     'TEMPLATES_AUTO_RELOAD': True,
     'MEMORY_SESSIONS': False,
+    'FETCHMAIL_ENABLED': False,
     # Database settings
     'DB_FLAVOR': None,
     'DB_USER': 'mailu',
     'DB_PW': None,
     'DB_HOST': 'database',
     'DB_NAME': 'mailu',
-    'SQLITE_DATABASE_FILE':'data/main.db',
+    'SQLITE_DATABASE_FILE': 'data/main.db',
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     # Statistics management
@@ -61,7 +62,7 @@ DEFAULT_CONFIG = {
     # Web settings
     'SITENAME': 'Mailu',
     'WEBSITE': 'https://mailu.io',
-    'ADMIN' : 'none',
+    'ADMIN': 'none',
     'WEB_ADMIN': '/admin',
     'WEB_WEBMAIL': '/webmail',
     'WEBMAIL': 'none',

@@ -16,7 +16,7 @@ DEFAULT_CONFIG = {
     'DOMAIN_REGISTRATION': False,
     'TEMPLATES_AUTO_RELOAD': True,
     'MEMORY_SESSIONS': False,
-    'FETCHMAIL_ENABLED': True,
+    'FETCHMAIL_ENABLED': False,
     # Database settings
     'DB_FLAVOR': None,
     'DB_USER': 'mailu',

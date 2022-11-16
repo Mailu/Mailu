@@ -19,6 +19,10 @@ RUN set -euxo pipefail \
     && apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc
 
 ENV LD_PRELOAD=/usr/lib/libhardened_malloc.so
+ENV CXXFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security"
+ENV CFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security"
+ENV CPPFLAGS="-Wdate-time -D_FORTIFY_SOURCE=2"
+ENV LDFLAGS="-Wl,-z,relro"
 
 WORKDIR /app
 
@@ -42,10 +46,6 @@ RUN set -euxo pipefail \
   ; rm -f /tmp/*.pem
 
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
-ENV CXXFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security"
-ENV CFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security"
-ENV CPPFLAGS="-Wdate-time -D_FORTIFY_SOURCE=2"
-ENV LDFLAGS="-Wl,-z,relro"
 
 COPY requirements-${MAILU_DEPS}.txt ./
 COPY libs/ libs/

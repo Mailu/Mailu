@@ -12,9 +12,14 @@ COPY static ./static
 COPY server.py ./server.py
 COPY main.py ./main.py
 
+RUN set -euxo pipefail \
+ ; apk add --no-cache libcap \
+ ; setcap 'cap_net_bind_service=+ep' /app/venv/bin/gunicorn
+
 RUN echo $VERSION >> /version
 
 EXPOSE 80/tcp
 HEALTHCHECK --start-period=350s CMD curl -skfLo /dev/null http://localhost/
+USER mailu
 
 CMD gunicorn -w 4 -b :80 --access-logfile - --error-logfile - --preload main:app

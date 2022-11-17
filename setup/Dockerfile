@@ -6,10 +6,6 @@ FROM base
 ARG VERSION=local
 LABEL version=$VERSION
 
-RUN set -euxo pipefail \
- ; apk add --no-cache libcap \
- ; setcap 'cap_net_bind_service=+ep' /app/venv/bin/gunicorn
-
 COPY flavors /data/flavors
 COPY templates /data/templates
 COPY static ./static

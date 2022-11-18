@@ -11,7 +11,7 @@ sp.harden_random.enable();
 sp.xxe_protection.enable();
 
 # Global configuration variables
-sp.global.secret_key("{{ SNUFFLEPAGUS_KEY }}");
+sp.global.secret_key("{{ SNUFFLEUPAGUS_KEY }}");
 
 # Globally activate strict mode
 # https://www.php.net/manual/en/language.types.declarations.php#language.types.declarations.strict

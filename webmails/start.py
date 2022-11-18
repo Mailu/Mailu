@@ -52,7 +52,7 @@ if not secret_key:
         exit(2)
 
 context['ROUNDCUBE_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray('ROUNDCUBE_KEY', 'utf-8'), 'sha256').hexdigest()
-context['SNUFFLEPAGUS_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray('SNUFFLEPAGUS_KEY', 'utf-8'), 'sha256').hexdigest()
+context['SNUFFLEUPAGUS_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray('SNUFFLEUPAGUS_KEY', 'utf-8'), 'sha256').hexdigest()
 conf.jinja("/etc/snuffleupagus.rules.tpl", context, "/etc/snuffleupagus.rules")
 
 # roundcube plugins

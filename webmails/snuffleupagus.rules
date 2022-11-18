@@ -125,4 +125,4 @@ sp.cookie.name("roundcube_sessauth").samesite("strict");
 sp.cookie.name("roundcube_sessid").samesite("strict");
 sp.ini_protection.policy_silent_fail();
 
-sp.disable_function.function("unserialize").param("data").value_r("[cCoO]:\d+:\"").drop();
+sp.disable_function.function("unserialize").param("data").value_r("[cCoO]:\d+:[\"{]").drop();

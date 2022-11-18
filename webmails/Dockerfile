@@ -21,6 +21,8 @@ RUN set -euxo pipefail \
   ; ln -s /usr/bin/php81 /usr/bin/php \
   ; gpg --import /tmp/snappymail.asc \
   ; gpg --import /tmp/roundcube.asc \
+  ; echo extension=snuffleupagus > /etc/php81/conf.d/snuffleupagus.ini \
+  ; rm -f /tmp/*asc \
   ; mkdir -p /run/nginx \
   ; mkdir -p /conf
 
@@ -41,7 +43,8 @@ RUN set -euxo pipefail \
   ; cd roundcube \
   ; rm -rf CHANGELOG.md SECURITY.md INSTALL LICENSE README.md UPGRADING composer.json-dist installer composer.* \
   ; ln -sf index.php /var/www/roundcube/public_html/sso.php \
-  ; rm -rf plugins/{autologon,example_addressbook,http_authentication,krb_authentication,new_user_identity,password,redundant_attachments,squirrelmail_usercopy,userinfo,virtuser_file,virtuser_query}
+  ; rm -rf plugins/{autologon,example_addressbook,http_authentication,krb_authentication,new_user_identity,password,redundant_attachments,squirrelmail_usercopy,userinfo,virtuser_file,virtuser_query} \
+  ; sed -i '/suhosin.session.encrypt/d;/mbstring\.func_overload/d' program/lib/Roundcube/bootstrap.php
 
 COPY roundcube/config/config.inc.php /conf/
 COPY roundcube/login/mailu.php /var/www/roundcube/plugins/mailu/
@@ -81,6 +84,7 @@ COPY start.py /
 COPY php.ini /defaults/
 COPY php-webmail.conf /etc/php81/php-fpm.d/php-webmail.conf
 COPY nginx-webmail.conf /conf/
+COPY snuffleupagus.rules /etc/snuffleupagus.rules.tpl
 
 EXPOSE 80/tcp
 VOLUME /data

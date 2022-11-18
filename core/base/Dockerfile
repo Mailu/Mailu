@@ -52,16 +52,32 @@ RUN set -euxo pipefail \
         mkdir -p /root/.cargo/registry/index && \
         git clone --bare https://github.com/rust-lang/crates.io-index.git /root/.cargo/registry/index/github.com-1285ae84e5963aae \
     ; pip install -r requirements-${MAILU_DEPS}.txt \
-    ; apk del -r .build-deps \
     ; rm -rf /root/.cargo /tmp/*.pem \
   ; } \
   ; rm -rf /root/.cache
 
+ARG SNUFFLEUPAGUS_VERSION=0.8.3
+ENV SNUFFLEUPAGUS_URL https://github.com/jvoisin/snuffleupagus/archive/refs/tags/v$SNUFFLEUPAGUS_VERSION.tar.gz
+
+RUN set -euxo pipefail \
+  ; curl -sL  ${SNUFFLEUPAGUS_URL} | tar xz \
+  ; cd snuffleupagus-$SNUFFLEUPAGUS_VERSION \
+  ; rm -rf src/tests/*php7*/ src/tests/*session*/ src/tests/broken_configuration/ src/tests/*cookie* src/tests/upload_validation/ \
+  ; apk add --virtual .build-deps php81-dev php81-cgi php81-simplexml php81-xml pcre-dev build-base php81-pear php81-openssl re2c \
+  ; ln -s /usr/bin/phpize81 /usr/bin/phpize \
+  ; ln -s /usr/bin/pecl81 /usr/bin/pecl \
+  ; ln -s /usr/bin/php-config81 /usr/bin/php-config \
+  ; ln -s /usr/bin/php81 /usr/bin/php \
+  ; pecl install vld-beta \
+  ; make -j $(grep -c processor /proc/cpuinfo) release \
+  ; cp src/.libs/snuffleupagus.so /app \
+  ; apk del -r .build-deps
 
 # base mailu image
 FROM system
 
 COPY --from=build /app/venv/ /app/venv/
+COPY --chown=root:root --from=build /app/snuffleupagus.so /usr/lib/php81/modules/
 
 ENV VIRTUAL_ENV=/app/venv
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"

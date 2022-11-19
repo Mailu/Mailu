@@ -80,6 +80,9 @@ DEFAULT_CONFIG = {
     'TLS_PERMISSIVE': True,
     'TZ': 'Etc/UTC',
     'DEFAULT_SPAM_THRESHOLD': 80,
+    'PROXY_AUTH_WHITELIST': '',
+    'PROXY_AUTH_HEADER': 'X-Auth-Email',
+    'PROXY_AUTH_CREATE': False,
     # Host settings
     'HOST_IMAP': 'imap',
     'HOST_LMTP': 'imap:2525',
@@ -171,6 +174,7 @@ class ConfigManager:
         self.config['HOSTNAMES'] = ','.join(hostnames)
         self.config['HOSTNAME'] = hostnames[0]
         self.config['DEFAULT_SPAM_THRESHOLD'] = int(self.config['DEFAULT_SPAM_THRESHOLD'])
+        self.config['PROXY_AUTH_WHITELIST'] = set(ipaddress.ip_network(cidr, False) for cidr in (cidr.strip() for cidr in self.config['PROXY_AUTH_WHITELIST'].split(',')) if cidr)
 
         # update the app config
         app.config.update(self.config)

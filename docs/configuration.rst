@@ -362,3 +362,15 @@ It can be configured with the following option:
 When ``POSTFIX_LOG_FILE`` is enabled, the logrotate program will automatically rotate the 
 logs every week and keep 52 logs. To override the logrotate configuration, create the file logrotate.conf 
 with the desired configuration in the :ref:`Postfix overrides folder<override-label>`.
+
+
+Header authentication using an external proxy
+---------------------------------------------
+
+The ``PROXY_AUTH_WHITELIST`` (default: unset/disabled) option allows you to configure a comma separated list of CIDRs of proxies to trust for authentication. This list is separate from ``REAL_IP_FROM`` and any entry in ``PROXY_AUTH_WHITELIST`` should also appear in ``REAL_IP_FROM``.
+
+Use ``PROXY_AUTH_HEADER`` (default: 'X-Auth-Email') to customize which HTTP header the email address of the user to authenticate as should be and ``PROXY_AUTH_CREATE`` (default: False) to control whether non-existing accounts should be auto-created. Please note that Mailu doesn't currently support creating new users for non-existing domains; you do need to create all the domains that may be used manually.
+
+Once configured, any request to /sso/proxy will be redirected to the webmail and /sso/proxy/admin to the admin panel. Please check issue `1972` for more details.
+
+.. _`1972`: https://github.com/Mailu/Mailu/issues/1972

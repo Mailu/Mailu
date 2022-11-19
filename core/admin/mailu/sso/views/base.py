@@ -6,6 +6,8 @@ from mailu.ui import access
 from flask import current_app as app
 import flask
 import flask_login
+import secrets
+import ipaddress
 
 @sso.route('/login', methods=['GET', 'POST'])
 def login():
@@ -57,3 +59,36 @@ def logout():
     flask.session.destroy()
     return flask.redirect(flask.url_for('.login'))
 
+
+@sso.route('/proxy', methods=['GET'])
+@sso.route('/proxy/<target>', methods=['GET'])
+def proxy(target='webmail'):
+    ip = ipaddress.ip_address(flask.request.remote_addr)
+    if not any(ip in cidr for cidr in app.config['PROXY_AUTH_WHITELIST']):
+        return flask.abort(500, '%s is not on PROXY_AUTH_WHITELIST' % flask.request.remote_addr)
+
+    email = flask.request.headers.get(app.config['PROXY_AUTH_HEADER'], None)
+    if not email:
+        return flask.abort(500, 'No %s header' % app.config['PROXY_AUTH_HEADER'])
+
+    user = models.User.get(email)
+    if user:
+        flask.session.regenerate()
+        flask_login.login_user(user)
+        return flask.redirect(app.config['WEB_ADMIN'] if target=='admin' else app.config['WEB_WEBMAIL'])
+    elif app.config['PROXY_AUTH_CREATE']:
+        localpart, desireddomain = email.split('@')
+        domain = models.Domain.query.get(desireddomain) or flask.abort(500, 'You don\'t exist. Go away! (domain=%s)' % desireddomain)
+        if not domain.max_users == -1 and len(domain.users) >= domain.max_users:
+            flask.current_app.logger.warning('Too many users for domain %s' % domain)
+            return flask.abort(500, 'Too many users in (domain=%s)' % domain)
+        user = models.User(localpart=localpart, domain=domain)
+        user.set_password(secrets.token_urlsafe())
+        models.db.session.add(user)
+        models.db.session.commit()
+        user.send_welcome()
+        client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
+        flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
+        return flask.redirect(app.config['WEB_ADMIN'] if target=='admin' else app.config['WEB_WEBMAIL'])
+    else:
+        return flask.abort(500, 'You don\'t exist. Go away! (%s)' % email)

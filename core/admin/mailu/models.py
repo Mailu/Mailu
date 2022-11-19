@@ -2,7 +2,6 @@
 """
 
 import os
-import smtplib
 import json
 
 from datetime import date
@@ -412,14 +411,19 @@ class Email(object):
 
     def sendmail(self, subject, body):
         """ send an email to the address """
-        f_addr = f'{app.config["POSTMASTER"]}@{idna.encode(app.config["DOMAIN"]).decode("ascii")}'
-        with smtplib.SMTP(app.config['HOST_AUTHSMTP'], port=10025) as smtp:
-            to_address = f'{self.localpart}@{idna.encode(self.domain_name).decode("ascii")}'
-            msg = text.MIMEText(body)
-            msg['Subject'] = subject
-            msg['From'] = f_addr
-            msg['To'] = to_address
-            smtp.sendmail(f_addr, [to_address], msg.as_string())
+        try:
+            f_addr = f'{app.config["POSTMASTER"]}@{idna.encode(app.config["DOMAIN"]).decode("ascii")}'
+            ip, port = app.config['HOST_LMTP'].rsplit(':')
+            with smtplib.LMTP(ip, port=port) as lmtp:
+                to_address = f'{self.localpart}@{idna.encode(self.domain_name).decode("ascii")}'
+                msg = text.MIMEText(body)
+                msg['Subject'] = subject
+                msg['From'] = f_addr
+                msg['To'] = to_address
+                lmtp.sendmail(f_addr, [to_address], msg.as_string())
+            return True
+        except smtplib.SMTPException:
+            return False
 
     @classmethod
     def resolve_domain(cls, email):

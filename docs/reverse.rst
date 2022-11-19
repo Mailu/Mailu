@@ -224,7 +224,7 @@ Alternatively, you can define SANs in the Traefik static configuration using rou
 Linuxserver Swag reverse proxy
 ------------------------------
 
-Another popular reverse proxy is Linuxserver Swag with built-in ``letsencrypt``. It can be placed in front of the Mailu front container and used with other docker-containers in ``docker-compose.yml``:
+Another popular reverse proxy is Linuxserver Swag with built-in ACME complient ``certbot client``. It can be placed in front of the Mailu front container and used with other docker-containers in ``docker-compose.yml``:
 
 Configuration steps:
 

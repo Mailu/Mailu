@@ -427,7 +427,12 @@ class Email(object):
         """ send an email to the address """
         try:
             f_addr = f'{app.config["POSTMASTER"]}@{idna.encode(app.config["DOMAIN"]).decode("ascii")}'
+<<<<<<< HEAD
             with smtplib.LMTP(host=app.config['FRONT_ADDRESS'], port=2525) as lmtp:
+=======
+            ip, port = app.config['HOST_LMTP'].rsplit(':')
+            with smtplib.LMTP(ip, port=port) as lmtp:
+>>>>>>> b20bf996 (Fix #2231: make public announcements work)
                 to_address = f'{self.localpart}@{idna.encode(self.domain_name).decode("ascii")}'
                 msg = text.MIMEText(body)
                 msg['Subject'] = subject

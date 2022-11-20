@@ -25,6 +25,7 @@
       prepend='<span class="input-group-text"><span id="quota_bytes_value"></span>&nbsp;GB</span>') }}
   {{ macros.form_field(form.enable_imap) }}
   {{ macros.form_field(form.enable_pop) }}
+  {{ macros.form_field(form.allow_spoofing) }}
   {%- endcall %}
 
   {{ macros.form_field(form.submit) }}

@@ -501,6 +501,7 @@ class User(Base, Email):
     # Features
     enable_imap = db.Column(db.Boolean, nullable=False, default=True)
     enable_pop = db.Column(db.Boolean, nullable=False, default=True)
+    allow_spoofing = db.Column(db.Boolean, nullable=False, default=False)
 
     # Filters
     forward_enabled = db.Column(db.Boolean, nullable=False, default=False)

@@ -84,6 +84,7 @@ class UserForm(flask_wtf.FlaskForm):
     quota_bytes = fields_.IntegerSliderField(_('Quota'), default=10**9)
     enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)
     enable_pop = fields.BooleanField(_('Allow POP3 access'), default=True)
+    allow_spoofing = fields.BooleanField(_('Allow the user to spoof the sender (send email as anyone)'), default=False)
     displayed_name = fields.StringField(_('Displayed name'))
     comment = fields.StringField(_('Comment'))
     enabled = fields.BooleanField(_('Enabled'), default=True)

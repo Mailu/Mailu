@@ -145,8 +145,9 @@ def postfix_sender_login(sender):
     localpart = localpart[:next((i for i, ch in enumerate(localpart) if ch in flask.current_app.config.get('RECIPIENT_DELIMITER')), None)]
     destinations = models.Email.resolve_destination(localpart, domain_name, True) or []
     destinations.extend(wildcard_senders)
+    destinations.extend(i[0] for i in models.User.query.filter_by(allow_spoofing=True).with_entities(models.User.email).all())
     if destinations:
-        return flask.jsonify(",".join(idna_encode(destinations)))
+        return flask.jsonify(",".join(idna_encode(list(set(destinations)))))
     return flask.abort(404)
 
 @internal.route("/postfix/sender/rate/<path:sender>")

@@ -64,10 +64,11 @@ def user_edit(user_email):
         form.quota_bytes.validators = [
             wtforms.validators.NumberRange(max=max_quota_bytes)]
     if form.validate_on_submit():
-        if msg := utils.isBadOrPwned(form):
-            flask.flash(msg, "error")
-            return flask.render_template('user/edit.html', form=form, user=user,
-                domain=user.domain, max_quota_bytes=max_quota_bytes)
+        if form.pw.data:
+            if msg := utils.isBadOrPwned(form):
+                flask.flash(msg, "error")
+                return flask.render_template('user/edit.html', form=form, user=user,
+                    domain=user.domain, max_quota_bytes=max_quota_bytes)
         form.populate_obj(user)
         if form.pw.data:
             user.set_password(form.pw.data)

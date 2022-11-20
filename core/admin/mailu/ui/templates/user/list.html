@@ -39,9 +39,10 @@
       <a href="{{ url_for('.fetch_list', user_email=user.email) }}" title="{% trans %}Fetched accounts{% endtrans %}"><i class="fa fa-download"></i></a>&nbsp;
     </td>
     <td>{{ user }}</td>
-    <td data-sort="{{ user.enable_imap*2 + user.enable_pop }}">
+    <td data-sort="{{ user.enable_imap*2 + user.enable_pop + user.allow_spoofing }}">
       {% if user.enable_imap %}<span class="badge bg-info">imap</span>{% endif %}
       {% if user.enable_pop %}<span class="badge bg-info">pop3</span>{% endif %}
+      {% if user.allow_spoofing %}<span class="badge bg-info">allow-spoofing</span>{% endif %}
     </td>
     <td data-sort="{{ user.quota_bytes_used }}">{{ user.quota_bytes_used | filesizeformat }} / {{ (user.quota_bytes | filesizeformat) if user.quota_bytes else '∞' }}</td>
     <td>{{ user.comment or '-' }}</td>

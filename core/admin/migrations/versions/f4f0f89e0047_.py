@@ -1,4 +1,4 @@
-"""empty message
+""" Add fetch.scan and fetch.folders
 
 Revision ID: f4f0f89e0047
 Revises: 8f9ea78776f4

@@ -1,4 +1,4 @@
-"""empty message
+""" Add user.allow_spoofing
 
 Revision ID: 7ac252f2bbbf
 Revises: 8f9ea78776f4

@@ -4,9 +4,10 @@ import os
 import logging
 import sys
 import subprocess
+import shutil
 import hmac
 
-from socrate import conf
+from socrate import conf, system
 
 env = os.environ
 
@@ -17,6 +18,8 @@ context = {}
 context.update(env)
 
 context["MAX_FILESIZE"] = str(int(int(env.get("MESSAGE_SIZE_LIMIT", "50000000")) * 0.66 / 1048576))
+context["FRONT_ADDRESS"] = system.get_host_address_from_environment("FRONT", "front")
+context["IMAP_ADDRESS"] = system.get_host_address_from_environment("IMAP", "imap")
 
 db_flavor = env.get("ROUNDCUBE_DB_FLAVOR", "sqlite")
 if db_flavor == "sqlite":
@@ -52,7 +55,7 @@ context['SECRET_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray('ROUN
 
 # roundcube plugins
 # (using "dict" because it is ordered and "set" is not)
-plugins = dict((p, None) for p in env.get("ROUNDCUBE_PLUGINS", "").replace(" ", "").split(",") if p and os.path.isdir(os.path.join("/var/www/webmail/plugins", p)))
+plugins = dict((p, None) for p in env.get("ROUNDCUBE_PLUGINS", "").replace(" ", "").split(",") if p and os.path.isdir(os.path.join("/var/www/roundcube/plugins", p)))
 if plugins:
     plugins["mailu"] = None
 else:
@@ -67,15 +70,14 @@ context["INCLUDES"] = sorted(inc for inc in os.listdir("/overrides") if inc.ends
 context["SESSION_TIMEOUT_MINUTES"] = max(int(env.get("SESSION_TIMEOUT", "3600")) // 60, 1)
 
 # create config files
-conf.jinja("/conf/php.ini", context, "/etc/php81/php.ini")
-conf.jinja("/conf/config.inc.php", context, "/var/www/webmail/config/config.inc.php")
+conf.jinja("/conf/config.inc.php", context, "/var/www/roundcube/config/config.inc.php")
 
 # create dirs
 os.system("mkdir -p /data/gpg")
 
 print("Initializing database")
 try:
-    result = subprocess.check_output(["/var/www/webmail/bin/initdb.sh", "--dir", "/var/www/webmail/SQL"],
+    result = subprocess.check_output(["/var/www/roundcube/bin/initdb.sh", "--dir", "/var/www/roundcube/SQL"],
                                      stderr=subprocess.STDOUT)
     print(result.decode())
 except subprocess.CalledProcessError as exc:
@@ -88,22 +90,30 @@ except subprocess.CalledProcessError as exc:
 
 print("Upgrading database")
 try:
-    subprocess.check_call(["/var/www/webmail/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT)
+    subprocess.check_call(["/var/www/roundcube/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT)
 except subprocess.CalledProcessError as exc:
     exit(4)
 else:
     print("Cleaning database")
     try:
-        subprocess.check_call(["/var/www/webmail/bin/cleandb.sh"], stderr=subprocess.STDOUT)
+        subprocess.check_call(["/var/www/roundcube/bin/cleandb.sh"], stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as exc:
         exit(5)
 
+base = "/data/_data_/_default_/"
+shutil.rmtree(base + "domains/", ignore_errors=True)
+os.makedirs(base + "domains", exist_ok=True)
+os.makedirs(base + "configs", exist_ok=True)
+
+conf.jinja("/defaults/default.json", context, "/data/_data_/_default_/domains/default.json")
+conf.jinja("/defaults/application.ini", context, "/data/_data_/_default_/configs/application.ini")
+conf.jinja("/defaults/php.ini", context, "/etc/php81/php.ini")
+
 # setup permissions
-os.system("chown -R nginx:nginx /data")
-os.system("chmod -R a+rX /var/www/webmail/")
+os.system("chown -R mailu:mailu /data")
 
 # Configure nginx
-conf.jinja("/conf/nginx-roundcube.conf", context, "/etc/nginx/http.d/roundcube.conf")
+conf.jinja("/conf/nginx-webmail.conf", context, "/etc/nginx/http.d/webmail.conf")
 if os.path.exists("/var/run/nginx.pid"):
     os.system("nginx -s reload")
 

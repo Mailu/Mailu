@@ -340,7 +340,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ["core", "fetchmail", "filters", "snappymail", "roundcube", "webdav"]
+        target: ["core", "fetchmail", "filters", "webmail", "webdav"]
         time: ["2"]
         include:
           - target: "filters"
@@ -394,7 +394,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ["setup", "docs", "fetchmail", "roundcube", "admin", "traefik-certdumper", "radicale", "clamav", "rspamd", "postfix", "dovecot", "unbound", "nginx", "snappymail"]
+        target: ["setup", "docs", "fetchmail", "webmail", "admin", "traefik-certdumper", "radicale", "clamav", "rspamd", "postfix", "dovecot", "unbound", "nginx"]
     steps:
       - uses: actions/checkout@v3
       - name: Retrieve global variables
@@ -439,7 +439,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ["setup", "docs", "fetchmail", "roundcube", "admin", "traefik-certdumper", "radicale", "clamav", "rspamd", "postfix", "dovecot", "unbound", "nginx", "snappymail"]
+        target: ["setup", "docs", "fetchmail", "webmail", "admin", "traefik-certdumper", "radicale", "clamav", "rspamd", "postfix", "dovecot", "unbound", "nginx"]
     steps:
       - uses: actions/checkout@v3
       - name: Retrieve global variables

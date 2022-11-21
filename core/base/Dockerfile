@@ -8,14 +8,13 @@ ENV TZ=Etc/UTC LANG=C.UTF-8
 
 ARG MAILU_UID=1000
 ARG MAILU_GID=1000
-ARG TARGETPLATFORM
 
 RUN set -euxo pipefail \
   ; addgroup -Sg ${MAILU_GID} mailu \
   ; adduser -Sg ${MAILU_UID} -G mailu -h /app -g "mailu app" -s /bin/bash mailu \
   ; apk add --no-cache bash ca-certificates curl python3 tzdata libcap \
   ; machine="$(uname -m)" \
-  ; ! [[ "${TARGETPLATFORM}" != linux/arm/v7 && \( "${machine}" == x86_64 || "${machine}" == armv8* || "${machine}" == aarch64 \) ]] \
+  ; ! [[ "${machine}" == x86_64 ]] \
     || apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc
 
 ENV LD_PRELOAD=/usr/lib/libhardened_malloc.so

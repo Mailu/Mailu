@@ -39,7 +39,7 @@
     <td>{{ fetch.username }}</td>
     <td data-sort="{{ fetch.keep }}">{% if fetch.keep %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
     <td data-sort="{{ fetch.scan }}">{% if fetch.scan %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
-    <td>{{ fetch.folders.data | join(',') }}</td>
+    <td>{{ fetch.folders | join(',') }}</td>
     <td>{{ fetch.last_check | format_datetime or '-' }}</td>
     <td>{{ fetch.error or '-' }}</td>
     <td data-sort="{{ fetch.created_at or '0000-00-00' }}">{{ fetch.created_at | format_date }}</td>

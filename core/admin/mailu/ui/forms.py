@@ -42,6 +42,7 @@ class MultipleEmailAddressesVerify(object):
             raise validators.ValidationError(self.message)
 
 class MultipleFoldersVerify(object):
+    """ Ensure that we have CSV formated data """
     def __init__(self,message=_('Invalid list of folders.')):
         self.message = message
 

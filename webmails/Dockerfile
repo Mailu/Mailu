@@ -79,7 +79,7 @@ RUN set -euxo pipefail \
 # common
 COPY start.py /
 COPY php.ini /defaults/
-COPY php-webmail.conf /etc/php81/php-fpm.d/php-webmail.conf
+COPY php-webmail.conf /etc/php81/php-fpm.d/
 COPY nginx-webmail.conf /conf/
 
 EXPOSE 80/tcp

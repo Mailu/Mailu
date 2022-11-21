@@ -771,6 +771,8 @@ class Fetch(Base):
     username = db.Column(db.String(255), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     keep = db.Column(db.Boolean, nullable=False, default=False)
+    scan = db.Column(db.Boolean, nullable=False, default=False)
+    folders = db.Column(CommaSeparatedList, nullable=True, default=list)
     last_check = db.Column(db.DateTime, nullable=True)
     error = db.Column(db.String(1023), nullable=True)
 

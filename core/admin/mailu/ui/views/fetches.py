@@ -1,4 +1,4 @@
-from mailu import models
+from mailu import models, utils
 from mailu.ui import ui, forms, access
 from flask import current_app as app
 
@@ -28,9 +28,12 @@ def fetch_create(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     form = forms.FetchForm()
     form.password.validators = [wtforms.validators.DataRequired()]
+    utils.formatCSVField(form.folders)
     if form.validate_on_submit():
         fetch = models.Fetch(user=user)
         form.populate_obj(fetch)
+        if form.folders.data:
+            fetch.folders = form.folders.data.replace(' ','').split(',')
         models.db.session.add(fetch)
         models.db.session.commit()
         flask.flash('Fetch configuration created')
@@ -46,10 +49,13 @@ def fetch_edit(fetch_id):
         flask.abort(404)
     fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
     form = forms.FetchForm(obj=fetch)
+    utils.formatCSVField(form.folders)
     if form.validate_on_submit():
         if not form.password.data:
             form.password.data = fetch.password
         form.populate_obj(fetch)
+        if form.folders.data:
+            fetch.folders = form.folders.data.replace(' ','').split(',')
         models.db.session.commit()
         flask.flash('Fetch configuration updated')
         return flask.redirect(

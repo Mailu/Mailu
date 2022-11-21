@@ -1,0 +1,1 @@
+Add an option so that emails fetched with fetchmail don't go through the filters (closes #1231)

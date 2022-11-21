@@ -35,4 +35,5 @@ while True:
 # Run rspamd
 os.system("mkdir -m 755 -p /run/rspamd")
 os.system("chown rspamd:rspamd /run/rspamd")
+os.system("find /var/lib/rspamd | grep -v /filter | xargs -n1 chown rspamd:rspamd")
 os.execv("/usr/sbin/rspamd", ["rspamd", "-f", "-u", "rspamd", "-g", "rspamd"])

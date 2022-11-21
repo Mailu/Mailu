@@ -7,7 +7,6 @@ import sys
 
 os.system("chown mailu:mailu -R /dkim")
 os.system("find /data | grep -v /fetchmail | xargs -n1 chown mailu:mailu")
-os.system("find /var/lib/rspamd | grep -v /filter | xargs -n1 chown mailu:mailu")
 mailu_id = getpwnam('mailu')
 os.setgid(mailu_id.pw_gid)
 os.setuid(mailu_id.pw_uid)

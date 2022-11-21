@@ -49,7 +49,7 @@ COPY roundcube/config/config.inc.carddav.php /var/www/roundcube/plugins/carddav/
 
 # snappymail
 
-ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.21.0/snappymail-2.21.0.tar.gz
+ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.21.3/snappymail-2.21.3.tar.gz
 
 RUN set -euxo pipefail \
   ; mkdir  /var/www/snappymail \

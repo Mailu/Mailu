@@ -33,4 +33,7 @@ while True:
     log.warning("Admin is not up just yet, retrying in 1 second")
 
 # Run rspamd
-os.execv("/usr/sbin/rspamd", ["rspamd", "-i", "-f"])
+os.system("mkdir -m 755 -p /run/rspamd")
+os.system("chown rspamd:rspamd /run/rspamd")
+os.system("find /var/lib/rspamd | grep -v /filter | xargs -n1 chown rspamd:rspamd")
+os.execv("/usr/sbin/rspamd", ["rspamd", "-f", "-u", "rspamd", "-g", "rspamd"])

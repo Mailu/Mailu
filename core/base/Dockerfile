@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile-upstream:1.4.3
 
 # base system image (intermediate)
-ARG DISTRO=alpine:3.16.2
+ARG DISTRO=alpine:3.16.3
 FROM $DISTRO as system
 
 ENV TZ=Etc/UTC LANG=C.UTF-8
@@ -12,7 +12,7 @@ ARG MAILU_GID=1000
 RUN set -euxo pipefail \
   ; addgroup -Sg ${MAILU_GID} mailu \
   ; adduser -Sg ${MAILU_UID} -G mailu -h /app -g "mailu app" -s /bin/bash mailu \
-  ; apk add --no-cache bash ca-certificates curl python3 tzdata \
+  ; apk add --no-cache bash ca-certificates curl python3 tzdata libcap \
   ; machine="$(uname -m)" \
   ; ! [[ "${machine}" == x86_64 ]] \
     || apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc
@@ -71,6 +71,7 @@ RUN set -euxo pipefail \
 FROM system
 
 COPY --from=build /app/venv/ /app/venv/
+RUN setcap 'cap_net_bind_service=+ep' /app/venv/bin/gunicorn
 
 ENV VIRTUAL_ENV=/app/venv
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"

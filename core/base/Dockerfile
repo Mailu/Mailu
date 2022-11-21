@@ -12,7 +12,16 @@ ARG MAILU_GID=1000
 RUN set -euxo pipefail \
   ; addgroup -Sg ${MAILU_GID} mailu \
   ; adduser -Sg ${MAILU_UID} -G mailu -h /app -g "mailu app" -s /bin/bash mailu \
-  ; apk add --no-cache bash ca-certificates curl python3 tzdata
+  ; apk add --no-cache bash ca-certificates curl python3 tzdata \
+  ; machine="$(uname -m)" \
+  ; ! [[ "${machine}" == x86_64 ]] \
+    || apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc
+
+ENV LD_PRELOAD=/usr/lib/libhardened_malloc.so
+ENV CXXFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security -fstack-clash-protection -fexceptions"
+ENV CFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security -fstack-clash-protection -fexceptions"
+ENV CPPFLAGS="-Wdate-time -D_FORTIFY_SOURCE=2"
+ENV LDFLAGS="-Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
 
 WORKDIR /app
 

@@ -119,6 +119,13 @@ if __name__ == "__main__":
     os.setgid(id_fetchmail.pw_gid)
     os.setuid(id_fetchmail.pw_uid)
     while True:
-        time.sleep(int(os.environ.get("FETCHMAIL_DELAY", 60)))
+        delay = int(os.environ.get("FETCHMAIL_DELAY", 60))
+        print("Sleeping for {} seconds".format(delay))
+        time.sleep(delay)
+
+        if not os.environ.get("FETCHMAIL_ENABLED", 'True') in ('True', 'true'):
+            print("Fetchmail disabled, skipping...")
+            continue
+
         run(os.environ.get("DEBUG", None) == "True")
         sys.stdout.flush()

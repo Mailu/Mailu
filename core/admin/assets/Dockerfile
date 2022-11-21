@@ -5,7 +5,6 @@ FROM node:16-alpine3.16
 WORKDIR /work
 
 COPY package.json ./
-COPY webpack.config.js ./
 
 RUN set -euxo pipefail \
   ; npm config set update-notifier false \
@@ -17,6 +16,7 @@ RUN set -euxo pipefail \
     done
 
 COPY assets/ ./assets/
+COPY webpack.config.js ./
 
 RUN set -euxo pipefail \
   ; node_modules/.bin/webpack-cli --color

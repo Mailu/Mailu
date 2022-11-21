@@ -31,12 +31,14 @@
           <p>{% trans %}Auto-reply{% endtrans %}</p>
         </a>
       </li>
+      {%- if config["FETCHMAIL_ENABLED"] %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.fetch_list') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fas fa-download"></i>
           <p>{% trans %}Fetched accounts{% endtrans %}</p>
         </a>
       </li>
+      {%- endif %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.token_list') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fas fa-ticket-alt"></i>

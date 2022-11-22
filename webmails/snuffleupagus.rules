@@ -72,6 +72,7 @@ sp.disable_function.function("include").drop()
 sp.disable_function.function("system").param("command").value_r("[$|;&`\\n\\(\\)\\\\]").drop();
 sp.disable_function.function("shell_exec").param("command").value_r("[$|;&`\\n\\(\\)\\\\]").drop();
 sp.disable_function.function("exec").param("command").value_r("[$|;&`\\n\\(\\)\\\\]").drop();
+# This is **very** broad but doing better is non-straightforward
 sp.disable_function.function("proc_open").param("command").value_r("^gpg ").allow();
 sp.disable_function.function("proc_open").param("command").value_r("[$|;&`\\n\\(\\)\\\\]").drop();
 
@@ -121,8 +122,12 @@ sp.disable_function.function("ini_set").param("option").value_r("error_log").dro
 sp.disable_function.function("ini_set").param("option").value_r("display_errors").drop()
 
 sp.auto_cookie_secure.enable();
+# TODO: consider encrypting the cookies?
+# TODO: ensure this is up to date
 sp.cookie.name("roundcube_sessauth").samesite("strict");
 sp.cookie.name("roundcube_sessid").samesite("strict");
 sp.ini_protection.policy_silent_fail();
 
+# roundcube uses unserialize() everywhere.
+# This should do the job until https://github.com/jvoisin/snuffleupagus/issues/438 is implemented.
 sp.disable_function.function("unserialize").param("data").value_r("[cCoO]:\d+:[\"{]").drop();

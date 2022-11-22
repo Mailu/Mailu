@@ -518,3 +518,10 @@ def isBadOrPwned(form):
     if breaches > 0:
         return f"This password appears in {breaches} data breaches! It is not unique; please change it."
     return None
+
+def formatCSVField(field):
+    if isinstance(field.data,str):
+        data = field.data.replace(" ","").split(",")
+    else:
+        data = field.data
+    field.data = ", ".join(data)

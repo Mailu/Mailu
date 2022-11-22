@@ -106,6 +106,9 @@ target "docs" {
 target "setup" {
   inherits = ["defaults"]
   context = "setup/"
+  contexts = {
+    base = "target:base"
+  }
   tags = tag("setup")
 }
 

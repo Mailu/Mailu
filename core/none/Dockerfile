@@ -10,5 +10,5 @@ RUN echo $VERSION >/version
 
 HEALTHCHECK CMD true
 
-USER app
+USER mailu
 CMD ["/bin/bash", "-c", "sleep infinity"]

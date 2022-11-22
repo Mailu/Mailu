@@ -104,6 +104,9 @@ support or e.g. mismatching TLS versions to deliver emails to Mailu.
 
 .. _fetchmail:
 
+When ``FETCHMAIL_ENABLED`` is set to ``True``, the fetchmail functionality is enabled in the admin interface.
+The container itself still needs to be deployed manually. ``FETCHMAIL_ENABLED`` defaults to ``True``.
+
 The ``FETCHMAIL_DELAY`` is a delay (in seconds) for the fetchmail service to
 go and fetch new email if available. Do not use too short delays if you do not
 want to be blacklisted by external services, but not too long delays if you
@@ -286,6 +289,10 @@ The admin service stores configurations in a database.
 - ``DB_PW``: the database password for mailu admin service. (when not ``sqlite``)
 - ``DB_USER``: the database user for mailu admin service. (when not ``sqlite``)
 - ``DB_NAME``: the database name for mailu admin service. (when not ``sqlite``)
+
+Alternatively, if you need more control, you can use a `DB URL`_ : do not set any of the ``DB_`` settings and set ``SQLALCHEMY_DATABASE_URI`` instead.
+
+.. _`DB URL`: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls
 
 The roundcube service stores configurations in a database.
 

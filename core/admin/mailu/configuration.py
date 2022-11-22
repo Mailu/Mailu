@@ -13,17 +13,19 @@ DEFAULT_CONFIG = {
     'RATELIMIT_STORAGE_URL': '',
     'DEBUG': False,
     'DEBUG_PROFILER': False,
+    'DEBUG_TB_INTERCEPT_REDIRECTS': False,
     'DEBUG_ASSETS': '',
     'DOMAIN_REGISTRATION': False,
     'TEMPLATES_AUTO_RELOAD': True,
     'MEMORY_SESSIONS': False,
+    'FETCHMAIL_ENABLED': False,
     # Database settings
     'DB_FLAVOR': None,
     'DB_USER': 'mailu',
     'DB_PW': None,
     'DB_HOST': 'database',
     'DB_NAME': 'mailu',
-    'SQLITE_DATABASE_FILE':'data/main.db',
+    'SQLITE_DATABASE_FILE': 'data/main.db',
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     # Statistics management
@@ -60,7 +62,7 @@ DEFAULT_CONFIG = {
     # Web settings
     'SITENAME': 'Mailu',
     'WEBSITE': 'https://mailu.io',
-    'ADMIN' : 'none',
+    'ADMIN': 'none',
     'WEB_ADMIN': '/admin',
     'WEB_WEBMAIL': '/webmail',
     'WEBMAIL': 'none',
@@ -73,7 +75,7 @@ DEFAULT_CONFIG = {
     'SESSION_KEY_BITS': 128,
     'SESSION_TIMEOUT': 3600,
     'PERMANENT_SESSION_LIFETIME': 30*24*3600,
-    'SESSION_COOKIE_SECURE': True,
+    'SESSION_COOKIE_SECURE': None,
     'CREDENTIAL_ROUNDS': 12,
     'TLS_PERMISSIVE': True,
     'TZ': 'Etc/UTC',
@@ -156,6 +158,8 @@ class ConfigManager:
         self.config['SESSION_STORAGE_URL'] = f'redis://{self.config["REDIS_ADDRESS"]}/3'
         self.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
+        if self.config['SESSION_COOKIE_SECURE'] is None:
+            self.config['SESSION_COOKIE_SECURE'] = self.config['TLS_FLAVOR'] != 'notls'
         self.config['SESSION_PERMANENT'] = True
         self.config['SESSION_TIMEOUT'] = int(self.config['SESSION_TIMEOUT'])
         self.config['PERMANENT_SESSION_LIFETIME'] = int(self.config['PERMANENT_SESSION_LIFETIME'])

@@ -103,16 +103,33 @@ services:
       - {{ dns }}
     {% endif %}
 
+  oletools:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-{{ version }}}
+    hostname: oletools
+    restart: always
+    networks:
+      - noinet
+    depends_on:
+    {% if resolver_enabled %}
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
+
   antispam:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-{{ version }}}
     hostname: antispam
     restart: always
     env_file: {{ env }}
+    networks:
+      - default
+      - noinet
     volumes:
       - "{{ root }}/filter:/var/lib/rspamd"
       - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d:ro"
     depends_on:
       - front
+      - oletools
     {% if resolver_enabled %}
       - resolver
     dns:
@@ -199,3 +216,6 @@ networks:
         {% if ipv6_enabled %}
         - subnet: {{ subnet6 }}
         {% endif %}
+  noinet:
+    driver: bridge
+    internal: true

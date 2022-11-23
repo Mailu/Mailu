@@ -14,6 +14,7 @@ log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
 os.environ["REDIS_ADDRESS"] = system.get_host_address_from_environment("REDIS", "redis")
 os.environ["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
+os.environ["OLETOOLS_ADDRESS"] = system.get_host_address_from_environment("OLETOOLS", "oletools:11343")
 
 if os.environ.get("ANTIVIRUS") == 'clamav':
     os.environ["ANTIVIRUS_ADDRESS"] = system.get_host_address_from_environment("ANTIVIRUS", "antivirus:3310")

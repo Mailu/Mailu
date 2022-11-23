@@ -41,7 +41,7 @@ MarkupSafe==2.1.1
 marshmallow==3.18.0
 marshmallow-sqlalchemy==0.28.1
 multidict==6.0.2
-mysql-connector-python==8.0.31
+mysql-connector-python==8.0.29
 packaging==21.3
 passlib==1.7.4
 podop @ file:///app/libs/podop

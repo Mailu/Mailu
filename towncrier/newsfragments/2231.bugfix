@@ -1,0 +1,1 @@
+Make public announcement bypass the filters. They may still time-out before being sent if there is a large number of users.

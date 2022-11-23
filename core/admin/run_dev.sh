@@ -87,7 +87,7 @@ EOF
 
 # build
 chmod -R u+rwX,go+rX .
-"${docker}" build --build-arg TARGETPLATFORM=linux/amd64 --tag "${DEV_NAME}:latest" .
+"${docker}" build --tag "${DEV_NAME}:latest" .
 
 # gather volumes to map into container
 volumes=()

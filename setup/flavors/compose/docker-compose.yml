@@ -130,6 +130,7 @@ services:
     depends_on:
       - front
       - oletools
+      - redis
     {% if resolver_enabled %}
       - resolver
     dns:

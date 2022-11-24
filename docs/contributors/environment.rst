@@ -130,8 +130,8 @@ To re-build only specific containers at a later time.
 
   docker buildx bake -f tests/build.hcl admin webdav
 
-If you have to push the images to Docker Hub for testing in Docker Swarm or a remote
-host, you have to define ``DOCKER_ORG`` (usually your Docker user-name) and login to
+If you have to push the images to Docker Hub for testing, you have to
+define ``DOCKER_ORG`` (usually your Docker user-name) and login to
 the hub.
 
 .. code-block:: bash

@@ -78,6 +78,18 @@ conf.jinja("/conf/config.inc.php", context, "/var/www/roundcube/config/config.in
 # create dirs
 os.system("mkdir -p /data/gpg")
 
+base = "/data/_data_/_default_/"
+shutil.rmtree(base + "domains/", ignore_errors=True)
+os.makedirs(base + "domains", exist_ok=True)
+os.makedirs(base + "configs", exist_ok=True)
+
+conf.jinja("/defaults/default.json", context, "/data/_data_/_default_/domains/default.json")
+conf.jinja("/defaults/application.ini", context, "/data/_data_/_default_/configs/application.ini")
+conf.jinja("/defaults/php.ini", context, "/etc/php81/php.ini")
+
+# setup permissions
+os.system("chown -R mailu:mailu /data")
+
 def demote(user_uid, user_gid):
     def result():
         os.setgid(user_gid)
@@ -109,18 +121,6 @@ else:
         subprocess.check_call(["/var/www/roundcube/bin/cleandb.sh"], stderr=subprocess.STDOUT, preexec_fn=demote(id_mailu.pw_uid,id_mailu.pw_gid))
     except subprocess.CalledProcessError as exc:
         exit(5)
-
-base = "/data/_data_/_default_/"
-shutil.rmtree(base + "domains/", ignore_errors=True)
-os.makedirs(base + "domains", exist_ok=True)
-os.makedirs(base + "configs", exist_ok=True)
-
-conf.jinja("/defaults/default.json", context, "/data/_data_/_default_/domains/default.json")
-conf.jinja("/defaults/application.ini", context, "/data/_data_/_default_/configs/application.ini")
-conf.jinja("/defaults/php.ini", context, "/etc/php81/php.ini")
-
-# setup permissions
-os.system("chown -R mailu:mailu /data")
 
 # Configure nginx
 conf.jinja("/conf/nginx-webmail.conf", context, "/etc/nginx/http.d/webmail.conf")

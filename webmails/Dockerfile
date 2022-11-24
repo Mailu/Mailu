@@ -22,9 +22,8 @@ RUN set -euxo pipefail \
   ; gpg --import /tmp/snappymail.asc \
   ; gpg --import /tmp/roundcube.asc \
   ; echo extension=snuffleupagus > /etc/php81/conf.d/snuffleupagus.ini \
-  ; rm -f /tmp/*asc \
-  ; mkdir -p /run/nginx \
-  ; mkdir -p /conf
+  ; rm -f /tmp/roundcube.asc /tmp/snappymail.asc \
+  ; mkdir -p /run/nginx /conf
 
 # roundcube
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.5.3/roundcubemail-1.5.3-complete.tar.gz

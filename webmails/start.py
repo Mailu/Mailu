@@ -2,6 +2,7 @@
 
 import os
 import logging
+from pwd import getpwnam
 import sys
 import subprocess
 import shutil
@@ -77,31 +78,6 @@ conf.jinja("/conf/config.inc.php", context, "/var/www/roundcube/config/config.in
 # create dirs
 os.system("mkdir -p /data/gpg")
 
-print("Initializing database")
-try:
-    result = subprocess.check_output(["/var/www/roundcube/bin/initdb.sh", "--dir", "/var/www/roundcube/SQL"],
-                                     stderr=subprocess.STDOUT)
-    print(result.decode())
-except subprocess.CalledProcessError as exc:
-    err = exc.stdout.decode()
-    if "already exists" in err:
-        print("Already initialized")
-    else:
-        print(err)
-        exit(3)
-
-print("Upgrading database")
-try:
-    subprocess.check_call(["/var/www/roundcube/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT)
-except subprocess.CalledProcessError as exc:
-    exit(4)
-else:
-    print("Cleaning database")
-    try:
-        subprocess.check_call(["/var/www/roundcube/bin/cleandb.sh"], stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as exc:
-        exit(5)
-
 base = "/data/_data_/_default_/"
 shutil.rmtree(base + "domains/", ignore_errors=True)
 os.makedirs(base + "domains", exist_ok=True)
@@ -113,6 +89,38 @@ conf.jinja("/defaults/php.ini", context, "/etc/php81/php.ini")
 
 # setup permissions
 os.system("chown -R mailu:mailu /data")
+
+def demote(user_uid, user_gid):
+    def result():
+        os.setgid(user_gid)
+        os.setuid(user_uid)
+    return result
+id_mailu = getpwnam('mailu')
+
+print("Initializing database")
+try:
+    result = subprocess.check_output(["/var/www/roundcube/bin/initdb.sh", "--dir", "/var/www/roundcube/SQL"],
+                                     stderr=subprocess.STDOUT, preexec_fn=demote(id_mailu.pw_uid,id_mailu.pw_gid))
+    print(result.decode())
+except subprocess.CalledProcessError as exc:
+    err = exc.stdout.decode()
+    if "already exists" in err:
+        print("Already initialized")
+    else:
+        print(err)
+        exit(3)
+
+print("Upgrading database")
+try:
+    subprocess.check_call(["/var/www/roundcube/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT, preexec_fn=demote(id_mailu.pw_uid,id_mailu.pw_gid))
+except subprocess.CalledProcessError as exc:
+    exit(4)
+else:
+    print("Cleaning database")
+    try:
+        subprocess.check_call(["/var/www/roundcube/bin/cleandb.sh"], stderr=subprocess.STDOUT, preexec_fn=demote(id_mailu.pw_uid,id_mailu.pw_gid))
+    except subprocess.CalledProcessError as exc:
+        exit(5)
 
 # Configure nginx
 conf.jinja("/conf/nginx-webmail.conf", context, "/etc/nginx/http.d/webmail.conf")

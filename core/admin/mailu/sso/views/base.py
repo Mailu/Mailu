@@ -83,17 +83,17 @@ def proxy(target='webmail'):
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
     try:
         localpart, desireddomain = email.rsplit('@')
-        domain = models.Domain.query.get(desireddomain) or flask.abort(500, 'You don\'t exist. Go away! (domain=%s)' % desireddomain)
-        if not domain.max_users == -1 and len(domain.users) >= domain.max_users:
-            flask.current_app.logger.warning('Too many users for domain %s' % domain)
-            return flask.abort(500, 'Too many users in (domain=%s)' % domain)
-        user = models.User(localpart=localpart, domain=domain)
-        user.set_password(secrets.token_urlsafe())
-        models.db.session.add(user)
-        models.db.session.commit()
-        user.send_welcome()
-        flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
-        return flask.redirect(app.config['WEB_ADMIN'] if target=='admin' else app.config['WEB_WEBMAIL'])
     except Exception as e:
         flask.current_app.logger.error('Error creating a new user via proxy for %s from %s: %s' % (email, client_ip, str(e)), e)
         return flask.abort(500, 'You don\'t exist. Go away! (%s)' % email)
+    domain = models.Domain.query.get(desireddomain) or flask.abort(500, 'You don\'t exist. Go away! (domain=%s)' % desireddomain)
+    if not domain.max_users == -1 and len(domain.users) >= domain.max_users:
+        flask.current_app.logger.warning('Too many users for domain %s' % domain)
+        return flask.abort(500, 'Too many users in (domain=%s)' % domain)
+    user = models.User(localpart=localpart, domain=domain)
+    user.set_password(secrets.token_urlsafe())
+    models.db.session.add(user)
+    models.db.session.commit()
+    user.send_welcome()
+    flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
+    return flask.redirect(app.config['WEB_ADMIN'] if target=='admin' else app.config['WEB_WEBMAIL'])

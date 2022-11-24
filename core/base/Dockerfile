@@ -15,7 +15,7 @@ RUN set -euxo pipefail \
   ; apk add --no-cache bash ca-certificates curl python3 tzdata libcap \
   ; machine="$(uname -m)" \
   ; ! [[ "${machine}" == x86_64 ]] \
-    || apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc
+    || apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc==11-r0
 
 ENV LD_PRELOAD=/usr/lib/libhardened_malloc.so
 ENV CXXFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security -fstack-clash-protection -fexceptions"

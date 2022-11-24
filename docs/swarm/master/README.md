@@ -2,6 +2,8 @@
 
 ## Some warnings
 
+**Please note that next version of Mailu will not support swarm deployments anymore.**
+
 ### How Docker swarm works
 
 Docker swarm enables replication and fail-over scenarios. As a feature, if a node dies or goes away, Docker will re-schedule it's containers on the remaining nodes.

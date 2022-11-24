@@ -8,6 +8,6 @@ maintained by specific contributors.</p>
 
 <div class="radio">
   {{ macros.radio("flavor", "compose", "Compose", "simply using Docker Compose manager", flavor) }}
-  {{ macros.radio("flavor", "stack", "Stack", "using stack deployments in a Swarm cluster", flavor) }}
+  {{ macros.radio("flavor", "stack", "Stack (DEPRECATED)", "using stack deployments in a Swarm cluster. Please note that next version of Mailu will not offer this flavor.", flavor) }}
 </div>
 {% endcall %}

@@ -1,0 +1,68 @@
+ID;PWXL;N;E
+P;PGeneral
+P;P0
+P;P0.00
+P;P#,##0
+P;P#,##0.00
+P;P#,##0;;\-#,##0
+P;P#,##0;;[Red]\-#,##0
+P;P#,##0.00;;\-#,##0.00
+P;P#,##0.00;;[Red]\-#,##0.00
+P;P#,##0\ "$";;\-#,##0\ "$"
+P;P#,##0\ "$";;[Red]\-#,##0\ "$"
+P;P#,##0.00\ "$";;\-#,##0.00\ "$"
+P;P#,##0.00\ "$";;[Red]\-#,##0.00\ "$"
+P;P0%
+P;P0.00%
+P;P0.00E+00
+P;P##0.0E+0
+P;P#" "?/?
+P;P#" "??/??
+P;Pdd/mm/yyyy
+P;Pdd\-mmm\-yy
+P;Pdd\-mmm
+P;Pmmm\-yy
+P;Ph:mm\ AM/PM
+P;Ph:mm:ss\ AM/PM
+P;Phh:mm
+P;Phh:mm:ss
+P;Pdd/mm/yyyy\ hh:mm
+P;Pmm:ss
+P;Pmm:ss.0
+P;P@
+P;P[h]:mm:ss
+P;P_-* #,##0\ "$"_-;;\-* #,##0\ "$"_-;;_-* "-"\ "$"_-;;_-@_-
+P;P_-* #,##0_-;;\-* #,##0_-;;_-* "-"_-;;_-@_-
+P;P_-* #,##0.00\ "$"_-;;\-* #,##0.00\ "$"_-;;_-* "-"??\ "$"_-;;_-@_-
+P;P_-* #,##0.00_-;;\-* #,##0.00_-;;_-* "-"??_-;;_-@_-
+P;FCalibri;M220;L9
+P;FCalibri;M220;L9
+P;FCalibri;M220;L9
+P;FCalibri;M220;L9
+P;ECalibri;M220;L9
+P;ECalibri Light;M360;L55
+P;ECalibri;M300;SB;L55
+P;ECalibri;M260;SB;L55
+P;ECalibri;M220;SB;L55
+P;ECalibri;M220;L18
+P;ECalibri;M220;L21
+P;ECalibri;M220;L61
+P;ECalibri;M220;L63
+P;ECalibri;M220;SB;L64
+P;ECalibri;M220;SB;L53
+P;ECalibri;M220;L53
+P;ECalibri;M220;SB;L10
+P;ECalibri;M220;L11
+P;ECalibri;M220;SI;L24
+P;ECalibri;M220;SB;L9
+P;ECalibri;M220;L10
+P;ESegoe UI;M200;L9
+F;P0;DG0G8;E;M292
+B;Y2;X1;D0 0 1 0
+O;L;E;D;V0;K47;G100 0.001
+F;W1 1 17
+F;W2 16384 9
+NN;NAuto_Open;ER1C1
+C;Y1;X1;KFALSE;EALERT("This is a sample Excel 4 macro")
+C;Y2;KTRUE;EHALT()
+E

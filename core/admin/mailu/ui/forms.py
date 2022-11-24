@@ -41,6 +41,16 @@ class MultipleEmailAddressesVerify(object):
         if not pattern.match(field.data.replace(" ", "")):
             raise validators.ValidationError(self.message)
 
+class MultipleFoldersVerify(object):
+    """ Ensure that we have CSV formated data """
+    def __init__(self,message=_('Invalid list of folders.')):
+        self.message = message
+
+    def __call__(self, form, field):
+        pattern = re.compile(r'^\w+(\s*,\s*\w+)*$')
+        if not pattern.match(field.data.replace(" ", "")):
+            raise validators.ValidationError(self.message)
+
 class ConfirmationForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Confirm'))
 
@@ -165,11 +175,13 @@ class FetchForm(flask_wtf.FlaskForm):
         ('imap', 'IMAP'), ('pop3', 'POP3')
     ])
     host = fields.StringField(_('Hostname or IP'), [validators.DataRequired()])
-    port = fields.IntegerField(_('TCP port'), [validators.DataRequired(), validators.NumberRange(min=0, max=65535)])
-    tls = fields.BooleanField(_('Enable TLS'))
+    port = fields.IntegerField(_('TCP port'), [validators.DataRequired(), validators.NumberRange(min=0, max=65535)], default=993)
+    tls = fields.BooleanField(_('Enable TLS'), default=True)
     username = fields.StringField(_('Username'), [validators.DataRequired()])
     password = fields.PasswordField(_('Password'))
     keep = fields.BooleanField(_('Keep emails on the server'))
+    scan = fields.BooleanField(_('Rescan emails locally'))
+    folders = fields.StringField(_('Folders to fetch on the server'), [validators.Optional(), MultipleFoldersVerify()], default='INBOX,Junk')
     submit = fields.SubmitField(_('Submit'))
 
 

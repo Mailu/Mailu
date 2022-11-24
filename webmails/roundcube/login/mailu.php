@@ -18,13 +18,6 @@ class mailu extends rcube_plugin
       $args['action'] = 'login';
     }
 
-    $ua = $_SERVER['HTTP_USER_AGENT'];
-    $ra = $_SERVER['REMOTE_ADDR'];
-    if ($ua == 'health' and ($ra == '127.0.0.1' or $ra == '::1')) {
-      print('OK');
-      exit();
-    }
-
     return $args;
   }
 
@@ -35,7 +28,7 @@ class mailu extends rcube_plugin
         header('HTTP/1.0 403 Forbidden');
         print('mailu sso failure');
       } else {
-        header('Location: sso.php');
+        header('Location: sso.php', 302);
       }
       exit();
     }
@@ -54,19 +47,19 @@ class mailu extends rcube_plugin
   {
     $this->load_config();
     $sso_logout_url = rcmail::get_instance()->config->get('sso_logout_url');
-    header('Location: ' . $sso_logout_url, true);
+    header('Location: ' . $sso_logout_url, true, 302);
     exit();
   }
 
   function login($args)
   {
-    header('Location: index.php');
+    header('Location: index.php', 302);
     exit();
   }
 
   function login_failed($args)
   {
-    header('Location: sso.php');
+    header('Location: sso.php', 302);
     exit();
   }
 

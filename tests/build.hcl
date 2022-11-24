@@ -36,8 +36,7 @@ group "default" {
     "imap",
     "smtp",
 
-    "snappymail",
-    "roundcube",
+    "webmail",
 
     "antivirus",
     "fetchmail",
@@ -107,6 +106,9 @@ target "docs" {
 target "setup" {
   inherits = ["defaults"]
   context = "setup/"
+  contexts = {
+    base = "target:base"
+  }
   tags = tag("setup")
 }
 
@@ -169,24 +171,15 @@ target "smtp" {
 }
 
 # -----------------------------------------------------------------------------------------
-# Webmail images
+# Webmail image
 # -----------------------------------------------------------------------------------------
-target "snappymail" {
+target "webmail" {
   inherits = ["defaults"]
-  context = "webmails/snappymail/"
+  context = "webmails/"
   contexts = {
     base = "target:base"
   }
-  tags = tag("snappymail")
-}
-
-target "roundcube" {
-  inherits = ["defaults"]
-  context = "webmails/roundcube/"
-  contexts = {
-    base = "target:base"
-  }
-  tags = tag("roundcube")
+  tags = tag("webmail")
 }
 
 # -----------------------------------------------------------------------------------------

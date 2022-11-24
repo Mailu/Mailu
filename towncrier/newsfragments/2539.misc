@@ -1,0 +1,1 @@
+Upgrade to Alpine 3.16.3; Make setup, admin and rspamd run without root privs. Please ensure that your folder overrides/rspamd is owned by 1000:1000

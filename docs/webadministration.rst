@@ -157,7 +157,11 @@ You can add a fetched account by clicking on the `Add an account` button on the 
 
 * Keep emails on the server. When ticked, retains the email message in the email account after retrieving it.
 
-Click the submit button to apply settings. With the default polling interval, fetchmail will start polling the email account after 10 minutes.
+* Scan emails. When ticked, all the fetched emails will go through the local filters (rspamd, clamav, ...).
+
+* Folders. A comma separated list of folders to fetch from the server. This is optional, by default only the INBOX will be pulled.
+
+Click the submit button to apply settings. With the default polling interval, fetchmail will start polling the email account after ``FETCHMAIL_DELAY``.
 
 
 Authentication tokens

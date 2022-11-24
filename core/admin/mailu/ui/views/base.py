@@ -21,8 +21,9 @@ def announcement():
     form = forms.AnnouncementForm()
     if form.validate_on_submit():
         for user in models.User.query.all():
-            user.sendmail(form.announcement_subject.data,
-                form.announcement_body.data)
+            if not user.sendmail(form.announcement_subject.data,
+                    form.announcement_body.data):
+                flask.flash('Failed to send to %s' % user.email, 'error')
         # Force-empty the form
         form.announcement_subject.data = ''
         form.announcement_body.data = ''

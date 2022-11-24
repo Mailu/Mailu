@@ -4,8 +4,8 @@ $config = array();
 
 // Generals
 $config['db_dsnw'] = '{{ DB_DSNW }}';
-$config['temp_dir'] = '/tmp/';
-$config['des_key'] = '{{ SECRET_KEY }}';
+$config['temp_dir'] = '/dev/shm/';
+$config['des_key'] = '{{ ROUNDCUBE_KEY }}';
 $config['cipher_method'] = 'AES-256-CBC';
 $config['identities_level'] = 0;
 $config['reply_all_mode'] = 1;

@@ -4,6 +4,7 @@ python3 tests/email_test.py message-macro-stomp "tests/compose/filters/2003x32_w
 if [ $? -ne 25 ]; then
 	exit 1
 fi
+# This does Auto_Open + Alert()
 python3 tests/email_test.py message-autoexec-macro "tests/compose/filters/excel4_sample_macro.slk"
 if [ $? -ne 25 ]; then
 	exit 1

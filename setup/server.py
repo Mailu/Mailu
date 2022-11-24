@@ -78,7 +78,7 @@ def build_app(path):
     @prefix_bp.route("/")
     @root_bp.route("/")
     def wizard():
-        return flask.render_template('setup.html', subnet6=random_ipv6_subnet())
+        return flask.render_template('wizard.html', subnet6=random_ipv6_subnet())
 
     @prefix_bp.route("/submit", methods=["POST"])
     @root_bp.route("/submit", methods=["POST"])

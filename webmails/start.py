@@ -2,6 +2,7 @@
 
 import os
 import logging
+from pwd import getpwnam
 import sys
 import subprocess
 import shutil
@@ -77,10 +78,17 @@ conf.jinja("/conf/config.inc.php", context, "/var/www/roundcube/config/config.in
 # create dirs
 os.system("mkdir -p /data/gpg")
 
+def demote(user_uid, user_gid):
+    def result():
+        os.setgid(user_gid)
+        os.setuid(user_uid)
+    return result
+id_mailu = getpwnam('mailu')
+
 print("Initializing database")
 try:
     result = subprocess.check_output(["/var/www/roundcube/bin/initdb.sh", "--dir", "/var/www/roundcube/SQL"],
-                                     stderr=subprocess.STDOUT)
+                                     stderr=subprocess.STDOUT, preexec_fn=demote(id_mailu.pw_uid,id_mailu.pw_gid))
     print(result.decode())
 except subprocess.CalledProcessError as exc:
     err = exc.stdout.decode()
@@ -92,13 +100,13 @@ except subprocess.CalledProcessError as exc:
 
 print("Upgrading database")
 try:
-    subprocess.check_call(["/var/www/roundcube/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT)
+    subprocess.check_call(["/var/www/roundcube/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT, preexec_fn=demote(id_mailu.pw_uid,id_mailu.pw_gid))
 except subprocess.CalledProcessError as exc:
     exit(4)
 else:
     print("Cleaning database")
     try:
-        subprocess.check_call(["/var/www/roundcube/bin/cleandb.sh"], stderr=subprocess.STDOUT)
+        subprocess.check_call(["/var/www/roundcube/bin/cleandb.sh"], stderr=subprocess.STDOUT, preexec_fn=demote(id_mailu.pw_uid,id_mailu.pw_gid))
     except subprocess.CalledProcessError as exc:
         exit(5)
 

@@ -51,7 +51,9 @@ if not secret_key:
         print(f"Can't read SECRET_KEY from file: {exc}", file=sys.stderr)
         exit(2)
 
-context['SECRET_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray('ROUNDCUBE_KEY', 'utf-8'), 'sha256').hexdigest()
+context['ROUNDCUBE_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray('ROUNDCUBE_KEY', 'utf-8'), 'sha256').hexdigest()
+context['SNUFFLEUPAGUS_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray('SNUFFLEUPAGUS_KEY', 'utf-8'), 'sha256').hexdigest()
+conf.jinja("/etc/snuffleupagus.rules.tpl", context, "/etc/snuffleupagus.rules")
 
 # roundcube plugins
 # (using "dict" because it is ordered and "set" is not)
@@ -118,7 +120,7 @@ if os.path.exists("/var/run/nginx.pid"):
     os.system("nginx -s reload")
 
 # clean env
-[env.pop(key, None) for key in env.keys() if key == "SECRET_KEY" or key.startswith("ROUNDCUBE_")]
+[env.pop(key, None) for key in env.keys() if key == "SECRET_KEY" or key.endswith("_KEY")]
 
 # run nginx
 os.system("php-fpm81")

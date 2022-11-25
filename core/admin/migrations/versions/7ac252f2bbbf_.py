@@ -15,7 +15,7 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.add_column('user', sa.Column('allow_spoofing', sa.Boolean(), nullable=False))
+    op.add_column('user', sa.Column('allow_spoofing', sa.Boolean(), nullable=False, server_default=sa.sql.expression.false()))
 
 
 def downgrade():

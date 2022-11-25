@@ -54,7 +54,7 @@ Architecture
 What setups should be supported
 ```````````````````````````````
 
-Mailu supports out-of-the-box Docker Compose, Docker Swarm and Kubernetes
+Mailu supports out-of-the-box Docker Compose and Kubernetes
 environments. In those environments, it consists of many containers and
 supports hosting some of those containers in a separate environment.
 

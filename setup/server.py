@@ -78,15 +78,12 @@ def build_app(path):
     @prefix_bp.route("/")
     @root_bp.route("/")
     def wizard():
-        return flask.render_template('wizard.html')
-
-    @prefix_bp.route("/submit_flavor", methods=["POST"])
-    @root_bp.route("/submit_flavor", methods=["POST"])
-    def submit_flavor():
-        data = flask.request.form.copy()
-        subnet6 = random_ipv6_subnet()
-        steps = sorted(os.listdir(os.path.join(path, "templates", "steps", data["flavor"])))
-        return flask.render_template('wizard.html', flavor=data["flavor"], steps=steps, subnet6=subnet6)
+        return flask.render_template(
+            'wizard.html',
+            flavor="compose",
+            steps=sorted(os.listdir(os.path.join(path, "templates", "steps", "compose"))),
+            subnet6=random_ipv6_subnet()
+        )
 
     @prefix_bp.route("/submit", methods=["POST"])
     @root_bp.route("/submit", methods=["POST"])

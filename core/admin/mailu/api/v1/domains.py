@@ -78,7 +78,7 @@ alternative_fields = api.model('AlternativeDomain', {
 class Domains(Resource):
     @dom.doc('list_domain')
     @dom.marshal_with(domain_fields_get, as_list=True, skip_none=True, mask=None)
-    @dom.doc(security='apikey')
+    @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
         """ List domains """
@@ -89,7 +89,7 @@ class Domains(Resource):
     @dom.response(200, 'Success', response_fields)
     @dom.response(400, 'Input validation exception', response_fields)
     @dom.response(409, 'Duplicate domain/alternative name', response_fields)
-    @dom.doc(security='apikey')
+    @dom.doc(security='Bearer')
     @common.api_token_authorization
     def post(self):
         """ Create a new domain """
@@ -133,7 +133,7 @@ class Domain(Resource):
     @dom.doc('find_domain')
     @dom.response(200, 'Success', domain_fields)
     @dom.response(404, 'Domain not found', response_fields)
-    @dom.doc(security='apikey')
+    @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, domain):
         """ Find domain by name """
@@ -150,7 +150,7 @@ class Domain(Resource):
     @dom.response(400, 'Input validation exception', response_fields)
     @dom.response(404, 'Domain not found', response_fields)
     @dom.response(409, 'Duplicate domain/alternative name', response_fields)
-    @dom.doc(security='apikey')
+    @dom.doc(security='Bearer')
     @common.api_token_authorization
     def put(self, domain):
         """ Update an existing domain """
@@ -194,7 +194,7 @@ class Domain(Resource):
     @dom.response(200, 'Success', response_fields)
     @dom.response(400, 'Input validation exception', response_fields)
     @dom.response(404, 'Domain not found', response_fields)
-    @dom.doc(security='apikey')
+    @dom.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, domain):
         """ Delete domain """
@@ -213,7 +213,7 @@ class Domain(Resource):
     @dom.response(200, 'Success', response_fields)
     @dom.response(400, 'Input validation exception', response_fields)
     @dom.response(404, 'Domain not found', response_fields)
-    @dom.doc(security='apikey')
+    @dom.doc(security='Bearer')
     @common.api_token_authorization
     def post(self, domain):
         """ Generate new DKIM/DMARC keys for domain """
@@ -232,7 +232,7 @@ class Manager(Resource):
     @dom.marshal_with(manager_fields, as_list=True, skip_none=True, mask=None)
     @dom.response(400, 'Input validation exception', response_fields)
     @dom.response(404, 'domain not found', response_fields)
-    @dom.doc(security='apikey')
+    @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, domain):
         """ List managers of domain """
@@ -249,7 +249,7 @@ class Manager(Resource):
     @dom.response(400, 'Input validation exception', response_fields)
     @dom.response(404, 'User or domain not found', response_fields)
     @dom.response(409, 'Duplicate domain manager', response_fields)
-    @dom.doc(security='apikey')
+    @dom.doc(security='Bearer')
     @common.api_token_authorization
     def post(self, domain):
         """ Create a new domain manager """
@@ -275,7 +275,7 @@ class Domain(Resource):
     @dom.doc('find_manager')
     @dom.response(200, 'Success', manager_fields)
     @dom.response(404, 'Manager not found', response_fields)
-    @dom.doc(security='apikey')
+    @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, domain, email):
         """ Find manager by email address """
@@ -301,7 +301,7 @@ class Domain(Resource):
     @dom.response(200, 'Success', response_fields)
     @dom.response(400, 'Input validation exception', response_fields)
     @dom.response(404, 'Manager not found', response_fields)
-    @dom.doc(security='apikey')
+    @dom.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, domain, email):
         if not validators.email(email):
@@ -327,7 +327,7 @@ class User(Resource):
     @dom.marshal_with(user.user_fields_get, as_list=True, skip_none=True, mask=None)
     @dom.response(400, 'Input validation exception', response_fields)
     @dom.response(404, 'Domain not found', response_fields)
-    @dom.doc(security='apikey')
+    @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, domain):
         """ List users from domain """
@@ -343,7 +343,7 @@ class Alternatives(Resource):
 
     @alt.doc('list_alternative')
     @alt.marshal_with(alternative_fields, as_list=True, skip_none=True, mask=None)
-    @alt.doc(security='apikey')
+    @alt.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
       """ List alternatives """
@@ -356,7 +356,7 @@ class Alternatives(Resource):
     @alt.response(400, 'Input validation exception', response_fields)
     @alt.response(404, 'Domain not found or missing', response_fields)
     @alt.response(409, 'Duplicate alternative domain name', response_fields)
-    @alt.doc(security='apikey')
+    @alt.doc(security='Bearer')
     @common.api_token_authorization
     def post(self):
         """ Create new alternative (for domain) """
@@ -379,7 +379,7 @@ class Alternatives(Resource):
 @alt.route('/<string:alt>')
 class Alternative(Resource):
     @alt.doc('find_alternative')
-    @alt.doc(security='apikey')
+    @alt.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, alt):
         """ Find alternative (of domain) """
@@ -395,7 +395,7 @@ class Alternative(Resource):
     @alt.response(400, 'Input validation exception', response_fields)
     @alt.response(404, 'Alternative/Domain not found or missing', response_fields)
     @alt.response(409, 'Duplicate domain name', response_fields)
-    @alt.doc(security='apikey')
+    @alt.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, alt):
         """ Delete alternative (for domain) """

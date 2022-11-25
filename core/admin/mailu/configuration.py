@@ -71,7 +71,7 @@ DEFAULT_CONFIG = {
     'LOGO_BACKGROUND': None,
     'API': False,
     # Advanced settings
-    'API' : 'false',
+    'API' : False,
     'WEB_API' : '/api',
     'API_TOKEN': None,
     'LOG_LEVEL': 'WARNING',

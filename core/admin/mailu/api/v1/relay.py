@@ -24,7 +24,7 @@ relay_fields_update = api.model('RelayUpdate', {
 class Relays(Resource):
     @relay.doc('list_relays')
     @relay.marshal_with(relay_fields, as_list=True, skip_none=True, mask=None)
-    @relay.doc(security='apikey')
+    @relay.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
         "List relays"
@@ -35,7 +35,7 @@ class Relays(Resource):
     @relay.response(200, 'Success', response_fields)
     @relay.response(400, 'Input validation exception')
     @relay.response(409, 'Duplicate relay', response_fields)
-    @relay.doc(security='apikey')
+    @relay.doc(security='Bearer')
     @common.api_token_authorization
     def post(self):
         """ Create relay """
@@ -61,7 +61,7 @@ class Relay(Resource):
     @relay.doc('find_relay')
     @relay.response(400, 'Input validation exception', response_fields)
     @relay.response(404, 'Relay not found', response_fields)
-    @relay.doc(security='apikey')
+    @relay.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, name):
         """ Find relay """
@@ -79,7 +79,7 @@ class Relay(Resource):
     @relay.response(400, 'Input validation exception', response_fields)
     @relay.response(404, 'Relay not found', response_fields)
     @relay.response(409, 'Duplicate relay', response_fields)
-    @relay.doc(security='apikey')
+    @relay.doc(security='Bearer')
     @common.api_token_authorization
     def put(self, name):
         """ Update relay """
@@ -105,7 +105,7 @@ class Relay(Resource):
     @relay.response(200, 'Success', response_fields)
     @relay.response(400, 'Input validation exception', response_fields)
     @relay.response(404, 'Relay not found', response_fields)
-    @relay.doc(security='apikey')
+    @relay.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, name):
         """ Delete relay """

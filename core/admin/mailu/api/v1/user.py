@@ -64,7 +64,7 @@ user_fields_put = api.model('UserUpdate', {
 class Users(Resource):
     @user.doc('list_users')
     @user.marshal_with(user_fields_get, as_list=True, skip_none=True, mask=None)
-    @user.doc(security='apikey')
+    @user.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
         "List users"
@@ -75,7 +75,7 @@ class Users(Resource):
     @user.response(200, 'Success', response_fields)
     @user.response(400, 'Input validation exception')
     @user.response(409, 'Duplicate user', response_fields)
-    @user.doc(security='apikey')
+    @user.doc(security='Bearer')
     @common.api_token_authorization
     def post(self):
         """ Create user """
@@ -141,7 +141,7 @@ class User(Resource):
     @user.doc('find_user')
     @user.response(400, 'Input validation exception', response_fields)
     @user.response(404, 'User not found', response_fields)
-    @user.doc(security='apikey')
+    @user.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, email):
         """ Find user """
@@ -159,7 +159,7 @@ class User(Resource):
     @user.response(400, 'Input validation exception', response_fields)
     @user.response(404, 'User not found', response_fields)
     @user.response(409, 'Duplicate user', response_fields)
-    @user.doc(security='apikey')
+    @user.doc(security='Bearer')
     @common.api_token_authorization
     def put(self, email):
         """ Update user """
@@ -222,7 +222,7 @@ class User(Resource):
     @user.response(200, 'Success', response_fields)
     @user.response(400, 'Input validation exception', response_fields)
     @user.response(404, 'User not found', response_fields)
-    @user.doc(security='apikey')
+    @user.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, email):
         """ Delete user """

@@ -203,14 +203,13 @@ Depending on your particular deployment you most probably will want to change th
 Advanced settings
 -----------------
 
-The ``API`` (default: False) setting controls if the API endpoint is publicly
-reachable.
+The ``API`` (default: False) setting controls if the API endpoint is reachable.
 
 The ``WEB_API`` (default: /api) setting configures the endpoint that the API
 listens on publicly&interally. The path must always start with a leading slash.
 
 The ``API_TOKEN`` (default: None) enables the API endpoint. This token must be
-passed as query parameter with requests to the API as authentication token.
+passed as request header to the API as authentication token.
 
 The ``CREDENTIAL_ROUNDS`` (default: 12) setting is the number of rounds used by the
 password hashing scheme. The number of rounds can be reduced in case faster

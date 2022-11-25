@@ -24,7 +24,7 @@ alias_fields = alias.inherit('Alias',alias_fields_update, {
 class Aliases(Resource):
     @alias.doc('list_alias')
     @alias.marshal_with(alias_fields, as_list=True, skip_none=True, mask=None)
-    @alias.doc(security='apikey')
+    @alias.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
         """ List aliases """
@@ -35,7 +35,7 @@ class Aliases(Resource):
     @alias.response(200, 'Success', response_fields)
     @alias.response(400, 'Input validation exception', response_fields)
     @alias.response(409, 'Duplicate alias', response_fields)
-    @alias.doc(security='apikey')
+    @alias.doc(security='Bearer')
     @common.api_token_authorization
     def post(self):
         """ Create a new alias """
@@ -60,7 +60,7 @@ class Alias(Resource):
     @alias.doc('find_alias')
     @alias.response(200, 'Success', alias_fields)
     @alias.response(404, 'Alias not found', response_fields)
-    @alias.doc(security='apikey')
+    @alias.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, alias):
         """ Find alias """
@@ -75,7 +75,7 @@ class Alias(Resource):
     @alias.response(200, 'Success', response_fields)
     @alias.response(404, 'Alias not found', response_fields)
     @alias.response(400, 'Input validation exception', response_fields)
-    @alias.doc(security='apikey')
+    @alias.doc(security='Bearer')
     @common.api_token_authorization
     def put(self, alias):
       """ Update alias """
@@ -97,7 +97,7 @@ class Alias(Resource):
     @alias.doc('delete_alias')
     @alias.response(200, 'Success', response_fields)
     @alias.response(404, 'Alias not found', response_fields)
-    @alias.doc(security='apikey')
+    @alias.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, alias):
       """ Delete alias """
@@ -113,7 +113,7 @@ class AliasWithDest(Resource):
     @alias.doc('find_alias_filter_domain')
     @alias.response(200, 'Success', alias_fields)
     @alias.response(404, 'Alias or domain not found', response_fields)
-    @alias.doc(security='apikey')
+    @alias.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, domain):
         """ Find aliases of domain """

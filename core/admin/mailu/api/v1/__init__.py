@@ -8,20 +8,19 @@ api_token = None
 blueprint = Blueprint(f'api_v{int(VERSION)}', __name__)
 
 authorization = {
-    'apikey': {
+    'Bearer': {
         'type': 'apiKey',
-        'in': 'query',
-        'name': 'api_token'
+        'in': 'header',
+        'name': 'Authorization'
     }
 }
-
 
 api = Api(
     blueprint, version=f'{VERSION:.1f}',
     title='Mailu API', default_label='Mailu',
     validate=True,
     authorizations=authorization,
-    security='apikey',
+    security='Bearer',
     doc='/swaggerui/'
 )
 

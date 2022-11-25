@@ -1,24 +1,20 @@
 from flask import redirect, url_for
 from flask_restx import apidoc
-from . import v1
+from . import v1 as APIv1
 
 
-def register(app, web_api):
+def register(app, web_api_root):
 
-    ACTIVE=v1
-    ROOT=web_api
-    v1.app = app
+    APIv1.app = app
     # register api bluprint(s)
-    apidoc.apidoc.url_prefix = f'{ROOT}/v{int(v1.VERSION)}'
-    v1.api_token = app.config['API_TOKEN']
-    app.register_blueprint(v1.blueprint, url_prefix=f'{ROOT}/v{int(v1.VERSION)}')
-
-
+    apidoc.apidoc.url_prefix = f'{web_api_root}/v{int(APIv1.VERSION)}'
+    APIv1.api_token = app.config['API_TOKEN']
+    app.register_blueprint(APIv1.blueprint, url_prefix=f'{web_api_root}/v{int(APIv1.VERSION)}')
 
     # add redirect to current api version
-    @app.route(f'{ROOT}/')
+    @app.route(f'{web_api_root}/')
     def redir():
-        return redirect(url_for(f'{ACTIVE.blueprint.name}.root'))
+        return redirect(url_for(f'{APIv1.blueprint.name}.root'))
 
     # swagger ui config
     app.config.SWAGGER_UI_DOC_EXPANSION = 'list'

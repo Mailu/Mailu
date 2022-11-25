@@ -3,7 +3,7 @@
     {%- for fieldname, errors in form.errors.items() %}
       {%- if bootstrap_is_hidden_field(form[fieldname]) %}
         {%- for error in errors %}
-          <p class="error">{{error}}</p>
+          <p class="form-text text-danger">{{error}}</p>
         {%- endfor %}
       {%- endif %}
     {%- endfor %}
@@ -13,7 +13,7 @@
 {%- macro form_field_errors(field) %}
   {%- if field.errors %}
     {%- for error in field.errors %}
-      <p class="help-block inline">{{ error }}</p>
+      <p class="form-text text-danger">{{ error }}</p>
     {%- endfor %}
   {%- endif %}
 {%- endmacro %}
@@ -23,7 +23,7 @@
   <div class="form-group">
     <div class="row">
       {%- for field in fields %}
-      <div class="col-lg-{{ width }} col-xs-12 {{ 'has-error' if field.errors else '' }}">
+      <div class="col-lg-{{ width }} col-xs-12">
         {%- if field.__class__.__name__ == 'list' %}
           {%- for subfield in field %}
             {{ form_individual_field(subfield, prepend=prepend, append=append, label=label, **kwargs) }}
@@ -38,12 +38,13 @@
 {%- endmacro %}
 
 {%- macro form_individual_field(field, prepend='', append='', label=True, class_="") %}
+  {%- set fieldclass=" ".join(["form-control"] + ([class_] if class_ else []) + (["is-invalid"] if field.errors else [])) %}
   {%- if field.type == "BooleanField" %}
     {{ field(**kwargs) }}<span>&nbsp;&nbsp;</span>{{ field.label if label else '' }}
   {%- else %}
     {{ field.label if label else '' }}{{ form_field_errors(field) }}
     {%- if prepend %}<div class="input-group-prepend">{%- elif append %}<div class="input-group-append">{%- endif %}
-      {{ prepend|safe }}{{ field(class_=("form-control " + class_) if class_ else "form-control", **kwargs) }}{{ append|safe }}
+      {{ prepend|safe }}{{ field(class_=fieldclass, **kwargs) }}{{ append|safe }}
     {%- if prepend or append %}</div>{%- endif %}
   {%- endif %}
 {%- endmacro %}

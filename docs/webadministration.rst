@@ -325,7 +325,7 @@ This page also shows an overview of the following settings of an user:
 
 * Email. The email address of the user.
 
-* Features. Shows if IMAP or POP3 access is enabled.
+* Features. Shows if IMAP or POP3 access is enabled and whether the user should be allowed to spoof emails.
 
 * Storage quota. Shows how much assigned storage has been consumed.
 
@@ -360,6 +360,8 @@ For adding a new user the following options can be configured.
 * Allow IMAP access. When ticked, allows email retrieval via the IMAP protocol.
 
 * Allow POP3 access. When ticked, allows email retrieval via the POP3 protocol.
+
+* Allow the user to spoof the sender. When ticked, allows the user to send email as anyone.
 
 
 Aliases

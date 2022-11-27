@@ -1,0 +1,1 @@
+Remove postfix's master.pid on startup if there is no other instance running

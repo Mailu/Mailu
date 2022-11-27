@@ -401,10 +401,10 @@ class Alternative(Resource):
         """ Delete alternative (for domain) """
         if not validators.domain(alt):
             return { 'code': 400, 'message': f'Alternative domain {alt} is not a valid domain'}, 400
-        alternative = models.Alternative.query.filter_by(name=alt).first
+        alternative = models.Alternative.query.filter_by(name=alt).scalar()
         if not alternative:
             return { 'code': 404, 'message': f'Alternative domain {alt} does not exist'}, 404
-        domain = alternative.domain
+        domain = alternative.domain_name
         db.session.delete(alternative)
         db.session.commit()
         return {'code': 200, 'message': f'Alternative {alt} for domain {domain} has been deleted'}, 200

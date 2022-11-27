@@ -14,6 +14,8 @@ from socrate import system, conf
 
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
+os.system("flock -n /queue/pid/master.pid rm /queue/pid/master.pid")
+
 def start_podop():
     os.setuid(getpwnam('postfix').pw_uid)
     os.makedirs('/dev/shm/postfix',mode=0o700, exist_ok=True)

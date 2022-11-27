@@ -80,19 +80,6 @@ def user_edit(user_email):
         domain=user.domain, max_quota_bytes=max_quota_bytes)
 
 
-@ui.route('/user/delete/<path:user_email>', methods=['GET', 'POST'])
-@access.domain_admin(models.User, 'user_email')
-@access.confirmation_required("delete {user_email}")
-def user_delete(user_email):
-    user = models.User.query.get(user_email) or flask.abort(404)
-    domain = user.domain
-    models.db.session.delete(user)
-    models.db.session.commit()
-    flask.flash('User %s deleted' % user)
-    return flask.redirect(
-        flask.url_for('.user_list', domain_name=domain.name))
-
-
 @ui.route('/user/settings', methods=['GET', 'POST'], defaults={'user_email': None})
 @ui.route('/user/usersettings/<path:user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')

@@ -400,18 +400,6 @@ def config_export(full=False, secrets=False, color=False, dns=False, output=None
     finally:
         os.umask(old_umask)
 
-
-@mailu.command()
-@click.argument('email')
-@with_appcontext
-def user_delete(email):
-    """delete user"""
-    user = models.User.query.get(email)
-    if user:
-        db.session.delete(user)
-    db.session.commit()
-
-
 @mailu.command()
 @click.argument('email')
 @with_appcontext

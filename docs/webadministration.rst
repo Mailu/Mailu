@@ -313,8 +313,6 @@ This page is also accessible for domain managers. On the users page new users ca
 
 * Edit. For all available options see :ref:`the Add user page <webadministration_add_user>`.
 
-* Delete. Deletes the user. The Admin GUI will ask for confirmation if the user must be really deleted.
-
 * Setting. Access the settings page of the user. See :ref:`the settings page <webadministration_settings>` for more information.
 
 * Auto-reply. Access the auto-reply page of the user. See the :ref:`auto-reply page <webadministration_auto-reply>` for more information.

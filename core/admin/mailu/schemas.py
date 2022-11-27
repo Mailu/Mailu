@@ -19,7 +19,7 @@ from marshmallow_sqlalchemy.fields import RelatedList
 
 from flask_marshmallow import Marshmallow
 
-from OpenSSL import crypto
+from cryptography.hazmat.primitives import serialization
 
 from pygments import highlight
 from pygments.token import Token
@@ -609,7 +609,7 @@ class DkimKeyField(fields.String):
 
         # check key validity
         try:
-            crypto.load_privatekey(crypto.FILETYPE_PEM, value)
+            serialization.load_pem_private_key(value, password=None)
         except crypto.Error as exc:
             raise ValidationError(f'invalid dkim key {bad_key!r}') from exc
         else:

@@ -609,8 +609,8 @@ class DkimKeyField(fields.String):
 
         # check key validity
         try:
-            serialization.load_pem_private_key(value, password=None)
-        except crypto.Error as exc:
+            serialization.load_pem_private_key(bytes(value, "ascii"), password=None)
+        except (UnicodeEncodeError, ValueError) as exc:
             raise ValidationError(f'invalid dkim key {bad_key!r}') from exc
         else:
             return value

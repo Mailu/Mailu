@@ -33,11 +33,18 @@ STATUSES = {
     }),
 }
 
+<<<<<<< HEAD
 WEBMAIL_PORTS = ['14190', '10143', '10025']
 
 def check_credentials(user, password, ip, protocol=None, auth_port=None, source_port=None, raw_user=None):
     if not user or not user.enabled or (protocol == "imap" and not user.enable_imap and not auth_port in WEBMAIL_PORTS) or (protocol == "pop3" and not user.enable_pop):
         app.logger.info(f'Login attempt for: {user or raw_user!r}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: account disabled')
+=======
+WEBMAIL_PORTS = ['10143', '10025']
+
+def check_credentials(user, password, ip, protocol=None, auth_port=None):
+    if not user or not user.enabled or (protocol == "imap" and not user.enable_imap and not auth_port in WEBMAIL_PORTS) or (protocol == "pop3" and not user.enable_pop):
+>>>>>>> 00f07ef5 (close #2451: prevent an auth-loop on webmails)
         return False
     # webmails
     if auth_port in WEBMAIL_PORTS and password.startswith('token-'):

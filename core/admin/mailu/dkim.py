@@ -16,7 +16,6 @@ def gen_key(bits=2048):
 def strip_key(pem):
     """ Return only the b64 part of the ASCII armored PEM.
     """
-
     priv_key = serialization.load_pem_private_key(pem, password=None)
     public_pem = priv_key.public_key().public_bytes(encoding=serialization.Encoding.PEM,format=serialization.PublicFormat.SubjectPublicKeyInfo)
     return public_pem.replace(b"\n", b"").split(b"-----")[2]

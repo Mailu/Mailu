@@ -66,10 +66,6 @@ RUN set -euxo pipefail \
   ; cd snuffleupagus-$SNUFFLEUPAGUS_VERSION \
   ; rm -rf src/tests/*php7*/ src/tests/*session*/ src/tests/broken_configuration/ src/tests/*cookie* src/tests/upload_validation/ \
   ; apk add --virtual .build-deps php81-dev php81-cgi php81-simplexml php81-xml pcre-dev build-base php81-pear php81-openssl re2c \
-  ; ln -s /usr/bin/phpize81 /usr/bin/phpize \
-  ; ln -s /usr/bin/pecl81 /usr/bin/pecl \
-  ; ln -s /usr/bin/php-config81 /usr/bin/php-config \
-  ; ln -s /usr/bin/php81 /usr/bin/php \
   ; pecl install vld-beta \
   ; make -j $(grep -c processor /proc/cpuinfo) release \
   ; cp src/.libs/snuffleupagus.so /app \

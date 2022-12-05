@@ -23,6 +23,7 @@ user_fields_post = api.model('UserCreate', {
     'enabled': fields.Boolean(description='Enable the user. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail'),
     'enable_imap': fields.Boolean(description='Allow email retrieval via IMAP'),
     'enable_pop': fields.Boolean(description='Allow email retrieval via POP3'),
+    'allow_spoofing': fields.Boolean(description='Allow the user to spoof the sender (send email as anyone)'),
     'forward_enabled': fields.Boolean(description='Enable auto forwarding'),
     'forward_destination': fields.List(fields.String(description='Email address to forward emails to'), example='Other@example.com'),
     'forward_keep': fields.Boolean(description='Keep a copy of the forwarded email in the inbox'),
@@ -45,6 +46,7 @@ user_fields_put = api.model('UserUpdate', {
     'enabled': fields.Boolean(description='Enable the user. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail'),
     'enable_imap': fields.Boolean(description='Allow email retrieval via IMAP'),
     'enable_pop': fields.Boolean(description='Allow email retrieval via POP3'),
+    'allow_spoofing': fields.Boolean(description='Allow the user to spoof the sender (send email as anyone)'),
     'forward_enabled': fields.Boolean(description='Enable auto forwarding'),
     'forward_destination': fields.List(fields.String(description='Email address to forward emails to'), example='Other@example.com'),
     'forward_keep': fields.Boolean(description='Keep a copy of the forwarded email in the inbox'),
@@ -102,6 +104,8 @@ class Users(Resource):
             user_new.enable_imap = data['enable_imap']
         if 'enable_pop' in data:
             user_new.enable_pop = data['enable_pop']
+        if 'allow_spoofing' in data:
+            user.allow_spoofing = data['allow_spoofing']
         if 'forward_enabled' in data:
             user_new.forward_enabled = data['forward_enabled']
         if 'forward_destination' in data:
@@ -184,6 +188,8 @@ class User(Resource):
             user_found.enable_imap = data['enable_imap']
         if 'enable_pop' in data:
             user_found.enable_pop = data['enable_pop']
+        if 'allow_spoofing' in data:
+            user.allow_spoofing = data['allow_spoofing']
         if 'forward_enabled' in data:
             user_found.forward_enabled = data['forward_enabled']
         if 'forward_destination' in data:

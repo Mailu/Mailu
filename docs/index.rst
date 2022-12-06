@@ -31,6 +31,7 @@ Main features include:
 - **Security**, enforced TLS, DANE, MTA-STS, Letsencrypt!, outgoing DKIM, anti-virus scanner, Snuffleupagus
 - **Antispam**, auto-learn, greylisting, DMARC and SPF, anti-spoofing
 - **Freedom**, all FOSS components, no tracker included
+- **Authentication**, external Open ID Connect
 
 .. image:: assets/screenshots/create.png
 

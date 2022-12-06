@@ -374,3 +374,16 @@ Use ``PROXY_AUTH_HEADER`` (default: 'X-Auth-Email') to customize which HTTP head
 Once configured, any request to /sso/proxy will be redirected to the webmail and /sso/proxy/admin to the admin panel. Please check issue `1972` for more details.
 
 .. _`1972`: https://github.com/Mailu/Mailu/issues/1972
+
+
+External Open ID Connect provider
+---------------------------------
+
+The ``OIDC_ENABLED`` (default: unset/disabled) option allows you to configure an external Open ID Connect provider. Set the value to ``true`` to enable the feature.
+
+The following options need to be configured:
+
+- ``OIDC_CLIENT_ID``: The client ID of the Open ID Connect provider.
+- ``OIDC_CLIENT_SECRET``: The client secret of the Open ID Connect provider.
+- ``OIDC_PROVIDER_INFO_URL``: The discovery URL of the Open ID Connect provider. (example: ``https://accounts.google.com/.well-known/openid-configuration`` or ``https://<host>:<port>/auth/realms/.well-known/openid-configuration``)
+- ``OIDC_BUTTON_NAME``: The name of the button to display on the login page.

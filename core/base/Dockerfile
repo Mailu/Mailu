@@ -80,7 +80,7 @@ FROM system
 
 COPY --from=build /app/venv/ /app/venv/
 COPY --chown=root:root --from=build /app/snuffleupagus.so /usr/lib/php81/modules/
-RUN setcap 'cap_net_bind_service=+ep' /app/venv/bin/gunicorn
+RUN setcap 'cap_net_bind_service=+ep' /app/venv/bin/gunicorn 'cap_net_bind_service=+ep' /usr/bin/python3.10
 
 ENV VIRTUAL_ENV=/app/venv
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"

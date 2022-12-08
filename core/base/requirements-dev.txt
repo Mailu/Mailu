@@ -16,7 +16,6 @@ Flask-Login
 flask-marshmallow
 Flask-Migrate
 Flask-SQLAlchemy<3
-Flask-script
 Flask-WTF
 gunicorn
 idna

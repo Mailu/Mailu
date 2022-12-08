@@ -137,17 +137,23 @@ class OicClient:
         self.registration_response = None
 
     def init_app(self, app):
+        """ initialize the OpenID Connect client """
         self.app = app
         self.client = Client(client_authn_method=CLIENT_AUTHN_METHOD)
         self.client.provider_config(app.config['OIDC_PROVIDER_INFO_URL'])
         self.extension_client = ExtensionClient(client_authn_method=CLIENT_AUTHN_METHOD)
         self.extension_client.provider_config(app.config['OIDC_PROVIDER_INFO_URL'])
-        info = {"client_id": app.config['OIDC_CLIENT_ID'], "client_secret": app.config['OIDC_CLIENT_SECRET'], "redirect_uris": [ "https://" + self.app.config['HOSTNAME'] + "/sso/login" ]}
+        info = {
+            "client_id": app.config['OIDC_CLIENT_ID'],
+            "client_secret": app.config['OIDC_CLIENT_SECRET'],
+            "redirect_uris": [ f"https://{self.app.config['HOSTNAME']}/sso/login" ]
+        }
         client_reg = RegistrationResponse(**info)
         self.client.store_registration_info(client_reg)
         self.extension_client.store_registration_info(client_reg)
 
     def get_redirect_url(self):
+        """ returns the URL to redirect the user to the OpenID Provider """
         if not self.is_enabled():
             return None
         f_session["state"] = rndstr()
@@ -157,7 +163,7 @@ class OicClient:
             "response_type": ["code"],
             "scope": ["openid"],
             "nonce": f_session["nonce"],
-            "redirect_uri": "https://" + self.app.config['HOSTNAME'] + "/sso/login",
+            "redirect_uri": f"https://{self.app.config['HOSTNAME']}/sso/login",
             "state": f_session["state"]
         }
 
@@ -166,15 +172,19 @@ class OicClient:
         return login_url
 
     def exchange_code(self, query):
+        """ exchanges the code for an access token """
         aresp = self.client.parse_response(AuthorizationResponse, info=query, sformat="urlencoded")
         if not ("state" in f_session and aresp["state"] == f_session["state"]):
+            app.logger.warning('Error while retrieving the access token: state mismatch')
             return None, None
         args = {
             "code": aresp["code"]
         }
-        response = self.client.do_access_token_request(state=aresp["state"],
+        response = self.client.do_access_token_request(
+            state=aresp["state"],
             request_args=args,
-            authn_method="client_secret_basic")
+            authn_method="client_secret_basic"
+        )
         if 'access_token' not in response or not isinstance(response, AccessTokenResponse):
             return None, None
         user_response = self.client.do_user_info_request(
@@ -182,6 +192,7 @@ class OicClient:
         return user_response['email'], response
 
     def get_token(self, username, password):
+        """ gets an access token for the given username and password """
         args = {
             "username": username,
             "password": password,
@@ -189,8 +200,11 @@ class OicClient:
             "client_secret": self.extension_client.client_secret,
             "grant_type": "password"
         }
-        url, body, ht_args, csi = self.extension_client.request_info(ROPCAccessTokenRequest,
-                request_args=args, method="POST")
+        url, body, ht_args, csi = self.extension_client.request_info(
+            ROPCAccessTokenRequest,
+            request_args=args,
+            method="POST"
+        )
         response = self.extension_client.request_and_return(url, AccessTokenResponse, "POST", body, "json", "", ht_args)
         if isinstance(response, AccessTokenResponse):
             return response
@@ -198,10 +212,11 @@ class OicClient:
         
 
     def get_user_info(self, token):
-        return self.client.do_user_info_request(
-            access_token=token['access_token'])
+        """ gets the user info for the given token """
+        return self.client.do_user_info_request(access_token=token['access_token'])
 
     def check_validity(self, token):
+        """ checks if the token is still valid, if not, refreshes it and returns the new token """
         try:
             args = {
                 "client_id": self.extension_client.client_id,
@@ -215,8 +230,9 @@ class OicClient:
         except:
             return self.refresh_token(token)
         return token
-    
+
     def refresh_token(self, token):
+        """ Refreshes the token if possible """
         try:
             args = {
                 "refresh_token": token['refresh_token']
@@ -229,12 +245,13 @@ class OicClient:
             return None
 
     def logout(self):
+        """ Performs a logout"""
         state = rndstr()
         f_session['state'] = state
         args = {
             "id_token": "",
             "state": state,
-            "post_logout_redirect_uri": "https://" + app.config['HOSTNAME'] + "/sso/logout",
+            "post_logout_redirect_uri": f"https://{app.config['HOSTNAME']}/sso/logout",
             "client_id": self.client.client_id
         }
 
@@ -243,8 +260,10 @@ class OicClient:
         return uri
 
     def is_enabled(self):
+        """ returns true if the OpenID Connect client is enabled, false otherwise """
         return self.app is not None and self.app.config['OIDC_ENABLED']
 
+# Create the OIC client
 oic_client = OicClient()
 
 

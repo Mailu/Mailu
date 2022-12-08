@@ -56,7 +56,7 @@ RUN set -euxo pipefail \
   ;  machine="$(uname -m)" \
   ; deps="build-base gcc libffi-dev python3-dev" \
   ; [[ "${machine}" != x86_64 ]] && \
-      deps="${deps} cargo git openssl-dev mariadb-connector-c-dev postgresql-dev" \
+      deps="${deps} cargo git libretls-dev mariadb-connector-c-dev postgresql-dev" \
   ; apk add --virtual .build-deps ${deps} \
   ; [[ "${machine}" == armv7* ]] && \
       mkdir -p /root/.cargo/registry/index && \

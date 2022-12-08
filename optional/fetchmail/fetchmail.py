@@ -7,7 +7,6 @@ from pwd import getpwnam
 import tempfile
 import shlex
 import subprocess
-import re
 import requests
 from socrate import system
 import sys
@@ -34,11 +33,6 @@ poll "{host}" proto {protocol}  port {port}
 """
 
 
-def extract_host_port(host_and_port, default_port):
-    host, _, port = re.match('^(.*?)(:([0-9]*))?$', host_and_port).groups()
-    return host, int(port) if port else default_port
-
-
 def escape_rc_string(arg):
     return "".join("\\x%2x" % ord(char) for char in arg)
 
@@ -54,20 +48,7 @@ def fetchmail(fetchmailrc):
 
 def run(debug):
     try:
-        os.environ["SMTP_ADDRESS"] = system.get_host_address_from_environment("SMTP", "smtp")
-        os.environ["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
         fetches = requests.get(f"http://{os.environ['ADMIN_ADDRESS']}/internal/fetch").json()
-        smtphost, smtpport = extract_host_port(os.environ["SMTP_ADDRESS"], None)
-        if smtpport is None:
-            smtphostport = smtphost
-        else:
-            smtphostport = "%s/%d" % (smtphost, smtpport)
-        os.environ["LMTP_ADDRESS"] = system.get_host_address_from_environment("LMTP", "imap:2525")
-        lmtphost, lmtpport = extract_host_port(os.environ["LMTP_ADDRESS"], None)
-        if lmtpport is None:
-            lmtphostport = lmtphost
-        else:
-            lmtphostport = "%s/%d" % (lmtphost, lmtpport)
         for fetch in fetches:
             fetchmailrc = ""
             options = "options antispam 501, 504, 550, 553, 554"
@@ -79,7 +60,7 @@ def run(debug):
                 protocol=fetch["protocol"],
                 host=escape_rc_string(fetch["host"]),
                 port=fetch["port"],
-                smtphost=smtphostport if fetch['scan'] else lmtphostport,
+                smtphost=f'{os.environ["SMTP_ADDRESS"]}' if fetch['scan'] else f'{os.environ["IMAP_ADDRESS"]}/2525',
                 username=escape_rc_string(fetch["username"]),
                 password=escape_rc_string(fetch["password"]),
                 options=options,
@@ -118,6 +99,7 @@ if __name__ == "__main__":
     os.chmod("/data/fetchids", 0o700)
     os.setgid(id_fetchmail.pw_gid)
     os.setuid(id_fetchmail.pw_uid)
+    system.set_env()
     while True:
         delay = int(os.environ.get("FETCHMAIL_DELAY", 60))
         print("Sleeping for {} seconds".format(delay))

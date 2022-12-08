@@ -75,12 +75,15 @@ ENV \
     DEBUG_ASSETS="/app/static" \
     DEBUG_TB_INTERCEPT_REDIRECTS=False \
     \
-    IMAP_ADDRESS="127.0.0.1" \
-    POP3_ADDRESS="127.0.0.1" \
-    AUTHSMTP_ADDRESS="127.0.0.1" \
+    ADMIN_ADDRESS="127.0.0.1" \
+    FRONT_ADDRESS="127.0.0.1" \
     SMTP_ADDRESS="127.0.0.1" \
+    IMAP_ADDRESS="127.0.0.1" \
     REDIS_ADDRESS="127.0.0.1" \
-    WEBMAIL_ADDRESS="127.0.0.1"
+    ANTIVIRUS_ADDRESS="127.0.0.1" \
+    ANTISPAM_ADDRESS="127.0.0.1" \
+    WEBMAIL_ADDRESS="127.0.0.1" \
+    WEBDAV_ADDRESS="127.0.0.1"
 
 CMD ["/bin/bash", "-c", "flask db upgrade &>/dev/null && flask mailu admin '${DEV_ADMIN/@*}' '${DEV_ADMIN#*@}' '${DEV_PASSWORD}' --mode ifmissing >/dev/null; flask --debug run --host=0.0.0.0 --port=8080"]
 EOF

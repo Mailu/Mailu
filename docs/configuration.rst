@@ -249,32 +249,22 @@ virus mails during SMTP dialogue, so the sender will receive a reject message.
 Infrastructure settings
 -----------------------
 
-Various environment variables ``HOST_*`` can be used to run Mailu containers
+Various environment variables ``*_ADDRESS`` can be used to run Mailu containers
 separately from a supported orchestrator. It is used by the various components
-to find the location of the other containers it depends on. They can contain an
-optional port number. Those variables are:
+to find the location of the other containers it depends on. Those variables are:
 
-- ``HOST_IMAP``: the container that is running the IMAP server (default: ``imap``, port 143)
-- ``HOST_LMTP``: the container that is running the LMTP server (default: ``imap:2525``)
-- ``HOST_HOSTIMAP``: the container that is running the IMAP server for the webmail (default: ``imap``, port 10143)
-- ``HOST_POP3``: the container that is running the POP3 server (default: ``imap``, port 110)
-- ``HOST_SMTP``: the container that is running the SMTP server (default: ``smtp``, port 25)
-- ``HOST_AUTHSMTP``: the container that is running the authenticated SMTP server for the webnmail (default: ``smtp``, port 10025)
-- ``HOST_ADMIN``: the container that is running the admin interface (default: ``admin``)
-- ``HOST_ANTISPAM_MILTER``: the container that is running the antispam milter service (default: ``antispam:11332``)
-- ``HOST_ANTISPAM_WEBUI``: the container that is running the antispam webui service (default: ``antispam:11334``)
-- ``HOST_ANTIVIRUS``: the container that is running the antivirus service (default: ``antivirus:3310``)
-- ``HOST_WEBMAIL``: the container that is running the webmail (default: ``webmail``)
-- ``HOST_WEBDAV``: the container that is running the webdav server (default: ``webdav:5232``)
-- ``HOST_REDIS``: the container that is running the redis daemon (default: ``redis``)
-- ``HOST_WEBMAIL``: the container that is running the webmail (default: ``webmail``)
+- ``ADMIN_ADDRESS``
+- ``ANTISPAM_ADDRESS``
+- ``ANTIVIRUS_ADDRESS``
+- ``FRONT_ADDRESS``
+- ``IMAP_ADDRESS``
+- ``REDIS_ADDRESS``
+- ``SMTP_ADDRESS``
+- ``WEBDAV_ADDRESS``
+- ``WEBMAIL_ADDRESS``
 
-The startup scripts will resolve ``HOST_*`` to their IP addresses and store the result in ``*_ADDRESS`` for further use.
-
-Alternatively, ``*_ADDRESS`` can directly be set. In this case, the values of ``*_ADDRESS`` is kept and not
-resolved. This can be used to rely on DNS based service discovery with changing services IP addresses.
-When using ``*_ADDRESS``, the hostnames must be full-qualified hostnames. Otherwise nginx will not be able to
-resolve the hostnames.
+These are used for DNS based service discovery with possibly changing services IP addresses.
+``*_ADDRESS`` values must be fully qualified domain names without port numbers.
 
 .. _db_settings:
 

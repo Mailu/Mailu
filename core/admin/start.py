@@ -4,6 +4,7 @@ import os
 import logging as log
 from pwd import getpwnam
 import sys
+from socrate import system
 
 os.system("chown mailu:mailu -R /dkim")
 os.system("find /data | grep -v /fetchmail | xargs -n1 chown mailu:mailu")
@@ -12,6 +13,7 @@ os.setgid(mailu_id.pw_gid)
 os.setuid(mailu_id.pw_uid)
 
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "INFO"))
+system.set_env(['SECRET'])
 
 os.system("flask mailu advertise")
 os.system("flask db upgrade")

@@ -13,14 +13,13 @@ from socrate import conf, system
 env = os.environ
 
 logging.basicConfig(stream=sys.stderr, level=env.get("LOG_LEVEL", "WARNING"))
+system.set_env(['ROUNDCUBE','SNUFFLEUPAGUS'])
 
 # jinja context
 context = {}
 context.update(env)
 
 context["MAX_FILESIZE"] = str(int(int(env.get("MESSAGE_SIZE_LIMIT", "50000000")) * 0.66 / 1048576))
-context["FRONT_ADDRESS"] = system.get_host_address_from_environment("FRONT", "front")
-context["IMAP_ADDRESS"] = system.get_host_address_from_environment("IMAP", "imap")
 
 db_flavor = env.get("ROUNDCUBE_DB_FLAVOR", "sqlite")
 if db_flavor == "sqlite":
@@ -43,17 +42,6 @@ else:
     print(f"Unknown ROUNDCUBE_DB_FLAVOR: {db_flavor}", file=sys.stderr)
     exit(1)
 
-# derive roundcube secret key
-secret_key = env.get("SECRET_KEY")
-if not secret_key:
-    try:
-        secret_key = open(env.get("SECRET_KEY_FILE"), "r").read().strip()
-    except Exception as exc:
-        print(f"Can't read SECRET_KEY from file: {exc}", file=sys.stderr)
-        exit(2)
-
-context['ROUNDCUBE_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray('ROUNDCUBE_KEY', 'utf-8'), 'sha256').hexdigest()
-context['SNUFFLEUPAGUS_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray('SNUFFLEUPAGUS_KEY', 'utf-8'), 'sha256').hexdigest()
 conf.jinja("/etc/snuffleupagus.rules.tpl", context, "/etc/snuffleupagus.rules")
 
 # roundcube plugins
@@ -127,8 +115,7 @@ conf.jinja("/conf/nginx-webmail.conf", context, "/etc/nginx/http.d/webmail.conf"
 if os.path.exists("/var/run/nginx.pid"):
     os.system("nginx -s reload")
 
-# clean env
-[env.pop(key, None) for key in env.keys() if key == "SECRET_KEY" or key.endswith("_KEY")]
+system.clean_env()
 
 # run nginx
 os.system("php-fpm81")

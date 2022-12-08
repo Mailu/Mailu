@@ -165,7 +165,7 @@ class ConfigManager:
             self.config['RATELIMIT_STORAGE_URL'] = f'redis://{self.config["REDIS_ADDRESS"]}/2'
 
         self.config['SESSION_STORAGE_URL'] = f'redis://{self.config["REDIS_ADDRESS"]}/3'
-        self.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+        self.config['SESSION_COOKIE_SAMESITE'] = 'Lax' if self.config['OIDC_ENABLED'] else 'Strict'
         self.config['SESSION_COOKIE_HTTPONLY'] = True
         if self.config['SESSION_COOKIE_SECURE'] is None:
             self.config['SESSION_COOKIE_SECURE'] = self.config['TLS_FLAVOR'] != 'notls'

@@ -1,4 +1,3 @@
-from multiprocessing.spawn import is_forking
 from mailu import models, utils
 from flask import current_app as app
 from socrate import system

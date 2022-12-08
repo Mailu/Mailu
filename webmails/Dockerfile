@@ -18,7 +18,6 @@ RUN set -euxo pipefail \
     aspell-uk aspell-ru aspell-fr aspell-de aspell-en \
   ; rm /etc/nginx/http.d/default.conf \
   ; rm /etc/php81/php-fpm.d/www.conf \
-  ; ln -s /usr/bin/php81 /usr/bin/php \
   ; gpg --import /tmp/snappymail.asc \
   ; gpg --import /tmp/roundcube.asc \
   ; echo extension=snuffleupagus > /etc/php81/conf.d/snuffleupagus.ini \

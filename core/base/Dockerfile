@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile-upstream:1.4.3
 
 # base system image (intermediate)
-ARG DISTRO=alpine:3.16.3
+ARG DISTRO=alpine:3.17.0
 FROM $DISTRO as system
 
 ENV TZ=Etc/UTC LANG=C.UTF-8
@@ -56,7 +56,7 @@ RUN set -euxo pipefail \
   ;  machine="$(uname -m)" \
   ; deps="build-base gcc libffi-dev python3-dev" \
   ; [[ "${machine}" != x86_64 ]] && \
-      deps="${deps} cargo git libressl-dev mariadb-connector-c-dev postgresql-dev" \
+      deps="${deps} cargo git libretls-dev mariadb-connector-c-dev postgresql-dev" \
   ; apk add --virtual .build-deps ${deps} \
   ; [[ "${machine}" == armv7* ]] && \
       mkdir -p /root/.cargo/registry/index && \
@@ -66,10 +66,6 @@ RUN set -euxo pipefail \
   ; cd snuffleupagus-$SNUFFLEUPAGUS_VERSION \
   ; rm -rf src/tests/*php7*/ src/tests/*session*/ src/tests/broken_configuration/ src/tests/*cookie* src/tests/upload_validation/ \
   ; apk add --virtual .build-deps php81-dev php81-cgi php81-simplexml php81-xml pcre-dev build-base php81-pear php81-openssl re2c \
-  ; ln -s /usr/bin/phpize81 /usr/bin/phpize \
-  ; ln -s /usr/bin/pecl81 /usr/bin/pecl \
-  ; ln -s /usr/bin/php-config81 /usr/bin/php-config \
-  ; ln -s /usr/bin/php81 /usr/bin/php \
   ; pecl install vld-beta \
   ; make -j $(grep -c processor /proc/cpuinfo) release \
   ; cp src/.libs/snuffleupagus.so /app \

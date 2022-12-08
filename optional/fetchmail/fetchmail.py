@@ -99,15 +99,15 @@ if __name__ == "__main__":
     os.chmod("/data/fetchids", 0o700)
     os.setgid(id_fetchmail.pw_gid)
     os.setuid(id_fetchmail.pw_uid)
-    system.set_env()
+    config = system.set_env()
     while True:
-        delay = int(os.environ.get("FETCHMAIL_DELAY", 60))
+        delay = int(os.environ.get('FETCHMAIL_DELAY', 60))
         print("Sleeping for {} seconds".format(delay))
         time.sleep(delay)
 
-        if not os.environ.get("FETCHMAIL_ENABLED", 'True') in ('True', 'true'):
+        if not config.get('FETCHMAIL_ENABLED', True):
             print("Fetchmail disabled, skipping...")
             continue
 
-        run(os.environ.get("DEBUG", None) == "True")
+        run(config.get('DEBUG', False))
         sys.stdout.flush()

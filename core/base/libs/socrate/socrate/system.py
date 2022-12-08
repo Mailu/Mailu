@@ -15,6 +15,14 @@ def resolve_hostname(hostname):
     except Exception as e:
         log.warn("Unable to lookup '%s': %s",hostname,e)
         raise e
+
+def _coerce_value(value):
+    if isinstance(value, str) and value.lower() in ('true','yes'):
+        return True
+    elif isinstance(value, str) and value.lower() in ('false', 'no'):
+        return False
+    return value
+
 def set_env(required_secrets=[]):
     """ This will set all the environment variables and retains only the secrets we need """
     secret_key = os.environ.get('SECRET_KEY')
@@ -28,6 +36,11 @@ def set_env(required_secrets=[]):
     # derive the keys we need
     for secret in required_secrets:
         os.environ[f'{secret}_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray(secret, 'utf-8'), 'sha256').hexdigest()
+
+    return {
+            key: _coerce_value(os.environ.get(key, value))
+            for key, value in os.environ.items()
+           }
 
 def clean_env():
     """ remove all secret keys """

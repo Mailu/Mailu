@@ -529,7 +529,7 @@ class User(Base, Email):
     # Flask-login attributes
     is_active = True
     is_anonymous = False
-    _authenticated = True #Flask attribute would be is_authenticated but we needed to overrride this attribute for OpenID checks
+    _authenticated = True # Flask attribute would be is_authenticated but we needed to overrride this attribute for OpenID checks
 
     def get_id(self):
         """ return users email address """
@@ -618,17 +618,17 @@ class User(Base, Email):
                 try:
                     openid_token = utils.oic_client.get_token(self.email, password)
                     if openid_token is None:
-                        return self.check_password_legacy(password)
+                        return self.check_password_internal(password)
                     session['openid_token'] = openid_token
                 except: 
-                    return self.check_password_legacy(password)
+                    return self.check_password_internal(password)
                 else:
                     return True
             return self.is_authenticated()
         else:
-            return self.check_password_legacy(password)
+            return self.check_password_internal(password)
 
-    def check_password_legacy(self, password):
+    def check_password_internal(self, password):
         if self.password is None or self.password == "openid":
             return False
         cache_result = self._credential_cache.get(self.get_id())

@@ -84,6 +84,7 @@ sp.disable_function.function("ini_set").param("option").value("include_path").dr
 sp.disable_function.function("ini_set").param("option").value("open_basedir").drop();
 
 # Detect some backdoors via environment recon
+sp.disable_function.function("ini_get").filename("/var/www/roundcube/vendor/guzzlehttp/guzzle/src/functions.php").param("option").value("allow_url_fopen").allow();
 sp.disable_function.function("ini_get").param("option").value("allow_url_fopen").drop();
 sp.disable_function.function("ini_get").param("option").value("open_basedir").drop();
 sp.disable_function.function("ini_get").param("option").value_r("suhosin").drop();
@@ -97,7 +98,7 @@ sp.disable_function.function("is_callable").param("value").value("eval").drop();
 sp.disable_function.function("is_callable").param("value").value("exec").drop();
 sp.disable_function.function("is_callable").param("value").value("system").drop();
 sp.disable_function.function("is_callable").param("value").value("shell_exec").drop();
-sp.disable_function.function("is_callable").filename_r("/app/libraries/snappymail/pgp/gpg\.php$").param("value").value("proc_open").allow();
+sp.disable_function.function("is_callable").filename_r("^/var/www/snappymail/snappymail/v/\d+\.\d+\.\d+/app/libraries/snappymail/pgp/gpg\.php$").param("value").value("proc_open").allow();
 sp.disable_function.function("is_callable").param("value").value("proc_open").drop();
 sp.disable_function.function("is_callable").param("value").value("passthru").drop();
 

@@ -41,7 +41,7 @@ class Aliases(Resource):
         """ Create a new alias """
         data = api.payload
 
-        alias_found = models.Alias.query.filter_by(email = data['email']).all()
+        alias_found = models.Alias.query.filter_by(email = data['email']).first()
         if alias_found:
           return { 'code': 409, 'message': f'Duplicate alias {data["email"]}'}, 409
 
@@ -64,7 +64,7 @@ class Alias(Resource):
     @common.api_token_authorization
     def get(self, alias):
         """ Find alias """
-        alias_found = models.Alias.query.filter_by(email = alias).all()
+        alias_found = models.Alias.query.filter_by(email = alias).first()
         if alias_found is None:
           return { 'code': 404, 'message': f'Alias {alias} cannot be found'}, 404
         else:

@@ -44,7 +44,6 @@ class Relays(Resource):
         if not validators.domain(name):
             return { 'code': 400, 'message': f'Relayed domain {name} is not a valid domain'}, 400
 
-        relay_found = models.Relay.query.filter_by(name=data['name']).all()
         if common.fqdn_in_use(data['name']):
             return { 'code': 409, 'message': f'Duplicate domain {data["name"]}'}, 409
         relay_model = models.Relay(name=data['name'])

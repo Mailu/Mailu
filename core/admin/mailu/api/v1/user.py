@@ -12,6 +12,25 @@ user = api.namespace('user', description='User operations')
 user_fields_get = api.model('UserGet', {
     'email': fields.String(description='The email address of the user', example='John.Doe@example.com', attribute='_email'),
     'password': fields.String(description="Hash of the user's password; Example='$bcrypt-sha256$v=2,t=2b,r=12$fmsAdJbYAD1gGQIE5nfJq.$zLkQUEs2XZfTpAEpcix/1k5UTNPm0jO'"),
+    'comment': fields.String(description='A description for the user. This description is shown on the Users page', example='my comment'),
+    'quota_bytes': fields.Integer(description='The maximum quota for the user’s email box in bytes', example='1000000000'),
+    'global_admin': fields.Boolean(description='Make the user a global administrator'),
+    'enabled': fields.Boolean(description='Enable the user. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail'),
+    'enable_imap': fields.Boolean(description='Allow email retrieval via IMAP'),
+    'enable_pop': fields.Boolean(description='Allow email retrieval via POP3'),
+    'allow_spoofing': fields.Boolean(description='Allow the user to spoof the sender (send email as anyone)'),
+    'forward_enabled': fields.Boolean(description='Enable auto forwarding'),
+    'forward_destination': fields.List(fields.String(description='Email address to forward emails to'), example='Other@example.com'),
+    'forward_keep': fields.Boolean(description='Keep a copy of the forwarded email in the inbox'),
+    'reply_enabled': fields.Boolean(description='Enable automatic replies. This is also known as out of office (ooo) or out of facility (oof) replies'),
+    'reply_subject': fields.String(description='Optional subject for the automatic reply', example='Out of office'),
+    'reply_body': fields.String(description='The body of the automatic reply email', example='Hello, I am out of office. I will respond when I am back.'),
+    'reply_startdate': fields.Date(description='Start date for automatic replies in YYYY-MM-DD format.', example='2022-02-10'),
+    'reply_enddate': fields.Date(description='End date for automatic replies in YYYY-MM-DD format.', example='2022-02-22'),
+    'displayed_name': fields.String(description='The display name of the user within the Admin GUI', example='John Doe'),
+    'spam_enabled': fields.Boolean(description='Enable the spam filter'),
+    'spam_mark_as_read': fields.Boolean(description='Enable marking spam mails as read'),
+    'spam_threshold': fields.Integer(description='The user defined spam filter tolerance', example='80'),
 })
 
 user_fields_post = api.model('UserCreate', {
@@ -105,7 +124,7 @@ class Users(Resource):
         if 'enable_pop' in data:
             user_new.enable_pop = data['enable_pop']
         if 'allow_spoofing' in data:
-            user.allow_spoofing = data['allow_spoofing']
+            user_new.allow_spoofing = data['allow_spoofing']
         if 'forward_enabled' in data:
             user_new.forward_enabled = data['forward_enabled']
         if 'forward_destination' in data:
@@ -170,7 +189,7 @@ class User(Resource):
         data = api.payload
         if not validators.email(email):
             return { 'code': 400, 'message': f'Provided email address {data["email"]} is not a valid email address'}, 400
-        user_found = models.User.query.filter_by(email=email).first()
+        user_found = models.User.query.get(email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
 
@@ -189,7 +208,7 @@ class User(Resource):
         if 'enable_pop' in data:
             user_found.enable_pop = data['enable_pop']
         if 'allow_spoofing' in data:
-            user.allow_spoofing = data['allow_spoofing']
+            user_found.allow_spoofing = data['allow_spoofing']
         if 'forward_enabled' in data:
             user_found.forward_enabled = data['forward_enabled']
         if 'forward_destination' in data:

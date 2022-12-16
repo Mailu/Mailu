@@ -62,6 +62,7 @@ the version of Mailu that you are running.
     reverse
     database
     arm_images
+    oidc
 
 .. toctree::
     :maxdepth: 2

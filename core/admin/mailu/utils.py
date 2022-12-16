@@ -127,8 +127,8 @@ class PrefixMiddleware(object):
 proxy = PrefixMiddleware()
 
 
-class OicClient:
-    "Redirects users to OpenID Provider if configured"
+class OidcClient:
+    """ Redirects users to OpenID Client provider if configured """
 
     def __init__(self):
         self.app = None
@@ -163,7 +163,7 @@ class OicClient:
             "response_type": ["code"],
             "scope": ["openid"],
             "nonce": f_session["nonce"],
-            "redirect_uri": f"https://{self.app.config['HOSTNAME']}/sso/login/oic",
+            "redirect_uri": f"https://{self.app.config['HOSTNAME']}/sso/login/oidc",
             "state": f_session["state"]
         }
 
@@ -264,7 +264,7 @@ class OicClient:
         return self.app is not None and self.app.config['OIDC_ENABLED']
 
 # Create the OIC client
-oic_client = OicClient()
+oidc_client = OidcClient()
 
 
 # Data migrate

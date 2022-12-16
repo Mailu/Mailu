@@ -529,15 +529,15 @@ class User(Base, Email):
     # Flask-login attributes
     is_active = True
     is_anonymous = False
-    _authenticated = True # Flask attribute would be is_authenticated but we needed to overrride this attribute for OpenID checks
+    _authenticated = True # Flask attribute would be is_authenticated but we needed to overrride this attribute for OIDC checks
 
     def get_id(self):
         """ return users email address """
         return self.email
 
     @property
-    def openid_token(self):
-        return session['openid_token']
+    def oidc_token(self):
+        return session['oidc_token']
 
     @property
     def destination(self):
@@ -568,20 +568,20 @@ class User(Base, Email):
 
     @property
     def is_authenticated(self):
-        if 'openid_token' not in session:
+        if 'oidc_token' not in session:
             return self._authenticated
         else:
-            token = utils.oic_client.check_validity(self.openid_token)
+            token = utils.oidc_client.check_validity(self.oidc_token)
             if token is None:
                 flask_login.logout_user()
                 session.destroy()
                 return False
-            session['openid_token'] = token
+            session['oidc_token'] = token
             return True
 
     @is_authenticated.setter
     def is_authenticated(self, value):
-        if 'openid_token' not in session:
+        if 'oidc_token' not in session:
             self._authenticated = value
 
     @classmethod
@@ -613,13 +613,13 @@ class User(Base, Email):
         if password == '':
             return False
         
-        if utils.oic_client.is_enabled():
-            if 'openid_token' not in session:
+        if utils.oidc_client.is_enabled():
+            if 'oidc_token' not in session:
                 try:
-                    openid_token = utils.oic_client.get_token(self.email, password)
-                    if openid_token is None:
+                    oidc_token = utils.oidc_client.get_token(self.email, password)
+                    if oidc_token is None:
                         return self.check_password_internal(password)
-                    session['openid_token'] = openid_token
+                    session['oidc_token'] = oidc_token
                 except: 
                     return self.check_password_internal(password)
                 else:

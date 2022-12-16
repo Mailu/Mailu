@@ -36,10 +36,10 @@ def login():
         username = form.email.data
         if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
             flask.flash('Too many attempts from your IP (rate-limit)', 'error')
-            return flask.render_template('login.html', form=form, fields=fields, openId=app.config['OIDC_ENABLED'], openIdEndpoint=utils.oic_client.get_redirect_url())
+            return flask.render_template('login.html', form=form, fields=fields, oidc_enabled=app.config['OIDC_ENABLED'], oidc_redirect_url=utils.oidc_client.get_redirect_url())
         if utils.limiter.should_rate_limit_user(username, client_ip, device_cookie, device_cookie_username):
             flask.flash('Too many attempts for this user (rate-limit)', 'error')
-            return flask.render_template('login.html', form=form, fields=fields, openId=app.config['OIDC_ENABLED'], openIdEndpoint=utils.oic_client.get_redirect_url())
+            return flask.render_template('login.html', form=form, fields=fields, oidc_enabled=app.config['OIDC_ENABLED'], oidc_redirect_url=utils.oidc_client.get_redirect_url())
         user = models.User.login(username, form.pw.data)
         if user:
             flask.session.regenerate()
@@ -54,10 +54,10 @@ def login():
             utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)
             flask.current_app.logger.warn(f'Login failed for {username} from {client_ip}.')
             flask.flash('Wrong e-mail or password', 'error')
-    return flask.render_template('login.html', form=form, fields=fields, openId=app.config['OIDC_ENABLED'], openIdEndpoint=utils.oic_client.get_redirect_url())
+    return flask.render_template('login.html', form=form, fields=fields, oidc_enabled=app.config['OIDC_ENABLED'], oidc_redirect_url=utils.oidc_client.get_redirect_url())
 
-@sso.route('/login/oic', methods=['GET', 'POST'])
-def login_oic():
+@sso.route('/login/oidc', methods=['GET', 'POST'])
+def login_oidc():
     # Redirect to /login if OIDC is disabled
     if not app.config['OIDC_ENABLED']:
         return redirect('/login')
@@ -66,7 +66,7 @@ def login_oic():
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
 
     if 'code' in flask.request.args:
-        username, token_response = utils.oic_client.exchange_code(flask.request.query_string.decode())
+        username, token_response = utils.oidc_client.exchange_code(flask.request.query_string.decode())
         if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
             flask.flash('Too many attempts from your IP (rate-limit)', 'error')
             return redirect('/login')
@@ -79,7 +79,7 @@ def login_oic():
             if user is None:
                 user = models.User.create(username)
 
-            flask.session["openid_token"] = token_response
+            flask.session["oidc_token"] = token_response
             flask.session.regenerate()
             flask_login.login_user(user)
             # Redirect to the admin interface by default
@@ -92,18 +92,18 @@ def login_oic():
             flask.current_app.logger.warn(f'OIDC login failed for {username} from {client_ip}: exchanged code didn\'t return any username.')
 
     # No code was provided, redirect to the OIDC provider
-    return redirect(utils.oic_client.get_redirect_url())
+    return redirect(utils.oidc_client.get_redirect_url())
 
 @sso.route('/logout', methods=['GET'])
 @access.authenticated
 def logout():
-    if utils.oic_client.is_enabled():
-        if 'openid_token' not in flask.session:
+    if utils.oidc_client.is_enabled():
+        if 'oidc_token' not in flask.session:
             return logout_internal()
         if 'state' in flask.request.args and 'state' in flask.session:
             if flask.args.get('state') == flask.session['state']:
                 logout_internal()
-        return redirect(utils.oic_client.logout())
+        return redirect(utils.oidc_client.logout())
     return logout_internal()
     
 

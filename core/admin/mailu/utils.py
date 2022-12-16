@@ -189,7 +189,11 @@ class OidcClient:
             return None, None
         user_response = self.client.do_user_info_request(
             access_token=response['access_token'])
-        return user_response['email'], response
+        user_data = {
+            "email": user_response['email'],
+            "name": user_response['name'] if 'name' in user_response else user_response['email'],
+        }
+        return user_data, response
 
     def get_token(self, username, password):
         """ gets an access token for the given username and password """

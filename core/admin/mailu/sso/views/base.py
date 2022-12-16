@@ -66,7 +66,9 @@ def login_oidc():
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
 
     if 'code' in flask.request.args:
-        username, token_response = utils.oidc_client.exchange_code(flask.request.query_string.decode())
+        user_data, token_response = utils.oidc_client.exchange_code(flask.request.query_string.decode())
+        username = user_data['email']
+        user_display_name = user_data['name']
         if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
             flask.flash('Too many attempts from your IP (rate-limit)', 'error')
             return redirect('/login')
@@ -78,6 +80,11 @@ def login_oidc():
             # If the user does not exist, create it with an empty password
             if user is None:
                 user = models.User.create(username)
+
+            if user.displayed_name != user_display_name:
+                # Update the display name if it has changed
+                user.set_display_name(user_display_name)
+                models.db.session.commit()
 
             flask.session["oidc_token"] = token_response
             flask.session.regenerate()

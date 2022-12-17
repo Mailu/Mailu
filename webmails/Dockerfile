@@ -7,10 +7,11 @@ LABEL version=$VERSION
 
 COPY snappymail/pubkey.asc /tmp/snappymail.asc
 COPY roundcube/pubkey.asc /tmp/roundcube.asc
+COPY roundcube/roundcube.diff /tmp/roundcube.diff
 
 RUN set -euxo pipefail \
   ; apk add --no-cache \
-    nginx gpg gpg-agent \
+    nginx gpg gpg-agent patch \
     php81 php81-fpm php81-mbstring php81-zip php81-xml php81-simplexml php81-pecl-apcu \
     php81-dom php81-curl php81-exif gd php81-gd php81-iconv php81-intl php81-openssl php81-ctype \
     php81-pdo_sqlite php81-pdo_mysql php81-pdo_pgsql php81-pdo php81-sodium libsodium php81-tidy php81-pecl-uuid \
@@ -42,7 +43,8 @@ RUN set -euxo pipefail \
   ; rm -rf CHANGELOG.md SECURITY.md INSTALL LICENSE README.md UPGRADING composer.json-dist installer composer.* \
   ; ln -sf index.php /var/www/roundcube/public_html/sso.php \
   ; rm -rf plugins/{autologon,example_addressbook,http_authentication,krb_authentication,new_user_identity,password,redundant_attachments,squirrelmail_usercopy,userinfo,virtuser_file,virtuser_query} \
-  ; sed -i '/suhosin.session.encrypt/d;/mbstring\.func_overload/d' program/lib/Roundcube/bootstrap.php
+  ; patch -p0 < /tmp/roundcube.diff \
+  ; rm /tmp/roundcube.diff
 
 COPY roundcube/config/config.inc.php /conf/
 COPY roundcube/login/mailu.php /var/www/roundcube/plugins/mailu/

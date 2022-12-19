@@ -17,11 +17,21 @@ RUN set -euxo pipefail \
   ; ! [[ "${machine}" == x86_64 ]] \
     || apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc==11-r0
 
-ENV LD_PRELOAD=/usr/lib/libhardened_malloc.so
-ENV CXXFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security -fstack-clash-protection -fexceptions"
-ENV CFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security -fstack-clash-protection -fexceptions"
-ENV CPPFLAGS="-Wdate-time -D_FORTIFY_SOURCE=2"
-ENV LDFLAGS="-Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
+ENV \
+  LD_PRELOAD="/usr/lib/libhardened_malloc.so" \
+  CXXFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security -fstack-clash-protection -fexceptions" \
+  CFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security -fstack-clash-protection -fexceptions" \
+  CPPFLAGS="-Wdate-time -D_FORTIFY_SOURCE=2" \
+  LDFLAGS="-Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now" \
+  ADMIN_ADDRESS="admin" \
+  FRONT_ADDRESS="front" \
+  SMTP_ADDRESS="smtp" \
+  IMAP_ADDRESS="imap" \
+  REDIS_ADDRESS="redis" \
+  ANTIVIRUS_ADDRESS="antivirus" \
+  ANTISPAM_ADDRESS="antispam" \
+  WEBMAIL_ADDRESS="webmail" \
+  WEBDAV_ADDRESS="webdav"
 
 WORKDIR /app
 

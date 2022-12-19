@@ -1,9 +1,8 @@
 #!/bin/bash
-{% set hostname,port = ANTISPAM_WEBUI_ADDRESS.split(':') %}
-RSPAMD_HOST="$(getent hosts {{ hostname }}|cut -d\  -f1):{{ port }}"
+RSPAMD_HOST="$(getent hosts {{ ANTISPAM_ADDRESS }}|cut -d\  -f1):11334"
 if [[ $? -ne 0 ]]
 then
-	echo "Failed to lookup {{ ANTISPAM_WEBUI_ADDRESS }}" >&2
+	echo "Failed to lookup {{ ANTISPAM_ADDRESS }}" >&2
 	exit 1
 fi
 

@@ -113,6 +113,9 @@ services:
       - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d:ro"
     depends_on:
       - front
+    {% if antivirus_enabled %}
+      - antivirus
+    {% endif %}
     {% if resolver_enabled %}
       - resolver
     dns:

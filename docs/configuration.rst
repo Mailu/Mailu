@@ -100,6 +100,12 @@ by setting ``INBOUND_TLS_ENFORCE`` to ``True``. Please note that this is forbidd
 internet facing hosts according to e.g. `RFC 3207`_ , because this prevents MTAs without STARTTLS
 support or e.g. mismatching TLS versions to deliver emails to Mailu.
 
+The ``SCAN_MACROS`` (default: True) setting controls whether Mailu will endavour
+to reject emails containing documents with malicious macros. Under the hood, it uses
+`mraptor from oletools`_ to determine whether a macro is malicious or not.
+
+.. _`mraptor from oletools`: https://github.com/decalage2/oletools/wiki/mraptor
+
 .. _`RFC 3207`: https://tools.ietf.org/html/rfc3207
 
 .. _fetchmail:

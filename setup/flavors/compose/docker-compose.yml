@@ -13,12 +13,6 @@ services:
     restart: always
     volumes:
       - "{{ root }}/redis:/data"
-    {% if resolver_enabled %}
-    depends_on:
-      - resolver
-    dns:
-      - {{ dns }}
-    {% endif %}
 
   # Core services
   front:
@@ -42,16 +36,11 @@ services:
     {% if resolver_enabled %}
     depends_on:
       - resolver
-    dns:
-      - {{ dns }}
 
   resolver:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
     restart: always
-    networks:
-      default:
-        ipv4_address: {{ dns }}
     {% endif %}
 
   admin:
@@ -69,8 +58,6 @@ services:
       - redis
     {% if resolver_enabled %}
       - resolver
-    dns:
-      - {{ dns }}
     {% endif %}
 
   imap:
@@ -84,8 +71,6 @@ services:
       - front
     {% if resolver_enabled %}
       - resolver
-    dns:
-      - {{ dns }}
     {% endif %}
 
   smtp:
@@ -99,8 +84,6 @@ services:
       - front
     {% if resolver_enabled %}
       - resolver
-    dns:
-      - {{ dns }}
     {% endif %}
 
 {% if oletools_enabled %}
@@ -142,8 +125,6 @@ services:
     {% endif %}
     {% if resolver_enabled %}
       - resolver
-    dns:
-      - {{ dns }}
     {% endif %}
 
   # Optional services
@@ -157,8 +138,6 @@ services:
     {% if resolver_enabled %}
     depends_on:
       - resolver
-    dns:
-      - {{ dns }}
     {% endif %}
   {% endif %}
 
@@ -172,8 +151,6 @@ services:
     {% if resolver_enabled %}
     depends_on:
       - resolver
-    dns:
-      - {{ dns }}
     {% endif %}
   {% endif %}
 
@@ -190,8 +167,6 @@ services:
       - imap
     {% if resolver_enabled %}
       - resolver
-    dns:
-      - {{ dns }}
     {% endif %}
   {% endif %}
 
@@ -208,8 +183,6 @@ services:
       - imap
     {% if resolver_enabled %}
       - resolver
-    dns:
-      - {{ dns }}
     {% endif %}
   {% endif %}
 
@@ -219,15 +192,14 @@ networks:
     enable_ipv6: true
     {% endif %}
     driver: bridge
+    {% if ipv6_enabled %}
     ipam:
       driver: default
       config:
-        - subnet: {{ subnet }}
-        {% if ipv6_enabled %}
         - subnet: {{ subnet6 }}
-        {% endif %}
-{% if oletools_enabled %}
+    {% endif %}
+  {% if oletools_enabled %}
   noinet:
     driver: bridge
     internal: true
-{% endif %}
+  {% endif %}

@@ -2,3 +2,4 @@ Remove HOST_* variables, use *_ADDRESS everywhere instead. Please note that thos
 Derive a different key for admin/SECRET_KEY; this will invalidate existing sessions
 Ensure that rspamd starts after clamav
 Only display a single HOSTNAME on the client configuration page
+Autodetect SUBNET

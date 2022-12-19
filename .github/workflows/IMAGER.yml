@@ -1,0 +1,217 @@
+name: IMAGER
+on:
+  workflow_dispatch:
+
+concurrency: imager-${{ github.ref }}
+
+jobs:
+  prepare:
+    name: Prepare Image
+    # X64 we need for nodegit
+    # runs-on: ['self-hosted', 'Linux', 'X64']
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: mabels/neckless@main
+        with:
+          version: v0.1.15
+
+      - shell: bash
+        name: OCI Write Config and Key File
+        env:
+          NECKLESS_PRIVKEY: ${{ secrets.NECKLESS_PRIVKEY }}
+        run: |
+          mkdir -p .oci
+          neckless kv ls OCI_KEY_FILE@.oci/instances_oci_api_key.pem --rawValue
+          eval $(neckless kv ls OCI_CONFIG --shEvalKeyValue)
+          echo -e "$OCI_CONFIG" > .oci/config
+          unset OCI_CONFIG
+          ls -l .oci
+          cp .github/workflows/oci-via.docker /usr/local/bin/oci
+          chmod +x /usr/local/bin/oci
+          oci --version
+          oci setup repair-file-permissions --file $HOME/.oci/config
+          oci setup repair-file-permissions --file $HOME/.oci/instances_oci_api_key.pem
+
+      - shell: bash
+        name: start-instances
+        env:
+          NECKLESS_PRIVKEY: ${{ secrets.NECKLESS_PRIVKEY }}
+        run: |
+          eval $(neckless kv ls --ghAddMask  --shKeyValue GITHUB_ACCESS_TOKEN)
+          bash .github/workflows/imager-oci-github-worker.sh ${{github.sha}} x86_64
+          bash .github/workflows/imager-oci-github-worker.sh ${{github.sha}} aarch64
+
+          for i in $(find . -name "oci.*.worker")
+          do
+            instanceId=$(jq -r '.data.id' < $i)
+            echo "$instanceId"
+          done
+
+      - name: workers
+        uses: actions/upload-artifact@v3
+        with:
+          name: workers
+          path: ./*.worker
+
+  build:
+    name: Build images
+    needs: prepare
+    strategy:
+      matrix:
+        include:
+          - unamem: aarch64
+            arch: arm64
+          - unamem: x86_64
+            arch: amd64
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
+
+      - uses: mabels/neckless@main
+        with:
+          version: v0.1.15
+
+      - shell: bash
+        name: OCI Write Config and Key File
+        env:
+          NECKLESS_PRIVKEY: ${{ secrets.NECKLESS_PRIVKEY }}
+        run: |
+          mkdir -p .oci
+          neckless kv ls OCI_KEY_FILE@.oci/instances_oci_api_key.pem --rawValue
+          eval $(neckless kv ls OCI_CONFIG --shEvalKeyValue)
+          echo -e "$OCI_CONFIG" > .oci/config
+          unset OCI_CONFIG
+          ls -l .oci
+          cp .github/workflows/oci-via.docker /usr/local/bin/oci
+          chmod +x /usr/local/bin/oci
+          oci --version
+          oci setup repair-file-permissions --file $HOME/.oci/config
+          oci setup repair-file-permissions --file $HOME/.oci/instances_oci_api_key.pem
+
+
+      - name: extract worker-cleanup
+        uses: actions/download-artifact@v3
+        with:
+          name: workers
+
+      - name: get instance id ${{ matrix.arch }}
+        shell: bash
+        run: |
+            ls -la
+            echo instanceId=$(jq -r '.data.id' < oci.${{ matrix.unamem }}.*.worker) >> $GITHUB_ENV
+            cat $GITHUB_ENV
+
+      - shell: bash
+        name: Wait for Public IP
+        run: |
+            publicIp=""
+            while [ -z "$publicIp" ]
+            do
+              publicIp=$(oci  compute instance list-vnics --instance-id $instanceId | jq -r '.data[0]."public-ip"' || true)
+              echo "Waiting: "$publicIp
+              sleep 5
+            done
+            echo publicIp=$publicIp >> $GITHUB_ENV
+
+      - shell: bash
+        name: Wait for Ready
+        run: |
+            which nc
+            ready="not-ready"
+            while [ "$ready" != "ready" ]
+            do
+              ready=$((echo quit | nc -w 3 $publicIp 22 | grep -q '^SSH' && echo 'ready') || echo 'not-ready')
+              echo "Test:"$ready
+              sleep 5
+            done
+
+      - shell: bash
+        name: Wait for Shutdown
+        run: |
+            ready="ready"
+            while [ "$ready" != "not-ready" ]
+            do
+              ready=$((echo quit | nc -w 3 $publicIp 22 | grep -q '^SSH' && echo 'ready') || echo 'not-ready')
+              echo "Test:"$ready
+              sleep 5
+            done
+            sleep 20
+
+      - shell: bash
+        name: Send to Stop
+        run: |
+            oci --auth api_key compute instance action --action STOP --instance-id $instanceId  > /dev/null
+            imageId=$(oci compute image create  --display-name mailu-${{ matrix.arch }} --instance-id $instanceId | jq -r '.data.id')
+            echo $imageId
+            ready=1
+            while [ $ready -ne 0 ]
+            do
+              state=$(oci compute image get --image-id ocid1.image.oc1.eu-frankfurt-1.aaaaaaaainyt3papdafhbslxvlevwtssxqy63eljcudmdp27exhiuyj32qnq | jq -r '.data."lifecycle-state"')
+              if [ $state = "AVAILABLE" ]
+              then
+                ready = 1
+              else
+                sleep 5
+              fi
+            done
+
+  cleanup:
+    runs-on: ubuntu-latest
+    name: Cleanup
+    if: always()
+    needs:
+      - prepare
+      - build
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: extract worker-cleanup
+        uses: actions/download-artifact@v3
+        with:
+          name: workers
+
+      - uses: mabels/neckless@main
+        with:
+          version: v0.1.15
+
+      - shell: bash
+        name: OCI Write Config and Key File
+        env:
+          NECKLESS_PRIVKEY: ${{ secrets.NECKLESS_PRIVKEY }}
+        run: |
+          mkdir -p .oci
+          neckless kv ls OCI_KEY_FILE@.oci/instances_oci_api_key.pem --rawValue
+          eval $(neckless kv ls OCI_CONFIG --shEvalKeyValue)
+          echo -e "$OCI_CONFIG" > .oci/config
+          unset OCI_CONFIG
+          ls -l .oci
+          cp .github/workflows/oci-via.docker /usr/local/bin/oci
+          chmod +x /usr/local/bin/oci
+          oci --version
+          oci setup repair-file-permissions --file $HOME/.oci/config
+          oci setup repair-file-permissions --file $HOME/.oci/instances_oci_api_key.pem
+
+      - shell: bash
+        name: terminate ec2
+        run: |
+          ls -la *.worker
+          for i in $(find . -name "ec2.*.worker" -print)
+          do
+            echo "EC2 to terminate: $i -- $(jq -r '.Instances[0].InstanceId' < $i)" || true
+            aws ec2 terminate-instances --instance-ids $(jq -r '.Instances[0].InstanceId' < $i) || true
+          done
+          for i in $(find . -name "oci.*.worker" -print)
+          do
+            echo "OCI to terminate: $i -- $(jq -r '.data.id' < $i)" || true
+            oci --auth api_key \
+              compute instance terminate \
+              --instance-id $(jq -r '.data.id' < $i) \
+              --force || true
+          done
+

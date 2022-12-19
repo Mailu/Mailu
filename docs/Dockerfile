@@ -1,5 +1,5 @@
 # Convert .rst files to .html in temporary build container
-FROM python:3.8-alpine3.14 AS build
+FROM python:alpine AS build
 
 ARG version=master
 ENV VERSION=$version
@@ -16,7 +16,7 @@ RUN apk add --no-cache --virtual .build-deps \
 
 
 # Build nginx deployment image including generated html
-FROM nginx:1.21-alpine
+FROM nginx:stable-alpine
 
 ARG version=master
 ARG pinned_version=master

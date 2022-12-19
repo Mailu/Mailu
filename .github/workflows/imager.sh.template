@@ -1,0 +1,104 @@
+#stop=1
+#systemctl start docker.service
+#while [ $stop -ne 0 ]
+#do
+#  docker network ls
+#  docker network inspect bridge | tee out.json
+#  stop=$?
+#  if [ $stop = 0 ]
+#  then
+#    bindif=$(jq -r '.[0].Options."com.docker.network.bridge.name"' < out.json)
+#    bindip=$(ip -j a l  dev $bindif | jq -r '.[0].addr_info[0].local')
+#    if [ $bindip = "null" ]
+#    then
+#      stop=1
+#    fi
+#    echo "Binding: $bindip:$bindif"
+#  fi
+#  rm -f out.json
+#  if [ $stop = 0 ]
+#  then
+#    mkdir -p /etc/systemd/system/docker.service.d
+#    cat >/etc/systemd/system/docker.service.d/override.conf <<EOF2
+#[Service]
+#ExecStart=
+#ExecStart=/usr/bin/dockerd -H fd:// -H tcp://$bindip:2376 --containerd=/run/containerd/containerd.sock
+#EOF2
+#    iptables -I INPUT -p tcp -d $bindip -m state --state NEW -m tcp --dport 2376 -j ACCEPT
+#    systemctl stop docker.service
+#    systemctl daemon-reload
+#    systemctl start docker.service
+#    waitDocker=1
+#    while [ $waitDocker -ne 0 ]
+#    do
+#      DOCKER_HOST=tcp://$bindip:2376 docker ps
+#      waitDocker=$?
+#      if [ $waitDocker -ne 0 ]
+#      then
+#        sleep 5
+#      fi
+#    done
+#    export DOCKER_HOST=tcp://$bindip:2376
+#  else
+#    sleep 5
+#  fi
+#done
+
+cat > /tmp/start.sh <<EOF1
+#!/bin/bash
+#mv /usr/bin/docker /usr/bin/docker-orig
+#cat > /usr/bin/docker <<EOF3
+##!/bin/bash
+#export DOCKER_HOST=$DOCKER_HOST
+#exec /usr/bin/docker-orig \\\$@
+#EOF3
+#mv /usr/bin/docker-compose /usr/bin/docker-compose-orig
+#cat > /usr/bin/docker-compose <<EOF4
+##!/bin/bash
+#export DOCKER_HOST=$DOCKER_HOST
+#exec /usr/bin/docker-compose-orig \\\$@
+#EOF4
+cat > /usr/bin/docker-host-env <<EOF3
+#!/bin/bash
+if [ -z "$DOCKER_HOST" ]
+then
+  DOCKER_HOST="unix:///var/run/docker.sock"
+fi
+echo "$DOCKER_HOST"
+export DOCKER_HOST=$DOCKER_HOST
+EOF3
+#chmod +x /usr/bin/docker /usr/bin/docker-compose /usr/bin/docker-host-env
+chmod +x /usr/bin/docker-host-env
+chmod -R 777 /images
+#echo "DOCKER_HOST=$DOCKER_HOST"
+unset DOCKER_HOST
+/usr/bin/dockerd --host=unix:///var/run/docker.sock &
+sleep 1
+docker ps
+docker-compose version
+usermod -a -G docker runner
+su runner -c 'id; docker ps; docker-compose version'
+su runner -c 'cd /home/runner/actions-runner && /home/runner/actions-runner/start-worker.sh ./run.sh'
+EOF1
+apt install -y parallel
+cat > /docker-run.sh <<EOF3
+#!/bin/bash -x
+id=\$(cat /dev/urandom | tr -dc '[:alpha:]' | fold -w \${1:-10} | head -n 1)
+mkdir -p /images 
+chmod -R 777 /images
+exec docker run \
+             --privileged \
+             -v /tmp/start.sh:/tmp/start.sh \
+             -v /images:/images \
+             -e DOCKER_HOST=$DOCKER_HOST \
+             -e GITHUB_ACCESS_TOKEN="$GITHUB_ACCESS_TOKEN" \
+             -e RUNNER_NAME="dp-$ARCH-$REV-\$id --ephemeral" \
+             -e CONFIG_OPTS="--ephemeral" \
+             -e RUNNER_LABELS="$REV" \
+             -e RUNNER_REPOSITORY_URL=https://github.com/${USER}/${PROJECT} \
+             public.ecr.aws/mabels/developers-paradise:$DOCKER_TAG \
+             bash /tmp/start.sh
+EOF3
+chmod 755 /docker-run.sh
+docker pull public.ecr.aws/mabels/developers-paradise:$DOCKER_TAG
+poweroff

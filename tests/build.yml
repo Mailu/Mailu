@@ -3,98 +3,98 @@ version: '3'
 services:
 
   front:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}nginx:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}nginx:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../core/nginx
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
   resolver:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../optional/unbound
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
   imap:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../core/dovecot
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
   smtp:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../core/postfix
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
   antispam:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../core/rspamd
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
   antivirus:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}clamav:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}clamav:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../optional/clamav
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
   webdav:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}radicale:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}radicale:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../optional/radicale
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
   traefik-certdumper:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}traefik-certdumper:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}traefik-certdumper:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../optional/traefik-certdumper
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
   admin:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../core/admin
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
   roundcube:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}roundcube:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}roundcube:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../webmails/roundcube
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
   rainloop:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rainloop:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rainloop:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../webmails/rainloop
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
   fetchmail:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}fetchmail:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}fetchmail:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../optional/fetchmail
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
   none:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}none:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}none:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../core/none
       args:
         VERSION: ${PINNED_MAILU_VERSION:-local}
 
   docs:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}docs:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}docs:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../docs
       args:
@@ -102,7 +102,7 @@ services:
         pinned_version: ${PINNED_MAILU_VERSION:-local}
 
   setup:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}setup:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}setup:${PINNED_MAILU_ARCH_VERSION:-local}
     build:
       context: ../setup
       args:

@@ -11,11 +11,11 @@ services:
     image: redis:alpine
     restart: always
     volumes:
-      - "/mailu/redis:/data"
+      - "${MAILU_BASE:-/mailu/}redis:/data"
 
   # Core services
   front:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}nginx:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}nginx:${PINNED_MAILU_ARCH_VERSION:-local}
     restart: always
     env_file: mailu.env
     logging:
@@ -31,15 +31,15 @@ services:
       - "127.0.0.1:143:143"
       - "127.0.0.1:993:993"
     volumes:
-      - "/mailu/certs:/certs"
+      - ${MAILU_BASE:-/mailu/}certs:/certs:ro
 
   admin:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${PINNED_MAILU_ARCH_VERSION:-local}
     restart: always
     env_file: mailu.env
     volumes:
-      - "/mailu/data:/data"
-      - "/mailu/dkim:/dkim"
+      - "${MAILU_BASE:-/mailu/}data:/data"
+      - "${MAILU_BASE:-/mailu/}dkim:/dkim"
     dns:
       - 192.168.203.254
     depends_on:
@@ -47,39 +47,39 @@ services:
       - resolver
 
   imap:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot:${PINNED_MAILU_ARCH_VERSION:-local}
     restart: always
     env_file: mailu.env
     volumes:
-      - "/mailu/mail:/mail"
-      - "/mailu/overrides:/overrides"
+      - "${MAILU_BASE:-/mailu/}mail:/mail"
+      - "${MAILU_BASE:-/mailu/}overrides:/overrides"
     depends_on:
       - front
 
   smtp:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix:${PINNED_MAILU_ARCH_VERSION:-local}
     restart: always
     env_file: mailu.env
     volumes:
-      - "/mailu/overrides:/overrides"
+      - "${MAILU_BASE:-/mailu/}overrides:/overrides"
     depends_on:
       - front
 
   antispam:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${PINNED_MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${PINNED_MAILU_ARCH_VERSION:-local}
     restart: always
     env_file: mailu.env
     volumes:
-      - "/mailu/filter:/var/lib/rspamd"
-      - "/mailu/dkim:/dkim"
-      - "/mailu/overrides/rspamd:/etc/rspamd/override.d"
+      - "${MAILU_BASE:-/mailu/}filter:/var/lib/rspamd"
+      - "${MAILU_BASE:-/mailu/}dkim:/dkim"
+      - "${MAILU_BASE:-/mailu/}overrides/rspamd:/etc/rspamd/override.d"
     depends_on:
       - front
 
   # Optional services
 
   resolver:
-    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-local}
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${PINNED_MAILU_ARCH_VERSION:-local}
     env_file: mailu.env
     restart: always
     networks:

@@ -1,2 +1,2 @@
-docker==4.2.2
-colorama==0.4.3
+docker==6.0.1
+colorama==0.4.6

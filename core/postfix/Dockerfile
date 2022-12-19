@@ -21,7 +21,7 @@ RUN pip3 install "podop>0.2.5"
 # Image specific layers under this line
 # Building pycares from source requires py3-wheel and libffi-dev packages
 RUN apk add --no-cache --virtual .build-deps gcc musl-dev python3-dev py3-wheel libffi-dev \
-  && pip3 install --no-binary :all: postfix-mta-sts-resolver==1.0.1 \
+  && pip3 install --no-binary :all: postfix-mta-sts-resolver==1.1.4 \
   && apk del .build-deps
 
 RUN apk add --no-cache postfix postfix-pcre cyrus-sasl-login rsyslog logrotate

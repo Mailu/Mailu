@@ -1,0 +1,36 @@
+#!/bin/bash
+set -eu -o pipefail
+
+if [[ ! -e "$HOME/.kube" ]]; then
+  mkdir "$HOME/.kube"
+fi
+if [[ ! -e "$HOME/.oci" ]]; then
+  mkdir "$HOME/.oci"
+fi
+
+if [[ $(command -v docker) ]]; then
+  # shellcheck disable=SC2046
+  docker container run \
+    --name oci$$ \
+    --rm \
+    -e HOME="$HOME" \
+    -e USER_NAME="$(id -un)" \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):$HOME" \
+    $([[ -v OCI_CLI_PROFILE ]] && echo "-e OCI_CLI_PROFILE=$OCI_CLI_PROFILE") \
+    docker.io/shakiyam/oci-cli "$@"
+else
+  # shellcheck disable=SC2046
+  podman container run \
+    --entrypoint=/usr/local/bin/oci \
+    --name oci$$ \
+    --rm \
+    --security-opt label=disable \
+    --userns=keep-id \
+    -e HOME="$HOME" \
+    -v "$HOME/.kube:$HOME/.kube" \
+    -v "$HOME/.oci:$HOME/.oci" \
+    -v "$(pwd)/user-data:$HOME/user-data" \
+    $([[ -v OCI_CLI_PROFILE ]] && echo "-e OCI_CLI_PROFILE=$OCI_CLI_PROFILE") \
+    docker.io/shakiyam/oci-cli "$@"
+fi

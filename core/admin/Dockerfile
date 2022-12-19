@@ -22,7 +22,7 @@ RUN set -eu \
 # Actual application
 FROM $DISTRO
 ARG VERSION
-COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
+#COPY --from=balenalib/rpi-alpine:3.16 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 
 ENV TZ Etc/UTC
 

@@ -421,8 +421,7 @@ class Email(object):
         """ send an email to the address """
         try:
             f_addr = f'{app.config["POSTMASTER"]}@{idna.encode(app.config["DOMAIN"]).decode("ascii")}'
-            ip, port = app.config['HOST_LMTP'].rsplit(':')
-            with smtplib.LMTP(ip, port=port) as lmtp:
+            with smtplib.LMTP(ip=app.config['IMAP_ADDRESS'], port=2525) as lmtp:
                 to_address = f'{self.localpart}@{idna.encode(self.domain_name).decode("ascii")}'
                 msg = text.MIMEText(body)
                 msg['Subject'] = subject
@@ -505,6 +504,7 @@ class User(Base, Email):
     # Features
     enable_imap = db.Column(db.Boolean, nullable=False, default=True)
     enable_pop = db.Column(db.Boolean, nullable=False, default=True)
+    allow_spoofing = db.Column(db.Boolean, nullable=False, default=False)
 
     # Filters
     forward_enabled = db.Column(db.Boolean, nullable=False, default=False)

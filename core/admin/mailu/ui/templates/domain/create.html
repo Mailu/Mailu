@@ -10,7 +10,7 @@
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.name) }}
   {{ macros.form_fields((form.max_users, form.max_aliases)) }}
-  {{ macros.form_field(form.max_quota_bytes, step=10**9, max=50*10**9, data_infinity="true",
+  {{ macros.form_field(form.max_quota_bytes, step=50*10**6, max=50*10**9, data_infinity="true",
       prepend='<span class="input-group-text"><span id="max_quota_bytes_value"></span>&nbsp;GB</span>') }}
   {{ macros.form_field(form.signup_enabled) }}
   {{ macros.form_field(form.comment) }}

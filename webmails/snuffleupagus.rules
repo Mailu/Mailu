@@ -1,0 +1,134 @@
+# This is based on default configuration file for Snuffleupagus (https://snuffleupagus.rtfd.io),
+# for php8.
+# It contains "reasonable" defaults that won't break your websites,
+# and a lot of commented directives that you can enable if you want to
+# have a better protection.
+
+# Harden the PRNG
+sp.harden_random.enable();
+
+# Disabled XXE
+sp.xxe_protection.enable();
+
+# Global configuration variables
+sp.global.secret_key("{{ SNUFFLEUPAGUS_KEY }}");
+
+# Globally activate strict mode
+# https://www.php.net/manual/en/language.types.declarations.php#language.types.declarations.strict
+sp.global_strict.enable();
+
+# Prevent unserialize-related exploits
+# sp.unserialize_hmac.enable();
+
+# Only allow execution of read-only files. This is a low-hanging fruit that you should enable.
+sp.readonly_exec.enable();
+
+# PHP has a lot of wrappers, most of them aren't usually useful, you should
+# only enable the ones you're using.
+sp.wrappers_whitelist.list("file,php,phar,mailsosubstreams");
+
+# Prevent sloppy comparisons.
+sp.sloppy_comparison.enable();
+
+# Use SameSite on session cookie
+# https://snuffleupagus.readthedocs.io/features.html#protection-against-cross-site-request-forgery
+sp.cookie.name("PHPSESSID").samesite("lax");
+
+# Harden the `chmod` function (0777 (oct = 511, 0666 = 438)
+sp.disable_function.function("chmod").param("permissions").value("438").drop();
+sp.disable_function.function("chmod").param("permissions").value("511").drop();
+
+# Prevent various `mail`-related vulnerabilities
+sp.disable_function.function("mail").param("additional_parameters").value_r("\\-").drop();
+
+# Since it's now burned, me might as well mitigate it publicly
+sp.disable_function.function("putenv").param("assignment").value_r("LD_").drop()
+
+# This one was burned in Nov 2019 - https://gist.github.com/LoadLow/90b60bd5535d6c3927bb24d5f9955b80
+sp.disable_function.function("putenv").param("assignment").value_r("GCONV_").drop()
+
+# Since people are stupid enough to use `extract` on things like $_GET or $_POST, we might as well mitigate this vector
+sp.disable_function.function("extract").param("array").value_r("^_").drop()
+sp.disable_function.function("extract").param("flags").value("0").drop()
+
+# This is also burned:
+# ini_set('open_basedir','..');chdir('..');…;chdir('..');ini_set('open_basedir','/');echo(file_get_contents('/etc/passwd'));
+# Since we have no way of matching on two parameters at the same time, we're
+# blocking calls to open_basedir altogether: nobody is using it via ini_set anyway.
+# Moreover, there are non-public bypasses that are also using this vector ;)
+sp.disable_function.function("ini_set").param("option").value_r("open_basedir").drop()
+
+# Prevent various `include`-related vulnerabilities
+sp.disable_function.function("require_once").value_r("\.(inc|phtml|php)$").allow();
+sp.disable_function.function("include_once").value_r("\.(inc|phtml|php)$").allow();
+sp.disable_function.function("require").value_r("\.(inc|phtml|php)$").allow();
+sp.disable_function.function("include").value_r("\.(inc|phtml|php)$").allow();
+sp.disable_function.function("require_once").drop()
+sp.disable_function.function("include_once").drop()
+sp.disable_function.function("require").drop()
+sp.disable_function.function("include").drop()
+
+# Prevent `system`-related injections
+sp.disable_function.function("system").param("command").value_r("[$|;&`\\n\\(\\)\\\\]").drop();
+sp.disable_function.function("shell_exec").param("command").value_r("[$|;&`\\n\\(\\)\\\\]").drop();
+sp.disable_function.function("exec").param("command").value_r("[$|;&`\\n\\(\\)\\\\]").drop();
+# This is **very** broad but doing better is non-straightforward
+sp.disable_function.function("proc_open").param("command").value_r("^gpg ").allow();
+sp.disable_function.function("proc_open").param("command").value_r("[$|;&`\\n\\(\\)\\\\]").drop();
+
+# Prevent runtime modification of interesting things
+sp.disable_function.function("ini_set").param("option").value("assert.active").drop();
+sp.disable_function.function("ini_set").param("option").value("zend.assertions").drop();
+sp.disable_function.function("ini_set").param("option").value("memory_limit").drop();
+sp.disable_function.function("ini_set").param("option").value("include_path").drop();
+sp.disable_function.function("ini_set").param("option").value("open_basedir").drop();
+
+# Detect some backdoors via environment recon
+sp.disable_function.function("ini_get").filename("/var/www/roundcube/vendor/guzzlehttp/guzzle/src/functions.php").param("option").value("allow_url_fopen").allow();
+sp.disable_function.function("ini_get").param("option").value("allow_url_fopen").drop();
+sp.disable_function.function("ini_get").param("option").value("open_basedir").drop();
+sp.disable_function.function("ini_get").param("option").value_r("suhosin").drop();
+sp.disable_function.function("function_exists").param("function").value("eval").drop();
+sp.disable_function.function("function_exists").param("function").value("exec").drop();
+sp.disable_function.function("function_exists").param("function").value("system").drop();
+sp.disable_function.function("function_exists").param("function").value("shell_exec").drop();
+sp.disable_function.function("function_exists").param("function").value("proc_open").drop();
+sp.disable_function.function("function_exists").param("function").value("passthru").drop();
+sp.disable_function.function("is_callable").param("value").value("eval").drop();
+sp.disable_function.function("is_callable").param("value").value("exec").drop();
+sp.disable_function.function("is_callable").param("value").value("system").drop();
+sp.disable_function.function("is_callable").param("value").value("shell_exec").drop();
+sp.disable_function.function("is_callable").filename_r("^/var/www/snappymail/snappymail/v/\d+\.\d+\.\d+/app/libraries/snappymail/pgp/gpg\.php$").param("value").value("proc_open").allow();
+sp.disable_function.function("is_callable").param("value").value("proc_open").drop();
+sp.disable_function.function("is_callable").param("value").value("passthru").drop();
+
+# Ghetto error-based sqli detection
+#sp.disable_function.function("mysql_query").ret("FALSE").drop();
+#sp.disable_function.function("mysqli_query").ret("FALSE").drop();
+#sp.disable_function.function("PDO::query").ret("FALSE").drop();
+
+# Ensure that certificates are properly verified
+sp.disable_function.function("curl_setopt").param("value").value("1").allow();
+sp.disable_function.function("curl_setopt").param("value").value("2").allow();
+# `81` is SSL_VERIFYHOST and `64` SSL_VERIFYPEER
+sp.disable_function.function("curl_setopt").param("option").value("64").drop().alias("Please don't turn CURLOPT_SSL_VERIFYCLIENT off.");
+sp.disable_function.function("curl_setopt").param("option").value("81").drop().alias("Please don't turn CURLOPT_SSL_VERIFYHOST off.");
+
+# File upload
+sp.disable_function.function("move_uploaded_file").param("to").value_r("\\.ph").drop();
+sp.disable_function.function("move_uploaded_file").param("to").value_r("\\.ht").drop();
+
+# Logging lockdown
+sp.disable_function.function("ini_set").param("option").value_r("error_log").drop()
+sp.disable_function.function("ini_set").param("option").value_r("display_errors").drop()
+
+sp.auto_cookie_secure.enable();
+# TODO: consider encrypting the cookies?
+# TODO: ensure this is up to date
+sp.cookie.name("roundcube_sessauth").samesite("strict");
+sp.cookie.name("roundcube_sessid").samesite("strict");
+sp.ini_protection.policy_silent_fail();
+
+# roundcube uses unserialize() everywhere.
+# This should do the job until https://github.com/jvoisin/snuffleupagus/issues/438 is implemented.
+sp.disable_function.function("unserialize").param("data").value_r("[cCoO]:\d+:[\"{]").drop();

@@ -1,0 +1,47 @@
+--- plugins/managesieve/lib/Roundcube/rcube_sieve_engine.php
++++ plugins/managesieve/lib/Roundcube/rcube_sieve_engine.php
+@@ -529,28 +529,13 @@
+         // get request size limits (#1488648)
+         $max_post = max([
+                 ini_get('max_input_vars'),
+-                ini_get('suhosin.request.max_vars'),
+-                ini_get('suhosin.post.max_vars'),
+         ]);
+-        $max_depth = max([
+-                ini_get('suhosin.request.max_array_depth'),
+-                ini_get('suhosin.post.max_array_depth'),
+-        ]);
+ 
+         // check request size limit
+         if ($max_post && count($_POST, COUNT_RECURSIVE) >= $max_post) {
+             rcube::raise_error([
+                     'code' => 500, 'file' => __FILE__, 'line' => __LINE__,
+                     'message' => "Request size limit exceeded (one of max_input_vars/suhosin.request.max_vars/suhosin.post.max_vars)"
+-                ], true, false
+-            );
+-            $this->rc->output->show_message('managesieve.filtersaveerror', 'error');
+-        }
+-        // check request depth limits
+-        else if ($max_depth && count($_POST['_header']) > $max_depth) {
+-            rcube::raise_error([
+-                    'code' => 500, 'file' => __FILE__, 'line' => __LINE__,
+-                    'message' => "Request size limit exceeded (one of suhosin.request.max_array_depth/suhosin.post.max_array_depth)"
+                 ], true, false
+             );
+             $this->rc->output->show_message('managesieve.filtersaveerror', 'error');
+--- program/lib/Roundcube/bootstrap.php
++++ program/lib/Roundcube/bootstrap.php
+@@ -32,13 +32,11 @@
+     // Some users are not using Installer, so we'll check some
+     // critical PHP settings here. Only these, which doesn't provide
+     // an error/warning in the logs later. See (#1486307).
+-    'mbstring.func_overload' => 0,
+ ];
+ 
+ // check these additional ini settings if not called via CLI
+ if (php_sapi_name() != 'cli') {
+     $config += [
+-        'suhosin.session.encrypt' => false,
+         'file_uploads'            => true,
+         'session.auto_start'      => false,
+         'zlib.output_compression' => false,

@@ -385,6 +385,7 @@ def config_export(full=False, secrets=False, color=False, dns=False, output=None
         'dns': dns,
     }
 
+    old_umask = os.umask(0o077)
     try:
         schema = MailuSchema(only=only, context=context)
         if as_json:
@@ -396,6 +397,8 @@ def config_export(full=False, secrets=False, color=False, dns=False, output=None
         if msg := log.format_exception(exc):
             raise click.ClickException(msg) from exc
         raise
+    finally:
+        os.umask(old_umask)
 
 
 @mailu.command()

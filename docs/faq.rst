@@ -195,9 +195,8 @@ Mailu will start to function on IPv6:
 How does Mailu scale up?
 ````````````````````````
 
-Recent works allow Mailu to be deployed in Docker Swarm and Kubernetes.
-This means it can be scaled horizontally. For more information, refer to :ref:`kubernetes`
-or the `Docker swarm howto`_.
+Recent works allow Mailu to be deployed in Docker Kubernetes.
+This means it can be scaled horizontally. For more information, refer to :ref:`kubernetes`.
 
 *Issue reference:* `165`_, `520`_.
 
@@ -360,7 +359,6 @@ How do I use webdav (radicale)?
 .. _`Rspamd`:    https://www.rspamd.com/doc/configuration/index.html
 .. _`Roundcube`: https://github.com/roundcube/roundcubemail/wiki/Configuration#customize-the-look
 
-.. _`Docker swarm howto`: https://github.com/Mailu/Mailu/tree/master/docs/swarm/master
 .. _`125`: https://github.com/Mailu/Mailu/issues/125
 .. _`165`: https://github.com/Mailu/Mailu/issues/165
 .. _`177`: https://github.com/Mailu/Mailu/issues/177

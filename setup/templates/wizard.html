@@ -8,11 +8,6 @@
   ready when using this wizard.
   {% endcall %}
 
-  <form method="post" action="{{ url_for(".submit_flavor") }}">
-  {% include "steps/flavor.html" %}
-  <input class="btn btn-primary" type="submit" value="Next >" style="margin-bottom: 15px">
-  </form>
-  {% if flavor %}
   <form method="post" action="{{ url_for(".submit") }}">
   <input type="hidden" name="flavor" value="{{ flavor }}">
   {% include "steps/config.html" %}
@@ -21,6 +16,5 @@
   {% endfor %}
   {% include "steps/database.html" %}
   <input class="btn btn-primary" type="submit" value="Setup Mailu">
-  {% endif %}
   </form>
 {% endblock %}

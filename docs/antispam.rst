@@ -155,3 +155,26 @@ For more information on using the multimap filter see the official `multimap doc
 .. _`1438`: https://github.com/Mailu/Mailu/issues/1438
 .. _`1167`: https://github.com/Mailu/Mailu/issues/1167
 .. _`1566`: https://github.com/Mailu/Mailu/issues/1566
+
+Can I change the list of authorized file attachments?
+-----------------------------------------------------
+
+Mailu rejects emails with file attachements it deems to be "executable" or otherwise dangerous. If you would like to tweak the block list, you can do so using the following commands:
+
+   .. code-block:: bash
+
+     docker-compose exec antispam cat /etc/rspamd/local.d/forbidden_file_extension.map > overrides/rspamd/forbidden_file_extension.map
+     docker-compose restart antispam
+
+
+Mailu rejects emails with documents attached containing some macros. How can I fix it?
+--------------------------------------------------------------------------------------
+
+If configured to do so, Mailu uses a lightweight tool called `mraptor from oletools`_ to scan documents containing macros. By default only macros deemed potentially harmful are blocked but there may be false positives. If you want to change the default behaviour, you may need to override the ``/etc/rspamd/local.d/composites.conf`` file in the antispam container. The following commands may be useful:
+
+   .. code-block:: bash
+
+     docker-compose exec antispam cat /etc/rspamd/local.d/composites.conf > overrides/rspamd/composites.conf
+     docker-compose restart antispam
+
+.. _`mraptor from oletools`: https://github.com/decalage2/oletools/wiki/mraptor

@@ -28,7 +28,7 @@ def set_env(required_secrets=[]):
     secret_key = os.environ.get('SECRET_KEY')
     if not secret_key:
         try:
-            secret_key = open(env.get("SECRET_KEY_FILE"), "r").read().strip()
+            secret_key = open(os.environ.get("SECRET_KEY_FILE"), "r").read().strip()
         except Exception as exc:
             log.error(f"Can't read SECRET_KEY from file: {exc}")
             raise exc

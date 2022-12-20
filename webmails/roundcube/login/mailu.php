@@ -2,22 +2,41 @@
 
 class mailu extends rcube_plugin
 {
+  public $noajax = true;
 
   function init()
   {
+    // sso & mailu admin button
     $this->add_hook('startup', array($this, 'startup'));
+    // sso
     $this->add_hook('authenticate', array($this, 'authenticate'));
     $this->add_hook('login_after', array($this, 'login'));
     $this->add_hook('login_failed', array($this, 'login_failed'));
     $this->add_hook('logout_after', array($this, 'logout'));
+    // mailu admin button
+    $this->add_texts('localization/', false);
   }
 
   function startup($args)
   {
+    // mailu admin button
+    $rcmail = rcmail::get_instance();
+    if (!$rcmail->output->framed and $rcmail->config->get('show_mailu_button', false)) {
+      $this->include_stylesheet($this->local_skin_path() . '/mailu.css');
+      $this->add_button([
+          'type'       => 'link',
+          'href'       => $rcmail->config->get('support_url'),
+          'class'      => 'button-mailu',
+          'label'      => 'mailu.mailu',
+          'tabindex'   => '0',
+          'innerclass' => 'button-inner',
+        ], 'taskbar'
+      );
+    }
+    // sso
     if (empty($_SESSION['user_id'])) {
       $args['action'] = 'login';
     }
-
     return $args;
   }
 

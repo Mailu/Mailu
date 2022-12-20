@@ -4,7 +4,3 @@
   background-size: 22px 22px;
   height: 19px;
 }
-#taskbar a.button-mailu.selected, #taskmenu a.button-mailu.selected:hover, #taskmenu a.button-mailu:hover {
-  color: #fff;
-  background-color: #45555c;
-}

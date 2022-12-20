@@ -47,7 +47,7 @@ RUN set -euxo pipefail \
   ; rm /tmp/roundcube.diff
 
 COPY roundcube/config/config.inc.php /conf/
-COPY roundcube/login/mailu.php /var/www/roundcube/plugins/mailu/
+COPY roundcube/login/ /var/www/roundcube/plugins/mailu/
 COPY roundcube/config/config.inc.carddav.php /var/www/roundcube/plugins/carddav/config.inc.php
 
 # snappymail

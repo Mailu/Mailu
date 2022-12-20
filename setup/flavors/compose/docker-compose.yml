@@ -133,6 +133,7 @@ services:
       - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d:ro"
     depends_on:
       - front
+      - redis
     {% if oletools_enabled %}
       - oletools
     {% endif %}
@@ -141,7 +142,6 @@ services:
     {% endif %}
     {% if resolver_enabled %}
       - resolver
-      - redis
     dns:
       - {{ dns }}
     {% endif %}

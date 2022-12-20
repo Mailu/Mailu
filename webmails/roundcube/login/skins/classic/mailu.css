@@ -1,0 +1,7 @@
+#taskbar a.button-mailu
+{
+  background-image: url('/static/mailu.png');
+  background-repeat: no-repeat;
+  background-size: 30px 30px;
+  background-position: -6px -4px;
+}

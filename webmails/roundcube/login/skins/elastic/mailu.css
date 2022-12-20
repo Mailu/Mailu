@@ -1,0 +1,11 @@
+#taskmenu a.button-mailu {
+  background: url('/static/mailu.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-position-y: 6px;
+  background-size: 22px 22px;
+}
+#taskmenu a.button-mailu.selected, #taskmenu a.button-mailu.selected:hover, #taskmenu a.button-mailu:hover {
+  color: #fff;
+  background-color: #45555c;
+}

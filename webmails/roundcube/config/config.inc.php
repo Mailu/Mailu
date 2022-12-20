@@ -60,7 +60,7 @@ $config['sso_logout_url'] = '/sso/logout';
 $config['enigma_pgp_homedir'] = '/data/gpg';
 
 // configure mailu button
-$config['show_mailu_button'] = {{ 'true' if ADMIN AND WEB_ADMIN else 'false' }};
+$config['show_mailu_button'] = {{ 'true' if ADMIN and WEB_ADMIN else 'false' }};
 
 // set From header for DKIM signed message delivery reports
 $config['mdn_use_from'] = true;

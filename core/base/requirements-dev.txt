@@ -45,6 +45,10 @@ watchdog
 # core/postfix
 postfix-mta-sts-resolver
 
+# core/oletools
+python-magic
+oletools
+
 # optional/fetchmail
 requests
 

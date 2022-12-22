@@ -27,6 +27,7 @@ ENV \
   FRONT_ADDRESS="front" \
   SMTP_ADDRESS="smtp" \
   IMAP_ADDRESS="imap" \
+  OLETOOLS_ADDRESS="oletools" \
   REDIS_ADDRESS="redis" \
   ANTIVIRUS_ADDRESS="antivirus" \
   ANTISPAM_ADDRESS="antispam" \

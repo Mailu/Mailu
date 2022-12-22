@@ -41,6 +41,7 @@ MarkupSafe==2.1.1
 marshmallow==3.18.0
 marshmallow-sqlalchemy==0.28.1
 multidict==6.0.2
+oletools==0.60.1
 mysql-connector-python==8.0.29
 packaging==21.3
 passlib==1.7.4
@@ -51,7 +52,10 @@ psycopg2-binary==2.9.5
 pycares==4.2.2
 pycparser==2.21
 Pygments==2.13.0
-pyparsing==3.0.9
+pyOpenSSL==22.1.0
+pyparsing==2.4.7
+python-dateutil==2.8.2
+python-magic==0.4.27
 python-dateutil==2.8.2
 pytz==2022.6
 PyYAML==6.0

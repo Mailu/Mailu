@@ -74,7 +74,7 @@ class CommaSeparatedList(db.TypeDecorator):
     """ Stores a list as a comma-separated string, compatible with Postfix.
     """
 
-    impl = db.String
+    impl = db.Text
     cache_ok = True
     python_type = list
 
@@ -95,7 +95,7 @@ class JSONEncoded(db.TypeDecorator):
     """ Represents an immutable structure as a json-encoded string.
     """
 
-    impl = db.String
+    impl = db.Text
     cache_ok = True
     python_type = str
 

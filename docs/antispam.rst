@@ -166,15 +166,18 @@ Mailu rejects emails with file attachements it deems to be "executable" or other
      docker-compose exec antispam cat /etc/rspamd/local.d/forbidden_file_extension.map > overrides/rspamd/forbidden_file_extension.map
      docker-compose restart antispam
 
+Now the file `overrides/rspamd/forbidden_file_extension.map` can be edited, to make changes to the forbidden file extensions list.
 
 Mailu rejects emails with documents attached containing some macros. How can I fix it?
 --------------------------------------------------------------------------------------
 
-If configured to do so, Mailu uses a lightweight tool called `mraptor from oletools`_ to scan documents containing macros. By default only macros deemed potentially harmful are blocked but there may be false positives. If you want to change the default behaviour, you may need to override the ``/etc/rspamd/local.d/composites.conf`` file in the antispam container. The following commands may be useful:
+If configured to do so, Mailu uses a lightweight tool called `mraptor from oletools`_ to scan documents containing macros. By default only macros deemed potentially harmful are blocked, but there may be false positives. If you want to change the default behaviour, you may need to override the ``/etc/rspamd/local.d/composites.conf`` file in the antispam container. The following commands may be useful:
 
    .. code-block:: bash
 
      docker-compose exec antispam cat /etc/rspamd/local.d/composites.conf > overrides/rspamd/composites.conf
      docker-compose restart antispam
+
+Now the file `overrides/rspamd/composites.conf` can be edited, to override the mraptor configuration in rspamd.
 
 .. _`mraptor from oletools`: https://github.com/decalage2/oletools/wiki/mraptor

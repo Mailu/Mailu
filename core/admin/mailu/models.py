@@ -80,7 +80,11 @@ class CommaSeparatedList(db.TypeDecorator):
     """ Stores a list as a comma-separated string, compatible with Postfix.
     """
 
+<<<<<<< HEAD
     impl = db.String(4096)
+=======
+    impl = db.Text
+>>>>>>> bd20ef04 (change field type to db.text)
     cache_ok = True
     python_type = list
 
@@ -101,7 +105,11 @@ class JSONEncoded(db.TypeDecorator):
     """ Represents an immutable structure as a json-encoded string.
     """
 
+<<<<<<< HEAD
     impl = db.String(255)
+=======
+    impl = db.Text
+>>>>>>> bd20ef04 (change field type to db.text)
     cache_ok = True
     python_type = str
 

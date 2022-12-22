@@ -47,7 +47,7 @@ class MultipleFoldersVerify(object):
         self.message = message
 
     def __call__(self, form, field):
-        pattern = re.compile(r'^\w+(\s*,\s*\w+)*$')
+        pattern = re.compile(r'^[^,]+(,[^,]+)*$')
         if not pattern.match(field.data.replace(" ", "")):
             raise validators.ValidationError(self.message)
 

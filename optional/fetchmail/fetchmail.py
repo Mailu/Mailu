@@ -97,8 +97,7 @@ if __name__ == "__main__":
     os.chown("/data/fetchids", id_fetchmail.pw_uid, id_fetchmail.pw_gid)
     os.chown("/data/", id_fetchmail.pw_uid, id_fetchmail.pw_gid)
     os.chmod("/data/fetchids", 0o700)
-    os.setgid(id_fetchmail.pw_gid)
-    os.setuid(id_fetchmail.pw_uid)
+    system.drop_privs_to('fetchmail')
     config = system.set_env()
     while True:
         delay = int(os.environ.get('FETCHMAIL_DELAY', 60))

@@ -2,7 +2,6 @@
 
 import os
 import logging
-from pwd import getpwnam
 import sys
 import subprocess
 import shutil
@@ -78,17 +77,15 @@ conf.jinja("/defaults/php.ini", context, "/etc/php81/php.ini")
 # setup permissions
 os.system("chown -R mailu:mailu /data")
 
-def demote(user_uid, user_gid):
+def demote(username='mailu'):
     def result():
-        os.setgid(user_gid)
-        os.setuid(user_uid)
+        system.drop_privs_to(username)
     return result
-id_mailu = getpwnam('mailu')
 
 print("Initializing database")
 try:
     result = subprocess.check_output(["/var/www/roundcube/bin/initdb.sh", "--dir", "/var/www/roundcube/SQL"],
-                                     stderr=subprocess.STDOUT, preexec_fn=demote(id_mailu.pw_uid,id_mailu.pw_gid))
+                                     stderr=subprocess.STDOUT, preexec_fn=demote())
     print(result.decode())
 except subprocess.CalledProcessError as exc:
     err = exc.stdout.decode()
@@ -100,13 +97,13 @@ except subprocess.CalledProcessError as exc:
 
 print("Upgrading database")
 try:
-    subprocess.check_call(["/var/www/roundcube/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT, preexec_fn=demote(id_mailu.pw_uid,id_mailu.pw_gid))
+    subprocess.check_call(["/var/www/roundcube/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT, preexec_fn=demote())
 except subprocess.CalledProcessError as exc:
     exit(4)
 else:
     print("Cleaning database")
     try:
-        subprocess.check_call(["/var/www/roundcube/bin/cleandb.sh"], stderr=subprocess.STDOUT, preexec_fn=demote(id_mailu.pw_uid,id_mailu.pw_gid))
+        subprocess.check_call(["/var/www/roundcube/bin/cleandb.sh"], stderr=subprocess.STDOUT, preexec_fn=demote())
     except subprocess.CalledProcessError as exc:
         exit(5)
 

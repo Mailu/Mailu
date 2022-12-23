@@ -5,7 +5,6 @@ import glob
 import multiprocessing
 import logging as log
 import sys
-from pwd import getpwnam
 
 from podop import run_server
 from socrate import system, conf
@@ -14,9 +13,7 @@ log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 system.set_env()
 
 def start_podop():
-    id_mail = getpwnam('mail')
-    os.setgid(id_mail.pw_gid)
-    os.setuid(id_mail.pw_uid)
+    system.drop_privs_to('mail')
     url = "http://" + os.environ["ADMIN_ADDRESS"] + "/internal/dovecot/§"
     run_server(0, "dovecot", "/tmp/podop.socket", [
 		("quota", "url", url ),

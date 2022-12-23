@@ -21,7 +21,7 @@ api = Api(
     validate=True,
     authorizations=authorization,
     security='Bearer',
-    doc='/swaggerui/'
+    doc='/'
 )
 
 response_fields = api.model('Response', {

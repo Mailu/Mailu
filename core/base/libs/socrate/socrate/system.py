@@ -1,6 +1,7 @@
 import hmac
 import logging as log
 import os
+from pwd import getpwnam
 import socket
 import tenacity
 
@@ -45,3 +46,10 @@ def set_env(required_secrets=[]):
 def clean_env():
     """ remove all secret keys """
     [os.environ.pop(key, None) for key in os.environ.keys() if key.endswith("_KEY")]
+
+def drop_privs_to(username='mailu'):
+    pwnam = getpwnam(username)
+    os.setgroups([])
+    os.setgid(pwnam.pw_gid)
+    os.setuid(pwnam.pw_uid)
+    os.environ['HOME'] = pwnam.pw_dir

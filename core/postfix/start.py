@@ -9,7 +9,6 @@ import sys
 import re
 
 from podop import run_server
-from pwd import getpwnam
 from socrate import system, conf
 
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
@@ -18,7 +17,7 @@ system.set_env()
 os.system("flock -n /queue/pid/master.pid rm /queue/pid/master.pid")
 
 def start_podop():
-    os.setuid(getpwnam('postfix').pw_uid)
+    system.drop_privs_to('postfix')
     os.makedirs('/dev/shm/postfix',mode=0o700, exist_ok=True)
     url = "http://" + os.environ["ADMIN_ADDRESS"] + "/internal/postfix/"
     # TODO: Remove verbosity setting from Podop?
@@ -36,7 +35,7 @@ def start_podop():
 
 def start_mta_sts_daemon():
     os.chmod("/root/", 0o755) # read access to /root/.netrc required
-    os.setuid(getpwnam('postfix').pw_uid)
+    system.drop_privs_to('postfix')
     from postfix_mta_sts_resolver import daemon
     daemon.main()
 

@@ -69,10 +69,9 @@ DEFAULT_CONFIG = {
     'RECAPTCHA_PRIVATE_KEY': '',
     'LOGO_URL': None,
     'LOGO_BACKGROUND': None,
-    'API': False,
     # Advanced settings
-    'API' : False,
-    'WEB_API' : '/api',
+    'API': False,
+    'WEB_API': '/api',
     'API_TOKEN': None,
     'LOG_LEVEL': 'WARNING',
     'SESSION_KEY_BITS': 128,

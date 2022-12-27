@@ -919,6 +919,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
         # stabilize import of auto-increment primary keys (not required),
         # by matching import data to existing items and setting primary key
         if not self._primary in data:
+<<<<<<< HEAD
             parent, field = self.get_parent()
             if parent is not None:
                 for item in getattr(parent, field):
@@ -926,11 +927,25 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
                     this = existing.pop(self._primary)
                     if data == existing:
                         self.instance = item
+=======
+            parent = self.recall('parent')
+            if parent is not None:
+                for item in getattr(parent, self.recall('field', 'parent')):
+                    existing = self.dump(item, many=False)
+                    this = existing.pop(self._primary)
+                    if data == existing:
+                        instance = item
+>>>>>>> 84ebab2c (Fix creation of deep structures using import in update mode)
                         data[self._primary] = this
                         break
 
         # try to load instance
         instance = self.instance or self.get_instance(data)
+
+        # remember instance as parent for pruning siblings
+        if not self.Meta.sibling and self.context.get('update'):
+            self.store('parent', instance)
+
         if instance is None:
 
             if '__delete__' in data:
@@ -1023,17 +1038,28 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
                 del_items = True
 
         if add_items or del_items:
+<<<<<<< HEAD
             parent, field = self.get_parent()
             if parent is not None:
                 existing = {item[self._primary] for item in items if self._primary in item}
                 for item in getattr(parent, field):
+=======
+            parent = self.recall('parent')
+            if parent is not None:
+                existing = {item[self._primary] for item in items if self._primary in item}
+                for item in getattr(parent, self.recall('field', 'parent')):
+>>>>>>> 84ebab2c (Fix creation of deep structures using import in update mode)
                     key = getattr(item, self._primary)
                     if key not in existing:
                         if add_items:
                             items.append({self._primary: key})
                         else:
+<<<<<<< HEAD
                             if self.context.get('update'):
                                 self.opts.sqla_session.delete(self.instance or self.get_instance({self._primary: key}))
+=======
+                            items.append({self._primary: key, '__delete__': '?'})
+>>>>>>> 84ebab2c (Fix creation of deep structures using import in update mode)
 
         return items
 

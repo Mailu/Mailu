@@ -23,6 +23,7 @@ alias_maps =
 podop = socketmap:unix:/tmp/podop.socket:
 
 postscreen_upstream_proxy_protocol = haproxy
+compatibility_level=3.6
 
 # Only accept virtual emails
 mydestination =

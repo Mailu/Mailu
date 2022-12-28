@@ -22,6 +22,8 @@ alias_maps =
 # Podop configuration
 podop = socketmap:unix:/tmp/podop.socket:
 
+postscreen_upstream_proxy_protocol = haproxy
+
 # Only accept virtual emails
 mydestination =
 
@@ -37,9 +39,8 @@ smtp_sasl_tls_security_options = noanonymous
 # Recipient delimiter for extended addresses
 recipient_delimiter = {{ RECIPIENT_DELIMITER }}
 
-# Only the front server is allowed to perform xclient
-# In kubernetes and Docker swarm, such address cannot be determined using the hostname. Allow for the whole Mailu subnet instead.
-smtpd_authorized_xclient_hosts={{ SUBNET }}
+# We need to allow everything to do xclient and rely on front to filter-out "bad" requests
+smtpd_authorized_xclient_hosts=0.0.0.0/0 [::0]/0
 
 ###############
 # TLS

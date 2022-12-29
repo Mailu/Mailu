@@ -7,18 +7,18 @@ from socrate import conf, system
 
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 
+env = os.environ.copy()
 with open( '/etc/resolv.conf', 'r' ) as resolv:
     for line in resolv.readlines():
         if line.startswith('nameserver '):
-            os.environ['DOCKER_RESOLVER'] = line.split(' ')[1].rstrip()
+            env['DOCKER_RESOLVER'] = line.split(' ')[1].rstrip()
             break
 
-container_names=[]
-for key in os.environ:
-    if key.endswith('_ADDRESS'):
-        container_names.append(os.environ[key])
-os.environ['CONTAINERS'] = ','.join(container_names)
+env['CONTAINERS'] = [value for key, value in env.items() if key.endswith('_ADDRESS')]
 
-conf.jinja("/unbound.conf", os.environ, "/etc/unbound/unbound.conf")
+if not env.get('SUBNET'):
+    env['SUBNET'] = system.get_network_v4()
+
+conf.jinja("/unbound.conf", env, "/etc/unbound/unbound.conf")
 
 os.execv("/usr/sbin/unbound", ["-c /etc/unbound/unbound.conf"])

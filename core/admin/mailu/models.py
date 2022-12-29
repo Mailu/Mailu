@@ -81,10 +81,14 @@ class CommaSeparatedList(db.TypeDecorator):
     """
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     impl = db.String(4096)
 =======
     impl = db.Text
 >>>>>>> bd20ef04 (change field type to db.text)
+=======
+    impl = db.String(255)
+>>>>>>> ca44ccbe (Use the size other implementations default to)
     cache_ok = True
     python_type = list
 
@@ -106,10 +110,14 @@ class JSONEncoded(db.TypeDecorator):
     """
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     impl = db.String(255)
 =======
     impl = db.Text
 >>>>>>> bd20ef04 (change field type to db.text)
+=======
+    impl = db.String(255)
+>>>>>>> ca44ccbe (Use the size other implementations default to)
     cache_ok = True
     python_type = str
 

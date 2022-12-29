@@ -41,14 +41,6 @@ def set_env(required_secrets=[]):
     for secret in required_secrets:
         os.environ[f'{secret}_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray(secret, 'utf-8'), 'sha256').hexdigest()
 
-    if not os.environ.get('SUBNET'):
-        os.environ['SUBNET'] = get_network_v4()
-
-    to_return={
-            key: _coerce_value(os.environ.get(key, value))
-            for key, value in os.environ.items()
-           }
-
     try:
         ip_resolver = dns.resolver.query("resolver")[0].address
         log.info(f'Setting DNS to {ip_resolver}')
@@ -57,7 +49,13 @@ def set_env(required_secrets=[]):
     except:
         pass
 
-    return to_return
+    if not os.environ.get('SUBNET'):
+        os.environ['SUBNET'] = get_network_v4()
+
+    return {
+            key: _coerce_value(os.environ.get(key, value))
+            for key, value in os.environ.items()
+           }
 
 def clean_env():
     """ remove all secret keys """

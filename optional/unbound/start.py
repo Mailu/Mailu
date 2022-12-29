@@ -14,10 +14,14 @@ with open( '/etc/resolv.conf', 'r' ) as resolv:
             env['DOCKER_RESOLVER'] = line.split(' ')[1].rstrip()
             break
 
-env['CONTAINERS'] = [value for key, value in env.items() if key.endswith('_ADDRESS')]
-
 if not env.get('SUBNET'):
     env['SUBNET'] = system.get_network_v4()
+
+env['CONTAINERS'] = [value for key, value in env.items() if key.endswith('_ADDRESS')]
+
+if 'DOCKER_RESOLVER' not in env:
+    env['CONTAINERS'] = []
+    log.error("Can't determine docker resolver from /etc/resolv.conf")
 
 conf.jinja("/unbound.conf", env, "/etc/unbound/unbound.conf")
 

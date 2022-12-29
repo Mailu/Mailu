@@ -23,7 +23,7 @@ RUN set -euxo pipefail \
 RUN echo $VERSION >/version
 
 EXPOSE 80/tcp
-HEALTHCHECK CMD curl -skfLo /dev/null http://localhost/sso/login?next=ui.index
+HEALTHCHECK CMD curl -skfLo /dev/null http://localhost/ping
 
 VOLUME ["/data","/dkim"]
 

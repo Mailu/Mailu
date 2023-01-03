@@ -665,7 +665,7 @@ Using iptables with ipset might reduce the system load in such attacks significa
 
   [Definition]
 
-  actionstart = actionstart = ipset --create f2b-bad-auth iphash
+  actionstart = ipset --create f2b-bad-auth iphash
                 iptables -I DOCKER-USER -m set --match-set f2b-bad-auth src -j DROP
 
   actionstop = iptables -D DOCKER-USER -m set --match-set f2b-bad-auth src -j DROP

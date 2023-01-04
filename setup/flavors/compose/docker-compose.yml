@@ -36,6 +36,9 @@ services:
       - "{{ bind6 }}:{{ port }}:{{ port }}"
     {% endif %}
     {% endfor %}
+    networks:
+      - default
+      - webmail
     volumes:
       - "{{ root }}/certs:/certs"
       - "{{ root }}/overrides/nginx:/overrides:ro"
@@ -169,12 +172,8 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/dav:/data"
-    {% if resolver_enabled %}
-    depends_on:
-      - resolver
-    dns:
-      - {{ dns }}
-    {% endif %}
+    networks:
+      - radicale
   {% endif %}
 
   {% if fetchmail_enabled %}
@@ -204,13 +203,10 @@ services:
     volumes:
       - "{{ root }}/webmail:/data"
       - "{{ root }}/overrides/{{ webmail_type }}:/overrides:ro"
+    networks:
+      - webmail
     depends_on:
-      - imap
-    {% if resolver_enabled %}
-      - resolver
-    dns:
-      - {{ dns }}
-    {% endif %}
+      - front
   {% endif %}
 
 networks:
@@ -226,6 +222,14 @@ networks:
         {% if ipv6_enabled %}
         - subnet: {{ subnet6 }}
         {% endif %}
+{% if webdav_enabled %}
+  radicale:
+    driver: bridge
+{% endif %}
+{% if webmail_type != 'none' %}
+  webmail:
+    driver: bridge
+{% endif %}
 {% if oletools_enabled %}
   noinet:
     driver: bridge

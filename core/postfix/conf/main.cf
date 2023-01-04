@@ -40,9 +40,6 @@ smtp_sasl_tls_security_options = noanonymous
 # Recipient delimiter for extended addresses
 recipient_delimiter = {{ RECIPIENT_DELIMITER }}
 
-# We need to allow everything to do xclient and rely on front to filter-out "bad" requests
-smtpd_authorized_xclient_hosts=0.0.0.0/0 [::0]/0
-
 ###############
 # TLS
 ###############

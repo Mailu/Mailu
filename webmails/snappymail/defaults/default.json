@@ -32,8 +32,8 @@
         "usePhpMail": false
     },
     "Sieve": {
-        "host": "{{ IMAP_ADDRESS }}",
-        "port": 4190,
+        "host": "{{ FRONT_ADDRESS }}",
+        "port": 14190,
         "secure": 0,
         "shortLogin": false,
         "ssl": {

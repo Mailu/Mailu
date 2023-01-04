@@ -17,7 +17,8 @@ ARG VERSION
 LABEL version=$VERSION
 
 RUN set -euxo pipefail \
-  ; apk add --no-cache certbot nginx nginx-mod-mail openssl
+  ; apk add --no-cache certbot nginx nginx-mod-http-brotli nginx-mod-stream nginx-mod-mail openssl \
+  ; rm /etc/nginx/conf.d/stream.conf
 
 COPY conf/ /conf/
 COPY --from=static /static/ /static/
@@ -25,7 +26,7 @@ COPY *.py /
 
 RUN echo $VERSION >/version
 
-EXPOSE 80/tcp 443/tcp 110/tcp 143/tcp 465/tcp 587/tcp 993/tcp 995/tcp 25/tcp 10025/tcp 10143/tcp
+EXPOSE 80/tcp 443/tcp 110/tcp 143/tcp 465/tcp 587/tcp 993/tcp 995/tcp 25/tcp 14190/tcp 10025/tcp 10143/tcp
 HEALTHCHECK --start-period=60s CMD curl -skfLo /dev/null http://localhost/health
 
 VOLUME ["/certs", "/overrides"]

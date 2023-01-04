@@ -11,6 +11,7 @@ smtp      inet  n       -       n       -       1       smtpd
   -o smtpd_client_restrictions=$check_ratelimit,reject_unlisted_sender,reject_authenticated_sender_login_mismatch,permit
   -o smtpd_reject_unlisted_recipient={% if REJECT_UNLISTED_RECIPIENT %}{{ REJECT_UNLISTED_RECIPIENT }}{% else %}no{% endif %}
   -o cleanup_service_name=outclean
+  -o smtpd_authorized_xclient_hosts={{ SUBNET}},{{ SUBNET6 }}
 outclean  unix n       -       n       -       0       cleanup
   -o header_checks=pcre:/etc/postfix/outclean_header_filter.cf
   -o nested_header_checks=

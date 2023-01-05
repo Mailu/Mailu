@@ -1,5 +1,5 @@
-recommonmark
-Sphinx
-sphinx-autobuild
-sphinx-rtd-theme
+recommonmark==0.7.1
+Sphinx==5.2.0
+sphinx-autobuild==2021.3.14
+sphinx-rtd-theme==1.0.0
 docutils==0.16

@@ -121,6 +121,8 @@ smtpd_relay_restrictions =
 
 unverified_recipient_reject_reason = Address lookup failure
 
+smtpd_authorized_xclient_hosts={{ SUBNET}},{{ SUBNET6 }}
+
 ###############
 # Milter
 ###############

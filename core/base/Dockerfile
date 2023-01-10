@@ -60,7 +60,7 @@ ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 COPY requirements-${MAILU_DEPS}.txt ./
 COPY libs/ libs/
 
-ARG SNUFFLEUPAGUS_VERSION=0.8.3
+ARG SNUFFLEUPAGUS_VERSION=0.9.0
 ENV SNUFFLEUPAGUS_URL https://github.com/jvoisin/snuffleupagus/archive/refs/tags/v$SNUFFLEUPAGUS_VERSION.tar.gz
 
 RUN set -euxo pipefail \

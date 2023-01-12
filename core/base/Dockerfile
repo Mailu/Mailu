@@ -77,7 +77,7 @@ RUN setcap 'cap_net_bind_service=+ep' /app/venv/bin/gunicorn 'cap_net_bind_servi
 
 ENV \
   VIRTUAL_ENV=/app/venv \
-  PATH="${VIRTUAL_ENV}/bin:${PATH}" \
+  PATH="/app/venv/bin:${PATH}" \
   LD_PRELOAD="/usr/lib/libhardened_malloc.so" \
   ADMIN_ADDRESS="admin" \
   FRONT_ADDRESS="front" \

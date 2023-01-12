@@ -77,7 +77,7 @@ class Alias(Resource):
     @alias.response(400, 'Input validation exception', response_fields)
     @alias.doc(security='Bearer')
     @common.api_token_authorization
-    def put(self, alias):
+    def patch(self, alias):
       """ Update alias """
       data = api.payload
       alias_found = models.Alias.query.filter_by(email = alias).first()
@@ -86,8 +86,7 @@ class Alias(Resource):
       if 'comment' in data:
         alias_found.comment = data['comment']
       if 'destination' in data:
-        destination_csl = ",".join(data['destination'])
-        alias_found.destination = destination_csl
+        alias_found.destination = data['destination']
       if 'wildcard' in data:
         alias_found.wildcard = data['wildcard']
       db.session.add(alias_found)

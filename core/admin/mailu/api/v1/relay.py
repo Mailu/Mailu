@@ -80,7 +80,7 @@ class Relay(Resource):
     @relay.response(409, 'Duplicate relay', response_fields)
     @relay.doc(security='Bearer')
     @common.api_token_authorization
-    def put(self, name):
+    def patch(self, name):
         """ Update relay """
         data = api.payload
 

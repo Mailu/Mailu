@@ -184,7 +184,7 @@ class User(Resource):
     @user.response(409, 'Duplicate user', response_fields)
     @user.doc(security='Bearer')
     @common.api_token_authorization
-    def put(self, email):
+    def patch(self, email):
         """ Update user """
         data = api.payload
         if not validators.email(email):

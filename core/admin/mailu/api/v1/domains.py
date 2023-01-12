@@ -152,7 +152,7 @@ class Domain(Resource):
     @dom.response(409, 'Duplicate domain/alternative name', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
-    def put(self, domain):
+    def patch(self, domain):
         """ Update an existing domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400

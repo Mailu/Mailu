@@ -70,6 +70,9 @@ DEFAULT_CONFIG = {
     'LOGO_URL': None,
     'LOGO_BACKGROUND': None,
     # Advanced settings
+    'API': False,
+    'WEB_API': '/api',
+    'API_TOKEN': None,
     'LOG_LEVEL': 'WARNING',
     'SESSION_KEY_BITS': 128,
     'SESSION_TIMEOUT': 3600,
@@ -157,4 +160,3 @@ class ConfigManager:
 
         # update the app config
         app.config.update(self.config)
-

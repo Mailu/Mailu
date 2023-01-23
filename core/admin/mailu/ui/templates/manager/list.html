@@ -24,6 +24,7 @@
 {%- for manager in domain.managers %}
 <tr>
   <td>
+    <a href="{{ url_for('.user_edit', user_email=manager.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fas fa-pencil-alt"></i></a>&nbsp;
     <a href="{{ url_for('.manager_delete', domain_name=domain.name, user_email=manager.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
   </td>
   <td>{{ manager }}</td>

@@ -9,3 +9,13 @@
   color: #fff;
   background-color: #45555c;
 }
+@media screen and (max-width: 480px) {
+  #taskmenu a.button-mailu {
+    background-position: 0px;
+    background-size: 40px 40px;
+  }
+  #taskmenu a.button-mailu.selected, #taskmenu a.button-mailu.selected:hover, #taskmenu a.button-mailu:hover {
+    color: #000;
+    background-color: #ececec;
+  }
+}

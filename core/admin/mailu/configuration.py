@@ -86,7 +86,7 @@ DEFAULT_CONFIG = {
     'PROXY_AUTH_HEADER': 'X-Auth-Email',
     'PROXY_AUTH_CREATE': False,
     'SUBNET': '192.168.203.0/24',
-    'SUBNET6': None
+    'SUBNET6': None,
 }
 
 class ConfigManager:
@@ -96,7 +96,7 @@ class ConfigManager:
     DB_TEMPLATES = {
         'sqlite': 'sqlite:////{SQLITE_DATABASE_FILE}',
         'postgresql': 'postgresql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}',
-        'mysql': 'mysql+mysqlconnector://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}'
+        'mysql': 'mysql+mysqlconnector://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}',
     }
 
     def __init__(self):

@@ -14,7 +14,7 @@ queue_directory = /queue
 message_size_limit = {{ MESSAGE_SIZE_LIMIT }}
 
 # Relayed networks
-mynetworks = 127.0.0.1/32 [::1]/128 {{ SUBNET }}  {% if RELAYNETS %}{{ RELAYNETS.split(",") | join(' ') }}{% endif %}
+mynetworks = 127.0.0.1/32 [::1]/128 {{ SUBNET }} {% if SUBNET6 %}{{ "[{}]/{}".format(*SUBNET6.split("/")) }}{% endif %} {% if RELAYNETS %}{{ RELAYNETS.split(",") | join(" ") }}{% endif %}
 
 # Empty alias list to override the configuration variable and disable NIS
 alias_maps =
@@ -121,7 +121,7 @@ smtpd_relay_restrictions =
 
 unverified_recipient_reject_reason = Address lookup failure
 
-smtpd_authorized_xclient_hosts={{ SUBNET}}{% if SUBNET6 %},[{{ SUBNET6 }}]{% endif %}
+smtpd_authorized_xclient_hosts={{ SUBNET }}{% if SUBNET6 %},[{{ SUBNET6 }}]{% endif %}
 
 ###############
 # Milter

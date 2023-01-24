@@ -36,7 +36,9 @@
     <td>
       <a href="{{ url_for('.user_settings', user_email=user.email) }}" title="{% trans %}Settings{% endtrans %}"><i class="fa fa-wrench"></i></a>&nbsp;
       <a href="{{ url_for('.user_reply', user_email=user.email) }}" title="{% trans %}Auto-reply{% endtrans %}"><i class="fa fa-plane"></i></a>&nbsp;
+      {%- if config["FETCHMAIL_ENABLED"] -%}
       <a href="{{ url_for('.fetch_list', user_email=user.email) }}" title="{% trans %}Fetched accounts{% endtrans %}"><i class="fa fa-download"></i></a>&nbsp;
+      {%- endif -%}
     </td>
     <td>{{ user }}</td>
     <td data-sort="{{ user.allow_spoofing*4 + user.enable_imap*2 + user.enable_pop }}">

@@ -147,11 +147,30 @@ How to make IPv6 work?
 
 Docker IPv6 interfacing with ``ip6tables``, which is required for proper IPv6 support, is currently considered experimental.
 
-You can enable experimental IPv6 support in docker via a custom ``/etc/docker/daemon.json`` file like this one:
+Although the supposed way to enable IPv6 would be to give each container a publicly routable address, docker's IPv6 support
+uses NAT to pass outside connections to the containers.
+
+Currently we recommend to use `docker-ipv6nat` by `Robert Klarenbeek <https://github.com/robbertkl>` instead of docker's
+experimental support.
+
+Before enabling IPv6 you **MUST** disable the userland-proxy in your ``/etc/docker/daemon.json`` to not create an Open Relay!
 
 .. code-block:: json
 
   {
+      "userland-proxy": false
+  }
+
+You can enable `docker-ipv6nat` like this:
+
+  docker run -d --name ipv6nat --privileged --network host --restart unless-stopped -v /var/run/docker.sock:/var/run/docker.sock:ro -v /lib/modules:/lib/modules:ro robbertkl/ipv6nat
+
+If you want to try docker's experimental IPv6 support, it can be enabled like this:
+
+.. code-block:: json
+
+  {
+      "userland-proxy": false,
       "ipv6": true,
       "experimental": true,
       "fixed-cidr-v6": "fd00:1234:abcd::/48",

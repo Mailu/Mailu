@@ -5,6 +5,7 @@ from copy import deepcopy
 from collections import Counter
 from datetime import timezone
 
+import inspect
 import json
 import logging
 import yaml
@@ -669,20 +670,15 @@ class Storage:
 
     context = {}
 
-    def _bind(self, key, bind):
-        if bind is True:
-            return (self.__class__, key)
-        if isinstance(bind, str):
-            return (get_schema(self.recall(bind).__class__), key)
-        return (bind, key)
-
-    def store(self, key, value, bind=None):
+    def store(self, key, value):
         """ store value under key """
-        self.context.setdefault('_track', {})[self._bind(key, bind)]= value
+        key = f'{self.__class__.__name__}.{key}'
+        self.context.setdefault('_track', {})[key] = value
 
-    def recall(self, key, bind=None):
+    def recall(self, key):
         """ recall value from key """
-        return self.context['_track'][self._bind(key, bind)]
+        key = f'{self.__class__.__name__}.{key}'
+        return self.context['_track'][key]
 
 class BaseOpts(SQLAlchemyAutoSchemaOpts):
     """ Option class with sqla session
@@ -790,10 +786,16 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
             for key, value in data.items()
         }
 
-    def _call_and_store(self, *args, **kwargs):
-        """ track current parent field for pruning """
-        self.store('field', kwargs['field_name'], True)
-        return super()._call_and_store(*args, **kwargs)
+    def get_parent(self):
+        """ helper to determine parent of current object """
+        for x in inspect.stack():
+            loc = x[0].f_locals
+            if 'ret_d' in loc:
+                if isinstance(loc['self'], MailuSchema):
+                    return self.context.get('config'), loc['attr_name']
+                else:
+                    return loc['self'].get_instance(loc['ret_d']), loc['attr_name']
+        return None, None
 
     # this is only needed to work around the declared attr "email" primary key in model
     def get_instance(self, data):
@@ -803,9 +805,13 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
         if keys := getattr(self.Meta, 'primary_keys', None):
             filters = {key: data.get(key) for key in keys}
             if None not in filters.values():
-                res= self.session.query(self.opts.model).filter_by(**filters).first()
-                return res
-        res= super().get_instance(data)
+                try:
+                    res = self.session.query(self.opts.model).filter_by(**filters).first()
+                except sqlalchemy.exc.StatementError as exc:
+                    raise ValidationError(f'Invalid {keys[0]}: {data.get(keys[0])!r}', data.get(keys[0])) from exc
+                else:
+                    return res
+        res = super().get_instance(data)
         return res
 
     @pre_load(pass_many=True)
@@ -828,6 +834,10 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
         # patch "delete", "prune" and "default"
         want_prune = []
         def patch(count, data):
+
+            # we only process objects here
+            if type(data) is not dict:
+                raise ValidationError(f'Invalid item. {self.Meta.model.__tablename__.title()} needs to be an object.', f'{data!r}')
 
             # don't allow __delete__ coming from input
             if '__delete__' in data:
@@ -882,10 +892,10 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
         ]
 
         # remember if prune was requested for _prune_items@post_load
-        self.store('prune', bool(want_prune), True)
+        self.store('prune', bool(want_prune))
 
         # remember original items to stabilize password-changes in _add_instance@post_load
-        self.store('original', items, True)
+        self.store('original', items)
 
         return items
 
@@ -909,23 +919,18 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
         # stabilize import of auto-increment primary keys (not required),
         # by matching import data to existing items and setting primary key
         if not self._primary in data:
-            parent = self.recall('parent')
+            parent, field = self.get_parent()
             if parent is not None:
-                for item in getattr(parent, self.recall('field', 'parent')):
+                for item in getattr(parent, field):
                     existing = self.dump(item, many=False)
                     this = existing.pop(self._primary)
                     if data == existing:
-                        instance = item
+                        self.instance = item
                         data[self._primary] = this
                         break
 
         # try to load instance
         instance = self.instance or self.get_instance(data)
-
-        # remember instance as parent for pruning siblings
-        if not self.Meta.sibling and self.context.get('update'):
-            self.store('parent', instance)
-
         if instance is None:
 
             if '__delete__' in data:
@@ -1001,7 +1006,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
             return items
 
         # get prune flag from _patch_many@pre_load
-        want_prune = self.recall('prune', True)
+        want_prune = self.recall('prune')
 
         # prune: determine if existing items in db need to be added or marked for deletion
         add_items = False
@@ -1018,16 +1023,17 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
                 del_items = True
 
         if add_items or del_items:
-            parent = self.recall('parent')
+            parent, field = self.get_parent()
             if parent is not None:
                 existing = {item[self._primary] for item in items if self._primary in item}
-                for item in getattr(parent, self.recall('field', 'parent')):
+                for item in getattr(parent, field):
                     key = getattr(item, self._primary)
                     if key not in existing:
                         if add_items:
                             items.append({self._primary: key})
                         else:
-                            items.append({self._primary: key, '__delete__': '?'})
+                            if self.context.get('update'):
+                                self.opts.sqla_session.delete(self.instance or self.get_instance({self._primary: key}))
 
         return items
 
@@ -1048,7 +1054,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
         # did we hash a new plaintext password?
         original = None
         pkey = getattr(item, self._primary)
-        for data in self.recall('original', True):
+        for data in self.recall('original'):
             if 'hash_password' in data and data.get(self._primary) == pkey:
                 original = data['password']
                 break
@@ -1243,12 +1249,6 @@ class MailuSchema(Schema, Storage):
             for field in self.Meta.order:
                 if field in fieldlist:
                     fieldlist[field] = fieldlist.pop(field)
-
-    def _call_and_store(self, *args, **kwargs):
-        """ track current parent and field for pruning """
-        self.store('field', kwargs['field_name'], True)
-        self.store('parent', self.context.get('config'))
-        return super()._call_and_store(*args, **kwargs)
 
     @pre_load
     def _clear_config(self, data, many, **kwargs): # pylint: disable=unused-argument

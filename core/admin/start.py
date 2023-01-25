@@ -52,20 +52,21 @@ def test_DNS():
 
 test_DNS()
 
-bind_addr = ":80"
-if os.environ.get("SUBNET6") is not None:
-    # If SUBNET6 is defined, gunicorn must listen on IPv6 as well as IPv4
-    bind_addr = "[::]:80"
-
-start_command=" ".join([
-    "gunicorn",
-    f"--threads {str(os.cpu_count())}",
-	"-b", bind_addr,
+cmdline = [
+	"gunicorn",
+	"--threads", f"{os.cpu_count()}",
+	# If SUBNET6 is defined, gunicorn must listen on IPv6 as well as IPv4
+	"-b", f"{'[::]' if os.environ.get('SUBNET6') else ''}:80",
     "--logger-class mailu.Logger",
     "--worker-tmp-dir /dev/shm",
-    "--access-logfile -" if (log.root.level<=log.INFO) else "",
-    "--error-logfile -",
-    "--preload",
-    "'mailu:create_app()'"])
+	"--error-logfile", "-",
+	"--preload"
+]
 
-os.system(start_command)
+# logging
+if log.root.level <= log.INFO:
+	cmdline.extend(["--access-logfile", "-"])
+
+cmdline.append("'mailu:create_app()'")
+
+os.system(" ".join(cmdline))

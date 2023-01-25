@@ -110,8 +110,9 @@ to reject emails containing documents with malicious macros. Under the hood, it 
 
 .. _fetchmail:
 
-When ``FETCHMAIL_ENABLED`` is set to ``True``, the fetchmail functionality is enabled in the admin interface.
-The container itself still needs to be deployed manually. ``FETCHMAIL_ENABLED`` defaults to ``True``.
+When ``FETCHMAIL_ENABLED`` is set to ``True``, the fetchmail functionality is enabled and
+shown in the admin interface. The container itself still needs to be deployed manually.
+``FETCHMAIL_ENABLED`` defaults to ``True``.
 
 The ``FETCHMAIL_DELAY`` is a delay (in seconds) for the fetchmail service to
 go and fetch new email if available. Do not use too short delays if you do not

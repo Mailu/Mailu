@@ -47,7 +47,7 @@ def set_env(required_secrets=[]):
         with open('/etc/resolv.conf','w') as f:
             f.write(f'nameserver {ip_resolver}\noptions ndots:0\n')
     except:
-        pass
+        log.info('The unbound container cannot be found or is not enabled. Falling back to the default DNS resolver')
 
     if not os.environ.get('SUBNET'):
         os.environ['SUBNET'] = get_network_v4()

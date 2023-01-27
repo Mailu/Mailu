@@ -57,3 +57,9 @@ fieldset:disabled .form-control:disabled {
 .input-group-text {
   margin-right: 1em;
 }
+
+/* version string */
+.mailu-version {
+  font-size: 60%;
+  line-height: 0;
+}

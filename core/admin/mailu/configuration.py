@@ -18,6 +18,7 @@ DEFAULT_CONFIG = {
     'TEMPLATES_AUTO_RELOAD': True,
     'MEMORY_SESSIONS': False,
     'FETCHMAIL_ENABLED': True,
+    'MAILU_VERSION': 'unknown',
     # Database settings
     'DB_FLAVOR': None,
     'DB_USER': 'mailu',
@@ -157,6 +158,10 @@ class ConfigManager:
         self.config['HOSTNAME'] = hostnames[0]
         self.config['DEFAULT_SPAM_THRESHOLD'] = int(self.config['DEFAULT_SPAM_THRESHOLD'])
         self.config['PROXY_AUTH_WHITELIST'] = set(ipaddress.ip_network(cidr, False) for cidr in (cidr.strip() for cidr in self.config['PROXY_AUTH_WHITELIST'].split(',')) if cidr)
+        try:
+            self.config['MAILU_VERSION'] = open('/version', 'r').read()
+        except FileNotFoundError:
+            pass
 
         # update the app config
         app.config.update(self.config)

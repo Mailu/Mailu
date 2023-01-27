@@ -141,13 +141,15 @@ Web settings
 
 - ``WEB_WEBMAIL`` contains the path to the Web email client.
 
+- ``WEB_API`` contains the path to the RESTful API.
+
 - ``WEBROOT_REDIRECT`` redirects all non-found queries to the set path.
   An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables
   classic behavior of a 404 result when not found.
   Alternatively, ``WEBROOT_REDIRECT`` can be set to ``none`` if you
   are using an Nginx override for ``location /``.
 
-All three options need a leading slash (``/``) to work.
+All four options need a leading slash (``/``) to work.
 
   .. note:: ``WEBROOT_REDIRECT`` has to point to a valid path on the webserver.
     This means it cannot point to any services which are not enabled.
@@ -204,13 +206,9 @@ Depending on your particular deployment you most probably will want to change th
 Advanced settings
 -----------------
 
-The ``API`` (default: False) setting controls if the API endpoint is reachable.
-
-The ``WEB_API`` (default: /api) setting configures the endpoint that the API
-listens on publicly&interally. The path must always start with a leading slash.
-
-The ``API_TOKEN`` (default: None) enables the API endpoint. This token must be
-passed as request header to the API as authentication token.
+The ``API_TOKEN`` (default: None) configures the authentication token.
+This token must be passed as request header to the API as authentication token.
+This is a mandatory setting for using the RESTful API.
 
 The ``CREDENTIAL_ROUNDS`` (default: 12) setting is the number of rounds used by the
 password hashing scheme. The number of rounds can be reduced in case faster

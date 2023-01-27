@@ -9,6 +9,7 @@ Managing users and aliases can be done from CLI using commands:
 * password
 * user
 * user-import
+* user-delete
 * config-update
 * config-export
 * config-import
@@ -61,6 +62,19 @@ primary difference with simple `user` command is that password is being imported
 .. code-block:: bash
 
   docker-compose run --rm admin flask mailu user-import myuser example.net '$6$51ebe0cb9f1dab48effa2a0ad8660cb489b445936b9ffd812a0b8f46bca66dd549fea530ce' 'SHA512-CRYPT'
+
+
+user-delete
+-----------
+
+Although the action is called "user-delete" the user is only deactivated by default.
+This is due to the fact mailu does not remove user-data (emails and webmail contacts) when a user is deleted.
+Add the flag `-r` to really delete the user after you have deleted user-data manually.
+
+.. code-block:: bash
+
+  docker-compose exec admin flask mailu user-delete foo@example.net
+
 
 config-update
 -------------

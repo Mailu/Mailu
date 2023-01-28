@@ -20,6 +20,12 @@ context.update(env)
 
 context["MAX_FILESIZE"] = str(int(int(env.get("MESSAGE_SIZE_LIMIT", "50000000")) * 0.66 / 1048576))
 
+# Get the first DNS server
+with open("/etc/resolv.conf") as handle:
+    content = handle.read().split()
+    resolver = content[content.index("nameserver") + 1]
+    context["RESOLVER"] = f"[{resolver}]" if ":" in resolver else resolver
+
 db_flavor = env.get("ROUNDCUBE_DB_FLAVOR", "sqlite")
 if db_flavor == "sqlite":
     context["DB_DSNW"] = "sqlite:////data/roundcube.db"

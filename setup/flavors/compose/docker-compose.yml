@@ -96,12 +96,6 @@ services:
     restart: always
     networks:
       - noinet
-    depends_on:
-    {% if resolver_enabled %}
-      - resolver
-    dns:
-      - {{ dns }}
-    {% endif %}
 {% endif %}
 
   antispam:

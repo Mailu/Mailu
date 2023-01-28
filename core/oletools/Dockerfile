@@ -19,7 +19,7 @@ HEALTHCHECK --start-period=60s CMD echo PING|nc -q1 127.0.0.1 11343|grep "PONG"
 USER nobody:nobody
 
 ENV \
-    OLEFY_BINDADDRESS="0.0.0.0" \
+    OLEFY_BINDADDRESS="" \
     OLEFY_BINDPORT="11343" \
     OLEFY_OLEVBA_PATH="/app/venv/bin/olevba" \
     OLEFY_PYTHON_PATH="/app/venv/bin/python3" \

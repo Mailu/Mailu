@@ -17,7 +17,7 @@ DEFAULT_CONFIG = {
     'DOMAIN_REGISTRATION': False,
     'TEMPLATES_AUTO_RELOAD': True,
     'MEMORY_SESSIONS': False,
-    'FETCHMAIL_ENABLED': False,
+    'FETCHMAIL_ENABLED': True,
     # Database settings
     'DB_FLAVOR': None,
     'DB_USER': 'mailu',
@@ -70,6 +70,9 @@ DEFAULT_CONFIG = {
     'LOGO_URL': None,
     'LOGO_BACKGROUND': None,
     # Advanced settings
+    'API': False,
+    'WEB_API': '/api',
+    'API_TOKEN': None,
     'LOG_LEVEL': 'WARNING',
     'SESSION_KEY_BITS': 128,
     'SESSION_TIMEOUT': 3600,
@@ -83,7 +86,7 @@ DEFAULT_CONFIG = {
     'PROXY_AUTH_HEADER': 'X-Auth-Email',
     'PROXY_AUTH_CREATE': False,
     'SUBNET': '192.168.203.0/24',
-    'SUBNET6': None
+    'SUBNET6': None,
 }
 
 class ConfigManager:
@@ -93,7 +96,7 @@ class ConfigManager:
     DB_TEMPLATES = {
         'sqlite': 'sqlite:////{SQLITE_DATABASE_FILE}',
         'postgresql': 'postgresql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}',
-        'mysql': 'mysql+mysqlconnector://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}'
+        'mysql': 'mysql+mysqlconnector://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}',
     }
 
     def __init__(self):
@@ -157,4 +160,3 @@ class ConfigManager:
 
         # update the app config
         app.config.update(self.config)
-

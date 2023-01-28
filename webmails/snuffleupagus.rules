@@ -98,7 +98,7 @@ sp.disable_function.function("is_callable").param("value").value("eval").drop();
 sp.disable_function.function("is_callable").param("value").value("exec").drop();
 sp.disable_function.function("is_callable").param("value").value("system").drop();
 sp.disable_function.function("is_callable").param("value").value("shell_exec").drop();
-sp.disable_function.function("is_callable").filename_r("^/var/www/snappymail/snappymail/v/\d+\.\d+\.\d+/app/libraries/snappymail/pgp/gpg\.php$").param("value").value("proc_open").allow();
+sp.disable_function.function("is_callable").filename_r("^/var/www/snappymail/snappymail/v/[0-9]+\.[0-9]+\.[0-9]+/app/libraries/snappymail/pgp/gpg\.php$").param("value").value("proc_open").allow();
 sp.disable_function.function("is_callable").param("value").value("proc_open").drop();
 sp.disable_function.function("is_callable").param("value").value("passthru").drop();
 
@@ -130,5 +130,4 @@ sp.cookie.name("roundcube_sessid").samesite("strict");
 sp.ini_protection.policy_silent_fail();
 
 # roundcube uses unserialize() everywhere.
-# This should do the job until https://github.com/jvoisin/snuffleupagus/issues/438 is implemented.
-sp.disable_function.function("unserialize").param("data").value_r("[cCoO]:\d+:[\"{]").drop();
+sp.unserialize_noclass.enable();

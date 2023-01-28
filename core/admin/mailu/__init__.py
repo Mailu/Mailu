@@ -89,10 +89,11 @@ def create_app_from_config(config):
     app.route('/ping')(ping)
 
     # Import views
-    from mailu import ui, internal, sso
+    from mailu import ui, internal, sso, api
     app.register_blueprint(ui.ui, url_prefix=app.config['WEB_ADMIN'])
     app.register_blueprint(internal.internal, url_prefix='/internal')
     app.register_blueprint(sso.sso, url_prefix='/sso')
+    api.register(app, web_api_root=app.config.get('WEB_API'))
     return app
 
 

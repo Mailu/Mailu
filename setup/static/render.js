@@ -1,18 +1,28 @@
+//API_TOKEN generator
+var chars = "0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+var tokenLength = 12;
+var token = "";
+
+for (var i = 0; i <= tokenLength; i++) {
+	var randomNumber = Math.floor(Math.random() * chars.length);
+	token += chars.substring(randomNumber, randomNumber +1);
+   }
+
 $(document).ready(function() {
 	if ($("#webmail").val() == 'none') {
 		$("#webmail_path").hide();
-		$("#webmail_path").attr("value", "");
+		$("#webmail_path").val("");
 	} else {
 		$("#webmail_path").show();
-		$("#webmail_path").attr("value", "/webmail");
+		$("#webmail_path").val("/webmail");
 	}
 	$("#webmail").click(function() {
 		if (this.value == 'none') {
 			$("#webmail_path").hide();
-			$("#webmail_path").attr("value", "");
+			$("#webmail_path").val("");
 		} else {
 			$("#webmail_path").show();
-			$("#webmail_path").attr("value", "/webmail");
+			$("#webmail_path").val("/webmail");
 		}
 	});
 });
@@ -20,15 +30,50 @@ $(document).ready(function() {
 $(document).ready(function() {
 	if ($('#admin').prop('checked')) {
 		$("#admin_path").show();
-		$("#admin_path").attr("value", "/admin");
+		$("#admin_path").val("/admin");
 	}
 	$("#admin").change(function() {
 		if ($(this).is(":checked")) {
 			$("#admin_path").show();
-			$("#admin_path").attr("value", "/admin");
+			$("#admin_path").val("/admin");
 		} else {
 			$("#admin_path").hide();
-			$("#admin_path").attr("value", "");
+			$("#admin_path").val("");
+		}
+	});
+});
+
+$(document).ready(function() {
+	if ($('#api').prop('checked')) {
+		$("#api_path").show();
+		$("#api_path").val("/api")
+		$("#api_token").show();
+		$("#api_token").prop('required',true);
+		$("#api_token").val(token);
+		$("#api_token_label").show();
+	} else {
+		$("#api_path").hide();
+		$("#api_path").val("/api")
+		$("#api_token").hide();
+		$("#api_token").prop('required',false);
+		$("#api_token").val("");
+		$("#api_token_label").hide();
+	}
+	$("#api").change(function() {
+		if ($(this).is(":checked")) {
+			$("#api_path").show();
+			$("#api_path").val("/api");
+			$("#api_token").show();
+			$("#api_token").prop('required',true);
+			$("#api_token").val(token)
+			$("#api_token_label").show();
+		} else {
+			$("#api_path").hide();
+			$("#api_path").val("/api")
+			$("#api_token").hide();
+			$("#api_token").prop('required',false);
+			$("#api_token").val("");
+			$("#api_token_label").hide();
 		}
 	});
 });

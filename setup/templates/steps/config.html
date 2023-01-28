@@ -87,6 +87,19 @@ manage your email domains, users, etc.</p>
     <input class="form-control" type="text" name="admin_path" id="admin_path" style="display: none">
 </div>
 
+<p>The API interface is a RESTful API for changing the Mailu configuration.
+  Anything that can be configured via the Mailu web administration interface,
+  can also be configured via the RESTful API. For enabling the API, an API token must be configured.
+  It is not possible to use the API without an API token.</p>
+
+  <div class="form-group">
+      <input type="checkbox" name="api_enabled" value="false" id="api" >
+      <label>Enable the API (and path to the API)</label>
+      <input class="form-control" type="text" name="api_path" id="api_path" style="display: none">
+      <label name="api_token_label" id="api_token_label">API token</label>
+      <input class="form-control" type="text" name="api_token" id="api_token" style="display: none">
+  </div>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <script type="text/javascript" src="{{ url_for('static', filename='render.js') }}"></script>

@@ -86,7 +86,7 @@ COPY php-webmail.conf /etc/php81/php-fpm.d/
 COPY nginx-webmail.conf /conf/
 COPY snuffleupagus.rules /etc/snuffleupagus.rules.tpl
 
-EXPOSE 80/tcp
+# EXPOSE 80/tcp
 VOLUME /data
 VOLUME /overrides
 

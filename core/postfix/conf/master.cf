@@ -2,10 +2,10 @@
 #               (yes)   (yes)   (yes)   (never) (100)
 
 # Exposed SMTP service
-smtp      inet  n       -       n       -       -       smtpd
+smtp      inet  n       -       n       -       1       smtpd
 
 # Internal SMTP service
-10025     inet  n       -       n       -       -       smtpd
+10025     inet  n       -       n       -       1       smtpd
   -o smtpd_sasl_auth_enable=yes
   -o smtpd_discard_ehlo_keywords=pipelining
   -o smtpd_client_restrictions=$check_ratelimit,reject_unlisted_sender,reject_authenticated_sender_login_mismatch,permit
@@ -44,6 +44,7 @@ verify    unix  -       -       n       -       1       verify
 flush     unix  n       -       n       1000?   0       flush
 proxymap  unix  -       -       n       -       -       proxymap
 smtp      unix  -       -       n       -       -       smtp
+smtpd     pass  -       -       n       -       -       smtpd
 relay     unix  -       -       n       -       -       smtp
 error     unix  -       -       n       -       -       error
 retry     unix  -       -       n       -       -       error
@@ -52,4 +53,3 @@ lmtp      unix  -       -       n       -       -       lmtp
 anvil     unix  -       -       n       -       1       anvil
 scache    unix  -       -       n       -       1       scache
 postlog   unix-dgram n  -       n       -       1       postlogd
-

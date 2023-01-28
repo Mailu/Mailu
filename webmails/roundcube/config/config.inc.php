@@ -28,7 +28,7 @@ $config['default_host']  = '{{ FRONT_ADDRESS or "front" }}';
 $config['default_port'] = '10143';
 
 // Sieve script management
-$config['managesieve_host'] = '{{ IMAP_ADDRESS or "imap" }}';
+$config['managesieve_host'] = '{{ FRONT_ADDRESS or "front" }}:14190';
 
 // We access the IMAP and SMTP servers locally with internal names, SSL
 // will obviously fail but this sounds better than allowing insecure login

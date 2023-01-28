@@ -14,8 +14,8 @@ COPY start.py /
 
 RUN echo $VERSION >/version
 
-EXPOSE 25/tcp 10025/tcp
-HEALTHCHECK --start-period=350s CMD echo QUIT|nc localhost 25|grep "220 .* ESMTP Postfix"
+#EXPOSE 25/tcp 10025/tcp
+HEALTHCHECK --start-period=350s CMD /usr/sbin/postfix status
 
 VOLUME ["/queue"]
 

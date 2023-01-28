@@ -14,7 +14,7 @@ RUN set -euxo pipefail \
 RUN echo $VERSION >/version
 
 HEALTHCHECK --start-period=60s CMD echo PING|nc -q1 127.0.0.1 11343|grep "PONG"
-EXPOSE 11343/tcp
+#EXPOSE 11343/tcp
 
 USER nobody:nobody
 

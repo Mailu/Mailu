@@ -5,8 +5,23 @@ import flask
 import flask_bootstrap
 
 from mailu import utils, debug, models, manage, configuration
+from gunicorn import glogging
+import logging
 
 import hmac
+
+class NoPingFilter(logging.Filter):
+    def filter(self, record):
+        if not (record.args['{host}i'] == 'localhost' and record.args['r'] == 'GET /ping HTTP/1.1'):
+            return True
+
+class Logger(glogging.Logger):
+    def setup(self, cfg):
+        super().setup(cfg)
+
+        # Add filters to Gunicorn logger
+        logger = logging.getLogger("gunicorn.access")
+        logger.addFilter(NoPingFilter())
 
 def create_app_from_config(config):
     """ Create a new application based on the given configuration
@@ -68,6 +83,10 @@ def create_app_from_config(config):
     @app.template_filter()
     def format_datetime(value):
         return utils.flask_babel.format_datetime(value) if value else ''
+
+    def ping():
+        return ''
+    app.route('/ping')(ping)
 
     # Import views
     from mailu import ui, internal, sso, api

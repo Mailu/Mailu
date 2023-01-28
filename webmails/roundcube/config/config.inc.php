@@ -15,6 +15,7 @@ $config['enable_spellcheck'] = true;
 $config['spellcheck_engine'] = 'pspell';
 $config['session_lifetime'] = {{ SESSION_TIMEOUT_MINUTES | int }};
 $config['request_path'] = '{{ WEB_WEBMAIL or "none" }}';
+$config['trusted_host_patterns'] = [ {{ HOSTNAMES.split(",") | map("tojson") | join(',') }}];
 
 // Mail servers
 $config['imap_host'] = '{{ FRONT_ADDRESS or "front" }}:10143';

@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile-upstream:1.4.3
 
 # base system image (intermediate)
-ARG DISTRO=alpine:3.17.0
+ARG DISTRO=alpine:3.17.1
 FROM $DISTRO as system
 
 ENV TZ=Etc/UTC LANG=C.UTF-8

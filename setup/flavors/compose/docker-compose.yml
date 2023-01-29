@@ -33,7 +33,7 @@ services:
       - "{{ bind4 }}:{{ port }}:{{ port }}"
     {% endif %}
     {% if ipv6_enabled and bind6 %}
-      - "{{ bind6 }}:{{ port }}:{{ port }}"
+      - "[{{ bind6 }}]:{{ port }}:{{ port }}"
     {% endif %}
     {% endfor %}
     networks:

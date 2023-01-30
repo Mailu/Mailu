@@ -1,12 +1,7 @@
 //API_TOKEN generator
-var chars = "0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-var tokenLength = 12;
-var token = "";
-
-for (var i = 0; i <= tokenLength; i++) {
-	var randomNumber = Math.floor(Math.random() * chars.length);
-	token += chars.substring(randomNumber, randomNumber +1);
-   }
+var random_array = new Uint32Array(2);
+crypto.getRandomValues(random_array);
+var token =  random_array[0].toString() + random_array[1].toString();
 
 $(document).ready(function() {
 	if ($("#webmail").val() == 'none') {
@@ -53,7 +48,7 @@ $(document).ready(function() {
 		$("#api_token_label").show();
 	} else {
 		$("#api_path").hide();
-		$("#api_path").val("/api")
+		$("#api_path").val("")
 		$("#api_token").hide();
 		$("#api_token").prop('required',false);
 		$("#api_token").val("");
@@ -69,7 +64,7 @@ $(document).ready(function() {
 			$("#api_token_label").show();
 		} else {
 			$("#api_path").hide();
-			$("#api_path").val("/api")
+			$("#api_path").val("")
 			$("#api_token").hide();
 			$("#api_token").prop('required',false);
 			$("#api_token").val("");

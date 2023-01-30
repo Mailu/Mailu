@@ -86,9 +86,12 @@ $('document').ready(function() {
         if (value_element.length) {
             value_element = $(value_element[0]);
             var infinity = $(this).data('infinity');
-            var step = $(this).attr('step');
+            var unit = $(this).data('unit');
+            if (typeof unit === 'undefined' || unit === false) {
+                unit=1;
+            }
             $(this).on('input', function() {
-                var num = (infinity && this.value == 0) ? '∞' : (this.value/step).toFixed(2);
+                var num = (infinity && this.value == 0) ? '∞' : (this.value/unit).toFixed(2);
                 if (num.endsWith('.00')) num = num.substr(0, num.length - 3);
                 value_element.text(num);
             }).trigger('input');

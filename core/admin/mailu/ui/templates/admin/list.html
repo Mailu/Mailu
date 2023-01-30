@@ -11,7 +11,7 @@
 {%- endblock %}
 
 {%- block content %}
-{%- call macros.table() %}
+{%- call macros.table(order='[[1,"asc"]]') %}
 <thead>
   <tr>
     <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
@@ -22,6 +22,7 @@
   {%- for admin in admins %}
   <tr>
     <td>
+      <a href="{{ url_for('.user_edit', user_email=admin.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fas fa-pencil-alt"></i></a>&nbsp;
       <a href="{{ url_for('.admin_delete', admin=admin.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
     </td>
     <td>{{ admin }}</td>

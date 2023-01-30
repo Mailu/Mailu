@@ -1,3 +1,1 @@
-{% if RELAYNETS %}
-local_networks = [{{ RELAYNETS }},{{ SUBNET }}{% if SUBNET6 %}, {{ SUBNET6 }}{% endif %}];
-{% endif %}
+local_networks = [{{ SUBNET }}{% if SUBNET6 %}, {{ SUBNET6 }}{% endif %}{% if RELAYNETS %}, {{ RELAYNETS }}{% endif %}];

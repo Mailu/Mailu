@@ -1,12 +1,5 @@
-//API_TOKEN generator
-var chars = "0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-var tokenLength = 12;
-var token = "";
-
-for (var i = 0; i <= tokenLength; i++) {
-	var randomNumber = Math.floor(Math.random() * chars.length);
-	token += chars.substring(randomNumber, randomNumber +1);
-   }
+//Store API token in variable.
+var token = $("#api_token").val();
 
 $(document).ready(function() {
 	if ($("#webmail").val() == 'none') {
@@ -44,7 +37,7 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-	if ($('#api').prop('checked')) {
+	if ($('#api_enabled').prop('checked')) {
 		$("#api_path").show();
 		$("#api_path").val("/api")
 		$("#api_token").show();
@@ -53,13 +46,13 @@ $(document).ready(function() {
 		$("#api_token_label").show();
 	} else {
 		$("#api_path").hide();
-		$("#api_path").val("/api")
+		$("#api_path").val("")
 		$("#api_token").hide();
 		$("#api_token").prop('required',false);
 		$("#api_token").val("");
 		$("#api_token_label").hide();
 	}
-	$("#api").change(function() {
+	$("#api_enabled").change(function() {
 		if ($(this).is(":checked")) {
 			$("#api_path").show();
 			$("#api_path").val("/api");
@@ -69,7 +62,7 @@ $(document).ready(function() {
 			$("#api_token_label").show();
 		} else {
 			$("#api_path").hide();
-			$("#api_path").val("/api")
+			$("#api_path").val("")
 			$("#api_token").hide();
 			$("#api_token").prop('required',false);
 			$("#api_token").val("");

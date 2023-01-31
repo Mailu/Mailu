@@ -93,11 +93,11 @@ manage your email domains, users, etc.</p>
   It is not possible to use the API without an API token.</p>
 
   <div class="form-group">
-      <input type="checkbox" name="api_enabled" value="false" id="api" >
+      <input type="checkbox" name="api_enabled" value="true" id="api_enabled" >
       <label>Enable the API (and path to the API)</label>
       <input class="form-control" type="text" name="api_path" id="api_path" style="display: none">
       <label name="api_token_label" id="api_token_label">API token</label>
-      <input class="form-control" type="text" name="api_token" id="api_token" style="display: none">
+      <input class="form-control" type="text" name="api_token" id="api_token" style="display: none" value="{{ secret(32) }}">
   </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

@@ -5,8 +5,7 @@ import logging as log
 import sys
 from socrate import system, conf
 
-system.set_env()
-args = os.environ.copy()
+args = system.set_env()
 log.basicConfig(stream=sys.stderr, level=args.get("LOG_LEVEL", "WARNING"))
 
 args['TLS_PERMISSIVE'] = str(args.get('TLS_PERMISSIVE')).lower() not in ('false', 'no')

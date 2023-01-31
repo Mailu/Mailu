@@ -1,7 +1,5 @@
-//API_TOKEN generator
-var random_array = new Uint32Array(2);
-crypto.getRandomValues(random_array);
-var token =  random_array[0].toString() + random_array[1].toString();
+//Store API token in variable.
+var token = $("#api_token").val();
 
 $(document).ready(function() {
 	if ($("#webmail").val() == 'none') {
@@ -39,7 +37,7 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-	if ($('#api').prop('checked')) {
+	if ($('#api_enabled').prop('checked')) {
 		$("#api_path").show();
 		$("#api_path").val("/api")
 		$("#api_token").show();
@@ -54,7 +52,7 @@ $(document).ready(function() {
 		$("#api_token").val("");
 		$("#api_token_label").hide();
 	}
-	$("#api").change(function() {
+	$("#api_enabled").change(function() {
 		if ($(this).is(":checked")) {
 			$("#api_path").show();
 			$("#api_path").val("/api");

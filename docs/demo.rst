@@ -16,12 +16,13 @@ If you find actual bugs when using the demo server, please report these!
 Functionality
 -------------
 
-- The server is reset every day at 3am, UTC.
+- The server is reset every day at 3am, 12pm, 8pm UTC.
 - You can send mail from any client to the server.
   However, the SMTP server is made incapable of relaying the e-mail to the destination server.
   As such, the mail will never arrive. This is to prevent abuse of the server.
 - The server is capable of receiving mail for any configured domains.
 - The server exposes IMAP, POP3 and SMTP as usual for connection with mail clients such as Thunderbird.
+- The RESTful API is enabled.
 - The containers have limited (throttled) CPU, this means it can respond slow during heavy operations.
 - The containers have limited memory available and will be killed when exceeded.
   This is to prevent people from doing nasty things to the server as a whole.
@@ -35,6 +36,8 @@ Connecting to the server
  * Admin UI : https://test.mailu.io/admin/
  * Admin login : ``admin@test.mailu.io``
  * Admin password : ``letmein``
+ * RESTful API: https://test.mailu.io/api
+ * API token: ``Bearer APITokenForMailu``
 
 Adding domains
 --------------

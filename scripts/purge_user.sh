@@ -51,21 +51,28 @@ for maildir in "${storage}"/mail/*; do
 	fi
 done
 
-# output actions
 if [[ ${#users[@]} -eq 0 ]]; then
-	echo "Nothing to be done."
+	echo "Nothing to clean up."
 	exit 0
 fi
+
+# is roundcube webmail in use?
+webmail=false
+docker compose exec webmail test -e /data/roundcube.db 2>/dev/null && webmail=true
+
+# output actions
 if ${unknown}; then
 	echo "# To delete maildirs unknown to mailu, run:"
 	for email in "${!users[@]}"; do
 		[[ "${users[${email}]}" == "unknown" ]] || continue
-		echo "rm -rf '${storage}/mail/${email}'"
+		echo -n "rm -rf '${storage}/mail/${email}'"
+		${webmail} && \
+			echo -n " && docker compose exec -T webmail su mailu -c \"/var/www/roundcube/bin/deluser.sh --host=front '${email}'\""
+		echo
 	done
 	echo
 fi
 if ${disabled}; then
-	webmail=true; docker compose ps webmail &>/dev/null || webmail=false
 	echo "# To purge disabled users, run:"
 	for email in "${!users[@]}"; do
 		[[ "${users[${email}]}" == "disabled" ]] || continue
@@ -76,4 +83,3 @@ if ${disabled}; then
 	done
 	echo
 fi
-

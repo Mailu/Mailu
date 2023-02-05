@@ -21,7 +21,7 @@
   {%- endcall %}
 
   {%- call macros.card(_("Features and quotas"), theme="success") %}
-  {{ macros.form_field(form.quota_bytes, step=1000000000, max=(max_quota_bytes or domain.max_quota_bytes or 50*10**9), data_infinity="true",
+  {{ macros.form_field(form.quota_bytes, step=1000000000, max=(max_quota_bytes or domain.max_quota_bytes or 50*10**9), data_infinity="true", data_unit=10**9,
       prepend='<span class="input-group-text"><span id="quota_bytes_value"></span>&nbsp;GB</span>') }}
   {{ macros.form_field(form.enable_imap) }}
   {{ macros.form_field(form.enable_pop) }}

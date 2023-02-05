@@ -1,0 +1,2 @@
+Backport part of #2632 to fix quotas.
+Backport of #2650 to fix encoding of sieve scripts edited through roundcube.

@@ -25,6 +25,7 @@ $config['smtp_pass'] = '%p';
 
 // Sieve script management
 $config['managesieve_host'] = '{{ FRONT_ADDRESS or "front" }}:14190';
+$config['managesieve_mbox_encoding'] = 'UTF8';
 
 // roundcube customization
 $config['product_name'] = 'Mailu Webmail';

@@ -1,0 +1,1 @@
+Tell roundcube to use UTF8 instead of 'UTF7-IMAP' when creating sieve scripts.

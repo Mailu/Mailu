@@ -45,7 +45,7 @@ attackers that attempt a password spraying attack. The value defines the limit o
 authentication attempts that will be processed on **distinct** non-existing
 accounts for a specific IP subnet as defined in
 ``AUTH_RATELIMIT_IP_V4_MASK`` (default: /24) and
-``AUTH_RATELIMIT_IP_V6_MASK`` (default: /56).
+``AUTH_RATELIMIT_IP_V6_MASK`` (default: /48).
 
 The ``AUTH_RATELIMIT_USER`` (default: 100/day) holds a security setting for fighting
 attackers that attempt to guess a user's password (typically using a password

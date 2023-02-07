@@ -49,6 +49,9 @@ $config['show_mailu_button'] = {{ 'true' if ADMIN and WEB_ADMIN else 'false' }};
 // set From header for DKIM signed message delivery reports
 $config['mdn_use_from'] = true;
 
+// zero quota is unlimited
+$config['quota_zero_as_unlimited'] = true;
+
 // includes
 {%- for inc in INCLUDES %}
 include('/overrides/{{ inc }}');

@@ -41,7 +41,7 @@ $('document').ready(function() {
         if (value_element.length) {
             value_element = $(value_element[0]);
             var infinity = $(this).data('infinity');
-            var unit = $(this).attr('unit');
+            var unit = $(this).data('unit');
             if (typeof unit === 'undefined' || unit === false) {
                 unit=1;
             }

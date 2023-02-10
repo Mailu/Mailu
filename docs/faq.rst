@@ -566,7 +566,7 @@ follow these steps:
 
   # Fail2Ban configuration file
   [Definition]
-  failregex = .* client login failed: .+ client:\ <HOST>
+  failregex = ^\[info\] \d+#\d+: \*\d+ client login failed: "[\"]+" while in http auth state, client: <HOST>, server:
   ignoreregex =
   journalmatch = CONTAINER_TAG=mailu-front
 
@@ -600,7 +600,7 @@ The above will block flagged IPs for a week, you can of course change it to your
 
   # Fail2Ban configuration file
   [Definition]
-  failregex = .* Login failed for .+ from <HOST>.
+  failregex = : Login failed for .*? from <HOST>\.$
   ignoreregex =
   journalmatch = CONTAINER_TAG=mailu-admin
 
@@ -625,7 +625,7 @@ The above will block flagged IPs for a week, you can of course change it to your
 
   # Fail2Ban configuration file
   [Definition]
-  failregex = .* Invalid API token provided by <HOST>.
+  failregex = Invalid API token provided by <HOST>\.$
   ignoreregex =
   journalmatch = CONTAINER_TAG=mailu-admin
 

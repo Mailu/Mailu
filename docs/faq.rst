@@ -566,7 +566,7 @@ follow these steps:
 
   # Fail2Ban configuration file
   [Definition]
-  failregex = ^.*?\[info\] \d+#\d+: \*\d+ client login failed: "AUTH not supported" while in http auth state, client: <HOST>, server:
+  failregex = ^.*?\[info\] \d+#\d+: \*\d+ client login failed: \"AUTH not supported\" while in http auth state, client: <HOST>, server:
   ignoreregex =
   journalmatch = CONTAINER_TAG=mailu-front
 

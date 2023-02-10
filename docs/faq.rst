@@ -560,32 +560,55 @@ follow these steps:
     options:
       tag: mailu-front
 
-2. Add the /etc/fail2ban/filter.d/bad-auth.conf
+2. Add the /etc/fail2ban/filter.d/bad-auth-bots.conf
 
 .. code-block:: bash
 
   # Fail2Ban configuration file
   [Definition]
-  failregex = ^\[info\] \d+#\d+: \*\d+ client login failed: "[\"]+" while in http auth state, client: <HOST>, server:
+  failregex = ^\[info\] \d+#\d+: \*\d+ client login failed: "AUTH not supported" while in http auth state, client: <HOST>, server:
   ignoreregex =
   journalmatch = CONTAINER_TAG=mailu-front
 
-3. Add the /etc/fail2ban/jail.d/bad-auth.conf
+3. Add the /etc/fail2ban/jail.d/bad-auth-bots.conf
 
 .. code-block:: bash
 
-  [bad-auth]
+  [bad-auth-bots]
   enabled = true
   backend = systemd
-  filter = bad-auth
+  filter = bad-auth-bots
   bantime = 604800
-  findtime = 300
-  maxretry = 10
-  action = docker-action
+  findtime = 600
+  maxretry = 5
+  action = docker-action-net
 
 The above will block flagged IPs for a week, you can of course change it to your needs.
 
-4. In the mailu docker-compose set the logging driver of the Admin container to journald; and set the tag to mailu-admin
+5.  Add the following to /etc/fail2ban/action.d/docker-action-net.conf
+
+IMPORTANT: You have to install ipset on the host system, eg. `apt-get install ipset` on a Debian/Ubuntu system.
+
+See ipset homepage for details on ipset, https://ipset.netfilter.org/.
+
+.. code-block:: bash
+
+  [Definition]
+
+  actionstart = ipset --create f2b-bad-auth-bots nethash
+                iptables -I DOCKER-USER -m set --match-set f2b-bad-auth-bots src -p tcp -m tcp --dport 25 -j DROP
+
+  actionstop = iptables -D DOCKER-USER -m set --match-set f2b-bad-auth-bots src -p tcp -m tcp --dport 25 -j DROP
+               ipset --destroy f2b-bad-auth-bots
+
+
+  actionban = ipset add -exist f2b-bad-auth-bots <ip>/24
+
+  actionunban = ipset del -exist f2b-bad-auth-bots <ip>/24
+
+Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
+
+6. In the mailu docker-compose set the logging driver of the Admin container to journald; and set the tag to mailu-admin
 
 .. code-block:: bash
 
@@ -594,89 +617,36 @@ The above will block flagged IPs for a week, you can of course change it to your
     options:
       tag: mailu-admin
 
-5. Add the /etc/fail2ban/filter.d/bad-auth-sso.conf
+7. Add the /etc/fail2ban/filter.d/bad-auth.conf
 
 .. code-block:: bash
 
   # Fail2Ban configuration file
   [Definition]
-  failregex = : Login failed for .*? from <HOST>\.$
+  failregex = : Authentication attempt from <HOST> has been rate-limited\.$
   ignoreregex =
   journalmatch = CONTAINER_TAG=mailu-admin
 
-6. Add the /etc/fail2ban/jail.d/bad-auth-sso.conf
+6. Add the /etc/fail2ban/jail.d/bad-auth.conf
 
 .. code-block:: bash
 
-  [bad-auth-sso]
+  [bad-auth]
   enabled = true
   backend = systemd
-  filter = bad-auth-sso
+  filter = bad-auth
   bantime = 604800
-  findtime = 300
-  maxretry = 10
+  findtime = 900
+  maxretry = 15
   action = docker-action
 
 The above will block flagged IPs for a week, you can of course change it to your needs.
 
-7. Add the /etc/fail2ban/filter.d/bad-auth-api.conf
+7.  Add the following to /etc/fail2ban/action.d/docker-action.conf
 
-.. code-block:: bash
-
-  # Fail2Ban configuration file
-  [Definition]
-  failregex = Invalid API token provided by <HOST>\.$
-  ignoreregex =
-  journalmatch = CONTAINER_TAG=mailu-admin
-
-8. Add the /etc/fail2ban/jail.d/bad-auth-api.conf
-
-.. code-block:: bash
-
-  [bad-auth-api]
-  enabled = true
-  backend = systemd
-  filter = bad-auth-api
-  bantime = 604800
-  findtime = 300
-  maxretry = 10
-  action = docker-action
-
-The above will block flagged IPs for a week, you can of course change it to your needs.
-
-9.  Add the /etc/fail2ban/action.d/docker-action.conf
-
-Option 1: Use plain iptables
-
-.. code-block:: bash
-
-  [Definition]
-
-  actionstart = iptables -N f2b-bad-auth
-                iptables -A f2b-bad-auth -j RETURN
-                iptables -I DOCKER-USER -j f2b-bad-auth
-
-  actionstop = iptables -D DOCKER-USER -j f2b-bad-auth
-               iptables -F f2b-bad-auth
-               iptables -X f2b-bad-auth
-
-  actioncheck = iptables -n -L DOCKER-USER | grep -q 'f2b-bad-auth[ \t]'
-
-  actionban = iptables -I f2b-bad-auth 1 -s <ip> -j DROP
-
-  actionunban = iptables -D f2b-bad-auth -s <ip> -j DROP
-
-Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
-
-Option 2:  Use ipset together with iptables
 IMPORTANT: You have to install ipset on the host system, eg. `apt-get install ipset` on a Debian/Ubuntu system.
 
 See ipset homepage for details on ipset, https://ipset.netfilter.org/.
-
-ipset and iptables provide one big advantage over just using iptables: This setup reduces the overall iptable rules.
-There is just one rule for the bad authentications and the IPs are within the ipset.
-Specially in larger setups with a high amount of brute force attacks this comes in handy.
-Using iptables with ipset might reduce the system load in such attacks significantly.
 
 .. code-block:: bash
 
@@ -695,7 +665,7 @@ Using iptables with ipset might reduce the system load in such attacks significa
 
 Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
 
-10. Configure and restart the Fail2Ban service
+8. Configure and restart the Fail2Ban service
 
 Make sure Fail2Ban is started after the Docker service by adding a partial override which appends this to the existing configuration.
 

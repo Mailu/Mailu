@@ -24,7 +24,7 @@ advice in the `Technical issues`_ section of this page.
 I think I found a bug!
 ``````````````````````
 
-If you did not manage to solve the issue using this FAQ and there are not any 
+If you did not manage to solve the issue using this FAQ and there are not any
 `open issues`_ describing the same problem, you can open a
 `new issue`_ on GitHub.
 
@@ -64,7 +64,7 @@ We currently maintain a strict work flow:
 #. We use Github actions for some very basic building and testing;
 #. The pull request needs to be code-reviewed and tested by at least two members
    from the contributors team.
-  
+
 Please consider that this project is mostly developed in people their free time.
 We thank you for your understanding and patience.
 
@@ -152,7 +152,7 @@ Lets start with quoting everything that's wrong:
   It was added later and, while it has come a long way, is still not as usable as one would want.
   Much discussion is still going on as to how IPv6 should be used in a containerized world;
   See the various GitHub issues linked below:
-  
+
   - Giving each container a publicly routable address means all ports (even unexposed / unpublished ports) are suddenly
     reachable by everyone, if no additional filtering is done
     (`docker/docker#21614 <https://github.com/docker/docker/issues/21614>`_)
@@ -163,14 +163,14 @@ Lets start with quoting everything that's wrong:
     (which, for now, is enabled by default in Docker)
   - The userland proxy, however, seems to be on its way out
     (`docker/docker#14856 <https://github.com/docker/docker/issues/14856>`_) and has various issues, like:
-  
+
     - It can use a lot of RAM (`docker/docker#11185 <https://github.com/docker/docker/issues/11185>`_)
-    - Source IP addresses are rewritten, making it completely unusable for many purposes, e.g. mail servers 
+    - Source IP addresses are rewritten, making it completely unusable for many purposes, e.g. mail servers
       (`docker/docker#17666 <https://github.com/docker/docker/issues/17666>`_),
       (`docker/libnetwork#1099 <https://github.com/docker/libnetwork/issues/1099>`_).
-  
+
   -- `Robbert Klarenbeek <https://github.com/robbertkl>`_ (docker-ipv6nat author)
-  
+
 Okay, but I still want to use IPv6! Can I just use the installers IPv6 checkbox? **NO, YOU SHOULD NOT DO THAT!** Why you ask?
 Mailu has its own trusted IPv4 network, every container inside this network can use e.g. the SMTP container without further
 authentication. If you enabled IPv6 inside the setup assistant (and fixed the ports to also be exposed on IPv6) Docker will
@@ -223,7 +223,7 @@ For **service** HA, please see: `How does Mailu scale up?`_
 
 *Issue reference:* `177`_, `591`_.
 
-.. _`spam magnet`: https://web.archive.org/web/20130131032707/https://blog.zensoftware.co.uk/2012/07/02/why-we-tend-to-recommend-not-having-a-secondary-mx-these-days/ 
+.. _`spam magnet`: https://web.archive.org/web/20130131032707/https://blog.zensoftware.co.uk/2012/07/02/why-we-tend-to-recommend-not-having-a-secondary-mx-these-days/
 
 Does Mailu run on Rancher?
 ``````````````````````````
@@ -292,7 +292,7 @@ I want to integrate Nextcloud 15 (and newer) with Mailu
         ),
       ),
   ),
-  
+
 
 If a domain name (e.g. example.com) is specified, then this makes sure that only users from this domain will be allowed to login.
 After successfull login the domain part will be stripped and the rest used as username in Nextcloud. e.g. 'username@example.com' will be 'username' in Nextcloud. Disable this behaviour by changing true (the fifth parameter) to false.
@@ -346,7 +346,7 @@ How do I use webdav (radicale)?
 |
 | Subsequently to use webdav (radicale), you can configure your carddav/caldav client to use the following url:
 | `https://mail.example.com/webdav/user@example.com`
-| As username you must provide the complete email address (user@example.com).  
+| As username you must provide the complete email address (user@example.com).
 | As password you must provide the password of the email address.
 | The user must be an existing Mailu user.
 
@@ -400,6 +400,46 @@ Technical issues
 
 In this section we are trying to cover the most common problems our users are having.
 If your issue is not listed here, please consult issues with the `troubleshooting tag`_.
+
+.. _delete_users:
+
+How to delete users?
+````````````````````
+
+From the web administration interface, when a user is deleted, the user is only disabled. When a user is not enabled, this user:
+
+* cannot send/receive email
+* cannot access Mailu (admin/webmail)
+* cannot access the email box via pop3/imap
+
+It is not possible to delete users via the Mailu web administration interface. The main reason is to prevent email address reusage. If a user was deleted, it can be recreated and used by someone else. It is not clear that the email address has been used by someone else previously. This new user might receive emails which were meant to be received by the previous user. Disabling the user, prevents the email address to be reused by mistake.
+
+Another reason is that extra post-deletion steps are required after a user has been deleted from the Mailu database. Those additional steps are:
+
+* Delete the dovecot mailbox. If this does not happen, a new user with the same email address reuses the previous user's mailbox.
+* Delete the user from the roundcube database (not required when SnappyMail is used). If this does not happen, a new user with the same email address reuses the previous roundcube data (such as address lists, gpg keys etc).
+
+For safely deleting the user data (and possible the user as well) a script has been introduced. The scripts provides the following information
+
+* commands for deleting mailboxes of unknown users. These users were deleted from Mailu, but still have their mailbox data on the file system.
+* commands for deleting mailboxes and roundcube data for disabled users.
+* commands for deleting users from the Mailu database.
+
+Proceed as following for deleting an user:
+
+1. Disable the to-be-deleted user. This can be done via the Web Administration interface (/admin), the Mailu CLI command user-delete, or the RESTful API. Do **not** delete the user.
+2. Download .\\scripts\\purge_user.sh from the `github project`_. Or clone the Mailu github project.
+3. Copy the script purge_user.sh to the Mailu folder that contains the `docker-compose.yml` file.
+4. Run as root: purge_user.sh
+5. The script will output the commands that can be used for fully purging each disabled user. It will show the instruction for deleting the user from the
+
+   * Dovecot maildir from filesystem (all email data)
+   * Roundcube database (all data saved in roundcube)
+   * Mailu database.
+
+6. Run the commands for deleting all user data for each disabled user.
+
+.. _`github project`: https://github.com/Mailu/Mailu/
 
 Changes in .env don't propagate
 ```````````````````````````````
@@ -545,14 +585,14 @@ inside a container. The ``front`` container does use authentication rate limitin
 down brute force attacks. The same applies to login attempts via the single sign on page.
 
 We *do* provide a possibility to export the logs from the ``front`` service and ``Admin`` service to the host.
-The ``front`` container logs failed logon attempts on SMTP, IMAP and POP3. 
+The ``front`` container logs failed logon attempts on SMTP, IMAP and POP3.
 The ``Admin``container logs failed logon attempt on the single sign on page.
 For this you need to set ``LOG_DRIVER=journald`` or ``syslog``, depending on the log
 manager of the host. You will need to setup the proper Regex in the Fail2Ban configuration.
-Below an example how to do so. 
+Below an example how to do so.
 
 If you use a reverse proxy in front of Mailu, it is vital to set the environment variables REAL_IP_HEADER and REAL_IP_FROM.
-Without these environment variables, Mailu will not trust the remote client IP passed on by the reverse proxy and as a result your reverse proxy will be banned. 
+Without these environment variables, Mailu will not trust the remote client IP passed on by the reverse proxy and as a result your reverse proxy will be banned.
 See the :ref:`[configuration reference <reverse_proxy_headers>` for more information.
 
 
@@ -596,7 +636,7 @@ The above will block flagged IPs for a week, you can of course change it to you 
 4. In the mailu docker-compose set the logging driver of the Admin container to journald; and set the tag to mailu-admin
 
 .. code-block:: bash
-  
+
   logging:
     driver: journald
     options:
@@ -628,25 +668,25 @@ The above will block flagged IPs for a week, you can of course change it to you 
 The above will block flagged IPs for a week, you can of course change it to you needs.
 
 7. Add the /etc/fail2ban/action.d/docker-action.conf
-  
+
 Option 1: Use plain iptables
 
 .. code-block:: bash
 
   [Definition]
-  
+
   actionstart = iptables -N f2b-bad-auth
                 iptables -A f2b-bad-auth -j RETURN
                 iptables -I DOCKER-USER -j f2b-bad-auth
-  
+
   actionstop = iptables -D DOCKER-USER -j f2b-bad-auth
                iptables -F f2b-bad-auth
                iptables -X f2b-bad-auth
-  
+
   actioncheck = iptables -n -L DOCKER-USER | grep -q 'f2b-bad-auth[ \t]'
-  
+
   actionban = iptables -I f2b-bad-auth 1 -s <ip> -j DROP
-  
+
   actionunban = iptables -D f2b-bad-auth -s <ip> -j DROP
 
 Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
@@ -657,7 +697,7 @@ IMPORTANT: You have to install ipset on the host system, eg. `apt-get install ip
 See ipset homepage for details on ipset, https://ipset.netfilter.org/.
 
 ipset and iptables provide one big advantage over just using iptables: This setup reduces the overall iptable rules.
-There is just one rule for the bad authentications and the IPs are within the ipset. 
+There is just one rule for the bad authentications and the IPs are within the ipset.
 Specially in larger setups with a high amount of brute force attacks this comes in handy.
 Using iptables with ipset might reduce the system load in such attacks significantly.
 
@@ -727,7 +767,7 @@ In any case, using a dedicated DNS server will improve the performance of your m
 
 Can I learn ham/spam messages from an already existing mailbox?
 ```````````````````````````````````````````````````````````````
-Mailu supports automatic spam learning for messages moved to the Junk mailbox. Any email moved from the Junk Folder will learnt as ham. 
+Mailu supports automatic spam learning for messages moved to the Junk mailbox. Any email moved from the Junk Folder will learnt as ham.
 
 If you already have an existing mailbox and want Mailu to learn them all as ham messages, you might run rspamc from within the dovecot container:
 
@@ -736,7 +776,7 @@ If you already have an existing mailbox and want Mailu to learn them all as ham 
   rspamc -h antispam:11334 -P mailu -f 13 fuzzy_add /mail/user\@example.com/.Ham_Learn/cur/
   rspamc -h antispam:11334 -P mailu learn_ham /mail/user\@example.com/.Ham_Learn/cur/
 
-This should learn every file located in the ``Ham_Learn`` folder from user@example.com 
+This should learn every file located in the ``Ham_Learn`` folder from user@example.com
 
 Likewise, to lean all messages within the folder ``Spam_Learn`` as spam messages :
 

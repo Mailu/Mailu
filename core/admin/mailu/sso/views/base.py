@@ -62,7 +62,6 @@ def logout():
         response.set_cookie(cookie, 'empty', expires=0)
     return response
 
-
 @sso.route('/proxy', methods=['GET'])
 @sso.route('/proxy/<target>', methods=['GET'])
 def proxy(target='webmail'):
@@ -95,6 +94,8 @@ def proxy(target='webmail'):
         return flask.abort(500, 'Too many users in (domain=%s)' % domain)
     user = models.User(localpart=localpart, domain=domain)
     user.set_password(secrets.token_urlsafe())
+    flask.session.regenerate()
+    flask_login.login_user(user)
     models.db.session.add(user)
     models.db.session.commit()
     user.send_welcome()

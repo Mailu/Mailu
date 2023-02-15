@@ -125,12 +125,12 @@ The following steps have to be taken to configure an additional symbol (rule) th
      #This file is LIVE reloaded by rspamd. Any changes are EFFECTIVE IMMEDIATELY.
      dummy.com
 
-3. Reload Rspamd by stopping the Rspamd container and starting the Rspamd container again. Example for docker-compose setup:
+3. Reload Rspamd by stopping the Rspamd container and starting the Rspamd container again. Example for docker compose setup:
 
    .. code-block:: bash
 
-     docker-compose scale antispam=0
-     docker-compose scale antispam=1
+     docker compose scale antispam=0
+     docker compose scale antispam=1
 
 4. (Optional) Check if the custom symbol is loaded. To access the Rspamd webgui, log in the Mailu administration web interface with a user that is an administrator and go to Antispam. In Rspamd webgui go to tab Symbols. Change the group drop-down box to local_bl. The following additional rule will be listed.
 
@@ -163,8 +163,8 @@ Mailu rejects emails with file attachements it deems to be "executable" or other
 
    .. code-block:: bash
 
-     docker-compose exec antispam cat /etc/rspamd/local.d/forbidden_file_extension.map > overrides/rspamd/forbidden_file_extension.map
-     docker-compose restart antispam
+     docker compose exec antispam cat /etc/rspamd/local.d/forbidden_file_extension.map > overrides/rspamd/forbidden_file_extension.map
+     docker compose restart antispam
 
 Now the file `overrides/rspamd/forbidden_file_extension.map` can be edited, to make changes to the forbidden file extensions list.
 For the changes to take effect, rspamd must be restarted.
@@ -176,8 +176,8 @@ If configured to do so, Mailu uses a lightweight tool called `mraptor from oleto
 
    .. code-block:: bash
 
-     docker-compose exec antispam cat /etc/rspamd/local.d/composites.conf > overrides/rspamd/composites.conf
-     docker-compose restart antispam
+     docker compose exec antispam cat /etc/rspamd/local.d/composites.conf > overrides/rspamd/composites.conf
+     docker compose restart antispam
 
 Now the file `overrides/rspamd/composites.conf` can be edited, to override the mraptor configuration in rspamd.
 For the changes to take effect, rspamd must be restarted.

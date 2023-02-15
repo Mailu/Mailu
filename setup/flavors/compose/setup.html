@@ -31,12 +31,12 @@ files before going any further.</p>
 command using <code>-p mailu</code> flag for project name.</p>
 
 <pre><code>cd {{ root }}
-docker-compose -p mailu up -d
+docker compose -p mailu up -d
 </pre></code>
 
 Before you can use Mailu, you must create the primary administrator user account. This should be {{ postmaster }}@{{ domain }}. Use the following command, changing PASSWORD to your liking:
 
-<pre><code>docker-compose -p mailu exec admin flask mailu admin {{ postmaster }} {{ domain }} PASSWORD
+<pre><code>docker compose -p mailu exec admin flask mailu admin {{ postmaster }} {{ domain }} PASSWORD
 </pre></code>
 
 <p>Login to the admin interface to change the password for a safe one, at

@@ -1,4 +1,4 @@
-cat << EOF | docker-compose -f tests/compose/core/docker-compose.yml exec -T admin flask mailu config-update -v 1
+cat << EOF | docker compose -f tests/compose/core/docker-compose.yml exec -T admin flask mailu config-update -v 1
 aliases:
   - localpart: alltheusers
     domain: mailu.io
@@ -7,6 +7,6 @@ EOF
 
 python3 tests/alias_test.py
 
-cat << EOF | docker-compose -f tests/compose/core/docker-compose.yml exec -T admin flask mailu config-update -v 1
+cat << EOF | docker compose -f tests/compose/core/docker-compose.yml exec -T admin flask mailu config-update -v 1
 aliases: []
 EOF

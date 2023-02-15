@@ -19,7 +19,7 @@ alias
 
 .. code-block:: bash
 
-  docker-compose exec admin flask mailu alias foo example.net "mail1@example.com,mail2@example.com"
+  docker compose exec admin flask mailu alias foo example.net "mail1@example.com,mail2@example.com"
 
 
 alias-delete
@@ -27,7 +27,7 @@ alias-delete
 
 .. code-block:: bash
 
-  docker-compose exec admin flask mailu alias-delete foo@example.net
+  docker compose exec admin flask mailu alias-delete foo@example.net
 
 
 domain
@@ -35,7 +35,7 @@ domain
 
 .. code-block:: bash
 
-  docker-compose exec admin flask mailu domain example.net
+  docker compose exec admin flask mailu domain example.net
 
 
 password
@@ -43,7 +43,7 @@ password
 
 .. code-block:: bash
 
-  docker-compose exec admin flask mailu password myuser example.net 'password123'
+  docker compose exec admin flask mailu password myuser example.net 'password123'
 
 
 user
@@ -51,7 +51,7 @@ user
 
 .. code-block:: bash
 
-  docker-compose exec admin flask mailu user myuser example.net 'password123'
+  docker compose exec admin flask mailu user myuser example.net 'password123'
 
 
 user-import
@@ -61,14 +61,14 @@ primary difference with simple `user` command is that password is being imported
 
 .. code-block:: bash
 
-  docker-compose run --rm admin flask mailu user-import myuser example.net '$6$51ebe0cb9f1dab48effa2a0ad8660cb489b445936b9ffd812a0b8f46bca66dd549fea530ce' 'SHA512-CRYPT'
+  docker compose run --rm admin flask mailu user-import myuser example.net '$6$51ebe0cb9f1dab48effa2a0ad8660cb489b445936b9ffd812a0b8f46bca66dd549fea530ce' 'SHA512-CRYPT'
 
 user-delete
 -----------
 
 .. code-block:: bash
 
-  docker-compose exec admin flask mailu user-delete foo@example.net
+  docker compose exec admin flask mailu user-delete foo@example.net
 
 config-update
 -------------
@@ -77,7 +77,7 @@ The sole purpose of this command is for importing users/aliases in bulk and sync
 
 .. code-block:: bash
 
-  cat mail-config.yml | docker-compose exec -T admin flask mailu config-update --delete-objects
+  cat mail-config.yml | docker compose exec -T admin flask mailu config-update --delete-objects
 
 where mail-config.yml looks like:
 
@@ -131,7 +131,7 @@ The purpose of this command is to export the complete configuration in YAML or J
 
 .. code-block:: bash
 
-  $ docker-compose exec admin flask mailu config-export --help
+  $ docker compose exec admin flask mailu config-export --help
 
  Usage: flask mailu config-export [OPTIONS] [FILTER]...
 
@@ -156,11 +156,11 @@ Attributes explicitly specified in filters are automatically exported: there is 
 
 .. code-block:: bash
 
-  $ docker-compose exec admin flask mailu config-export --output mail-config.yml
+  $ docker compose exec admin flask mailu config-export --output mail-config.yml
 
-  $ docker-compose exec admin flask mailu config-export domain.dns_mx domain.dns_spf
+  $ docker compose exec admin flask mailu config-export domain.dns_mx domain.dns_spf
 
-  $ docker-compose exec admin flask mailu config-export user.spam_threshold
+  $ docker compose exec admin flask mailu config-export user.spam_threshold
 
 config-import
 -------------
@@ -169,7 +169,7 @@ This command imports configuration data from an external YAML or JSON source.
 
 .. code-block:: bash
 
-  $ docker-compose exec admin flask mailu config-import --help
+  $ docker compose exec admin flask mailu config-import --help
 
  Usage: flask mailu config-import [OPTIONS] [FILENAME|-]
 
@@ -184,11 +184,11 @@ This command imports configuration data from an external YAML or JSON source.
    -n, --dry-run   Perform a trial run with no changes made.
    -?, -h, --help  Show this message and exit.
 
-The current version of docker-compose exec does not pass stdin correctly, so you have to user docker exec instead:
+The current version of docker compose exec does not pass stdin correctly, so you have to user docker exec instead:
 
 .. code-block:: bash
 
-  docker exec -i $(docker-compose ps -q admin) flask mailu config-import -nv < mail-config.yml
+  docker exec -i $(docker compose ps -q admin) flask mailu config-import -nv < mail-config.yml
 
 mail-config.yml contains the configuration and looks like this:
 

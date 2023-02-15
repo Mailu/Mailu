@@ -22,7 +22,7 @@ containers = []
 def stop(exit_code):
     print_logs()
     sys.stdout.flush()
-    print(subprocess.check_output("docker-compose -f " + compose_file + " down", shell=True).decode())
+    print(subprocess.check_output("docker compose -f " + compose_file + " down", shell=True).decode())
     sys.exit(exit_code)
 
 def health_checks(deadline):
@@ -88,7 +88,7 @@ def hooks():
 sys.stdout.flush()
 deadline=datetime.datetime.now()+datetime.timedelta(minutes=timeout)
 deadline=calendar.timegm(deadline.timetuple())
-print(subprocess.check_output("docker-compose -f " + compose_file + " up -d", shell=True).decode())
+print(subprocess.check_output("docker compose -f " + compose_file + " up -d", shell=True).decode())
 print()
 print(Fore.LIGHTMAGENTA_EX + "Sleeping for 10s" + Style.RESET_ALL)
 time.sleep(10)

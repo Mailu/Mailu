@@ -382,9 +382,9 @@ For this upgrade it is necessary to bring the project down and up, due to networ
 
 .. code-block:: bash
 
-  docker-compose pull
-  docker-compose down --remove-orphans
-  docker-compose up -d
+  docker compose pull
+  docker compose down --remove-orphans
+  docker compose up -d
 
 After everything runs successfully, ``/mailu/certs/dhparam.pem`` is no longer needed and can be deleted.
 It's included in the Mailu distribution by default now. Also the old ``.env`` can be deleted.
@@ -441,8 +441,8 @@ were removed (e.g. rmilter):
 
 .. code-block:: bash
 
-  docker-compose pull
-  docker-compose up -d --remove-orphans
+  docker compose pull
+  docker compose up -d --remove-orphans
 
 If you experience problems when upgrading, feel free to post issues and contact
 us on our chat channel for emergency support.

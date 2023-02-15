@@ -91,7 +91,7 @@ The Docker website is full of `detailed instructions`_
 about setting up a proper Docker install. Default configuration should be
 suited for Mailu.
 
-Additionally, you must install ``docker-compose`` by following the instructions
+Additionally, you must install ``docker compose`` by following the instructions
 from the `Docker website`_ if you plan on using the Compose flavor. Compose is a
 management tool for Docker, especially suited for multiple containers systems
 like Mailu.
@@ -121,8 +121,8 @@ Once everything is setup, you should be able to run the following commands
    Built:        Mon May  2 00:06:51 2016
    OS/Arch:      linux/amd64
 
-  $ docker-compose version
-  docker-compose version 1.7.1, build 6c29830
+  $ docker compose version
+  docker compose version 1.7.1, build 6c29830
   docker-py version: 1.8.1
   CPython version: 3.5.1
   OpenSSL version: OpenSSL 1.0.2h  3 May 2016

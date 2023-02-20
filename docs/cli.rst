@@ -158,7 +158,7 @@ Attributes explicitly specified in filters are automatically exported: there is 
 
   $ docker compose exec admin flask mailu config-export --output mail-config.yml
 
-  $ docker compose exec admin flask mailu config-export domain.dns_mx domain.dns_spf
+  $ docker compose exec -T admin flask mailu config-export domain.dns_mx domain.dns_spf
 
   $ docker compose exec admin flask mailu config-export user.spam_threshold
 

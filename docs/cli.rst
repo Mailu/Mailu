@@ -184,7 +184,7 @@ This command imports configuration data from an external YAML or JSON source.
    -n, --dry-run   Perform a trial run with no changes made.
    -?, -h, --help  Show this message and exit.
 
-The current version of docker compose exec does not pass stdin correctly, so you have to user docker exec instead:
+To pass stdin correctly you have to use the `-T` option:
 
 .. code-block:: bash
 

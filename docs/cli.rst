@@ -131,7 +131,7 @@ The purpose of this command is to export the complete configuration in YAML or J
 
 .. code-block:: bash
 
-  $ docker compose exec admin flask mailu config-export --help
+  $ docker compose exec -T admin flask mailu config-export --help
 
  Usage: flask mailu config-export [OPTIONS] [FILTER]...
 

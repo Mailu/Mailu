@@ -188,7 +188,7 @@ The current version of docker compose exec does not pass stdin correctly, so you
 
 .. code-block:: bash
 
-  docker exec -i $(docker compose ps -q admin) flask mailu config-import -nv < mail-config.yml
+  docker compose exec -T admin flask mailu config-import -nv < mail-config.yml
 
 mail-config.yml contains the configuration and looks like this:
 

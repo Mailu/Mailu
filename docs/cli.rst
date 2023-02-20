@@ -169,7 +169,7 @@ This command imports configuration data from an external YAML or JSON source.
 
 .. code-block:: bash
 
-  $ docker compose exec admin flask mailu config-import --help
+  $ docker compose exec -T admin flask mailu config-import --help
 
  Usage: flask mailu config-import [OPTIONS] [FILENAME|-]
 

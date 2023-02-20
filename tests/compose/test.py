@@ -88,7 +88,7 @@ def hooks():
 sys.stdout.flush()
 deadline=datetime.datetime.now()+datetime.timedelta(minutes=timeout)
 deadline=calendar.timegm(deadline.timetuple())
-print(subprocess.check_output("docker compose -f " + compose_file + " up -d", shell=True).decode())
+print(subprocess.check_output(f"docker compose -f {compose_file} up -d", shell=True).decode())
 print()
 print(Fore.LIGHTMAGENTA_EX + "Sleeping for 10s" + Style.RESET_ALL)
 time.sleep(10)

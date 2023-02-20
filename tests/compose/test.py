@@ -22,7 +22,7 @@ containers = []
 def stop(exit_code):
     print_logs()
     sys.stdout.flush()
-    print(subprocess.check_output("docker compose -f " + compose_file + " down", shell=True).decode())
+    print(subprocess.check_output(f"docker compose -f {compose_file} down", shell=True).decode())
     sys.exit(exit_code)
 
 def health_checks(deadline):

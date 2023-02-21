@@ -1,15 +1,15 @@
-# English translations for PROJECT.
-# Copyright (C) 2016 ORGANIZATION
+# Czech translations for Mailu.io.
+# Copyright (C) 2023 S474N
 # This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
+# S474N <translate@s474n.com>, 2023.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"Report-Msgid-Bugs-To: translate@s474n.com\n"
 "POT-Creation-Date: 2022-05-22 18:47+0200\n"
 "PO-Revision-Date: 2023-02-21 16:14+0100\n"
-"Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
+"Last-Translator: S474N <translate@s474n.com>\n"
 "Language-Team: Czech\n"
 "Language: cs_CZ\n"
 "MIME-Version: 1.0\n"
@@ -722,7 +722,7 @@ msgstr "Automatické přeposlání"
 
 #: mailu/ui/templates/user/signup_domain.html:8
 msgid "pick a domain for the new account"
-msgstr "vyberat doménu pro nový účet"
+msgstr "vybrat doménu pro nový účet"
 
 #: mailu/ui/templates/user/signup_domain.html:14
 msgid "Domain"

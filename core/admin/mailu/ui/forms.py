@@ -1,7 +1,6 @@
 from wtforms import validators, fields, widgets
 from wtforms_components import fields as fields_
 from flask_babel import lazy_gettext as _
-from flask import current_app as app
 
 import flask_login
 import flask_wtf
@@ -92,7 +91,7 @@ class UserForm(flask_wtf.FlaskForm):
     pw = fields.PasswordField(_('Password'))
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
     pwned = fields.HiddenField(label='', default=-1)
-    quota_bytes = fields_.IntegerSliderField(_('Quota'), default=app.config['DEFAULT_QUOTA'])
+    quota_bytes = fields_.IntegerSliderField(_('Quota'), default=10**9)
     enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)
     enable_pop = fields.BooleanField(_('Allow POP3 access'), default=True)
     allow_spoofing = fields.BooleanField(_('Allow the user to spoof the sender (send email as anyone)'), default=False)

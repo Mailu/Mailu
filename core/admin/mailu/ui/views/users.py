@@ -27,6 +27,8 @@ def user_create(domain_name):
     if domain.max_quota_bytes:
         form.quota_bytes.validators = [
             wtforms.validators.NumberRange(max=domain.max_quota_bytes)]
+        if form.quota_bytes.default > domain.max_quota_bytes:
+            form.quota_bytes.default = domain.max_quota_bytes
     if form.validate_on_submit():
         if msg := utils.isBadOrPwned(form):
             flask.flash(msg, "error")

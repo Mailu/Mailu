@@ -30,7 +30,6 @@ def user_create(domain_name):
             wtforms.validators.NumberRange(max=domain.max_quota_bytes)]
         if form.quota_bytes.default > domain.max_quota_bytes:
             form.quota_bytes.default = domain.max_quota_bytes
-    form.process()
     if form.validate_on_submit():
         if msg := utils.isBadOrPwned(form):
             flask.flash(msg, "error")
@@ -48,6 +47,7 @@ def user_create(domain_name):
             flask.flash('User %s created' % user)
             return flask.redirect(
                 flask.url_for('.user_list', domain_name=domain.name))
+    form.process()
     return flask.render_template('user/create.html',
         domain=domain, form=form)
 

@@ -23,7 +23,9 @@ services:
     restart: always
     env_file: {{ env }}
     logging:
-      driver: {{ log_driver or 'json-file' }}
+      driver: journald
+      options:
+        tag: mailu-front
     ports:
     {% for port in (80, 443, 25, 465, 587, 110, 995, 143, 993) %}
     {% if bind4 %}
@@ -59,6 +61,9 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    driver: journald
+      options:
+        tag: mailu-admin
     {% if not admin_enabled %}
     ports:
       - 127.0.0.1:8080:80
@@ -80,6 +85,9 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    driver: journald
+      options:
+        tag: mailu-imap
     volumes:
       - "{{ root }}/mail:/mail"
       - "{{ root }}/overrides/dovecot:/overrides:ro"
@@ -97,6 +105,9 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    driver: journald
+      options:
+        tag: mailu-smtp
     volumes:
       - "{{ root }}/mailqueue:/queue"
       - "{{ root }}/overrides/postfix:/overrides:ro"
@@ -115,6 +126,9 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-{{ version }}}
     hostname: oletools
     restart: always
+    driver: journald
+      options:
+        tag: mailu-oletools
     networks:
       - noinet
     depends_on:
@@ -131,6 +145,9 @@ services:
     hostname: antispam
     restart: always
     env_file: {{ env }}
+    driver: journald
+      options:
+        tag: mailu-antispam
 {% if oletools_enabled %}
     networks:
       - default
@@ -165,6 +182,9 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}clamav:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    driver: journald
+      options:
+        tag: mailu-antivirus
     volumes:
       - "{{ root }}/filter:/data"
     {% if resolver_enabled %}
@@ -181,6 +201,9 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}radicale:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    driver: journald
+      options:
+        tag: mailu-webdav
     volumes:
       - "{{ root }}/dav:/data"
     networks:
@@ -192,6 +215,9 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}fetchmail:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    driver: journald
+      options:
+        tag: mailu-fetchmail
     volumes:
       - "{{ root }}/data/fetchmail:/data"
     depends_on:
@@ -215,6 +241,9 @@ services:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    driver: journald
+      options:
+        tag: mailu-webmail
     volumes:
       - "{{ root }}/webmail:/data"
       - "{{ root }}/overrides/{{ webmail_type }}:/overrides:ro"

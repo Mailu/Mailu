@@ -1,2 +1,3 @@
 Change healtchecks to be able to improve the startup sequence of containers
 Don't restart nginx unless new certificates are actually deployed by LE
+Change the default log-driver from json-files to journald

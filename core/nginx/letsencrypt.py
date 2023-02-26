@@ -18,7 +18,7 @@ command = [
     "--allow-subset-of-names",
     "--renew-with-new-domains",
     "--config-dir", "/certs/letsencrypt",
-    "--post-hook", "/config.py"
+    "--deploy-hook", "/config.py"
 ]
 command2 = [
     "certbot",
@@ -33,7 +33,7 @@ command2 = [
     "--key-type", "ecdsa",
     "--renew-with-new-domains",
     "--config-dir", "/certs/letsencrypt",
-    "--post-hook", "/config.py"
+    "--deploy-hook", "/config.py"
 ]
 
 # Wait for nginx to start

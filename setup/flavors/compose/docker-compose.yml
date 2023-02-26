@@ -92,8 +92,6 @@ services:
       - "{{ root }}/mail:/mail"
       - "{{ root }}/overrides/dovecot:/overrides:ro"
     depends_on:
-      front:
-        condition: service_healthy
     {% if resolver_enabled %}
       resolver:
         condition: service_healthy

@@ -3,8 +3,6 @@
 # Please read the documentation before attempting any change.
 # Generated for {{ flavor }} flavor
 
-version: '2.2'
-
 services:
 
   # External dependencies
@@ -13,12 +11,11 @@ services:
     restart: always
     volumes:
       - "{{ root }}/redis:/data"
-    {% if resolver_enabled %}
-    depends_on:
-      - resolver
-    dns:
-      - {{ dns }}
-    {% endif %}
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
 
   # Core services
   front:
@@ -44,7 +41,8 @@ services:
       - "{{ root }}/overrides/nginx:/overrides:ro"
     {% if resolver_enabled %}
     depends_on:
-      - resolver
+      resolver:
+        condition: service_healthy
     dns:
       - {{ dns }}
 
@@ -69,9 +67,11 @@ services:
       - "{{ root }}/data:/data"
       - "{{ root }}/dkim:/dkim"
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     {% if resolver_enabled %}
-      - resolver
+      resolver:
+        condition: service_healthy
     dns:
       - {{ dns }}
     {% endif %}
@@ -84,9 +84,11 @@ services:
       - "{{ root }}/mail:/mail"
       - "{{ root }}/overrides/dovecot:/overrides:ro"
     depends_on:
-      - front
+      front:
+        condition: service_healthy
     {% if resolver_enabled %}
-      - resolver
+      resolver:
+        condition: service_healthy
     dns:
       - {{ dns }}
     {% endif %}
@@ -99,9 +101,11 @@ services:
       - "{{ root }}/mailqueue:/queue"
       - "{{ root }}/overrides/postfix:/overrides:ro"
     depends_on:
-      - front
+      front:
+        condition: service_healthy
     {% if resolver_enabled %}
-      - resolver
+      resolver:
+        condition: service_healthy
     dns:
       - {{ dns }}
     {% endif %}
@@ -115,7 +119,8 @@ services:
       - noinet
     depends_on:
     {% if resolver_enabled %}
-      - resolver
+      resolver:
+        condition: service_healthy
     dns:
       - {{ dns }}
     {% endif %}
@@ -135,16 +140,21 @@ services:
       - "{{ root }}/filter:/var/lib/rspamd"
       - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d:ro"
     depends_on:
-      - front
-      - redis
+      front:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     {% if oletools_enabled %}
-      - oletools
+      oletools:
+        condition: service_healthy
     {% endif %}
     {% if antivirus_enabled %}
-      - antivirus
+      antivirus:
+        condition: service_healthy
     {% endif %}
     {% if resolver_enabled %}
-      - resolver
+      resolver:
+        condition: service_healthy
     dns:
       - {{ dns }}
     {% endif %}
@@ -159,7 +169,8 @@ services:
       - "{{ root }}/filter:/data"
     {% if resolver_enabled %}
     depends_on:
-      - resolver
+      resolver:
+        condition: service_healthy
     dns:
       - {{ dns }}
     {% endif %}
@@ -184,11 +195,15 @@ services:
     volumes:
       - "{{ root }}/data/fetchmail:/data"
     depends_on:
-      - admin
-      - smtp
-      - imap
+      admin:
+        condition: service_healthy
+      smtp:
+        condition: service_healthy
+      imap:
+        condition: service_healthy
     {% if resolver_enabled %}
-      - resolver
+      resolver:
+        condition: service_healthy
     dns:
       - {{ dns }}
     {% endif %}
@@ -206,7 +221,8 @@ services:
     networks:
       - webmail
     depends_on:
-      - front
+      front:
+        condition: service_healthy
   {% endif %}
 
 networks:

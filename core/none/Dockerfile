@@ -8,7 +8,7 @@ LABEL version=$VERSION
 
 RUN echo $VERSION >/version
 
-HEALTHCHECK CMD true
+HEALTHCHECK --retries=10 --interval=2s CMD true
 
 USER mailu
 CMD ["/bin/bash", "-c", "sleep infinity"]

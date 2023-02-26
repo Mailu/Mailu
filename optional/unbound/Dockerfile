@@ -19,6 +19,6 @@ COPY start.py /
 RUN echo $VERSION >/version
 
 #EXPOSE 53/udp 53/tcp
-HEALTHCHECK CMD dig @127.0.0.1 || exit 1
+HEALTHCHECK --retries=10 --interval=2s CMD dig +timeout=1 @127.0.0.1 || exit 1
 
 CMD /start.py

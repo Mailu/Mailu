@@ -14,7 +14,7 @@ COPY fetchmail.py /
 
 RUN echo $VERSION >/version
 
-HEALTHCHECK --start-period=350s CMD ["/bin/sh", "-c", "ps ax | grep [/]fetchmail.py"]
+HEALTHCHECK --retries=10 --interval=2s CMD ["/bin/sh", "-c", "ps ax | grep [/]fetchmail.py"]
 
 VOLUME ["/var/lib/rspamd"]
 

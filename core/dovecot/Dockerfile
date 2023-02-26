@@ -16,7 +16,7 @@ COPY start.py /
 RUN echo $VERSION >/version
 
 EXPOSE 110/tcp 143/tcp 993/tcp 4190/tcp 2525/tcp
-HEALTHCHECK CMD echo PING|nc -w2 localhost 5001|grep "PONG"
+HEALTHCHECK --retries=10 --interval=2s CMD echo PING|nc -w2 localhost 5001|grep "PONG"
 
 VOLUME ["/mail"]
 

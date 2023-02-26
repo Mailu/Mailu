@@ -23,7 +23,7 @@ RUN set -euxo pipefail \
 RUN echo $VERSION >/version
 
 #EXPOSE 80/tcp
-HEALTHCHECK CMD curl -skfLo /dev/null http://localhost/ping
+HEALTHCHECK --retries=10 --interval=2s CMD curl -m 1 -skfLo /dev/null http://localhost/ping
 
 VOLUME ["/data","/dkim"]
 

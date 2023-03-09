@@ -8,7 +8,8 @@ LABEL version=$VERSION
 
 RUN set -euxo pipefail \
   ; apk add --no-cache rspamd rspamd-controller rspamd-fuzzy rspamd-proxy \
-  ; mkdir /run/rspamd
+  ; mkdir /run/rspamd \
+  ; mkdir /overrides
 
 COPY conf/ /conf/
 COPY start.py /

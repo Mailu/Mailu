@@ -133,7 +133,7 @@ services:
 {% endif %}
     volumes:
       - "{{ root }}/filter:/var/lib/rspamd"
-      - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d:ro"
+      - "{{ root }}/overrides/rspamd:/overrides:ro"
     depends_on:
       - front
       - redis

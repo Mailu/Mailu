@@ -1,2 +1,2 @@
-Make the login page "guess" where the user wants to land using the Referer header
+Make the login page "guess" where the user wants to land
 Introduce AUTH_PROXY_LOGOUT_URL to redirect users to a specific URL after they have been logged-out

@@ -8,19 +8,25 @@ import flask
 import flask_login
 import secrets
 import ipaddress
+from urllib.parse import urlparse, urljoin
+from werkzeug.urls import url_unquote
 
 @sso.route('/login', methods=['GET', 'POST'])
 def login():
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
     form = forms.LoginForm()
-    form.submitAdmin.label.text = form.submitAdmin.label.text + ' Admin'
-    form.submitWebmail.label.text = form.submitWebmail.label.text + ' Webmail'
 
     fields = []
-    if str(app.config["WEBMAIL"]).upper() != "NONE":
-        fields.append(form.submitWebmail)
-    if str(app.config["ADMIN"]).upper() != "FALSE":
+
+    if flask.request.args.get('url'):
         fields.append(form.submitAdmin)
+    else:
+        form.submitAdmin.label.text = form.submitAdmin.label.text + ' Admin'
+        form.submitWebmail.label.text = form.submitWebmail.label.text + ' Webmail'
+        if str(app.config["WEBMAIL"]).upper() != "NONE":
+            fields.append(form.submitWebmail)
+        if str(app.config["ADMIN"]).upper() != "FALSE":
+            fields.append(form.submitAdmin)
     fields = [fields]
 
     if form.validate_on_submit():
@@ -28,6 +34,11 @@ def login():
             destination = app.config['WEB_ADMIN']
         elif form.submitWebmail.data:
             destination = app.config['WEB_WEBMAIL']
+        if url := flask.request.args.get('url'):
+            url = url_unquote(url)
+            target = urlparse(urljoin(flask.request.url, url))
+            if target.netloc == urlparse(flask.request.url).netloc:
+                destination = target.geturl()
         device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
         username = form.email.data
         if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
@@ -57,7 +68,7 @@ def login():
 def logout():
     flask_login.logout_user()
     flask.session.destroy()
-    response = flask.redirect(app.config('PROXY_AUTH_LOGOUT_URL') or flask.url_for('.login'))
+    response = flask.redirect(app.config['PROXY_AUTH_LOGOUT_URL'] or flask.url_for('.login'))
     for cookie in ['roundcube_sessauth', 'roundcube_sessid', 'smsession']:
         response.set_cookie(cookie, 'empty', expires=0)
     return response

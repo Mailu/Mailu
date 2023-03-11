@@ -33,6 +33,7 @@ from flask.sessions import SessionMixin, SessionInterface
 from itsdangerous.encoding import want_bytes
 from werkzeug.datastructures import CallbackDict
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.urls import url_quote
 
 # Login configuration
 login = flask_login.LoginManager()
@@ -42,7 +43,7 @@ login.login_view = "sso.login"
 def handle_needs_login():
     """ redirect unauthorized requests to login page """
     return flask.redirect(
-        flask.url_for('sso.login')
+        flask.url_for('sso.login')+f'?url={url_quote(flask.request.url)}'
     )
 
 # DNS stub configured to do DNSSEC enabled queries

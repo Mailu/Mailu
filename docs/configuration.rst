@@ -377,4 +377,6 @@ Use ``PROXY_AUTH_HEADER`` (default: 'X-Auth-Email') to customize which HTTP head
 
 Once configured, any request to /sso/proxy will be redirected to the webmail and /sso/proxy/admin to the admin panel. Please check issue `1972` for more details.
 
+Use ``PROXY_AUTH_LOGOUT_URL`` (default: unset) to redirect users to a specific URL after they have been logged out.
+
 .. _`1972`: https://github.com/Mailu/Mailu/issues/1972

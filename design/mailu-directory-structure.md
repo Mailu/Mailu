@@ -88,7 +88,7 @@ If RFC issue #1222 is accepted, Dovecot will need read-only access to the certif
 
 - Path: `/mailu/data/`
 
-Database files, like SQLite or PostgreSQL files. Databases don't perform well on network filesystems as they depend heavily on file locking and full controll on the database files. Making it unfit for concurrent access from multiple hosts. This directory should always live on a local filesystem. This makes it only usable in `docker-compose` deployments. Usage of this directory should be avoided in Kubernetes and Docker Swarm deployments. Some services will need to be improved to allow for this.
+Database files, like SQLite or PostgreSQL files. Databases don't perform well on network filesystems as they depend heavily on file locking and full controll on the database files. Making it unfit for concurrent access from multiple hosts. This directory should always live on a local filesystem. This makes it only usable in `docker compose` deployments. Usage of this directory should be avoided in Kubernetes and Docker Swarm deployments. Some services will need to be improved to allow for this.
 
 #### admin data
 
@@ -138,7 +138,7 @@ In the old situation, Maildir indexes are stored on the same volume. However, th
 
 - Path: `/mailu/local` (new)
 
-Persistent storage not suitable for replication. In `docker-compose` deployments it lives inside `/mailu` and in replicated deployments it should live somewhere on the local host machine.
+Persistent storage not suitable for replication. In `docker compose` deployments it lives inside `/mailu` and in replicated deployments it should live somewhere on the local host machine.
 
 #### Mailqueue
 
@@ -185,7 +185,7 @@ The final layout of the Mailu filesystem will look like:
 Where in replicated environments:
 
 - `/mailu/config/`: should be a small, low performant and shared filesystem.
-- `/mailu/data`: should be avoided. More work will need to be done to configure external DB servers for relevant services. Ideally, this directory should only exist on docker-compose deployments.
+- `/mailu/data`: should be avoided. More work will need to be done to configure external DB servers for relevant services. Ideally, this directory should only exist on docker compose deployments.
 - `/mailu/local/`: Should exist only on local file systems of worker nodes.
 - `/mailu/mail`: A distributed filesystem with sufficient performance and storage requirements to hold and process all user mailboxes. Ideally only Maildir without indexes.
 

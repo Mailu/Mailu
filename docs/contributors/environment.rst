@@ -153,25 +153,25 @@ After that you can run:
 
 .. code-block:: bash
 
-  docker-compose up -d
+  docker compose up -d
 
 If you wish to run commands inside a container, simply run (example):
 
 .. code-block:: bash
 
-  docker-compose exec admin ls -lah /
+  docker compose exec admin ls -lah /
 
 Or if you wish to start a shell for debugging:
 
 .. code-block:: bash
 
-  docker-compose exec admin sh
+  docker compose exec admin sh
 
 Finally, if you need to install packages inside the containers for debugging:
 
 .. code-block:: bash
 
-  docker-compose exec admin apk add --no-cache package-name
+  docker compose exec admin apk add --no-cache package-name
 
 Reviewing
 ---------
@@ -215,8 +215,8 @@ For example, to test PR #500 against master, reviewers can use:
 
   export DOCKER_ORG="mailuci"
   export MAILU_VERSION="pr-500"
-  docker-compose pull
-  docker-compose up -d
+  docker compose pull
+  docker compose up -d
 
 You can now test the PR. Play around. See if (external) mails work. Check for whatever functionality the PR is
 trying to fix. When happy, you can approve the PR. When running into failures, mark the review as

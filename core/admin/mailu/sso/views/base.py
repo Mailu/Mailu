@@ -62,7 +62,6 @@ def logout():
         response.set_cookie(cookie, 'empty', expires=0)
     return response
 
-
 @sso.route('/proxy', methods=['GET'])
 @sso.route('/proxy/<target>', methods=['GET'])
 def proxy(target='webmail'):
@@ -97,6 +96,8 @@ def proxy(target='webmail'):
     user.set_password(secrets.token_urlsafe())
     models.db.session.add(user)
     models.db.session.commit()
+    flask.session.regenerate()
+    flask_login.login_user(user)
     user.send_welcome()
     flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
     return flask.redirect(app.config['WEB_ADMIN'] if target=='admin' else app.config['WEB_WEBMAIL'])

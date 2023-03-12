@@ -1,4 +1,4 @@
-cat << EOF | docker-compose -f tests/compose/core/docker-compose.yml exec -T admin flask mailu config-update -v 1
+cat << EOF | docker compose -f tests/compose/core/docker-compose.yml exec -T admin flask mailu config-update -v 1
 users:
   - localpart: replyuser
     password_hash: "\$1\$F2OStvi1\$Q8hBIHkdJpJkJn/TrMIZ9/"
@@ -10,7 +10,7 @@ EOF
 
 python3 tests/reply_test.py
 
-cat << EOF | docker-compose -f tests/compose/core/docker-compose.yml exec -T admin flask mailu config-update -v 1
+cat << EOF | docker compose -f tests/compose/core/docker-compose.yml exec -T admin flask mailu config-update -v 1
 users:
   - localpart: replyuser
     password_hash: "\$1\$F2OStvi1\$Q8hBIHkdJpJkJn/TrMIZ9/"

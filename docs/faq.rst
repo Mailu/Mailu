@@ -401,8 +401,8 @@ down and up again. A container restart is not sufficient.
 
 .. code-block:: bash
 
-  docker-compose down && \
-  docker-compose up -d
+  docker compose down && \
+  docker compose up -d
 
 *Issue reference:* `615`_.
 
@@ -479,8 +479,8 @@ to check the logs.
 
 .. code-block:: bash
 
-  docker-compose logs front | less -R
-  docker-compose exec front less /var/log/letsencrypt/letsencrypt.log
+  docker compose logs front | less -R
+  docker compose exec front less /var/log/letsencrypt/letsencrypt.log
 
 Common problems:
 
@@ -551,7 +551,7 @@ See the :ref:`configuration reference <reverse_proxy_headers>` for more informat
 Assuming you have a working Fail2Ban installation on the host running your Docker containers,
 follow these steps:
 
-1. In the mailu docker-compose set the logging driver of the front container to journald; and set the tag to mailu-front
+1. In the mailu docker compose set the logging driver of the front container to journald; and set the tag to mailu-front
 
 .. code-block:: bash
 
@@ -566,7 +566,7 @@ follow these steps:
 
   # Fail2Ban configuration file
   [Definition]
-  failregex = ^.*?\[info\] \d+#\d+: \*\d+ client login failed: \"AUTH not supported\" while in http auth state, client: <HOST>, server:
+  failregex = ^ \S+ mailu\-front\[\d+\]: \S+ \S+ \[info\] \d+#\d+: \*\d+ client login failed: \"AUTH not supported\" while in http auth state, client: <HOST>, server:
   ignoreregex =
   journalmatch = CONTAINER_TAG=mailu-front
 
@@ -585,7 +585,7 @@ follow these steps:
 
 The above will block flagged IPs for a week, you can of course change it to your needs.
 
-5.  Add the following to /etc/fail2ban/action.d/docker-action-net.conf
+4. In the mailu docker compose set the logging driver of the Admin container to journald; and set the tag to mailu-admin
 
 IMPORTANT: You have to install ipset on the host system, eg. `apt-get install ipset` on a Debian/Ubuntu system.
 
@@ -760,7 +760,7 @@ In many cases, Docker Compose will complain about the yaml syntax because it is 
 Unless your distribution has proper up-to-date packages for Compose, we strongly advise that you install it either:
 
  - from the Docker-CE repositories along with Docker CE itself,
- - from PyPI using `pip install docker-compose` or
+ - from PyPI using `pip install docker compose` or
  - from Github by downloading it directly.
 
 Detailed instructions can be found at https://docs.docker.com/compose/install/

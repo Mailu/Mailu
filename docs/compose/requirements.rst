@@ -91,7 +91,7 @@ The Docker website is full of `detailed instructions`_
 about setting up a proper Docker install. Default configuration should be
 suited for Mailu.
 
-Additionally, you must install ``docker-compose`` by following the instructions
+Additionally, you must install ``docker compose`` v2 by following the instructions
 from the `Docker website`_ if you plan on using the Compose flavor. Compose is a
 management tool for Docker, especially suited for multiple containers systems
 like Mailu.
@@ -105,24 +105,34 @@ Once everything is setup, you should be able to run the following commands
 .. code-block:: bash
 
   $ docker version
-  Client:
-   Version:      1.11.2
-   API version:  1.23
-   Go version:   go1.6.2
-   Git commit:   b9f10c9
-   Built:        Sun Jun  5 23:17:55 2016
-   OS/Arch:      linux/amd64
+    Client: Docker Engine - Community
+     Version:           20.10.22
+     API version:       1.41
+     Go version:        go1.18.9
+     Git commit:        3a2c30b
+     Built:             Thu Dec 15 22:27:03 2022
+     OS/Arch:           linux/arm64
+     Context:           default
+     Experimental:      true
+    
+    Server: Docker Engine - Community
+     Engine:
+      Version:          20.10.22
+      API version:      1.41 (minimum version 1.12)
+      Go version:       go1.18.9
+      Git commit:       42c8b31
+      Built:            Thu Dec 15 22:25:25 2022
+      OS/Arch:          linux/arm64
+      Experimental:     false
+     containerd:
+      Version:          1.6.14
+      GitCommit:        9ba4b250366a5ddde94bb7c9d1def331423aa323
+     runc:
+      Version:          1.1.4
+      GitCommit:        v1.1.4-0-g5fd4c4d
+     docker-init:
+      Version:          0.19.0
+      GitCommit:        de40ad0
 
-  Server:
-   Version:      1.11.1
-   API version:  1.23
-   Go version:   go1.6.2
-   Git commit:   5604cbe
-   Built:        Mon May  2 00:06:51 2016
-   OS/Arch:      linux/amd64
-
-  $ docker-compose version
-  docker-compose version 1.7.1, build 6c29830
-  docker-py version: 1.8.1
-  CPython version: 3.5.1
-  OpenSSL version: OpenSSL 1.0.2h  3 May 2016
+  $ docker compose version
+    Docker Compose version v2.14.1

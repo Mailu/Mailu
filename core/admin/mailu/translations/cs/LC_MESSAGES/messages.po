@@ -1,0 +1,733 @@
+# Czech translations for Mailu.io.
+# Copyright (C) 2023 S474N
+# This file is distributed under the same license as the PROJECT project.
+# S474N <translate@s474n.com>, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: translate@s474n.com\n"
+"POT-Creation-Date: 2022-05-22 18:47+0200\n"
+"PO-Revision-Date: 2023-02-21 16:14+0100\n"
+"Last-Translator: S474N <translate@s474n.com>\n"
+"Language-Team: Czech\n"
+"Language: cs_CZ\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n>=2 && n<=4 ? 1 : 2);\n"
+"Generated-By: Babel 2.3.4\n"
+"X-Generator: Poedit 3.2.2\n"
+
+#: mailu/sso/forms.py:8 mailu/ui/forms.py:79
+msgid "E-mail"
+msgstr "E-mail"
+
+#: mailu/sso/forms.py:9 mailu/ui/forms.py:80 mailu/ui/forms.py:93
+#: mailu/ui/forms.py:112 mailu/ui/forms.py:166
+#: mailu/ui/templates/client.html:32 mailu/ui/templates/client.html:57
+msgid "Password"
+msgstr "Heslo"
+
+#: mailu/sso/forms.py:10 mailu/sso/forms.py:11 mailu/sso/templates/login.html:4
+#: mailu/ui/templates/sidebar.html:142
+msgid "Sign in"
+msgstr "Přihlásit se"
+
+#: mailu/sso/templates/base_sso.html:8 mailu/ui/templates/base.html:8
+msgid "Admin page for"
+msgstr "Admin stránka pro"
+
+#: mailu/sso/templates/base_sso.html:19 mailu/ui/templates/base.html:19
+msgid "toggle sidebar"
+msgstr "přepnout postranní panel"
+
+#: mailu/sso/templates/base_sso.html:37 mailu/ui/templates/base.html:37
+msgid "change language"
+msgstr "změnit jazyk"
+
+#: mailu/sso/templates/sidebar_sso.html:4 mailu/ui/templates/sidebar.html:94
+msgid "Go to"
+msgstr "Jít"
+
+#: mailu/sso/templates/sidebar_sso.html:9 mailu/ui/templates/client.html:4
+#: mailu/ui/templates/sidebar.html:50 mailu/ui/templates/sidebar.html:107
+msgid "Client setup"
+msgstr "Nastavení klienta"
+
+#: mailu/sso/templates/sidebar_sso.html:16 mailu/ui/templates/sidebar.html:114
+msgid "Website"
+msgstr "Webová stránka"
+
+#: mailu/sso/templates/sidebar_sso.html:22 mailu/ui/templates/sidebar.html:120
+msgid "Help"
+msgstr "Pomoc"
+
+#: mailu/sso/templates/sidebar_sso.html:35
+#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:127
+msgid "Register a domain"
+msgstr "Registrovat doménu"
+
+#: mailu/sso/templates/sidebar_sso.html:49 mailu/ui/forms.py:95
+#: mailu/ui/templates/sidebar.html:149 mailu/ui/templates/user/signup.html:4
+#: mailu/ui/templates/user/signup_domain.html:4
+msgid "Sign up"
+msgstr "Registrovat se"
+
+#: mailu/ui/forms.py:33 mailu/ui/forms.py:36
+msgid "Invalid email address."
+msgstr "Špatná mailová adresa."
+
+#: mailu/ui/forms.py:45
+msgid "Confirm"
+msgstr "Potvrdit"
+
+#: mailu/ui/forms.py:48 mailu/ui/forms.py:58
+#: mailu/ui/templates/domain/details.html:26
+#: mailu/ui/templates/domain/list.html:19 mailu/ui/templates/relay/list.html:18
+msgid "Domain name"
+msgstr "Název domény"
+
+#: mailu/ui/forms.py:49
+msgid "Maximum user count"
+msgstr "Maximální počet uživatelů"
+
+#: mailu/ui/forms.py:50
+msgid "Maximum alias count"
+msgstr "Maximální počet aliasů"
+
+#: mailu/ui/forms.py:51
+msgid "Maximum user quota"
+msgstr "Maximální uživatelská kvóta"
+
+#: mailu/ui/forms.py:52
+msgid "Enable sign-up"
+msgstr "Povolit registraci"
+
+#: mailu/ui/forms.py:53 mailu/ui/forms.py:74 mailu/ui/forms.py:86
+#: mailu/ui/forms.py:132 mailu/ui/forms.py:144
+#: mailu/ui/templates/alias/list.html:22 mailu/ui/templates/domain/list.html:22
+#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:20
+#: mailu/ui/templates/user/list.html:24
+msgid "Comment"
+msgstr "Komentář"
+
+#: mailu/ui/forms.py:54 mailu/ui/forms.py:68 mailu/ui/forms.py:75
+#: mailu/ui/forms.py:88 mailu/ui/forms.py:136 mailu/ui/forms.py:145
+msgid "Save"
+msgstr "Uložit"
+
+#: mailu/ui/forms.py:59
+msgid "Initial admin"
+msgstr "Hlavní admin"
+
+#: mailu/ui/forms.py:60
+msgid "Admin password"
+msgstr "Heslo admina"
+
+#: mailu/ui/forms.py:61 mailu/ui/forms.py:81 mailu/ui/forms.py:94
+msgid "Confirm password"
+msgstr "Potvrdit heslo"
+
+#: mailu/ui/forms.py:63
+msgid "Create"
+msgstr "Vytvořit"
+
+#: mailu/ui/forms.py:67
+msgid "Alternative name"
+msgstr "Alternativní jméno"
+
+#: mailu/ui/forms.py:72
+msgid "Relayed domain name"
+msgstr "Seznam předávaných domén"
+
+#: mailu/ui/forms.py:73 mailu/ui/templates/relay/list.html:19
+msgid "Remote host"
+msgstr "Vzdálený hostitel"
+
+#: mailu/ui/forms.py:82 mailu/ui/templates/user/list.html:23
+#: mailu/ui/templates/user/signup_domain.html:16
+msgid "Quota"
+msgstr "Kvóta"
+
+#: mailu/ui/forms.py:83
+msgid "Allow IMAP access"
+msgstr "Povolit přístup IMAP"
+
+#: mailu/ui/forms.py:84
+msgid "Allow POP3 access"
+msgstr "Povolit přístup POP3"
+
+#: mailu/ui/forms.py:85 mailu/ui/forms.py:101
+#: mailu/ui/templates/user/settings.html:15
+msgid "Displayed name"
+msgstr "Zobrazené jméno"
+
+#: mailu/ui/forms.py:87
+msgid "Enabled"
+msgstr "Povoleno"
+
+#: mailu/ui/forms.py:92
+msgid "Email address"
+msgstr "Emailová adresa"
+
+#: mailu/ui/forms.py:102
+msgid "Enable spam filter"
+msgstr "Povolit filtr spamu"
+
+#: mailu/ui/forms.py:103
+msgid "Enable marking spam mails as read"
+msgstr "Povolit označování spamových e-mailů jako přečtených"
+
+#: mailu/ui/forms.py:104
+msgid "Spam filter tolerance"
+msgstr "Tolerance spamového filtru"
+
+#: mailu/ui/forms.py:105
+msgid "Enable forwarding"
+msgstr "Povolit přeposílání"
+
+#: mailu/ui/forms.py:106
+msgid "Keep a copy of the emails"
+msgstr "Zachovat kopii e-mailů"
+
+#: mailu/ui/forms.py:107 mailu/ui/forms.py:143
+#: mailu/ui/templates/alias/list.html:21
+msgid "Destination"
+msgstr "Cíl"
+
+#: mailu/ui/forms.py:108
+msgid "Save settings"
+msgstr "Uložit nastavení"
+
+#: mailu/ui/forms.py:113
+msgid "Password check"
+msgstr "Kontrola hesla"
+
+#: mailu/ui/forms.py:114 mailu/ui/templates/sidebar.html:25
+msgid "Update password"
+msgstr "Aktualizovat heslo"
+
+#: mailu/ui/forms.py:118
+msgid "Enable automatic reply"
+msgstr "Povolit automatickou odpověď"
+
+#: mailu/ui/forms.py:119
+msgid "Reply subject"
+msgstr "Předmět odpovědi"
+
+#: mailu/ui/forms.py:120
+msgid "Reply body"
+msgstr "Tělo odpovědi"
+
+#: mailu/ui/forms.py:122
+msgid "Start of vacation"
+msgstr "Začátek dovolené"
+
+#: mailu/ui/forms.py:123
+msgid "End of vacation"
+msgstr "Konec dovolené"
+
+#: mailu/ui/forms.py:124
+msgid "Update"
+msgstr "Aktualizovat"
+
+#: mailu/ui/forms.py:129
+msgid "Your token (write it down, as it will never be displayed again)"
+msgstr "Váš token (zapište si ho, protože se již nikdy nezobrazí)"
+
+#: mailu/ui/forms.py:134 mailu/ui/templates/token/list.html:21
+msgid "Authorized IP"
+msgstr "Autorizovaná IP"
+
+#: mailu/ui/forms.py:140
+msgid "Alias"
+msgstr "Alias"
+
+#: mailu/ui/forms.py:142
+msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"
+msgstr "Použít syntaxi jako SQL (např. pro doménové koše)"
+
+#: mailu/ui/forms.py:149
+msgid "Admin email"
+msgstr "Email admina"
+
+#: mailu/ui/forms.py:150 mailu/ui/forms.py:155 mailu/ui/forms.py:168
+msgid "Submit"
+msgstr "Poslat"
+
+#: mailu/ui/forms.py:154
+msgid "Manager email"
+msgstr "E-mail manažera"
+
+#: mailu/ui/forms.py:159
+msgid "Protocol"
+msgstr "Protokol"
+
+#: mailu/ui/forms.py:162
+msgid "Hostname or IP"
+msgstr "Hostitel nebo IP"
+
+#: mailu/ui/forms.py:163 mailu/ui/templates/client.html:20
+#: mailu/ui/templates/client.html:45
+msgid "TCP port"
+msgstr "TCP port"
+
+#: mailu/ui/forms.py:164
+msgid "Enable TLS"
+msgstr "Povolit TLS"
+
+#: mailu/ui/forms.py:165 mailu/ui/templates/client.html:28
+#: mailu/ui/templates/client.html:53 mailu/ui/templates/fetch/list.html:21
+msgid "Username"
+msgstr "Uživatelské jméno"
+
+#: mailu/ui/forms.py:167
+msgid "Keep emails on the server"
+msgstr "Zachovat e-maily na serveru"
+
+#: mailu/ui/forms.py:172
+msgid "Announcement subject"
+msgstr "Předmět oznámení"
+
+#: mailu/ui/forms.py:174
+msgid "Announcement body"
+msgstr "Tělo oznámení"
+
+#: mailu/ui/forms.py:176
+msgid "Send"
+msgstr "Poslat"
+
+#: mailu/ui/templates/announcement.html:4
+msgid "Public announcement"
+msgstr "Veřejné oznámení"
+
+#: mailu/ui/templates/antispam.html:4 mailu/ui/templates/sidebar.html:80
+#: mailu/ui/templates/user/settings.html:19
+msgid "Antispam"
+msgstr "Antispam"
+
+#: mailu/ui/templates/antispam.html:8
+msgid "RSPAMD status page"
+msgstr "Stavová stránka RSPAMD"
+
+#: mailu/ui/templates/client.html:8
+msgid "configure your email client"
+msgstr "nakonfigurovat e-mailového klienta"
+
+#: mailu/ui/templates/client.html:13
+msgid "Incoming mail"
+msgstr "Příchozí mail"
+
+#: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:41
+msgid "Mail protocol"
+msgstr "Poštovní protokol"
+
+#: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:49
+msgid "Server name"
+msgstr "Název serveru"
+
+#: mailu/ui/templates/client.html:38
+msgid "Outgoing mail"
+msgstr "Odchozí pošta"
+
+#: mailu/ui/templates/confirm.html:4
+msgid "Confirm action"
+msgstr "Potvrdit akci"
+
+#: mailu/ui/templates/confirm.html:13
+#, python-format
+msgid "You are about to %(action)s. Please confirm your action."
+msgstr "Chystáte se %(action)s. Potvrďte prosím vaši akci."
+
+#: mailu/ui/templates/docker-error.html:4
+msgid "Docker error"
+msgstr "Chyba Dockeru"
+
+#: mailu/ui/templates/docker-error.html:12
+msgid "An error occurred while talking to the Docker server."
+msgstr "Při komunikaci se serverem Docker došlo k chybě."
+
+#: mailu/ui/templates/macros.html:129
+msgid "copy to clipboard"
+msgstr "zkopírovat do schránky"
+
+#: mailu/ui/templates/sidebar.html:15
+msgid "My account"
+msgstr "Můj účet"
+
+#: mailu/ui/templates/sidebar.html:19 mailu/ui/templates/user/list.html:37
+msgid "Settings"
+msgstr "Nastavení"
+
+#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/user/list.html:38
+msgid "Auto-reply"
+msgstr "Automatická odpověď"
+
+#: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:37
+#: mailu/ui/templates/user/list.html:39
+msgid "Fetched accounts"
+msgstr "Fetched účty"
+
+#: mailu/ui/templates/sidebar.html:43 mailu/ui/templates/token/list.html:4
+msgid "Authentication tokens"
+msgstr "Autentizační tokeny"
+
+#: mailu/ui/templates/sidebar.html:56
+msgid "Administration"
+msgstr "Administrace"
+
+#: mailu/ui/templates/sidebar.html:62
+msgid "Announcement"
+msgstr "Oznámení"
+
+#: mailu/ui/templates/sidebar.html:68
+msgid "Administrators"
+msgstr "Administrátoři"
+
+#: mailu/ui/templates/sidebar.html:74
+msgid "Relayed domains"
+msgstr "Relayované domény"
+
+#: mailu/ui/templates/sidebar.html:88
+msgid "Mail domains"
+msgstr "Poštovní domény"
+
+#: mailu/ui/templates/sidebar.html:99
+msgid "Webmail"
+msgstr "Webmail"
+
+#: mailu/ui/templates/sidebar.html:135
+msgid "Sign out"
+msgstr "Odhlásit se"
+
+#: mailu/ui/templates/working.html:4
+msgid "We are still working on this feature!"
+msgstr "Na této funkci stále pracujeme!"
+
+#: mailu/ui/templates/admin/create.html:4
+msgid "Add a global administrator"
+msgstr "Přidat globálního administrátora"
+
+#: mailu/ui/templates/admin/list.html:4
+msgid "Global administrators"
+msgstr "Globální administrátor"
+
+#: mailu/ui/templates/admin/list.html:9
+msgid "Add administrator"
+msgstr "Přidat administrátora"
+
+#: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
+#: mailu/ui/templates/alternative/list.html:19
+#: mailu/ui/templates/domain/list.html:17 mailu/ui/templates/fetch/list.html:19
+#: mailu/ui/templates/manager/list.html:19
+#: mailu/ui/templates/relay/list.html:17 mailu/ui/templates/token/list.html:19
+#: mailu/ui/templates/user/list.html:19
+msgid "Actions"
+msgstr "Akce"
+
+#: mailu/ui/templates/admin/list.html:18 mailu/ui/templates/alias/list.html:20
+#: mailu/ui/templates/manager/list.html:20 mailu/ui/templates/user/list.html:21
+msgid "Email"
+msgstr "Email"
+
+#: mailu/ui/templates/admin/list.html:25 mailu/ui/templates/alias/list.html:32
+#: mailu/ui/templates/alternative/list.html:29
+#: mailu/ui/templates/domain/list.html:34 mailu/ui/templates/fetch/list.html:34
+#: mailu/ui/templates/manager/list.html:27
+#: mailu/ui/templates/relay/list.html:30 mailu/ui/templates/token/list.html:30
+#: mailu/ui/templates/user/list.html:34
+msgid "Delete"
+msgstr "Vymazat"
+
+#: mailu/ui/templates/alias/create.html:4
+msgid "Create alias"
+msgstr "Vytvořit alias"
+
+#: mailu/ui/templates/alias/edit.html:4
+msgid "Edit alias"
+msgstr "Upravit alias"
+
+#: mailu/ui/templates/alias/list.html:4
+msgid "Alias list"
+msgstr "Seznam aliasů"
+
+#: mailu/ui/templates/alias/list.html:12
+msgid "Add alias"
+msgstr "Přidat alias"
+
+#: mailu/ui/templates/alias/list.html:23
+#: mailu/ui/templates/alternative/list.html:21
+#: mailu/ui/templates/domain/list.html:23 mailu/ui/templates/fetch/list.html:25
+#: mailu/ui/templates/relay/list.html:21 mailu/ui/templates/token/list.html:22
+#: mailu/ui/templates/user/list.html:25
+msgid "Created"
+msgstr "Vytvořeno"
+
+#: mailu/ui/templates/alias/list.html:24
+#: mailu/ui/templates/alternative/list.html:22
+#: mailu/ui/templates/domain/list.html:24 mailu/ui/templates/fetch/list.html:26
+#: mailu/ui/templates/relay/list.html:22 mailu/ui/templates/token/list.html:23
+#: mailu/ui/templates/user/list.html:26
+msgid "Last edit"
+msgstr "Poslední úprava"
+
+#: mailu/ui/templates/alias/list.html:31 mailu/ui/templates/domain/list.html:33
+#: mailu/ui/templates/fetch/list.html:33 mailu/ui/templates/relay/list.html:29
+#: mailu/ui/templates/user/list.html:33
+msgid "Edit"
+msgstr "Upravit"
+
+#: mailu/ui/templates/alternative/create.html:4
+msgid "Create alternative domain"
+msgstr "Vytvořit alternativní doménu"
+
+#: mailu/ui/templates/alternative/list.html:4
+msgid "Alternative domain list"
+msgstr "Seznam alternativních domén"
+
+#: mailu/ui/templates/alternative/list.html:12
+msgid "Add alternative"
+msgstr "Přidat alternativu"
+
+#: mailu/ui/templates/alternative/list.html:20
+msgid "Name"
+msgstr "Jméno"
+
+#: mailu/ui/templates/domain/create.html:4
+#: mailu/ui/templates/domain/list.html:9
+msgid "New domain"
+msgstr "Nová doména"
+
+#: mailu/ui/templates/domain/details.html:4
+msgid "Domain details"
+msgstr "Podrobnosti o doméně"
+
+#: mailu/ui/templates/domain/details.html:15
+msgid "Regenerate keys"
+msgstr "Obnovit klíče"
+
+#: mailu/ui/templates/domain/details.html:17
+msgid "Generate keys"
+msgstr "Generovat klíče"
+
+#: mailu/ui/templates/domain/details.html:30
+msgid "DNS MX entry"
+msgstr "Záznam DNS MX"
+
+#: mailu/ui/templates/domain/details.html:34
+msgid "DNS SPF entries"
+msgstr "Záznamy DNS SPF"
+
+#: mailu/ui/templates/domain/details.html:40
+msgid "DKIM public key"
+msgstr "Veřejný klíč DKIM"
+
+#: mailu/ui/templates/domain/details.html:44
+msgid "DNS DKIM entry"
+msgstr "Záznam DNS DKIM"
+
+#: mailu/ui/templates/domain/details.html:48
+msgid "DNS DMARC entry"
+msgstr "Záznam DNS DMARC"
+
+#: mailu/ui/templates/domain/details.html:58
+msgid "DNS TLSA entry"
+msgstr "Záznam DNS TLSA"
+
+#: mailu/ui/templates/domain/details.html:63
+msgid "DNS client auto-configuration entries"
+msgstr "Položky automatické konfigurace klienta DNS"
+
+#: mailu/ui/templates/domain/edit.html:4
+msgid "Edit domain"
+msgstr "Upravit doménu"
+
+#: mailu/ui/templates/domain/list.html:4
+msgid "Domain list"
+msgstr "Seznam domén"
+
+#: mailu/ui/templates/domain/list.html:18
+msgid "Manage"
+msgstr "Spravovat"
+
+#: mailu/ui/templates/domain/list.html:20
+msgid "Mailbox count"
+msgstr "Počet poštovních schránek"
+
+#: mailu/ui/templates/domain/list.html:21
+msgid "Alias count"
+msgstr "Počet aliasů"
+
+#: mailu/ui/templates/domain/list.html:31
+msgid "Details"
+msgstr "Podrobnosti"
+
+#: mailu/ui/templates/domain/list.html:38
+msgid "Users"
+msgstr "Uživatelů"
+
+#: mailu/ui/templates/domain/list.html:39
+msgid "Aliases"
+msgstr "Aliasů"
+
+#: mailu/ui/templates/domain/list.html:40
+msgid "Managers"
+msgstr "Manažerů"
+
+#: mailu/ui/templates/domain/list.html:42
+msgid "Alternatives"
+msgstr "Alternativ"
+
+#: mailu/ui/templates/domain/signup.html:13
+msgid ""
+"In order to register a new domain, you must first setup the\n"
+"    domain zone so that the domain <code>MX</code> points to this server"
+msgstr ""
+"Chcete-li zaregistrovat novou doménu, musíte nejprve nastavit\n"
+"     zónu domény tak, aby doménový <code>MX</code> záznam ukazovala na tento "
+"server"
+
+#: mailu/ui/templates/domain/signup.html:18
+msgid ""
+"If you do not know how to setup an <code>MX</code> record for your DNS "
+"zone,\n"
+"    please contact your DNS provider or administrator. Also, please wait a\n"
+"    couple minutes after the <code>MX</code> is set so the local server "
+"cache\n"
+"    expires."
+msgstr ""
+"Pokud nevíte, jak nastavit <code>MX</code> záznam pro zónu DNS,\n"
+"     kontaktujte svého poskytovatele DNS nebo správce. Také prosím počkejte "
+"a\n"
+"     několik minut po <code>MX</code> tak, aby vypršela  v mezipaměti "
+"místního\n"
+"     serveru."
+
+#: mailu/ui/templates/fetch/create.html:4
+msgid "Add a fetched account"
+msgstr "Přidejte fetched účet"
+
+#: mailu/ui/templates/fetch/edit.html:4
+msgid "Update a fetched account"
+msgstr "Aktualizujte fetched účet"
+
+#: mailu/ui/templates/fetch/list.html:12
+msgid "Add an account"
+msgstr "Přidat účet"
+
+#: mailu/ui/templates/fetch/list.html:20
+msgid "Endpoint"
+msgstr "Koncový bod"
+
+#: mailu/ui/templates/fetch/list.html:22
+msgid "Keep emails"
+msgstr "Zachovat emaily"
+
+#: mailu/ui/templates/fetch/list.html:23
+msgid "Last check"
+msgstr "Poslední kontrola"
+
+#: mailu/ui/templates/fetch/list.html:24
+msgid "Status"
+msgstr "Status"
+
+#: mailu/ui/templates/fetch/list.html:38
+msgid "yes"
+msgstr "ano"
+
+#: mailu/ui/templates/fetch/list.html:38
+msgid "no"
+msgstr "ne"
+
+#: mailu/ui/templates/manager/create.html:4
+msgid "Add a manager"
+msgstr "Přidat manažera"
+
+#: mailu/ui/templates/manager/list.html:4
+msgid "Manager list"
+msgstr "Seznam manažerů"
+
+#: mailu/ui/templates/manager/list.html:12
+msgid "Add manager"
+msgstr "Přidat manažera"
+
+#: mailu/ui/templates/relay/create.html:4
+msgid "New relay domain"
+msgstr "Nová relay doména"
+
+#: mailu/ui/templates/relay/edit.html:4
+msgid "Edit relayed domain"
+msgstr "Upravit relay doménu"
+
+#: mailu/ui/templates/relay/list.html:4
+msgid "Relayed domain list"
+msgstr "Seznam relay domén"
+
+#: mailu/ui/templates/relay/list.html:9
+msgid "New relayed domain"
+msgstr "Nová relay doména"
+
+#: mailu/ui/templates/token/create.html:4
+msgid "Create an authentication token"
+msgstr "Vytvořit ověřovací token"
+
+#: mailu/ui/templates/token/list.html:12
+msgid "New token"
+msgstr "Nový token"
+
+#: mailu/ui/templates/user/create.html:4
+msgid "New user"
+msgstr "Nový uživatel"
+
+#: mailu/ui/templates/user/create.html:15
+msgid "General"
+msgstr "Všeobecné"
+
+#: mailu/ui/templates/user/create.html:23
+msgid "Features and quotas"
+msgstr "Funkce a kvóty"
+
+#: mailu/ui/templates/user/edit.html:4
+msgid "Edit user"
+msgstr "Upravit uživatele"
+
+#: mailu/ui/templates/user/list.html:4
+msgid "User list"
+msgstr "Seznam uživatelů"
+
+#: mailu/ui/templates/user/list.html:12
+msgid "Add user"
+msgstr "Přidat uživatele"
+
+#: mailu/ui/templates/user/list.html:20 mailu/ui/templates/user/settings.html:4
+msgid "User settings"
+msgstr "Uživatelské nastavení"
+
+#: mailu/ui/templates/user/list.html:22
+msgid "Features"
+msgstr "Funkce"
+
+#: mailu/ui/templates/user/password.html:4
+msgid "Password update"
+msgstr "Aktualizace hesla"
+
+#: mailu/ui/templates/user/reply.html:4
+msgid "Automatic reply"
+msgstr "Automatická odpověď"
+
+#: mailu/ui/templates/user/settings.html:27
+msgid "Auto-forward"
+msgstr "Automatické přeposlání"
+
+#: mailu/ui/templates/user/signup_domain.html:8
+msgid "pick a domain for the new account"
+msgstr "vybrat doménu pro nový účet"
+
+#: mailu/ui/templates/user/signup_domain.html:14
+msgid "Domain"
+msgstr "Doména"
+
+#: mailu/ui/templates/user/signup_domain.html:15
+msgid "Available slots"
+msgstr "Dostupných slotů"

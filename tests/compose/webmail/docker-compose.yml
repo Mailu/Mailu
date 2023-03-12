@@ -32,6 +32,9 @@ services:
       - "127.0.0.1:993:993"
     volumes:
       - "/mailu/certs:/certs"
+    networks:
+      - default
+      - webmail
 
   admin:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-local}
@@ -105,6 +108,8 @@ services:
       - "/mailu/webmail:/data"
     depends_on:
       - imap
+    networks:
+      - webmail
 
 
 networks:
@@ -114,6 +119,8 @@ networks:
       driver: default
       config:
         - subnet: 192.168.203.0/24
+  webmail:
+    driver: bridge
   noinet:
     driver: bridge
     internal: true

@@ -84,7 +84,9 @@ sp.disable_function.function("ini_set").param("option").value("include_path").dr
 sp.disable_function.function("ini_set").param("option").value("open_basedir").drop();
 
 # Detect some backdoors via environment recon
-sp.disable_function.function("ini_get").filename("/var/www/roundcube/vendor/guzzlehttp/guzzle/src/functions.php").param("option").value("allow_url_fopen").allow();
+sp.disable_function.function("ini_get").filename_r("^/var/www/snappymail/snappymail/v/[0-9]+\.[0-9]+\.[0-9]+/app/libraries/RainLoop/Utils\.php$").param("option").value("open_basedir").allow();
+sp.disable_function.function("ini_get").filename("/var/www/roundcube/vendor/guzzlehttp/guzzle/src/Utils.php").param("option").value("allow_url_fopen").allow();
+sp.disable_function.function("ini_get").filename("/var/www/roundcube/plugins/managesieve/lib/Roundcube/rcube_sieve_engine.php").param("option").value_r("suhosin").allow();
 sp.disable_function.function("ini_get").param("option").value("allow_url_fopen").drop();
 sp.disable_function.function("ini_get").param("option").value("open_basedir").drop();
 sp.disable_function.function("ini_get").param("option").value_r("suhosin").drop();

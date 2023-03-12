@@ -585,7 +585,7 @@ follow these steps:
 
 The above will block flagged IPs for a week, you can of course change it to your needs.
 
-4. In the mailu docker compose set the logging driver of the Admin container to journald; and set the tag to mailu-admin
+4.  Add the following to /etc/fail2ban/action.d/docker-action-net.conf
 
 IMPORTANT: You have to install ipset on the host system, eg. `apt-get install ipset` on a Debian/Ubuntu system.
 
@@ -606,9 +606,11 @@ See ipset homepage for details on ipset, https://ipset.netfilter.org/.
 
   actionunban = ipset del -exist f2b-bad-auth-bots <ip>/24
 
-Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
+Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/.
 
-6. In the mailu docker-compose set the logging driver of the Admin container to journald; and set the tag to mailu-admin
+Please note that the provided example will block the subnet from sending any email to the Mailu instance.
+
+5. In the mailu docker-compose set the logging driver of the Admin container to journald; and set the tag to mailu-admin
 
 .. code-block:: bash
 
@@ -617,7 +619,7 @@ Using DOCKER-USER chain ensures that the blocked IPs are processed in the correc
     options:
       tag: mailu-admin
 
-7. Add the /etc/fail2ban/filter.d/bad-auth.conf
+6. Add the /etc/fail2ban/filter.d/bad-auth.conf
 
 .. code-block:: bash
 
@@ -627,7 +629,7 @@ Using DOCKER-USER chain ensures that the blocked IPs are processed in the correc
   ignoreregex =
   journalmatch = CONTAINER_TAG=mailu-admin
 
-6. Add the /etc/fail2ban/jail.d/bad-auth.conf
+7. Add the /etc/fail2ban/jail.d/bad-auth.conf
 
 .. code-block:: bash
 
@@ -642,11 +644,7 @@ Using DOCKER-USER chain ensures that the blocked IPs are processed in the correc
 
 The above will block flagged IPs for a week, you can of course change it to your needs.
 
-7.  Add the following to /etc/fail2ban/action.d/docker-action.conf
-
-IMPORTANT: You have to install ipset on the host system, eg. `apt-get install ipset` on a Debian/Ubuntu system.
-
-See ipset homepage for details on ipset, https://ipset.netfilter.org/.
+8.  Add the following to /etc/fail2ban/action.d/docker-action.conf
 
 .. code-block:: bash
 
@@ -665,7 +663,7 @@ See ipset homepage for details on ipset, https://ipset.netfilter.org/.
 
 Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
 
-8. Configure and restart the Fail2Ban service
+9. Configure and restart the Fail2Ban service
 
 Make sure Fail2Ban is started after the Docker service by adding a partial override which appends this to the existing configuration.
 

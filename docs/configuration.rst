@@ -375,8 +375,9 @@ The ``PROXY_AUTH_WHITELIST`` (default: unset/disabled) option allows you to conf
 
 Use ``PROXY_AUTH_HEADER`` (default: 'X-Auth-Email') to customize which HTTP header the email address of the user to authenticate as should be and ``PROXY_AUTH_CREATE`` (default: False) to control whether non-existing accounts should be auto-created. Please note that Mailu doesn't currently support creating new users for non-existing domains; you do need to create all the domains that may be used manually.
 
-Once configured, any request to /sso/proxy will be redirected to the webmail and /sso/proxy/admin to the admin panel. Please check issue `1972` for more details.
+Once configured, any request to /sso/login with the correct headers will be authenticated unless the "noproxyauth" parameter is passed, in which case the "standard" login form will be displayed. Please check issues `1972` and `2692` for more details.
 
 Use ``PROXY_AUTH_LOGOUT_URL`` (default: unset) to redirect users to a specific URL after they have been logged out.
 
 .. _`1972`: https://github.com/Mailu/Mailu/issues/1972
+.. _`2692`: https://github.com/Mailu/Mailu/issues/2692

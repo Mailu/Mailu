@@ -33,7 +33,9 @@ def login():
     fields = [fields]
 
     if form.validate_on_submit():
-        if not destination := _has_usable_redirect():
+        if destination := _has_usable_redirect():
+            pass
+        else:
             if form.submitAdmin.data:
                 destination = app.config['WEB_ADMIN']
             elif form.submitWebmail.data:

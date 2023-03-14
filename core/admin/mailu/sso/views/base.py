@@ -21,7 +21,7 @@ def login():
 
     fields = []
 
-    if flask.request.args.get('url'):
+    if 'url' in flask.request.args and not 'homepage' in flask.request.url:
         fields.append(form.submitAdmin)
     else:
         form.submitAdmin.label.text = form.submitAdmin.label.text + ' Admin'
@@ -79,6 +79,8 @@ Redirect to the url passed in parameter if any; Ensure that this is not an open-
 https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html
 """
 def _has_usable_redirect():
+    if 'homepage' in flask.request.url:
+        return None
     if url := flask.request.args.get('url'):
         url = url_unquote(url)
         target = urlparse(urljoin(flask.request.url, url))

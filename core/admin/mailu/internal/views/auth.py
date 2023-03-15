@@ -33,8 +33,8 @@ def nginx_authentication():
     for key, value in headers.items():
         response.headers[key] = str(value)
     is_valid_user = False
+    username = response.headers.get('Auth-User', None)
     if response.headers.get("Auth-User-Exists") == "True":
-        username = response.headers["Auth-User"]
         if utils.limiter.should_rate_limit_user(username, client_ip):
             # FIXME could be done before handle_authentication()
             status, code = nginx.get_status(flask.request.headers['Auth-Protocol'], 'ratelimit')
@@ -50,7 +50,7 @@ def nginx_authentication():
     elif is_valid_user:
         utils.limiter.rate_limit_user(username, client_ip)
     elif not is_from_webmail:
-        utils.limiter.rate_limit_ip(client_ip)
+        utils.limiter.rate_limit_ip(client_ip, username)
     return response
 
 @internal.route("/auth/admin")
@@ -109,7 +109,7 @@ def basic_authentication():
                 utils.limiter.exempt_ip_from_ratelimits(client_ip)
                 return response
             # We failed check_credentials
-            utils.limiter.rate_limit_user(user_email, client_ip) if user else utils.limiter.rate_limit_ip(client_ip)
+            utils.limiter.rate_limit_user(user_email, client_ip) if user else utils.limiter.rate_limit_ip(client_ip, user_email)
     response = flask.Response(status=401)
     response.headers["WWW-Authenticate"] = 'Basic realm="Login Required"'
     return response

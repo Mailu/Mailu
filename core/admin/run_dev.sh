@@ -11,6 +11,7 @@ DEV_LISTEN="${DEV_LISTEN:-127.0.0.1:8080}"
 [[ "${DEV_LISTEN}" == *:* ]] || DEV_LISTEN="127.0.0.1:${DEV_LISTEN}"
 DEV_ADMIN="${DEV_ADMIN:-admin@example.com}"
 DEV_PASSWORD="${DEV_PASSWORD:-letmein}"
+DEV_ARGS=( "$@" )
 
 ### MAIN
 
@@ -75,19 +76,23 @@ ENV \
     DEBUG_ASSETS="/app/static" \
     DEBUG_TB_INTERCEPT_REDIRECTS=False \
     \
-    IMAP_ADDRESS="127.0.0.1" \
-    POP3_ADDRESS="127.0.0.1" \
-    AUTHSMTP_ADDRESS="127.0.0.1" \
+    ADMIN_ADDRESS="127.0.0.1" \
+    FRONT_ADDRESS="127.0.0.1" \
     SMTP_ADDRESS="127.0.0.1" \
+    IMAP_ADDRESS="127.0.0.1" \
     REDIS_ADDRESS="127.0.0.1" \
-    WEBMAIL_ADDRESS="127.0.0.1"
+    ANTIVIRUS_ADDRESS="127.0.0.1" \
+    ANTISPAM_ADDRESS="127.0.0.1" \
+    WEBMAIL_ADDRESS="127.0.0.1" \
+    WEBDAV_ADDRESS="127.0.0.1"
 
 CMD ["/bin/bash", "-c", "flask db upgrade &>/dev/null && flask mailu admin '${DEV_ADMIN/@*}' '${DEV_ADMIN#*@}' '${DEV_PASSWORD}' --mode ifmissing >/dev/null; flask --debug run --host=0.0.0.0 --port=8080"]
 EOF
 
 # build
 chmod -R u+rwX,go+rX .
-"${docker}" build --tag "${DEV_NAME}:latest" .
+echo Running: "${docker/*\/}" build --tag "${DEV_NAME}:latest" "${DEV_ARGS[@]}" .
+"${docker}" build --tag "${DEV_NAME}:latest" "${DEV_ARGS[@]}" .
 
 # gather volumes to map into container
 volumes=()
@@ -107,6 +112,7 @@ done
 cat <<EOF
 
 =============================================================================
+
 The "${DEV_NAME}" container was built using this configuration:
 
 DEV_NAME="${DEV_NAME}"
@@ -115,19 +121,34 @@ DEV_PROFILER="${DEV_PROFILER}"
 DEV_LISTEN="${DEV_LISTEN}"
 DEV_ADMIN="${DEV_ADMIN}"
 DEV_PASSWORD="${DEV_PASSWORD}"
-=============================================================================
+DEV_ARGS=( ${DEV_ARGS[*]} )
 
 =============================================================================
-You can start the container later using this commandline:
+
+You can start the container later using this command:
 
 ${docker/*\/} run --rm -it --name "${DEV_NAME}" --publish ${DEV_LISTEN}:8080$(printf " %q" "${volumes[@]}") "${DEV_NAME}"
-=============================================================================
 
 =============================================================================
+
+Enter the running container using this command:
+${docker/*\/} exec -it "${DEV_NAME}" /bin/bash
+
+=============================================================================
+
+To update requirements-prod.txt you can build (and test) using:
+${docker/*\/} build --tag "${DEV_NAME}:latest" --build-arg MAILU_DEPS=dev .
+
+And then fetch the new dependencies with:
+${docker/*\/} exec "${DEV_NAME}" pip freeze >$(realpath "${base}")/requirements-new.txt
+
+=============================================================================
+
 The Mailu UI can be found here: http://${DEV_LISTEN}/sso/login
 EOF
 [[ -z "${DEV_DB}" ]] && echo "You can log in with user ${DEV_ADMIN} and password ${DEV_PASSWORD}"
 cat <<EOF
+
 =============================================================================
 
 Starting mailu dev environment...

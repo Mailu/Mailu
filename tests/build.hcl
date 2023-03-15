@@ -34,6 +34,7 @@ group "default" {
     "antispam",
     "front",
     "imap",
+    "oletools",
     "smtp",
 
     "webmail",
@@ -150,6 +151,15 @@ target "front" {
     base = "target:base"
   }
   tags = tag("nginx")
+}
+
+target "oletools" {
+  inherits = ["defaults"]
+  context = "core/oletools/"
+  contexts = {
+    base = "target:base"
+  }
+  tags = tag("oletools")
 }
 
 target "imap" {

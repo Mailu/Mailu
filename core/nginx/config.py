@@ -5,8 +5,7 @@ import logging as log
 import sys
 from socrate import system, conf
 
-args = os.environ.copy()
-
+args = system.set_env()
 log.basicConfig(stream=sys.stderr, level=args.get("LOG_LEVEL", "WARNING"))
 
 args['TLS_PERMISSIVE'] = str(args.get('TLS_PERMISSIVE')).lower() not in ('false', 'no')
@@ -17,16 +16,9 @@ with open("/etc/resolv.conf") as handle:
     resolver = content[content.index("nameserver") + 1]
     args["RESOLVER"] = f"[{resolver}]" if ":" in resolver else resolver
 
-args["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
-args["ANTISPAM_WEBUI_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM_WEBUI", "antispam:11334")
-if args["WEBMAIL"] != "none":
-    args["WEBMAIL_ADDRESS"] = system.get_host_address_from_environment("WEBMAIL", "webmail")
-if args["WEBDAV"] != "none":
-    args["WEBDAV_ADDRESS"] = system.get_host_address_from_environment("WEBDAV", "webdav:5232")
-
 # TLS configuration
-cert_name = os.getenv("TLS_CERT_FILENAME", default="cert.pem")
-keypair_name = os.getenv("TLS_KEYPAIR_FILENAME", default="key.pem")
+cert_name = args.get("TLS_CERT_FILENAME", "cert.pem")
+keypair_name = args.get("TLS_KEYPAIR_FILENAME", "key.pem")
 args["TLS"] = {
     "cert": ("/certs/%s" % cert_name, "/certs/%s" % keypair_name),
     "letsencrypt": ("/certs/letsencrypt/live/mailu/nginx-chain.pem",
@@ -44,7 +36,7 @@ def format_for_nginx(fullchain, output):
     split = '-----END CERTIFICATE-----\n'
     with open(fullchain, 'r') as pem:
         certs = [f'{cert}{split}' for cert in pem.read().split(split) if cert]
-    if len(certs)>2 and os.getenv('LETSENCRYPT_SHORTCHAIN'):
+    if len(certs)>2 and args.get('LETSENCRYPT_SHORTCHAIN'):
         del certs[-1]
     with open(output, 'w') as pem:
         pem.write(''.join(certs))

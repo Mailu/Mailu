@@ -145,51 +145,43 @@ Your mail service will be reachable for IMAP, POP3, SMTP and Webmail at the addr
 How to make IPv6 work?
 ``````````````````````
 
-Docker currently does not expose the IPv6 ports properly, as it does not interface with ``ip6tables``.
-Lets start with quoting everything that's wrong:
+Docker IPv6 interfacing with ``ip6tables``, which is required for proper IPv6 support, is currently considered experimental.
 
-  Unfortunately, initially Docker was not created with IPv6 in mind.
-  It was added later and, while it has come a long way, is still not as usable as one would want.
-  Much discussion is still going on as to how IPv6 should be used in a containerized world;
-  See the various GitHub issues linked below:
+Although the supposed way to enable IPv6 would be to give each container a publicly routable address, docker's IPv6 support
+uses NAT to pass outside connections to the containers.
 
-  - Giving each container a publicly routable address means all ports (even unexposed / unpublished ports) are suddenly
-    reachable by everyone, if no additional filtering is done
-    (`docker/docker#21614 <https://github.com/docker/docker/issues/21614>`_)
-  - By default, each container gets a random IPv6, making it impossible to do properly do DNS;
-    the alternative is to assign a specific IPv6 address to each container,
-    still an administrative hassle (`docker/docker#13481 <https://github.com/docker/docker/issues/13481>`_)
-  - Published ports won't work on IPv6, unless you have the userland proxy enabled
-    (which, for now, is enabled by default in Docker)
-  - The userland proxy, however, seems to be on its way out
-    (`docker/docker#14856 <https://github.com/docker/docker/issues/14856>`_) and has various issues, like:
+Currently we recommend to use `docker-ipv6nat` by `Robert Klarenbeek <https://github.com/robbertkl>` instead of docker's
+experimental support.
 
-    - It can use a lot of RAM (`docker/docker#11185 <https://github.com/docker/docker/issues/11185>`_)
-    - Source IP addresses are rewritten, making it completely unusable for many purposes, e.g. mail servers
-      (`docker/docker#17666 <https://github.com/docker/docker/issues/17666>`_),
-      (`docker/libnetwork#1099 <https://github.com/docker/libnetwork/issues/1099>`_).
+Before enabling IPv6 you **MUST** disable the userland-proxy in your ``/etc/docker/daemon.json`` to not create an Open Relay!
 
-  -- `Robbert Klarenbeek <https://github.com/robbertkl>`_ (docker-ipv6nat author)
+.. code-block:: json
 
-Okay, but I still want to use IPv6! Can I just use the installers IPv6 checkbox? **NO, YOU SHOULD NOT DO THAT!** Why you ask?
-Mailu has its own trusted IPv4 network, every container inside this network can use e.g. the SMTP container without further
-authentication. If you enabled IPv6 inside the setup assistant (and fixed the ports to also be exposed on IPv6) Docker will
-still rewrite any incoming IPv6 requests to an IPv4 address, *which is located inside the trusted network*. Therefore any
-incoming connection to the SMTP container will bypass the authentication stage by the front container regardless of your
-settings and causes an Open Relay. And you really don't want this!
+  {
+      "userland-proxy": false
+  }
 
-So, how to make it work? Well, by using `docker-ipv6nat`_! This nifty container will set up ``ip6tables``,
-just as Docker would do for IPv4. We know that NAT-ing is not advised in IPv6,
-however exposing all containers to public network neither. The choice is ultimately yous.
+You can enable `docker-ipv6nat` like this:
 
-Mailu `setup utility`_ generates a safe IPv6 ULA subnet by default. So when you run the following command,
-Mailu will start to function on IPv6:
+  docker run -d --name ipv6nat --privileged --network host --restart unless-stopped -v /var/run/docker.sock:/var/run/docker.sock:ro -v /lib/modules:/lib/modules:ro robbertkl/ipv6nat
 
-.. code-block:: bash
+If you want to try docker's experimental IPv6 support, it can be enabled like this:
 
-  docker run -d --restart=always -v /var/run/docker.sock:/var/run/docker.sock:ro --privileged --net=host robbertkl/ipv6nat
+.. code-block:: json
 
-.. _`docker-ipv6nat`: https://github.com/robbertkl/docker-ipv6nat
+  {
+      "userland-proxy": false,
+      "ipv6": true,
+      "experimental": true,
+      "fixed-cidr-v6": "fd00:1234:abcd::/48",
+      "ip6tables": true
+  }
+
+and enabling the IPv6 checkbox in the `setup utility`_.
+
+This setup however is not officially supported, and might result in unforeseen issues.
+With bad misconfiguration you might even cause your instance to become an Open Relay, you have been warned!
+
 .. _`setup utility`: https://setup.mailu.io
 
 How does Mailu scale up?
@@ -449,8 +441,8 @@ down and up again. A container restart is not sufficient.
 
 .. code-block:: bash
 
-  docker-compose down && \
-  docker-compose up -d
+  docker compose down && \
+  docker compose up -d
 
 *Issue reference:* `615`_.
 
@@ -527,8 +519,8 @@ to check the logs.
 
 .. code-block:: bash
 
-  docker-compose logs front | less -R
-  docker-compose exec front less /var/log/letsencrypt/letsencrypt.log
+  docker compose logs front | less -R
+  docker compose exec front less /var/log/letsencrypt/letsencrypt.log
 
 Common problems:
 
@@ -586,20 +578,21 @@ down brute force attacks. The same applies to login attempts via the single sign
 
 We *do* provide a possibility to export the logs from the ``front`` service and ``Admin`` service to the host.
 The ``front`` container logs failed logon attempts on SMTP, IMAP and POP3.
-The ``Admin``container logs failed logon attempt on the single sign on page.
+The ``Admin`` container logs failed logon attempt on the single sign on page.
 For this you need to set ``LOG_DRIVER=journald`` or ``syslog``, depending on the log
 manager of the host. You will need to setup the proper Regex in the Fail2Ban configuration.
 Below an example how to do so.
 
 If you use a reverse proxy in front of Mailu, it is vital to set the environment variables REAL_IP_HEADER and REAL_IP_FROM.
 Without these environment variables, Mailu will not trust the remote client IP passed on by the reverse proxy and as a result your reverse proxy will be banned.
-See the :ref:`[configuration reference <reverse_proxy_headers>` for more information.
+
+See the :ref:`configuration reference <reverse_proxy_headers>` for more information.
 
 
 Assuming you have a working Fail2Ban installation on the host running your Docker containers,
 follow these steps:
 
-1. In the mailu docker-compose set the logging driver of the front container to journald; and set the tag to mailu-front
+1. In the mailu docker compose set the logging driver of the front container to journald; and set the tag to mailu-front
 
 .. code-block:: bash
 
@@ -608,32 +601,57 @@ follow these steps:
     options:
       tag: mailu-front
 
-2. Add the /etc/fail2ban/filter.d/bad-auth.conf
+2. Add the /etc/fail2ban/filter.d/bad-auth-bots.conf
 
 .. code-block:: bash
 
   # Fail2Ban configuration file
   [Definition]
-  failregex = .* client login failed: .+ client:\ <HOST>
+  failregex = ^\s?\S+ mailu\-front\[\d+\]: \S+ \S+ \[info\] \d+#\d+: \*\d+ client login failed: \"AUTH not supported\" while in http auth state, client: <HOST>, server:
   ignoreregex =
   journalmatch = CONTAINER_TAG=mailu-front
 
-3. Add the /etc/fail2ban/jail.d/bad-auth.conf
+3. Add the /etc/fail2ban/jail.d/bad-auth-bots.conf
 
 .. code-block:: bash
 
-  [bad-auth]
+  [bad-auth-bots]
   enabled = true
   backend = systemd
-  filter = bad-auth
+  filter = bad-auth-bots
   bantime = 604800
-  findtime = 300
-  maxretry = 10
-  action = docker-action
+  findtime = 600
+  maxretry = 5
+  action = docker-action-net
 
-The above will block flagged IPs for a week, you can of course change it to you needs.
+The above will block flagged IPs for a week, you can of course change it to your needs.
 
-4. In the mailu docker-compose set the logging driver of the Admin container to journald; and set the tag to mailu-admin
+4.  Add the following to /etc/fail2ban/action.d/docker-action-net.conf
+
+IMPORTANT: You have to install ipset on the host system, eg. `apt-get install ipset` on a Debian/Ubuntu system.
+
+See ipset homepage for details on ipset, https://ipset.netfilter.org/.
+
+.. code-block:: bash
+
+  [Definition]
+
+  actionstart = ipset --create f2b-bad-auth-bots nethash
+                iptables -I DOCKER-USER -m set --match-set f2b-bad-auth-bots src -p tcp -m tcp --dport 25 -j DROP
+
+  actionstop = iptables -D DOCKER-USER -m set --match-set f2b-bad-auth-bots src -p tcp -m tcp --dport 25 -j DROP
+               ipset --destroy f2b-bad-auth-bots
+
+
+  actionban = ipset add -exist f2b-bad-auth-bots <ip>/24
+
+  actionunban = ipset del -exist f2b-bad-auth-bots <ip>/24
+
+Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/.
+
+Please note that the provided example will block the subnet from sending any email to the Mailu instance.
+
+5. In the mailu docker-compose set the logging driver of the Admin container to journald; and set the tag to mailu-admin
 
 .. code-block:: bash
 
@@ -642,70 +660,38 @@ The above will block flagged IPs for a week, you can of course change it to you 
     options:
       tag: mailu-admin
 
-5. Add the /etc/fail2ban/filter.d/bad-auth-sso.conf
+6. Add the /etc/fail2ban/filter.d/bad-auth.conf
 
 .. code-block:: bash
 
   # Fail2Ban configuration file
   [Definition]
-  failregex = .* Login failed for .+ from <HOST>.
+  failregex = : Authentication attempt from <HOST> has been rate-limited\.$
   ignoreregex =
   journalmatch = CONTAINER_TAG=mailu-admin
 
-6. Add the /etc/fail2ban/jail.d/bad-auth-sso.conf
+7. Add the /etc/fail2ban/jail.d/bad-auth.conf
 
 .. code-block:: bash
 
-  [bad-auth-sso]
+  [bad-auth]
   enabled = true
   backend = systemd
-  filter = bad-auth-sso
+  filter = bad-auth
   bantime = 604800
-  findtime = 300
-  maxretry = 10
+  findtime = 900
+  maxretry = 15
   action = docker-action
 
-The above will block flagged IPs for a week, you can of course change it to you needs.
+The above will block flagged IPs for a week, you can of course change it to your needs.
 
-7. Add the /etc/fail2ban/action.d/docker-action.conf
-
-Option 1: Use plain iptables
+8.  Add the following to /etc/fail2ban/action.d/docker-action.conf
 
 .. code-block:: bash
 
   [Definition]
 
-  actionstart = iptables -N f2b-bad-auth
-                iptables -A f2b-bad-auth -j RETURN
-                iptables -I DOCKER-USER -j f2b-bad-auth
-
-  actionstop = iptables -D DOCKER-USER -j f2b-bad-auth
-               iptables -F f2b-bad-auth
-               iptables -X f2b-bad-auth
-
-  actioncheck = iptables -n -L DOCKER-USER | grep -q 'f2b-bad-auth[ \t]'
-
-  actionban = iptables -I f2b-bad-auth 1 -s <ip> -j DROP
-
-  actionunban = iptables -D f2b-bad-auth -s <ip> -j DROP
-
-Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
-
-Option 2:  Use ipset together with iptables
-IMPORTANT: You have to install ipset on the host system, eg. `apt-get install ipset` on a Debian/Ubuntu system.
-
-See ipset homepage for details on ipset, https://ipset.netfilter.org/.
-
-ipset and iptables provide one big advantage over just using iptables: This setup reduces the overall iptable rules.
-There is just one rule for the bad authentications and the IPs are within the ipset.
-Specially in larger setups with a high amount of brute force attacks this comes in handy.
-Using iptables with ipset might reduce the system load in such attacks significantly.
-
-.. code-block:: bash
-
-  [Definition]
-
-  actionstart = actionstart = ipset --create f2b-bad-auth iphash
+  actionstart = ipset --create f2b-bad-auth iphash
                 iptables -I DOCKER-USER -m set --match-set f2b-bad-auth src -j DROP
 
   actionstop = iptables -D DOCKER-USER -m set --match-set f2b-bad-auth src -j DROP
@@ -718,7 +704,7 @@ Using iptables with ipset might reduce the system load in such attacks significa
 
 Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
 
-1. Configure and restart the Fail2Ban service
+9. Configure and restart the Fail2Ban service
 
 Make sure Fail2Ban is started after the Docker service by adding a partial override which appends this to the existing configuration.
 
@@ -813,7 +799,7 @@ In many cases, Docker Compose will complain about the yaml syntax because it is 
 Unless your distribution has proper up-to-date packages for Compose, we strongly advise that you install it either:
 
  - from the Docker-CE repositories along with Docker CE itself,
- - from PyPI using `pip install docker-compose` or
+ - from PyPI using `pip install docker compose` or
  - from Github by downloading it directly.
 
 Detailed instructions can be found at https://docs.docker.com/compose/install/

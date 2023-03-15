@@ -14,9 +14,9 @@ simply pull the latest images and recreate the containers :
 
 .. code-block:: bash
 
-  docker-compose pull
-  docker-compose down
-  docker-compose up -d
+  docker compose pull
+  docker compose down
+  docker compose up -d
 
 Monitoring the mail server
 --------------------------
@@ -25,7 +25,7 @@ Logs are managed by Docker directly. You can easily read your logs using:
 
 .. code-block:: bash
 
-  docker-compose logs
+  docker compose logs
 
 Docker is able to forward logs to multiple log engines. Read the following documentation for details: https://docs.docker.com/engine/admin/logging/overview/.
 

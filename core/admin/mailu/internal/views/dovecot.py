@@ -17,7 +17,7 @@ def dovecot_passdb_dict(user_email):
     return flask.jsonify({
         "password": None,
         "nopassword": "Y",
-        "allow_nets": ",".join(allow_nets)
+        "allow_real_nets": ",".join(allow_nets)
     })
 
 @internal.route("/dovecot/userdb/")

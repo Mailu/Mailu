@@ -2,7 +2,6 @@ from mailu import models, utils
 from flask import current_app as app
 from socrate import system
 
-import re
 import urllib
 import ipaddress
 import sqlalchemy.exc
@@ -26,12 +25,14 @@ STATUSES = {
     }),
 }
 
+WEBMAIL_PORTS = ['10143', '10025']
+
 def check_credentials(user, password, ip, protocol=None, auth_port=None):
-    if not user or not user.enabled or (protocol == "imap" and not user.enable_imap) or (protocol == "pop3" and not user.enable_pop):
+    if not user or not user.enabled or (protocol == "imap" and not user.enable_imap and not auth_port in WEBMAIL_PORTS) or (protocol == "pop3" and not user.enable_pop):
         return False
     is_ok = False
     # webmails
-    if auth_port in ['10143', '10025'] and password.startswith('token-'):
+    if auth_port in WEBMAIL_PORTS and password.startswith('token-'):
         if utils.verify_temp_token(user.get_id(), password):
             is_ok = True
     # All tokens are 32 characters hex lowercase
@@ -126,20 +127,16 @@ def get_status(protocol, status):
     status, codes = STATUSES[status]
     return status, codes[protocol]
 
-def extract_host_port(host_and_port, default_port):
-    host, _, port = re.match('^(.*?)(:([0-9]*))?$', host_and_port).groups()
-    return host, int(port) if port else default_port
-
 def get_server(protocol, authenticated=False):
     if protocol == "imap":
-        hostname, port = extract_host_port(app.config['IMAP_ADDRESS'], 143)
+        hostname, port = app.config['IMAP_ADDRESS'], 143
     elif protocol == "pop3":
-        hostname, port = extract_host_port(app.config['POP3_ADDRESS'], 110)
+        hostname, port = app.config['IMAP_ADDRESS'], 110
     elif protocol == "smtp":
         if authenticated:
-            hostname, port = extract_host_port(app.config['AUTHSMTP_ADDRESS'], 10025)
+            hostname, port = app.config['SMTP_ADDRESS'], 10025
         else:
-            hostname, port = extract_host_port(app.config['SMTP_ADDRESS'], 25)
+            hostname, port = app.config['SMTP_ADDRESS'], 25
     try:
         # test if hostname is already resolved to an ip address
         ipaddress.ip_address(hostname)

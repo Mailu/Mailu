@@ -19,7 +19,7 @@ Please put your text outside of the comment blocks to be visible. You can use th
 
 ### Environment
 
-- [ ] docker-compose
+- [ ] docker compose
 - [ ] kubernetes
 - [ ] docker swarm
 
@@ -61,7 +61,7 @@ Just saying "it doesn’t work as expected" is not useful. It's also helpful to 
 Often it is very useful to include log fragments of the involved component.
 You can get the logs via `docker logs <container name> --tail 1000`.
 For example for the admin container: `docker logs mailu_admin_1 --tail 1000`
-or using docker-compose `docker-compose -f /mailu/docker-compose.yml logs --tail 1000 admin`
+or using docker compose `docker compose -f /mailu/docker-compose.yml logs --tail 1000 admin`
 
 If you can find the relevant section, please share only the parts that seem relevant. If you have any logs, please enclose them in code tags, like so:
 

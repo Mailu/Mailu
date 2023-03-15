@@ -162,6 +162,7 @@ You can add a fetched account by clicking on the `Add an account` button on the 
 * Folders. A comma separated list of folders to fetch from the server. This is optional, by default only the INBOX will be pulled.
 
 Click the submit button to apply settings. With the default polling interval, fetchmail will start polling the email account after ``FETCHMAIL_DELAY``.
+Make sure ``FETCHMAIL_ENABLED`` is set to ``true`` in ``mailu.env`` to enable fetching and showing fetchmail in the admin interface.
 
 
 Authentication tokens

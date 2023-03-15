@@ -75,7 +75,7 @@ class CommaSeparatedList(db.TypeDecorator):
     """ Stores a list as a comma-separated string, compatible with Postfix.
     """
 
-    impl = db.String
+    impl = db.String(255)
     cache_ok = True
     python_type = list
 
@@ -96,7 +96,7 @@ class JSONEncoded(db.TypeDecorator):
     """ Represents an immutable structure as a json-encoded string.
     """
 
-    impl = db.String
+    impl = db.String(255)
     cache_ok = True
     python_type = str
 
@@ -421,8 +421,7 @@ class Email(object):
         """ send an email to the address """
         try:
             f_addr = f'{app.config["POSTMASTER"]}@{idna.encode(app.config["DOMAIN"]).decode("ascii")}'
-            ip, port = app.config['HOST_LMTP'].rsplit(':')
-            with smtplib.LMTP(ip, port=port) as lmtp:
+            with smtplib.LMTP(host=app.config['IMAP_ADDRESS'], port=2525) as lmtp:
                 to_address = f'{self.localpart}@{idna.encode(self.domain_name).decode("ascii")}'
                 msg = text.MIMEText(body)
                 msg['Subject'] = subject

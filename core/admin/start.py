@@ -2,16 +2,15 @@
 
 import os
 import logging as log
-from pwd import getpwnam
 import sys
+from socrate import system
 
 os.system("chown mailu:mailu -R /dkim")
 os.system("find /data | grep -v /fetchmail | xargs -n1 chown mailu:mailu")
-mailu_id = getpwnam('mailu')
-os.setgid(mailu_id.pw_gid)
-os.setuid(mailu_id.pw_uid)
+system.drop_privs_to('mailu')
 
 log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "INFO"))
+system.set_env(['SECRET'])
 
 os.system("flask mailu advertise")
 os.system("flask db upgrade")
@@ -53,12 +52,21 @@ def test_DNS():
 
 test_DNS()
 
-start_command="".join([
-    "gunicorn --threads ", str(os.cpu_count()),
-    " -b :80 ",
-    "--access-logfile - " if (log.root.level<=log.INFO) else "",
-    "--error-logfile - ",
-    "--preload ",
-    "'mailu:create_app()'"])
+cmdline = [
+	"gunicorn",
+	"--threads", f"{os.cpu_count()}",
+	# If SUBNET6 is defined, gunicorn must listen on IPv6 as well as IPv4
+	"-b", f"{'[::]' if os.environ.get('SUBNET6') else ''}:80",
+    "--logger-class mailu.Logger",
+    "--worker-tmp-dir /dev/shm",
+	"--error-logfile", "-",
+	"--preload"
+]
 
-os.system(start_command)
+# logging
+if log.root.level <= log.INFO:
+	cmdline.extend(["--access-logfile", "-"])
+
+cmdline.append("'mailu:create_app()'")
+
+os.system(" ".join(cmdline))

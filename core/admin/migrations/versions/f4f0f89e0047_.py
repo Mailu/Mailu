@@ -21,5 +21,5 @@ def upgrade():
 
 def downgrade():
     with op.batch_alter_table('fetch') as batch:
-        batch.drop_column('fetch', 'folders')
-        batch.drop_column('fetch', 'scan')
+        batch.drop_column('folders')
+        batch.drop_column('scan')

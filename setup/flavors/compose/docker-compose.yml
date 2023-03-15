@@ -33,9 +33,12 @@ services:
       - "{{ bind4 }}:{{ port }}:{{ port }}"
     {% endif %}
     {% if ipv6_enabled and bind6 %}
-      - "{{ bind6 }}:{{ port }}:{{ port }}"
+      - "[{{ bind6 }}]:{{ port }}:{{ port }}"
     {% endif %}
     {% endfor %}
+    networks:
+      - default
+      - webmail
     volumes:
       - "{{ root }}/certs:/certs"
       - "{{ root }}/overrides/nginx:/overrides:ro"
@@ -103,16 +106,43 @@ services:
       - {{ dns }}
     {% endif %}
 
+{% if oletools_enabled %}
+  oletools:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-{{ version }}}
+    hostname: oletools
+    restart: always
+    networks:
+      - noinet
+    depends_on:
+    {% if resolver_enabled %}
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
+{% endif %}
+
   antispam:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-{{ version }}}
     hostname: antispam
     restart: always
     env_file: {{ env }}
+{% if oletools_enabled %}
+    networks:
+      - default
+      - noinet
+{% endif %}
     volumes:
       - "{{ root }}/filter:/var/lib/rspamd"
       - "{{ root }}/overrides/rspamd:/etc/rspamd/override.d:ro"
     depends_on:
       - front
+      - redis
+    {% if oletools_enabled %}
+      - oletools
+    {% endif %}
+    {% if antivirus_enabled %}
+      - antivirus
+    {% endif %}
     {% if resolver_enabled %}
       - resolver
     dns:
@@ -142,12 +172,8 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/dav:/data"
-    {% if resolver_enabled %}
-    depends_on:
-      - resolver
-    dns:
-      - {{ dns }}
-    {% endif %}
+    networks:
+      - radicale
   {% endif %}
 
   {% if fetchmail_enabled %}
@@ -177,13 +203,10 @@ services:
     volumes:
       - "{{ root }}/webmail:/data"
       - "{{ root }}/overrides/{{ webmail_type }}:/overrides:ro"
+    networks:
+      - webmail
     depends_on:
-      - imap
-    {% if resolver_enabled %}
-      - resolver
-    dns:
-      - {{ dns }}
-    {% endif %}
+      - front
   {% endif %}
 
 networks:
@@ -199,3 +222,16 @@ networks:
         {% if ipv6_enabled %}
         - subnet: {{ subnet6 }}
         {% endif %}
+{% if webdav_enabled %}
+  radicale:
+    driver: bridge
+{% endif %}
+{% if webmail_type != 'none' %}
+  webmail:
+    driver: bridge
+{% endif %}
+{% if oletools_enabled %}
+  noinet:
+    driver: bridge
+    internal: true
+{% endif %}

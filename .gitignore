@@ -10,6 +10,7 @@ pip-selfcheck.json
 /docs/include
 /docs/_build
 /.env
+/.venv
 /docker-compose.yml
 /.idea
 /.vscode

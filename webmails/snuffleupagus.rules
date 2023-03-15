@@ -84,6 +84,9 @@ sp.disable_function.function("ini_set").param("option").value("include_path").dr
 sp.disable_function.function("ini_set").param("option").value("open_basedir").drop();
 
 # Detect some backdoors via environment recon
+sp.disable_function.function("ini_get").filename_r("^/var/www/snappymail/snappymail/v/[0-9]+\.[0-9]+\.[0-9]+/app/libraries/RainLoop/Utils\.php$").param("option").value("open_basedir").allow();
+sp.disable_function.function("ini_get").filename("/var/www/roundcube/vendor/guzzlehttp/guzzle/src/Utils.php").param("option").value("allow_url_fopen").allow();
+sp.disable_function.function("ini_get").filename("/var/www/roundcube/plugins/managesieve/lib/Roundcube/rcube_sieve_engine.php").param("option").value_r("suhosin").allow();
 sp.disable_function.function("ini_get").param("option").value("allow_url_fopen").drop();
 sp.disable_function.function("ini_get").param("option").value("open_basedir").drop();
 sp.disable_function.function("ini_get").param("option").value_r("suhosin").drop();
@@ -97,7 +100,7 @@ sp.disable_function.function("is_callable").param("value").value("eval").drop();
 sp.disable_function.function("is_callable").param("value").value("exec").drop();
 sp.disable_function.function("is_callable").param("value").value("system").drop();
 sp.disable_function.function("is_callable").param("value").value("shell_exec").drop();
-sp.disable_function.function("is_callable").filename_r("/app/libraries/snappymail/pgp/gpg\.php$").param("value").value("proc_open").allow();
+sp.disable_function.function("is_callable").filename_r("^/var/www/snappymail/snappymail/v/[0-9]+\.[0-9]+\.[0-9]+/app/libraries/snappymail/pgp/gpg\.php$").param("value").value("proc_open").allow();
 sp.disable_function.function("is_callable").param("value").value("proc_open").drop();
 sp.disable_function.function("is_callable").param("value").value("passthru").drop();
 
@@ -129,5 +132,4 @@ sp.cookie.name("roundcube_sessid").samesite("strict");
 sp.ini_protection.policy_silent_fail();
 
 # roundcube uses unserialize() everywhere.
-# This should do the job until https://github.com/jvoisin/snuffleupagus/issues/438 is implemented.
-sp.disable_function.function("unserialize").param("data").value_r("[cCoO]:\d+:[\"{]").drop();
+sp.unserialize_noclass.enable();

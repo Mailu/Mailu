@@ -1,7 +1,6 @@
 import os
 
 from datetime import timedelta
-from socrate import system
 import ipaddress
 
 DEFAULT_CONFIG = {
@@ -18,7 +17,8 @@ DEFAULT_CONFIG = {
     'DOMAIN_REGISTRATION': False,
     'TEMPLATES_AUTO_RELOAD': True,
     'MEMORY_SESSIONS': False,
-    'FETCHMAIL_ENABLED': False,
+    'FETCHMAIL_ENABLED': True,
+    'MAILU_VERSION': 'unknown',
     # Database settings
     'DB_FLAVOR': None,
     'DB_USER': 'mailu',
@@ -40,9 +40,9 @@ DEFAULT_CONFIG = {
     'TLS_FLAVOR': 'cert',
     'INBOUND_TLS_ENFORCE': False,
     'DEFER_ON_TLS_ERROR': True,
-    'AUTH_RATELIMIT_IP': '60/hour',
+    'AUTH_RATELIMIT_IP': '5/hour',
     'AUTH_RATELIMIT_IP_V4_MASK': 24,
-    'AUTH_RATELIMIT_IP_V6_MASK': 56,
+    'AUTH_RATELIMIT_IP_V6_MASK': 48,
     'AUTH_RATELIMIT_USER': '100/day',
     'AUTH_RATELIMIT_EXEMPTION': '',
     'AUTH_RATELIMIT_EXEMPTION_LENGTH': 86400,
@@ -71,6 +71,9 @@ DEFAULT_CONFIG = {
     'LOGO_URL': None,
     'LOGO_BACKGROUND': None,
     # Advanced settings
+    'API': False,
+    'WEB_API': '/api',
+    'API_TOKEN': None,
     'LOG_LEVEL': 'WARNING',
     'SESSION_KEY_BITS': 128,
     'SESSION_TIMEOUT': 3600,
@@ -83,19 +86,8 @@ DEFAULT_CONFIG = {
     'PROXY_AUTH_WHITELIST': '',
     'PROXY_AUTH_HEADER': 'X-Auth-Email',
     'PROXY_AUTH_CREATE': False,
-    # Host settings
-    'HOST_IMAP': 'imap',
-    'HOST_LMTP': 'imap:2525',
-    'HOST_POP3': 'imap',
-    'HOST_SMTP': 'smtp',
-    'HOST_AUTHSMTP': 'smtp',
-    'HOST_ADMIN': 'admin',
-    'HOST_WEBMAIL': 'webmail',
-    'HOST_WEBDAV': 'webdav:5232',
-    'HOST_REDIS': 'redis',
-    'HOST_FRONT': 'front',
     'SUBNET': '192.168.203.0/24',
-    'SUBNET6': None
+    'SUBNET6': None,
 }
 
 class ConfigManager:
@@ -105,24 +97,11 @@ class ConfigManager:
     DB_TEMPLATES = {
         'sqlite': 'sqlite:////{SQLITE_DATABASE_FILE}',
         'postgresql': 'postgresql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}',
-        'mysql': 'mysql+mysqlconnector://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}'
+        'mysql': 'mysql+mysqlconnector://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}',
     }
 
     def __init__(self):
         self.config = dict()
-
-    def get_host_address(self, name):
-        # if MYSERVICE_ADDRESS is defined, use this
-        if f'{name}_ADDRESS' in os.environ:
-            return os.environ.get(f'{name}_ADDRESS')
-        # otherwise use the host name and resolve it
-        return system.resolve_address(self.config[f'HOST_{name}'])
-
-    def resolve_hosts(self):
-        for key in ['IMAP', 'POP3', 'AUTHSMTP', 'SMTP', 'REDIS']:
-            self.config[f'{key}_ADDRESS'] = self.get_host_address(key)
-        if self.config['WEBMAIL'] != 'none':
-            self.config['WEBMAIL_ADDRESS'] = self.get_host_address('WEBMAIL')
 
     def __get_env(self, key, value):
         key_file = key + "_FILE"
@@ -144,11 +123,14 @@ class ConfigManager:
         # get current app config
         self.config.update(app.config)
         # get environment variables
+        for key in os.environ:
+            if key.endswith('_ADDRESS'):
+                self.config[key] = os.environ[key]
+
         self.config.update({
             key: self.__coerce_value(self.__get_env(key, value))
             for key, value in DEFAULT_CONFIG.items()
         })
-        self.resolve_hosts()
 
         # automatically set the sqlalchemy string
         if self.config['DB_FLAVOR']:
@@ -165,6 +147,7 @@ class ConfigManager:
             self.config['SESSION_COOKIE_SECURE'] = self.config['TLS_FLAVOR'] != 'notls'
         self.config['SESSION_PERMANENT'] = True
         self.config['SESSION_TIMEOUT'] = int(self.config['SESSION_TIMEOUT'])
+        self.config['SESSION_KEY_BITS'] = int(self.config['SESSION_KEY_BITS'])
         self.config['PERMANENT_SESSION_LIFETIME'] = int(self.config['PERMANENT_SESSION_LIFETIME'])
         self.config['AUTH_RATELIMIT_IP_V4_MASK'] = int(self.config['AUTH_RATELIMIT_IP_V4_MASK'])
         self.config['AUTH_RATELIMIT_IP_V6_MASK'] = int(self.config['AUTH_RATELIMIT_IP_V6_MASK'])
@@ -175,7 +158,10 @@ class ConfigManager:
         self.config['HOSTNAME'] = hostnames[0]
         self.config['DEFAULT_SPAM_THRESHOLD'] = int(self.config['DEFAULT_SPAM_THRESHOLD'])
         self.config['PROXY_AUTH_WHITELIST'] = set(ipaddress.ip_network(cidr, False) for cidr in (cidr.strip() for cidr in self.config['PROXY_AUTH_WHITELIST'].split(',')) if cidr)
+        try:
+            self.config['MAILU_VERSION'] = open('/version', 'r').read()
+        except FileNotFoundError:
+            pass
 
         # update the app config
         app.config.update(self.config)
-

@@ -14,6 +14,8 @@ $config['zipdownload_selection'] = true;
 $config['enable_spellcheck'] = true;
 $config['spellcheck_engine'] = 'pspell';
 $config['session_lifetime'] = {{ SESSION_TIMEOUT_MINUTES | int }};
+$config['request_path'] = '{{ WEB_WEBMAIL or "none" }}';
+$config['trusted_host_patterns'] = [ {{ HOSTNAMES.split(",") | map("tojson") | join(',') }}];
 
 // Mail servers
 $config['imap_host'] = '{{ FRONT_ADDRESS or "front" }}:10143';
@@ -21,27 +23,9 @@ $config['smtp_host'] = '{{ FRONT_ADDRESS or "front" }}:10025';
 $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 
-#old deprecated settings will be replaced from roundcube 1.6.
-$config['smtp_server']  = '{{ FRONT_ADDRESS or "front" }}';
-$config['smtp_port'] = '10025';
-$config['default_host']  = '{{ FRONT_ADDRESS or "front" }}';
-$config['default_port'] = '10143';
-
 // Sieve script management
-$config['managesieve_host'] = '{{ IMAP_ADDRESS or "imap" }}';
-
-// We access the IMAP and SMTP servers locally with internal names, SSL
-// will obviously fail but this sounds better than allowing insecure login
-// from the outter world
-$ssl_no_check = array(
- 'ssl' => array(
-     'verify_peer' => false,
-     'verify_peer_name' => false,
-  ),
-);
-$config['imap_conn_options'] = $ssl_no_check;
-$config['smtp_conn_options'] = $ssl_no_check;
-$config['managesieve_conn_options'] = $ssl_no_check;
+$config['managesieve_host'] = '{{ FRONT_ADDRESS or "front" }}:14190';
+$config['managesieve_mbox_encoding'] = 'UTF8';
 
 // roundcube customization
 $config['product_name'] = 'Mailu Webmail';
@@ -59,8 +43,14 @@ $config['sso_logout_url'] = '/sso/logout';
 // configure enigma gpg plugin
 $config['enigma_pgp_homedir'] = '/data/gpg';
 
+// configure mailu button
+$config['show_mailu_button'] = {{ 'true' if ADMIN and WEB_ADMIN else 'false' }};
+
 // set From header for DKIM signed message delivery reports
 $config['mdn_use_from'] = true;
+
+// zero quota is unlimited
+$config['quota_zero_as_unlimited'] = true;
 
 // includes
 {%- for inc in INCLUDES %}

@@ -37,10 +37,9 @@ Or in plain english: if receivers start to classify your mail as spam, this post
 </div>
 
 <div class="form-group">
-  <label>Authentication rate limit per IP for failed login attempts or non-existing accounts</label>
+  <label>Authentication rate limit per IP for failed login attempts on unique non-existing accounts (password spraying counter-measure)</label>
   <!--   Validates number input only -->
-  <p><input class="form-control" style="width: 9%; display: inline;" type="number" name="auth_ratelimit_ip"
-  		value="60" required > / hour
+  <p><input class="form-control" style="width: 9%; display: inline;" type="number" name="auth_ratelimit_ip" value="5" required > / hour
   </p>
 </div>
 
@@ -82,10 +81,23 @@ Or in plain english: if receivers start to classify your mail as spam, this post
 manage your email domains, users, etc.</p>
 
 <div class="form-group">
-    <input type="checkbox" name="admin_enabled" value="true" id="admin">
+    <input type="checkbox" name="admin_enabled" value="true" id="admin" checked>
   	<label>Enable the admin UI (and path to the admin UI)</label>
     <input class="form-control" type="text" name="admin_path" id="admin_path" style="display: none">
 </div>
+
+<p>The API interface is a RESTful API for changing the Mailu configuration.
+  Anything that can be configured via the Mailu web administration interface,
+  can also be configured via the RESTful API. For enabling the API, an API token must be configured.
+  It is not possible to use the API without an API token.</p>
+
+  <div class="form-group">
+      <input type="checkbox" name="api_enabled" value="true" id="api_enabled" >
+      <label>Enable the API (and path to the API)</label>
+      <input class="form-control" type="text" name="api_path" id="api_path" style="display: none">
+      <label name="api_token_label" id="api_token_label">API token</label>
+      <input class="form-control" type="text" name="api_token" id="api_token" style="display: none" value="{{ secret(32) }}">
+  </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 

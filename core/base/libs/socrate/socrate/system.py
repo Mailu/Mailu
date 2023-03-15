@@ -1,7 +1,9 @@
+import hmac
+import logging as log
+import os
+from pwd import getpwnam
 import socket
 import tenacity
-from os import environ
-import logging as log
 
 @tenacity.retry(stop=tenacity.stop_after_attempt(100),
                 wait=tenacity.wait_random(min=2, max=5))
@@ -15,24 +17,39 @@ def resolve_hostname(hostname):
         log.warn("Unable to lookup '%s': %s",hostname,e)
         raise e
 
+def _coerce_value(value):
+    if isinstance(value, str) and value.lower() in ('true','yes'):
+        return True
+    elif isinstance(value, str) and value.lower() in ('false', 'no'):
+        return False
+    return value
 
-def resolve_address(address):
-    """ This function is identical to ``resolve_hostname`` but also supports
-    resolving an address, i.e. including a port.
-    """
-    hostname, *rest = address.rsplit(":", 1)
-    ip_address = resolve_hostname(hostname)
-    if ":" in ip_address:
-        ip_address = "[{}]".format(ip_address)
-    return ip_address + "".join(":" + port for port in rest)
+def set_env(required_secrets=[]):
+    """ This will set all the environment variables and retains only the secrets we need """
+    secret_key = os.environ.get('SECRET_KEY')
+    if not secret_key:
+        try:
+            secret_key = open(os.environ.get("SECRET_KEY_FILE"), "r").read().strip()
+        except Exception as exc:
+            log.error(f"Can't read SECRET_KEY from file: {exc}")
+            raise exc
+    clean_env()
+    # derive the keys we need
+    for secret in required_secrets:
+        os.environ[f'{secret}_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray(secret, 'utf-8'), 'sha256').hexdigest()
 
+    return {
+            key: _coerce_value(os.environ.get(key, value))
+            for key, value in os.environ.items()
+           }
 
-def get_host_address_from_environment(name, default):
-    """ This function looks up an envionment variable ``{{ name }}_ADDRESS``.
-    If it's defined, it is returned unmodified. If it's undefined, an environment
-    variable ``HOST_{{ name }}`` is looked up and resolved to an ip address.
-    If this is also not defined, the default is resolved to an ip address.
-    """
-    if "{}_ADDRESS".format(name) in environ:
-        return environ.get("{}_ADDRESS".format(name))
-    return resolve_address(environ.get("HOST_{}".format(name), default))
+def clean_env():
+    """ remove all secret keys """
+    [os.environ.pop(key, None) for key in os.environ.keys() if key.endswith("_KEY")]
+
+def drop_privs_to(username='mailu'):
+    pwnam = getpwnam(username)
+    os.setgroups([])
+    os.setgid(pwnam.pw_gid)
+    os.setuid(pwnam.pw_uid)
+    os.environ['HOME'] = pwnam.pw_dir

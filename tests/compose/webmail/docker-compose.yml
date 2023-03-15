@@ -32,6 +32,9 @@ services:
       - "127.0.0.1:993:993"
     volumes:
       - "/mailu/certs:/certs"
+    networks:
+      - default
+      - webmail
 
   admin:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-local}
@@ -65,10 +68,20 @@ services:
     depends_on:
       - front
 
+  oletools:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-local}
+    hostname: oletools
+    restart: always
+    networks:
+      - noinet
+
   antispam:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-local}
     restart: always
     env_file: mailu.env
+    networks:
+      - default
+      - noinet
     volumes:
       - "/mailu/filter:/var/lib/rspamd"
       - "/mailu/dkim:/dkim"
@@ -95,6 +108,8 @@ services:
       - "/mailu/webmail:/data"
     depends_on:
       - imap
+    networks:
+      - webmail
 
 
 networks:
@@ -104,3 +119,8 @@ networks:
       driver: default
       config:
         - subnet: 192.168.203.0/24
+  webmail:
+    driver: bridge
+  noinet:
+    driver: bridge
+    internal: true

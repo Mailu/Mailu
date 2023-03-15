@@ -10,7 +10,7 @@ These settings tell Mailu that the HTTP header with the remote client IP address
 For more information see the [configuration reference](https://mailu.io/1.9/configuration.html#advanced-settings).
 
 One major change for the docker compose file is that the antispam container needs a fixed hostname [#1837](https://github.com/Mailu/Mailu/issues/1837).
-This is handled when you regenerate the docker-compose file. A fixed hostname is required to retain rspamd history. 
+This is handled when you regenerate the docker compose file. A fixed hostname is required to retain rspamd history.
 
 After changing mailu.env, it is required to recreate all containers for the changes to be propagated.
 
@@ -314,8 +314,8 @@ v1.6.0 - 2019-01-18
 - Enhancement: Reverse proxy - Real ip header and mail-letsencrypt ([#358](https://github.com/Mailu/Mailu/issues/358))
 - Enhancement: Parametrize hosts ([#373](https://github.com/Mailu/Mailu/issues/373))
 - Enhancement: Expose ports in dockerfiles ([#392](https://github.com/Mailu/Mailu/issues/392))
-- Enhancement: Added webmail-imap dependency in docker-compose ([#403](https://github.com/Mailu/Mailu/issues/403))
-- Enhancement: Add environment variables to allow running outside of docker-compose ([#429](https://github.com/Mailu/Mailu/issues/429))
+- Enhancement: Added webmail-imap dependency in docker compose ([#403](https://github.com/Mailu/Mailu/issues/403))
+- Enhancement: Add environment variables to allow running outside of docker compose ([#429](https://github.com/Mailu/Mailu/issues/429))
 - Enhancement: Add original Delivered-To header to received messages ([#433](https://github.com/Mailu/Mailu/issues/433))
 - Enhancement: Use HOST_ADMIN in "Forwarding authentication server" ([#436](https://github.com/Mailu/Mailu/issues/436), [#437](https://github.com/Mailu/Mailu/issues/437))
 - Enhancement: Use POD_ADDRESS_RANGE for Dovecot ([#448](https://github.com/Mailu/Mailu/issues/448))

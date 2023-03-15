@@ -1,3 +1,7 @@
-Make the login page "guess" where the user wants to land
+Make the login page "guess" where the user wants to land.
+This means that requests for /admin result in a login page that always redirects to admin.
+Requests for /webmail results in a login page that redirects the user being logged in to webmail.
+You can still access / (https://mydomain/) or /sso/login, to access the login page with both login buttons.
+
 Introduce AUTH_PROXY_LOGOUT_URL to redirect users to a specific URL after they have been logged-out
 Retire /sso/proxy and merge it in /sso/login

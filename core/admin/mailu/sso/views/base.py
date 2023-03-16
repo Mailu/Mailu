@@ -100,7 +100,7 @@ def _proxy():
     if not email:
         return flask.abort(500, 'No %s header' % app.config['PROXY_AUTH_HEADER'])
 
-    url = _has_usable_redirect or app.config['WEB_ADMIN']
+    url = _has_usable_redirect() or app.config['WEB_ADMIN']
 
     user = models.User.get(email)
     if user:

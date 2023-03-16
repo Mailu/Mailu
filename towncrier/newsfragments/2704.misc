@@ -1,0 +1,10 @@
+Switch the container registry used for deploying images from docker.io
+to ghcr.io (github).
+
+To start using ghcr.io, regenerate your docker-compose.yml file via setup.mailu.io.
+
+For Mailu 1.9 users:
+1. docker-compose down.
+2. create the file .env in the same folder as docker-compose.yml with the following contents:
+DOCKER_ORG=ghcr.io/mailu
+3. docker-compose up -d

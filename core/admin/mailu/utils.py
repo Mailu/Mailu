@@ -42,7 +42,7 @@ login.login_view = "sso.login"
 def handle_needs_login():
     """ redirect unauthorized requests to login page """
     return flask.redirect(
-        flask.url_for('sso.login')
+        flask.url_for('sso.login', url=flask.request.url)
     )
 
 # DNS stub configured to do DNSSEC enabled queries

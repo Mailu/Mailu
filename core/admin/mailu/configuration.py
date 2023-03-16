@@ -86,6 +86,7 @@ DEFAULT_CONFIG = {
     'PROXY_AUTH_WHITELIST': '',
     'PROXY_AUTH_HEADER': 'X-Auth-Email',
     'PROXY_AUTH_CREATE': False,
+    'PROXY_AUTH_LOGOUT_URL': None,
     'SUBNET': '192.168.203.0/24',
     'SUBNET6': None,
 }

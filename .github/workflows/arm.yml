@@ -7,20 +7,10 @@ on:
 
 concurrency: ci-arm-${{ github.ref }}
 
-###############################################
-# REQUIRED secrets
-# ${{ secrets.Docker_Login }}
-#    Username of docker login for pushing the images to repo env.DOCKER_ORG and env.DOCKER_ORG_TESTS
-# ${{ secrets.Docker_Password }}
-#    Password of docker login for pushing the images to repo env.DOCKER_ORG and env.DOCKER_ORG_TESTS
-# Add the above secrets to your github repo to determine where the images will be pushed.
-################################################
 # REQUIRED global variables
-# DOCKER_ORG, docker org used for pushing release images (branch x.y and master)
-# DOCKER_ORG_TEST, docker org used for pushing images for testing (branch testing).
+# DOCKER_ORG, docker org used for pushing images.
 env:
-  DOCKER_ORG: mailu
-  DOCKER_ORG_TEST: mailuci
+  DOCKER_ORG: ghcr.io/mailu
 
 jobs:
 # This job calculates all global job variables that are required by all the subsequent jobs.

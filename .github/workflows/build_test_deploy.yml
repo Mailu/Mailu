@@ -1,3 +1,11 @@
+###############################################
+# REQUIRED secrets
+# ${{ secrets.Docker_Login }}
+#    Username of docker login for logging in docker for pulling images (higher pull rate limit)
+# ${{ secrets.Docker_Password }}
+#    Password of docker login for logging in docker for pulling images (higher pull rate limit)
+################################################
+
 name: build-test-deploy
 on:
   workflow_call:
@@ -16,7 +24,7 @@ on:
         required: true
         type: string
       docker_org:
-        description: 'The docker organisation where the images are pushed to.'
+        description: 'The docker organisation where the images are pushed to. E.g. ghcr.io/mailu'
         required: true
         type: string
       branch:
@@ -24,7 +32,7 @@ on:
         required: true
         type: string
       deploy:
-        description: Deploy to docker hub. Happens for all branches but staging. Use string true or false.
+        description: Deploy to container registry. Happens for all branches but staging. Use string true or false.
         default: true
         required: false
         type: string
@@ -50,7 +58,7 @@ on:
         required: true
         type: string
       docker_org:
-        description: 'The docker organisation where the images are pushed to.'
+        description: 'The docker organisation where the images are pushed to. E.g. ghcr.io/mailu'
         required: true
         type: string
       branch:
@@ -58,7 +66,7 @@ on:
         required: true
         type: string
       deploy:
-        description: Deploy to docker hub. Happens for all branches but staging. Use string true or false.
+        description: Deploy to container registry. Happens for all branches but staging. Use string true or false.
         default: true
         required: false
         type: string
@@ -250,8 +258,8 @@ jobs:
       - name: Build all docker images
         env:
           DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
-          MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}-build
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-build
         uses: docker/bake-action@v2
         with:
           files: ${{env.HCL_FILE}}
@@ -313,8 +321,8 @@ jobs:
       - name: Build all docker images
         env:
           DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
-          MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}-build
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-build
         uses: docker/bake-action@v2
         with:
           files: ${{env.HCL_FILE}}
@@ -381,8 +389,8 @@ jobs:
         run: python tests/compose/test.py ${{ matrix.target }} ${{ matrix.time }}
         env:
           DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
-          MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}-build
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-build
 
   deploy:
     name: Deploy images
@@ -409,17 +417,18 @@ jobs:
       - uses: crazy-max/ghaction-github-runtime@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Login to Docker Hub
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.Docker_Login }}
-          password: ${{ secrets.Docker_Password }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Helper to convert docker org to lowercase
         id: string
         uses: ASzc/change-string-case-action@v5
         with:
           string: ${{ github.repository_owner }}
-      - name: Push image to Docker
+      - name: Push image to Github (ghcr.io)
         shell: bash
         run: |
           if [ '${{ env.MAILU_VERSION }}' == 'master' ]; then pinned_mailu_version='master'; else pinned_mailu_version=${{ env.PINNED_MAILU_VERSION}}; fi;
@@ -427,7 +436,7 @@ jobs:
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:${{ env.MAILU_VERSION }} \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:$pinned_mailu_version \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:latest \
-            ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}
+            ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}-build
 
   deploy-arm:
     name: Deploy images for arm
@@ -454,17 +463,18 @@ jobs:
       - uses: crazy-max/ghaction-github-runtime@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Login to Docker Hub
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.Docker_Login }}
-          password: ${{ secrets.Docker_Password }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Helper to convert docker org to lowercase
         id: string
         uses: ASzc/change-string-case-action@v5
         with:
           string: ${{ github.repository_owner }}
-      - name: Push image to Docker
+      - name: Push image to Github (ghcr.io)
         shell: bash
         run: |
           if [ '${{ env.MAILU_VERSION }}' == 'master-arm' ]; then pinned_mailu_version='master-arm'; else pinned_mailu_version=${{ env.PINNED_MAILU_VERSION}}; fi;
@@ -472,7 +482,7 @@ jobs:
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:${{ env.MAILU_VERSION }} \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:$pinned_mailu_version \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:latest \
-            ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}
+            ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}-build
 
 #This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.
   tag-release:

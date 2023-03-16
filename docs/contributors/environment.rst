@@ -116,7 +116,7 @@ After cloning the git repository to your workstation, you can build the images:
 
 The ``build.hcl`` file has three variables:
 
-#. ``$DOCKER_ORG``: First part of the image tag. Defaults to *mailu* and needs to be changed
+#. ``$DOCKER_ORG``: First part of the image tag. Defaults to *ghcr.io/mailu* and needs to be changed
    only  when pushing to your own Docker hub account.
 #. ``$MAILU_VERSION``: Last part of the image tag. Defaults to *local* to differentiate from pulled
    images.
@@ -206,14 +206,14 @@ Test images
 
 All PR's automatically get build by a Github Action workflow, controlled by `bors-ng`_.
 Some primitive auto testing is done.
-The resulting images get uploaded to Docker hub, under the
-tag name ``mailuci/<name>:pr-<no>``.
+The resulting images get uploaded to the Github container registry, under the
+tag name ``ghcr.io/mailu/<name>:pr-<no>``.
 
 For example, to test PR #500 against master, reviewers can use:
 
 .. code-block:: bash
 
-  export DOCKER_ORG="mailuci"
+  export DOCKER_ORG="ghcr.io/mailu"
   export MAILU_VERSION="pr-500"
   docker compose pull
   docker compose up -d

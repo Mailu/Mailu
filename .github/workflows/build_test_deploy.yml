@@ -142,6 +142,8 @@ jobs:
           DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+          LABEL_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_LABEL_VERSION: ${{ env.PINNED_MAILU_VERSION }}
         uses: docker/bake-action@v2
         with:
           files: ${{env.HCL_FILE}}
@@ -198,6 +200,8 @@ jobs:
           DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+          LABEL_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_LABEL_VERSION: ${{ env.PINNED_MAILU_VERSION }}
         uses: docker/bake-action@v2
         with:
           files: ${{env.HCL_FILE}}
@@ -260,6 +264,8 @@ jobs:
           DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
           MAILU_VERSION: ${{ env.MAILU_VERSION }}-build
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-build
+          LABEL_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_LABEL_VERSION: ${{ env.PINNED_MAILU_VERSION }}
         uses: docker/bake-action@v2
         with:
           files: ${{env.HCL_FILE}}
@@ -323,6 +329,8 @@ jobs:
           DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
           MAILU_VERSION: ${{ env.MAILU_VERSION }}-build
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-build
+          LABEL_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_LABEL_VERSION: ${{ env.PINNED_MAILU_VERSION }}
         uses: docker/bake-action@v2
         with:
           files: ${{env.HCL_FILE}}

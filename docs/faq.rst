@@ -404,7 +404,7 @@ From the web administration interface, when a user is deleted, the user is only 
 * cannot access Mailu (admin/webmail)
 * cannot access the email box via pop3/imap
 
-It is not possible to delete users via the Mailu web administration interface. The main reason is to prevent email address reusage. If a user was deleted, it can be recreated and used by someone else. It is not clear that the email address has been used by someone else previously. This new user might receive emails which were meant to be received by the previous user. Disabling the user, prevents the email address to be reused by mistake.
+It is not possible to delete users via the Mailu web administration interface. The main reason is to prevent email address reuse. If a user was deleted, it can be recreated and used by someone else. It is not clear that the email address has been used by someone else previously. This new user might receive emails which were meant for the previous user. Disabling the user, prevents the email address to be reused by mistake.
 
 Another reason is that extra post-deletion steps are required after a user has been deleted from the Mailu database. Those additional steps are:
 

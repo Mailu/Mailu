@@ -45,11 +45,11 @@ It offers the following configuration options:
 Access the web administration interface
 ---------------------------------------
 
-The admin GUI is by default accessed via the URL `https://<my domain>/admin`, when it's enabled in the setup utility 
+The admin GUI is by default accessed via the URL `https://<my domain>/admin`, when it's enabled in the setup utility
 or by manually setting `ADMIN=true` in `mailu.env`.
 To login the admin GUI enter the email address and password of an user.
 
-Only global administrator users have access to all configuration settings and the Rspamd webgui. Other users will be 
+Only global administrator users have access to all configuration settings and the Rspamd webgui. Other users will be
 presented with settings for only their account, and domains they are managers of.
 To create a user who is a global administrator for a new installation, the Mailu.env file can be adapted.
 For more information see the section 'Admin account - automatic creation' in :ref:`the configuration reference <admin_account>`.
@@ -314,9 +314,9 @@ This page is also accessible for domain managers. On the users page new users ca
 
 * Edit. For all available options see :ref:`the Add user page <webadministration_add_user>`.
 
-* Delete. Deletes the user. The Admin GUI will ask for confirmation if the user must be really deleted.
+* Delete. Disables the user. For more information on permanently deleting users, refer to the :ref:`How to delete users page<delete_users>`.
 
-* Setting. Access the settings page of the user. See :ref:`the settings page <webadministration_settings>` for more information.
+* Settings. Access the settings page of the user. See :ref:`the settings page <webadministration_settings>` for more information.
 
 * Auto-reply. Access the auto-reply page of the user. See the :ref:`auto-reply page <webadministration_auto-reply>` for more information.
 
@@ -330,13 +330,13 @@ This page also shows an overview of the following settings of an user:
 
 * Storage quota. Shows how much assigned storage has been consumed.
 
-* Sending Quota. The sending quota is the limit of messages a single user can send per day. 
+* Sending Quota. The sending quota is the limit of messages a single user can send per day.
 
 * Comment. A description for the user.
 
 * Created. Date when the user was created.
 
-* Last edit. Last date when the user was modified. 
+* Last edit. Last date when the user was modified.
 
 .. _webadministration_add_user:
 

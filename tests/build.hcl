@@ -20,6 +20,12 @@ variable "PINNED_MAILU_VERSION" {
 variable "MAILU_VERSION" {
   default = "local"
 }
+variable "LABEL_VERSION" {
+  default = "local"
+}
+variable "PINNED_LABEL_VERSION" {
+  default = "local"
+}
 
 #-----------------------------------------------------------------------------------------
 # Grouping of targets to build. All these images are built when using:
@@ -54,7 +60,7 @@ target "defaults" {
   platforms = [ "linux/amd64"]
   dockerfile = "Dockerfile"
   args = {
-    VERSION = "${PINNED_MAILU_VERSION}"
+    VERSION = "${PINNED_LABEL_VERSION}"
   }
 }
 
@@ -99,8 +105,8 @@ target "docs" {
   context = "docs/"
   tags = tag("docs")
   args = {
-    version = "${MAILU_VERSION}"
-    pinned_version = "${PINNED_MAILU_VERSION}"
+    version = "${LABEL_VERSION}"
+    pinned_version = "${PINNED_LABEL_VERSION}"
   }
 }
 

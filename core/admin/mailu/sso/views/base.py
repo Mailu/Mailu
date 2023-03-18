@@ -78,8 +78,8 @@ def logout():
 Redirect to the url passed in parameter if any; Ensure that this is not an open-redirect too...
 https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html
 """
-def _has_usable_redirect():
-    if 'homepage' in flask.request.url and not (flask.request.headers.get(app.config['PROXY_AUTH_HEADER']) and not 'noproxyauth'):
+def _has_usable_redirect(is_proxied=False):
+    if 'homepage' in flask.request.url and not is_proxied:
         return None
     if url := flask.request.args.get('url'):
         url = url_unquote(url)
@@ -101,7 +101,7 @@ def _proxy():
     if not email:
         return flask.abort(500, 'No %s header' % app.config['PROXY_AUTH_HEADER'])
 
-    url = _has_usable_redirect() or app.config['WEB_ADMIN']
+    url = _has_usable_redirect(True) or app.config['WEB_ADMIN']
 
     user = models.User.get(email)
     if user:

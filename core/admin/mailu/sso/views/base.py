@@ -78,8 +78,8 @@ def logout():
 Redirect to the url passed in parameter if any; Ensure that this is not an open-redirect too...
 https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html
 """
-def _has_usable_redirect():
-    if 'homepage' in flask.request.url:
+def _has_usable_redirect(is_proxied=False):
+    if 'homepage' in flask.request.url and not is_proxied:
         return None
     if url := flask.request.args.get('url'):
         url = url_unquote(url)
@@ -92,15 +92,16 @@ def _has_usable_redirect():
 https://mailu.io/master/configuration.html#header-authentication-using-an-external-proxy
 """
 def _proxy():
-    ip = ipaddress.ip_address(flask.request.remote_addr)
+    proxy_ip = flask.request.headers.get('X-Forwarded-By', flask.request.remote_addr)
+    ip = ipaddress.ip_address(proxy_ip)
     if not any(ip in cidr for cidr in app.config['PROXY_AUTH_WHITELIST']):
-        return flask.abort(500, '%s is not on PROXY_AUTH_WHITELIST' % flask.request.remote_addr)
+        return flask.abort(500, '%s is not on PROXY_AUTH_WHITELIST' % proxy_ip)
 
     email = flask.request.headers.get(app.config['PROXY_AUTH_HEADER'])
     if not email:
         return flask.abort(500, 'No %s header' % app.config['PROXY_AUTH_HEADER'])
 
-    url = _has_usable_redirect() or app.config['WEB_ADMIN']
+    url = _has_usable_redirect(True) or app.config['WEB_ADMIN']
 
     user = models.User.get(email)
     if user:

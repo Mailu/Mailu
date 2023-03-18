@@ -79,7 +79,7 @@ Redirect to the url passed in parameter if any; Ensure that this is not an open-
 https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html
 """
 def _has_usable_redirect():
-    if 'homepage' in flask.request.url:
+    if 'homepage' in flask.request.url and not (flask.request.headers.get(app.config['PROXY_AUTH_HEADER']) and not 'noproxyauth'):
         return None
     if url := flask.request.args.get('url'):
         url = url_unquote(url)

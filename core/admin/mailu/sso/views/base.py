@@ -92,7 +92,7 @@ def _has_usable_redirect():
 https://mailu.io/master/configuration.html#header-authentication-using-an-external-proxy
 """
 def _proxy():
-    proxy_ip = flask.request.headers.get('X-Forwarded-By')
+    proxy_ip = flask.request.headers.get('X-Forwarded-By', flask.request.remote_addr)
     ip = ipaddress.ip_address(proxy_ip)
     if not any(ip in cidr for cidr in app.config['PROXY_AUTH_WHITELIST']):
         return flask.abort(500, '%s is not on PROXY_AUTH_WHITELIST' % proxy_ip)

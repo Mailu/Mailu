@@ -4,6 +4,7 @@ import os
 import glob
 import logging as log
 import requests
+import shutil
 import sys
 import time
 from socrate import system,conf
@@ -13,8 +14,14 @@ system.set_env()
 
 # Actual startup script
 
+config_files = []
 for rspamd_file in glob.glob("/conf/*"):
     conf.jinja(rspamd_file, os.environ, os.path.join("/etc/rspamd/local.d", os.path.basename(rspamd_file)))
+    config_files.append(os.path.basename(rspamd_file))
+
+for override_file in glob.glob("/overrides/*"):
+    if os.path.basename(override_file) not in config_files:
+        shutil.copyfile(override_file, os.path.join("/etc/rspamd/local.d", os.path.basename(override_file)))
 
 # Admin may not be up just yet
 healthcheck = f'http://{os.environ["ADMIN_ADDRESS"]}/internal/rspamd/local_domains'

@@ -369,7 +369,7 @@ jobs:
               ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} \
               || echo "builder does not exist" \
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \
-              ; /usr/bin/docker buildx bake --file ./tests/build.hcl --set *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/base:${{ hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }}-arm --set *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/base:${{ hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }}-arm,mode=max --set *.platform=${{ env.ARCH }} base \
+              ; /usr/bin/docker buildx bake --file ./tests/build.hcl --set *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/base:${{ hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }}-arm --set *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/base:${{ hashFiles('core/base/Dockerfile','core/base/requirements-prod.txt') }}-arm,mode=max --set *.platform=${{ env.ARCH }} ${{ matrix.target }} \
               ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }}
       - name: cleanup docker buildx instance after failure of build step
         if: ${{ failure() }}

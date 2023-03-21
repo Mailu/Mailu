@@ -17,11 +17,12 @@ long-term professional support, you should probably turn to them instead.
 Prepare the environment
 -----------------------
 
-Mailu images are designed to work on x86 or equivalent hardware, so it
+Mailu ships multi-arch images which are designed to work on linux/amd64,
+linux/arm64v8 or linux/armv7 hardware, so it
 should run on pretty much any cloud server as long as enough power is
-provided. For non x86 machines, see :ref:`arm_images`
+provided.
 
-You are free to choose any operating system that runs Docker (>= 1.11),
+You are free to choose any linux operating system that runs Docker (>= 1.11),
 then chose between various flavors including Docker Compose, Kubernetes
 and Rancher.
 

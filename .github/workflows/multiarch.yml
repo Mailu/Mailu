@@ -1,4 +1,4 @@
-name: start-linux-amd64
+name: start-linux-multiarch
 on:
   push:
     branches:
@@ -6,8 +6,9 @@ on:
       - staging
       - '1.9'
       - master
+      - test-*
 
-concurrency: ci-x64-${{ github.ref }}
+concurrency: ci-multiarch-${{ github.ref }}
 
 # REQUIRED global variables
 # DOCKER_ORG, docker org used for pushing images.
@@ -57,7 +58,7 @@ jobs:
           echo "DEPLOY=true" >> $GITHUB_ENV
           echo "RELEASE=false" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION and DEPLOY/RELEASE for normal release x.y
-        if: env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master'
+        if: env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' && !(contains(env.BRANCH, 'test-'))
         shell: bash
         run: |
           version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
@@ -81,13 +82,21 @@ jobs:
           echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
           echo "DEPLOY=true" >> $GITHUB_ENV
           echo "RELEASE=false" >> $GITHUB_ENV
+      - name: Derive for branch test-*
+        if: contains(env.BRANCH, 'test-')
+        run: |
+          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG_DERIVED=${{ env.DOCKER_ORG }}" >> $GITHUB_ENV
+          echo "DEPLOY=true" >> $GITHUB_ENV
+          echo "RELEASE=false" >> $GITHUB_ENV
 
   build-test-deploy:
     needs:
       - derive-variables
     uses: ./.github/workflows/build_test_deploy.yml
     with:
-      architecture: 'linux/amd64'
+      architecture: 'linux/amd64,linux/arm64/v8,linux/arm/v7'
       mailu_version: ${{needs.derive-variables.outputs.MAILU_VERSION}}
       pinned_mailu_version: ${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}
       docker_org: ${{needs.derive-variables.outputs.DOCKER_ORG}}

@@ -24,7 +24,7 @@ Pick a distribution
 -------------------
 
 The mail server runs as a set of Docker containers, so it is almost operating
-system agnostic as long as a fairly recent Linux kernel is running and
+system agnostic.
 the Docker API (>= 1.11) is available.
 
 Because most of our tests run on Debian Jessie and Debian Stretch, we recommend

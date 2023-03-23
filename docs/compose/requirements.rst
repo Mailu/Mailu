@@ -25,7 +25,6 @@ Pick a distribution
 
 The mail server runs as a set of Docker containers, so it is almost operating
 system agnostic.
-the Docker API (>= 1.11) is available.
 
 Because most of our tests run on Debian Jessie and Debian Stretch, we recommend
 one of these for the base system. Mailu should however be able to run on

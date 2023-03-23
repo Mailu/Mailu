@@ -145,9 +145,10 @@ jobs:
           BUILDER: ${{ steps.uuid.outputs.uuid }}
           DOCKER_LOGIN: ${{ secrets.Docker_Login }}
           DOCKER_PASSW: ${{ secrets.Docker_Password }}
+          BUILDX_NO_DEFAULT_ATTESTATIONS: 1
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 5
+          timeout_minutes: 20
           retry_wait_seconds: 30
           max_attempts: 3
           shell: bash
@@ -210,9 +211,10 @@ jobs:
           BUILDER: ${{ steps.uuid.outputs.uuid }}
           DOCKER_LOGIN2: ${{ secrets.Docker_Login2 }}
           DOCKER_PASSW2: ${{ secrets.Docker_Password2 }}
+          BUILDX_NO_DEFAULT_ATTESTATIONS: 1
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 10
+          timeout_minutes: 30
           retry_wait_seconds: 30
           max_attempts: 10
           shell: bash
@@ -284,9 +286,10 @@ jobs:
           BUILDER: ${{ steps.uuid.outputs.uuid }}
           DOCKER_LOGIN: ${{ secrets.Docker_Login }}
           DOCKER_PASSW: ${{ secrets.Docker_Password }}
+          BUILDX_NO_DEFAULT_ATTESTATIONS: 1
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 5
+          timeout_minutes: 20
           retry_wait_seconds: 30
           max_attempts: 3
           shell: bash
@@ -348,17 +351,18 @@ jobs:
       - name: Build docker image with retry
         env:
           DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
-          MAILU_VERSION: ${{ env.MAILU_VERSION }}-arm-build
-          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-arm-build
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}-build-arm
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-build-arm
           LABEL_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_LABEL_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           ARCH: linux/arm64/v8,linux/arm/v7
           BUILDER: ${{ steps.uuid.outputs.uuid }}
           DOCKER_LOGIN2: ${{ secrets.Docker_Login2 }}
           DOCKER_PASSW2: ${{ secrets.Docker_Password2 }}
+          BUILDX_NO_DEFAULT_ATTESTATIONS: 1
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 10
+          timeout_minutes: 30
           retry_wait_seconds: 30
           max_attempts: 10
           shell: bash
@@ -484,7 +488,7 @@ jobs:
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:$pinned_mailu_version \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:latest \
             ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}-build \
-            ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}-arm-build
+            ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}-build-arm
       - name: Push x64 image to Github (ghcr.io)
         if: contains(inputs.architecture, 'linux/amd64') && !contains(inputs.architecture, 'linux/arm64/v8,linux/arm/v7')
         shell: bash
@@ -504,7 +508,7 @@ jobs:
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:${{ env.MAILU_VERSION }} \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:$pinned_mailu_version \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:latest \
-            ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}-arm-build
+            ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}-build-arm
 
 #This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.
   tag-release:

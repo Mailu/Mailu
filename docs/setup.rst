@@ -22,6 +22,7 @@ linux/arm64v8 or linux/armv7 hardware, so it
 should run on pretty much any cloud server as long as enough power is
 provided.
 
+You are free to choose any linux operating system that runs Docker,
 then chose between various flavors including Docker Compose, Kubernetes
 and Rancher.
 

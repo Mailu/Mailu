@@ -22,13 +22,6 @@ linux/arm64v8 or linux/armv7 hardware, so it
 should run on pretty much any cloud server as long as enough power is
 provided.
 
-You are free to choose any linux operating system that runs Docker,
-then chose between various flavors including Docker Compose, Kubernetes
-and Rancher.
-
-Compose is the most tested flavor and should be the choice for less experienced
-users. Make sure you complete the requirements for the flavor you chose.
-
 You should also have at least a DNS hostname and a DNS name for receiving
 emails. Some instructions are provided on the matter in the article
 :ref:`dns_setup`.

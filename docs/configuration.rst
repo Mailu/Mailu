@@ -253,6 +253,14 @@ The ``TZ`` sets the timezone Mailu will use. The timezone naming convention usua
 
 .. _`TZ database name`: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
+The ``PROXY_PROTOCOL`` (default: unset) allows the the front container to receive TCP and HTTP connections with
+the PROXY protocol. It can be set to:
+* ``http`` to accept the ``PROXY`` protocol on nginx's HTTP proxy ports
+* ``mail`` to accept the ``PROXY`` protocol on nginx's mail proxy ports
+* ``all`` to accept the ``PROXY`` protocol on all nginx's HTTP and mail proxy ports
+
+This requires to have a valid ``REAL_IP_FROM``.
+
 Antivirus settings
 ------------------
 

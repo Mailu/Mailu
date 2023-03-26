@@ -1,0 +1,17 @@
+Introduce SQLAlchemy database uris for configuring the admin and roundcube database.
+Remove the database configuration option from the setup utility. Using a different
+database system than SQLite is not necessary for Mailu. The Mailu database generally
+contains static data.
+
+The usage of the *DB_* environment variables is deprecated now.
+They can still be used in the release after Mailu 1.9, but will be removed
+after that version. This means it will be removed from master after the upcoming
+Mailu release.
+
+To start using the new environment variables, all *DB_* environment variables must be changed to:
+SQLALCHEMY_DATABASE_URI=<SQLAlchemy database URL>
+SQLALCHEMY_DATABASE_URI_ROUNDCUBE=<Roundcube database URL>
+
+If no URI is specified, SQLite is used with these settings:
+SQLALCHEMY_DATABASE_URI=sqlite:////data/main.db
+SQLALCHEMY_DATABASE_URI_ROUNDCUBE=sqlite:////data/roundcube.db

@@ -45,7 +45,7 @@ marshmallow==3.18.0
 marshmallow-sqlalchemy==0.28.1
 msoffcrypto-tool==5.0.0
 multidict==6.0.2
-mysql-connector-python==8.0.29
+mysql-connector-python==8.0.32
 olefile==0.46
 oletools==0.60.1
 packaging==21.3

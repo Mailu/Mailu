@@ -26,7 +26,8 @@ with open("/etc/resolv.conf") as handle:
     resolver = content[content.index("nameserver") + 1]
     context["RESOLVER"] = f"[{resolver}]" if ":" in resolver else resolver
 
-db_flavor = env.get("ROUNDCUBE_DB_FLAVOR", "sqlite")
+db_uri = env.get("SQLALCHEMY_DATABASE_URI_ROUNDCUBE", "sqlite:////data/roundcube.db")
+db_flavor = env.get("ROUNDCUBE_DB_FLAVOR")
 if db_flavor == "sqlite":
     context["DB_DSNW"] = "sqlite:////data/roundcube.db"
 elif db_flavor == "mysql":
@@ -43,6 +44,8 @@ elif db_flavor == "postgresql":
         env.get("ROUNDCUBE_DB_HOST", "database"),
         env.get("ROUNDCUBE_DB_NAME", "roundcube")
     )
+elif db_uri:
+    context["DB_DSNW"] = db_uri
 else:
     print(f"Unknown ROUNDCUBE_DB_FLAVOR: {db_flavor}", file=sys.stderr)
     exit(1)

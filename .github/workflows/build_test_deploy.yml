@@ -154,6 +154,7 @@ jobs:
           shell: bash
           command: |
             set -euxo pipefail \
+              ; /usr/bin/docker info \
               ; echo "${{ github.token }}" |        docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
               ; echo "$DOCKER_PASSW" |    docker login --username "$DOCKER_LOGIN" --password-stdin \
               ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} \
@@ -220,6 +221,7 @@ jobs:
           shell: bash
           command: |
             set -euxo pipefail \
+              ; /usr/bin/docker info \
               ; echo "${{ github.token }}" |        docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
               ; echo "$DOCKER_PASSW2" |    docker login --username "$DOCKER_LOGIN2" --password-stdin \
               ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} \
@@ -295,6 +297,7 @@ jobs:
           shell: bash
           command: |
             set -euxo pipefail \
+              ; /usr/bin/docker info \
               ; echo "${{ github.token }}" |        docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
               ; echo "$DOCKER_PASSW" |   docker login --username "$DOCKER_LOGIN" --password-stdin \
               ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} \
@@ -368,6 +371,7 @@ jobs:
           shell: bash
           command: |
             set -euxo pipefail \
+              ; /usr/bin/docker info \
               ; echo "${{ github.token }}" |        docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
               ; echo "$DOCKER_PASSW2" |    docker login --username "$DOCKER_LOGIN2" --password-stdin \
               ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} \

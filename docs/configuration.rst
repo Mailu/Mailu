@@ -285,10 +285,10 @@ These are used for DNS based service discovery with possibly changing services I
 Database settings
 -----------------
 
-The admin service stores configurations in a database. The roundcube service also stores configurations in a database.
-By default SQLite is used. SQLite is sufficient for practically any deployment.
-The database contains static configuration. It is recommended to use SQLite. However, a different database back-end can be used via a
-`DB URL`_. For Admin, only supported are SQLite, PostgreSQL and MariaDB/MySQL.
+Both the admin and roundcube services store their configurations in a SQLite database.
+Alternatives hosted options like PostgreSQL and MariaDB/MySQL can be configured using `DB URL`_
+but the development team recommends against it. Indeed, there is currently very little data
+to be stored and SQLite is deemed both sufficient, simpler and more reliable overall.
 
 - ``SQLALCHEMY_DATABASE_URI`` (default: sqlite:////data/main.db): the SQLAlchemy database URL for accessing the database
 - ``SQLALCHEMY_DATABASE_URI_ROUNDCUBE`` (default: sqlite:////data/roundcube.db): the Roundcube database URL for accessing the Roundcube database

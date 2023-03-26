@@ -24,7 +24,7 @@ itsdangerous
 limits
 marshmallow
 marshmallow-sqlalchemy
-mysql-connector-python==8.0.29
+mysql-connector-python
 passlib
 psycopg2-binary
 Pygments

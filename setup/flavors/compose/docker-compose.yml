@@ -39,6 +39,7 @@ services:
     networks:
       - default
       - webmail
+      - radicale
     volumes:
       - "{{ root }}/certs:/certs"
       - "{{ root }}/overrides/nginx:/overrides:ro"

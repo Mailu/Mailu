@@ -383,7 +383,7 @@ msgstr "Administrateurs"
 
 #: mailu/ui/templates/sidebar.html:74
 msgid "Relayed domains"
-msgstr "Domaines relayé"
+msgstr "Domaines relayés"
 
 #: mailu/ui/templates/sidebar.html:88
 msgid "Mail domains"

@@ -170,7 +170,6 @@ services:
   webdav:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}radicale:${MAILU_VERSION:-{{ version }}}
     restart: always
-    env_file: {{ env }}
     volumes:
       - "{{ root }}/dav:/data"
     networks:

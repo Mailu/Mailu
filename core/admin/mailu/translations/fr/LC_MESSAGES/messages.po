@@ -383,7 +383,7 @@ msgstr "Administrateurs"
 
 #: mailu/ui/templates/sidebar.html:74
 msgid "Relayed domains"
-msgstr "Domaines relayé"
+msgstr "Domaines relayés"
 
 #: mailu/ui/templates/sidebar.html:88
 msgid "Mail domains"
@@ -529,11 +529,11 @@ msgstr "Entrée DNS DMARC"
 
 #: mailu/ui/templates/domain/details.html:58
 msgid "DNS TLSA entry"
-msgstr ""
+msgstr "Entrée DNS TLSA"
 
 #: mailu/ui/templates/domain/details.html:63
 msgid "DNS client auto-configuration entries"
-msgstr ""
+msgstr "Entrées DNS pour la configuration client automatique"
 
 #: mailu/ui/templates/domain/edit.html:4
 msgid "Edit domain"
@@ -626,7 +626,7 @@ msgstr "Dernier relevé"
 
 #: mailu/ui/templates/fetch/list.html:24
 msgid "Status"
-msgstr "Etat"
+msgstr "État"
 
 #: mailu/ui/templates/fetch/list.html:38
 msgid "yes"

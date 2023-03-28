@@ -6,21 +6,16 @@
 name: mirror-images
 on:
   workflow_dispatch:
-  schedule:
-    # * is a special character in YAML so you have to quote this string
-    # Mirror (copy) the image every day at 03:00h
-    # m h  dom mon dow
-    - cron:  '0 3 * * *'
+    inputs:
+      tag:
+        description: 'The tag of the docker.io/alpine image that is mirrored as ghcr.io/mailu/alpine'
+        required: true
+        type: string
 
 jobs:
 # mirror alpine image
   mirror-image-alpine:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        #list of tags to mirror, update this to sync a different alpine tag
-        tag: ["3.17.2"]
     steps:
       - name: Helper to convert docker org to lowercase
         id: string
@@ -31,7 +26,7 @@ jobs:
         shell: bash
         env:
           DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
-          TAG: ${{ matrix.tag }}
+          TAG: ${{ inputs.tag }}
         run: |
           set -euxo pipefail \
           ; echo "${{ github.token }}" | docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \

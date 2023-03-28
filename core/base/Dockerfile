@@ -1,14 +1,8 @@
 # syntax=docker/dockerfile-upstream:1.4.3
 
 # base system image (intermediate)
-# Note when updating tag, also update it in .github/workflows/mirror.yml.
-# Then run that workflow at least once to pull & mirror the new alpine image. Or do it manually via:
-# echo "$MY_GH_PAT" | docker login --username "my_gh_user_name" --password-stdin ghcr.io
-# curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 >regctl
-# chmod 755 regctl
-# ./regctl image copy docker.io/alpine:3.17.2 ghcr.io/mailu/alpine:3.17.2
-# rm regctl
-# docker logout ghcr.io
+# Note when updating the alpine tag, first manually run the workflow .github/workflows/mirror.yml.
+# Just run the workflow with the tag that must be synchronised.
 ARG DISTRO=ghcr.io/mailu/alpine:3.17.2
 FROM $DISTRO as system
 

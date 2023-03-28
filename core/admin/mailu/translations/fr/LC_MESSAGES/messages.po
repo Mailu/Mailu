@@ -529,11 +529,11 @@ msgstr "Entrée DNS DMARC"
 
 #: mailu/ui/templates/domain/details.html:58
 msgid "DNS TLSA entry"
-msgstr ""
+msgstr "Entrée DNS TLSA"
 
 #: mailu/ui/templates/domain/details.html:63
 msgid "DNS client auto-configuration entries"
-msgstr ""
+msgstr "Entrées DNS pour la configuration client automatique"
 
 #: mailu/ui/templates/domain/edit.html:4
 msgid "Edit domain"

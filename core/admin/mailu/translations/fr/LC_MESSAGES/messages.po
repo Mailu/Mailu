@@ -626,7 +626,7 @@ msgstr "Dernier relevé"
 
 #: mailu/ui/templates/fetch/list.html:24
 msgid "Status"
-msgstr "Etat"
+msgstr "État"
 
 #: mailu/ui/templates/fetch/list.html:38
 msgid "yes"

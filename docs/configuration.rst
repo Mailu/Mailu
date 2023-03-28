@@ -256,6 +256,7 @@ The ``TZ`` sets the timezone Mailu will use. The timezone naming convention usua
 The ``PROXY_PROTOCOL`` (default: unset) allows the the front container to receive TCP and HTTP connections with
 the `PROXY protocol`_ (originally introduced in HAProxy, now also configurable in other proxy servers).
 It can be set to:
+
 * ``http`` to accept the ``PROXY`` protocol on nginx's HTTP proxy ports
 * ``mail`` to accept the ``PROXY`` protocol on nginx's mail proxy ports
 * ``all`` to accept the ``PROXY`` protocol on all nginx's HTTP and mail proxy ports
@@ -263,7 +264,10 @@ It can be set to:
 .. _`PROXY protocol`: https://github.com/haproxy/haproxy/blob/master/doc/proxy-protocol.txt
 
 This requires to have a valid ``REAL_IP_FROM`` (default: unset). Setting ``PROXY_PROTOCOL`` without setting
-``REAL_IP_FROM`` *will not work*. Make sure to set a ``REAL_IP_FROM`` only pointing to IP addresses or networks
+``REAL_IP_FROM`` *will not work*. The ``REAL_IP_HEADER`` **must be unset**. Otherwise Mailu will not accept
+the IP address from the remote client specified by the proxy. This results in the proxy being rate limited
+or even banned (when fail2ban is used).
+Make sure to set a ``REAL_IP_FROM`` only pointing to IP addresses or networks
 that you trust; accepting the ``PROXY`` protocol from untrusted sources is a serious security vulnerability,
 allowing a potential attacker to spoof their source address.
 

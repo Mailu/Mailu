@@ -1,0 +1,37 @@
+# Used for creating mirror images of images currently on docker.io.
+# The main reason is to circumvent the docker pull rate-limit
+# Currently this is used for:
+# Alpine (used in Dockerfile for base image)
+
+name: mirror-images
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The tag of the docker.io/alpine image that is mirrored as ghcr.io/mailu/alpine'
+        required: true
+        type: string
+
+jobs:
+# mirror alpine image
+  mirror-image-alpine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Helper to convert docker org to lowercase
+        id: string
+        uses: ASzc/change-string-case-action@v5
+        with:
+          string: ${{ github.repository_owner }}
+      - name: Mirror images
+        shell: bash
+        env:
+          DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euxo pipefail \
+          ; echo "${{ github.token }}" | docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
+          ; curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 >regctl \
+          ; chmod 755 regctl \
+          ; ./regctl image copy docker.io/alpine:"$TAG" "$DOCKER_ORG"/alpine:"$TAG" \
+          ; rm regctl \
+          ; docker logout ghcr.io

@@ -47,10 +47,11 @@ accounts for a specific IP subnet as defined in
 ``AUTH_RATELIMIT_IP_V4_MASK`` (default: /24) and
 ``AUTH_RATELIMIT_IP_V6_MASK`` (default: /48).
 
-The ``AUTH_RATELIMIT_USER`` (default: 100/day) holds a security setting for fighting
+The ``AUTH_RATELIMIT_USER`` (default: 50/day) holds a security setting for fighting
 attackers that attempt to guess a user's password (typically using a password
-bruteforce attack). The value defines the limit of authentication attempts allowed
-for any given account within a specific timeframe.
+bruteforce attack). The value defines the limit of distinct authentication attempts
+allowed for any given account within a specific timeframe. Multiple attempts for the
+same account with the same password only counts for one.
 
 The ``AUTH_RATELIMIT_EXEMPTION_LENGTH`` (default: 86400) is the number of seconds
 after a successful login for which a specific IP address is exempted from rate limits.

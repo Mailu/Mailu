@@ -68,9 +68,13 @@ class LimitWraperFactory(object):
             app.logger.warn(f'Authentication attempt from {ip} for {username} has been rate-limited.')
         return is_rate_limited
 
-    def rate_limit_user(self, username, ip, device_cookie=None, device_cookie_name=None):
+    def rate_limit_user(self, username, ip, device_cookie=None, device_cookie_name=None, password=None):
         limiter = self.get_limiter(app.config["AUTH_RATELIMIT_USER"], 'auth-user')
         if self.is_subject_to_rate_limits(ip):
+            truncated_password = hmac.new(bytearray(username, 'utf-8'), bytearray(password, 'utf-8'), 'sha256').hexdigest()[-6:]
+            if password and self.storage.get(f'dedup2-{username}-{truncated_password}') > 0:
+                return
+            self.storage.incr(f'dedup2-{username}-{truncated_password}', limits.parse(app.config['AUTH_RATELIMIT_USER']).GRANULARITY.seconds, True)
             limiter.hit(device_cookie if device_cookie_name == username else username)
 
     """ Device cookies as described on:

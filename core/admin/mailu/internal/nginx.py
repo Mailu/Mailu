@@ -85,6 +85,7 @@ def handle_authentication(headers):
         raw_user_email = urllib.parse.unquote(headers["Auth-User"])
         raw_password = urllib.parse.unquote(headers["Auth-Pass"])
         user_email = 'invalid'
+        password = 'invalid'
         try:
             user_email = raw_user_email.encode("iso8859-1").decode("utf8")
             password = raw_password.encode("iso8859-1").decode("utf8")
@@ -107,6 +108,7 @@ def handle_authentication(headers):
                         "Auth-Server": server,
                         "Auth-User": user_email,
                         "Auth-User-Exists": is_valid_user,
+                        "Auth-Password": password,
                         "Auth-Port": port
                     }
         status, code = get_status(protocol, "authentication")
@@ -115,6 +117,7 @@ def handle_authentication(headers):
             "Auth-Error-Code": code,
             "Auth-User": user_email,
             "Auth-User-Exists": is_valid_user,
+            "Auth-Password": password,
             "Auth-Wait": 0
         }
     # Unexpected

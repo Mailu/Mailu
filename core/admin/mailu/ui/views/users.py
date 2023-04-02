@@ -106,7 +106,7 @@ def _process_password_change(form, user_email):
     if form.validate_on_submit():
         if form.pw.data != form.pw2.data:
             flask.flash('Passwords do not match', 'error')
-        elif models.User.login(user_email_or_current, form.current_pw.data):
+        elif user_email or models.User.login(user_email_or_current, form.current_pw.data):
             if msg := utils.isBadOrPwned(form):
                 flask.flash(msg, "error")
                 return flask.render_template('user/password.html', form=form, user=user)

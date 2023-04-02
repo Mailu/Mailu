@@ -38,8 +38,12 @@ services:
     {% endfor %}
     networks:
       - default
+{% if webmail_type != 'none' %}
       - webmail
+{% endif %}
+{% if webdav_enabled %}
       - radicale
+{% endif %}
     volumes:
       - "{{ root }}/certs:/certs"
       - "{{ root }}/overrides/nginx:/overrides:ro"

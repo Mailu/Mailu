@@ -99,18 +99,14 @@ def user_settings(user_email):
                 flask.url_for('.user_list', domain_name=user.domain.name))
     return flask.render_template('user/settings.html', form=form, user=user)
 
-
-@ui.route('/user/password', methods=['GET', 'POST'], defaults={'user_email': None})
-@ui.route('/user/password/<path:user_email>', methods=['GET', 'POST'])
-@access.owner(models.User, 'user_email')
-def user_password(user_email):
+def _process_password_change(form, user_email):
     user_email_or_current = user_email or flask_login.current_user.email
     user = models.User.query.get(user_email_or_current) or flask.abort(404)
-    form = forms.UserPasswordForm()
+    form = forms.UserPasswordChangeForm()
     if form.validate_on_submit():
         if form.pw.data != form.pw2.data:
             flask.flash('Passwords do not match', 'error')
-        else:
+        elif models.User.login(user_email_or_current, form.current_pw.data):
             if msg := utils.isBadOrPwned(form):
                 flask.flash(msg, "error")
                 return flask.render_template('user/password.html', form=form, user=user)
@@ -121,8 +117,19 @@ def user_password(user_email):
             if user_email:
                 return flask.redirect(flask.url_for('.user_list',
                     domain_name=user.domain.name))
+        else:
+            flask.flash('Wrong current password', 'error')
     return flask.render_template('user/password.html', form=form, user=user)
 
+@ui.route('/user/password', methods=['GET', 'POST'], defaults={'user_email': None})
+@access.owner(models.User, 'user_email')
+def user_password_change(user_email):
+    return _process_password_change(forms.UserPasswordChangeForm(), user_email)
+
+@ui.route('/user/password/<path:user_email>', methods=['GET', 'POST'])
+@access.domain_admin(models.User, 'user_email')
+def user_password(user_email):
+    return _process_password_change(forms.UserPasswordForm(), user_email)
 
 @ui.route('/user/reply', methods=['GET', 'POST'], defaults={'user_email': None})
 @ui.route('/user/reply/<path:user_email>', methods=['GET', 'POST'])

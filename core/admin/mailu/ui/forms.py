@@ -128,6 +128,12 @@ class UserPasswordForm(flask_wtf.FlaskForm):
     pwned = fields.HiddenField(label='', default=-1)
     submit = fields.SubmitField(_('Update password'))
 
+class UserPasswordChangeForm(flask_wtf.FlaskForm):
+    current_pw = fields.PasswordField(_('Current password'), [validators.DataRequired()])
+    pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
+    pw2 = fields.PasswordField(_('Password check'), [validators.DataRequired()])
+    pwned = fields.HiddenField(label='', default=-1)
+    submit = fields.SubmitField(_('Update password'))
 
 class UserReplyForm(flask_wtf.FlaskForm):
     reply_enabled = fields.BooleanField(_('Enable automatic reply'))

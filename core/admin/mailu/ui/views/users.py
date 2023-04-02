@@ -102,7 +102,6 @@ def user_settings(user_email):
 def _process_password_change(form, user_email):
     user_email_or_current = user_email or flask_login.current_user.email
     user = models.User.query.get(user_email_or_current) or flask.abort(404)
-    form = forms.UserPasswordChangeForm()
     if form.validate_on_submit():
         if form.pw.data != form.pw2.data:
             flask.flash('Passwords do not match', 'error')

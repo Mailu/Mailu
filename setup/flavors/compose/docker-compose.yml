@@ -28,7 +28,7 @@ services:
     logging:
       driver: journald
       options:
-        tag: docker-front
+        tag: mailu-front
     ports:
     {% for port in (80, 443, 25, 465, 587, 110, 995, 143, 993) %}
     {% if bind4 %}
@@ -71,7 +71,7 @@ services:
     logging:
       driver: journald
       options:
-        tag: docker-admin
+        tag: mailu-admin
     {% if not admin_enabled %}
     ports:
       - 127.0.0.1:8080:80
@@ -94,7 +94,7 @@ services:
     logging:
       driver: journald
       options:
-        tag: docker-imap
+        tag: mailu-imap
     volumes:
       - "{{ root }}/mail:/mail"
       - "{{ root }}/overrides/dovecot:/overrides:ro"
@@ -113,7 +113,7 @@ services:
     logging:
       driver: journald
       options:
-        tag: docker-smtp
+        tag: mailu-smtp
     volumes:
       - "{{ root }}/mailqueue:/queue"
       - "{{ root }}/overrides/postfix:/overrides:ro"
@@ -148,7 +148,7 @@ services:
     logging:
       driver: journald
       options:
-        tag: docker-antispam
+        tag: mailu-antispam
 {% if oletools_enabled %}
     networks:
       - default

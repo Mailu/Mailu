@@ -579,8 +579,7 @@ down brute force attacks. The same applies to login attempts via the single sign
 We *do* provide a possibility to export the logs from the ``front`` service and ``Admin`` service to the host.
 The ``front`` container logs failed logon attempts on SMTP, IMAP and POP3.
 The ``Admin`` container logs failed logon attempt on the single sign on page.
-For this you need to set ``LOG_DRIVER=journald`` or ``syslog``, depending on the log
-manager of the host. You will need to setup the proper Regex in the Fail2Ban configuration.
+You will need to setup the proper Regex in the Fail2Ban configuration.
 Below an example how to do so.
 
 If you use a reverse proxy in front of Mailu, it is vital to set the environment variables REAL_IP_HEADER and REAL_IP_FROM.

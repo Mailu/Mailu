@@ -9,7 +9,9 @@ services:
     restart: always
     env_file: .env
     logging:
-      driver: $LOG_DRIVER
+      driver: journald
+      options:
+        tag: docker-front
     ports:
     - "$BIND_ADDRESS4:80:80"
     - "$BIND_ADDRESS4:443:443"
@@ -43,6 +45,10 @@ services:
     image: mailu/dovecot:$VERSION
     restart: always
     env_file: .env
+    logging:
+      driver: journald
+      options:
+        tag: docker-imap
     volumes:
       - "$ROOT/mail:/mail"
       - "$ROOT/overrides/dovecot:/overrides:ro"
@@ -53,6 +59,10 @@ services:
     image: mailu/postfix:$VERSION
     restart: always
     env_file: .env
+    logging:
+      driver: journald
+      options:
+        tag: docker-smtp
     volumes:
       - "$ROOT/mailqueue:/queue"
       - "$ROOT/overrides/postfix:/overrides:ro"
@@ -63,6 +73,10 @@ services:
     image: mailu/rspamd:$VERSION
     restart: always
     env_file: .env
+    logging:
+      driver: journald
+      options:
+        tag: docker-antispam
     volumes:
       - "$ROOT/filter:/var/lib/rspamd"
       - "$ROOT/dkim:/dkim:ro"
@@ -88,6 +102,10 @@ services:
     image: mailu/admin:$VERSION
     restart: always
     env_file: .env
+    logging:
+      driver: journald
+      options:
+        tag: docker-admin
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/dkim:/dkim"

@@ -9,7 +9,7 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'Mailu'
-copyright = '2018, Mailu authors'
+copyright = '2023, Mailu authors'
 author = 'Mailu authors'
 version = release = os.environ.get('VERSION', 'master')
 language = 'en'
@@ -25,7 +25,7 @@ htmlhelp_basename = 'Mailudoc'
 # to template names.
 html_sidebars = {
     '**': [
-        'relations.html', 
+        'relations.html',
         'searchbox.html',
     ]
 }
@@ -36,10 +36,10 @@ html_context = {
     'github_user': 'mailu',
     'github_repo': 'mailu',
     'github_version': version,
-    'stable_version': '1.9',
+    'stable_version': '2.0',
     'versions': [
-        ('1.8', '/1.8/'),
         ('1.9', '/1.9/'),
+        ('2.0', '/2.0/'),
         ('master', '/master/')
     ],
     'conf_py_path': '/docs/'

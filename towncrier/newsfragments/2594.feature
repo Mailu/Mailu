@@ -1,1 +1,0 @@
-Drop postfix rsyslog localhost messages with IPv6 address

@@ -1,1 +1,0 @@
-Enable unbound by default. Mailu now requires a DNSSEC validating DNS resolver and experience has shown that this may not be the default everywhere yet.

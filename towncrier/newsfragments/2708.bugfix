@@ -1,3 +1,0 @@
-Proxy authentication was using the real client ip instead of the proxy
-IP for checking the PROXY_AUTH_WHITELIST.
-

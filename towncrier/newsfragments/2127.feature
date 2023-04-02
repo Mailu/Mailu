@@ -1,1 +1,0 @@
-Add FETCHMAIL_ENABLED to toggle the fetchmail functionality in the admin interface

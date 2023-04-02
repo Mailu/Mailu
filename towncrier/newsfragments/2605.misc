@@ -1,1 +1,0 @@
-Reduce the SSL session caches from 50m each to 3m each. This should be good for 12k sessions (within 1day) for each cache and will help reduce memory usage.

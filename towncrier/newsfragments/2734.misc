@@ -1,0 +1,2 @@
+Remove LOG_DRIVER which never worked and replace it with journald by default
+Fix a bug where front may get attached to networks that don't exist

@@ -11,7 +11,7 @@ services:
     logging:
       driver: journald
       options:
-        tag: docker-front
+        tag: mailu-front
     ports:
     - "$BIND_ADDRESS4:80:80"
     - "$BIND_ADDRESS4:443:443"
@@ -48,7 +48,7 @@ services:
     logging:
       driver: journald
       options:
-        tag: docker-imap
+        tag: mailu-imap
     volumes:
       - "$ROOT/mail:/mail"
       - "$ROOT/overrides/dovecot:/overrides:ro"
@@ -62,7 +62,7 @@ services:
     logging:
       driver: journald
       options:
-        tag: docker-smtp
+        tag: mailu-smtp
     volumes:
       - "$ROOT/mailqueue:/queue"
       - "$ROOT/overrides/postfix:/overrides:ro"
@@ -76,7 +76,7 @@ services:
     logging:
       driver: journald
       options:
-        tag: docker-antispam
+        tag: mailu-antispam
     volumes:
       - "$ROOT/filter:/var/lib/rspamd"
       - "$ROOT/dkim:/dkim:ro"
@@ -105,7 +105,7 @@ services:
     logging:
       driver: journald
       options:
-        tag: docker-admin
+        tag: mailu-admin
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/dkim:/dkim"

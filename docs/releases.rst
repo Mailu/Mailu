@@ -68,18 +68,18 @@ In line with security best practices, we have introduced password policy.
 
 Passwords now need to:
 - be at least 8 characters long
-- not be listed on [HaveIBeenPwned](https://haveibeenpwned.com/Passwords)
+- not be listed on `HaveIBeenPwned <https://haveibeenpwned.com/Passwords>`_
 
-This mirrors word-for-word the advice from [NIST Special Publication 800-63B](https://pages.nist.gov/800-63-3/sp800-63b.html#5111-memorized-secret-authenticators).
+This mirrors word-for-word the advice from `NIST Special Publication 800-63B <https://pages.nist.gov/800-63-3/sp800-63b.html#5111-memorized-secret-authenticators>`_.
 
 Significant improvements to the Rate-limiter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Now the rate limiter will only take __distinct__ attempts into account. We have two different types of checks:
+Now the rate limiter will only take distinct attempts into account. We have two different types of checks:
 - to prevent crendential bruteforce (an attacker trying to guess a password), we limit the maximal amount of attempts an attacker has for a given account (from any IP address)
 - to prevent password spraying (an attacker trying the same common password on all accounts he can enumerate), we limit the maximal number of non-existing accounts an attacker can attempt to authenticate against from a given network subnet.
 
-We have also implemented state-of-the-art features such as [Device Cookies](https://owasp.org/www-community/Slow_Down_Online_Guessing_Attacks_with_Device_Cookies) and IP-whitelisting post-authentication to ensure we don't lock genuine users out.
+We have also implemented state-of-the-art features such as `Device Cookies <https://owasp.org/www-community/Slow_Down_Online_Guessing_Attacks_with_Device_Cookies>`_ and IP-whitelisting post-authentication to ensure we don't lock genuine users out.
 
 Rate-limiters have a bad name because they are often misunderstood. If you used Mailu's rate-limiter in the past and had a bad experience please consider giving it another try after upgrading.
 
@@ -115,7 +115,7 @@ It is  possible to see if you received spam now.
 OLETools
 ^^^^^^^^
 
-[OLETools](https://github.com/decalage2/oletools) is introduced to block bad macros in Microsoft Office documents. OLETools is able to scan Microsoft Office documents and determine if a macro is malicous.
+`OLETools <https://github.com/decalage2/oletools>`_ is introduced to block bad macros in Microsoft Office documents. OLETools is able to scan Microsoft Office documents and determine if a macro is malicous.
 
 By default attachments with know bad/executable file extensions (such as ``.exe``) are blocked. See the FAQ for more information on updating the list of blocked file extensions.
 
@@ -149,7 +149,7 @@ As a user you can now go back to your profile page where you can change your pas
 PROXY PROTOCOL Support
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Reverse proxies can connect to Mailu with the proxy protocol for HTTP and Mail. Below is a small example for Traefik connecting via proxy protocol to Mailu
+Reverse proxies can connect to Mailu with the `proxy protocol <https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt>`_ for HTTP and Mail. Below is a small example for Traefik connecting via proxy protocol to Mailu
 
 .. code-block:: bash
 
@@ -236,6 +236,12 @@ Reverse proxies can connect to Mailu with the proxy protocol for HTTP and Mail. 
           servers:
             - address: "MailuServer:993"
 
+Security hardening
+^^^^^^^^^^^^^^^^^^
+
+We have gone further than ever. Now Mailu containers drop their privileges and communicate on separate networks. They also share the same base image where on x86 `a Hardened memory allocator <https://github.com/GrapheneOS/hardened_malloc>`_ is configured.
+
+Webmails which are running PHP make use of `Snuffleupagus <https://github.com/jvoisin/snuffleupagus>`_.
 
 
 New Functionality & Improvements
@@ -342,7 +348,7 @@ A fair amount of work went in this release; In no particular order:
 - outbound emails can now be rate-limited (to mitigate SPAM in case an account is taken over)
 - long term storage of passwords has been rethought to enable stronger protection against offline attackers (switch to iterated and salted SHA+bcrypt) while enabling much better performance (credential cache). Please encourage your users to use tokens where appropriate and keep in mind that existing hashes will be converted on first use to the new format.
 - session handling has been reworked from the grounds up: they have been switched from client side (cookies) to server-side, unified (SSO, expiry, lifetime) accross all web-facing applications and some mitigations against session fixation have been implemented.
-- rate limiting has seen many improvements: It is now deployed on **all** entry points (SMTP/IMAP/POP3/WEB/WEBMAIL) and configured to defeat both password bruteforces (thanks to a limit against total number of failed attempts against an account over a period) and password spraying (thanks to a limit for each client on the total number of non-existing accounts that can be queried). Exemption mechanisms have been put in place (device tokens, dynamic IP whitelists) to ensure that genuine clients and users won't be affected by default and the default configuration thought to fit most usecases.
+- rate limiting has seen many improvements: It is now deployed on all entry points (SMTP/IMAP/POP3/WEB/WEBMAIL) and configured to defeat both password bruteforces (thanks to a limit against total number of failed attempts against an account over a period) and password spraying (thanks to a limit for each client on the total number of non-existing accounts that can be queried). Exemption mechanisms have been put in place (device tokens, dynamic IP whitelists) to ensure that genuine clients and users won't be affected by default and the default configuration thought to fit most usecases.
 - if you use letsencrypt, Mailu is now configured to offer both RSA and ECC certificates to clients; It will OSCP stapple its replies where appropriate
 
 

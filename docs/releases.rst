@@ -11,7 +11,7 @@ Highlights
 
 This is an overview of the major features introduced in Mailu 2.0.
 
-Multi-arch images (arm support)
+Multi-arch images (ARM support)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Mailu project now ships multi-arch images for the architectures:
@@ -25,41 +25,70 @@ It is now possible to run Mailu on most ARM hardware such as the Raspberry Pi.
 Auto-configuration for client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-On the domain details page, there are also DNS records for enabling DNS auto-client configuration.
-Email clients make use of these DNS records to automatically determine the configuration.
-If a reverse proxy is used, then the settings might have to be updated.
+On the domain details page, there are new DNS records for enabling DNS auto-client configuration.
+Provided they are configured, email clients will make use of them to auto-configure.
+
+If a reverse proxy is in use, settings might have to be tweaked.
 
 For Apple users, the client setup page now offers an autoconfiguration link to automatically configure
-the Apple device for using the Mailu email server.
+their device.
 
 RESTFul API
 ^^^^^^^^^^^
 
 Mailu offers a RESTful API for changing the Mailu configuration.
-Anything that can be configured via the Mailu web administration interface,
+Now, anything that can be configured via the Mailu web administration interface
 can also be configured via the Mailu RESTful API.
 
-This means the process of configuring a new domain or add new users can be fully automated now.
+Configuring a new domain or add new users can be fully automated now.
 
-This release still makes use of a single configured API token. In a future release the authentication
-mechanism for using the Mailu RESTful API will be improved.
+The current API makes use of a single API token for authentication.
+In a future release this will likely be re-visited.
 
 For more information refer to the `Mailu RESTful API` page.
 
 Header authentication support (use external identity providers)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-It is now possible to use different authentication providers (such as keycloak) to handle the authentication of Mailu users.
-Mailu offers the functionality to pass via headers the information for automatically loggin in users.
-If a user does not exist yet, Mailu can create the user automatically.
+It is now possible to use different authentication systems (such as keycloak, authentik, vouch-proxy) to handle the authentication of Mailu users.
+This can be used to enable Single Sign On from other IDentity Providers via protocols such as OIDC or SAML2.
 
 For more information see `Header authentication using an external proxy` in the configuration reference.
 
-Login page for specifically admin or webmail
+Better anti-spoofing protection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Previously Mailu would reject emails where an attacker spoofs the envelope-From. Now Mailu also checks the header-From for any hosted domain.
+It won't let any email which pretends to be for any of the local domains through unless they pass DMARC.
+
+Implement a password policy
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In line with security best practices, we have introduced password policy.
+
+Passwords now need to:
+- be at least 8 characters long
+- not be listed on [HaveIBeenPwned](https://haveibeenpwned.com/Passwords)
+
+This mirrors word-for-word the advice from [NIST Special Publication 800-63B](https://pages.nist.gov/800-63-3/sp800-63b.html#5111-memorized-secret-authenticators).
+
+Significant improvements to the Rate-limiter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-With the introduction of `Header authentication support`, it is now possible to have a login page only for admin or webmail.
-This functionality can be used by visiting either the URL for admin or webmail. E.g.
+Now the rate limiter will only take __distinct__ attempts into account. We have two different types of checks:
+- to prevent crendential bruteforce (an attacker trying to guess a password), we limit the maximal amount of attempts an attacker has for a given account (from any IP address)
+- to prevent password spraying (an attacker trying the same common password on all accounts he can enumerate), we limit the maximal number of non-existing accounts an attacker can attempt to authenticate against from a given network subnet.
+
+We have also implemented state-of-the-art features such as [Device Cookies](https://owasp.org/www-community/Slow_Down_Online_Guessing_Attacks_with_Device_Cookies) and IP-whitelisting post-authentication to ensure we don't lock genuine users out.
+
+Rate-limiters have a bad name because they are often misunderstood. If you used Mailu's rate-limiter in the past and had a bad experience please consider giving it another try after upgrading.
+
+Remember the login URL
+^^^^^^^^^^^^^^^^^^^^^^
+
+Mailu will now remember which URL was requested and redirect you to it post-authentication.
+
+This functionality can be used by visiting a "deep" URL E.g.
 
 - https://test.mailu.io/admin
 - https://test.mailu.io/webmail
@@ -74,7 +103,7 @@ Introduction of SnappyMail
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Rainloop webmail client has been replaced with SnappyMail.
-The Rainloop project had multiple long outstanding security bugs. For this reason the Mailu project looked for alternatives.
+The Rainloop project has multiple long outstanding security bugs. For this reason the Mailu project looked for alternatives.
 SnappyMail is a fork of Rainloop focussed on performance and security. It offers a similar experience as Rainloop.
 
 Do not mark spam as read
@@ -83,22 +112,12 @@ Do not mark spam as read
 In the user settings it is now possible to configure if a received spam email must be marked as read.
 It is  possible to see if you received spam now.
 
-Improve password complexity
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The minimum password length has been increased to 8. It is important to use complex passwords to prevent password guessing attacks.
-We did not want to make changing your password too cumbersome. For this reason the HaveIBeenPwned check is introduced.
-When a user changes his password, Mailu checks if this password exists in any of the breaches reported to HaveIBeenPwned.
-The changed password is only accepted when the password does not exist in any breaches.
-Mailu only checks the hash of the password. Only a part of the hash is submitted to the HaveIBeenPwned API.
-
 OLETools
 ^^^^^^^^
 
-OLETools is introduced to block bad macros in Microsoft Office documents. OLETools is able to scan Microsoft Office documents and determine if
-a macro is malicous.
+[OLETools](https://github.com/decalage2/oletools) is introduced to block bad macros in Microsoft Office documents. OLETools is able to scan Microsoft Office documents and determine if a macro is malicous.
 
-By default attachments with know bad file extensions (such as .exe) are blocked. See the FAQ for more information on updating the list of blocked file extensions.
+By default attachments with know bad/executable file extensions (such as ``.exe``) are blocked. See the FAQ for more information on updating the list of blocked file extensions.
 
 New override system for Rspamd
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -121,7 +140,7 @@ For more information, see the description of the local.d folder on the rspamd we
 https://www.rspamd.com/doc/faq.html#what-are-the-locald-and-overrided-directories
 
 
-Adds a button to the roundcube interface that gets you back to the admin interface
+Add a button to the roundcube interface that gets you back to the admin interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Small feature, but so handy. The menu in Roundcube now shows a button to go the the web administration interface.

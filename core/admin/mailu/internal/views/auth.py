@@ -48,7 +48,7 @@ def nginx_authentication():
     if headers.get("Auth-Status") == "OK":
         utils.limiter.exempt_ip_from_ratelimits(client_ip)
     elif is_valid_user:
-        utils.limiter.rate_limit_user(username, client_ip)
+        utils.limiter.rate_limit_user(username, client_ip, password=response.headers.get('Auth-Password', None))
     elif not is_from_webmail:
         utils.limiter.rate_limit_ip(client_ip, username)
     return response

@@ -4,7 +4,7 @@ Release notes
 Mailu 2.0 - 2023-04-03
 ----------------------
 
-Mailu 2.0 is finally available. It is vital to read the `Upgrading` section before upgrading to Mailu 2.0.
+Mailu 2.0 is finally available. It is vital to read the `Upgrading` section before upgrading to Mailu 2.0 as it introduces major features and breaking changes from 1.9.
 
 Highlights
 ``````````
@@ -59,18 +59,17 @@ Better anti-spoofing protection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Previously Mailu would reject emails where an attacker spoofs the envelope-From. Now Mailu also checks the header-From for any hosted domain.
-It won't let any email which pretends to be for any of the local domains through unless they pass DMARC.
+It won't let any email which pretends to be for any of the local domains through unless they pass DMARC. This means that if you intend on sending emails for a domain hosted on the Mailu instance to the Mailu instance from somwhere else, you must setup DMARC.
 
 Implement a password policy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In line with security best practices, we have introduced password policy.
+In line with security best practices from `NIST (Special Publication 800-63B) <https://pages.nist.gov/800-63-3/sp800-63b.html#5111-memorized-secret-authenticators>`_, we have introduced password policy.
 
 Passwords now need to:
 - be at least 8 characters long
 - not be listed on `HaveIBeenPwned <https://haveibeenpwned.com/Passwords>`_
 
-This mirrors word-for-word the advice from `NIST Special Publication 800-63B <https://pages.nist.gov/800-63-3/sp800-63b.html#5111-memorized-secret-authenticators>`_.
 
 Significant improvements to the Rate-limiter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

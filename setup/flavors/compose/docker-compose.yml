@@ -26,7 +26,9 @@ services:
     restart: always
     env_file: {{ env }}
     logging:
-      driver: {{ log_driver or 'json-file' }}
+      driver: journald
+      options:
+        tag: mailu-front
     ports:
     {% for port in (80, 443, 25, 465, 587, 110, 995, 143, 993) %}
     {% if bind4 %}
@@ -38,8 +40,12 @@ services:
     {% endfor %}
     networks:
       - default
+{% if webmail_type != 'none' %}
       - webmail
+{% endif %}
+{% if webdav_enabled %}
       - radicale
+{% endif %}
     volumes:
       - "{{ root }}/certs:/certs"
       - "{{ root }}/overrides/nginx:/overrides:ro"
@@ -62,6 +68,10 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    logging:
+      driver: journald
+      options:
+        tag: mailu-admin
     {% if not admin_enabled %}
     ports:
       - 127.0.0.1:8080:80
@@ -81,6 +91,10 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    logging:
+      driver: journald
+      options:
+        tag: mailu-imap
     volumes:
       - "{{ root }}/mail:/mail"
       - "{{ root }}/overrides/dovecot:/overrides:ro"
@@ -96,6 +110,10 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    logging:
+      driver: journald
+      options:
+        tag: mailu-smtp
     volumes:
       - "{{ root }}/mailqueue:/queue"
       - "{{ root }}/overrides/postfix:/overrides:ro"
@@ -127,6 +145,10 @@ services:
     hostname: antispam
     restart: always
     env_file: {{ env }}
+    logging:
+      driver: journald
+      options:
+        tag: mailu-antispam
 {% if oletools_enabled %}
     networks:
       - default

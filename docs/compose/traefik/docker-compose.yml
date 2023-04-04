@@ -35,8 +35,6 @@ services:
     image: mailu/nginx:$VERSION
     restart: always
     env_file: .env
-    logging:
-      driver: $LOG_DRIVER
     labels: # Traefik labels for simple reverse-proxying
       - "traefik.enable=true"
       - "traefik.port=80"

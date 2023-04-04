@@ -9,7 +9,7 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'Mailu'
-copyright = '2023, Mailu authors'
+copyright = '2016, Mailu authors'
 author = 'Mailu authors'
 version = release = os.environ.get('VERSION', 'master')
 language = 'en'

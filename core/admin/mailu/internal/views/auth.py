@@ -13,7 +13,8 @@ def nginx_authentication():
     """
     client_ip = flask.request.headers["Client-Ip"]
     headers = flask.request.headers
-    if headers["Auth-Port"] == '25' and headers['Auth-Method'] != 'none':
+    is_port_25 = headers["Auth-Port"] == '25'
+    if is_port_25 and headers['Auth-Method'] != 'none':
         response = flask.Response()
         response.headers['Auth-Status'] = 'AUTH not supported'
         response.headers['Auth-Error-Code'] = '502 5.5.1'
@@ -47,7 +48,7 @@ def nginx_authentication():
         is_valid_user = True
     if headers.get("Auth-Status") == "OK":
         # successful email delivery isn't enough to warrant an exemption
-        if headers["Auth-Port"] != '25':
+        if not is_port_25:
             utils.limiter.exempt_ip_from_ratelimits(client_ip)
     elif is_valid_user:
         utils.limiter.rate_limit_user(username, client_ip, password=response.headers.get('Auth-Password', None))

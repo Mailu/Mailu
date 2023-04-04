@@ -1,1 +1,0 @@
-Change the behaviour of AUTH_RATELIMIT_USER and only account for distinct attempts. Same username and same password is now a only accounted once per period.

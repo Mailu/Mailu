@@ -13,14 +13,15 @@ def nginx_authentication():
     """
     client_ip = flask.request.headers["Client-Ip"]
     headers = flask.request.headers
-    if headers["Auth-Port"] == '25' and headers['Auth-Method'] != 'none':
+    is_port_25 = headers["Auth-Port"] == '25'
+    if is_port_25 and headers['Auth-Method'] != 'none':
         response = flask.Response()
         response.headers['Auth-Status'] = 'AUTH not supported'
         response.headers['Auth-Error-Code'] = '502 5.5.1'
         utils.limiter.rate_limit_ip(client_ip)
         return response
     is_from_webmail = headers['Auth-Port'] in ['10143', '10025']
-    if not is_from_webmail and utils.limiter.should_rate_limit_ip(client_ip):
+    if not is_from_webmail and not is_port_25 and utils.limiter.should_rate_limit_ip(client_ip):
         status, code = nginx.get_status(flask.request.headers['Auth-Protocol'], 'ratelimit')
         response = flask.Response()
         response.headers['Auth-Status'] = status
@@ -46,7 +47,9 @@ def nginx_authentication():
             return response
         is_valid_user = True
     if headers.get("Auth-Status") == "OK":
-        utils.limiter.exempt_ip_from_ratelimits(client_ip)
+        # successful email delivery isn't enough to warrant an exemption
+        if not is_port_25:
+            utils.limiter.exempt_ip_from_ratelimits(client_ip)
     elif is_valid_user:
         utils.limiter.rate_limit_user(username, client_ip, password=response.headers.get('Auth-Password', None))
     elif not is_from_webmail:

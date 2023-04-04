@@ -58,7 +58,7 @@ psycopg2-binary==2.9.5
 pycares==4.2.2
 pycparser==2.21
 Pygments==2.13.0
-pyOpenSSL==22.1.0
+pyOpenSSL==23.1.1
 pyparsing==2.4.7
 python-dateutil==2.8.2
 python-magic==0.4.27

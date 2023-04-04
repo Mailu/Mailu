@@ -6,6 +6,10 @@ Mailu 2.0 - 2023-04-03
 
 Mailu 2.0 is finally available. It is vital to read the `Upgrading` section before upgrading to Mailu 2.0 as it introduces major features and breaking changes from 1.9.
 
+The Helm Chart project will be updated soon after this release.
+
+The Mailu project has moved to ghcr.io for hosting the docker images. The images on docker.io will be taken down after this release.
+
 Highlights
 ``````````
 
@@ -16,9 +20,9 @@ Multi-arch images (ARM support)
 
 The Mailu project now ships multi-arch images for the architectures:
 
-- linux/amd64
-- linux/arm64/v8
-- linux/arm/v7
+- linux/amd64.
+- linux/arm64/v8.
+- linux/arm/v7.
 
 It is now possible to run Mailu on most ARM hardware such as the Raspberry Pi.
 
@@ -67,15 +71,17 @@ Implement a password policy
 In line with security best practices from `NIST (Special Publication 800-63B) <https://pages.nist.gov/800-63-3/sp800-63b.html#5111-memorized-secret-authenticators>`_, we have introduced password policy.
 
 Passwords now need to:
-- be at least 8 characters long
-- not be listed on `HaveIBeenPwned <https://haveibeenpwned.com/Passwords>`_
+
+- be at least 8 characters long.
+- not be listed on `HaveIBeenPwned <https://haveibeenpwned.com/Passwords>`_.
 
 
 Significant improvements to the Rate-limiter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Now the rate limiter will only take distinct attempts into account. We have two different types of checks:
-- to prevent crendential bruteforce (an attacker trying to guess a password), we limit the maximal amount of attempts an attacker has for a given account (from any IP address)
+
+- to prevent crendential bruteforce (an attacker trying to guess a password), we limit the maximal amount of attempts an attacker has for a given account (from any IP address).
 - to prevent password spraying (an attacker trying the same common password on all accounts he can enumerate), we limit the maximal number of non-existing accounts an attacker can attempt to authenticate against from a given network subnet.
 
 We have also implemented state-of-the-art features such as `Device Cookies <https://owasp.org/www-community/Slow_Down_Online_Guessing_Attacks_with_Device_Cookies>`_ and IP-whitelisting post-authentication to ensure we don't lock genuine users out.
@@ -96,7 +102,7 @@ This results in a login page with a single login button. To access the normal lo
 
 - https://test.mailu.io
 
-Users who only use the /admin endpoint can now bookmark https://test.mailu.io/admin. When logging in, it is possible to use the `Enter` key again.
+Users who only use the /admin endpoint can now bookmark https://test.mailu.io/admin. When logging in, it is possible to use the `Enter` key again to login (this will not login the webmail but admin).
 
 Introduction of SnappyMail
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -109,7 +115,7 @@ Do not mark spam as read
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 In the user settings it is now possible to configure if a received spam email must be marked as read.
-It is  possible to see if you received spam now.
+It is possible to see if you received spam now.
 
 OLETools
 ^^^^^^^^
@@ -129,7 +135,7 @@ It works as following.
 
 * If the override file overrides a Mailu defined config file,
   it will be included in the Mailu config file with lowest priority.
-  It will merge with existing sections.
+  This means it will merge with existing sections.
 
 * If the override file does not override a Mailu defined config file,
   then the file will be placed in the rspamd local.d folder.
@@ -248,74 +254,39 @@ New Functionality & Improvements
 
 For a list of all the changes (including bug fixes) refer to `CHANGELOG.md` in the root folder of the Mailu github project.
 
-A short summary of the new features:
+A short summary of the other new features:
 
-- Features: Provide auto-configuration files (autodiscover, autoconfig & mobileconfig); Please update your DNS records
-- Features: Introduction of the Mailu RESTful API. The full Mailu config can be changed via the Mailu API.
-  See the section Mailu RESTful API & the section configuration reference in the documentation for more information.
-- Features: Allow other folders to be synced by fetchmail
+- Features: Allow other folders to be synced by fetchmail.
 - Features: Update the webmail images.
-  Roundcube
+  Roundcube:
 
-    - Switch to base image (alpine)
-    - Switch to php-fpm
+    - Switch to base image (alpine).
+    - Switch to php-fpm.
 
-  SnappyMail
+  SnappyMail:
 
-    - Switch to base image
+    - Switch to base image.
     - Upgrade php7 to php8.
 
-- Features: Implement Header authentication via external proxy
-- Features: Add FETCHMAIL_ENABLED to toggle the fetchmail functionality in the admin interface
-- Features: Create a polite and turtle delivery queue to accommodate destinations that expect emails to be sent slowly
+- Features: Add FETCHMAIL_ENABLED to toggle the fetchmail functionality in the admin interface.
+- Features: Create a polite and turtle delivery queue to accommodate destinations that expect emails to be sent slowly.
 - Features: Add support for custom NGINX config in /etc/nginx/conf.d.
-- Features: Added ability to mark spam mails as read or unread when moving to junk folder.
-- Features: Switch from RainLoop to SnappyMail. SnappyMail has better performance and is more secure.
-- Features: Configurable default spam threshold used for new users
-- Features: Create a GUI for WILDCARD_SENDERS
+- Features: Configurable default spam threshold used for new users.
+- Features: Create a GUI for WILDCARD_SENDERS.
 - Features: Prevent signups with accounts for which an SQL-LIKE alias exists.
 - Features: Introduce TLS_PERMISSIVE, a new advanced setting to harden cipher configuration on port 25. Changing the default is strongly discouraged, please read the documentation before doing so.
-- Features: Upgrade the anti-spoofing rule. We shouldn't assume that Mailu is the only MTA allowed to send emails on behalf of the domains it hosts... but we should also ensure that both the envelope from and header from are checked.
-- Features: Implement the required glue to make "doveadm -A" work
-- Features: Implement a minimum length for passwords of 8 characters. Check passwords upon login against HaveIBeenPwned and warn users if their passwords are compromised.
-- Features: Implement OLETools and block bad macros in office documents
-- Features: Switch to GrapheneOS's hardened_malloc
-- Features: New override system for Rspamd. In the old system, all files were placed in the Rspamd overrides folder.
-  These overrides would override everything, including the Mailu Rspamd config.
-
-  Now overrides are placed in /overrides.
-  If you use your own map files, change the location to /override/myMapFile.map in the corresponding conf file.
-  It works as following.
-
-  * If the override file overrides a Mailu defined config file,
-    it will be included in the Mailu config file with lowest priority.
-    It will merge with existing sections.
-  * If the override file does not override a Mailu defined config file,
-    then the file will be placed in the rspamd local.d folder.
-    It will merge with existing sections.
-
-  For more information, see the description of the local.d folder on the rspamd website:
-  https://www.rspamd.com/doc/faq.html#what-are-the-locald-and-overrided-directories
-- Features: Adds a button to the roundcube interface that gets you back to the admin interface
-- Features: Drop postfix rsyslog localhost messages with IPv6 address
-- Features: Isolate radicale and webmail on their own network. This ensures they don't have privileged access to any of the other containers.
-- Features: Improved IPv6 support
+- Features: Implement the required glue to make "doveadm -A" work.
+- Features: Drop postfix rsyslog localhost messages with IPv6 address.
+- Features: Improved IPv6 support.
 - Features: Provide a changelog for minor releases. The github release will now:
 
   * Provide the changelog message from the newsfragment of the PR that triggered the backport.
   * Provide a github link to the PR/issue of the PR that was backported.
 
-  Switch to building multi-arch images. The images build for pull requests, master and production
-  are now multi-arch images for the architectures:
-
-  * linux/amd64
-  * linux/arm64/v8
-  * linux/arm/v7
-
-  Enhance CI/CD workflow with retry functionality. All steps for building images are now automatically
+- Enhance CI/CD workflow with retry functionality. All steps for building images are now automatically
   retried. If a build temporarily fails due to a network error, the retried step will still succeed.
 - Features: Add Czech translation for web administration interface.
-- Features: Allow inbound to http and mail ports to accept the PROXY protocol
+
 
 Upgrading
 `````````

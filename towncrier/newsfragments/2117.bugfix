@@ -1,3 +1,0 @@
-The gpg-agent package was missing due to updating to a new debian version.
-This fix adds gpg-agent back to the roundcube image.
-It is used for the enigmail roundcube plugin.

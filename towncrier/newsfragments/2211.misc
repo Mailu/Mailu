@@ -1,1 +1,0 @@
-Set imap_idle_notify_interval to 29 mins (see rfc2177) to ensure we use IMAP IDLE effectively

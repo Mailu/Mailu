@@ -1,1 +1,0 @@
-Speak HAPROXY protocol in between front and smtp and front and imap. This ensures the backend is aware of the real client IP and whether TLS was used.

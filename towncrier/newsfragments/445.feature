@@ -1,2 +1,0 @@
-Introduction of the Mailu RESTful API. The full Mailu config can be changed via the Mailu API.
-See the section Mailu RESTful API & the section configuration reference in the documentation for more information.

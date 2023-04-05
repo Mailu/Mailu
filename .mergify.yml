@@ -11,9 +11,9 @@ pull_request_rules:
         message: |
           Thanks for submitting this pull request.
           Bors-ng will now build test images. When it succeeds, we will continue to review and test your PR.
-          
+
           bors try
-          
+
           Note: if this build fails, [read this](http://mailu.io/master/contributors/environment.html#when-bors-try-fails).
 
   - name: 2 approved reviews; trigger bors r+
@@ -35,18 +35,18 @@ pull_request_rules:
       comment:
         message: bors r+
 
-  - name: Backport to 1.9  branch
+  - name: Backport to 2.0  branch
     conditions:
       - base=master
       - label=type/backport
     actions:
       backport:
         branches:
-          - '1.9'
+          - '2.0'
 
   - name: remove outdated reviews
     conditions:
-      - base~=^(master|1.9)$
+      - base~=^(master|2.0)$
     actions:
       dismiss_reviews:
         approved: True

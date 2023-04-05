@@ -1,6 +1,146 @@
 Changelog
 =========
 
+For full details see the [releases page](https://mailu.io/2.0/releases.html)
+
+Upgrade should run fine as long as you generate a new docker-compose.yml file and mailu.env file via setup.mailu.io.
+After that any old settings can be reapplied to mailu.env.
+Before making any changes, carefully read the [configuration reference](https://mailu.io/2.0/configuration.html). New settings have been introduced and some settings have been removed.
+Multiple changes have been made to the docker-compose.yml file and mailu.env file.
+
+If you use Fail2Ban, then the Fail2Ban intructions have been improved. It is mandatory to remove your Fail2Ban config and re-apply it using the instructions from the [documentation](https://mailu.io/2.0/faq.html#do-you-support-fail2ban).
+
+Please note that once you have upgraded to 2.0 you won't be able to roll-back to earlier versions
+
+After changing mailu.env, it is required to recreate all containers for the changes to be propagated.
+
+2.0.0 - 2023-04-03
+
+- Features: Provide auto-configuration files (autodiscover, autoconfig & mobileconfig); Please update your DNS records ([#224](https://github.com/Mailu/Mailu/issues/224))
+- Features: Introduction of the Mailu RESTful API. The full Mailu config can be changed via the Mailu API.
+  See the section Mailu RESTful API & the section configuration reference in the documentation for more information. ([#445](https://github.com/Mailu/Mailu/issues/445))
+- Features: Allow other folders to be synced by fetchmail ([#711](https://github.com/Mailu/Mailu/issues/711))
+- Features: Update the webmail images.
+  Roundcube
+    - Switch to base image (alpine)
+    - Switch to php-fpm
+  SnappyMail
+    - Switch to base image
+    - Upgrade php7 to php8. ([#1521](https://github.com/Mailu/Mailu/issues/1521))
+- Features: Implement Header authentication via external proxy ([#1972](https://github.com/Mailu/Mailu/issues/1972))
+- Features: Add FETCHMAIL_ENABLED to toggle the fetchmail functionality in the admin interface ([#2127](https://github.com/Mailu/Mailu/issues/2127))
+- Features: Create a polite and turtle delivery queue to accommodate destinations that expect emails to be sent slowly ([#2213](https://github.com/Mailu/Mailu/issues/2213))
+- Features: Add support for custom NGINX config in /etc/nginx/conf.d. ([#2221](https://github.com/Mailu/Mailu/issues/2221))
+- Features: Added ability to mark spam mails as read or unread when moving to junk folder. ([#2278](https://github.com/Mailu/Mailu/issues/2278))
+- Features: Switch from RainLoop to SnappyMail. SnappyMail has better performance and is more secure. ([#2295](https://github.com/Mailu/Mailu/issues/2295))
+- Features: Configurable default spam threshold used for new users ([#2328](https://github.com/Mailu/Mailu/issues/2328))
+- Features: Create a GUI for WILDCARD_SENDERS ([#2372](https://github.com/Mailu/Mailu/issues/2372))
+- Features: Prevent signups with accounts for which an SQL-LIKE alias exists. ([#2429](https://github.com/Mailu/Mailu/issues/2429))
+- Features: Introduce TLS_PERMISSIVE, a new advanced setting to harden cipher configuration on port 25. Changing the default is strongly discouraged, please read the documentation before doing so. ([#2449](https://github.com/Mailu/Mailu/issues/2449))
+- Features: Upgrade the anti-spoofing rule. We shouldn't assume that Mailu is the only MTA allowed to send emails on behalf of the domains it hosts... but we should also ensure that both the envelope from and header from are checked. ([#2475](https://github.com/Mailu/Mailu/issues/2475))
+- Features: Implement the required glue to make "doveadm -A" work ([#2498](https://github.com/Mailu/Mailu/issues/2498))
+- Features: Implement a minimum length for passwords of 8 characters. Check passwords upon login against HaveIBeenPwned and warn users if their passwords are compromised. ([#2500](https://github.com/Mailu/Mailu/issues/2500))
+- Features: Implement OLETools and block bad macros in office documents ([#2510](https://github.com/Mailu/Mailu/issues/2510))
+- Features: Switch to GrapheneOS's hardened_malloc ([#2525](https://github.com/Mailu/Mailu/issues/2525))
+- Features: New override system for Rspamd. In the old system, all files were placed in the Rspamd overrides folder.
+  These overrides would override everything, including the Mailu Rspamd config.
+
+  Now overrides are placed in /overrides.
+  If you use your own map files, change the location to /override/myMapFile.map in the corresponding conf file.
+  It works as following.
+  * If the override file overrides a Mailu defined config file,
+    it will be included in the Mailu config file with lowest priority.
+    It will merge with existing sections.
+  * If the override file does not override a Mailu defined config file,
+    then the file will be placed in the rspamd local.d folder.
+    It will merge with existing sections.
+
+  For more information, see the description of the local.d folder on the rspamd website:
+  https://www.rspamd.com/doc/faq.html#what-are-the-locald-and-overrided-directories ([#2555](https://github.com/Mailu/Mailu/issues/2555))
+- Features: Adds a button to the roundcube interface that gets you back to the admin interface ([#2591](https://github.com/Mailu/Mailu/issues/2591))
+- Features: Drop postfix rsyslog localhost messages with IPv6 address ([#2594](https://github.com/Mailu/Mailu/issues/2594))
+- Features: Isolate radicale and webmail on their own network. This ensures they don't have privileged access to any of the other containers. ([#2613](https://github.com/Mailu/Mailu/issues/2613))
+- Features: Improved IPv6 support ([#2630](https://github.com/Mailu/Mailu/issues/2630))
+- Features: Provide a changelog for minor releases. The github release will now:
+  * Provide the changelog message from the newsfragment of the PR that triggered the backport.
+  * Provide a github link to the PR/issue of the PR that was backported.
+
+  Switch to building multi-arch images. The images build for pull requests, master and production
+  are now multi-arch images for the architectures:
+  * linux/amd64
+  * linux/arm64/v8
+  * linux/arm/v7
+
+  Enhance CI/CD workflow with retry functionality. All steps for building images are now automatically
+  retried. If a build temporarily fails due to a network error, the retried step will still succeed. ([#2653](https://github.com/Mailu/Mailu/issues/2653))
+- Features: Add Czech translation for web administration interface. ([#2676](https://github.com/Mailu/Mailu/issues/2676))
+- Features: Allow inbound to http and mail ports to accept the PROXY protocol ([#2717](https://github.com/Mailu/Mailu/issues/2717))
+- Bugfixes: Add an option so that emails fetched with fetchmail don't go through the filters (closes #1231) ([#1231](https://github.com/Mailu/Mailu/issues/1231))
+- Bugfixes: Allow '+' in the localpart of email addresses to forward to ([#1236](https://github.com/Mailu/Mailu/issues/1236))
+- Bugfixes: Do not update the updated_at field of the User model when quota_bytes_used is updated ([#1363](https://github.com/Mailu/Mailu/issues/1363))
+- Bugfixes: Remove postfix's master.pid on startup if there is no other instance running ([#1483](https://github.com/Mailu/Mailu/issues/1483))
+- Bugfixes: updated Dockerfile to alpine 3.14.3 to address several CVEs ([#2099](https://github.com/Mailu/Mailu/issues/2099))
+- Bugfixes: The gpg-agent package was missing due to updating to a new debian version.
+  This fix adds gpg-agent back to the roundcube image.
+  It is used for the enigmail roundcube plugin. ([#2117](https://github.com/Mailu/Mailu/issues/2117))
+- Bugfixes: Fix CI/CD workflow. Tags were not set to the correct commit hash. ([#2124](https://github.com/Mailu/Mailu/issues/2124))
+- Bugfixes: Fix a bug preventing mailu from being usable when no webmail is configured ([#2125](https://github.com/Mailu/Mailu/issues/2125))
+- Bugfixes: Enable unbound by default. Mailu now requires a DNSSEC validating DNS resolver and experience has shown that this may not be the default everywhere yet. ([#2135](https://github.com/Mailu/Mailu/issues/2135))
+- Bugfixes: Pin the root certificate differently for DANE. If you have setup a TLSA record following previous suggestion from Mailu please update it. ([#2138](https://github.com/Mailu/Mailu/issues/2138))
+- Bugfixes: Remove the misleading text in mailu.env that zstd and lz4 are supported for dovecot mail compression.
+  Zstd and lz4 are not supported. The reason is that the alpine project does not compile this
+  into the dovecot package.
+  Users who want this funcionality, can kindly request the alpine project to compile dovecot
+  with lz4&zstd support. ([#2139](https://github.com/Mailu/Mailu/issues/2139))
+- Bugfixes: Update roundcube to 1.5.2 to fixe an XSS ([#2141](https://github.com/Mailu/Mailu/issues/2141))
+- Bugfixes: matching rainloop php to roundcube's: timezone is a parameter in mailu.env ([#2193](https://github.com/Mailu/Mailu/issues/2193))
+- Bugfixes: Added the /overrides directory in the roundcube config.inc.php file ([#2195](https://github.com/Mailu/Mailu/issues/2195))
+- Bugfixes: Configuring pwstore_scheme in carddav plugin with des_key because Mailu is incompatible with encrypted
+  https://github.com/mstilkerich/rcmcarddav/blob/master/doc/ADMIN-SETTINGS.md#password-storing-scheme ([#2196](https://github.com/Mailu/Mailu/issues/2196))
+- Bugfixes: Switch from DST_ROOT_X3 to ISRG_X1 as alpine is not shipping the former anymore ([#2199](https://github.com/Mailu/Mailu/issues/2199))
+- Bugfixes: Will update /etc/nginx/nginx.conf and /etc/nginx/http.d/rainloop.conf in webmail container to support MESSAGE_SIZE_LIMIT ([#2207](https://github.com/Mailu/Mailu/issues/2207))
+- Bugfixes: Add input validation for domain creation ([#2210](https://github.com/Mailu/Mailu/issues/2210))
+- Bugfixes: Make public announcement bypass the filters. They may still time-out before being sent if there is a large number of users. ([#2231](https://github.com/Mailu/Mailu/issues/2231))
+- Bugfixes: Work around a bug in coredns: set the DO flag on our DNSSEC queries. Add a new FAQ entry to explain our DNSSEC requirements and ensure that our error message points to it. ([#2239](https://github.com/Mailu/Mailu/issues/2239))
+- Bugfixes: Fetchmail: Missing support for '*_ADDRESS' env vars ([#2246](https://github.com/Mailu/Mailu/issues/2246))
+- Bugfixes: Fix broken setup. Not all dependencies were pinned resulting in a broken update being pulled. ([#2249](https://github.com/Mailu/Mailu/issues/2249))
+- Bugfixes: Fix a bug where rspamd may trigger HFILTER_HOSTNAME_UNKNOWN if part of the delivery chain was using ipv6 ([#2260](https://github.com/Mailu/Mailu/issues/2260))
+- Bugfixes: Update to Alpine Linux 3.14.4 which contains a security fix for openssl. ([#2281](https://github.com/Mailu/Mailu/issues/2281))
+- Bugfixes: Fixed AUTH_RATELIMIT_IP not working on imap/pop3/smtp. ([#2284](https://github.com/Mailu/Mailu/issues/2284))
+- Bugfixes: update alpine linux docker image to version 3.14.5 which includes a security fix for zlib’s CVE-2018-25032. ([#2302](https://github.com/Mailu/Mailu/issues/2302))
+- Bugfixes: postfix: wrap IPv6 CIDRs in square brackets for RELAYNETS ([#2325](https://github.com/Mailu/Mailu/issues/2325))
+- Bugfixes: Disable the built-in nginx resolver for traffic going through the mail plugin. This will silence errors about DNS resolution when the connecting host has no rDNS. ([#2346](https://github.com/Mailu/Mailu/issues/2346))
+- Bugfixes: Re-enable the built-in nginx resolver for traffic going through the mail plugin.
+  This is required for passing rDNS/ptr information to postfix.
+  Without this rspamd will flag all messages with DHFILTER_HOSTNAME_UNKNOWN due to the missing rDNS/ptr info. ([#2368](https://github.com/Mailu/Mailu/issues/2368))
+- Bugfixes: Roundcube overrides now also include .inc.php files. Only .inc.php should be used moving forward. ([#2388](https://github.com/Mailu/Mailu/issues/2388))
+- Bugfixes: Forwarding emails user setting did not support 1 letter domains. ([#2402](https://github.com/Mailu/Mailu/issues/2402))
+- Bugfixes: Update roundcube to 1.5.3
+  Update rcmcarddav plugin to 4.4.2 ([#2415](https://github.com/Mailu/Mailu/issues/2415))
+- Bugfixes: Switch from mysqlclient to mysql-connector explicitely ([#2432](https://github.com/Mailu/Mailu/issues/2432))
+- Bugfixes: Enable rspamd's autolearn feature to ensure that its bayes classifier has enough HAM to make it usable. Previously the bayes module would never work unless some HAM had been learnt manually. ([#2447](https://github.com/Mailu/Mailu/issues/2447))
+- Bugfixes: Fix a bug preventing users without IMAP access to access the webmails ([#2451](https://github.com/Mailu/Mailu/issues/2451))
+- Bugfixes: Ensure that Mailu keeps working even if it can't obtain a certificate from letsencrypt for one of the HOSTNAMES ([#2467](https://github.com/Mailu/Mailu/issues/2467))
+- Bugfixes: Quote SMTP SIZE to avoid splitting keyword and parameter in EHLO response ([#2485](https://github.com/Mailu/Mailu/issues/2485))
+- Bugfixes: Upgrade to alpine 3.16.2 ([#2497](https://github.com/Mailu/Mailu/issues/2497))
+- Bugfixes: Fix: include start and end dates in the auto-reply period ([#2512](https://github.com/Mailu/Mailu/issues/2512))
+- Bugfixes: Fix creation of deep structures using import in update mode ([#2601](https://github.com/Mailu/Mailu/issues/2601))
+- Bugfixes: Speak HAPROXY protocol in between front and smtp and front and imap. This ensures the backend is aware of the real client IP and whether TLS was used. ([#2603](https://github.com/Mailu/Mailu/issues/2603))
+- Bugfixes: Fix a bug introduced in master whereby anything locally generated (sieve, autoresponder, ...) would be blocked by the anti-spoofing rules ([#2633](https://github.com/Mailu/Mailu/issues/2633))
+- Bugfixes: Fix sieve/out of office replies by adding SUBNET to rspamd's local_networks ([#2635](https://github.com/Mailu/Mailu/issues/2635))
+- Bugfixes: Uses the correct From address (instead of an SRS alias) in the sieve/vacation module ([#2640](https://github.com/Mailu/Mailu/issues/2640))
+- Bugfixes: Tell roundcube to use UTF8 instead of 'UTF7-IMAP' when creating sieve scripts. ([#2650](https://github.com/Mailu/Mailu/issues/2650))
+- Bugfixes: Tweak the snuffleupagus rules to make roundcube's caldav work ([#2693](https://github.com/Mailu/Mailu/issues/2693))
+- Bugfixes: Proxy authentication was using the real client ip instead of the proxy
+  IP for checking the PROXY_AUTH_WHITELIST. ([#2708](https://github.com/Mailu/Mailu/issues/2708))
+- Improved Documentation: remove the / in the location to avoid http 404 ([#2185](https://github.com/Mailu/Mailu/issues/2185))
+- Improved Documentation:  ([#2214](https://github.com/Mailu/Mailu/issues/2214))
+- Deprecations and Removals: Remove POD_ADDRESS_RANGE in favor of SUBNET ([#1258](https://github.com/Mailu/Mailu/issues/1258))
+- Misc:  ([#1341](https://github.com/Mailu/Mailu/issues/1341), [#2121](https://github.com/Mailu/Mailu/issues/2121), [#2211](https://github.com/Mailu/Mailu/issues/2211), [#2242](https://github.com/Mailu/Mailu/issues/2242), [#2338](https://github.com/Mailu/Mailu/issues/2338), [#2357](https://github.com/Mailu/Mailu/issues/2357), [#2383](https://github.com/Mailu/Mailu/issues/2383), [#2511](https://github.com/Mailu/Mailu/issues/2511), [#2526](https://github.com/Mailu/Mailu/issues/2526), [#2533](https://github.com/Mailu/Mailu/issues/2533), [#2539](https://github.com/Mailu/Mailu/issues/2539), [#2550](https://github.com/Mailu/Mailu/issues/2550), [#2566](https://github.com/Mailu/Mailu/issues/2566), [#2570](https://github.com/Mailu/Mailu/issues/2570), [#2577](https://github.com/Mailu/Mailu/issues/2577), [#2605](https://github.com/Mailu/Mailu/issues/2605), [#2606](https://github.com/Mailu/Mailu/issues/2606), [#2618](https://github.com/Mailu/Mailu/issues/2618), [#2634](https://github.com/Mailu/Mailu/issues/2634), [#2644](https://github.com/Mailu/Mailu/issues/2644), [#2660](https://github.com/Mailu/Mailu/issues/2660), [#2666](https://github.com/Mailu/Mailu/issues/2666), [#2692](https://github.com/Mailu/Mailu/issues/2692), [#2698](https://github.com/Mailu/Mailu/issues/2698), [#2704](https://github.com/Mailu/Mailu/issues/2704), [#2726](https://github.com/Mailu/Mailu/issues/2726), [#2733](https://github.com/Mailu/Mailu/issues/2733), [#2734](https://github.com/Mailu/Mailu/issues/2734))
+
+Changelog
+=========
+
 For full details see the [releases page](https://mailu.io/1.9/releases.html)
 
 Upgrade should run fine as long as you generate a new compose or stack configuration and upgrade your mailu.env. Please note that once you have upgraded to 1.9 you won't be able to roll-back to earlier versions without resetting user passwords.
@@ -57,7 +197,7 @@ Please note that the shipped image for PostgreSQL database is fully deprecated n
     -  For X.Y and X.Y.Z write the version (X.Y.Z) into /version on the image and add a label with version=X.Y.Z
   	  -  This means that the latest X.Y image shows the pinned version (X.Y.Z e.g. 1.8.1) it was based on. Via the tag X.Y.Z you can see the commit hash that triggered the built.
     -  For master write the commit hash into /version on the image and add a label with version={commit hash}
-  -  Automatic releases. For x.y triggered builts (e.g. merge on 1.9) do a new github release for the pinned x.y.z (e.g. 1.9.2). 
+  -  Automatic releases. For x.y triggered builts (e.g. merge on 1.9) do a new github release for the pinned x.y.z (e.g. 1.9.2).
     -  Release shows a static message (see RELEASE_TEMPLATE.md) that explains how to reach the newsfragments folder and change the branch to the tag (x.y.z) mentioned in the release. Now you can get the changelog by reading all newsfragment files in this folder. ([#1182](https://github.com/Mailu/Mailu/issues/1182))
 - Features: Add a credential cache to speedup authentication requests. ([#1194](https://github.com/Mailu/Mailu/issues/1194))
 - Features: Introduces postfix logging via syslog with these features:
@@ -118,7 +258,7 @@ Please note that the shipped image for PostgreSQL database is fully deprecated n
   Fix bug #1838. ([#2069](https://github.com/Mailu/Mailu/issues/2069))
 - Bugfixes: RELAYNETS should be a comma separated list of networks ([#360](https://github.com/Mailu/Mailu/issues/360))
 - Bugfixes: Fix rate-limiting on /webdav/ ([#1194](https://github.com/Mailu/Mailu/issues/1194))
-- Bugfixes: Fixed fetchmail losing track of fetched emails upon container recreation. 
+- Bugfixes: Fixed fetchmail losing track of fetched emails upon container recreation.
   The relevant fetchmail files are now retained in the /data folder (in the fetchmail image).
   See the docker-compose.yml file for the relevant volume mapping.
   If you already had your own mapping, you must double check the volume mapping and take action. ([#1223](https://github.com/Mailu/Mailu/issues/1223))
@@ -135,7 +275,7 @@ Please note that the shipped image for PostgreSQL database is fully deprecated n
 - Bugfixes: Reverse proxy documentation has been updated to reflect new security hardening from PR#1959.
   If you do not set the configuration parameters in Mailu what reverse proxy header to trust,
   then Mailu will not have access to the real ip address of the connecting client.
-  This means that rate limiting will not properly work. You can also not use fail2ban. 
+  This means that rate limiting will not properly work. You can also not use fail2ban.
   It is very important to configure this when using a reverse proxy. ([#1962](https://github.com/Mailu/Mailu/issues/1962))
 - Bugfixes: Fixed roundcube sso login not working. ([#1990](https://github.com/Mailu/Mailu/issues/1990))
 - Bugfixes: The DB_PORT and ROUNDCUBE_DB_PORT environment variables were not actually used. They are removed from the documentation. For using different ports you can already use the notation host:port . ([#2073](https://github.com/Mailu/Mailu/issues/2073))
@@ -148,7 +288,7 @@ Please note that the shipped image for PostgreSQL database is fully deprecated n
 - Bugfixes: Alias, relay and fetchmail lists in the admin interface were missing the edit button. ([#2093](https://github.com/Mailu/Mailu/issues/2093))
 - Bugfixes: Fix bug introduced by enhanced session management ([#2098](https://github.com/Mailu/Mailu/issues/2102))
 - Bugfixes: Fix build dependencies postfix-mta-sts-resolver. ([#2106](https://github.com/Mailu/Mailu/issues/2106))
-- Improved Documentation: Document hardware requirements when using clamav. 
+- Improved Documentation: Document hardware requirements when using clamav.
   Clamav requires **at least** 2GB of memory.
   This 2Gb does not entail any other software running on the box.
   So in total you require at least 3GB of memory and 1GB swap when antivirus is enabled. ([#470](https://github.com/Mailu/Mailu/issues/470))

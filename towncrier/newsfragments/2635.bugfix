@@ -1,1 +1,0 @@
-Fix sieve/out of office replies by adding SUBNET to rspamd's local_networks

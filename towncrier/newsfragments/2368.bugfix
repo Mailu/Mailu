@@ -1,3 +1,0 @@
-Re-enable the built-in nginx resolver for traffic going through the mail plugin.
-This is required for passing rDNS/ptr information to postfix.
-Without this rspamd will flag all messages with DHFILTER_HOSTNAME_UNKNOWN due to the missing rDNS/ptr info.

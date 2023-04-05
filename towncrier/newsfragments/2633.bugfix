@@ -1,1 +1,0 @@
-Fix a bug introduced in master whereby anything locally generated (sieve, autoresponder, ...) would be blocked by the anti-spoofing rules

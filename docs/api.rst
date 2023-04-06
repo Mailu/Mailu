@@ -1,3 +1,5 @@
+.. _mailu_restful_api:
+
 Mailu RESTful API
 =================
 

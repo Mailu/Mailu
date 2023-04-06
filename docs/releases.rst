@@ -49,7 +49,7 @@ Configuring a new domain or add new users can be fully automated now.
 The current API makes use of a single API token for authentication.
 In a future release this will likely be re-visited.
 
-For more information refer to the `Mailu RESTful API` page.
+For more information refer to the :ref:`Mailu RESTful API <mailu_restful_api>` page.
 
 Header authentication support (use external identity providers)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -57,7 +57,7 @@ Header authentication support (use external identity providers)
 It is now possible to use different authentication systems (such as keycloak, authentik, vouch-proxy) to handle the authentication of Mailu users.
 This can be used to enable Single Sign On from other IDentity Providers via protocols such as OIDC or SAML2.
 
-For more information see `Header authentication using an external proxy` in the configuration reference.
+For more information see :ref:`Header authentication using an external proxy <header_authentication>` in the configuration reference.
 
 Better anti-spoofing protection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -68,7 +68,7 @@ It won't let any email which pretends to be for any of the local domains through
 Implement a password policy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In line with security best practices from `NIST (Special Publication 800-63B) <https://pages.nist.gov/800-63-3/sp800-63b.html#5111-memorized-secret-authenticators>`_, we have introduced password policy.
+In line with security best practices from `NIST (Special Publication 800-63B) <https://pages.nist.gov/800-63-3/sp800-63b.html#5111-memorized-secret-authenticators>`_, we have introduced a password policy.
 
 Passwords now need to:
 
@@ -86,7 +86,7 @@ Now the rate limiter will only take distinct attempts into account. We have two 
 
 We have also implemented state-of-the-art features such as `Device Cookies <https://owasp.org/www-community/Slow_Down_Online_Guessing_Attacks_with_Device_Cookies>`_ and IP-whitelisting post-authentication to ensure we don't lock genuine users out.
 
-Rate-limiters have a bad name because they are often misunderstood. If you used Mailu's rate-limiter in the past and had a bad experience please consider giving it another try after upgrading.
+Rate-limiters have a bad name because they are often misunderstood. If you have used Mailu's rate-limiter in the past and had a bad experience please consider giving it another try after upgrading.
 
 Remember the login URL
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -130,7 +130,21 @@ New override system for Rspamd
 The override system for Rspamd has been overhauled. While the config files were first completely overridden, they are now merged.
 Now overrides are placed in the location (in the Rspamd/Antispam container) /overrides.
 
-If you use your own map files, change the location to /override/myMapFile.map in the corresponding conf file.
+If you use your own map files, change the location to ``/overrides/myMapFile.map`` in the corresponding conf file.
+For example when overriding multimap.conf that use a custom ``.map`` file:
+
+.. code-block:: bash
+
+  #multimap.conf
+  LOCAL_BL_DOMAIN {
+    type = "from";
+    filter = "email:domain";
+    map = "/overrides/blacklist.map";
+    score = 15;
+    description = "Senders domain part is on the local blacklist";
+    group = "local_bl";
+  }
+
 It works as following.
 
 * If the override file overrides a Mailu defined config file,
@@ -246,7 +260,7 @@ Security hardening
 
 We have gone further than ever. Now Mailu containers drop their privileges and communicate on separate networks. They also share the same base image where on x86 `a Hardened memory allocator <https://github.com/GrapheneOS/hardened_malloc>`_ is configured.
 
-Webmails which are running PHP make use of `Snuffleupagus <https://github.com/jvoisin/snuffleupagus>`_.
+Webmails relying on PHP now make use of `Snuffleupagus <https://github.com/jvoisin/snuffleupagus>`_.
 
 
 New Functionality & Improvements
@@ -292,11 +306,22 @@ Upgrading
 `````````
 
 Upgrade should run fine as long as you generate a new compose & mailu.env and then reapply custom config settings to mailu.env.
+Carefully read the :ref:`configuration page <common_cfg>` to check what old settings have been removed. If a setting is not listed anymore
+on the :ref:`configuration page <common_cfg>`, then this setting has been removed.
 
-If you use Fail2Ban, then the Fail2Ban intructions have been improved. It is mandatory to remove your Fail2Ban config and re-apply it using the instructions from :ref:`updated Fail2Ban documentation <Fail2Ban>`.
+If you use Fail2Ban, then the Fail2Ban intructions have been improved. It is **mandatory** to remove your Fail2Ban config
+and re-apply it using the instructions from :ref:`updated Fail2Ban documentation <Fail2Ban>`.
+
+If you use overrides for Rspamd, then please note that overrides are now placed in the location ``/overrides`` in the rspamd container.
+If you use your own map files, change the location to ``/overrides/myMapFile.map`` in the corresponding rspamd conf file.
 
 To use the new autoconfig endpoint and Mailu RESTFul API, you may need to update your reverse proxy config.
+If you use ``TLS_FLAVOR=letsencrypt``, add autoconfig.myhostname.com to the setting ``HOSTNAMES=`` in mailu.env to generate a certificate for the autoconfig endpoint as well.
+After starting your Mailu deployment, please refer to the section `DNS client auto-configuration entries` on the domain details page
+in the web administration interface for the exact name of the autoconfig endpoint (https://test.mailu.io/admin/domain/details/test.mailu.io).
 
+It is also recommended to have a look at :ref:`mta-sts <mta-sts>`.
+When mta-sts is enabled, modern email servers will immediately use TLS for delivering emails to Mailu.
 
 Mailu 1.9 - 2021-12-29
 ----------------------

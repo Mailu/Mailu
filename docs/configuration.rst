@@ -382,6 +382,7 @@ When ``POSTFIX_LOG_FILE`` is enabled, the logrotate program will automatically r
 logs every week and keep 52 logs. To override the logrotate configuration, create the file logrotate.conf
 with the desired configuration in the :ref:`Postfix overrides folder<override-label>`.
 
+.. _header_authentication:
 
 Header authentication using an external proxy
 ---------------------------------------------

@@ -68,7 +68,7 @@ It won't let any email which pretends to be for any of the local domains through
 Implement a password policy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In line with security best practices from `NIST (Special Publication 800-63B) <https://pages.nist.gov/800-63-3/sp800-63b.html#5111-memorized-secret-authenticators>`_, we have introduced password policy.
+In line with security best practices from `NIST (Special Publication 800-63B) <https://pages.nist.gov/800-63-3/sp800-63b.html#5111-memorized-secret-authenticators>`_, we have introduced a password policy.
 
 Passwords now need to:
 
@@ -86,7 +86,7 @@ Now the rate limiter will only take distinct attempts into account. We have two 
 
 We have also implemented state-of-the-art features such as `Device Cookies <https://owasp.org/www-community/Slow_Down_Online_Guessing_Attacks_with_Device_Cookies>`_ and IP-whitelisting post-authentication to ensure we don't lock genuine users out.
 
-Rate-limiters have a bad name because they are often misunderstood. If you used Mailu's rate-limiter in the past and had a bad experience please consider giving it another try after upgrading.
+Rate-limiters have a bad name because they are often misunderstood. If you have used Mailu's rate-limiter in the past and had a bad experience please consider giving it another try after upgrading.
 
 Remember the login URL
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -130,8 +130,8 @@ New override system for Rspamd
 The override system for Rspamd has been overhauled. While the config files were first completely overridden, they are now merged.
 Now overrides are placed in the location (in the Rspamd/Antispam container) /overrides.
 
-If you use your own map files, change the location to /override/myMapFile.map in the corresponding conf file.
-For example when overriding multimap.conf that use a custom \*.map file:
+If you use your own map files, change the location to ``/overrides/myMapFile.map`` in the corresponding conf file.
+For example when overriding multimap.conf that use a custom ``.map`` file:
 
 .. code-block:: bash
 
@@ -139,7 +139,7 @@ For example when overriding multimap.conf that use a custom \*.map file:
   LOCAL_BL_DOMAIN {
     type = "from";
     filter = "email:domain";
-    map = "/override/blacklist.map";
+    map = "/overrides/blacklist.map";
     score = 15;
     description = "Senders domain part is on the local blacklist";
     group = "local_bl";
@@ -260,7 +260,7 @@ Security hardening
 
 We have gone further than ever. Now Mailu containers drop their privileges and communicate on separate networks. They also share the same base image where on x86 `a Hardened memory allocator <https://github.com/GrapheneOS/hardened_malloc>`_ is configured.
 
-Webmails which are running PHP make use of `Snuffleupagus <https://github.com/jvoisin/snuffleupagus>`_.
+Webmails relying on PHP now make use of `Snuffleupagus <https://github.com/jvoisin/snuffleupagus>`_.
 
 
 New Functionality & Improvements
@@ -312,8 +312,8 @@ on the :ref:`configuration page <common_cfg>`, then this setting has been remove
 If you use Fail2Ban, then the Fail2Ban intructions have been improved. It is **mandatory** to remove your Fail2Ban config
 and re-apply it using the instructions from :ref:`updated Fail2Ban documentation <Fail2Ban>`.
 
-If you use overrides for Rspamd, then please note that overrides are now placed in the location `/overrides` in the rspamd container.
-If you use your own map files, change the location to /override/myMapFile.map in the corresponding rspamd conf file.
+If you use overrides for Rspamd, then please note that overrides are now placed in the location ``/overrides`` in the rspamd container.
+If you use your own map files, change the location to ``/overrides/myMapFile.map`` in the corresponding rspamd conf file.
 
 To use the new autoconfig endpoint and Mailu RESTFul API, you may need to update your reverse proxy config.
 If you use ``TLS_FLAVOR=letsencrypt``, add autoconfig.myhostname.com to the setting ``HOSTNAMES=`` in mailu.env to generate a certifficate for the autoconfig endpoint as well.

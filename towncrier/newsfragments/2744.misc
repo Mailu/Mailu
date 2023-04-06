@@ -1,0 +1,5 @@
+Fix tag-release step in workflow which prevented github releases from being created automatically. 
+Cause was that a specific method is required for assigning multi-line strings in github workflow files:
+https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
+
+Add some extra clarifications to release.rst. Upgrade section did not mention you need to check your rspamd overrides.

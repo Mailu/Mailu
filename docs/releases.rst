@@ -49,7 +49,7 @@ Configuring a new domain or add new users can be fully automated now.
 The current API makes use of a single API token for authentication.
 In a future release this will likely be re-visited.
 
-For more information refer to the `Mailu RESTful API` page.
+For more information refer to the :ref:`Mailu RESTful API <mailu_restful_api>` page.
 
 Header authentication support (use external identity providers)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -57,7 +57,7 @@ Header authentication support (use external identity providers)
 It is now possible to use different authentication systems (such as keycloak, authentik, vouch-proxy) to handle the authentication of Mailu users.
 This can be used to enable Single Sign On from other IDentity Providers via protocols such as OIDC or SAML2.
 
-For more information see `Header authentication using an external proxy` in the configuration reference.
+For more information see :ref:`Header authentication using an external proxy <header_authentication>` in the configuration reference.
 
 Better anti-spoofing protection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -131,6 +131,20 @@ The override system for Rspamd has been overhauled. While the config files were 
 Now overrides are placed in the location (in the Rspamd/Antispam container) /overrides.
 
 If you use your own map files, change the location to /override/myMapFile.map in the corresponding conf file.
+For example when overriding multimap.conf that use a custom \*.map file:
+
+.. code-block:: bash
+
+  #multimap.conf
+  LOCAL_BL_DOMAIN {
+    type = "from";
+    filter = "email:domain";
+    map = "/override/blacklist.map";
+    score = 15;
+    description = "Senders domain part is on the local blacklist";
+    group = "local_bl";
+  }
+
 It works as following.
 
 * If the override file overrides a Mailu defined config file,
@@ -292,10 +306,19 @@ Upgrading
 `````````
 
 Upgrade should run fine as long as you generate a new compose & mailu.env and then reapply custom config settings to mailu.env.
+Carefully read the :ref:`configuration page <common_cfg>` to check what old settings have been removed. If a setting is not listed anymore
+on the :ref:`configuration page <common_cfg>`, then this setting has been removed.
 
-If you use Fail2Ban, then the Fail2Ban intructions have been improved. It is mandatory to remove your Fail2Ban config and re-apply it using the instructions from :ref:`updated Fail2Ban documentation <Fail2Ban>`.
+If you use Fail2Ban, then the Fail2Ban intructions have been improved. It is **mandatory** to remove your Fail2Ban config
+and re-apply it using the instructions from :ref:`updated Fail2Ban documentation <Fail2Ban>`.
+
+If you use overrides for Rspamd, then please note that overrides are now placed in the location `/overrides` in the rspamd container.
+If you use your own map files, change the location to /override/myMapFile.map in the corresponding rspamd conf file.
 
 To use the new autoconfig endpoint and Mailu RESTFul API, you may need to update your reverse proxy config.
+If you use ``TLS_FLAVOR=letsencrypt``, add autoconfig.myhostname.com to the setting ``HOSTNAMES=`` in mailu.env to generate a certifficate for the autoconfig endpoint as well.
+After starting your Mailu deployment, please refer to the section `DNS client auto-configuration entries` on the domain details page
+in the web administration interface for the exact name of the autoconfig endpoint (https://test.mailu.io/admin/domain/details/test.mailu.io).
 
 
 Mailu 1.9 - 2021-12-29

@@ -362,6 +362,8 @@ How do I use webdav (radicale)?
 .. _`575`: https://github.com/Mailu/Mailu/issues/575
 .. _`1591`: https://github.com/Mailu/Mailu/issues/1591
 
+.. _mta-sts:
+
 How do I setup a MTA-STS policy?
 ````````````````````````````````
 

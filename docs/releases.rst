@@ -299,12 +299,17 @@ The override system for Rspamd has been overhauled. While the config files were 
 Now overrides are placed in the location (in the Rspamd/Antispam container) /overrides.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 If you use your own map files, change the location to ``/overrides/myMapFile.map`` in the corresponding conf file.
 For example when overriding multimap.conf that use a custom ``.map`` file:
 =======
 If you use your own map files, change the location to /override/myMapFile.map in the corresponding conf file.
 For example when overriding multimap.conf that use a custom \*.map file:
 >>>>>>> 0faae503 (Improve releases.rst.)
+=======
+If you use your own map files, change the location to ``/overrides/myMapFile.map`` in the corresponding conf file.
+For example when overriding multimap.conf that use a custom ``.map`` file:
+>>>>>>> a15566a3 (Update releases.rst)
 
 .. code-block:: bash
 
@@ -313,10 +318,14 @@ For example when overriding multimap.conf that use a custom \*.map file:
     type = "from";
     filter = "email:domain";
 <<<<<<< HEAD
+<<<<<<< HEAD
     map = "/overrides/blacklist.map";
 =======
     map = "/override/blacklist.map";
 >>>>>>> 0faae503 (Improve releases.rst.)
+=======
+    map = "/overrides/blacklist.map";
+>>>>>>> a15566a3 (Update releases.rst)
     score = 15;
     description = "Senders domain part is on the local blacklist";
     group = "local_bl";
@@ -490,6 +499,7 @@ If you use Fail2Ban, then the Fail2Ban intructions have been improved. It is **m
 and re-apply it using the instructions from :ref:`updated Fail2Ban documentation <Fail2Ban>`.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 If you use overrides for Rspamd, then please note that overrides are now placed in the location ``/overrides`` in the rspamd container.
 If you use your own map files, change the location to ``/overrides/myMapFile.map`` in the corresponding rspamd conf file.
 
@@ -498,6 +508,10 @@ If you use ``TLS_FLAVOR=letsencrypt``, add autoconfig.myhostname.com to the sett
 =======
 If you use overrides for Rspamd, then please note that overrides are now placed in the location `/overrides` in the rspamd container.
 If you use your own map files, change the location to /override/myMapFile.map in the corresponding rspamd conf file.
+=======
+If you use overrides for Rspamd, then please note that overrides are now placed in the location ``/overrides`` in the rspamd container.
+If you use your own map files, change the location to ``/overrides/myMapFile.map`` in the corresponding rspamd conf file.
+>>>>>>> a15566a3 (Update releases.rst)
 
 To use the new autoconfig endpoint and Mailu RESTFul API, you may need to update your reverse proxy config.
 If you use ``TLS_FLAVOR=letsencrypt``, add autoconfig.myhostname.com to the setting ``HOSTNAMES=`` in mailu.env to generate a certifficate for the autoconfig endpoint as well.

@@ -505,6 +505,7 @@ If you use your own map files, change the location to ``/overrides/myMapFile.map
 
 To use the new autoconfig endpoint and Mailu RESTFul API, you may need to update your reverse proxy config.
 If you use ``TLS_FLAVOR=letsencrypt``, add autoconfig.myhostname.com to the setting ``HOSTNAMES=`` in mailu.env to generate a certificate for the autoconfig endpoint as well.
+<<<<<<< HEAD
 =======
 If you use overrides for Rspamd, then please note that overrides are now placed in the location `/overrides` in the rspamd container.
 If you use your own map files, change the location to /override/myMapFile.map in the corresponding rspamd conf file.
@@ -516,6 +517,8 @@ If you use your own map files, change the location to ``/overrides/myMapFile.map
 To use the new autoconfig endpoint and Mailu RESTFul API, you may need to update your reverse proxy config.
 If you use ``TLS_FLAVOR=letsencrypt``, add autoconfig.myhostname.com to the setting ``HOSTNAMES=`` in mailu.env to generate a certifficate for the autoconfig endpoint as well.
 >>>>>>> 0faae503 (Improve releases.rst.)
+=======
+>>>>>>> 410e1d3e (Add reminder to configure mta-sts)
 After starting your Mailu deployment, please refer to the section `DNS client auto-configuration entries` on the domain details page
 in the web administration interface for the exact name of the autoconfig endpoint (https://test.mailu.io/admin/domain/details/test.mailu.io).
 

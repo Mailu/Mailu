@@ -1,0 +1,2 @@
+Fix breaking bug in config-import command line command.
+Import yml's containing dkim keys (the element 'dkim_key:') failed to import using `config-import`.

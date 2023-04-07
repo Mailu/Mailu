@@ -574,8 +574,8 @@ class DkimKeyField(fields.String):
         if value.lower() == '-generate-':
             return dkim.gen_key()
 
-        # no key?
-        if not value:
+        # no key or key is <hidden>?
+        if not value or str(value) == '<hidden>':
             return None
 
         # remember part of value for ValidationError
@@ -610,7 +610,7 @@ class DkimKeyField(fields.String):
 
         # check key validity
         try:
-            serialization.load_pem_private_key(bytes(value, "ascii"), password=None)
+            serialization.load_pem_private_key(value, password=None)
         except (UnicodeEncodeError, ValueError) as exc:
             raise ValidationError(f'invalid dkim key {bad_key!r}') from exc
         else:

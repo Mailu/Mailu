@@ -166,7 +166,7 @@ jobs:
               || echo "builder does not exist" \
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
-              --file ./tests/build.hcl \
+              --file ./tests/build-ci.hcl \
               --set *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache \
               --set *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache,mode=max \
               --set *.platform=${{ env.ARCH }} ${{ matrix.target }} \
@@ -240,7 +240,7 @@ jobs:
               || echo "builder does not exist" \
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
-              --file ./tests/build.hcl \
+              --file ./tests/build-ci.hcl \
               --set *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache-arm \
               --set *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache-arm,mode=max \
               --set *.platform=${{ env.ARCH }} ${{ matrix.target }} \
@@ -320,6 +320,7 @@ jobs:
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
               --file ./tests/build-ci.hcl \
+<<<<<<< HEAD
               --set *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache \
               --set *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache,mode=max \
               --set *.platform=${{ env.ARCH }} ${{ matrix.target }} \
@@ -482,6 +483,8 @@ jobs:
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
               --file ./tests/build-ci.hcl \
+=======
+>>>>>>> c1e00f14 (Forgot to update the hcl file to the new build-ci.hcl file)
               --set *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache \
               --set *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache,mode=max \
               --set *.platform=${{ env.ARCH }} ${{ matrix.target }} \

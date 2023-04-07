@@ -80,7 +80,7 @@ on:
         required: false
         type: string
 env:
-  HCL_FILE: ./tests/build.hcl
+  HCL_FILE: ./tests/build-ci.hcl
 
 jobs:
 # This job calculates what images must be build. It reads the build.hcl file and then outputs all targets (images) in it.
@@ -163,7 +163,7 @@ jobs:
               || echo "builder does not exist" \
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
-              --file ./tests/build.hcl \
+              --file ./tests/build-ci.hcl \
               --set *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache \
               --set *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache,mode=max \
               --set *.platform=${{ env.ARCH }} ${{ matrix.target }} \
@@ -237,7 +237,7 @@ jobs:
               || echo "builder does not exist" \
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
-              --file ./tests/build.hcl \
+              --file ./tests/build-ci.hcl \
               --set *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache-arm \
               --set *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache-arm,mode=max \
               --set *.platform=${{ env.ARCH }} ${{ matrix.target }} \
@@ -315,7 +315,7 @@ jobs:
               || echo "builder does not exist" \
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
-              --file ./tests/build.hcl \
+              --file ./tests/build-ci.hcl \
               --set *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache \
               --set *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache,mode=max \
               --set *.platform=${{ env.ARCH }} ${{ matrix.target }} \
@@ -392,7 +392,7 @@ jobs:
               || echo "builder does not exist" \
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
-              --file ./tests/build.hcl \
+              --file ./tests/build-ci.hcl \
               --set *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache-arm \
               --set *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache-arm,mode=max \
               --set *.platform=${{ env.ARCH }} ${{ matrix.target }} \

@@ -1,0 +1,2 @@
+Improve CI/CD workflow to first build the intermediate images which are required for building the main images.
+This should drastically improve the time required for builds in the worst cache scenario (no cache hits).

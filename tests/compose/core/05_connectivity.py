@@ -28,7 +28,7 @@ def test_imap(server, username, password):
         print(f'Authenticating to imap://{username}:{password}@{server}:143/ worked without STARTTLS!')
         os.exit(102)
     except imaplib.IMAP4.error:
-        print('NOK')
+        print('NOK - expected')
 
 def test_pop3(server, username, password):
     print(f'Authenticating to pop3s://{username}:{password}@{server}:995/')
@@ -56,7 +56,7 @@ def test_pop3(server, username, password):
         print(f'Authenticating to pop3://{username}:{password}@{server}:110/ worked without STARTTLS!')
         os.exit(103)
     except poplib.error_proto:
-        print('NOK')
+        print('NOK - expected')
 
 def test_SMTP(server, username, password):
     print(f'Authenticating to smtps://{username}:{password}@{server}:465/')
@@ -76,8 +76,9 @@ def test_SMTP(server, username, password):
         with smtplib.SMTP(server, 587) as conn:
             conn.ehlo()
             conn.login(username, password)
+            print(f'Authenticating to smtp://{username}:{password}@{server}:587/ worked!')
     except smtplib.SMTPNotSupportedError:
-        print('NOK')
+        print('NOK - expected')
     #port 25 should fail
     try:
         print(f'Authenticating to smtps://{username}:{password}@{server}:25/')
@@ -86,17 +87,18 @@ def test_SMTP(server, username, password):
             conn.starttls()
             conn.ehlo()
             conn.login(username, password)
+            print(f'Authenticating to smtps://{username}:{password}@{server}:25/ worked!')
     except smtplib.SMTPNotSupportedError:
-        print('NOK')
+        print('NOK - expected')
     try:
         print(f'Authenticating to smtp://{username}:{password}@{server}:25/')
         with smtplib.SMTP(server) as conn:
             conn.ehlo()
             conn.login(username, password)
-            print(f'Authenticating to smtp://{username}:{password}@{server}:587/ worked without STARTTLS!')
+            print(f'Authenticating to smtp://{username}:{password}@{server}:25/ worked without STARTTLS!')
             os.exit(104)
     except smtplib.SMTPNotSupportedError:
-        print('NOK')
+        print('NOK - expected')
 
 if __name__ == '__main__':
     test_imap(SERVER, USERNAME, PASSWORD)

@@ -41,29 +41,35 @@ def test_imap(server, username, password):
 import os
 
 SERVER='localhost'
-USERNAME='test@mailu.io'
+USERNAME='user@mailu.io'
 PASSWORD='password'
 
 def test_imap(server, username, password):
+    print(f'Authenticating to imaps://{username}:{password}@{server}:993/')
     with imaplib.IMAP4_SSL(server) as conn:
         conn.login(username, password)
-        if conn.status('inbox')[0] != 'OK':
-            print(f'Authenticating to imaps://{username}:{password}@{server}:993/ failed!')
-            os.exit(101)
+        conn.noop()
+    print('OK')
+    print(f'Authenticating to imaps://{username}:{password}@{server}:143/')
     with imaplib.IMAP4(server) as conn:
         conn.starttls()
         conn.login(username, password)
-        if conn.status('inbox')[0] != 'OK':
-            print(f'Authenticating to imap://{username}:{password}@{server}:143/ failed!')
-            os.exit(101)
+        conn.noop()
+    print('OK')
+    print(f'Authenticating to imap://{username}:{password}@{server}:143/')
     try:
         with imaplib.IMAP4(server) as conn:
             conn.login(username, password)
         print(f'Authenticating to imap://{username}:{password}@{server}:143/ worked without STARTTLS!')
         os.exit(102)
+<<<<<<< HEAD
     except imaplib.error:
         pass
 >>>>>>> 7b46c7bc (Add test to show it's broken)
+=======
+    except imaplib.IMAP4.error:
+        print('NOK')
+>>>>>>> a09c23d8 (Fix it)
 
 def test_pop3(server, username, password):
     print(f'Authenticating to pop3s://{username}:{password}@{server}:995/')
@@ -73,9 +79,13 @@ def test_pop3(server, username, password):
     conn.pass_(password)
     conn.close()
 <<<<<<< HEAD
+<<<<<<< HEAD
     print('OK')
 =======
 >>>>>>> 7b46c7bc (Add test to show it's broken)
+=======
+    print('OK')
+>>>>>>> a09c23d8 (Fix it)
     print(f'Authenticating to pop3s://{username}:{password}@{server}:110/')
     conn = poplib.POP3(server)
     conn.stls()
@@ -84,9 +94,13 @@ def test_pop3(server, username, password):
     conn.pass_(password)
     conn.close()
 <<<<<<< HEAD
+<<<<<<< HEAD
     print('OK')
 =======
 >>>>>>> 7b46c7bc (Add test to show it's broken)
+=======
+    print('OK')
+>>>>>>> a09c23d8 (Fix it)
     print(f'Authenticating to pop3://{username}:{password}@{server}:110/')
     try:
         conn = poplib.POP3(server)
@@ -111,29 +125,44 @@ def test_SMTP(server, username, password):
 =======
         os.exit(103)
     except poplib.error_proto:
-        pass
+        print('NOK')
 
 def test_SMTP(server, username, password):
+    print(f'Authenticating to smtps://{username}:{password}@{server}:465/')
     with smtplib.SMTP_SSL(server) as conn:
         conn.ehlo()
         conn.login(username, password)
+<<<<<<< HEAD
     with smtplib.SMTP(server) as conn:
 >>>>>>> 7b46c7bc (Add test to show it's broken)
+=======
+        print('OK')
+    print(f'Authenticating to smtps://{username}:{password}@{server}:587/')
+    with smtplib.SMTP(server, 587) as conn:
+>>>>>>> a09c23d8 (Fix it)
         conn.ehlo()
         conn.starttls()
         conn.ehlo()
         conn.login(username, password)
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> a09c23d8 (Fix it)
         print('OK')
     try:
         print(f'Authenticating to smtp://{username}:{password}@{server}:587/')
         with smtplib.SMTP(server, 587) as conn:
             conn.ehlo()
             conn.login(username, password)
+<<<<<<< HEAD
             print(f'Authenticating to smtp://{username}:{password}@{server}:587/ worked!')
             sys.exit(104)
     except smtplib.SMTPNotSupportedError:
         print('NOK - expected')
+=======
+    except smtplib.SMTPNotSupportedError:
+        print('NOK')
+>>>>>>> a09c23d8 (Fix it)
     #port 25 should fail
     try:
         print(f'Authenticating to smtps://{username}:{password}@{server}:25/')
@@ -142,6 +171,7 @@ def test_SMTP(server, username, password):
             conn.starttls()
             conn.ehlo()
             conn.login(username, password)
+<<<<<<< HEAD
             print(f'Authenticating to smtps://{username}:{password}@{server}:25/ worked!')
             sys.exit(105)
     except smtplib.SMTPNotSupportedError:
@@ -192,9 +222,19 @@ if __name__ == '__main__':
 #https://github.com/python/cpython/issues/73936
 #SMTPlib does not support UTF8 passwords.
 =======
+=======
+    except smtplib.SMTPNotSupportedError:
+        print('NOK')
+    try:
+        print(f'Authenticating to smtp://{username}:{password}@{server}:25/')
+        with smtplib.SMTP(server) as conn:
+            conn.ehlo()
+            conn.login(username, password)
+            print(f'Authenticating to smtp://{username}:{password}@{server}:587/ worked without STARTTLS!')
+>>>>>>> a09c23d8 (Fix it)
             os.exit(104)
     except smtplib.SMTPNotSupportedError:
-        pass
+        print('NOK')
 
 if __name__ == '__main__':
     test_imap(SERVER, USERNAME, PASSWORD)

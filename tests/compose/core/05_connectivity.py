@@ -170,6 +170,7 @@ def test_SMTP(server, username, password):
 >>>>>>> a09c23d8 (Fix it)
 =======
             print(f'Authenticating to smtp://{username}:{password}@{server}:587/ worked!')
+            os.exit(104)
     except smtplib.SMTPNotSupportedError:
         print('NOK - expected')
 >>>>>>> c008ce66 (review)
@@ -184,6 +185,7 @@ def test_SMTP(server, username, password):
 <<<<<<< HEAD
 <<<<<<< HEAD
             print(f'Authenticating to smtps://{username}:{password}@{server}:25/ worked!')
+<<<<<<< HEAD
             sys.exit(105)
     except smtplib.SMTPNotSupportedError:
         print('NOK - expected')
@@ -237,6 +239,9 @@ if __name__ == '__main__':
 =======
             print(f'Authenticating to smtps://{username}:{password}@{server}:25/ worked!')
 >>>>>>> c008ce66 (review)
+=======
+            os.exit(105)
+>>>>>>> a61de6c2 (Unique exit codes)
     except smtplib.SMTPNotSupportedError:
         print('NOK - expected')
     try:
@@ -249,8 +254,12 @@ if __name__ == '__main__':
 >>>>>>> a09c23d8 (Fix it)
 =======
             print(f'Authenticating to smtp://{username}:{password}@{server}:25/ worked without STARTTLS!')
+<<<<<<< HEAD
 >>>>>>> c008ce66 (review)
             os.exit(104)
+=======
+            os.exit(106)
+>>>>>>> a61de6c2 (Unique exit codes)
     except smtplib.SMTPNotSupportedError:
         print('NOK - expected')
 

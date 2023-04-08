@@ -77,6 +77,7 @@ def test_SMTP(server, username, password):
             conn.ehlo()
             conn.login(username, password)
             print(f'Authenticating to smtp://{username}:{password}@{server}:587/ worked!')
+            os.exit(104)
     except smtplib.SMTPNotSupportedError:
         print('NOK - expected')
     #port 25 should fail
@@ -88,6 +89,7 @@ def test_SMTP(server, username, password):
             conn.ehlo()
             conn.login(username, password)
             print(f'Authenticating to smtps://{username}:{password}@{server}:25/ worked!')
+            os.exit(105)
     except smtplib.SMTPNotSupportedError:
         print('NOK - expected')
     try:
@@ -96,7 +98,7 @@ def test_SMTP(server, username, password):
             conn.ehlo()
             conn.login(username, password)
             print(f'Authenticating to smtp://{username}:{password}@{server}:25/ worked without STARTTLS!')
-            os.exit(104)
+            os.exit(106)
     except smtplib.SMTPNotSupportedError:
         print('NOK - expected')
 

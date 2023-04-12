@@ -1,0 +1,1 @@
+Letsencrypt only works if port 80 is reachable. Users behind reverse-proxies don't read instructions... this makes the common misconfiguration work too.

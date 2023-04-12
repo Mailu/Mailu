@@ -1,7 +1,10 @@
 import hmac
 import logging as log
 import os
+<<<<<<< HEAD
 import signal
+=======
+>>>>>>> 7b082320 (Sanitize logs as appropriate)
 import sys
 import re
 from pwd import getpwnam
@@ -30,15 +33,26 @@ def _coerce_value(value):
     return value
 
 class LogFilter(object):
+<<<<<<< HEAD
     def __init__(self, stream, re_patterns):
         self.stream = stream
         if isinstance(re_patterns, list):
             self.pattern = re.compile('|'.join([fr'(?:{pattern})' for pattern in re_patterns]))
+=======
+    def __init__(self, stream, re_patterns, log_file):
+        self.stream = stream
+        if isinstance(re_patterns, list):
+            self.pattern = re.compile('|'.join([f'(?:{pattern})' for pattern in re_patterns]))
+>>>>>>> 7b082320 (Sanitize logs as appropriate)
         elif isinstance(re_patterns, str):
             self.pattern = re.compile(re_patterns)
         else:
             self.pattern = re_patterns
         self.found = False
+<<<<<<< HEAD
+=======
+        self.log_file = log_file
+>>>>>>> 7b082320 (Sanitize logs as appropriate)
 
     def __getattr__(self, attr_name):
         return getattr(self.stream, attr_name)
@@ -50,6 +64,15 @@ class LogFilter(object):
             if not self.pattern.search(data):
                 self.stream.write(data)
                 self.stream.flush()
+<<<<<<< HEAD
+=======
+                if self.log_file:
+                    try:
+                        with open(self.log_file, 'a', encoding='utf-8') as l:
+                            l.write(data)
+                    except:
+                        pass
+>>>>>>> 7b082320 (Sanitize logs as appropriate)
             else:
                 # caught bad pattern
                 self.found = True
@@ -57,6 +80,7 @@ class LogFilter(object):
     def flush(self):
         self.stream.flush()
 
+<<<<<<< HEAD
 def _is_compatible_with_hardened_malloc():
     with open('/proc/cpuinfo', 'r') as f:
         lines = f.readlines()
@@ -85,6 +109,13 @@ def set_env(required_secrets=[], log_filters=[]):
     if not 'LD_PRELOAD' in os.environ and _is_compatible_with_hardened_malloc():
         log.warning('Your CPU has Advanced Vector Extensions available, we recommend you enable hardened-malloc earlier in the boot process by adding LD_PRELOAD=/usr/lib/libhardened_malloc.so to your mailu.env')
         os.environ['LD_PRELOAD'] = '/usr/lib/libhardened_malloc.so'
+=======
+def set_env(required_secrets=[], log_filters=[], log_file=None):
+    if log_filters:
+        sys.stdout = LogFilter(sys.stdout, log_filters, log_file)
+        sys.stderr = LogFilter(sys.stderr, log_filters, log_file)
+    log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", 'WARNING'))
+>>>>>>> 7b082320 (Sanitize logs as appropriate)
 
     """ This will set all the environment variables and retains only the secrets we need """
     if 'SECRET_KEY_FILE' in os.environ:

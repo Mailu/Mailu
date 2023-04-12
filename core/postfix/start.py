@@ -11,10 +11,18 @@ from podop import run_server
 from socrate import system, conf
 
 system.set_env(log_filters=[
+<<<<<<< HEAD
     r'(dis)?connect from localhost\[(\:\:1|127\.0\.0\.1)\]( quit=1 commands=1)?$',
     r'haproxy read\: short protocol header\: QUIT$',
     r'discarding EHLO keywords\: PIPELINING$'
     ])
+=======
+    r'the Postfix mail system is running\: \d+$',
+    r'(dis)?connect from localhost\[(\:\:1|127\.0\.0\.1)\]( quit=1 commands=1)?$',
+    r'haproxy read\: short protocol header\: QUIT$',
+    r'discarding EHLO keywords\: PIPELINING$',
+    ], log_file=os.environ.get('POSTFIX_LOG_FILE'))
+>>>>>>> 7b082320 (Sanitize logs as appropriate)
 
 os.system("flock -n /queue/pid/master.pid rm /queue/pid/master.pid")
 

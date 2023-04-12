@@ -9,7 +9,11 @@ import sys
 import time
 from socrate import system,conf
 
+<<<<<<< HEAD
 env = system.set_env()
+=======
+system.set_env()
+>>>>>>> 7b082320 (Sanitize logs as appropriate)
 
 # Actual startup script
 

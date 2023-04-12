@@ -4,7 +4,11 @@ import os
 import subprocess
 from socrate import system
 
+<<<<<<< HEAD
 system.set_env(log_filters=r'could not be resolved \(\d\: [^\)]+\) while in resolving client address, client\: [^,]+, server: [^\:]+\:(25|110|143|587|465|993|995)$')
+=======
+system.set_env(log_filters=r'could not be resolved \(\d\: [^\)]+\) while in resolving client address, client\: [^,]+, server: [^\:]+\:(25,110,143,587,465,993,995)$')
+>>>>>>> 7b082320 (Sanitize logs as appropriate)
 
 # Check if a stale pid file exists
 if os.path.exists("/var/run/nginx.pid"):

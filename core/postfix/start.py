@@ -4,15 +4,18 @@ import os
 import glob
 import shutil
 import multiprocessing
-import logging as log
 import sys
 import re
 
 from podop import run_server
 from socrate import system, conf
 
-log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
-system.set_env()
+system.set_env(log_filters=[
+    r'the Postfix mail system is running\: \d+$',
+    r'(dis)?connect from localhost\[(\:\:1|127\.0\.0\.1)\]( quit=1 commands=1)?$',
+    r'haproxy read\: short protocol header\: QUIT$',
+    r'discarding EHLO keywords\: PIPELINING$',
+    ], log_file=os.environ.get('POSTFIX_LOG_FILE'))
 
 os.system("flock -n /queue/pid/master.pid rm /queue/pid/master.pid")
 
@@ -45,8 +48,6 @@ def is_valid_postconf_line(line):
 
 # Actual startup script
 os.environ['DEFER_ON_TLS_ERROR'] = os.environ['DEFER_ON_TLS_ERROR'] if 'DEFER_ON_TLS_ERROR' in os.environ else 'True'
-os.environ["POSTFIX_LOG_SYSLOG"] = os.environ.get("POSTFIX_LOG_SYSLOG","local")
-os.environ["POSTFIX_LOG_FILE"] = os.environ.get("POSTFIX_LOG_FILE", "")
 
 # Postfix requires IPv6 addresses to be wrapped in square brackets
 if 'RELAYNETS' in os.environ:
@@ -86,11 +87,8 @@ if "RELAYUSER" in os.environ:
     conf.jinja("/conf/sasl_passwd", os.environ, path)
     os.system("postmap {}".format(path))
 
-# Configure and start local rsyslog server
-conf.jinja("/conf/rsyslog.conf", os.environ, "/etc/rsyslog.conf")
-os.system("/usr/sbin/rsyslogd -niNONE &")
 # Configure logrotate and start crond
-if os.environ["POSTFIX_LOG_FILE"] != "":
+if os.environ.get('POSTFIX_LOG_FILE'):
     conf.jinja("/conf/logrotate.conf", os.environ, "/etc/logrotate.d/postfix.conf")
     os.system("/usr/sbin/crond")
     if os.path.exists("/overrides/logrotate.conf"):

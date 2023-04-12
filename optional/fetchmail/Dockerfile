@@ -16,6 +16,4 @@ RUN echo $VERSION >/version
 
 HEALTHCHECK --start-period=350s CMD ["/bin/sh", "-c", "ps ax | grep [/]fetchmail.py"]
 
-VOLUME ["/var/lib/rspamd"]
-
 CMD ["/fetchmail.py"]

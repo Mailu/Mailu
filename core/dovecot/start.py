@@ -9,8 +9,7 @@ import sys
 from podop import run_server
 from socrate import system, conf
 
-log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
-system.set_env()
+system.set_env(log_filters=r'waitpid\(\) returned unknown PID \d+$')
 
 def start_podop():
     system.drop_privs_to('mail')
@@ -36,4 +35,4 @@ os.system("chown mail:mail /mail")
 os.system("chown -R mail:mail /var/lib/dovecot /conf")
 
 multiprocessing.Process(target=start_podop).start()
-os.execv("/usr/sbin/dovecot", ["dovecot", "-c", "/etc/dovecot/dovecot.conf", "-F"])
+os.system("dovecot -c /etc/dovecot/dovecot.conf -F")

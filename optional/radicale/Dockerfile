@@ -11,7 +11,7 @@ COPY radicale.conf /
 RUN echo $VERSION >/version
 
 #EXPOSE 5232/tcp
-HEALTHCHECK CMD curl -f -L http://localhost:5232/ || exit 1
+HEALTHCHECK CMD ["/bin/sh", "-c", "ps ax | grep [/]radicale.conf"]
 
 VOLUME ["/data"]
 

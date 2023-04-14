@@ -42,9 +42,14 @@ def check_credentials(user, password, ip, protocol=None, auth_port=None, source_
     # webmails
     if auth_port in WEBMAIL_PORTS and password.startswith('token-'):
         if utils.verify_temp_token(user.get_id(), password):
+<<<<<<< HEAD
             app.logger.debug(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: success: webmail-token')
             return True
     if utils.is_app_token(password):
+=======
+            is_ok = True
+    if not is_ok and utils.is_app_token(password):
+>>>>>>> c3633780 (Always exempt app-tokens from rate limits)
         for token in user.tokens:
             if token.check_password(password):
                 if not token.ip or utils.is_ip_in_subnet(ip, token.ip):

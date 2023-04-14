@@ -36,7 +36,11 @@ def nginx_authentication():
     is_valid_user = False
     username = response.headers.get('Auth-User', None)
     if response.headers.get("Auth-User-Exists") == "True":
+<<<<<<< HEAD
         if not is_from_webmail and not is_app_token and utils.limiter.should_rate_limit_user(username, client_ip):
+=======
+        if not is_app_token and utils.limiter.should_rate_limit_user(username, client_ip):
+>>>>>>> c3633780 (Always exempt app-tokens from rate limits)
             # FIXME could be done before handle_authentication()
             status, code = nginx.get_status(flask.request.headers['Auth-Protocol'], 'ratelimit')
             response = flask.Response()

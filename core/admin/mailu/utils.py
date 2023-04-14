@@ -525,3 +525,9 @@ def formatCSVField(field):
     else:
         data = field.data
     field.data = ", ".join(data)
+
+# All tokens are 32 characters hex lowercase
+def is_app_token(candidate):
+    if len(candidate) == 32 and all(c in string.hexdigits[:-6] for c in candidate):
+        return True
+    return False

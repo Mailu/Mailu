@@ -61,11 +61,23 @@ class LogFilter(object):
     def flush(self):
         self.stream.flush()
 
+def _is_compatible_with_hardened_malloc():
+    with open('/proc/cpuinfo', 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            # See #2764, we need vmovdqu
+            if line.startswith('flags') and ' avx ' not in line:
+                return False
+    return True
+
 def set_env(required_secrets=[], log_filters=[], log_file=None):
     if log_filters:
         sys.stdout = LogFilter(sys.stdout, log_filters, log_file)
         sys.stderr = LogFilter(sys.stderr, log_filters, log_file)
     log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", 'WARNING'))
+
+    if not _is_compatible_with_hardened_malloc():
+        del os.environ['LD_PRELOAD']
 
     """ This will set all the environment variables and retains only the secrets we need """
     if 'SECRET_KEY_FILE' in os.environ:

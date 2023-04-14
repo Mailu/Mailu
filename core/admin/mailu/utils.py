@@ -15,6 +15,7 @@ import dns.rdataclass
 
 import hmac
 import secrets
+import string
 import time
 
 from multiprocessing import Value

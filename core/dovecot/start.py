@@ -36,4 +36,5 @@ os.system("chown mail:mail /mail")
 os.system("chown -R mail:mail /var/lib/dovecot /conf")
 
 multiprocessing.Process(target=start_podop).start()
+os.system("dovecot -c /etc/dovecot/dovecot2.conf")
 os.execv("/usr/sbin/dovecot", ["dovecot", "-c", "/etc/dovecot/dovecot.conf", "-F"])

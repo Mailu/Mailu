@@ -81,11 +81,15 @@ class LogFilter(object):
         self.stream.flush()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> b6ed4fd8 (fix #2764)
 def _is_compatible_with_hardened_malloc():
     with open('/proc/cpuinfo', 'r') as f:
         lines = f.readlines()
         for line in lines:
             # See #2764, we need vmovdqu
+<<<<<<< HEAD
             # See #2959, we need vpunpckldq
             if line.startswith('flags') and ' avx2 ' not in line:
                 return False
@@ -110,12 +114,21 @@ def set_env(required_secrets=[], log_filters=[]):
         log.warning('Your CPU has Advanced Vector Extensions available, we recommend you enable hardened-malloc earlier in the boot process by adding LD_PRELOAD=/usr/lib/libhardened_malloc.so to your mailu.env')
         os.environ['LD_PRELOAD'] = '/usr/lib/libhardened_malloc.so'
 =======
+=======
+            if line.startswith('flags') and ' avx ' not in line:
+                return False
+    return True
+
+>>>>>>> b6ed4fd8 (fix #2764)
 def set_env(required_secrets=[], log_filters=[], log_file=None):
     if log_filters:
         sys.stdout = LogFilter(sys.stdout, log_filters, log_file)
         sys.stderr = LogFilter(sys.stderr, log_filters, log_file)
     log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", 'WARNING'))
 >>>>>>> 7b082320 (Sanitize logs as appropriate)
+
+    if not _is_compatible_with_hardened_malloc():
+        del os.environ['LD_PRELOAD']
 
     """ This will set all the environment variables and retains only the secrets we need """
     if 'SECRET_KEY_FILE' in os.environ:

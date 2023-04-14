@@ -1,0 +1,1 @@
+Always exempt login attempts that use app-tokens from rate-limits

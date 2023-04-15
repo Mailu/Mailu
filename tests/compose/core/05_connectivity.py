@@ -106,7 +106,9 @@ def test_SMTP(server, username, password):
         print('NOK - expected')
 
 def test_managesieve(server, username, password):
-    ctx = ssl.SSLContext()
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
     print(f'Authenticating to managesieves://{username}:{password}@{server}:4190/')
     with socket.create_connection((server, 4190)) as sock:
         with ctx.wrap_socket(sock) as ssock:

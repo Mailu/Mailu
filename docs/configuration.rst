@@ -260,6 +260,7 @@ It can be set to:
 
 * ``http`` to accept the ``PROXY`` protocol on nginx's HTTP proxy ports
 * ``mail`` to accept the ``PROXY`` protocol on nginx's mail proxy ports
+* ``sieve`` to accept the ``PROXY`` protocol on nginx's managesieve proxy port
 * ``all`` to accept the ``PROXY`` protocol on all nginx's HTTP and mail proxy ports
 
 .. _`PROXY protocol`: https://github.com/haproxy/haproxy/blob/master/doc/proxy-protocol.txt

@@ -71,6 +71,7 @@ class LimitWraperFactory(object):
     def rate_limit_user(self, username, ip, device_cookie=None, device_cookie_name=None, password=''):
         limiter = self.get_limiter(app.config["AUTH_RATELIMIT_USER"], 'auth-user')
         if self.is_subject_to_rate_limits(ip):
+            self.rate_limit_ip(ip, username)
             truncated_password = hmac.new(bytearray(username, 'utf-8'), bytearray(password, 'utf-8'), 'sha256').hexdigest()[-6:]
             if password and (self.storage.get(f'dedup2-{username}-{truncated_password}') > 0):
                 return

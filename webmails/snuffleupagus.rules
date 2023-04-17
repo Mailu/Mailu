@@ -25,7 +25,7 @@ sp.readonly_exec.enable();
 
 # PHP has a lot of wrappers, most of them aren't usually useful, you should
 # only enable the ones you're using.
-sp.wrappers_whitelist.list("file,php,phar,mailsosubstreams");
+sp.wrappers_whitelist.list("file,php,phar,mailsosubstreams,mailsoliteral,mailsotempfile,mailsobinary");
 
 # Prevent sloppy comparisons.
 sp.sloppy_comparison.enable();

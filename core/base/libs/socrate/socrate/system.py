@@ -68,6 +68,9 @@ def _is_compatible_with_hardened_malloc():
             # See #2764, we need vmovdqu
             if line.startswith('flags') and ' avx ' not in line:
                 return False
+            # See #2541
+            if line.startswith('Features') and ' lrcpc ' not in line:
+                return False
     return True
 
 def set_env(required_secrets=[], log_filters=[], log_file=None):
@@ -77,6 +80,7 @@ def set_env(required_secrets=[], log_filters=[], log_file=None):
     log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", 'WARNING'))
 
     if 'LD_PRELOAD' in os.environ and not _is_compatible_with_hardened_malloc():
+        log.error('Disabling hardened-malloc on this CPU')
         del os.environ['LD_PRELOAD']
 
     """ This will set all the environment variables and retains only the secrets we need """

@@ -36,8 +36,7 @@ def check_credentials(user, password, ip, protocol=None, auth_port=None):
     if auth_port in WEBMAIL_PORTS or auth_port == '4190' and password.startswith('token-'):
         if utils.verify_temp_token(user.get_id(), password):
             is_ok = True
-    # All tokens are 32 characters hex lowercase
-    if not is_ok and len(password) == 32:
+    if not is_ok and utils.is_app_token(password):
         for token in user.tokens:
             if (token.check_password(password) and
                 (not token.ip or token.ip == ip)):

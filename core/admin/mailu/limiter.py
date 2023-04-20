@@ -76,6 +76,7 @@ class LimitWraperFactory(object):
                 return
             self.storage.incr(f'dedup2-{username}-{truncated_password}', limits.parse(app.config['AUTH_RATELIMIT_USER']).GRANULARITY.seconds, True)
             limiter.hit(device_cookie if device_cookie_name == username else username)
+            self.rate_limit_ip(ip, username)
 
     """ Device cookies as described on:
     https://owasp.org/www-community/Slow_Down_Online_Guessing_Attacks_with_Device_Cookies

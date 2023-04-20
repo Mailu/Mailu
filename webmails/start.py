@@ -11,7 +11,6 @@ from socrate import conf, system
 
 env = os.environ
 
-logging.basicConfig(stream=sys.stderr, level=env.get("LOG_LEVEL", "WARNING"))
 system.set_env(['ROUNDCUBE','SNUFFLEUPAGUS'])
 
 # jinja context

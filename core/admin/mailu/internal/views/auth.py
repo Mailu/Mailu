@@ -21,7 +21,8 @@ def nginx_authentication():
         utils.limiter.rate_limit_ip(client_ip)
         return response
     is_from_webmail = headers['Auth-Port'] in ['10143', '10025']
-    if not is_from_webmail and not is_port_25 and utils.limiter.should_rate_limit_ip(client_ip):
+    is_app_token = utils.is_app_token(headers.get('Auth-Pass',''))
+    if not is_from_webmail and not is_port_25 and not is_app_token and utils.limiter.should_rate_limit_ip(client_ip):
         status, code = nginx.get_status(flask.request.headers['Auth-Protocol'], 'ratelimit')
         response = flask.Response()
         response.headers['Auth-Status'] = status
@@ -36,7 +37,7 @@ def nginx_authentication():
     is_valid_user = False
     username = response.headers.get('Auth-User', None)
     if response.headers.get("Auth-User-Exists") == "True":
-        if utils.limiter.should_rate_limit_user(username, client_ip):
+        if not is_app_token and utils.limiter.should_rate_limit_user(username, client_ip):
             # FIXME could be done before handle_authentication()
             status, code = nginx.get_status(flask.request.headers['Auth-Protocol'], 'ratelimit')
             response = flask.Response()

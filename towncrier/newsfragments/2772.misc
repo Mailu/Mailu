@@ -1,0 +1,2 @@
+Always exempt login attempts that use app-tokens from rate-limits
+Ensure that unsuccessful login attempts against a valid account hit the ip-based rate-limit too

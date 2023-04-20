@@ -24,7 +24,14 @@ $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 
 // Sieve script management
-$config['managesieve_host'] = '{{ FRONT_ADDRESS or "front" }}:14190';
+$config['managesieve_host'] = 'tls://{{ FRONT_ADDRESS or "front" }}:4190';
+$config['managesieve_conn_options'] = array(
+  'ssl'         => array(
+     'verify_peer'  => false,
+     'verify_peer_name' => false,
+     'allow_self_signed' => true,
+   ),
+);
 $config['managesieve_mbox_encoding'] = 'UTF8';
 
 // roundcube customization

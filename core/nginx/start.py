@@ -13,4 +13,5 @@ elif os.environ["TLS_FLAVOR"] in [ "mail", "cert" ]:
     subprocess.Popen(["/certwatcher.py"])
 
 subprocess.call(["/config.py"])
+os.system("dovecot -c /etc/dovecot/proxy.conf")
 os.execv("/usr/sbin/nginx", ["nginx", "-g", "daemon off;"])

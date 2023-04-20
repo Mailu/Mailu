@@ -30,7 +30,7 @@ services:
       options:
         tag: mailu-front
     ports:
-    {% for port in (80, 443, 25, 465, 587, 110, 995, 143, 993) %}
+    {% for port in (80, 443, 25, 465, 587, 110, 995, 143, 993, 4190) %}
     {% if bind4 %}
       - "{{ bind4 }}:{{ port }}:{{ port }}"
     {% endif %}

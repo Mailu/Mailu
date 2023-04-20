@@ -9,7 +9,10 @@ import sys
 from podop import run_server
 from socrate import system, conf
 
-system.set_env(log_filters=r'waitpid\(\) returned unknown PID \d+$')
+system.set_env(log_filters=[
+    r'waitpid\(\) returned unknown PID \d+$',
+    r'Error\: SSL context initialization failed, disabling SSL: Can\'t load SSL certificate \(ssl_cert setting\)\: The certificate is empty$',
+])
 
 def start_podop():
     system.drop_privs_to('mail')

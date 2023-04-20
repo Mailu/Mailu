@@ -91,7 +91,7 @@ def set_env(required_secrets=[], log_filters=[]):
         os.environ['LD_PRELOAD'] = '/usr/lib/libhardened_malloc.so'
 =======
     if 'LD_PRELOAD' in os.environ and not _is_compatible_with_hardened_malloc():
-        log.error('Disabling hardened-malloc on this CPU')
+        log.warning('Disabling hardened-malloc on this CPU')
         del os.environ['LD_PRELOAD']
 >>>>>>> ede331f6 (LD_PRELOAD may not be in ENV)
 

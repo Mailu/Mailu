@@ -129,8 +129,7 @@ The following steps have to be taken to configure an additional symbol (rule) th
 
    .. code-block:: bash
 
-     docker compose up -d --scale antispam=0
-     docker compose up -d --scale antispam=1
+     docker compose up antispam --force-recreate -d
 
 4. (Optional) Check if the custom symbol is loaded. To access the Rspamd webgui, log in the Mailu administration web interface with a user that is an administrator and go to Antispam. In Rspamd webgui go to tab Symbols. Change the group drop-down box to local_bl. The following additional rule will be listed.
 

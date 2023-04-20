@@ -9,7 +9,6 @@ import sys
 import time
 from socrate import system,conf
 
-log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
 system.set_env()
 
 # Actual startup script

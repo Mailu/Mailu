@@ -1,6 +1,8 @@
 import hmac
 import logging as log
 import os
+import sys
+import re
 from pwd import getpwnam
 import socket
 import tenacity
@@ -24,15 +26,68 @@ def _coerce_value(value):
         return False
     return value
 
-def set_env(required_secrets=[]):
+class LogFilter(object):
+    def __init__(self, stream, re_patterns, log_file):
+        self.stream = stream
+        if isinstance(re_patterns, list):
+            self.pattern = re.compile('|'.join([f'(?:{pattern})' for pattern in re_patterns]))
+        elif isinstance(re_patterns, str):
+            self.pattern = re.compile(re_patterns)
+        else:
+            self.pattern = re_patterns
+        self.found = False
+        self.log_file = log_file
+
+    def __getattr__(self, attr_name):
+        return getattr(self.stream, attr_name)
+
+    def write(self, data):
+        if data == '\n' and self.found:
+            self.found = False
+        else:
+            if not self.pattern.search(data):
+                self.stream.write(data)
+                self.stream.flush()
+                if self.log_file:
+                    try:
+                        with open(self.log_file, 'a', encoding='utf-8') as l:
+                            l.write(data)
+                    except:
+                        pass
+            else:
+                # caught bad pattern
+                self.found = True
+
+    def flush(self):
+        self.stream.flush()
+
+def _is_compatible_with_hardened_malloc():
+    with open('/proc/cpuinfo', 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            # See #2764, we need vmovdqu
+            if line.startswith('flags') and ' avx ' not in line:
+                return False
+    return True
+
+def set_env(required_secrets=[], log_filters=[], log_file=None):
+    if log_filters:
+        sys.stdout = LogFilter(sys.stdout, log_filters, log_file)
+        sys.stderr = LogFilter(sys.stderr, log_filters, log_file)
+    log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", 'WARNING'))
+
+    if not _is_compatible_with_hardened_malloc():
+        del os.environ['LD_PRELOAD']
+
     """ This will set all the environment variables and retains only the secrets we need """
-    secret_key = os.environ.get('SECRET_KEY')
-    if not secret_key:
+    if 'SECRET_KEY_FILE' in os.environ:
         try:
             secret_key = open(os.environ.get("SECRET_KEY_FILE"), "r").read().strip()
         except Exception as exc:
             log.error(f"Can't read SECRET_KEY from file: {exc}")
             raise exc
+    else:
+        secret_key = os.environ.get('SECRET_KEY')
     clean_env()
     # derive the keys we need
     for secret in required_secrets:

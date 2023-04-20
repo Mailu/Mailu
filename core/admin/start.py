@@ -9,7 +9,6 @@ os.system("chown mailu:mailu -R /dkim")
 os.system("find /data | grep -v /fetchmail | xargs -n1 chown mailu:mailu")
 system.drop_privs_to('mailu')
 
-log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "INFO"))
 system.set_env(['SECRET'])
 
 os.system("flask mailu advertise")

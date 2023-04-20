@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 import os
-import logging as log
+import logging as logger
 import sys
+from socrate import system
 
-log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", "WARNING"))
-logger=log.getLogger(__name__)
+system.set_env(log_filters=r'SelfCheck: Database status OK\.$')
 
 # Bootstrap the database if clamav is running for the first time
 if not os.path.isfile("/data/main.cvd"):

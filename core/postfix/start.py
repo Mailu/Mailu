@@ -11,7 +11,6 @@ from podop import run_server
 from socrate import system, conf
 
 system.set_env(log_filters=[
-    r'the Postfix mail system is running\: \d+$',
     r'(dis)?connect from localhost\[(\:\:1|127\.0\.0\.1)\]( quit=1 commands=1)?$',
     r'haproxy read\: short protocol header\: QUIT$',
     r'discarding EHLO keywords\: PIPELINING$',

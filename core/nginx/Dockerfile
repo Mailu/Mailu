@@ -28,7 +28,7 @@ RUN echo $VERSION >/version
 
 EXPOSE 80/tcp 443/tcp 110/tcp 143/tcp 465/tcp 587/tcp 993/tcp 995/tcp 25/tcp 4190/tcp
 # EXPOSE 10025/tcp 10143/tcp
-HEALTHCHECK --start-period=60s CMD curl -skfLo /dev/null http://127.0.0.1:10204/health && echo PING|nc -w2 localhost 5001|grep "PONG"
+HEALTHCHECK --start-period=60s CMD curl -skfLo /dev/null http://127.0.0.1/health && echo PING|nc -w2 127.0.0.1 5001|grep -q "PONG"
 
 VOLUME ["/certs", "/overrides"]
 

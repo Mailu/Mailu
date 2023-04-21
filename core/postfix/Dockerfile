@@ -15,7 +15,7 @@ COPY start.py /
 RUN echo $VERSION >/version
 
 #EXPOSE 25/tcp 10025/tcp
-HEALTHCHECK --start-period=350s CMD /usr/sbin/postfix status
+HEALTHCHECK --start-period=30s CMD ! /usr/libexec/postfix/master -t
 
 VOLUME ["/queue"]
 

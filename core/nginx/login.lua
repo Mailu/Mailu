@@ -17,7 +17,7 @@ function auth_passdb_lookup(req)
   auth_request:add_header('Auth-Port', req.local_port)
   auth_request:add_header('Auth-User', req.user)
   auth_request:add_header('Auth-Pass', req.password)
-  auth_request:add_header('Auth-Protocol', 'sieve')
+  auth_request:add_header('Auth-Protocol', req.service)
   auth_request:add_header('Client-IP', req.remote_ip)
   auth_request:add_header('Auth-SSL', req.secured)
   auth_request:add_header('Auth-Method', req.mechanism)
@@ -28,7 +28,9 @@ function auth_passdb_lookup(req)
   then
     if auth_response:header('Auth-Status') == 'OK'
     then
-      return dovecot.auth.PASSDB_RESULT_OK, "proxy=y host={{ IMAP_ADDRESS }} nopassword=Y"
+      local server = auth_response:header('Auth-Server')
+      local port = auth_response:header('Auth-Port')
+      return dovecot.auth.PASSDB_RESULT_OK, "proxy=y host=" .. server .. " port=" .. port .. " nopassword=Y"
     else
       return dovecot.auth.PASSDB_RESULT_PASSWORD_MISMATCH, ""
     end

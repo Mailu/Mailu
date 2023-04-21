@@ -1,1 +1,2 @@
 The SMTP container wasn't logging things like it should
+The health-check of dovecot was creating zombies

@@ -7,7 +7,11 @@ import multiprocessing
 from podop import run_server
 from socrate import system, conf
 
+<<<<<<< HEAD
 system.set_env(log_filters=[r'Error\: SSL context initialization failed, disabling SSL\: Can\'t load SSL certificate \(ssl_cert setting\)\: The certificate is empty$'])
+=======
+system.set_env()
+>>>>>>> 36fcb9b8 (dovecot is creating zombies)
 
 def start_podop():
     system.drop_privs_to('mail')

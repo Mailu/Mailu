@@ -15,7 +15,11 @@ COPY start.py /
 
 RUN echo $VERSION >/version
 
+<<<<<<< HEAD
 # EXPOSE 110/tcp 143/tcp 993/tcp 4190/tcp 2525/tcp
+=======
+EXPOSE 110/tcp 143/tcp 993/tcp 4190/tcp 2525/tcp
+>>>>>>> 36fcb9b8 (dovecot is creating zombies)
 HEALTHCHECK CMD kill -0 `cat /run/dovecot/master.pid`
 
 VOLUME ["/mail"]

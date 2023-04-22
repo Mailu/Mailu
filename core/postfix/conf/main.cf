@@ -6,6 +6,7 @@
 mydomain = {{ DOMAIN }}
 myhostname = {{ HOSTNAMES.split(",")[0] }}
 myorigin = $mydomain
+maillog_file = /dev/stdout
 
 # Queue location
 queue_directory = /queue

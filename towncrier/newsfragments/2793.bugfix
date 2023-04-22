@@ -1,0 +1,3 @@
+The SMTP container wasn't logging things like it should
+The health-check of dovecot was creating zombies
+Document that COMPRESSION=zstd is now possible (see #2139)

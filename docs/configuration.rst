@@ -265,6 +265,8 @@ and will improve compatibility with 3rd party tools.
 
 .. _`zlib_save_level`: https://doc.dovecot.org/settings/plugin/zlib-plugin/#plugin_setting-zlib-zlib_save_level
 
+The ``COMPRESSION`` (default: unset) setting controls whether emails are stored compressed at rest on disk. Valid values are ``gz``, ``bz2`` or ``zstd``. If the underlying filesystem supports compression natively you should use it instead of this setting as it will be more efficient and will improve compatibility with 3rd party tools.
+
 .. _reverse_proxy_headers:
 
 The ``REAL_IP_HEADER`` (default: unset) and ``REAL_IP_FROM`` (default: unset) settings

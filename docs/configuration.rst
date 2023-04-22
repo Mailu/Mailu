@@ -241,6 +241,8 @@ but slows down the performance of modern devices.
 
 The ``TLS_PERMISSIVE`` (default: true) setting controls whether ciphers and protocols offered on port 25 for STARTTLS are optimized for maximum compatibility. We **strongly recommend** that you do **not** change this setting on the basis that any encryption beats no encryption. If you are subject to compliance requirements and are not afraid of losing emails as a result of artificially reducing compatibility, set it to 'false'. Keep in mind that servers that are running a software stack old enough to not be compatible with the current TLS requirements will either a) deliver in plaintext b) bounce emails c) silently drop emails; moreover, modern servers will benefit from various downgrade protections (DOWNGRD, RFC7507) making the security argument mostly a moot point.
 
+The ``COMPRESSION`` (default: unset) setting controls whether emails are stored compressed at rest on disk. Valid values are ``gz``, ``bz2`` or ``zstd``. If the underlying filesystem supports compression natively you should use it instead of this setting as it will be more efficient and will improve compatibility with 3rd party tools.
+
 .. _reverse_proxy_headers:
 
 The ``REAL_IP_HEADER`` (default: unset) and ``REAL_IP_FROM`` (default: unset) settings

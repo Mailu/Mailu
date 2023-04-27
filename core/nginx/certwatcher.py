@@ -27,6 +27,9 @@ class ChangeHandler(FileSystemEventHandler):
         if exists("/var/run/nginx.pid"):
             print("Reloading a running nginx")
             system("nginx -s reload")
+        if os.path.exists("/run/dovecot/master.pid"):
+            print("Reloading a running dovecot")
+            os.system("doveadm reload")
 
     @staticmethod
     def reexec_config():

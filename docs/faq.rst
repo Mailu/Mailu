@@ -996,11 +996,15 @@ $config['spellcheck_ignore_nums'] = true;
 $config['spellcheck_dictionary'] = true;
 ```
 
-If not, you can download the `aspell dictionnary`_ you require and place it in ``/usr/share/aspell/`` and then enable it by tweaking the following in the configuration file:
+If not, you can download the `aspell dictionary`_ you require and place it in ``/usr/share/aspell/`` and then enable it by tweaking the following in the configuration file:
 
 ```
 $config['spellcheck_languages'] = array('en'=>'English', ...);
 ```
 
+<<<<<<< HEAD
 .. _`aspell dictionnary`: http://ftp.gnu.org/gnu/aspell/dict/0index.html
 >>>>>>> 6be5fbe9 (Document in the FAQ)
+=======
+.. _`aspell dictionary`: http://ftp.gnu.org/gnu/aspell/dict/0index.html
+>>>>>>> 0dd93c16 (Another typo)

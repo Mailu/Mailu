@@ -879,6 +879,7 @@ We have seen a fair amount of support requests related to the following:
 
 .. _`coredns has a bug`: https://github.com/coredns/coredns/issues/5189
 
+<<<<<<< HEAD
 .. _`netplan does not play nicely with docker`: https://github.com/Mailu/Mailu/issues/2868#issuecomment-1606014184
 
 How can I use Mailu without docker?
@@ -888,11 +889,14 @@ Running Mailu without docker is not supported. If you want to do so, you need to
 
 We welcome patches but do not have the bandwidth to test and fix issues related to your unsupported setup. If you do want to help, we welcome new maintainers: please get in touch.
 
+=======
+>>>>>>> 6be5fbe9 (Document in the FAQ)
 How can I add more languages to roundcube's spellchecker?
 `````````````````````````````````````````````````````````
 
 If you are comfortable using an online spellchecker, the easiest is to configure the following via an override:
 
+<<<<<<< HEAD
 .. code-block:: php
 
    $config['spellcheck_engine'] = 'googie';
@@ -984,3 +988,19 @@ Below are the steps for writing the postfix (mail) logs to a log file on the fil
   if [ -d /run/systemd/system ]; then
       systemctl kill -s HUP rsyslog.service
   fi
+=======
+```
+$config['spellcheck_engine'] = 'googie';
+$config['spellcheck_ignore_caps'] = true;
+$config['spellcheck_ignore_nums'] = true;
+$config['spellcheck_dictionary'] = true;
+```
+
+If not, you can download the `aspell dictionnary`_ you require and place it in ``/usr/share/aspell/``. And then enable it by tweaking the following in the configuration file:
+
+```
+$config['spellcheck_languages'] = array('en'=>'English', ...);
+```
+
+.. _`aspell dictionnary`: http://ftp.gnu.org/gnu/aspell/dict/0index.html
+>>>>>>> 6be5fbe9 (Document in the FAQ)

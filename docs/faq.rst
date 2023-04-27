@@ -888,10 +888,10 @@ $config['spellcheck_ignore_nums'] = true;
 $config['spellcheck_dictionary'] = true;
 ```
 
-If not, you can download the `aspell dictionnary`_ you require and place it in ``/usr/share/aspell/`` and then enable it by tweaking the following in the configuration file:
+If not, you can download the `aspell dictionary`_ you require and place it in ``/usr/share/aspell/`` and then enable it by tweaking the following in the configuration file:
 
 ```
 $config['spellcheck_languages'] = array('en'=>'English', ...);
 ```
 
-.. _`aspell dictionnary`: http://ftp.gnu.org/gnu/aspell/dict/0index.html
+.. _`aspell dictionary`: http://ftp.gnu.org/gnu/aspell/dict/0index.html

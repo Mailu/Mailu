@@ -16,6 +16,7 @@
 {%- call macros.table(order='[[1,"asc"]]') %}
 <thead>
   <tr>
+    <th>{% trans %}ID{% endtrans %}</th>
     <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
     <th>{% trans %}Comment{% endtrans %}</th>
     <th>{% trans %}Authorized IP{% endtrans %}</th>
@@ -26,6 +27,7 @@
 <tbody>
   {%- for token in user.tokens %}
   <tr>
+    <td>{{ token.id }}</td>
     <td>
       <a href="{{ url_for('.token_delete', token_id=token.id) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
     </td>

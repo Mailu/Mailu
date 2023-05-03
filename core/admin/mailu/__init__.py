@@ -12,8 +12,11 @@ import hmac
 
 class NoPingFilter(logging.Filter):
     def filter(self, record):
-        if not (record.args['{host}i'] == 'localhost' and record.args['r'] == 'GET /ping HTTP/1.1'):
-            return True
+        if (record.args['{host}i'] == 'localhost' and record.args['r'] == 'GET /ping HTTP/1.1'):
+            return False
+        if record.args['r'].endswith(' /internal/rspamd/local_domains HTTP/1.1'):
+            return False
+        return True
 
 class Logger(glogging.Logger):
     def setup(self, cfg):
@@ -46,6 +49,7 @@ def create_app_from_config(config):
     app.device_cookie_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('DEVICE_COOKIE_KEY', 'utf-8'), 'sha256').digest()
     app.temp_token_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('WEBMAIL_TEMP_TOKEN_KEY', 'utf-8'), 'sha256').digest()
     app.srs_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('SRS_KEY', 'utf-8'), 'sha256').digest()
+    app.truncated_pw_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('TRUNCATED_PW_KEY', 'utf-8'), 'sha256').digest()
 
     # Initialize list of translations
     app.config.translations = {
@@ -63,6 +67,7 @@ def create_app_from_config(config):
         debug.profiler.init_app(app)
     if assets := app.config.get('DEBUG_ASSETS'):
         app.static_folder = assets
+    app.logger.setLevel(app.config.get('LOG_LEVEL'))
 
     # Inject the default variables in the Jinja parser
     # TODO: move this to blueprints when needed

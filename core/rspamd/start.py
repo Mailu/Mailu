@@ -16,15 +16,23 @@ env = system.set_env()
 config_files = []
 for rspamd_file in glob.glob("/conf/*"):
     conf.jinja(rspamd_file, env, os.path.join("/etc/rspamd/local.d", os.path.basename(rspamd_file)))
+<<<<<<< HEAD
     if rspamd_file != '/conf/forbidden_file_extension.map':
         config_files.append(os.path.basename(rspamd_file))
+=======
+    config_files.append(os.path.basename(rspamd_file))
+>>>>>>> bee8ce93 (Fix2805)
 
 for override_file in glob.glob("/overrides/*"):
     if os.path.basename(override_file) not in config_files:
         shutil.copyfile(override_file, os.path.join("/etc/rspamd/local.d", os.path.basename(override_file)))
 
 # Admin may not be up just yet
+<<<<<<< HEAD
 healthcheck = f'http://{env["ADMIN_ADDRESS"]}:8080/internal/rspamd/local_domains'
+=======
+healthcheck = f'http://{env["ADMIN_ADDRESS"]}/internal/rspamd/local_domains'
+>>>>>>> bee8ce93 (Fix2805)
 while True:
     time.sleep(1)
     try:

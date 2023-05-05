@@ -1,0 +1,1 @@
+Fix SCAN_MACROS: OLETOOLS wasn't always enabled/disabled like it should have been

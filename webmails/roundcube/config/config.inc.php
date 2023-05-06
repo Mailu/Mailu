@@ -13,6 +13,7 @@ $config['log_driver'] = 'stdout';
 $config['zipdownload_selection'] = true;
 $config['enable_spellcheck'] = true;
 $config['spellcheck_engine'] = 'pspell';
+$config['spellcheck_languages'] = array('en'=>'English (US)', 'uk'=>'English (UK)', 'de'=>'Deutsch', 'fr'=>'French', 'ru'=>'Russian');
 $config['session_lifetime'] = {{ (((PERMANENT_SESSION_LIFETIME | default(10800)) | int)/3600) | int }};
 $config['request_path'] = '{{ WEB_WEBMAIL or "none" }}';
 $config['trusted_host_patterns'] = [ {{ HOSTNAMES.split(",") | map("tojson") | join(',') }}];

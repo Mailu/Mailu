@@ -875,3 +875,23 @@ We have seen a fair amount of support requests related to the following:
 - `coredns has a bug`_ that we have now worked around
 
 .. _`coredns has a bug`: https://github.com/coredns/coredns/issues/5189
+
+How can I add more languages to roundcube's spellchecker?
+`````````````````````````````````````````````````````````
+
+If you are comfortable using an online spellchecker, the easiest is to configure the following via an override:
+
+.. code-block:: php
+
+   $config['spellcheck_engine'] = 'googie';
+   $config['spellcheck_ignore_caps'] = true;
+   $config['spellcheck_ignore_nums'] = true;
+   $config['spellcheck_dictionary'] = true;
+
+If not, you can download the `aspell dictionary`_ you require and place it in ``/usr/share/aspell/`` and then enable it by tweaking the following in the configuration file:
+
+.. code-block:: bash
+
+   $config['spellcheck_languages'] = array('en'=>'English', ...);
+
+.. _`aspell dictionary`: http://ftp.gnu.org/gnu/aspell/dict/0index.html

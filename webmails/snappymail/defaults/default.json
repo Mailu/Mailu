@@ -33,7 +33,7 @@
     },
     "Sieve": {
         "host": "{{ FRONT_ADDRESS }}",
-        "port": 4190,
+        "port": 14190,
         "type": 2,
         "shortLogin": false,
         "ssl": {

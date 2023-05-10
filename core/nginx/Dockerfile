@@ -22,7 +22,7 @@ RUN set -euxo pipefail \
 COPY conf/ /conf/
 COPY --from=static /static/ /static/
 COPY *.py /
-COPY proxy.conf login.lua /
+COPY dovecot/proxy.conf dovecot/login.lua /dovecot_conf/
 
 RUN echo $VERSION >/version
 

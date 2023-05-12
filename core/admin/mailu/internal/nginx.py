@@ -40,7 +40,7 @@ def check_credentials(user, password, ip, protocol=None, auth_port=None, source_
         for token in user.tokens:
             if (token.check_password(password) and
                 (not token.ip or token.ip == ip)):
-                    app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: success: token-{token.id}: {token.comment or \'\'}')
+                    app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: success: token-{token.id}: {token.comment or ""}')
                     return True
     if user.check_password(password):
         app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: success: password')

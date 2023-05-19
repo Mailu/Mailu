@@ -26,11 +26,11 @@ Pick a distribution
 The mail server runs as a set of Docker containers, so it is almost operating
 system agnostic.
 
-Because most of our tests run on Debian Jessie and Debian Stretch, we recommend
+Because most of our tests run on Debian stable, we recommend
 one of these for the base system. Mailu should however be able to run on
 any of the `officially supported distributions`_.
 
-For the purpose of this guide, all examples are based on Debian Stretch. The
+For the purpose of this guide, all examples are based on Debian stable. The
 differences with other system will however hardly be noticeable.
 
 .. _`officially supported distributions`: https://docs.docker.com/engine/installation/
@@ -38,7 +38,7 @@ differences with other system will however hardly be noticeable.
 Install the distribution
 ------------------------
 
-First, install Debian Stretch from the *netinstall* CD image. When installing,
+First, install Debian stable from the *netinstall* CD image. When installing,
 make sure that you either:
 
  - setup a root *ext4* partition,

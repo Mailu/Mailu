@@ -923,6 +923,7 @@ I see a lot of "Unable to lookup the TLSA record for XXX. Is the DNSSEC zone oka
 There may be multiple causes for it but if you are running docker 24.0.0, odds are you are `experiencing this docker bug`_ and the workaround is to switch to a different version of docker.
 
 .. _`experiencing this docker bug`: https://github.com/Mailu/Mailu/issues/2827
+<<<<<<< HEAD
 
 How can I view and export the logs of a Mailu container?
 ````````````````````````````````````````````````````````
@@ -984,3 +985,5 @@ Below are the steps for writing the postfix (mail) logs to a log file on the fil
   if [ -d /run/systemd/system ]; then
       systemctl kill -s HUP rsyslog.service
   fi
+=======
+>>>>>>> 41757334 (update docs)

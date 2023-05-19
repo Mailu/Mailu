@@ -895,3 +895,19 @@ If not, you can download the `aspell dictionary`_ you require and place it in ``
    $config['spellcheck_languages'] = array('en'=>'English', ...);
 
 .. _`aspell dictionary`: http://ftp.gnu.org/gnu/aspell/dict/0index.html
+
+
+I see a lot of "mount: Deactivated successfully." messages in the logs
+``````````````````````````````````````````````````````````````````````
+
+This is a docker & systemd issue: see `this workaround`_
+
+.. _`this workaround`: https://stackoverflow.com/questions/63622619/docker-flooding-syslog-with-run-docker-runtime-logs/69415949#69415949
+
+
+I see a lot of "Unable to lookup the TLSA record for XXX. Is the DNSSEC zone okay on ..." messages in the logs
+``````````````````````````````````````````````````````````````````````````````````````````````````````````````
+
+There may be multiple causes for it but if you are running docker 24.0.0, odds are you are `experiencing this docker bug`_ and the workaround is to switch to a different version of docker.
+
+.. _`experiencing this docker bug`: https://github.com/Mailu/Mailu/issues/2827

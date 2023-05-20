@@ -1,0 +1,4 @@
+Update the documentation:
+ - debian Stretch -> debian stable (see #2826)
+ - docker 24.0.0 is broken (see #2827)
+ - document how to get rid of "mount: Deactivated successfully" messages from moby (see #2797)

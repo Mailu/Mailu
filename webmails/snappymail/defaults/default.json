@@ -34,12 +34,12 @@
     "Sieve": {
         "host": "{{ FRONT_ADDRESS }}",
         "port": 14190,
-        "secure": 0,
+        "type": 2,
         "shortLogin": false,
         "ssl": {
             "verify_peer": false,
             "verify_peer_name": false,
-            "allow_self_signed": false,
+            "allow_self_signed": true,
             "SNI_enabled": true,
             "disable_compression": true,
             "security_level": 1

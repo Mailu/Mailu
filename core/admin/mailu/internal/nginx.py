@@ -13,7 +13,8 @@ STATUSES = {
     "authentication": ("Authentication credentials invalid", {
         "imap": "AUTHENTICATIONFAILED",
         "smtp": "535 5.7.8",
-        "pop3": "-ERR Authentication failed"
+        "pop3": "-ERR Authentication failed",
+        "sieve": "AuthFailed"
     }),
     "encryption": ("Must issue a STARTTLS command first", {
         "smtp": "530 5.7.0"
@@ -25,7 +26,7 @@ STATUSES = {
     }),
 }
 
-WEBMAIL_PORTS = ['10143', '10025']
+WEBMAIL_PORTS = ['14190', '10143', '10025']
 
 def check_credentials(user, password, ip, protocol=None, auth_port=None):
     if not user or not user.enabled or (protocol == "imap" and not user.enable_imap and not auth_port in WEBMAIL_PORTS) or (protocol == "pop3" and not user.enable_pop):
@@ -49,8 +50,8 @@ def handle_authentication(headers):
     """ Handle an HTTP nginx authentication request
     See: http://nginx.org/en/docs/mail/ngx_mail_auth_http_module.html#protocol
     """
-    method = headers["Auth-Method"]
-    protocol = headers["Auth-Protocol"]
+    method = headers["Auth-Method"].lower()
+    protocol = headers["Auth-Protocol"].lower()
     # Incoming mail, no authentication
     if method == "none" and protocol == "smtp":
         server, port = get_server(protocol, False)
@@ -120,7 +121,7 @@ def handle_authentication(headers):
             "Auth-Wait": 0
         }
     # Unexpected
-    return {}
+    raise Exception("SHOULD NOT HAPPEN")
 
 
 def get_status(protocol, status):
@@ -139,6 +140,8 @@ def get_server(protocol, authenticated=False):
             hostname, port = app.config['SMTP_ADDRESS'], 10025
         else:
             hostname, port = app.config['SMTP_ADDRESS'], 25
+    elif protocol == "sieve":
+        hostname, port = app.config['IMAP_ADDRESS'], 4190
     try:
         # test if hostname is already resolved to an ip address
         ipaddress.ip_address(hostname)

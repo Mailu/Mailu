@@ -55,3 +55,7 @@ conf.jinja("/conf/proxy.conf", args, "/etc/nginx/proxy.conf")
 conf.jinja("/conf/nginx.conf", args, "/etc/nginx/nginx.conf")
 if os.path.exists("/var/run/nginx.pid"):
     os.system("nginx -s reload")
+conf.jinja("/dovecot_conf/login.lua", args, "/etc/dovecot/login.lua")
+conf.jinja("/dovecot_conf/proxy.conf", args, "/etc/dovecot/proxy.conf")
+if os.path.exists("/run/dovecot/master.pid"):
+    os.system("doveadm reload")

@@ -63,7 +63,7 @@ address for your mail server and that you have a dedicated hostname
 with forward and reverse DNS entries for this IP address.
 
 Also, your host must not listen on ports ``25``, ``80``, ``110``, ``143``,
-``443``, ``465``, ``587``, ``993`` or ``995`` as these are used by Mailu
+``443``, ``465``, ``587``, ``993``, ``995`` nor ``4190`` as these are used by Mailu
 services. Therefore, you should disable or uninstall any program that is
 listening on these ports (or have them listen on a different port). For
 instance, on a default Debian install:

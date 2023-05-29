@@ -65,8 +65,9 @@ with forward and reverse DNS entries for this IP address.
 Also, your host must not listen on ports ``25``, ``80``, ``110``, ``143``,
 ``443``, ``465``, ``587``, ``993``, ``995`` nor ``4190`` as these are used by Mailu
 services. Therefore, you should disable or uninstall any program that is
-listening on these ports (or have them listen on a different port). For
-instance, on a default Debian install:
+listening on these ports (or have them listen on a different port), and make sure
+that these ports are open in your firewall if you have one. For instance, on a
+default Debian install:
 
 .. code-block:: bash
 

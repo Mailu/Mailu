@@ -6,6 +6,8 @@ import shutil
 import multiprocessing
 import sys
 import re
+import subprocess
+import threading
 
 from podop import run_server
 from socrate import system, conf
@@ -44,6 +46,29 @@ def start_mta_sts_daemon():
 def is_valid_postconf_line(line):
     return not line.startswith("#") \
             and not line == ''
+
+
+# forwards text lines from src to dst in an infinite loop
+def forward_text_lines(src, dst):
+    while True:
+        current_line = src.readline()
+        dst.write(current_line)
+
+
+# runs a process and passes its standard/error output to the standard/error output of this script
+def run_process_and_forward_output(cmd):
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    stdout_thread = threading.Thread(target=forward_text_lines, args=(proc.stdout, sys.stdout))
+    stdout_thread.daemon = True
+    stdout_thread.start()
+
+    stderr_thread = threading.Thread(target=forward_text_lines, args=(proc.stderr, sys.stderr))
+    stderr_thread.daemon = True
+    stderr_thread.start()
+
+    proc.wait()
+
 
 # Actual startup script
 os.environ['DEFER_ON_TLS_ERROR'] = os.environ['DEFER_ON_TLS_ERROR'] if 'DEFER_ON_TLS_ERROR' in os.environ else 'True'
@@ -100,4 +125,6 @@ os.system("/usr/libexec/postfix/post-install meta_directory=/etc/postfix create-
 # Before starting postfix, we need to check permissions on /queue
 # in the event that postfix,postdrop id have changed
 os.system("postfix set-permissions")
-os.system("postfix start-fg")
+
+# start postfix and pass its standard/error output to the standard/error output of this script
+run_process_and_forward_output(["postfix", "start-fg"])

@@ -107,7 +107,6 @@ def handle_authentication(headers):
                         "Auth-Server": server,
                         "Auth-User": user_email,
                         "Auth-User-Exists": is_valid_user,
-                        "Auth-Password": urllib.parse.quote(password),
                         "Auth-Port": port
                     }
         status, code = get_status(protocol, "authentication")
@@ -116,7 +115,6 @@ def handle_authentication(headers):
             "Auth-Error-Code": code,
             "Auth-User": user_email,
             "Auth-User-Exists": is_valid_user,
-            "Auth-Password": urllib.parse.quote(password),
             "Auth-Wait": 0
         }
     # Unexpected

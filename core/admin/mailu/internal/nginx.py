@@ -111,7 +111,7 @@ def handle_authentication(headers):
                         "Auth-Server": server,
                         "Auth-User": user_email,
                         "Auth-User-Exists": is_valid_user,
-                        "Auth-Password": password,
+                        "Auth-Password": urllib.parse.quote(password),
                         "Auth-Port": port
                     }
         status, code = get_status(protocol, "authentication")

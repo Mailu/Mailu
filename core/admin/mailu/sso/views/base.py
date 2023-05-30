@@ -17,6 +17,7 @@ def login():
         return _proxy()
 
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
+    client_port = flask.request.headers.get('X-Real-Port', None)
     form = forms.LoginForm()
 
     fields = []
@@ -55,13 +56,13 @@ def login():
             flask_login.login_user(user)
             response = flask.redirect(destination)
             response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
-            flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip} pwned={form.pwned.data}.')
+            flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
             if msg := utils.isBadOrPwned(form):
                 flask.flash(msg, "error")
             return response
         else:
             utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username, form.pw.data) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip, username)
-            flask.current_app.logger.warn(f'Login failed for {username} from {client_ip}.')
+            flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: failed: badauth: {utils.truncated_pw_hash(form.pw.data)}')
             flask.flash('Wrong e-mail or password', 'error')
     return flask.render_template('login.html', form=form, fields=fields)
 
@@ -96,10 +97,12 @@ def _proxy():
     proxy_ip = flask.request.headers.get('X-Forwarded-By', flask.request.remote_addr)
     ip = ipaddress.ip_address(proxy_ip)
     if not any(ip in cidr for cidr in app.config['PROXY_AUTH_WHITELIST']):
+        flask.current_app.logger.error(f'Login failed by proxy - not on whitelist: from {client_ip} through {flask.request.remote_addr}.')
         return flask.abort(500, '%s is not on PROXY_AUTH_WHITELIST' % proxy_ip)
 
     email = flask.request.headers.get(app.config['PROXY_AUTH_HEADER'])
     if not email:
+        flask.current_app.logger.error(f'Login failed by proxy - no header: from {client_ip} through {flask.request.remote_addr}.')
         return flask.abort(500, 'No %s header' % app.config['PROXY_AUTH_HEADER'])
 
     url = _has_usable_redirect(True) or app.config['WEB_ADMIN']
@@ -108,9 +111,11 @@ def _proxy():
     if user:
         flask.session.regenerate()
         flask_login.login_user(user)
+        flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
         return flask.redirect(url)
 
     if not app.config['PROXY_AUTH_CREATE']:
+        flask.current_app.logger.warning(f'Login failed by proxy - does not exist: {user} from {client_ip} through {flask.request.remote_addr}.')
         return flask.abort(500, 'You don\'t exist. Go away! (%s)' % email)
 
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)

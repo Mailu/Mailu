@@ -75,7 +75,7 @@ DEFAULT_CONFIG = {
     'API': False,
     'WEB_API': '/api',
     'API_TOKEN': None,
-    'LOG_LEVEL': 'WARNING',
+    'LOG_LEVEL': 'INFO',
     'SESSION_KEY_BITS': 128,
     'SESSION_TIMEOUT': 3600,
     'PERMANENT_SESSION_LIFETIME': 30*24*3600,

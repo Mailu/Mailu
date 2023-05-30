@@ -28,23 +28,26 @@ STATUSES = {
 
 WEBMAIL_PORTS = ['14190', '10143', '10025']
 
-def check_credentials(user, password, ip, protocol=None, auth_port=None):
+def check_credentials(user, password, ip, protocol=None, auth_port=None, source_port=None):
     if not user or not user.enabled or (protocol == "imap" and not user.enable_imap and not auth_port in WEBMAIL_PORTS) or (protocol == "pop3" and not user.enable_pop):
+        app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: account disabled')
         return False
-    is_ok = False
     # webmails
     if auth_port in WEBMAIL_PORTS and password.startswith('token-'):
         if utils.verify_temp_token(user.get_id(), password):
-            is_ok = True
-    if not is_ok and utils.is_app_token(password):
+            app.logger.debug(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: success: webmail-token')
+            return True
+    if utils.is_app_token(password):
         for token in user.tokens:
             if (token.check_password(password) and
                 (not token.ip or token.ip == ip)):
-                    is_ok = True
-                    break
-    if not is_ok and user.check_password(password):
-        is_ok = True
-    return is_ok
+                    app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: success: token-{token.id}: {token.comment or ""!r}')
+                    return True
+    if user.check_password(password):
+        app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: success: password')
+        return True
+    app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: badauth: {utils.truncated_pw_hash(password)}')
+    return False
 
 def handle_authentication(headers):
     """ Handle an HTTP nginx authentication request
@@ -101,7 +104,7 @@ def handle_authentication(headers):
             else:
                 is_valid_user = user is not None
                 ip = urllib.parse.unquote(headers["Client-Ip"])
-                if check_credentials(user, password, ip, protocol, headers["Auth-Port"]):
+                if check_credentials(user, password, ip, protocol, headers["Auth-Port"], headers['Client-Port']):
                     server, port = get_server(headers["Auth-Protocol"], True)
                     return {
                         "Auth-Status": "OK",

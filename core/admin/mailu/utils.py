@@ -532,3 +532,6 @@ def is_app_token(candidate):
     if len(candidate) == 32 and all(c in string.hexdigits[:-6] for c in candidate):
         return True
     return False
+
+def truncated_pw_hash(pw):
+    return hmac.new(app.truncated_pw_key, bytearray(pw, 'utf-8'), 'sha256').hexdigest()[:6]

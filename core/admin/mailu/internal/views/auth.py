@@ -6,6 +6,7 @@ import flask
 import flask_login
 import base64
 import sqlalchemy.exc
+import urllib
 
 @internal.route("/auth/email")
 def nginx_authentication():
@@ -30,6 +31,7 @@ def nginx_authentication():
         if int(flask.request.headers['Auth-Login-Attempt']) < 10:
             response.headers['Auth-Wait'] = '3'
         return response
+    raw_password = urllib.parse.unquote(headers["Auth-Pass"])
     headers = nginx.handle_authentication(flask.request.headers)
     response = flask.Response()
     for key, value in headers.items():
@@ -52,7 +54,14 @@ def nginx_authentication():
         if not is_port_25:
             utils.limiter.exempt_ip_from_ratelimits(client_ip)
     elif is_valid_user:
-        utils.limiter.rate_limit_user(username, client_ip, password=response.headers.get('Auth-Password', None))
+        password = None
+        try:
+            password = raw_password.encode("iso8859-1").decode("utf8")
+        except:
+            app.logger.warn(f'Received undecodable password for {username} from nginx: {raw_password!r}')
+            utils.limiter.rate_limit_user(username, client_ip, password=None)
+        else:
+            utils.limiter.rate_limit_user(username, client_ip, password=password)
     elif not is_from_webmail:
         utils.limiter.rate_limit_ip(client_ip, username)
     return response

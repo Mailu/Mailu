@@ -7,25 +7,31 @@ import sys
 import managesieve
 
 SERVER='localhost'
-USERNAME='user@mailu.io'
-PASSWORD='password'
+USERNAME='user_UTF8@mailu.io'
+PASSWORD='password€'
+#https://github.com/python/cpython/issues/73936
+#SMTPlib does not support UTF8 passwords.
+USERNAME_ASCII='user@mailu.io'
+PASSWORD_ASCII='password'
+
 
 def test_imap(server, username, password):
+    auth = lambda data : f'\x00{username}\x00{password}'
     print(f'Authenticating to imaps://{username}:{password}@{server}:993/')
     with imaplib.IMAP4_SSL(server) as conn:
-        conn.login(username, password)
+        conn.authenticate('PLAIN', auth)
         conn.noop()
     print('OK')
     print(f'Authenticating to imaps://{username}:{password}@{server}:143/')
     with imaplib.IMAP4(server) as conn:
         conn.starttls()
-        conn.login(username, password)
+        conn.authenticate('PLAIN', auth)
         conn.noop()
     print('OK')
     print(f'Authenticating to imap://{username}:{password}@{server}:143/')
     try:
         with imaplib.IMAP4(server) as conn:
-            conn.login(username, password)
+            conn.authenticate('PLAIN', auth)
         print(f'Authenticating to imap://{username}:{password}@{server}:143/ worked without STARTTLS!')
         sys.exit(102)
     except imaplib.IMAP4.error:
@@ -121,7 +127,7 @@ def test_managesieve(server, username, password):
     if m.login('', username, password) != 'OK':
         print(f'Authenticating to sieve://{username}:{password}@{server}:4190/ has failed!')
         sys.exit(109)
-    
+
     if m.listscripts()[0] != 'OK':
         print(f'Listing scripts failed!')
         sys.exit(110)
@@ -130,5 +136,7 @@ def test_managesieve(server, username, password):
 if __name__ == '__main__':
     test_imap(SERVER, USERNAME, PASSWORD)
     test_pop3(SERVER, USERNAME, PASSWORD)
-    test_SMTP(SERVER, USERNAME, PASSWORD)
+    test_SMTP(SERVER, USERNAME_ASCII, PASSWORD_ASCII)
     test_managesieve(SERVER, USERNAME, PASSWORD)
+#https://github.com/python/cpython/issues/73936
+#SMTPlib does not support UTF8 passwords.

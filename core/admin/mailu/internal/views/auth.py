@@ -58,7 +58,7 @@ def nginx_authentication():
         try:
             password = raw_password.encode("iso8859-1").decode("utf8")
         except:
-            app.logger.warn(f'Received undecodable password from nginx: {raw_password!r}')
+            app.logger.warn(f'Received undecodable password for {username} from nginx: {raw_password!r}')
             utils.limiter.rate_limit_user(username, client_ip, password=None)
         else:
             utils.limiter.rate_limit_user(username, client_ip, password=password)

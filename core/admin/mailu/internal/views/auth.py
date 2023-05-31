@@ -31,6 +31,7 @@ def nginx_authentication():
         if int(flask.request.headers['Auth-Login-Attempt']) < 10:
             response.headers['Auth-Wait'] = '3'
         return response
+    raw_password = urllib.parse.unquote(headers["Auth-Pass"])
     headers = nginx.handle_authentication(flask.request.headers)
     response = flask.Response()
     for key, value in headers.items():
@@ -53,7 +54,6 @@ def nginx_authentication():
         if not is_port_25:
             utils.limiter.exempt_ip_from_ratelimits(client_ip)
     elif is_valid_user:
-        raw_password = urllib.parse.unquote(headers["Auth-Pass"])
         password = None
         try:
             password = raw_password.encode("iso8859-1").decode("utf8")

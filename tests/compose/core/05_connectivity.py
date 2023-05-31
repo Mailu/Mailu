@@ -108,41 +108,9 @@ def test_SMTP(server, username, password):
     except smtplib.SMTPNotSupportedError:
         print('NOK - expected')
 
-<<<<<<< HEAD
-if __name__ == '__main__':
-    test_imap(SERVER, USERNAME, PASSWORD)
-    test_pop3(SERVER, USERNAME, PASSWORD)
-    test_SMTP(SERVER, USERNAME, PASSWORD)
-=======
-def test_managesieve(server, username, password):
-    print(f'Authenticating to sieve://{username}:{password}@{server}:4190/')
-    m=managesieve.MANAGESIEVE(server)
-    try:
-        m.login('PLAIN', username, password)
-        print(f'Worked without STARTTLS!')
-        sys.exit(107)
-    except managesieve.MANAGESIEVE.abort:
-        pass
-
-    m=managesieve.MANAGESIEVE(server, use_tls=True)
-    if m.login('', username, 'wrongpass') != 'NO':
-        print(f'Authenticating to sieve://{username}:{password}@{server}:4190/ with wrong creds has worked!')
-        sys.exit(108)
-
-    if m.login('', username, password) != 'OK':
-        print(f'Authenticating to sieve://{username}:{password}@{server}:4190/ has failed!')
-        sys.exit(109)
-
-    if m.listscripts()[0] != 'OK':
-        print(f'Listing scripts failed!')
-        sys.exit(110)
-    print('OK')
-
 if __name__ == '__main__':
     test_imap(SERVER, USERNAME, PASSWORD)
     test_pop3(SERVER, USERNAME, PASSWORD)
     test_SMTP(SERVER, USERNAME_ASCII, PASSWORD_ASCII)
-    test_managesieve(SERVER, USERNAME, PASSWORD)
 #https://github.com/python/cpython/issues/73936
 #SMTPlib does not support UTF8 passwords.
->>>>>>> 9ad7cea5 (Update 05_connectivity test to use UTF8 password.)

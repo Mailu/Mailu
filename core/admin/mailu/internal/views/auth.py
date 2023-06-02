@@ -116,7 +116,7 @@ def basic_authentication():
             exc = str(exc).split('\n', 1)[0]
             app.logger.warn(f'Invalid user {user_email!r}: {exc}')
         else:
-            if user is not None and nginx.check_credentials(user, password.decode('utf-8'), client_ip, "web", flask.request.headers.get('X-Real-Port', None)):
+            if user is not None and nginx.check_credentials(user, password.decode('utf-8'), client_ip, "web", flask.request.headers.get('X-Real-Port', None), user_email):
                 response = flask.Response()
                 response.headers["X-User"] = models.IdnaEmail.process_bind_param(flask_login, user.email, "")
                 utils.limiter.exempt_ip_from_ratelimits(client_ip)

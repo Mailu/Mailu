@@ -125,6 +125,8 @@ def postfix_sender_map(sender):
 
     This is for bounces to come back the reverse path properly.
     """
+    if sender.count('@') > 1 or sender.startswith('"'):
+        return flask.abort(404)
     srs = srslib.SRS(flask.current_app.srs_key)
     domain = flask.current_app.config["DOMAIN"]
     try:

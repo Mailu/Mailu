@@ -421,7 +421,7 @@ class Email(object):
         """ send an email to the address """
         try:
             f_addr = f'{app.config["POSTMASTER"]}@{idna.encode(app.config["DOMAIN"]).decode("ascii")}'
-            with smtplib.LMTP(host=app.config['IMAP_ADDRESS'], port=2525) as lmtp:
+            with smtplib.LMTP(host=app.config['FRONT_ADDRESS'], port=2525) as lmtp:
                 to_address = f'{self.localpart}@{idna.encode(self.domain_name).decode("ascii")}'
                 msg = text.MIMEText(body)
                 msg['Subject'] = subject

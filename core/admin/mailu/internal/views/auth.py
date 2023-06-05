@@ -31,7 +31,7 @@ def nginx_authentication():
         if int(flask.request.headers['Auth-Login-Attempt']) < 10:
             response.headers['Auth-Wait'] = '3'
         return response
-    raw_password = urllib.parse.unquote(headers["Auth-Pass"])
+    raw_password = urllib.parse.unquote(headers['Auth-Pass']) if 'Auth-Pass' in headers else ''
     headers = nginx.handle_authentication(flask.request.headers)
     response = flask.Response()
     for key, value in headers.items():

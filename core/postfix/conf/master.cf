@@ -7,7 +7,7 @@ smtp      inet  n       -       n       -       1       smtpd
 # Internal SMTP service
 10025     inet  n       -       n       -       1       smtpd
   -o smtpd_sasl_auth_enable=yes
-  -o smtpd_discard_ehlo_keywords=pipelining
+  -o smtpd_discard_ehlo_keywords=pipelining,silent-discard
   -o smtpd_client_restrictions=$check_ratelimit,reject_unlisted_sender,reject_authenticated_sender_login_mismatch,permit
   -o smtpd_reject_unlisted_recipient={% if REJECT_UNLISTED_RECIPIENT %}{{ REJECT_UNLISTED_RECIPIENT }}{% else %}no{% endif %}
   -o cleanup_service_name=outclean

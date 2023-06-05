@@ -60,7 +60,7 @@ def run(debug):
                 protocol=fetch["protocol"],
                 host=escape_rc_string(fetch["host"]),
                 port=fetch["port"],
-                smtphost=f'{os.environ["SMTP_ADDRESS"]}' if fetch['scan'] else f'{os.environ["IMAP_ADDRESS"]}/2525',
+                smtphost=f'{os.environ["FRONT_ADDRESS"]}' if fetch['scan'] else f'{os.environ["FRONT_ADDRESS"]}/2525',
                 username=escape_rc_string(fetch["username"]),
                 password=escape_rc_string(fetch["password"]),
                 options=options,

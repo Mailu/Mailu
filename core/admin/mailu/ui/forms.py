@@ -5,6 +5,7 @@ from flask_babel import lazy_gettext as _
 import flask_login
 import flask_wtf
 import re
+import ipaddress
 
 LOCALPART_REGEX = "^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*$"
 
@@ -152,10 +153,18 @@ class TokenForm(flask_wtf.FlaskForm):
     raw_password = fields.HiddenField([validators.DataRequired()])
     comment = fields.StringField(_('Comment'))
     ip = fields.StringField(
-        _('Authorized IP'), [validators.Optional(), validators.IPAddress(ipv6=True)]
+        _('Authorized IP'), [validators.Optional()]
     )
     submit = fields.SubmitField(_('Save'))
 
+    def validate_ip(form, field):
+        if not field.data:
+            return True
+        try:
+            for candidate in field.data.replace(' ','').split(','):
+                ipaddress.ip_network(candidate, False)
+        except:
+            raise validators.ValidationError('Not a valid list of CIDRs')
 
 class AliasForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('Alias'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])

@@ -1,6 +1,7 @@
 """ Mailu config storage model
 """
 
+import enum
 import os
 import json
 
@@ -21,6 +22,7 @@ import dns.resolver
 import dns.exception
 
 from flask import current_app as app
+from sqlalchemy import Enum
 from sqlalchemy.ext import declarative
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
@@ -723,6 +725,10 @@ class Alias(Base, Email):
 class Token(Base):
     """ A token is an application password for a given user.
     """
+    class Rights(enum.Enum):
+        full = 0
+        send_only = 1
+        receive_only = 2
 
     __tablename__ = 'token'
 
@@ -733,6 +739,7 @@ class Token(Base):
         backref=db.backref('tokens', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
     ip = db.Column(CommaSeparatedList, nullable=True, default=list)
+    rights = db.Column(Enum(Rights), default=Rights.full)
 
     def check_password(self, password):
         """ verifies password against stored hash

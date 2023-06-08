@@ -13,6 +13,7 @@ STATUSES = {
     "authentication": ("Authentication credentials invalid", {
         "imap": "AUTHENTICATIONFAILED",
         "smtp": "535 5.7.8",
+        "submission": "535 5.7.8",
         "pop3": "-ERR Authentication failed",
         "sieve": "AuthFailed"
     }),
@@ -41,6 +42,12 @@ def check_credentials(user, password, ip, protocol=None, auth_port=None, source_
         for token in user.tokens:
             if token.check_password(password):
                 if not token.ip or utils.is_ip_in_subnet(ip, token.ip):
+                    if protocol in ['imap', 'pop3'] and token.rights.name == 'send_only':
+                        app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: send-only: token-{token.id}: {token.comment or ""!r}')
+                        return False
+                    if protocol in ['submission', 'smtp'] and token.rights.name == 'receive_only':
+                        app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: receive-only: token-{token.id}: {token.comment or ""!r}')
+                        return False
                     app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: success: token-{token.id}: {token.comment or ""!r}')
                     return True
                 else:

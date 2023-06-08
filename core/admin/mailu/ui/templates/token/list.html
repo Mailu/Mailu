@@ -20,6 +20,7 @@
     <th>{% trans %}ID{% endtrans %}</th>
     <th>{% trans %}Comment{% endtrans %}</th>
     <th>{% trans %}Authorized IP{% endtrans %}</th>
+    <th>{% trans %}Rights{% endtrans %}</th>
     <th>{% trans %}Created{% endtrans %}</th>
     <th>{% trans %}Last edit{% endtrans %}</th>
   </tr>
@@ -33,6 +34,7 @@
     <td>{{ token.id }}</td>
     <td>{{ token.comment }}</td>
     <td>{{ token.ip | join(', ') or "any" }}</td>
+    <td>{{ token.rights.name }}</td>
     <td data-sort="{{ token.created_at or '0000-00-00' }}">{{ token.created_at | format_date }}</td>
     <td data-sort="{{ token.updated_at or '0000-00-00' }}">{{ token.updated_at | format_date }}</td>
   </tr>

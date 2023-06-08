@@ -2,6 +2,8 @@ from wtforms import validators, fields, widgets
 from wtforms_components import fields as fields_
 from flask_babel import lazy_gettext as _
 
+from mailu import models
+
 import flask_login
 import flask_wtf
 import re
@@ -155,6 +157,12 @@ class TokenForm(flask_wtf.FlaskForm):
     ip = fields.StringField(
         _('Authorized IP'), [validators.Optional()]
     )
+    rights = fields.SelectField(
+            _('Rights'),
+            choices = [[c.name, c.name] for c in models.Token.Rights],
+            render_kw = {'class': 'btn-group-toggle'},
+    )
+
     submit = fields.SubmitField(_('Save'))
 
     def validate_ip(form, field):

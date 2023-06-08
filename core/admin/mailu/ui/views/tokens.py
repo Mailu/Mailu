@@ -1,4 +1,4 @@
-from mailu import models
+from mailu import models, utils
 from mailu.ui import ui, forms, access
 
 from passlib import pwd
@@ -27,11 +27,16 @@ def token_create(user_email):
     wtforms_components.read_only(form.displayed_password)
     if not form.raw_password.data:
         form.raw_password.data = pwd.genword(entropy=128, length=32, charset="hex")
-        form.displayed_password.data = form.raw_password.data
+    form.displayed_password.data = form.raw_password.data
+    utils.formatCSVField(form.ip)
     if form.validate_on_submit():
         token = models.Token(user=user)
         token.set_password(form.raw_password.data)
         form.populate_obj(token)
+        if form.ip.data:
+            token.ip = form.ip.data.replace(' ','').split(',')
+        else:
+            del token.ip
         models.db.session.add(token)
         models.db.session.commit()
         flask.flash('Authentication token created')

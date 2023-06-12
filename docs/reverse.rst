@@ -100,7 +100,7 @@ Because the admin interface is served as ``/admin``, the RESTful API as ``/api``
     }
   }
 
-.. warning:: If Nginx is upgrading HTTP connection to HTTPS then `TLS_FLAVOR=mail` must be set in the mailu.env. Otherwise you will be indefinitely redirected.
+.. warning:: If Nginx is upgrading HTTP connections to HTTPS, then `TLS_FLAVOR=mail` must be set in the mailu.env. Otherwise, you will be indefinitely redirected.
 .. note:: Please don’t add a ``/`` at the end of the location pattern or all your redirects will fail with 404 because the ``/`` would be missing, and you would have to add it manually to move on
 
 .. code-block:: docker

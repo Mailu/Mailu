@@ -13,6 +13,7 @@ STATUSES = {
     "authentication": ("Authentication credentials invalid", {
         "imap": "AUTHENTICATIONFAILED",
         "smtp": "535 5.7.8",
+        "submission": "535 5.7.8",
         "pop3": "-ERR Authentication failed",
         "sieve": "AuthFailed"
     }),

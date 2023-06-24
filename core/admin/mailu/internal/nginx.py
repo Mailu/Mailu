@@ -13,6 +13,7 @@ STATUSES = {
     "authentication": ("Authentication credentials invalid", {
         "imap": "AUTHENTICATIONFAILED",
         "smtp": "535 5.7.8",
+        "submission": "535 5.7.8",
         "pop3": "-ERR Authentication failed",
         "sieve": "AuthFailed"
     }),
@@ -56,7 +57,7 @@ def handle_authentication(headers):
     method = headers["Auth-Method"].lower()
     protocol = headers["Auth-Protocol"].lower()
     # Incoming mail, no authentication
-    if method == "none" and protocol == "smtp":
+    if method in ['', 'none'] and protocol in ['smtp', 'lmtp']:
         server, port = get_server(protocol, False)
         if app.config["INBOUND_TLS_ENFORCE"]:
             if "Auth-SSL" in headers and headers["Auth-SSL"] == "on":
@@ -79,7 +80,7 @@ def handle_authentication(headers):
                 "Auth-Port": port
             }
     # Authenticated user
-    elif method == "plain":
+    elif method in ['plain', 'login']:
         is_valid_user = False
         # According to RFC2616 section 3.7.1 and PEP 3333, HTTP headers should
         # be ASCII and are generally considered ISO8859-1. However when passing
@@ -122,7 +123,7 @@ def handle_authentication(headers):
             "Auth-Wait": 0
         }
     # Unexpected
-    raise Exception("SHOULD NOT HAPPEN")
+    raise Exception(f"SHOULD NOT HAPPEN {protocol} {method}")
 
 
 def get_status(protocol, status):
@@ -132,16 +133,20 @@ def get_status(protocol, status):
     return status, codes[protocol]
 
 def get_server(protocol, authenticated=False):
-    if protocol == "imap":
+    if protocol == 'imap':
         hostname, port = app.config['IMAP_ADDRESS'], 143
-    elif protocol == "pop3":
+    elif protocol == 'pop3':
         hostname, port = app.config['IMAP_ADDRESS'], 110
-    elif protocol == "smtp":
+    elif protocol == 'smtp':
         if authenticated:
             hostname, port = app.config['SMTP_ADDRESS'], 10025
         else:
             hostname, port = app.config['SMTP_ADDRESS'], 25
-    elif protocol == "sieve":
+    elif protocol == 'submission':
+        hostname, port = app.config['SMTP_ADDRESS'], 10025
+    elif protocol == 'lmtp':
+        hostname, port = app.config['IMAP_ADDRESS'], 2525
+    elif protocol == 'sieve':
         hostname, port = app.config['IMAP_ADDRESS'], 4190
     try:
         # test if hostname is already resolved to an ip address

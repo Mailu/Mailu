@@ -3,7 +3,7 @@
     "IMAP": {
         "host": "{{ FRONT_ADDRESS }}",
         "port": 10143,
-        "secure": 0,
+        "secure": 2,
         "shortLogin": false,
         "ssl": {
             "verify_peer": false,
@@ -17,7 +17,7 @@
     "SMTP": {
         "host": "{{ FRONT_ADDRESS }}",
         "port": 10025,
-        "secure": 0,
+        "secure": 2,
         "shortLogin": false,
         "ssl": {
             "verify_peer": false,

@@ -19,10 +19,24 @@ $config['request_path'] = '{{ WEB_WEBMAIL or "none" }}';
 $config['trusted_host_patterns'] = [ {{ HOSTNAMES.split(",") | map("tojson") | join(',') }}];
 
 // Mail servers
-$config['imap_host'] = '{{ FRONT_ADDRESS or "front" }}:10143';
-$config['smtp_host'] = '{{ FRONT_ADDRESS or "front" }}:10025';
+$config['imap_host'] = 'tls://{{ FRONT_ADDRESS or "front" }}:10143';
+$config['imap_conn_options'] = array(
+  'ssl'         => array(
+     'verify_peer'  => false,
+     'verify_peer_name' => false,
+     'allow_self_signed' => true,
+   ),
+);
+$config['smtp_host'] = 'tls://{{ FRONT_ADDRESS or "front" }}:10025';
 $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
+$config['smtp_conn_options'] = array(
+  'ssl'         => array(
+     'verify_peer'  => false,
+     'verify_peer_name' => false,
+     'allow_self_signed' => true,
+   ),
+);
 
 // Sieve script management
 $config['managesieve_host'] = 'tls://{{ FRONT_ADDRESS or "front" }}:14190';

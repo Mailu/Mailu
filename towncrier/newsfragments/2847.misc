@@ -1,0 +1,1 @@
+Switch from nginx mail module to dovecot-proxy. This will fix $remote_port and will enable us to work on new features such as BURL/XOAuth2/HA-load-balancing.

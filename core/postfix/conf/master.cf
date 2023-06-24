@@ -2,10 +2,10 @@
 #               (yes)   (yes)   (yes)   (never) (100)
 
 # Exposed SMTP service
-smtp      inet  n       -       n       -       1       smtpd
+smtp      inet  n       -       n       -       -       smtpd
 
 # Internal SMTP service
-10025     inet  n       -       n       -       1       smtpd
+10025     inet  n       -       n       -       -       smtpd
   -o smtpd_sasl_auth_enable=yes
   -o smtpd_discard_ehlo_keywords=pipelining
   -o smtpd_client_restrictions=$check_ratelimit,reject_unlisted_sender,reject_authenticated_sender_login_mismatch,permit

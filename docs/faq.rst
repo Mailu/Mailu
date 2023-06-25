@@ -873,8 +873,11 @@ We have seen a fair amount of support requests related to the following:
 
 - dnsmasq won't forward DNSSEC results unless instructed to do so. If you are running openwrt or pi-hole, you do need to enable DNSSEC.
 - `coredns has a bug`_ that we have now worked around
+- `netplan does not play nicely with docker` by default and may need to be configured to leave docker's network alone.
 
 .. _`coredns has a bug`: https://github.com/coredns/coredns/issues/5189
+
+.. _`netplan does not play nicely with docker`: https://github.com/Mailu/Mailu/issues/2868#issuecomment-1606014184
 
 How can I add more languages to roundcube's spellchecker?
 `````````````````````````````````````````````````````````

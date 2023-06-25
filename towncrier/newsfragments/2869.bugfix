@@ -1,0 +1,1 @@
+Increase the number of postfix workers, this should reduce the number of time Mailu replies with "451 4.3.2 Internal server error". To be clear, well behaved MTAs will retry so no email have been lost. 

@@ -75,7 +75,7 @@ class CommaSeparatedList(db.TypeDecorator):
     """ Stores a list as a comma-separated string, compatible with Postfix.
     """
 
-    impl = db.String(255)
+    impl = db.String(4096)
     cache_ok = True
     python_type = list
 
@@ -732,7 +732,7 @@ class Token(Base):
     user = db.relationship(User,
         backref=db.backref('tokens', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
-    ip = db.Column(db.String(255))
+    ip = db.Column(CommaSeparatedList, nullable=True, default=list)
 
     def check_password(self, password):
         """ verifies password against stored hash

@@ -178,8 +178,8 @@ After saving the application token it is not possible anymore to view the unique
 
 The comment field can be used to enter a description for the authentication token. For example the name of the application the application token is created for.
 
-In the Authorized IP field a white listed IP address can be entered. When an IP address is entered, then the application token can only be used when the IP address of the client matches with this IP address.
-When no IP address is entered, there is no restriction on IP address. It is not possible to enter multiple IP addresses.
+In the Authorized IP field a comma separated list of white listed IP addresses or networks can be entered. When the field is set, the application token can only be used when the IP address of the client matches what is in the field.
+When no IP address is entered, there is no restriction on IP address.
 
 
 Announcement

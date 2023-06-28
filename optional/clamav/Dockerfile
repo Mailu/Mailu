@@ -15,7 +15,7 @@ COPY start.py /
 RUN echo $VERSION >/version
 
 #EXPOSE 3310/tcp
-HEALTHCHECK --start-period=350s CMD echo PING|nc localhost 3310|grep "PONG"
+HEALTHCHECK CMD kill -0 `cat /run/clamd.pid` && kill -0 `cat /run/freshclam.pid`
 
 VOLUME ["/data"]
 

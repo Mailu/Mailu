@@ -134,6 +134,9 @@ the localpart for DMARC rua and ruf email addresses.
 Full-text search is enabled for IMAP is enabled by default. This feature can be disabled
 (e.g. for performance reasons) by setting the optional variable ``FULL_TEXT_SEARCH`` to ``off``.
 
+You can set a global ``DEFAULT_QUOTA`` to be used for mailboxes when the domain has
+no specific quota configured.
+
 .. _web_settings:
 
 Web settings

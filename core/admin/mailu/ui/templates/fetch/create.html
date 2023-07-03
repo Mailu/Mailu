@@ -13,7 +13,11 @@
   {{ form.hidden_tag() }}
   {%- call macros.card(title="Remote server") %}
   {{ macros.form_field(form.protocol) }}
+  {%- if form.host.data %}
   {{ macros.form_fields((form.host, form.port)) }}
+  {%- else %}
+  {{ macros.form_fields((form.host, form.port), autofocus=true) }}
+  {%- endif %}
   {{ macros.form_field(form.tls) }}
   {%- endcall %}
 

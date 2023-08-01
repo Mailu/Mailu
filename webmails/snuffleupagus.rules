@@ -74,6 +74,7 @@ sp.disable_function.function("shell_exec").param("command").value_r("[$|;&`\\n\\
 sp.disable_function.function("exec").param("command").value_r("[$|;&`\\n\\(\\)\\\\]").drop();
 # This is **very** broad but doing better is non-straightforward
 sp.disable_function.function("proc_open").param("command").value_r("^gpg ").allow();
+sp.disable_function.function("proc_open").param("command").value_r("^/usr/bin/gpg ").allow();
 sp.disable_function.function("proc_open").param("command").value_r("[$|;&`\\n\\(\\)\\\\]").drop();
 
 # Prevent runtime modification of interesting things

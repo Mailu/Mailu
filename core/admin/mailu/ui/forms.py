@@ -15,6 +15,9 @@ def checkStrippable(form, field):
     if field.data != field.data.strip(string.whitespace):
         raise ValidationError(_('Passwords should not start or end with whitespaces'))
 
+AUTOFOCUS = {'autofocus': True}
+NO_AUTOCOMPLETE = {'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'}
+
 class DestinationField(fields.SelectMultipleField):
     """ Allow for multiple emails selection from current user choices and
     additional email addresses.
@@ -62,18 +65,18 @@ class ConfirmationForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Confirm'))
 
 class DomainForm(flask_wtf.FlaskForm):
-    name = fields.StringField(_('Domain name'), [validators.DataRequired()])
+    name = fields.StringField(_('Domain name'), [validators.DataRequired()], render_kw=NO_AUTOCOMPLETE)
     max_users = fields_.IntegerField(_('Maximum user count'), [validators.NumberRange(min=-1)], default=10)
     max_aliases = fields_.IntegerField(_('Maximum alias count'), [validators.NumberRange(min=-1)], default=10)
     max_quota_bytes = fields_.IntegerSliderField(_('Maximum user quota'), default=0)
     signup_enabled = fields.BooleanField(_('Enable sign-up'), default=False)
-    comment = fields.StringField(_('Comment'), render_kw={'autofocus': True})
+    comment = fields.StringField(_('Comment'), render_kw=AUTOFOCUS)
     submit = fields.SubmitField(_('Save'))
 
 
 class DomainSignupForm(flask_wtf.FlaskForm):
-    name = fields.StringField(_('Domain name'), [validators.DataRequired()], render_kw={'autofocus': True})
-    localpart = fields.StringField(_('Initial admin'), [validators.DataRequired()])
+    name = fields.StringField(_('Domain name'), [validators.DataRequired()], render_kw=AUTOFOCUS|NO_AUTOCOMPLETE)
+    localpart = fields.StringField(_('Initial admin'), [validators.DataRequired()], render_kw=NO_AUTOCOMPLETE)
     pw = fields.PasswordField(_('Admin password'), [validators.DataRequired(), checkStrippable])
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
     pwned = fields.HiddenField(label='', default=-1)
@@ -82,19 +85,19 @@ class DomainSignupForm(flask_wtf.FlaskForm):
 
 
 class AlternativeForm(flask_wtf.FlaskForm):
-    name = fields.StringField(_('Alternative name'), [validators.DataRequired()], render_kw={'autofocus': True})
+    name = fields.StringField(_('Alternative name'), [validators.DataRequired()], render_kw=AUTOFOCUS|NO_AUTOCOMPLETE)
     submit = fields.SubmitField(_('Save'))
 
 
 class RelayForm(flask_wtf.FlaskForm):
-    name = fields.StringField(_('Relayed domain name'), [validators.DataRequired()], render_kw={'autofocus': True})
-    smtp = fields.StringField(_('Remote host'))
-    comment = fields.StringField(_('Comment'), render_kw={'autofocus': True})
+    name = fields.StringField(_('Relayed domain name'), [validators.DataRequired()], render_kw=AUTOFOCUS|NO_AUTOCOMPLETE)
+    smtp = fields.StringField(_('Remote host'), render_kw=NO_AUTOCOMPLETE)
+    comment = fields.StringField(_('Comment'), render_kw=AUTOFOCUS)
     submit = fields.SubmitField(_('Save'))
 
 
 class UserForm(flask_wtf.FlaskForm):
-    localpart = fields.StringField(_('E-mail'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
+    localpart = fields.StringField(_('E-mail'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)], render_kw=NO_AUTOCOMPLETE)
     pw = fields.PasswordField(_('Password'))
     pw2 = fields.PasswordField(_('Confirm password'), [checkStrippable, validators.EqualTo('pw')])
     pwned = fields.HiddenField(label='', default=-1)
@@ -102,7 +105,7 @@ class UserForm(flask_wtf.FlaskForm):
     enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)
     enable_pop = fields.BooleanField(_('Allow POP3 access'), default=True)
     allow_spoofing = fields.BooleanField(_('Allow the user to spoof the sender (send email as anyone)'), default=False)
-    displayed_name = fields.StringField(_('Displayed name'), render_kw={'autofocus': True})
+    displayed_name = fields.StringField(_('Displayed name'), render_kw=AUTOFOCUS)
     comment = fields.StringField(_('Comment'))
     enabled = fields.BooleanField(_('Enabled'), default=True)
     change_pw_next_login = fields.BooleanField(_('Force password change at next login'), default=True)
@@ -110,7 +113,7 @@ class UserForm(flask_wtf.FlaskForm):
 
 
 class UserSignupForm(flask_wtf.FlaskForm):
-    localpart = fields.StringField(_('Email address'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)], render_kw={'autofocus': True})
+    localpart = fields.StringField(_('Email address'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)], render_kw=AUTOFOCUS|NO_AUTOCOMPLETE)
     pw = fields.PasswordField(_('Password'), [validators.DataRequired(), checkStrippable])
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
     pwned = fields.HiddenField(label='', default=-1)
@@ -120,24 +123,24 @@ class UserSignupFormCaptcha(UserSignupForm):
     captcha = flask_wtf.RecaptchaField()
 
 class UserSettingsForm(flask_wtf.FlaskForm):
-    displayed_name = fields.StringField(_('Displayed name'), render_kw={'autofocus': True})
+    displayed_name = fields.StringField(_('Displayed name'), render_kw=AUTOFOCUS)
     spam_enabled = fields.BooleanField(_('Enable spam filter'))
     spam_mark_as_read = fields.BooleanField(_('Enable marking spam mails as read'))
     spam_threshold = fields_.IntegerSliderField(_('Spam filter tolerance'))
     forward_enabled = fields.BooleanField(_('Enable forwarding'))
     forward_keep = fields.BooleanField(_('Keep a copy of the emails'))
-    forward_destination = fields.StringField(_('Destination'), [validators.Optional(), MultipleEmailAddressesVerify()])
+    forward_destination = fields.StringField(_('Destination'), [validators.Optional(), MultipleEmailAddressesVerify()], render_kw=NO_AUTOCOMPLETE)
     submit = fields.SubmitField(_('Save settings'))
 
 
 class UserPasswordForm(flask_wtf.FlaskForm):
-    pw = fields.PasswordField(_('Password'), [validators.DataRequired()], render_kw={'autofocus': True})
+    pw = fields.PasswordField(_('Password'), [validators.DataRequired()], render_kw=AUTOFOCUS)
     pw2 = fields.PasswordField(_('Password check'), [validators.DataRequired()])
     pwned = fields.HiddenField(label='', default=-1)
     submit = fields.SubmitField(_('Update password'))
 
 class UserPasswordChangeForm(flask_wtf.FlaskForm):
-    current_pw = fields.PasswordField(_('Current password'), [validators.DataRequired()], render_kw={'autofocus': True})
+    current_pw = fields.PasswordField(_('Current password'), [validators.DataRequired()], render_kw=AUTOFOCUS)
     pw = fields.PasswordField(_('Password'), [validators.DataRequired(), checkStrippable])
     pw2 = fields.PasswordField(_('Password check'), [validators.DataRequired()])
     pwned = fields.HiddenField(label='', default=-1)
@@ -145,7 +148,7 @@ class UserPasswordChangeForm(flask_wtf.FlaskForm):
 
 class UserReplyForm(flask_wtf.FlaskForm):
     reply_enabled = fields.BooleanField(_('Enable automatic reply'))
-    reply_subject = fields.StringField(_('Reply subject'), render_kw={'autofocus': True})
+    reply_subject = fields.StringField(_('Reply subject'), render_kw=AUTOFOCUS)
     reply_body = fields.StringField(_('Reply body'),
         widget=widgets.TextArea())
     reply_startdate = fields.DateField(_('Start of vacation'))
@@ -158,9 +161,9 @@ class TokenForm(flask_wtf.FlaskForm):
         _('Your token (write it down, as it will never be displayed again)')
     )
     raw_password = fields.HiddenField([validators.DataRequired()])
-    comment = fields.StringField(_('Comment'), render_kw={'autofocus': True})
+    comment = fields.StringField(_('Comment'), render_kw=AUTOFOCUS)
     ip = fields.StringField(
-        _('Authorized IP'), [validators.Optional()]
+        _('Authorized IP'), [validators.Optional()], render_kw=NO_AUTOCOMPLETE
     )
     submit = fields.SubmitField(_('Save'))
 
@@ -174,11 +177,11 @@ class TokenForm(flask_wtf.FlaskForm):
             raise validators.ValidationError('Not a valid list of CIDRs')
 
 class AliasForm(flask_wtf.FlaskForm):
-    localpart = fields.StringField(_('Alias'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
+    localpart = fields.StringField(_('Alias'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)], render_kw=NO_AUTOCOMPLETE)
     wildcard = fields.BooleanField(
         _('Use SQL LIKE Syntax (e.g. for catch-all aliases)'))
     destination = DestinationField(_('Destination'))
-    comment = fields.StringField(_('Comment'), render_kw={'autofocus': True})
+    comment = fields.StringField(_('Comment'), render_kw=AUTOFOCUS)
     submit = fields.SubmitField(_('Save'))
 
 
@@ -196,20 +199,20 @@ class FetchForm(flask_wtf.FlaskForm):
     protocol = fields.SelectField(_('Protocol'), choices=[
         ('imap', 'IMAP'), ('pop3', 'POP3')
     ])
-    host = fields.StringField(_('Hostname or IP'), [validators.DataRequired()])
+    host = fields.StringField(_('Hostname or IP'), [validators.DataRequired()], render_kw=NO_AUTOCOMPLETE)
     port = fields.IntegerField(_('TCP port'), [validators.DataRequired(), validators.NumberRange(min=0, max=65535)], default=993)
     tls = fields.BooleanField(_('Enable TLS'), default=True)
-    username = fields.StringField(_('Username'), [validators.DataRequired()])
-    password = fields.PasswordField(_('Password'), render_kw={'autofocus': True})
+    username = fields.StringField(_('Username'), [validators.DataRequired()], render_kw=NO_AUTOCOMPLETE)
+    password = fields.PasswordField(_('Password'), render_kw=AUTOFOCUS)
     keep = fields.BooleanField(_('Keep emails on the server'))
     scan = fields.BooleanField(_('Rescan emails locally'))
-    folders = fields.StringField(_('Folders to fetch on the server'), [validators.Optional(), MultipleFoldersVerify()], default='INBOX,Junk')
+    folders = fields.StringField(_('Folders to fetch on the server'), [validators.Optional(), MultipleFoldersVerify()], default='INBOX,Junk', render_kw=NO_AUTOCOMPLETE)
     submit = fields.SubmitField(_('Submit'))
 
 
 class AnnouncementForm(flask_wtf.FlaskForm):
     announcement_subject = fields.StringField(_('Announcement subject'),
-        [validators.DataRequired()], render_kw={'autofocus': True})
+        [validators.DataRequired()], render_kw=AUTOFOCUS)
     announcement_body = fields.StringField(_('Announcement body'),
         [validators.DataRequired()], widget=widgets.TextArea())
     submit = fields.SubmitField(_('Send'))

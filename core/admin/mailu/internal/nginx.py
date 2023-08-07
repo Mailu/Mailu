@@ -24,7 +24,7 @@ STATUSES = {
         "imap": "LIMIT",
         "smtp": "451 4.3.2",
         "submission": "451 4.3.2",
-        "pop3": "-ERR [LOGIN-DELAY] Retry later"
+        "pop3": "-ERR [LOGIN-DELAY] Retry later",
         "sieve": "AuthFailed"
     }),
 }

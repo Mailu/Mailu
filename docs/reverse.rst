@@ -60,12 +60,12 @@ and then add the following to the front section:
       - "traefik.enable=true"
 
       # the second part is important to ensure Mailu can get certificates from letsencrypt
-      - "traefik.http.routers.web.rule=Host(`fqdn.example.com`) || Path(`/.well-known/acme-challenge/`)"
+      - "traefik.http.routers.web.rule=Host(`mail.example.com`) || Path(`/.well-known/acme-challenge/`)"
       - "traefik.http.routers.web.entrypoints=web"
       - "traefik.http.services.web.loadbalancer.server.port=80"
 
       #other FQDNS can be added here:
-      - "traefik.tcp.routers.websecure.rule=HostSNI(`fqdn.example.com`) || HostSNI(`autoconfig.example.com`) || HostSNI(`mta-sts.example.com`)"
+      - "traefik.tcp.routers.websecure.rule=HostSNI(`mail.example.com`) || HostSNI(`autoconfig.example.com`) || HostSNI(`mta-sts.example.com`)"
       - "traefik.tcp.routers.websecure.entrypoints=websecure"
       - "traefik.tcp.routers.websecure.tls.passthrough=true"
       - "traefik.tcp.routers.websecure.service=websecure"

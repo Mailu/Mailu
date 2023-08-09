@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 
+import logging as log
 import os
-import time
+import requests
+import sys
 import subprocess
+import time
+from threading import Thread
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 
+log.basicConfig(stream=sys.stderr, level="WARNING")
 hostnames = ','.join(set(host.strip() for host in os.environ['HOSTNAMES'].split(',')))
 
 command = [
@@ -39,8 +45,25 @@ command2 = [
 # Wait for nginx to start
 time.sleep(5)
 
+def serve_one_request():
+    with HTTPServer(("0.0.0.0", 8008), SimpleHTTPRequestHandler) as server:
+        server.handle_request()
+
 # Run certbot every day
 while True:
+    while True:
+        hostname = os.environ['HOSTNAMES'].split(' ')[0]
+        target = f'http://{hostname}/.well-known/acme-challenge/testing'
+        thread = Thread(target=serve_one_request)
+        thread.start()
+        r = requests.get(target)
+        if r.status_code != 404:
+            log.error(f"Can't reach {target}!, please ensure it's fixed or change the TLS_FLAVOR.")
+            time.sleep(5)
+        else:
+            break
+        thread.join()
+
     subprocess.call(command)
     subprocess.call(command2)
     time.sleep(86400)

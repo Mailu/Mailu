@@ -45,8 +45,13 @@ command2 = [
 # Wait for nginx to start
 time.sleep(5)
 
+class MyRequestHandler(SimpleHTTPRequestHandler):
+    def do_GET(self):
+        self.path = '/var/empty/'
+        return SimpleHTTPRequestHandler.do_GET(self)
+
 def serve_one_request():
-    with HTTPServer(("0.0.0.0", 8008), SimpleHTTPRequestHandler) as server:
+    with HTTPServer(("0.0.0.0", 8008), MyRequestHandler) as server:
         server.handle_request()
 
 # Run certbot every day

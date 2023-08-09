@@ -1,0 +1,1 @@
+Fix GPG operations from Roundcube - calling gpg with full path was blocked

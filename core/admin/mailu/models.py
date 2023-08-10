@@ -624,11 +624,13 @@ in clear-text regardless of the presence of the cache.
             self._credential_cache[self.get_id()] = (self.password.split('$')[3], passlib.hash.pbkdf2_sha256.using(rounds=1).hash(password))
         return result
 
-    def set_password(self, password, raw=False):
+    def set_password(self, password, raw=False, session=None):
         """ Set password for user
             @password: plain text password to encrypt (or, if raw is True: the hash itself)
         """
         self.password = password if raw else User.get_password_context().hash(password)
+        if session:
+            utils.MailuSessionExtension.prune_sessions(uid=self.email, keep=session)
 
     def get_managed_domains(self):
         """ return list of domains this user can manage """

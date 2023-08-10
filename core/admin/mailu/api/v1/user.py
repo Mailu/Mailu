@@ -194,7 +194,7 @@ class User(Resource):
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
 
         if 'raw_password' in data:
-            user_found.set_password(data['raw_password'])
+            user_found.set_password(data['raw_password'], '')
         if 'comment' in data:
             user_found.comment = data['comment']
         if 'quota_bytes' in data:

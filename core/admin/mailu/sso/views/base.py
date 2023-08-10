@@ -91,7 +91,7 @@ def pw_change():
         if user:
             flask.session.regenerate()
             flask_login.login_user(user)
-            user.set_password(form.pw.data)
+            user.set_password(form.pw.data, flask.session)
             user.change_pw_next_login = False
             models.db.session.commit()
             flask.current_app.logger.info(f'Forced password change by {user} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
@@ -167,7 +167,7 @@ def _proxy():
         flask.current_app.logger.warning('Too many users for domain %s' % domain)
         return flask.abort(500, 'Too many users in (domain=%s)' % domain)
     user = models.User(localpart=localpart, domain=domain)
-    user.set_password(secrets.token_urlsafe())
+    user.set_password(secrets.token_urlsafe(), flask.session)
     models.db.session.add(user)
     models.db.session.commit()
     flask.session.regenerate()

@@ -99,6 +99,7 @@ class UserForm(flask_wtf.FlaskForm):
     displayed_name = fields.StringField(_('Displayed name'))
     comment = fields.StringField(_('Comment'))
     enabled = fields.BooleanField(_('Enabled'), default=True)
+    change_pw_next_login = fields.BooleanField(_('Force password change at next login'), default=True)
     submit = fields.SubmitField(_('Save'))
 
 

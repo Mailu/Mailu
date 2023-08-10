@@ -3,7 +3,7 @@ from mailu import models, utils
 from mailu.sso import sso, forms
 from mailu.ui import access
 
-from flask import current_app as app
+from flask import current_app as app, session
 import flask
 import flask_login
 import secrets
@@ -54,6 +54,9 @@ def login():
         if user:
             flask.session.regenerate()
             flask_login.login_user(user)
+            if user.change_pw_next_login:
+                session['redirect_to'] = destination
+                destination = flask.url_for('sso.pw_change')
             response = flask.redirect(destination)
             response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
             flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
@@ -65,6 +68,41 @@ def login():
             flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: failed: badauth: {utils.truncated_pw_hash(form.pw.data)}')
             flask.flash('Wrong e-mail or password', 'error')
     return flask.render_template('login.html', form=form, fields=fields)
+
+@sso.route('/pw_change', methods=['GET', 'POST'])
+@access.authenticated
+def pw_change():
+    client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
+    client_port = flask.request.headers.get('X-Real-Port', None)
+    form = forms.PWChangeForm()
+
+    if form.validate_on_submit():
+        if msg := utils.isBadOrPwned(form):
+            flask.flash(msg, "error")
+            return flask.redirect(flask.url_for('sso.pw_change'))
+        if form.oldpw.data == form.pw2.data:
+            # TODO: fuzzy match?
+            flask.flash("The new password can't be the same as the old password", "error")
+            return flask.redirect(flask.url_for('sso.pw_change'))
+        if form.pw.data != form.pw2.data:
+            flask.flash("The new passwords don't match", "error")
+            return flask.redirect(flask.url_for('sso.pw_change'))
+        user = models.User.login(flask_login.current_user.email, form.oldpw.data)
+        if user:
+            flask.session.regenerate()
+            flask_login.login_user(user)
+            user.set_password(form.pw.data)
+            user.change_pw_next_login = False
+            models.db.session.commit()
+            flask.current_app.logger.info(f'Forced password change by {user} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
+            destination = app.config['WEB_ADMIN']
+            if 'redir_to' in session:
+                destination = session['redir_to']
+                del session['redir_to']
+            return flask.redirect(destination)
+        flask.flash("The current password is incorrect!", "error")
+
+    return flask.render_template('pw_change.html', form=form)
 
 @sso.route('/logout', methods=['GET'])
 @access.authenticated

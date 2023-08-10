@@ -523,6 +523,7 @@ class User(Base, Email):
     spam_enabled = db.Column(db.Boolean, nullable=False, default=True)
     spam_mark_as_read = db.Column(db.Boolean, nullable=False, default=True)
     spam_threshold = db.Column(db.Integer, nullable=False, default=lambda:int(app.config.get("DEFAULT_SPAM_THRESHOLD", 80)))
+    change_pw_next_login = db.Column(db.Boolean, nullable=False, default=False)
 
     # Flask-login attributes
     is_authenticated = True

@@ -49,7 +49,7 @@ def login():
                 flask.flash(_('Too many attempts from your IP (rate-limit)'), 'error')
                 return flask.render_template('login.html', form=form, fields=fields)
             if utils.limiter.should_rate_limit_user(username, client_ip, device_cookie, device_cookie_username):
-                flask.flash(_('Too many attempts for this user (rate-limit))', 'error')
+                flask.flash(_('Too many attempts for this user (rate-limit)'), 'error')
                 return flask.render_template('login.html', form=form, fields=fields)
         user = models.User.login(username, form.pw.data)
         if user:

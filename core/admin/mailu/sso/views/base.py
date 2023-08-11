@@ -4,6 +4,7 @@ from mailu.sso import sso, forms
 from mailu.ui import access
 
 from flask import current_app as app, session
+from flask_babel import lazy_gettext as _
 import flask
 import flask_login
 import secrets
@@ -45,10 +46,10 @@ def login():
         username = form.email.data
         if not utils.is_app_token(form.pw.data):
             if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
-                flask.flash('Too many attempts from your IP (rate-limit)', 'error')
+                flask.flash(_('Too many attempts from your IP (rate-limit)'), 'error')
                 return flask.render_template('login.html', form=form, fields=fields)
             if utils.limiter.should_rate_limit_user(username, client_ip, device_cookie, device_cookie_username):
-                flask.flash('Too many attempts for this user (rate-limit)', 'error')
+                flask.flash(_('Too many attempts for this user (rate-limit))', 'error')
                 return flask.render_template('login.html', form=form, fields=fields)
         user = models.User.login(username, form.pw.data)
         if user:
@@ -66,7 +67,7 @@ def login():
         else:
             utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username, form.pw.data) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip, username)
             flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: failed: badauth: {utils.truncated_pw_hash(form.pw.data)}')
-            flask.flash('Wrong e-mail or password', 'error')
+            flask.flash(_('Wrong e-mail or password'), 'error')
     return flask.render_template('login.html', form=form, fields=fields)
 
 @sso.route('/pw_change', methods=['GET', 'POST'])
@@ -82,10 +83,10 @@ def pw_change():
             return flask.redirect(flask.url_for('sso.pw_change'))
         if form.oldpw.data == form.pw2.data:
             # TODO: fuzzy match?
-            flask.flash("The new password can't be the same as the old password", "error")
+            flask.flash(_("The new password can't be the same as the old password"), "error")
             return flask.redirect(flask.url_for('sso.pw_change'))
         if form.pw.data != form.pw2.data:
-            flask.flash("The new passwords don't match", "error")
+            flask.flash(_("The new passwords don't match"), "error")
             return flask.redirect(flask.url_for('sso.pw_change'))
         user = models.User.login(flask_login.current_user.email, form.oldpw.data)
         if user:
@@ -100,7 +101,7 @@ def pw_change():
                 destination = session['redir_to']
                 del session['redir_to']
             return flask.redirect(destination)
-        flask.flash("The current password is incorrect!", "error")
+        flask.flash(_("The current password is incorrect!"), "error")
 
     return flask.render_template('pw_change.html', form=form)
 

@@ -3,7 +3,7 @@ from mailu import models, utils
 from mailu.sso import sso, forms
 from mailu.ui import access
 
-from flask import current_app as app, session
+from flask import current_app as app
 from flask_babel import lazy_gettext as _
 import flask
 import flask_login
@@ -56,7 +56,7 @@ def login():
             flask.session.regenerate()
             flask_login.login_user(user)
             if user.change_pw_next_login:
-                session['redirect_to'] = destination
+                flask.session['redirect_to'] = destination
                 destination = flask.url_for('sso.pw_change')
             response = flask.redirect(destination)
             response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
@@ -96,10 +96,7 @@ def pw_change():
             user.change_pw_next_login = False
             models.db.session.commit()
             flask.current_app.logger.info(f'Forced password change by {user} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
-            destination = app.config['WEB_ADMIN']
-            if 'redir_to' in session:
-                destination = session['redir_to']
-                del session['redir_to']
+            destination = flask.session.pop('redir_to', None) or app.config['WEB_ADMIN']
             return flask.redirect(destination)
         flask.flash(_("The current password is incorrect!"), "error")
 

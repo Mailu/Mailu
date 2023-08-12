@@ -181,6 +181,7 @@ def user_signup(domain_name=None):
             flask.session.regenerate()
             user = models.User(domain=domain)
             form.populate_obj(user)
+            user.change_pw_next_login = True
             user.set_password(form.pw.data)
             user.quota_bytes = quota_bytes
             models.db.session.add(user)

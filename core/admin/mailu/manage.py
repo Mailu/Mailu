@@ -123,6 +123,7 @@ def password(localpart, domain_name, password):
     user  = models.User.query.get(email)
     if user:
         user.set_password(password, keep_only_session='')
+        user.change_pw_next_login=True
     else:
         print(f'User {email} not found.')
     db.session.commit()

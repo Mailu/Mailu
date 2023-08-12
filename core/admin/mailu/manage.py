@@ -103,7 +103,8 @@ def user(localpart, domain_name, password):
     user = models.User(
         localpart=localpart,
         domain=domain,
-        global_admin=False
+        global_admin=False,
+        change_pw_next_login=True,
     )
     user.set_password(password)
     db.session.add(user)

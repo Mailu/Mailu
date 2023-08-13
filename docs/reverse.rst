@@ -15,6 +15,7 @@ Traefik as reverse proxy
 In your docker-compose.yml, add a section like follows:
 
 .. code-block:: yaml
+
   reverse-proxy:
     # The official v2 Traefik docker image
     image: traefik:v2.10
@@ -56,6 +57,7 @@ In your docker-compose.yml, add a section like follows:
 and then add the following to the front section:
 
 .. code-block:: yaml
+
   labels:
       - "traefik.enable=true"
 

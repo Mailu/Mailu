@@ -1,0 +1,2 @@
+Moving emails to the Junk folder may have created zombies (rspamc)
+Ensure that the spam reporting works even if the email isn't COPYed to the mailbox

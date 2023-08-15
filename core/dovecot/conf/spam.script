@@ -7,8 +7,14 @@ then
 fi
 
 
+<<<<<<< HEAD
 tee >(rspamc -t 3 -h $RSPAMD_HOST -P mailu learn_spam /dev/stdin||true) \
        >(rspamc -t 3 -h $RSPAMD_HOST -P mailu -f 13 fuzzy_del /dev/stdin||true) \
        >(rspamc -t 3 -h $RSPAMD_HOST -P mailu -f 11 fuzzy_add /dev/stdin||true) > /dev/null
 
 wait
+=======
+exec tee >(rspamc -t 3 -h $RSPAMD_HOST -P mailu learn_spam /dev/stdin||true) \
+       >(rspamc -t 3 -h $RSPAMD_HOST -P mailu -f 13 fuzzy_del /dev/stdin||true) \
+       >(rspamc -t 3 -h $RSPAMD_HOST -P mailu -f 11 fuzzy_add /dev/stdin||true)
+>>>>>>> a1f9fb43 (Prevent rspamc zombies, ensure that triggering learn-spam works)

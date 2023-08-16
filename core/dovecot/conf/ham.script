@@ -6,6 +6,8 @@ then
 	exit 1
 fi
 
-exec tee >(rspamc -t 3 -h $RSPAMD_HOST -P mailu learn_ham /dev/stdin||true) \
+tee >(rspamc -t 3 -h $RSPAMD_HOST -P mailu learn_ham /dev/stdin||true) \
        >(rspamc -t 3 -h $RSPAMD_HOST -P mailu -f 11 fuzzy_del /dev/stdin||true) \
        >(rspamc -t 3 -h $RSPAMD_HOST -P mailu -f 13 fuzzy_add /dev/stdin||true) > /dev/null
+
+wait

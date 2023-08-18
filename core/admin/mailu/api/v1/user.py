@@ -209,7 +209,7 @@ class User(Resource):
         if 'enabled' in data:
             user_found.enabled = data['enabled']
         if 'change_pw_next_login' in data:
-            user_new.change_pw_next_login = data['change_pw_next_login']
+            user_found.change_pw_next_login = data['change_pw_next_login']
         if 'enable_imap' in data:
             user_found.enable_imap = data['enable_imap']
         if 'enable_pop' in data:

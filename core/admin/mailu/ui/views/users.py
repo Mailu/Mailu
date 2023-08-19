@@ -75,7 +75,7 @@ def user_edit(user_email):
                     domain=user.domain, max_quota_bytes=max_quota_bytes)
         form.populate_obj(user)
         if form.pw.data:
-            user.set_password(form.pw.data, keep_only_session=flask.session)
+            user.set_password(form.pw.data, keep_sessions=set(flask.session))
         models.db.session.commit()
         flask.flash('User %s updated' % user)
         return flask.redirect(
@@ -114,7 +114,7 @@ def _process_password_change(form, user_email):
                 flask.flash(msg, "error")
                 return flask.render_template('user/password.html', form=form, user=user)
             flask.session.regenerate()
-            user.set_password(form.pw.data, keep_only_session=flask.session)
+            user.set_password(form.pw.data, keep_sessions=set(flask.session))
             models.db.session.commit()
             flask.flash('Password updated for %s' % user)
             if user_email:

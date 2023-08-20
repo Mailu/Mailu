@@ -4,6 +4,7 @@ from mailu.sso import sso, forms
 from mailu.ui import access
 
 from flask import current_app as app
+from flask_babel import lazy_gettext as _
 import flask
 import flask_login
 import secrets
@@ -45,15 +46,18 @@ def login():
         username = form.email.data
         if not utils.is_app_token(form.pw.data):
             if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
-                flask.flash('Too many attempts from your IP (rate-limit)', 'error')
+                flask.flash(_('Too many attempts from your IP (rate-limit)'), 'error')
                 return flask.render_template('login.html', form=form, fields=fields)
             if utils.limiter.should_rate_limit_user(username, client_ip, device_cookie, device_cookie_username):
-                flask.flash('Too many attempts for this user (rate-limit)', 'error')
+                flask.flash(_('Too many attempts for this user (rate-limit)'), 'error')
                 return flask.render_template('login.html', form=form, fields=fields)
         user = models.User.login(username, form.pw.data)
         if user:
             flask.session.regenerate()
             flask_login.login_user(user)
+            if user.change_pw_next_login:
+                flask.session['redirect_to'] = destination
+                destination = flask.url_for('sso.pw_change')
             response = flask.redirect(destination)
             response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
             flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
@@ -63,8 +67,40 @@ def login():
         else:
             utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username, form.pw.data) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip, username)
             flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: failed: badauth: {utils.truncated_pw_hash(form.pw.data)}')
-            flask.flash('Wrong e-mail or password', 'error')
+            flask.flash(_('Wrong e-mail or password'), 'error')
     return flask.render_template('login.html', form=form, fields=fields)
+
+@sso.route('/pw_change', methods=['GET', 'POST'])
+@access.authenticated
+def pw_change():
+    client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
+    client_port = flask.request.headers.get('X-Real-Port', None)
+    form = forms.PWChangeForm()
+
+    if form.validate_on_submit():
+        if msg := utils.isBadOrPwned(form):
+            flask.flash(msg, "error")
+            return flask.redirect(flask.url_for('sso.pw_change'))
+        if form.oldpw.data == form.pw2.data:
+            # TODO: fuzzy match?
+            flask.flash(_("The new password can't be the same as the old password"), "error")
+            return flask.redirect(flask.url_for('sso.pw_change'))
+        if form.pw.data != form.pw2.data:
+            flask.flash(_("The new passwords don't match"), "error")
+            return flask.redirect(flask.url_for('sso.pw_change'))
+        user = models.User.login(flask_login.current_user.email, form.oldpw.data)
+        if user:
+            flask.session.regenerate()
+            flask_login.login_user(user)
+            user.set_password(form.pw.data, keep_sessions=set(flask.session))
+            user.change_pw_next_login = False
+            models.db.session.commit()
+            flask.current_app.logger.info(f'Forced password change by {user} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
+            destination = flask.session.pop('redir_to', None) or app.config['WEB_ADMIN']
+            return flask.redirect(destination)
+        flask.flash(_("The current password is incorrect!"), "error")
+
+    return flask.render_template('pw_change.html', form=form)
 
 @sso.route('/logout', methods=['GET'])
 @access.authenticated
@@ -129,7 +165,7 @@ def _proxy():
         flask.current_app.logger.warning('Too many users for domain %s' % domain)
         return flask.abort(500, 'Too many users in (domain=%s)' % domain)
     user = models.User(localpart=localpart, domain=domain)
-    user.set_password(secrets.token_urlsafe())
+    user.set_password(secrets.token_urlsafe(), keep_sessions=set(flask.session))
     models.db.session.add(user)
     models.db.session.commit()
     flask.session.regenerate()

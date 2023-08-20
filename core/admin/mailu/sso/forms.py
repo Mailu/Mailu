@@ -10,3 +10,10 @@ class LoginForm(flask_wtf.FlaskForm):
     pwned = fields.HiddenField(label='', default=-1)
     submitWebmail = fields.SubmitField(_('Sign in'))
     submitAdmin = fields.SubmitField(_('Sign in'))
+
+class PWChangeForm(flask_wtf.FlaskForm):
+    oldpw = fields.PasswordField(_('Current password'), [validators.DataRequired()])
+    pw = fields.PasswordField(_('New password'), [validators.DataRequired()])
+    pw2 = fields.PasswordField(_('New password (again)'), [validators.DataRequired()])
+    pwned = fields.HiddenField(label='', default=-1)
+    submit = fields.SubmitField(_('Change password'))

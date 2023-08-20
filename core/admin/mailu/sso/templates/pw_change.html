@@ -1,0 +1,13 @@
+{%- extends "base_sso.html" %}
+
+{%- block content %}
+{%- call macros.card() %}
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {{ macros.form_field(form.oldpw) }}
+  {{ macros.form_field(form.pw) }}
+  {{ macros.form_field(form.pw2) }}
+  {{ macros.form_field(form.submit) }}
+</form>
+{%- endcall %}
+{%- endblock %}

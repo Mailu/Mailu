@@ -31,6 +31,7 @@ for script_file in glob.glob("/conf/*.script"):
 # Run Podop, then postfix
 os.system("chown mail:mail /mail")
 os.system("chown -R mail:mail /var/lib/dovecot /conf")
+os.system("rm -rf /run/dovecot/master.pid")
 
 multiprocessing.Process(target=start_podop).start()
 cmd = ['/usr/sbin/dovecot', '-c', '/etc/dovecot/dovecot.conf', '-F']

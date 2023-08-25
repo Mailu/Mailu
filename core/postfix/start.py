@@ -16,8 +16,6 @@ system.set_env(log_filters=[
     r'discarding EHLO keywords\: PIPELINING$',
     ], log_file=os.environ.get('POSTFIX_LOG_FILE'))
 
-os.system("flock -n /queue/pid/master.pid rm /queue/pid/master.pid")
-
 def start_podop():
     system.drop_privs_to('postfix')
     os.makedirs('/dev/shm/postfix',mode=0o700, exist_ok=True)

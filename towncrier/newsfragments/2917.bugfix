@@ -1,1 +1,2 @@
-Ensure that we delete any pre-exising PID file before starting dovecot
+Ensure that we delete any pre-exising PID files
+Make Rspamd retry for longer when connecting to clamav

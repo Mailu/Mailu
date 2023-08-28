@@ -101,10 +101,14 @@ def set_env(required_secrets=[], log_filters=[]):
         os.environ[f'{secret}_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray(secret, 'utf-8'), 'sha256').hexdigest()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     os.system('find /run -xdev -type f -name \*.pid -print -delete')
 =======
     os.system('find / -xdev -type f -name \*.pid -print -delete')
 >>>>>>> 367fd247 (Move the cleanup to socrate)
+=======
+    os.system('find /run -xdev -type f -name \*.pid -print -delete')
+>>>>>>> bbed508e (As per review)
 
     return {
             key: _coerce_value(os.environ.get(key, value))

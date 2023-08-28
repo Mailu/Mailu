@@ -47,8 +47,12 @@ time.sleep(5)
 
 class MyRequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
-        self.path = '/var/empty/'
-        return SimpleHTTPRequestHandler.do_GET(self)
+        if self.path == '/testing':
+            self.send_response(204)
+        else:
+            self.send_response(404)
+        self.send_header('Content-Type', 'text/plain')
+        self.end_headers()
 
 def serve_one_request():
     with HTTPServer(("0.0.0.0", 8008), MyRequestHandler) as server:
@@ -62,7 +66,7 @@ while True:
         thread = Thread(target=serve_one_request)
         thread.start()
         r = requests.get(target)
-        if r.status_code != 404:
+        if r.status_code != 204:
             log.error(f"Can't reach {target}!, please ensure it's fixed or change the TLS_FLAVOR.")
             time.sleep(5)
         else:

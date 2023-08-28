@@ -97,7 +97,7 @@ def set_env(required_secrets=[], log_filters=[], log_file=None):
     for secret in required_secrets:
         os.environ[f'{secret}_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray(secret, 'utf-8'), 'sha256').hexdigest()
 
-    os.system('find / -xdev -type f -name \*.pid -print -delete')
+    os.system('find /run -xdev -type f -name \*.pid -print -delete')
 
     return {
             key: _coerce_value(os.environ.get(key, value))

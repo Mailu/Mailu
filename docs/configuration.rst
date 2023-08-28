@@ -316,12 +316,12 @@ Alternatives hosted options like PostgreSQL and MariaDB/MySQL can be configured 
 but the development team recommends against it. Indeed, there is currently very little data
 to be stored and SQLite is deemed both sufficient, simpler and more reliable overall.
 
-- ``SQLALCHEMY_DATABASE_URI`` (default: sqlite:////data/main.db): the SQLAlchemy database URL for accessing the database
-- ``SQLALCHEMY_DATABASE_URI_ROUNDCUBE`` (default: sqlite:////data/roundcube.db): the Roundcube database URL for accessing the Roundcube database
+- ``SQLALCHEMY_DATABASE_URI`` (default: ``sqlite:////data/main.db``): the SQLAlchemy database URL for accessing the database
+- ``SQLALCHEMY_DATABASE_URI_ROUNDCUBE`` (default: ``sqlite:////data/roundcube.db``): the Roundcube database URL for accessing the Roundcube database
 
 For PostgreSQL use driver postgresql (``SQLALCHEMY_DATABASE_URI=postgresql://mailu:mailu_secret_password@database/mailu``).
 
-For MariaDB/MySQL use driver mysql+mysqlconnector (``SQLALCHEMY_DATABASE_URI= mysql+mysqlconnector://mailu:mailu_secret_password@database/mailu```).
+For MariaDB/MySQL use driver mysql+mysqlconnector (``SQLALCHEMY_DATABASE_URI= mysql+mysqlconnector://mailu:mailu_secret_password@database/mailu``).
 
 For Roundcube, refer to the `roundcube documentation`_ for the URL specification.
 

@@ -14,7 +14,7 @@ ARG MAILU_GID=1000
 RUN set -euxo pipefail \
   ; addgroup -Sg ${MAILU_GID} mailu \
   ; adduser -Sg ${MAILU_UID} -G mailu -h /app -g "mailu app" -s /bin/bash mailu \
-  ; apk add --no-cache bash ca-certificates curl python3 tzdata libcap \
+  ; apk add --no-cache bash ca-certificates curl python3 tzdata \
   ; ! [[ "$(uname -m)" == x86_64 ]] \
     || apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc==11-r0
 
@@ -75,7 +75,6 @@ FROM system
 
 COPY --from=build /app/venv/ /app/venv/
 COPY --chown=root:root --from=build /app/snuffleupagus.so /usr/lib/php81/modules/
-RUN setcap 'cap_net_bind_service=+ep' /app/venv/bin/gunicorn 'cap_net_bind_service=+ep' /usr/bin/python3.10
 
 ENV \
   VIRTUAL_ENV=/app/venv \

@@ -872,6 +872,7 @@ We recommend that you run your own DNS resolver (enable unbound and update your 
 We have seen a fair amount of support requests related to the following:
 
 - dnsmasq won't forward DNSSEC results unless instructed to do so. If you are running openwrt or pi-hole, you do need to enable DNSSEC.
+- systemd-resolve won't validate DNSSEC results unless instructed to do so. If you are using it you can check its configuration using ``systemd-resolve --status | grep DNSSEC``
 - `coredns has a bug`_ that we have now worked around
 - `netplan does not play nicely with docker` by default and may need to be configured to leave docker's network alone.
 

@@ -23,7 +23,7 @@ for override_file in glob.glob("/overrides/*"):
         shutil.copyfile(override_file, os.path.join("/etc/rspamd/local.d", os.path.basename(override_file)))
 
 # Admin may not be up just yet
-healthcheck = f'http://{env["ADMIN_ADDRESS"]}/internal/rspamd/local_domains'
+healthcheck = f'http://{env["ADMIN_ADDRESS"]}:8080/internal/rspamd/local_domains'
 while True:
     time.sleep(1)
     try:

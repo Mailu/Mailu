@@ -55,7 +55,7 @@ cmdline = [
     "gunicorn",
     "--threads", f"{os.cpu_count()}",
     # If SUBNET6 is defined, gunicorn must listen on IPv6 as well as IPv4
-    "-b", f"{'[::]' if os.environ.get('SUBNET6') else ''}:80",
+    "-b", f"{'[::]' if os.environ.get('SUBNET6') else '0.0.0.0'}:8080",
     "--logger-class mailu.Logger",
     f"--log-level {os.environ.get('LOG_LEVEL', 'INFO')}",
     "--worker-tmp-dir /dev/shm",

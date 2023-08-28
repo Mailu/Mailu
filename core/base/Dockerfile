@@ -74,7 +74,11 @@ RUN set -euxo pipefail \
 FROM system
 
 COPY --from=build /app/venv/ /app/venv/
+<<<<<<< HEAD
 COPY --chown=root:root --from=build /app/snuffleupagus.so /usr/lib/php83/modules/
+=======
+COPY --chown=root:root --from=build /app/snuffleupagus.so /usr/lib/php81/modules/
+>>>>>>> 562cd8c1 (Remove the usage of capabilities use port 8080)
 
 ENV \
   VIRTUAL_ENV=/app/venv \

@@ -21,7 +21,7 @@ os.system("flock -n /queue/pid/master.pid rm /queue/pid/master.pid")
 def start_podop():
     system.drop_privs_to('postfix')
     os.makedirs('/dev/shm/postfix',mode=0o700, exist_ok=True)
-    url = "http://" + os.environ["ADMIN_ADDRESS"] + "/internal/postfix/"
+    url = "http://" + os.environ["ADMIN_ADDRESS"] + ":8080/internal/postfix/"
     # TODO: Remove verbosity setting from Podop?
     run_server(0, "postfix", "/tmp/podop.socket", [
         ("transport", "url", url + "transport/§"),

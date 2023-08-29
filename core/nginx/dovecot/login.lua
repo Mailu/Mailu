@@ -12,7 +12,7 @@ local http_client = dovecot.http.client {
 
 function auth_passdb_lookup(req)
   local auth_request = http_client:request {
-    url = "http://{{ ADMIN_ADDRESS }}/internal/auth/email";
+    url = "http://{{ ADMIN_ADDRESS }}:8080/internal/auth/email";
   }
   auth_request:add_header('Auth-Port', req.local_port)
   auth_request:add_header('Auth-User', req.user)

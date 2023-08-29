@@ -1,0 +1,3 @@
+Switch the admin container from port 80 to port 8080. This should solve issues related to capabilities not working as expected
+Document that systemd-resolve may need to be configured to validate DNSSEC
+Ensure that dovecot is not attempting to bind a v6 socket if SUBNET6 is not configured

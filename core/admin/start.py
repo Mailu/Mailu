@@ -52,10 +52,10 @@ def test_DNS():
 test_DNS()
 
 cmdline = [
-	"gunicorn",
-	"--threads", f"{os.cpu_count()}",
-	# If SUBNET6 is defined, gunicorn must listen on IPv6 as well as IPv4
-	"-b", f"{'[::]' if os.environ.get('SUBNET6') else ''}:80",
+    "gunicorn",
+    "--threads", f"{os.cpu_count()}",
+    # If SUBNET6 is defined, gunicorn must listen on IPv6 as well as IPv4
+    "-b", f"{'[::]' if os.environ.get('SUBNET6') else '0.0.0.0'}:8080",
     "--logger-class mailu.Logger",
     "--worker-tmp-dir /dev/shm",
 	"--error-logfile", "-",

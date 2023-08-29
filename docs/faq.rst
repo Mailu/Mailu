@@ -872,6 +872,7 @@ We recommend that you run your own DNS resolver (enable unbound and update your 
 We have seen a fair amount of support requests related to the following:
 
 - dnsmasq won't forward DNSSEC results unless instructed to do so. If you are running openwrt or pi-hole, you do need to enable DNSSEC.
+- systemd-resolve won't validate DNSSEC results unless instructed to do so. If you are using it you can check its configuration using ``systemd-resolve --status | grep DNSSEC``
 - `coredns has a bug`_ that we have now worked around
 
 .. _`coredns has a bug`: https://github.com/coredns/coredns/issues/5189

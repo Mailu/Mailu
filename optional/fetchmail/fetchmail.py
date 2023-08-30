@@ -79,10 +79,14 @@ def run(debug):
                 password=escape_rc_string(fetch["password"]),
                 options=options,
 <<<<<<< HEAD
+<<<<<<< HEAD
                 folders='' if fetch['protocol'] == 'pop3' else folders,
 =======
                 folders='' if fetch['protocol'].lower().startswith('pop') else folders,
 >>>>>>> 5402d00b (Maybe fix fetchmail when used with pop3)
+=======
+                folders='' if fetch['protocol'] == 'pop3' else folders,
+>>>>>>> 008ff038 (as per review)
                 lmtp='' if fetch['scan'] else 'lmtp',
             )
             if debug:

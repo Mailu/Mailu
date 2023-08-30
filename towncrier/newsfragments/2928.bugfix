@@ -1,0 +1,1 @@
+fix fetchmail when used with POP3: disregard "folders"

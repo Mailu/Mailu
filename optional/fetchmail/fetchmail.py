@@ -64,7 +64,7 @@ def run(debug):
                 username=escape_rc_string(fetch["username"]),
                 password=escape_rc_string(fetch["password"]),
                 options=options,
-                folders=folders,
+                folders='' if fetch['protocol'].lower().startswith('pop') else folders,
                 lmtp='' if fetch['scan'] else 'lmtp',
             )
             if debug:

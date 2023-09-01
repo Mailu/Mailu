@@ -435,6 +435,25 @@ Proceed as following for deleting an user:
 
 .. _`github project`: https://github.com/Mailu/Mailu/
 
+
+How to unblock an IP from rate limiter manually?
+````````````````````````````````````````````````
+
+To manually unblock an IP from the rate limiter do the following on your CLI:
+
+.. code-block:: bash
+
+  # list the limited networks (this is not the IP, but only the network part according to AUTH_RATELIMIT_IP_V4_MASK
+  $ docker compose exec redis redis-cli -n 2 --scan --pattern 'LIMITER/auth-ip/*'
+
+  # remove from rate limiter
+  $ IP=8.8.8.8; docker compose exec redis redis-cli -n 2 --scan --pattern "LIMITER/auth-ip/${IP}/*" \
+  | xargs -r docker compose exec -T redis redis-cli -n 2 DEL
+
+*Issue reference:* `2856`_.
+
+.. _`2856`: https://github.com/Mailu/Mailu/issues/2856
+
 Changes in .env don't propagate
 ```````````````````````````````
 

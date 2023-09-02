@@ -450,6 +450,10 @@ To manually unblock an IP from the rate limiter do the following on your CLI:
   $ IP=8.8.8.8; docker compose exec redis redis-cli -n 2 --scan --pattern "LIMITER/auth-ip/${IP}/*" \
   | xargs -r docker compose exec -T redis redis-cli -n 2 DEL
 
+Consider to use :ref:`AUTH tokens` for your users. Ratelimiting is exempted for token-based authentication!
+
+Also have a look at the configuration parameter ``AUTH_RATELIMIT_EXEMPTION``. More on :ref:`Rate limiting<AUTH Ratelimit>`.
+
 *Issue reference:* `2856`_.
 
 .. _`2856`: https://github.com/Mailu/Mailu/issues/2856

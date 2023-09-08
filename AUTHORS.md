@@ -22,6 +22,7 @@ Other contributors:
  - "SunMar" - Dutch translation
  - "Marty Hou" - Chinese Simple translation
  - [Thomas Sänger](https://github.com/HorayNarea) - German translation
+ - [Hossein Hosni](https://github.com/hosni) - [Contributions](https://github.com/Mailu/Mailu/commits?author=hosni)
  - [Tim Mohlmann](https://github.com/muhlemmer) - [Contributions](https://github.com/Mailu/Mailu/commits?author=muhlemmer)
  - [Ionut Filip](https://github.com/ionutfilip) - [Contributions](https://github.com/Mailu/Mailu/commits?author=ionutfilip)
  - [Ichikawa Yuriko](https://github.com/IchikawaYukko) - [Contributions](https://github.com/Mailu/Mailu/commits?author=IchikawaYukko) Japanese translation

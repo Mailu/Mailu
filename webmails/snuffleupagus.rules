@@ -43,6 +43,7 @@ sp.disable_function.function("mail").param("additional_parameters").value_r("\\-
 
 # Since it's now burned, me might as well mitigate it publicly
 sp.disable_function.function("putenv").param("assignment").value_r("LD_").drop()
+sp.disable_function.function("putenv").param("assignment").value("PATH").drop()
 
 # This one was burned in Nov 2019 - https://gist.github.com/LoadLow/90b60bd5535d6c3927bb24d5f9955b80
 sp.disable_function.function("putenv").param("assignment").value_r("GCONV_").drop()

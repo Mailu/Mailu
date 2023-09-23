@@ -223,7 +223,8 @@ class Domain(Resource):
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
         domain_found.generate_dkim_key()
-        domain_found.save_dkim_key()
+        db.session.add(domain_found)
+        db.session.commit()
         return {'code': 200, 'message': f'DKIM/DMARC keys have been generated for domain {domain}'}, 200
 
 @dom.route('/<domain>/manager')

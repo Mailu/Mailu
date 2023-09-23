@@ -173,13 +173,6 @@ class Config(Base):
     name = db.Column(db.String(255), primary_key=True, nullable=False)
     value = db.Column(JSONEncoded)
 
-
-def _save_dkim_keys(session):
-    """ store DKIM keys after commit """
-    for obj in session.identity_map.values():
-        if isinstance(obj, Domain):
-            obj.save_dkim_key()
-
 class Domain(Base):
     """ A DNS domain that has mail addresses associated to it.
     """
@@ -193,27 +186,7 @@ class Domain(Base):
     max_aliases = db.Column(db.Integer, nullable=False, default=-1)
     max_quota_bytes = db.Column(db.BigInteger, nullable=False, default=0)
     signup_enabled = db.Column(db.Boolean, nullable=False, default=False)
-
-    _dkim_key = None
-    _dkim_key_on_disk = None
-
-    def _dkim_file(self):
-        """ return filename for active DKIM key """
-        return app.config['DKIM_PATH'].format(
-            domain=self.name,
-            selector=app.config['DKIM_SELECTOR']
-        )
-
-    def save_dkim_key(self):
-        """ save changed DKIM key to disk """
-        if self._dkim_key != self._dkim_key_on_disk:
-            file_path = self._dkim_file()
-            if self._dkim_key:
-                with open(file_path, 'wb') as handle:
-                    handle.write(self._dkim_key)
-            elif os.path.exists(file_path):
-                os.unlink(file_path)
-            self._dkim_key_on_disk = self._dkim_key
+    dkim_key = db.Column(db.String, nullable=True, default=None)
 
     @cached_property
     def dns_mx(self):
@@ -284,27 +257,6 @@ class Domain(Base):
         if app.config['TLS_FLAVOR'] in ('letsencrypt', 'mail-letsencrypt'):
             # current ISRG Root X1 (RSA 4096, O = Internet Security Research Group, CN = ISRG Root X1) @20210902
             return f'_25._tcp.{hostname}. 86400 IN TLSA 2 1 1 0b9fa5a59eed715c26c1020c711b4f6ec42d58b0015e14337a39dad301c5afc3'
-
-    @property
-    def dkim_key(self):
-        """ return private DKIM key """
-        if self._dkim_key is None:
-            file_path = self._dkim_file()
-            if os.path.exists(file_path):
-                with open(file_path, 'rb') as handle:
-                    self._dkim_key = self._dkim_key_on_disk = handle.read()
-            else:
-                self._dkim_key = self._dkim_key_on_disk = b''
-        return self._dkim_key if self._dkim_key else None
-
-    @dkim_key.setter
-    def dkim_key(self, value):
-        """ set private DKIM key """
-        old_key = self.dkim_key
-        self._dkim_key = value if value is not None else b''
-        if self._dkim_key != old_key:
-            if not sqlalchemy.event.contains(db.session, 'after_commit', _save_dkim_keys):
-                sqlalchemy.event.listen(db.session, 'after_commit', _save_dkim_keys)
 
     @property
     def dkim_publickey(self):

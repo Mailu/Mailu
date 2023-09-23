@@ -186,7 +186,8 @@ class Domain(Base):
     max_aliases = db.Column(db.Integer, nullable=False, default=-1)
     max_quota_bytes = db.Column(db.BigInteger, nullable=False, default=0)
     signup_enabled = db.Column(db.Boolean, nullable=False, default=False)
-    dkim_key = db.Column(db.String, nullable=True, default=None)
+
+    _dkim_key = db.Column('dkim_key', db.String, nullable=True, default=None)
 
     @cached_property
     def dns_mx(self):
@@ -257,6 +258,19 @@ class Domain(Base):
         if app.config['TLS_FLAVOR'] in ('letsencrypt', 'mail-letsencrypt'):
             # current ISRG Root X1 (RSA 4096, O = Internet Security Research Group, CN = ISRG Root X1) @20210902
             return f'_25._tcp.{hostname}. 86400 IN TLSA 2 1 1 0b9fa5a59eed715c26c1020c711b4f6ec42d58b0015e14337a39dad301c5afc3'
+
+    @property
+    def dkim_key(self):
+        """ return private DKIM key """
+        if not self._dkim_key is None:
+            if isinstance(self._dkim_key, str):
+                return self._dkim_key.encode('utf-8')
+        return self._dkim_key
+
+    @dkim_key.setter
+    def dkim_key(self, value):
+        """ set private DKIM key """
+        self._dkim_key = value if value is not None else b''
 
     @property
     def dkim_publickey(self):

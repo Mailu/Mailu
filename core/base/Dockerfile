@@ -16,7 +16,7 @@ RUN set -euxo pipefail \
   ; adduser -Sg ${MAILU_UID} -G mailu -h /app -g "mailu app" -s /bin/bash mailu \
   ; apk add --no-cache bash ca-certificates curl python3 tzdata \
   ; ! [[ "$(uname -m)" == x86_64 ]] \
-    || apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc==11-r0
+    || apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc
 
 WORKDIR /app
 

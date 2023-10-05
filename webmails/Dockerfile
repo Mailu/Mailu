@@ -61,7 +61,11 @@ RUN set -euxo pipefail \
   ; cd /var/www/snappymail \
   ; curl -sLo /dev/shm/snappymail.tgz  ${SNAPPYMAIL_URL} \
   ; curl -sLo /dev/shm/snappymail.tgz.asc  ${SNAPPYMAIL_URL}.asc \
+<<<<<<< HEAD
   ; gpg --status-fd 1 --verify /dev/shm/snappymail.tgz.asc /dev/shm/snappymail.tgz \
+=======
+  ; gpg --status-fd 1 --verify /dev/shm/snappymail.tgz.asc \
+>>>>>>> ee7bb533 (Fix extracting of snappymail archive not working.)
   ; cat /dev/shm/snappymail.tgz | tar xz
 
 # SnappyMail login

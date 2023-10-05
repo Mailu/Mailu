@@ -3,7 +3,11 @@
 # base system image (intermediate)
 # Note when updating the alpine tag, first manually run the workflow .github/workflows/mirror.yml.
 # Just run the workflow with the tag that must be synchronised.
+<<<<<<< HEAD
 ARG DISTRO=ghcr.io/mailu/alpine:3.20
+=======
+ARG DISTRO=ghcr.io/mailu/alpine:3.18.4
+>>>>>>> 85cf7e6a (Upgrade to alpine 3.18.4)
 FROM $DISTRO as system
 
 ENV TZ=Etc/UTC LANG=C.UTF-8

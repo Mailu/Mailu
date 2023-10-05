@@ -60,7 +60,7 @@ RUN set -euxo pipefail \
   ; curl -sLo /dev/shm/snappymail.tgz  ${SNAPPYMAIL_URL} \
   ; curl -sLo /dev/shm/snappymail.tgz.asc  ${SNAPPYMAIL_URL}.asc \
   ; gpg --status-fd 1 --verify /dev/shm/snappymail.tgz.asc \
-  ; tar xzf /dev/shm/snappymail.tgz
+  ; cat /dev/shm/snappymail.tgz | tar xz
 
 # SnappyMail login
 COPY snappymail/login/include.php /var/www/snappymail/

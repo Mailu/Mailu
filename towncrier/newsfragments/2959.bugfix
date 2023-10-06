@@ -1,1 +1,2 @@
-Hardened malloc was not disabled for oletools when an outdated CPU is used.
+Hardened malloc was not disabled for oletools when CPU misses required flags.
+Updated hardened malloc test that AVX2 is also required now.

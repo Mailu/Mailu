@@ -64,6 +64,9 @@ def _is_compatible_with_hardened_malloc():
             # See #2764, we need vmovdqu
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 3985d1d0 (clarify)
             # See #2959, we need vpunpckldq
             if line.startswith('flags') and ' avx2 ' not in line:
 =======
@@ -79,6 +82,7 @@ def _is_compatible_with_hardened_malloc():
     return True
 
 
+<<<<<<< HEAD
 def sigterm_handler(_signo, _stack_frame):
     log.critical("Received SIGTERM, terminating.")
     sys.exit(143)
@@ -93,6 +97,11 @@ def set_env(required_secrets=[], log_filters=[]):
     if not 'LD_PRELOAD' in os.environ and _is_compatible_with_hardened_malloc():
         log.warning('Your CPU has Advanced Vector Extensions available, we recommend you enable hardened-malloc earlier in the boot process by adding LD_PRELOAD=/usr/lib/libhardened_malloc.so to your mailu.env')
         os.environ['LD_PRELOAD'] = '/usr/lib/libhardened_malloc.so'
+=======
+    if 'LD_PRELOAD' in os.environ and not _is_compatible_with_hardened_malloc():
+        log.warning('Disabling hardened-malloc on this CPU: it requires Advanced Vector Extensions.')
+        del os.environ['LD_PRELOAD']
+>>>>>>> 3985d1d0 (clarify)
 
     """ This will set all the environment variables and retains only the secrets we need """
     if 'SECRET_KEY_FILE' in os.environ:

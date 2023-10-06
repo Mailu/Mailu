@@ -63,11 +63,15 @@ def _is_compatible_with_hardened_malloc():
         for line in lines:
             # See #2764, we need vmovdqu
 <<<<<<< HEAD
+<<<<<<< HEAD
             # See #2959, we need vpunpckldq
             if line.startswith('flags') and ' avx2 ' not in line:
 =======
             if line.startswith('flags') and ' avx ' not in line and ' avx2 ' not in line:
 >>>>>>> e70db935 (Hardened malloc also requires AVX2 cpu flag)
+=======
+            if line.startswith('flags') and ' avx2 ' not in line:
+>>>>>>> 0379857a (Update core/base/libs/socrate/socrate/system.py)
                 return False
             # See #2541
             if line.startswith('Features') and ' lrcpc ' not in line:

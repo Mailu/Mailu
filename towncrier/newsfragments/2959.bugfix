@@ -1,0 +1,1 @@
+Hardened malloc was not disabled for oletools when an outdated CPU is used.

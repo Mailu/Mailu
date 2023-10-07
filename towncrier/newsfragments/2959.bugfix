@@ -1,2 +1,2 @@
-Hardened malloc was not disabled for oletools when CPU misses required flags.
-Updated hardened malloc test that AVX2 is also required now.
+Update hardened malloc as the original package is not available from alpine anymore.
+The newer version of hardened malloc requires AVX2: Disable it by default and hint in the logs when it should be enabled instead.

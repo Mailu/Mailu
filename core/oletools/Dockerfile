@@ -12,7 +12,7 @@ ARG OLEFY_SHA256=1f5aa58b78ca7917350135b4425e5ed4d580c7051aabed1952c6afd12d0345a
 RUN set -euxo pipefail \
   ; apk add --no-cache netcat-openbsd libmagic libffi \
   ; curl -sLo olefy.py $OLEFY_SCRIPT \
-  ; echo "$OLEFY_SHA256 olefy.py" |sha256sum --check \
+  ; echo "$OLEFY_SHA256  olefy.py" |sha256sum -c \
   ; chmod 755 olefy.py
 
 COPY start.py /

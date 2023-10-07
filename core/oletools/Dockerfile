@@ -7,12 +7,17 @@ ARG VERSION=local
 LABEL version=$VERSION
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ARG OLEFY_SCRIPT=https://raw.githubusercontent.com/HeinleinSupport/olefy/f8aac6cc55283886d153e89c8f27fae66b1c24e2/olefy.py
 ARG OLEFY_SHA256=1f5aa58b78ca7917350135b4425e5ed4d580c7051aabed1952c6afd12d0345a0
 =======
 ARG OLEFY_SCRIPT https://raw.githubusercontent.com/HeinleinSupport/olefy/f8aac6cc55283886d153e89c8f27fae66b1c24e2/olefy.py
 ARG OLEFY_SHA256 1f5aa58b78ca7917350135b4425e5ed4d580c7051aabed1952c6afd12d0345a0
 >>>>>>> 9e1bf76a (Maybe fix olefy)
+=======
+ARG OLEFY_SCRIPT=https://raw.githubusercontent.com/HeinleinSupport/olefy/f8aac6cc55283886d153e89c8f27fae66b1c24e2/olefy.py
+ARG OLEFY_SHA256=1f5aa58b78ca7917350135b4425e5ed4d580c7051aabed1952c6afd12d0345a0
+>>>>>>> 12e8041b (Doh)
 
 RUN set -euxo pipefail \
   ; apk add --no-cache netcat-openbsd libmagic libffi \

@@ -74,11 +74,16 @@ Make sure to read the comments in the file and instructions from the :ref:`commo
 
 If your CPU supports Advanced Vector Extensions (AVX2 on x86_64, lrcpc on ARM64), you should
 <<<<<<< HEAD
+<<<<<<< HEAD
 consider enabling hardened-malloc earlier in the boot process by adding the following to
 your mailu.env:
 =======
 consider enabling hardened-malloc by adding the following to your mailu.env:
 >>>>>>> dd58d511 (change the logic as discussed)
+=======
+consider enabling hardened-malloc earlier in the boot process by adding the following to
+your mailu.env:
+>>>>>>> 92e861d4 (There is no reason not to enable it ourselves.)
 
 .. code-block:: bash
 

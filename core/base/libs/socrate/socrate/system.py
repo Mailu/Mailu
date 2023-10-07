@@ -98,6 +98,7 @@ def set_env(required_secrets=[], log_filters=[]):
     if not 'LD_PRELOAD' in os.environ and _is_compatible_with_hardened_malloc():
         log.warning('Your CPU has Advanced Vector Extensions available, we recommend you enable hardened-malloc earlier in the boot process by adding LD_PRELOAD=/usr/lib/libhardened_malloc.so to your mailu.env')
         os.environ['LD_PRELOAD'] = '/usr/lib/libhardened_malloc.so'
+<<<<<<< HEAD
 =======
     if 'LD_PRELOAD' in os.environ and not _is_compatible_with_hardened_malloc():
         log.warning('Disabling hardened-malloc on this CPU: it requires Advanced Vector Extensions.')
@@ -107,6 +108,8 @@ def set_env(required_secrets=[], log_filters=[]):
     if not 'LD_PRELOAD' in os.environ and _is_compatible_with_hardened_malloc():
         log.warning('Your CPU has Advanced Vector Extensions available, we recommend you enable hardened-malloc by adding LD_PRELOAD=/usr/lib/libhardened_malloc.so to your mailu.env')
 >>>>>>> dd58d511 (change the logic as discussed)
+=======
+>>>>>>> 92e861d4 (There is no reason not to enable it ourselves.)
 
     """ This will set all the environment variables and retains only the secrets we need """
     if 'SECRET_KEY_FILE' in os.environ:

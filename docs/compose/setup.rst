@@ -77,7 +77,8 @@ After downloading the files, open ``mailu.env`` and review the variable settings
 Make sure to read the comments in the file and instructions from the :ref:`common_cfg` page.
 
 If your CPU supports Advanced Vector Extensions (AVX2 on x86_64, lrcpc on ARM64), you should
-consider enabling hardened-malloc by adding the following to your mailu.env:
+consider enabling hardened-malloc earlier in the boot process by adding the following to
+your mailu.env:
 
 .. code-block:: bash
 

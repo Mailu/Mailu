@@ -6,13 +6,22 @@ FROM base
 ARG VERSION=local
 LABEL version=$VERSION
 
+<<<<<<< HEAD
 ARG OLEFY_SCRIPT=https://raw.githubusercontent.com/HeinleinSupport/olefy/f8aac6cc55283886d153e89c8f27fae66b1c24e2/olefy.py
 ARG OLEFY_SHA256=1f5aa58b78ca7917350135b4425e5ed4d580c7051aabed1952c6afd12d0345a0
+=======
+ARG OLEFY_SCRIPT https://raw.githubusercontent.com/HeinleinSupport/olefy/f8aac6cc55283886d153e89c8f27fae66b1c24e2/olefy.py
+ARG OLEFY_SHA256 1f5aa58b78ca7917350135b4425e5ed4d580c7051aabed1952c6afd12d0345a0
+>>>>>>> 9e1bf76a (Maybe fix olefy)
 
 RUN set -euxo pipefail \
   ; apk add --no-cache netcat-openbsd libmagic libffi \
   ; curl -sLo olefy.py $OLEFY_SCRIPT \
+<<<<<<< HEAD
   ; echo "$OLEFY_SHA256  olefy.py" |sha256sum -c \
+=======
+  ; echo "$OLEFY_SHA256 olefy.py" |sha256sum --check \
+>>>>>>> 9e1bf76a (Maybe fix olefy)
   ; chmod 755 olefy.py
 
 COPY start.py /

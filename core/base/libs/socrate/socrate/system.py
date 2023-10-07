@@ -83,6 +83,7 @@ def _is_compatible_with_hardened_malloc():
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 def sigterm_handler(_signo, _stack_frame):
     log.critical("Received SIGTERM, terminating.")
     sys.exit(143)
@@ -102,6 +103,10 @@ def set_env(required_secrets=[], log_filters=[]):
         log.warning('Disabling hardened-malloc on this CPU: it requires Advanced Vector Extensions.')
         del os.environ['LD_PRELOAD']
 >>>>>>> 3985d1d0 (clarify)
+=======
+    if not 'LD_PRELOAD' in os.environ and _is_compatible_with_hardened_malloc():
+        log.warning('Your CPU has Advanced Vector Extensions available, we recommend you enable hardened-malloc by adding LD_PRELOAD=/usr/lib/libhardened_malloc.so to your mailu.env')
+>>>>>>> dd58d511 (change the logic as discussed)
 
     """ This will set all the environment variables and retains only the secrets we need """
     if 'SECRET_KEY_FILE' in os.environ:

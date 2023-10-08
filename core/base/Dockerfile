@@ -79,7 +79,6 @@ COPY --chown=root:root --from=build /app/snuffleupagus.so /usr/lib/php81/modules
 ENV \
   VIRTUAL_ENV=/app/venv \
   PATH="/app/venv/bin:${PATH}" \
-  LD_PRELOAD="/usr/lib/libhardened_malloc.so" \
   ADMIN_ADDRESS="admin" \
   FRONT_ADDRESS="front" \
   SMTP_ADDRESS="smtp" \

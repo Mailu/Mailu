@@ -1,0 +1,3 @@
+Update hardened malloc as the original package is not available from alpine anymore.
+The newer version of hardened malloc requires AVX2: Disable it by default at startup and hint in the logs when it should be enabled instead.
+Upgrade snappymail to v2.29.1

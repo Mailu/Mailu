@@ -54,7 +54,11 @@ COPY roundcube/config/config.inc.carddav.php /var/www/roundcube/plugins/carddav/
 
 # snappymail
 
+<<<<<<< HEAD
 ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.36.4/snappymail-2.36.4.tar.gz
+=======
+ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.29.1/snappymail-2.29.1.tar.gz
+>>>>>>> a6f57ca3 (Upgrade snappymail to v2.29.1)
 
 RUN set -euxo pipefail \
   ; mkdir  /var/www/snappymail \

@@ -1,0 +1,1 @@
+Switch from fts-xapian to fts-flatcurve. This should address the problem with indexes getting too big and will be the default in dovecot 2.4

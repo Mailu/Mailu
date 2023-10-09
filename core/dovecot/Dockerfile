@@ -7,7 +7,8 @@ ARG VERSION
 LABEL version=$VERSION
 
 RUN set -euxo pipefail \
-  ; apk add --no-cache dovecot dovecot-fts-xapian dovecot-lmtpd dovecot-pigeonhole-plugin dovecot-pop3d dovecot-submissiond rspamd-client xapian-core \
+  ; apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main 'dovecot<2.4' dovecot-fts-xapian dovecot-lmtpd dovecot-pigeonhole-plugin dovecot-pop3d dovecot-submissiond xapian-core \
+  ; apk add rspamd-client \
   ; mkdir /var/lib/dovecot
 
 COPY conf/ /conf/

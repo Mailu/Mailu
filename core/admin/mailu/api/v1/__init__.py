@@ -37,7 +37,8 @@ error_fields = api.model('Error', {
     'message': fields.String,
 })
 
-from . import domains
+from . import domain
 from . import alias
 from . import relay
 from . import user
+from . import token

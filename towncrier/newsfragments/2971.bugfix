@@ -1,9 +1,12 @@
-Switch from fts-xapian to fts-flatcurve. This should address the problem with indexes getting too big and will be the default in dovecot 2.4
+- Switch from fts-xapian to fts-flatcurve. This should address the problem with indexes getting too big and will be the default in dovecot 2.4
+- Enable full-text search of email attachments
 
-You can dispose of old indexes using a command such as:
+If you would like more than english to be supported, please ensure you update your FULL_TEXT_SEARCH configuration variable.
+
+You may also want to dispose of old indexes using a command such as:
 
 find /mailu/mail -type d -name xapian-indexes -prune -exec rm -r {} \+
 
-And re-index using:
+And proactively force a reindexing using:
 
 docker compose exec imap doveadm index -A '*'

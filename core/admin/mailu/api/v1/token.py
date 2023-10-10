@@ -15,7 +15,7 @@ token_user_fields = api.model('TokenGetResponse', {
     'id': fields.String(description='The record id of the token (unique identifier)', example='1'),
     'email': fields.String(description='The email address of the user', example='John.Doe@example.com', attribute='user_email'),
     'comment': fields.String(description='A description for the token. This description is shown on the Authentication tokens page', example='my comment'),
-    'AuthorizedIP': fields.String(description='Comma separated list of white listed IP addresses or networks that may use this token', example='88.77.66.55', attribute='ip'),
+    'AuthorizedIP': fields.String(description='Comma separated list of white listed IP addresses or networks that may use this token.', example="['203.0.113.0/24']", attribute='ip'),
     'Created': fields.String(description='The date when the token was created', example='John.Doe@example.com', attribute='created_at'),
     'Last edit': fields.String(description='The date when the token was last modifified', example='John.Doe@example.com', attribute='updated_at')
 })
@@ -23,12 +23,12 @@ token_user_fields = api.model('TokenGetResponse', {
 token_user_fields_post = api.model('TokenPost', {
     'email': fields.String(description='The email address of the user', example='John.Doe@example.com', attribute='user_email'),
     'comment': fields.String(description='A description for the token. This description is shown on the Authentication tokens page', example='my comment'),
-    'AuthorizedIP': fields.String(description='Comma separated list of white listed IP addresses or networks that may use this token', example='88.77.66.55', attribute='ip')
+    'AuthorizedIP': fields.String(description='Comma separated list of white listed IP addresses or networks that may use this token.', example="['203.0.113.0/24']", attribute='ip'),
 })
 
 token_user_fields_post2 = api.model('TokenPost2', {
     'comment': fields.String(description='A description for the token. This description is shown on the Authentication tokens page', example='my comment'),
-    'AuthorizedIP': fields.String(description='Comma separated list of white listed IP addresses or networks that may use this token', example='88.77.66.55', attribute='ip')
+    'AuthorizedIP': fields.String(description='Comma separated list of white listed IP addresses or networks that may use this token.', example="['203.0.113.0/24']", attribute='ip'),
 })
 
 token_user_post_response = api.model('TokenPostResponse', {
@@ -36,7 +36,7 @@ token_user_post_response = api.model('TokenPostResponse', {
     'token': fields.String(description='The created authentication token for the user.', example='2caf6607de5129e4748a2c061aee56f2', attribute='password'),
     'email': fields.String(description='The email address of the user', example='John.Doe@example.com', attribute='user_email'),
     'comment': fields.String(description='A description for the token. This description is shown on the Authentication tokens page', example='my comment'),
-    'AuthorizedIP': fields.String(description='Comma separated list of white listed IP addresses or networks that may use this token', example='88.77.66.55', attribute='ip'),
+    'AuthorizedIP': fields.String(description='Comma separated list of white listed IP addresses or networks that may use this token.', example="['203.0.113.0/24']", attribute='ip'),
     'Created': fields.String(description='The date when the token was created', example='John.Doe@example.com', attribute='created_at')
 })
 
@@ -78,7 +78,6 @@ class Tokens(Resource):
         models.db.session.add(token_new)
         #apply the changes
         db.session.commit()
-        flask.current_app.logger.info(f'token_new.id == {token_new.id}.')
         response_dict  = {
             'id' : token_new.id,
             'token' : raw_password,
@@ -132,7 +131,6 @@ class Token(Resource):
         models.db.session.add(token_new)
         #apply the changes
         db.session.commit()
-        flask.current_app.logger.info(f'token_new.id == {token_new.id}.')
         response_dict  = {
             'id' : token_new.id,
             'token' : raw_password,

@@ -6,4 +6,4 @@ find /mailu/mail -type d -name xapian-indexes -prune -exec rm -r {} \+
 
 And re-index using:
 
-docker compose exec imap doveadm fts rescan -A
+docker compose exec imap doveadm index -A '*'

@@ -7,8 +7,8 @@ ARG VERSION
 LABEL version=$VERSION
 
 RUN set -euxo pipefail \
-  ; apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main 'dovecot<2.4' dovecot-lmtpd dovecot-pigeonhole-plugin dovecot-pop3d dovecot-submissiond \
-  ; apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing dovecot-fts-flatcurve \
+  ; apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main 'dovecot<2.4' dovecot-lmtpd dovecot-pigeonhole-plugin dovecot-pop3d dovecot-submissiond poppler-utils \
+  ; apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing dovecot-fts-flatcurve catdoc \
   ; apk add --no-cache rspamd-client \
   ; mkdir /var/lib/dovecot
 

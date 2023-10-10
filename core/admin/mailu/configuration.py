@@ -55,7 +55,6 @@ DEFAULT_CONFIG = {
     'WELCOME_SUBJECT': 'Dummy welcome topic',
     'WELCOME_BODY': 'Dummy welcome body',
     'DKIM_SELECTOR': 'dkim',
-    'DKIM_PATH': '/dkim/{domain}.{selector}.key',
     'DEFAULT_QUOTA': 1000000000,
     'MESSAGE_RATELIMIT': '200/day',
     'MESSAGE_RATELIMIT_EXEMPTION': '',

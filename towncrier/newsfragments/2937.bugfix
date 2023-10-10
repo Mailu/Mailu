@@ -1,0 +1,2 @@
+forbidden_file_extension.map could not be overridden. This file can be overriden to tweak with file extensions are allowed.
+The instructions on https://mailu.io/master/antispam.html#can-i-change-the-list-of-authorized-file-attachments work again.

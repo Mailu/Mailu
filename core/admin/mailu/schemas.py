@@ -1176,7 +1176,7 @@ class UserSchema(BaseSchema):
         model = models.User
         load_instance = True
         include_relationships = True
-        exclude = ['_email', 'domain', 'localpart', 'domain_name']
+        exclude = ['_email', 'domain', 'localpart', 'domain_name', 'quota_bytes_used']
 
         primary_keys = ['email']
         exclude_by_value = {

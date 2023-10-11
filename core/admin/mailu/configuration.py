@@ -75,6 +75,8 @@ DEFAULT_CONFIG = {
     'API': False,
     'WEB_API': '/api',
     'API_TOKEN': None,
+    'FULL_TEXT_SEARCH': 'en',
+    'FULL_TEXT_SEARCH_ATTACHMENTS': False,
     'LOG_LEVEL': 'INFO',
     'SESSION_KEY_BITS': 128,
     'SESSION_TIMEOUT': 3600,

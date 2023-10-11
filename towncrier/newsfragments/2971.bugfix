@@ -1,5 +1,5 @@
 - Switch from fts-xapian to fts-flatcurve. This should address the problem with indexes getting too big and will be the default in dovecot 2.4
-- Enable full-text search of email attachments
+- Enable full-text search of email attachments if configured (via Tika: you'll need to re-run setup)
 
 If you would like more than english to be supported, please ensure you update your FULL_TEXT_SEARCH configuration variable.
 

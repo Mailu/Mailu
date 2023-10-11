@@ -81,6 +81,7 @@ ENV \
   PATH="/app/venv/bin:${PATH}" \
   ADMIN_ADDRESS="admin" \
   FRONT_ADDRESS="front" \
+  FTS_ATTACHMENTS_ADDRESS="tika" \
   SMTP_ADDRESS="smtp" \
   IMAP_ADDRESS="imap" \
   OLETOOLS_ADDRESS="oletools" \

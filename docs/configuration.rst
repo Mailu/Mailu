@@ -131,11 +131,14 @@ later classify incoming mail based on the custom part.
 The ``DMARC_RUA`` and ``DMARC_RUF`` are DMARC protocol specific values. They hold
 the localpart for DMARC rua and ruf email addresses.
 
-Full-text search is enabled for IMAP is enabled by default. This feature can be disabled
-(e.g. for performance reasons) by setting the optional variable ``FULL_TEXT_SEARCH`` to ``off``.
+The ``FULL_TEXT_SEARCH`` variable (default: 'en') is a comma separated list of
+language codes as defined on `fts_languages`_. This feature can be disabled
+(e.g. for performance reasons) by setting the variable to ``off``.
 
 You can set a global ``DEFAULT_QUOTA`` to be used for mailboxes when the domain has
 no specific quota configured.
+
+.. _`fts_languages`: https://doc.dovecot.org/settings/plugin/fts-plugin/#fts-languages
 
 .. _web_settings:
 

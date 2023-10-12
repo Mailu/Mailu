@@ -64,6 +64,15 @@ the security implications caused by such an increase of attack surface.<p>
   <i>Oletools scans documents in email attachements for malicious macros. It has a much lower memory footprint than a full-fledged anti-virus.</i>
 </div>
 
+<div class="form-check form-check-inline">
+  <label class="form-check-label">
+    <input class="form-check-input" type="checkbox" name="tika_enabled" value="true">
+    Enable Tika
+  </label>
+
+  <i>Tika enables the functionality for searching through attachments. Tika scans documents in email attachments, process (OCR, keyword extraction) and then index them in a way they can be efficiently searched. This requires significant ressources (RAM, CPU and storage).</i>
+</div>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <script type="text/javascript" src="{{ url_for('static', filename='render.js') }}"></script>

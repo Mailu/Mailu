@@ -211,6 +211,12 @@ services:
       - clamav
     volumes:
       - "{{ root }}/filter/clamav:/var/lib/clamav"
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 `cat /var/run/clamd.pid` && kill -0 `cat /var/run/freshclam.pid`"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
   {% endif %}
 
   {% if webdav_enabled %}

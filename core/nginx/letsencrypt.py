@@ -47,7 +47,7 @@ time.sleep(5)
 
 class MyRequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
-        if self.path == '/testing':
+        if self.path == '/.well-known/acme-challenge/testing':
             self.send_response(204)
         else:
             self.send_response(404)
@@ -55,7 +55,7 @@ class MyRequestHandler(SimpleHTTPRequestHandler):
         self.end_headers()
 
 def serve_one_request():
-    with HTTPServer(("0.0.0.0", 8008), MyRequestHandler) as server:
+    with HTTPServer(("127.0.0.1", 8008), MyRequestHandler) as server:
         server.handle_request()
 
 # Run certbot every day

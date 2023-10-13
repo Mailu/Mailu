@@ -35,7 +35,7 @@ Connecting to the server
  * Webmail : https://test.mailu.io/webmail/
  * Admin UI : https://test.mailu.io/admin/
  * Admin login : ``admin@test.mailu.io``
- * Admin password : ``letmein``
+ * Admin password : ``Mailu+Demo@test.mailu.io`` (remove + and @test.mailu.io to get the correct password).
  * RESTful API: https://test.mailu.io/api
  * API token: ``Bearer APITokenForMailu``
 

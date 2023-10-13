@@ -19,6 +19,7 @@ RUN set -euxo pipefail \
     aspell-uk aspell-ru aspell-fr aspell-de aspell-en \
   ; rm /etc/nginx/http.d/default.conf \
   ; rm /etc/php81/php-fpm.d/www.conf \
+  ; mkdir -m 700 /root/.gnupg/ \
   ; gpg --import /tmp/snappymail.asc \
   ; gpg --import /tmp/roundcube.asc \
   ; echo extension=snuffleupagus > /etc/php81/conf.d/snuffleupagus.ini \
@@ -33,7 +34,7 @@ RUN set -euxo pipefail \
   ; cd /var/www \
   ; curl -sLo /dev/shm/roundcube.tgz ${ROUNDCUBE_URL} \
   ; curl -sLo /dev/shm/roundcube.tgz.asc ${ROUNDCUBE_URL}.asc \
-  ; gpg --status-fd 1 --verify /dev/shm/roundcube.tgz.asc \
+  ; gpg --status-fd 1 --verify /dev/shm/roundcube.tgz.asc /dev/shm/roundcube.tgz \
   ; tar xzf /dev/shm/roundcube.tgz \
   ; curl -sL ${CARDDAV_URL} | tar xz \
   ; mv roundcubemail-* roundcube \
@@ -52,15 +53,15 @@ COPY roundcube/config/config.inc.carddav.php /var/www/roundcube/plugins/carddav/
 
 # snappymail
 
-ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.28.4/snappymail-2.28.4.tar.gz
+ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.29.1/snappymail-2.29.1.tar.gz
 
 RUN set -euxo pipefail \
   ; mkdir  /var/www/snappymail \
   ; cd /var/www/snappymail \
   ; curl -sLo /dev/shm/snappymail.tgz  ${SNAPPYMAIL_URL} \
   ; curl -sLo /dev/shm/snappymail.tgz.asc  ${SNAPPYMAIL_URL}.asc \
-  ; gpg --status-fd 1 --verify /dev/shm/snappymail.tgz.asc \
-  ; tar xzf /dev/shm/snappymail.tgz
+  ; gpg --status-fd 1 --verify /dev/shm/snappymail.tgz.asc /dev/shm/snappymail.tgz \
+  ; cat /dev/shm/snappymail.tgz | tar xz
 
 # SnappyMail login
 COPY snappymail/login/include.php /var/www/snappymail/

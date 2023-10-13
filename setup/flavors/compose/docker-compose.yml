@@ -98,8 +98,16 @@ services:
     volumes:
       - "{{ root }}/mail:/mail"
       - "{{ root }}/overrides/dovecot:/overrides:ro"
+    networks:
+      - default
+    {% if tika_enabled %}
+      - fts_attachments
+    {% endif %}
     depends_on:
       - front
+    {% if tika_enabled %}
+      - fts_attachments
+    {% endif %}
     {% if resolver_enabled %}
       - resolver
     dns:
@@ -132,6 +140,21 @@ services:
     restart: always
     networks:
       - noinet
+    depends_on:
+    {% if resolver_enabled %}
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
+{% endif %}
+
+{% if tika_enabled %}
+  fts_attachments:
+    image: apache/tika:2.9.0.0-full
+    hostname: tika
+    restart: always
+    networks:
+      - fts_attachments
     depends_on:
     {% if resolver_enabled %}
       - resolver
@@ -254,6 +277,11 @@ networks:
 {% endif %}
 {% if oletools_enabled %}
   noinet:
+    driver: bridge
+    internal: true
+{% endif %}
+{% if tika_enabled %}
+  fts_attachments:
     driver: bridge
     internal: true
 {% endif %}

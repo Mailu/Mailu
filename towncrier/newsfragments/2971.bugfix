@@ -9,4 +9,5 @@ find /mailu/mail -type d -name xapian-indexes -prune -exec rm -r {} \+
 
 And proactively force a reindexing using:
 
-docker compose exec imap doveadm index -A '*'
+docker compose exec imap doveadm fts rescan -A
+docker compose exec imap doveadm user '*'|while read u; do docker compose exec imap doveadm index -u $u '*'; done

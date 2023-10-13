@@ -154,8 +154,7 @@ services:
 
 {% if tika_enabled %}
   fts_attachments:
-    image: apache/tika:2.9.0.0-full
-    # ARM users may want ghcr.io/paperless-ngx/tika:2.9.0-full instead
+    image: ghcr.io/paperless-ngx/tika:2.9.0-full
     hostname: tika
     logging:
       driver: journald

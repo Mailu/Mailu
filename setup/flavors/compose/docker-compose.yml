@@ -139,7 +139,7 @@ services:
     hostname: oletools
     restart: always
     networks:
-      - noinet
+      - oletools
     depends_on:
     {% if resolver_enabled %}
       - resolver
@@ -172,10 +172,13 @@ services:
       driver: journald
       options:
         tag: mailu-antispam
-{% if oletools_enabled %}
     networks:
       - default
-      - noinet
+{% if oletools_enabled %}
+      - oletools
+{% endif %}
+{% if antivirus_enabled %}
+      - clamav
 {% endif %}
     volumes:
       - "{{ root }}/filter:/var/lib/rspamd"
@@ -198,17 +201,16 @@ services:
   # Optional services
   {% if antivirus_enabled %}
   antivirus:
-    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}clamav:${MAILU_VERSION:-{{ version }}}
+    image: clamav/clamav-debian:1.2.0-6
     restart: always
-    env_file: {{ env }}
+    logging:
+      driver: journald
+      options:
+        tag: mailu-clamav
+    networks:
+      - clamav
     volumes:
-      - "{{ root }}/filter:/data"
-    {% if resolver_enabled %}
-    depends_on:
-      - resolver
-    dns:
-      - {{ dns }}
-    {% endif %}
+      - "{{ root }}/filter/clamav:/var/lib/clamav"
   {% endif %}
 
   {% if webdav_enabled %}
@@ -275,8 +277,12 @@ networks:
   webmail:
     driver: bridge
 {% endif %}
+{% if antivirus_enabled %}
+  clamav:
+    driver: bridge
+{% endif %}
 {% if oletools_enabled %}
-  noinet:
+  oletools:
     driver: bridge
     internal: true
 {% endif %}

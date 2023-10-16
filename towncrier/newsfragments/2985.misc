@@ -1,0 +1,2 @@
+- Upgrade to roundcube 1.6.4 (fix XSS)
+- Implement a new check to make it clear that unsupported setups are unsupported

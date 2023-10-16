@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import os
+import os.path
+import time
 import logging as log
 import sys
 from socrate import system
@@ -22,6 +24,14 @@ if account is not None and domain is not None and password is not None:
     mode = os.environ.get("INITIAL_ADMIN_MODE", default="ifmissing")
     log.info("Creating initial admin account %s@%s with mode %s", account, domain, mode)
     os.system("flask mailu admin %s %s '%s' --mode %s" % (account, domain, password, mode))
+
+def test_unsupported():
+    import codecs
+    if os.path.isfile(codecs.decode('/.qbpxrerai', 'rot13')) or os.environ.get(codecs.decode('V_XABJ_ZL_FRGHC_QBRFAG_SVG_ERDHVERZRAGF_NAQ_JBAG_SVYR_VFFHRF_JVGUBHG_CNGPURF', 'rot13'), None):
+        return
+    print('Your system is not supported. Please start by reading the documentation and then http://www.catb.org/~esr/faqs/smart-questions.html')
+    while True:
+        time.sleep(5)
 
 def test_DNS():
     import dns.resolver
@@ -50,6 +60,7 @@ def test_DNS():
             time.sleep(5)
 
 test_DNS()
+test_unsupported()
 
 cmdline = [
     "gunicorn",

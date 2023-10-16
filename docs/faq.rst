@@ -876,9 +876,6 @@ We have seen a fair amount of support requests related to the following:
 - `coredns has a bug`_ that we have now worked around
 
 .. _`coredns has a bug`: https://github.com/coredns/coredns/issues/5189
-
-<<<<<<< HEAD
-=======
 .. _`netplan does not play nicely with docker`: https://github.com/Mailu/Mailu/issues/2868#issuecomment-1606014184
 
 How can I use Mailu without docker?
@@ -888,7 +885,6 @@ Running Mailu without docker is not supported. If you want to do so, you need to
 
 We welcome patches but do not have the bandwidth to test and fix issues related to your unsupported setup. If you do want to help, we welcome new maintainers: please get in touch.
 
->>>>>>> 2a570d0f (Roundcube 1.6.4)
 How can I add more languages to roundcube's spellchecker?
 `````````````````````````````````````````````````````````
 

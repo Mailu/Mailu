@@ -880,6 +880,13 @@ We have seen a fair amount of support requests related to the following:
 
 .. _`netplan does not play nicely with docker`: https://github.com/Mailu/Mailu/issues/2868#issuecomment-1606014184
 
+How can I use Mailu without docker?
+```````````````````````````````````
+
+Running Mailu without docker is not supported. If you want to do so, you need to export an environment variable called ``I_KNOW_MY_SETUP_DOESNT_FIT_REQUIREMENTS_AND_WONT_FILE_ISSUES_WITHOUT_PATCHES`` to the ``admin`` container.
+
+We welcome patches but do not have the bandwidth to test and fix issues related to your unsupported setup. If you do want to help, we welcome new maintainers: please get in touch.
+
 How can I add more languages to roundcube's spellchecker?
 `````````````````````````````````````````````````````````
 

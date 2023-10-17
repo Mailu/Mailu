@@ -137,6 +137,10 @@ services:
   oletools:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-{{ version }}}
     hostname: oletools
+    logging:
+      driver: journald
+      options:
+        tag: mailu-oletools
     restart: always
     networks:
       - noinet
@@ -150,8 +154,12 @@ services:
 
 {% if tika_enabled %}
   fts_attachments:
-    image: apache/tika:2.9.0.0-full
+    image: ghcr.io/paperless-ngx/tika:2.9.0-full
     hostname: tika
+    logging:
+      driver: journald
+      options:
+        tag: mailu-tika
     restart: always
     networks:
       - fts_attachments
@@ -161,6 +169,12 @@ services:
     dns:
       - {{ dns }}
     {% endif %}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -nv -t1 -O /dev/null http://127.0.0.1:9998/tika || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 {% endif %}
 
   antispam:

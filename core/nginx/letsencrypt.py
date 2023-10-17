@@ -61,7 +61,7 @@ def serve_one_request():
 # Run certbot every day
 while True:
     while True:
-        hostname = os.environ['HOSTNAMES'].split(' ')[0]
+        hostname = os.environ['HOSTNAMES'].split(',')[0]
         target = f'http://{hostname}/.well-known/acme-challenge/testing'
         thread = Thread(target=serve_one_request)
         thread.start()

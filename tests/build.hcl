@@ -45,7 +45,6 @@ group "default" {
 
     "webmail",
 
-    "antivirus",
     "fetchmail",
     "resolver",
     "traefik-certdumper",
@@ -201,15 +200,6 @@ target "webmail" {
 # -----------------------------------------------------------------------------------------
 # Optional images
 # -----------------------------------------------------------------------------------------
-target "antivirus" {
-  inherits = ["defaults"]
-  context = "optional/clamav/"
-  contexts = {
-    base = "target:base"
-  }
-  tags = tag("clamav")
-}
-
 target "fetchmail" {
   inherits = ["defaults"]
   context = "optional/fetchmail/"

@@ -474,7 +474,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ["setup", "docs", "fetchmail", "webmail", "admin", "traefik-certdumper", "radicale", "clamav", "rspamd", "oletools", "postfix", "dovecot", "unbound", "nginx"]
+        target: ["setup", "docs", "fetchmail", "webmail", "admin", "traefik-certdumper", "radicale", "rspamd", "oletools", "postfix", "dovecot", "unbound", "nginx"]
     steps:
       - uses: actions/checkout@v3
       - name: Retrieve global variables

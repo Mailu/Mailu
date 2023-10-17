@@ -67,7 +67,7 @@ while True:
         thread.start()
         r = requests.get(target)
         if r.status_code != 204:
-            log.error(f"Can't reach {target}!, please ensure it's fixed or change the TLS_FLAVOR.")
+            log.critical(f"Can't reach {target}!, please ensure it's fixed or change the TLS_FLAVOR.")
             time.sleep(5)
         else:
             break

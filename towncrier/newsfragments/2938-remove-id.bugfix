@@ -1,0 +1,1 @@
+No longer advertize IMAP ID capability before authentication. This fixes issues with clients which send ID commands before authentication. One notable client with this issue is offlineimap.

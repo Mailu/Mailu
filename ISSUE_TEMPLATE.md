@@ -13,18 +13,13 @@ Before you open your issue
 
 Please put your text outside of the comment blocks to be visible. You can use the button "Preview" above to check.
 
+If you do not follow the issue template suggested below your issue may be summarily closed.
+
 -->
 
 ## Environment & Version
 
-### Environment
-
-- [ ] docker compose
-- [ ] kubernetes
-- [ ] docker swarm
-
-### Version
-
+- `docker compose version`
 - Version: `master`
 
 <!--
@@ -34,6 +29,9 @@ $> docker ps -a | grep mailu
 140b09d4b09c    mailu/roundcube:1.7    "docker-php-entrypoi…"    2 weeks ago    Up 2 days (healthy)    80/tcp
 $> grep MAILU_VERSION docker-compose.yml mailu.env
 -->
+
+If you are not using docker compose do not file any new issue here.
+Kubernetes related issues belong to https://github.com/Mailu/helm-charts/issues
 
 ## Description
 <!--

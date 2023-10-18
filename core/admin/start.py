@@ -29,7 +29,7 @@ def test_unsupported():
     import codecs
     if os.path.isfile(codecs.decode('/.qbpxrerai', 'rot13')) or os.environ.get(codecs.decode('V_XABJ_ZL_FRGHC_QBRFAG_SVG_ERDHVERZRAGF_NAQ_JBAG_SVYR_VFFHRF_JVGUBHG_CNGPURF', 'rot13'), None):
         return
-    print('Your system is not supported. Please start by reading the documentation and then http://www.catb.org/~esr/faqs/smart-questions.html')
+    log.critical('Your system is not supported. Please start by reading the documentation and then http://www.catb.org/~esr/faqs/smart-questions.html')
     while True:
         time.sleep(5)
 

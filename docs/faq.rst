@@ -193,7 +193,7 @@ This means it can be scaled horizontally. For more information, refer to :ref:`k
 *Issue reference:* `165`_, `520`_.
 
 How to achieve HA / fail-over?
-`````````````````````````````
+``````````````````````````````
 
 The mailboxes and databases for Mailu are kept on the host filesystem under ``$ROOT/``.
 For making the **storage** highly available, all sorts of techniques can be used:
@@ -474,7 +474,7 @@ Re-starting the smtp container will be required for changes to take effect.
 .. _`2213`: https://github.com/Mailu/Mailu/issues/2213
 
 My emails are getting deferred, what can I do?
-`````````````````````````````````````````````
+``````````````````````````````````````````````
 
 Emails are asynchronous and it's not abnormal for them to be defered sometimes. That being said, Mailu enforces secure connections where possible using DANE and MTA-STS, both of which have the potential to delay indefinitely delivery if something is misconfigured.
 

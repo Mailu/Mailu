@@ -33,7 +33,7 @@ Rspamd rejects non-compliant email messages and email messages that contain viru
 
    * In the administration web interface, under settings under Antispam 'Enable spam filter' must be ticked. If this option is disabled, then all email messages will automatically go to the inbox folder. Except for email messages with a score of 15 or higher, as these email messages are rejected by Rspamd.
 
-   * In the administration web interface, under settings under Antispam, the user defined spam filter tolerance must be configured. The default value is 80%. The lower the spam filter tolerance, the more false positives (ham classified as spam). The user can change this setting to finetune when an email message is classified as spam.
+   * In the administration web interface, under settings under Antispam, the user defined spam filter tolerance must be configured. The default value is 80%. The lower the spam filter tolerance, the more false positives (ham classified as spam). The user can change this setting to fine-tune when an email message is classified as spam.
 
    * Dovecot extracts the X-Spam-Level email header from the email message and converts the spam score (0 - 15) to a 0 - 100 percent scale. This spam score is compared with the user defined spam filter tolerance. If the spam score is lower than the user defined spam filter tolerance, then the email message is accepted. In logic:
 
@@ -110,7 +110,7 @@ The following steps have to be taken to configure an additional symbol (rule) th
 
    * no action: allow message. The email message will be allowed without a spam score being added in the mail header. This can be used for creating a whitelist filter.
 
-   * soft reject: temporarily delay message (this is used, for instance, to greylist or ratelimit messages)
+   * soft reject: temporarily delay message (this is used, for instance, to greylist or rate-limit messages)
 
    To move an email message to the Junk (Spam) folder, a score of 15 can be used in combination with the action "add header".
    The above example configuration will reject all emails send from domains that are listed in '/etc/rspamd/override.d/blacklist.inc'.
@@ -158,7 +158,7 @@ For more information on using the multimap filter see the official `multimap doc
 Can I change the list of authorized file attachments?
 -----------------------------------------------------
 
-Mailu rejects emails with file attachements it deems to be "executable" or otherwise dangerous. If you would like to tweak the block list, you can do so using the following commands:
+Mailu rejects emails with file attachments it deems to be "executable" or otherwise dangerous. If you would like to tweak the block list, you can do so using the following commands:
 
    .. code-block:: bash
 

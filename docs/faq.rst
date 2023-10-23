@@ -193,7 +193,7 @@ This means it can be scaled horizontally. For more information, refer to :ref:`k
 *Issue reference:* `165`_, `520`_.
 
 How to achieve HA / fail-over?
-``````````````````````````````
+```````````````````````````````
 
 The mailboxes and databases for Mailu are kept on the host filesystem under ``$ROOT/``.
 For making the **storage** highly available, all sorts of techniques can be used:

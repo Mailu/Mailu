@@ -192,8 +192,8 @@ This means it can be scaled horizontally. For more information, refer to :ref:`k
 
 *Issue reference:* `165`_, `520`_.
 
-How to achieve HA / failover?
-`````````````````````````````
+How to achieve HA / fail-over?
+``````````````````````````````
 
 The mailboxes and databases for Mailu are kept on the host filesystem under ``$ROOT/``.
 For making the **storage** highly available, all sorts of techniques can be used:
@@ -287,7 +287,7 @@ I want to integrate Nextcloud 15 (and newer) with Mailu
 
 
 If a domain name (e.g. example.com) is specified, then this makes sure that only users from this domain will be allowed to login.
-After successfull login the domain part will be stripped and the rest used as username in Nextcloud. e.g. 'username@example.com' will be 'username' in Nextcloud. Disable this behaviour by changing true (the fifth parameter) to false.
+After successful login the domain part will be stripped and the rest used as username in Nextcloud. e.g. 'username@example.com' will be 'username' in Nextcloud. Disable this behaviour by changing true (the fifth parameter) to false.
 
 *Issue reference:* `575`_.
 
@@ -473,8 +473,8 @@ Re-starting the smtp container will be required for changes to take effect.
 
 .. _`2213`: https://github.com/Mailu/Mailu/issues/2213
 
-My emails are getting defered, what can I do?
-`````````````````````````````````````````````
+My emails are getting deferred, what can I do?
+``````````````````````````````````````````````
 
 Emails are asynchronous and it's not abnormal for them to be defered sometimes. That being said, Mailu enforces secure connections where possible using DANE and MTA-STS, both of which have the potential to delay indefinitely delivery if something is misconfigured.
 
@@ -731,8 +731,8 @@ Restart the Fail2Ban service.
 Users can't change their password from webmail
 ``````````````````````````````````````````````
 
-All users have the abilty to login to the admin interface. Non-admin users
-have only restricted funtionality such as changing their password and the
+All users have the ability to login to the admin interface. Non-admin users
+have only restricted functionality such as changing their password and the
 spam filter weight settings.
 
 *Issue reference:* `503`_.

@@ -49,8 +49,8 @@ accounts for a specific IP subnet as defined in
 
 The ``AUTH_RATELIMIT_USER`` (default: 50/day) holds a security setting for fighting
 attackers that attempt to guess a user's password (typically using a password
-bruteforce attack). The value defines the limit of distinct authentication attempts
-allowed for any given account within a specific timeframe. Multiple attempts for the
+brute-force attack). The value defines the limit of distinct authentication attempts
+allowed for any given account within a specific time-frame. Multiple attempts for the
 same account with the same password only counts for one.
 
 The ``AUTH_RATELIMIT_EXEMPTION_LENGTH`` (default: 86400) is the number of seconds
@@ -102,7 +102,7 @@ by setting ``INBOUND_TLS_ENFORCE`` to ``True``. Please note that this is forbidd
 internet facing hosts according to e.g. `RFC 3207`_ , because this prevents MTAs without STARTTLS
 support or e.g. mismatching TLS versions to deliver emails to Mailu.
 
-The ``SCAN_MACROS`` (default: True) setting controls whether Mailu will endavour
+The ``SCAN_MACROS`` (default: True) setting controls whether Mailu will endeavor
 to reject emails containing documents with malicious macros. Under the hood, it uses
 `mraptor from oletools`_ to determine whether a macro is malicious or not.
 
@@ -168,11 +168,11 @@ in the admin interface, while ``SITENAME`` is a customization option for
 every Web interface.
 
 - ``LOGO_BACKGROUND`` sets a custom background colour for the brand logo
-  in the topleft of the main admin interface.
+  in the top-left of the main admin interface.
   For a list of colour codes refer to this page of `w3schools`_.
 
 - ``LOGO_URL`` sets a URL for a custom logo. This logo replaces the Mailu
-  logo in the topleft of the main admin interface.
+  logo in the top-left of the main admin interface.
 
 .. _`w3schools`: https://www.w3schools.com/cssref/css_colors.asp
 

@@ -93,7 +93,7 @@ Configuration files should be compiled at runtime by the container `start.py`
 script and all conditional syntax should be handled using Jinja logic.
 
 The `socrate` Python package should include relevant functions for container
-lifecycle management.
+life-cycle management.
 
 Anything that is not static, i.e. able to change at runtime, either due to
 configuration in the admin UI or user behavior, should take advantage of the

@@ -451,7 +451,7 @@ down and up again. A container restart is not sufficient.
 SMTP Banner from overrides/postfix.cf is ignored
 ````````````````````````````````````````````````
 
-Any mail related connection is proxied by nginx. Therefore the SMTP Banner is also set by nginx. Overwriting in overrides/postfix.cf does not apply.
+Any mail related connection is proxied by the front container. Therefore the SMTP Banner is also set by front container. Overwriting in overrides/postfix.cf does not apply.
 
 *Issue reference:* `1368`_.
 
@@ -922,3 +922,64 @@ I see a lot of "Unable to lookup the TLSA record for XXX. Is the DNSSEC zone oka
 There may be multiple causes for it but if you are running docker 24.0.0, odds are you are `experiencing this docker bug`_ and the workaround is to switch to a different version of docker.
 
 .. _`experiencing this docker bug`: https://github.com/Mailu/Mailu/issues/2827
+
+How can I view and export the logs of a Mailu container?
+````````````````````````````````````````````````````````
+
+In some situations, a separate log is required. For example a separate mail log (from postfix) could be required due to legal reasons.
+
+All Mailu containers log the output to journald. The logs are written to journald with the tag:
+
+| mailu-<service name>
+| where <service-name> is the name of the service in the docker-compose.yml file.
+| For example, the service running postfix is called smtp. To view the postfix logs use:
+
+.. code-block:: bash
+
+  journalctl -t mailu-smtp
+
+Note: ``SHIFT+G`` can be used to jump to the end of the log file. ``G`` can be used to jump back to the top of the log file.
+
+To export the log files from journald to the file system, the logs could be imported into a syslog program like ``rsyslog``.
+Via ``rsyslog`` the container specific logs could be written to a separate file using a filter.
+
+Below are the steps for writing the postfix (mail) logs to a log file on the file system.
+
+1. Install the ``rsyslog`` package. Note: on most distributions this program is already installed.
+2. Edit ``/etc/systemd/journald.conf``.
+3. Enable ``ForwardToSyslog=yes``. Note: on most distributions this is already enabled by default. This forwards journald to syslog.
+4. ``sudo touch /var/log/postfix.log``. This step creates the mail log file.
+5. ``sudo chown syslog:syslog /var/log/postfix.log``. This provides rsyslog the permissions for accessing this file.
+6. Create a new config file in ``/etc/rsyslog.d/export-postfix.conf``
+7. Add ``:programname, contains, "mailu-smtp" /var/log/postfix.log``. This instructs rsyslog to write the logs for mailu-smtp to a log file on file system.
+8. ``sudo systemctl restart systemd-journald.service``
+9. ``sudo systemctl restart rsyslog``
+10. All messages from the smtp/postfix container are now logged to ``/var/log/postfix.log``.
+11. Rsyslog does not perform log rotation. The program (package) ``log rotate`` can be used for this task. Install the ``logrotate`` package.
+12. Modify the existing configuration file for rsyslog: ``sudo nano /etc/logrotate.d/rsyslog``
+13. Add at the top add: ``/var/log/postfix.log``. Of course you can also use your own configuration. This is just an example. A complete example for configuring log rotate is:
+
+.. code-block:: bash
+
+  /var/log/postfix.log
+  {
+       rotate 4
+       weekly
+       missingok
+       notifempty
+       compress
+       delaycompress
+       sharedscripts
+       postrotate
+           /usr/lib/rsyslog/rsyslog-rotate
+       endscript
+  }
+
+.. code-block:: bash
+
+  #!/bin/sh
+  #/usr/lib/rsyslog/rsyslog-rotate
+
+  if [ -d /run/systemd/system ]; then
+      systemctl kill -s HUP rsyslog.service
+  fi

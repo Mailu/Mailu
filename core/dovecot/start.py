@@ -3,13 +3,11 @@
 import os
 import glob
 import multiprocessing
-import logging as log
-import sys
 
 from podop import run_server
 from socrate import system, conf
 
-system.set_env(log_filters=r'Error\: SSL context initialization failed, disabling SSL\: Can\'t load SSL certificate \(ssl_cert setting\)\: The certificate is empty$')
+system.set_env(log_filters=[r'Error\: SSL context initialization failed, disabling SSL\: Can\'t load SSL certificate \(ssl_cert setting\)\: The certificate is empty$'])
 
 def start_podop():
     system.drop_privs_to('mail')
@@ -35,4 +33,5 @@ os.system("chown mail:mail /mail")
 os.system("chown -R mail:mail /var/lib/dovecot /conf")
 
 multiprocessing.Process(target=start_podop).start()
-os.system("dovecot -c /etc/dovecot/dovecot.conf -F")
+cmd = ['/usr/sbin/dovecot', '-c', '/etc/dovecot/dovecot.conf', '-F']
+system.run_process_and_forward_output(cmd)

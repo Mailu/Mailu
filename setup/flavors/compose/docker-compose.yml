@@ -58,6 +58,10 @@ services:
   resolver:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
+    logging:
+      driver: journald
+      options:
+        tag: mailu-resolver
     restart: always
     networks:
       default:
@@ -220,7 +224,7 @@ services:
     logging:
       driver: journald
       options:
-        tag: mailu-clamav
+        tag: mailu-antivirus
     networks:
       - clamav
     volumes:
@@ -237,6 +241,10 @@ services:
   webdav:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}radicale:${MAILU_VERSION:-{{ version }}}
     restart: always
+    logging:
+      driver: journald
+      options:
+        tag: mailu-webdav
     volumes:
       - "{{ root }}/dav:/data"
     networks:
@@ -248,6 +256,10 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}fetchmail:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    logging:
+      driver: journald
+      options:
+        tag: mailu-fetchmail
     volumes:
       - "{{ root }}/data/fetchmail:/data"
     depends_on:
@@ -267,6 +279,10 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    logging:
+      driver: journald
+      options:
+        tag: mailu-webmail
     volumes:
       - "{{ root }}/webmail:/data"
       - "{{ root }}/overrides/{{ webmail_type }}:/overrides:ro"

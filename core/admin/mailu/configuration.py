@@ -72,6 +72,7 @@ DEFAULT_CONFIG = {
     'LOGO_URL': None,
     'LOGO_BACKGROUND': None,
     # Advanced settings
+    'AUTH_REQUIRE_TOKENS': False,
     'API': False,
     'WEB_API': '/api',
     'API_TOKEN': None,

@@ -50,8 +50,12 @@ def check_credentials(user, password, ip, protocol=None, auth_port=None, source_
                     app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: badip: token-{token.id}: {token.comment or ""!r}')
                     return False # we can return directly here since the token is valid
     if user.check_password(password):
-        app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: success: password')
-        return True
+        if app.config['AUTH_REQUIRE_TOKENS'] and protocol != 'web':
+            app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: password ok, but a token is required')
+            return False
+        else:
+            app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: success: password')
+            return True
     app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: badauth: {utils.truncated_pw_hash(password)}')
     return False
 

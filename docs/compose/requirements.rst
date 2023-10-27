@@ -43,7 +43,7 @@ make sure that you either:
 
  - setup a root *ext4* partition,
  - or setup a root *btrfs* partition,
- - or leave enough unpartitionned space for a dedicated *ext4* or *btrfs*
+ - or leave enough unpartitioned space for a dedicated *ext4* or *btrfs*
    partition.
 
 If you chose to create a dedicated partition, simply mount it to
@@ -74,7 +74,7 @@ default Debian install:
   apt-get autoremove --purge exim4 exim4-base
 
 
-Finally, Docker relies heavily on ``iptables`` for port forwardings. You
+Finally, Docker relies heavily on ``iptables`` for port forwarding. You
 should use ``iptables-persistent`` (or any equivalent tool on other
 systems) for managing persistent rules. If you were brave enough to switch to
 ``nftables``, you will have to rollback until official support is released

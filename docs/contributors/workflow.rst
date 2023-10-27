@@ -19,8 +19,8 @@ This is a community project, thus commits should be readable enough for any of
 the contributors to guess the content by simply reading the comment or find a
 proper commit when one knows what they are looking for.
 
-Usual standards remain: write english comments, single line short comments and
-additional multiline if required (keep in mind that the most important piece
+Usual standards remain: write English comments, single line short comments and
+additional multi-line if required (keep in mind that the most important piece
 of information should fit in the first line).
 
 Branches

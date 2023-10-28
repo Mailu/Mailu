@@ -11,8 +11,7 @@ Where to ask questions?
 
 First, please read this FAQ to check if your question is listed here.
 Simple questions are best asked in our `Matrix`_ room.
-For more complex questions, you can always open a `new issue`_ on GitHub.
-We actively monitor the issues list.
+For more complex questions, you can always open a `new discussion`_ on GitHub.
 
 
 My installation is broken!
@@ -33,16 +32,17 @@ I want a new feature or enhancement!
 
 Great! We are always open for suggestions. We currently maintain two tags:
 
-- `Enhancement issues`_: Typically used for optimization of features in the project.
-- `Feature request issues`_: For implementing new functionality,
+- ``type/enhancement``: Typically used for optimization of features in the project.
+- ``type/feature``: For implementing new functionality,
   plugins and applications.
 
-Please check if your idea (or something similar) is already mentioned there.
+Feature requests are discussed on the discussion page of the project (see `feature requests`_).
+Please check if your idea (or something similar) is already mentioned on the project.
 If there is one open, you can choose to vote with a thumbs up, so we can
 estimate the popular demand. Please refrain from writing comments like
 *"me too"* as it clobbers the actual discussion.
 
-If you can't find anything similar, you can open a `new issue`_.
+If you can't find anything similar, you can open a `new feature request`_.
 Please also share (where applicable):
 
 - Use case: how does this improve the project?
@@ -89,8 +89,9 @@ Please click the |sponsor| button on top of our GitHub Page for current possibil
 .. _`Matrix`: https://matrix.to/#/#mailu:tedomum.net
 .. _`open issues`: https://github.com/Mailu/Mailu/issues
 .. _`new issue`: https://github.com/Mailu/Mailu/issues/new
-.. _`Enhancement issues`: https://github.com/Mailu/Mailu/issues?q=is%3Aissue+is%3Aopen+label%3Atype%2Fenhancement
-.. _`Feature request issues`: https://github.com/Mailu/Mailu/issues?q=is%3Aopen+is%3Aissue+label%3Atype%2Ffeature
+.. _`new discussion`: https://github.com/Mailu/Mailu/discussions/categories/user-support
+.. _`feature requests`: https://github.com/Mailu/Mailu/discussions/categories/feature-requests-ideas
+.. _`new feature request`: https://github.com/Mailu/Mailu/discussions/new?category=feature-requests-ideas
 .. _`GitHub`: https://github.com/Mailu/Mailu
 .. _`Community Bridge`: https://funding.communitybridge.org/projects/mailu
 

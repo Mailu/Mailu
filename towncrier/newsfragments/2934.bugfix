@@ -1,0 +1,3 @@
+Upgrade to alpine 3.18.4: this will fix a bug whereby musl wasn't retrying using TCP when it received truncated DNS replies from its upstream. In practice, this has been seen in the wild when postfix complains of:
+
+"Host or domain name not found. Name service error for name=outlook-com.olc.protection.outlook.com type=AAAA: Host found but no data record of requested type"

@@ -86,6 +86,8 @@ services:
       - "/mailu/overrides/rspamd:/etc/rspamd/override.d"
     depends_on:
       - front
+      - antivirus
+      - oletools
 
   # Optional services
   antivirus:

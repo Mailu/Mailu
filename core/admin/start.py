@@ -27,7 +27,7 @@ if account is not None and domain is not None and password is not None:
 
 def test_unsupported():
     import codecs
-    if os.path.isfile(codecs.decode('/.qbpxrerai', 'rot13')) or os.environ.get(codecs.decode('V_XABJ_ZL_FRGHC_QBRFAG_SVG_ERDHVERZRAGF_NAQ_JBAG_SVYR_VFFHRF_JVGUBHG_CNGPURF', 'rot13'), None) or os.environ.get(codecs.decode('ZNVYH_URYZ_PUNEG'), None):
+    if os.path.isfile(codecs.decode('/.qbpxrerai', 'rot13')) or os.environ.get(codecs.decode('V_XABJ_ZL_FRGHC_QBRFAG_SVG_ERDHVERZRAGF_NAQ_JBAG_SVYR_VFFHRF_JVGUBHG_CNGPURF', 'rot13'), None) or os.environ.get(codecs.decode('ZNVYH_URYZ_PUNEG', 'rot13'), None):
         return
     log.critical('Your system is not supported. Please start by reading the documentation and then http://www.catb.org/~esr/faqs/smart-questions.html')
     while True:

@@ -1,0 +1,3 @@
+Setup:
+Regular expression for checking the Mailu storage path was invalid.
+Added checks to make sure JavaScript is enabled and that all JS files could be loaded. The setup site malfunctions if this is not the case.

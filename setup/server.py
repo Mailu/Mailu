@@ -10,12 +10,14 @@ import random
 import ipaddress
 import hashlib
 import time
-
+from flask_bootstrap import StaticCDN
 
 version = os.getenv("this_version", "master")
 static_url_path = "/" + version + "/static"
 app = flask.Flask(__name__, static_url_path=static_url_path)
 flask_bootstrap.Bootstrap(app)
+# Load our jQuery. Do not use jQuery 1.
+app.extensions['bootstrap']['cdns']['jquery'] = StaticCDN()
 db = redis.StrictRedis(host='redis', port=6379, db=0)
 
 

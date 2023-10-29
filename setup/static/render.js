@@ -1,3 +1,4 @@
+var render = 'RenderLoaded';
 //Store API token in variable.
 var token = $("#api_token").val();
 

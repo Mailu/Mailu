@@ -4,7 +4,7 @@
 <div class="form-group">
   <label>Mailu storage path: </label>
 <!--   Validates path -->
-  <input class="form-control" type="text" name="root" value="/mailu" required pattern="^/[-_A-Za-z0-9]+(/[-_A-Za-z0-9]*)*">
+  <input class="form-control" type="text" name="root" value="/mailu" required pattern="^\/[\-_A-Za-z0-9\.]+(\/[\-_A-Za-z0-9\.]*)*">
 </div>
 
 <p>In the following sections we need to set the postmaster address. This is a combination of the <i>postmaster</i> local part and the <i>main mail domain</i>.
@@ -98,9 +98,5 @@ manage your email domains, users, etc.</p>
       <label name="api_token_label" id="api_token_label">API token</label>
       <input class="form-control" type="text" name="api_token" id="api_token" style="display: none" value="{{ secret(32) }}">
   </div>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
-<script type="text/javascript" src="{{ url_for('static', filename='render.js') }}"></script>
 
 {% endcall %}

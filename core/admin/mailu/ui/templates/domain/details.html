@@ -17,6 +17,9 @@
   {% trans %}Generate keys{% endtrans %}
   {%- endif %}
 </a>
+<a class="btn btn-primary float-right" href="{{ url_for(".domain_download_zonefile", domain_name=domain.name) }}">
+  {% trans %}Download zonefile{% endtrans %}
+</a>
 {%- endif %}
 {%- endblock %}
 

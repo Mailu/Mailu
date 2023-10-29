@@ -10,13 +10,13 @@
 
 {%- block main_action %}
 {%- if current_user.global_admin %}
-<a class="btn btn-primary float-right" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}">
+<a class="btn btn-primary btn-group float-right" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}">
   {%- if domain.dkim_publickey %}
   {% trans %}Regenerate keys{% endtrans %}
   {%- else %}
   {% trans %}Generate keys{% endtrans %}
   {%- endif %}
-</a><a class="btn btn-primary float-right" href="{{ url_for(".domain_download_zonefile", domain_name=domain.name) }}">  {% trans %}Download zonefile{% endtrans %}</a>
+</a><a style="margin-right: 5px;" class="btn btn-primary btn-group float-right" href="{{ url_for(".domain_download_zonefile", domain_name=domain.name) }}">  {% trans %}Download zonefile{% endtrans %}</a>
 {%- endif %}
 {%- endblock %}
 

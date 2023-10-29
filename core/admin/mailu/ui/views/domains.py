@@ -70,9 +70,9 @@ def domain_details(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     return flask.render_template('domain/details.html', domain=domain)
 
-@ui.route('/domain/details/<domain_name>/downzonefile', methods=['GET'])
+@ui.route('/domain/details/<domain_name>/zonefile', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
-def domain_details(domain_name):
+def domain_download_zonefile(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     final = domain.dns_mx+"\n"
     final = final + domain.dns_spf+"\n"

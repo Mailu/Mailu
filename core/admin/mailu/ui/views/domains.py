@@ -70,6 +70,22 @@ def domain_details(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     return flask.render_template('domain/details.html', domain=domain)
 
+@ui.route('/domain/details/<domain_name>/downzonefile', methods=['GET'])
+@access.domain_admin(models.Domain, 'domain_name')
+def domain_details(domain_name):
+    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    final = domain.dns_mx+"\n"
+    final = final + domain.dns_spf+"\n"
+    if domain.dkim_publickey:
+        final = final + domain.dkim_publickey+"\n"
+        final = final + domain.dns_dkim+"\n"
+        final = final + domain.dns_dmarc+"\n"
+    if domain.dns_tlsa:
+        final = final + domain.dns_tlsa
+    for i in domain.dns_autoconfig:
+        final = final + i+"\n"
+    return flask.Response(final,content_type="text/plain")
+
 
 @ui.route('/domain/genkeys/<domain_name>', methods=['GET', 'POST'])
 @access.domain_admin(models.Domain, 'domain_name')

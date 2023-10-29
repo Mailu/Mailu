@@ -511,6 +511,10 @@ msgstr ""
 msgid "Generate keys"
 msgstr ""
 
+#: mailu/ui/templates/domain/details.html:19
+msgid "Download zonefile"
+msgstr ""
+
 #: mailu/ui/templates/domain/details.html:30
 msgid "DNS MX entry"
 msgstr ""

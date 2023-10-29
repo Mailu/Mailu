@@ -84,7 +84,7 @@ def domain_download_zonefile(domain_name):
         final = final + domain.dns_tlsa
     for i in domain.dns_autoconfig:
         final = final + i+"\n"
-    return flask.Response(final,content_type="text/plain")
+    return flask.Response(final,content_type="text/plain",headers={'Content-disposition': 'attachment; filename='+domain.name+'-zonefile.txt'})
 
 
 @ui.route('/domain/genkeys/<domain_name>', methods=['GET', 'POST'])

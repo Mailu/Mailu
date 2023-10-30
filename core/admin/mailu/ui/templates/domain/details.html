@@ -37,10 +37,6 @@
 </tr>
 {%- if domain.dkim_publickey %}
 <tr>
-  <th>{% trans %}DKIM public key{% endtrans %}</th>
-  <td>{{ macros.clip("dkim_key") }}<pre id="dkim_key" class="pre-config border bg-light">{{ domain.dkim_publickey }}</pre></td>
-</tr>
-<tr>
   <th>{% trans %}DNS DKIM entry{% endtrans %}</th>
   <td>{{ macros.clip("dns_dkim") }}<pre id="dns_dkim" class="pre-config border bg-light">{{ domain.dns_dkim }}</pre></td>
 </tr>

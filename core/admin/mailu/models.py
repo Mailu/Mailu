@@ -232,9 +232,7 @@ class Domain(Base):
         """ return DKIM record for domain """
         if self.dkim_key:
             selector = app.config['DKIM_SELECTOR']
-            txt = f'v=DKIM1; k=rsa; p={self.dkim_publickey}'
-            record = ' '.join(f'"{txt[p:p+250]}"' for p in range(0, len(txt), 250))
-            return f'{selector}._domainkey.{self.name}. 600 IN TXT {record}'
+            return f'{selector}._domainkey.{self.name}. 600 IN TXT "v=DKIM1; k=rsa; p={self.dkim_publickey}"'
 
     @cached_property
     def dns_dmarc(self):

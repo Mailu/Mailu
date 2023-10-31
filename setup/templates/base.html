@@ -1,5 +1,6 @@
 {% extends "bootstrap/base.html" %}
 {% import "macros.html" as macros %}
+{% from 'bootstrap/utils.html' import flashed_messages %}
 
 {% block title %}Mailu setup{% endblock %}
 
@@ -15,6 +16,7 @@
 
 <div id="container" class="container">
   <h1>Mailu configuration</h1>
+  {{ flashed_messages() }}
   <p>
     Version
     <select id=version_select onchange="window.location.href=this.value;" class="btn btn-primary dropdown-toggle">

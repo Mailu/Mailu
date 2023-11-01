@@ -12,7 +12,10 @@
             "SNI_enabled": true,
             "disable_compression": true,
             "security_level": 1
-        }
+        },
+	{% (FULL_TEXT_SEARCH or '').lower() not in ['off', 'false', '0'] %}
+	"fast_simple_search": "false",
+	{% endif %}
     },
     "SMTP": {
         "host": "{{ FRONT_ADDRESS }}",

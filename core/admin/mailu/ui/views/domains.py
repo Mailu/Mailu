@@ -79,7 +79,7 @@ def domain_download_zonefile(domain_name):
         record = domain.dns_dkim.split('"', 1)[0].strip()
         txt = f'v=DKIM1; k=rsa; p={domain.dkim_publickey}'
         txt = ' '.join(f'"{txt[p:p+250]}"' for p in range(0, len(txt), 250))
-        res.append(f'{record} {txt}"')
+        res.append(f'{record} {txt}')
         res.append(domain.dns_dmarc)
     if domain.dns_tlsa:
         res.append(domain.dns_tlsa)

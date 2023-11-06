@@ -40,7 +40,7 @@ def create_app_from_config(config):
     models.db.init_app(app)
     utils.session.init_app(app)
     utils.limiter.init_app(app)
-    utils.babel.init_app(app)
+    utils.babel.init_app(app, locale_selector=utils.get_locale)
     utils.login.init_app(app)
     utils.login.user_loader(models.User.get)
     utils.proxy.init_app(app)
@@ -52,13 +52,14 @@ def create_app_from_config(config):
     app.truncated_pw_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('TRUNCATED_PW_KEY', 'utf-8'), 'sha256').digest()
 
     # Initialize list of translations
-    app.config.translations = {
-        str(locale): locale
-        for locale in sorted(
-            utils.babel.list_translations(),
-            key=lambda l: l.get_language_name().title()
-        )
-    }
+    with app.app_context():
+        app.config.translations = {
+            str(locale): locale
+            for locale in sorted(
+                utils.babel.list_translations(),
+                key=lambda l: l.get_language_name().title()
+            )
+        }
 
     # Initialize debugging tools
     if app.config.get("DEBUG"):

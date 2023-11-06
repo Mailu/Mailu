@@ -18,6 +18,12 @@ $config['session_lifetime'] = {{ (((PERMANENT_SESSION_LIFETIME | default(10800))
 $config['request_path'] = '{{ WEB_WEBMAIL or "none" }}';
 $config['trusted_host_patterns'] = [ {{ HOSTNAMES.split(",") | map("tojson") | join(',') }}];
 
+// use redis for session and IMAP-Cache
+$config['session_storage'] = 'redis';
+$config['redis_hosts'] = ['{{ REDIS_ADDRESS }}:1'];
+$config['redis_max_allowed_packet'] = '8M';
+$config['imap_cache'] = 'redis';
+
 // Mail servers
 $config['imap_host'] = 'tls://{{ FRONT_ADDRESS or "front" }}:10143';
 $config['imap_conn_options'] = array(

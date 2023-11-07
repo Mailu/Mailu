@@ -108,18 +108,41 @@ def build_app(path):
         try:
             ipaddress.ip_network(data['subnet'])
         except:
-            flask.flash('Configured subnet(IPv4) is invalid.', 'error')
+            flask.flash('Configured subnet(IPv4) is invalid', 'error')
             valid = False
         try:
             ipaddress.ip_network(data['subnet6'])
         except:
-            flask.flash('Configured subnet(IPv6) is invalid.', 'error')
+            flask.flash('Configured subnet(IPv6) is invalid', 'error')
             valid = False
         try:
             data['dns'] = str(ipaddress.IPv4Network(data['subnet'], strict=False)[-2])
         except ValueError as err:
             flask.flash('Invalid configuration: ' + str(err))
             valid = False
+        if data['webmail_type'] != 'none':
+            if data['webmail_path'] == '':
+                flask.flash('Webmail path cannot be empty when webmail is enabled', 'error')
+                valid = False
+            if data['webmail_path'][0] != '/':
+                flask.flash('Webmail path must start with a leading slash "/"', 'error')
+                valid = False
+        if 'admin_enabled' in data:
+            if data['admin_enabled'] == 'true':
+                if data['admin_path'] == '':
+                    flask.flash('Admin path cannot be empty when admin is enabled', 'error')
+                    valid = False
+                if data['admin_path'][0] != '/':
+                    flask.flash('Admin path must start with a leading slash "/"', 'error')
+                    valid = False
+        if 'api_enabled' in data:
+            if (data['api_enabled'] == 'true'):
+                if  data['api_path'] == '' or data['api_token'] == '':
+                    flask.flash('API path and API token cannot be empty when API is enabled', 'error')
+                    valid = False
+                if data['api_path'][0] != '/':
+                    flask.flash('API path must start with a leading slash "/"', 'error')
+                    valid = False
         if valid:
             db.set(data['uid'], json.dumps(data))
             return flask.redirect(flask.url_for('.setup', uid=data['uid']))
@@ -130,7 +153,6 @@ def build_app(path):
                 steps=sorted(os.listdir(os.path.join(path, "templates", "steps", "compose"))),
                 subnet6=random_ipv6_subnet()
             )
-
 
     @prefix_bp.route("/setup/<uid>", methods=["GET"])
     @root_bp.route("/setup/<uid>", methods=["GET"])

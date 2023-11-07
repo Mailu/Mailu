@@ -18,6 +18,11 @@ $config['session_lifetime'] = {{ (((PERMANENT_SESSION_LIFETIME | default(10800))
 $config['request_path'] = '{{ WEB_WEBMAIL or "none" }}';
 $config['trusted_host_patterns'] = [ {{ HOSTNAMES.split(",") | map("tojson") | join(',') }}];
 
+{% if (FULL_TEXT_SEARCH or '').lower() not in ['off', 'false', '0'] %}
+$config['search_mods'] = ['*' => ['subject'=>1, 'from'=>1, 'to'=>1, 'cc'=>1, 'bcc'=>1, 'replyto'=>1, 'followupto'=>1, 'body'=>1]];
+$config['search_scope'] = 'sub';
+{% endif %}
+
 // Mail servers
 $config['imap_host'] = 'tls://{{ FRONT_ADDRESS or "front" }}:10143';
 $config['imap_conn_options'] = array(

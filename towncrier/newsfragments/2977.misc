@@ -1,0 +1,1 @@
+Improve FTS by adding the snowball filter. This should significantly cut down the size of indexes. You may want to re-index after upgrading.

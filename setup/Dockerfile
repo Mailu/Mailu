@@ -14,10 +14,6 @@ COPY main.py ./main.py
 
 RUN echo $VERSION >> /version
 
-#Note: This is appended so we can explicitly check if this JS file has been loaded
-#by the user's internet browser when accessing the setup site.
-RUN echo var jQueryMailu=\'loaded\'\; >> ./static/jquery.min.js
-
 EXPOSE 80/tcp
 HEALTHCHECK --start-period=350s CMD curl -skfLo /dev/null http://localhost/
 USER mailu

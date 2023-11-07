@@ -5,16 +5,12 @@
 {% block title %}Mailu setup{% endblock %}
 
 {% block content %}
-<noscript>
-  <style type="text/css">
-      .container {display:none;}
-  </style>
-  <div class="noscriptmsg">
-  JavaScript is not enabled. The Mailu setup site does not function without JavaScript enabled.
-  </div>
-</noscript>
 
-<div id="container" class="container">
+<div id=no_java_script class="noscriptmsg">
+  JavaScript is not enabled or JavaScript files were blocked. The Mailu setup site does not function when JavaScript is disabled.
+</div>
+
+<div id="container" class="container" style="display:none;">
   <h1>Mailu configuration</h1>
   {{ flashed_messages() }}
   <p>
@@ -44,14 +40,5 @@ For production scenarios we recommend to use the stable version.
 {% block scripts %}
 <script type="text/javascript" src="{{ url_for('static', filename='jquery.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='render.js') }}"></script>
-<script>
-  if ( typeof jQueryMailu == "undefined" || typeof jQuery == "undefined" || typeof render == "undefined"){
-    console.log("jQuery or render.js or bootstrap js are not defined");
-    document.getElementById("container").style["display"] = "none";
-    const message = document.createElement("p");
-    message.innerText = "JQuery or render.js or bootstrap could not be downloaded and initialized. JavaScript must be enabled. Do not block any scripts and do not block any site downloads.";
-    document.body.appendChild(message);
-  }
-  </script>
 {{super()}}
 {% endblock %}

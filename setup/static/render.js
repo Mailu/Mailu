@@ -1,6 +1,10 @@
-var render = 'RenderLoaded';
 //Store API token in variable.
 var token = $("#api_token").val();
+
+$(document).ready(function() {
+	$("#no_java_script").hide();
+	$("#container").show();
+});
 
 $(document).ready(function() {
 	if ($("#webmail").val() == 'none') {

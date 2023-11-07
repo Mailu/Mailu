@@ -1,6 +1,7 @@
 import hmac
 import logging as log
 import os
+import signal
 import sys
 import re
 from pwd import getpwnam
@@ -69,11 +70,17 @@ def _is_compatible_with_hardened_malloc():
                 return False
     return True
 
+
+def sigterm_handler(_signo, _stack_frame):
+    log.error("Received SIGTERM, terminating.")
+    sys.exit(0)
+
 def set_env(required_secrets=[], log_filters=[]):
     if log_filters:
         sys.stdout = LogFilter(sys.stdout, log_filters)
         sys.stderr = LogFilter(sys.stderr, log_filters)
     log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", 'WARNING'))
+    signal.signal(signal.SIGTERM, sigterm_handler)
 
     if not 'LD_PRELOAD' in os.environ and _is_compatible_with_hardened_malloc():
         log.warning('Your CPU has Advanced Vector Extensions available, we recommend you enable hardened-malloc earlier in the boot process by adding LD_PRELOAD=/usr/lib/libhardened_malloc.so to your mailu.env')

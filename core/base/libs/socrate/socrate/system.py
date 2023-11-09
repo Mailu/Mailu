@@ -72,7 +72,7 @@ def _is_compatible_with_hardened_malloc():
 
 
 def sigterm_handler(_signo, _stack_frame):
-    log.error("Received SIGTERM, terminating.")
+    log.critical("Received SIGTERM, terminating.")
     sys.exit(143)
 
 def set_env(required_secrets=[], log_filters=[]):

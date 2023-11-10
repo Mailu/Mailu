@@ -29,11 +29,6 @@ if spamtest :percent :value "gt" :comparator "i;ascii-numeric" "{{ user.spam_thr
 }
 {% endif %}
 
-if exists "X-Virus" {
-  discard;
-  stop;
-}
-
 {% if user.reply_active %}
 vacation :days 1 {% if user.displayed_name != "" %}:from "{{ user.displayed_name }} <{{ user.email }}>"{% endif %} :subject "{{ user.reply_subject }}" "{{ user.reply_body }}";
 {% endif %}

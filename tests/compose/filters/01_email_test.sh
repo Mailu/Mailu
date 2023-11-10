@@ -1,11 +1,10 @@
 python3 tests/email_test.py message-virus "tests/compose/filters/eicar.com.txt"
-if [ $? -eq 99 ]; then
-    python3 tests/email_test.py message-PUA "tests/compose/filters/PotentiallyUnwanted.exe_"
-    if [ $? -eq 99 ]; then
-        exit 0
-    else
-        exit 1
-    fi
-else
-	exit 1
+if [ $? -ne 99 ]; then
+  exit 1
 fi
+python3 tests/email_test.py message-PUA "tests/compose/filters/PotentiallyUnwanted.exe_"
+if [ $? -ne 99 ]; then
+  exit 1
+fi
+
+exit 0

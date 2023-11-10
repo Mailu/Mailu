@@ -6,7 +6,7 @@ if [ $? -ne 25 ]; then
 if [ $? -eq 99 ]; then
     python3 tests/email_test.py message-PUA "tests/compose/filters/PotentiallyUnwanted.exe_"
     if [ $? -eq 99 ]; then
-        return 0
+        exit 0
     else
         exit 1
     fi

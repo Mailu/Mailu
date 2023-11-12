@@ -1,30 +1,36 @@
 from mailu import models, utils
 from mailu.internal import internal
-from flask import current_app as app
 
 import flask
 import idna
 import re
-import sqlalchemy.exc
 import srslib
+
+db = models.db
+
 
 @internal.route("/postfix/dane/<domain_name>")
 def postfix_dane_map(domain_name):
     return flask.jsonify('dane-only') if utils.has_dane_record(domain_name) else flask.abort(404)
 
+
 @internal.route("/postfix/domain/<domain_name>")
 def postfix_mailbox_domain(domain_name):
     if re.match("^\[.*\]$", domain_name):
         return flask.abort(404)
-    domain = models.Domain.query.get(domain_name) or \
-             models.Alternative.query.get(domain_name) or \
-             flask.abort(404)
+
+    domain = (
+        db.session.get(models.Domain, domain_name) or
+        db.session.get(models.Alternative, domain_name) or
+        flask.abort(404)
+    )
+
     return flask.jsonify(domain.name)
 
 
 @internal.route("/postfix/mailbox/<path:email>")
 def postfix_mailbox_map(email):
-    user = models.User.query.get(email) or flask.abort(404)
+    user = db.get_or_404(models.User, email)
     return flask.jsonify(user.email)
 
 
@@ -37,12 +43,13 @@ def postfix_alias_map(alias):
         return flask.jsonify(",".join(idna_encode(destinations)))
     return flask.abort(404)
 
+
 @internal.route("/postfix/transport/<path:email>")
 def postfix_transport(email):
     if email == '*' or re.match("(^|.*@)\[.*\]$", email):
         return flask.abort(404)
     _, domain_name = models.Email.resolve_domain(email)
-    relay = models.Relay.query.get(domain_name) or flask.abort(404)
+    relay = db.get_or_404(models.Relay, domain_name)
     target = relay.smtp.lower()
     port = None
     use_lmtp = False
@@ -133,8 +140,9 @@ def postfix_sender_map(sender):
         localpart, domain_name = models.Email.resolve_domain(sender)
     except Exception as error:
         return flask.abort(404)
-    if models.Domain.query.get(domain_name):
-        return flask.abort(404)
+
+    db.get_or_404(models.Domain, domain_name)
+
     return flask.jsonify(srs.forward(sender, domain))
 
 
@@ -147,10 +155,11 @@ def postfix_sender_login(sender):
     localpart = localpart[:next((i for i, ch in enumerate(localpart) if ch in flask.current_app.config.get('RECIPIENT_DELIMITER')), None)]
     destinations = set(models.Email.resolve_destination(localpart, domain_name, True) or [])
     destinations.update(wildcard_senders)
-    destinations.update(i[0] for i in models.User.query.filter_by(allow_spoofing=True).with_entities(models.User.email).all())
+    destinations.update(i[0] for i in db.session.execute(db.select(models.User).filter_by(allow_spoofing=True).with_only_columns(models.User.email)).all())
     if destinations:
         return flask.jsonify(",".join(idna_encode(destinations)))
     return flask.abort(404)
+
 
 @internal.route("/postfix/sender/rate/<path:sender>")
 def postfix_sender_rate(sender):
@@ -158,8 +167,10 @@ def postfix_sender_rate(sender):
     """
     if sender in flask.current_app.config['MESSAGE_RATELIMIT_EXEMPTION']:
         flask.abort(404)
-    user = models.User.get(sender) or flask.abort(404)
+
+    user = db.get_or_404(models.User, sender)
     return flask.abort(404) if user.sender_limiter.hit() else flask.jsonify("450 4.2.1 You are sending too many emails too fast.")
+
 
 # idna encode domain part of each address in list of addresses
 def idna_encode(addresses):

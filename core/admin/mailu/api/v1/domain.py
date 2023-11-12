@@ -82,7 +82,7 @@ class Domains(Resource):
     @common.api_token_authorization
     def get(self):
         """ List domains """
-        return models.Domain.query.all()
+        return db.session.scalars(models.Domain).all()
 
     @dom.doc('create_domain')
     @dom.expect(domain_fields)
@@ -95,22 +95,22 @@ class Domains(Resource):
         """ Create a new domain """
         data = api.payload
         if not validators.domain(data['name']):
-            return { 'code': 400, 'message': f'Domain {data["name"]} is not a valid domain'}, 400
+            return {'code': 400, 'message': f'Domain {data["name"]} is not a valid domain'}, 400
 
         if common.fqdn_in_use(data['name']):
-            return { 'code': 409, 'message': f'Duplicate domain name {data["name"]}'}, 409
+            return {'code': 409, 'message': f'Duplicate domain name {data["name"]}'}, 409
         if 'alternatives' in data:
             #check if duplicate alternatives are supplied
             if [x for x in data['alternatives'] if data['alternatives'].count(x) >= 2]:
-                return { 'code': 409, 'message': f'Duplicate alternative domain names in request' }, 409
+                return {'code': 409, 'message': f'Duplicate alternative domain names in request' }, 409
             for item in data['alternatives']:
                 if common.fqdn_in_use(item):
-                    return { 'code': 409, 'message': f'Duplicate alternative domain name {item}' }, 409
+                    return {'code': 409, 'message': f'Duplicate alternative domain name {item}' }, 409
                 if not validators.domain(item):
-                    return { 'code': 400, 'message': f'Alternative domain {item} is not a valid domain'}, 400
+                    return {'code': 400, 'message': f'Alternative domain {item} is not a valid domain'}, 400
             for item in data['alternatives']:
                 alternative = models.Alternative(name=item, domain_name=data['name'])
-                models.db.session.add(alternative)
+                db.session.add(alternative)
         domain_new = models.Domain(name=data['name'])
         if 'comment' in data:
             domain_new.comment = data['comment']
@@ -122,10 +122,11 @@ class Domains(Resource):
             domain_new.max_quota_bytes = data['max_quota_bytes']
         if 'signup_enabled' in data:
             domain_new.signup_enabled = data['signup_enabled']
-        models.db.session.add(domain_new)
+        db.session.add(domain_new)
         #apply the changes
         db.session.commit()
-        return  {'code': 200, 'message': f'Domain {data["name"]} has been created'}, 200
+        return {'code': 200, 'message': f'Domain {data["name"]} has been created'}, 200
+
 
 @dom.route('/<domain>')
 class Domain(Resource):
@@ -138,10 +139,10 @@ class Domain(Resource):
     def get(self, domain):
         """ Find domain by name """
         if not validators.domain(domain):
-            return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain_found = models.Domain.query.get(domain)
+            return {'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
+        domain_found = db.session.get(models.Domain, domain)
         if not domain_found:
-            return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
+            return {'code': 404, 'message': f'Domain {domain} does not exist'}, 404
         return marshal(domain_found, domain_fields_get), 200
 
     @dom.doc('update_domain')
@@ -155,10 +156,10 @@ class Domain(Resource):
     def patch(self, domain):
         """ Update an existing domain """
         if not validators.domain(domain):
-            return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain_found = models.Domain.query.get(domain)
+            return {'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
+        domain_found = db.session.get(models.Domain, domain)
         if not domain:
-            return { 'code': 404, 'message': f'Domain {data["name"]} does not exist'}, 404
+            return {'code': 404, 'message': f'Domain {data["name"]} does not exist'}, 404
         data = api.payload
 
         if 'alternatives' in data:
@@ -167,12 +168,12 @@ class Domain(Resource):
                 return { 'code': 409, 'message': f'Duplicate alternative domain names in request' }, 409
             for item in data['alternatives']:
                 if common.fqdn_in_use(item):
-                    return { 'code': 409, 'message': f'Duplicate alternative domain name {item}' }, 409
+                    return {'code': 409, 'message': f'Duplicate alternative domain name {item}'}, 409
                 if not validators.domain(item):
-                    return { 'code': 400, 'message': f'Alternative domain {item} is not a valid domain'}, 400
+                    return {'code': 400, 'message': f'Alternative domain {item} is not a valid domain'}, 400
             for item in data['alternatives']:
                 alternative = models.Alternative(name=item, domain_name=data['name'])
-                models.db.session.add(alternative)
+                db.session.add(alternative)
 
         if 'comment' in data:
             domain_found.comment = data['comment']
@@ -184,11 +185,11 @@ class Domain(Resource):
             domain_found.max_quota_bytes = data['max_quota_bytes']
         if 'signup_enabled' in data:
             domain_found.signup_enabled = data['signup_enabled']
-        models.db.session.add(domain_found)
+        db.session.add(domain_found)
 
         #apply the changes
         db.session.commit()
-        return  {'code': 200, 'message': f'Domain {domain} has been updated'}, 200
+        return {'code': 200, 'message': f'Domain {domain} has been updated'}, 200
 
     @dom.doc('delete_domain')
     @dom.response(200, 'Success', response_fields)
@@ -199,13 +200,14 @@ class Domain(Resource):
     def delete(self, domain):
         """ Delete domain """
         if not validators.domain(domain):
-            return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain_found = models.Domain.query.get(domain)
+            return {'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
+        domain_found = db.session.get(models.Domain, domain)
         if not domain:
-            return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
+            return {'code': 404, 'message': f'Domain {domain} does not exist'}, 404
         db.session.delete(domain_found)
         db.session.commit()
         return {'code': 200, 'message': f'Domain {domain} has been deleted'}, 200
+
 
 @dom.route('/<domain>/dkim')
 class Domain(Resource):
@@ -218,13 +220,14 @@ class Domain(Resource):
     def post(self, domain):
         """ Generate new DKIM/DMARC keys for domain """
         if not validators.domain(domain):
-            return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain_found = models.Domain.query.get(domain)
+            return {'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
+        domain_found = db.session.get(models.Domain, domain)
         if not domain_found:
-            return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
+            return {'code': 404, 'message': f'Domain {domain} does not exist'}, 404
         domain_found.generate_dkim_key()
         domain_found.save_dkim_key()
         return {'code': 200, 'message': f'DKIM/DMARC keys have been generated for domain {domain}'}, 200
+
 
 @dom.route('/<domain>/manager')
 class Manager(Resource):
@@ -237,10 +240,10 @@ class Manager(Resource):
     def get(self, domain):
         """ List managers of domain """
         if not validators.domain(domain):
-            return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
+            return {'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
         if not domain:
-            return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
-        domain = models.Domain.query.filter_by(name=domain)
+            return {'code': 404, 'message': f'Domain {domain} does not exist'}, 404
+        domain = db.session.get(models.Domain, domain)
         return domain.managers
 
     @dom.doc('create_manager')
@@ -257,18 +260,19 @@ class Manager(Resource):
         if not validators.email(data['user_email']):
             return {'code': 400, 'message': f'Invalid email address {data["user_email"]}'}, 400
         if not validators.domain(domain):
-            return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain = models.Domain.query.get(domain)
+            return {'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
+        domain = db.session.get(models.Domain, domain)
         if not domain:
-            return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
-        user = models.User.query.get(data['user_email'])
+            return {'code': 404, 'message': f'Domain {domain} does not exist'}, 404
+        user = db.session.get(models.User, data['user_email'])
         if not user:
-            return { 'code': 404, 'message': f'User {data["user_email"]} does not exist'}, 404
+            return {'code': 404, 'message': f'User {data["user_email"]} does not exist'}, 404
         if user in domain.managers:
             return {'code': 409, 'message': f'User {data["user_email"]} is already a manager of the domain {domain} '}, 409
         domain.managers.append(user)
-        models.db.session.commit()
+        db.session.commit()
         return {'code': 200, 'message': f'User {data["user_email"]} has been added as manager of the domain {domain} '},200
+
 
 @dom.route('/<domain>/manager/<email>')
 class Domain(Resource):
@@ -282,19 +286,19 @@ class Domain(Resource):
         if not validators.email(email):
             return {'code': 400, 'message': f'Invalid email address {email}'}, 400
         if not validators.domain(domain):
-            return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain = models.Domain.query.get(domain)
+            return {'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
+        domain = db.session.get(models.Domain, domain)
         if not domain:
-            return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
-        user = models.User.query.get(email)
+            return {'code': 404, 'message': f'Domain {domain} does not exist'}, 404
+        user = db.session.get(models.User, email)
         if not user:
-            return { 'code': 404, 'message': f'User {email} does not exist'}, 404
+            return {'code': 404, 'message': f'User {email} does not exist'}, 404
         if user in domain.managers:
             for manager in domain.managers:
                 if manager.email == email:
                     return marshal(manager, manager_fields),200
         else:
-            return { 'code': 404, 'message': f'User {email} is not a manager of the domain {domain}'}, 404
+            return {'code': 404, 'message': f'User {email} is not a manager of the domain {domain}'}, 404
 
 
     @dom.doc('delete_manager')
@@ -307,19 +311,20 @@ class Domain(Resource):
         if not validators.email(email):
             return {'code': 400, 'message': f'Invalid email address {email}'}, 400
         if not validators.domain(domain):
-            return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain = models.Domain.query.get(domain)
+            return {'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
+        domain = db.session.get(models.Domain, domain)
         if not domain:
-            return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
-        user = models.User.query.get(email)
+            return {'code': 404, 'message': f'Domain {domain} does not exist'}, 404
+        user = db.session.get(models.User, email)
         if not user:
-            return { 'code': 404, 'message': f'User {email} does not exist'}, 404
+            return {'code': 404, 'message': f'User {email} does not exist'}, 404
         if user in domain.managers:
             domain.managers.remove(user)
-            models.db.session.commit()
-            return {'code': 200, 'message': f'User {email} has been removed as a manager of the domain {domain} '},200
+            db.session.commit()
+            return {'code': 200, 'message': f'User {email} has been removed as a manager of the domain {domain} '}, 200
         else:
-            return { 'code': 404, 'message': f'User {email} is not a manager of the domain {domain}'}, 404
+            return {'code': 404, 'message': f'User {email} is not a manager of the domain {domain}'}, 404
+
 
 @dom.route('/<domain>/users')
 class User(Resource):
@@ -332,11 +337,12 @@ class User(Resource):
     def get(self, domain):
         """ List users from domain """
         if not validators.domain(domain):
-            return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain_found = models.Domain.query.get(domain)
+            return {'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
+        domain_found = db.session.get(models.Domain, domain)
         if not domain_found:
-            return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
-        return  models.User.query.filter_by(domain=domain_found).all()
+            return {'code': 404, 'message': f'Domain {domain} does not exist'}, 404
+        return db.session.scalars(db.select(models.User).filter_by(domain=domain_found)).all()
+
 
 @alt.route('')
 class Alternatives(Resource):
@@ -347,7 +353,7 @@ class Alternatives(Resource):
     @common.api_token_authorization
     def get(self):
       """ List alternatives """
-      return models.Alternative.query.all()
+      return db.session.scalars(models.Alternative).all()
 
 
     @alt.doc('create_alternative')
@@ -362,19 +368,20 @@ class Alternatives(Resource):
         """ Create new alternative (for domain) """
         data = api.payload
         if not validators.domain(data['name']):
-            return { 'code': 400, 'message': f'Alternative domain {data["name"]} is not a valid domain'}, 400
+            return {'code': 400, 'message': f'Alternative domain {data["name"]} is not a valid domain'}, 400
         if not validators.domain(data['domain']):
-            return { 'code': 400, 'message': f'Domain {data["domain"]} is not a valid domain'}, 400
-        domain = models.Domain.query.get(data['domain'])
+            return {'code': 400, 'message': f'Domain {data["domain"]} is not a valid domain'}, 400
+        domain = db.session.get(models.Domain, data['domain'])
         if not domain:
-            return { 'code': 404, 'message': f'Domain {data["domain"]} does not exist'}, 404
+            return {'code': 404, 'message': f'Domain {data["domain"]} does not exist'}, 404
         if common.fqdn_in_use(data['name']):
-            return { 'code': 409, 'message': f'Duplicate alternative domain name {data["name"]}'}, 409
+            return {'code': 409, 'message': f'Duplicate alternative domain name {data["name"]}'}, 409
 
         alternative = models.Alternative(name=data['name'], domain_name=data['domain'])
-        models.db.session.add(alternative)
+        db.session.add(alternative)
         db.session.commit()
         return {'code': 200, 'message': f'Alternative {data["name"]} for domain {data["domain"]} has been created'}, 200
+
 
 @alt.route('/<string:alt>')
 class Alternative(Resource):
@@ -384,10 +391,10 @@ class Alternative(Resource):
     def get(self, alt):
         """ Find alternative (of domain) """
         if not validators.domain(alt):
-            return { 'code': 400, 'message': f'Alternative domain {alt} is not a valid domain'}, 400
-        alternative = models.Alternative.query.filter_by(name=alt).first()
+            return {'code': 400, 'message': f'Alternative domain {alt} is not a valid domain'}, 400
+        alternative = db.session.get(models.Alternative, alt)
         if not alternative:
-            return{ 'code': 404, 'message': f'Alternative domain {alt} does not exist'}, 404
+            return{'code': 404, 'message': f'Alternative domain {alt} does not exist'}, 404
         return marshal(alternative, alternative_fields), 200
 
     @alt.doc('delete_alternative')
@@ -400,10 +407,10 @@ class Alternative(Resource):
     def delete(self, alt):
         """ Delete alternative (for domain) """
         if not validators.domain(alt):
-            return { 'code': 400, 'message': f'Alternative domain {alt} is not a valid domain'}, 400
-        alternative = models.Alternative.query.filter_by(name=alt).scalar()
+            return {'code': 400, 'message': f'Alternative domain {alt} is not a valid domain'}, 400
+        alternative = db.session.get(models.Alternative, alt)
         if not alternative:
-            return { 'code': 404, 'message': f'Alternative domain {alt} does not exist'}, 404
+            return {'code': 404, 'message': f'Alternative domain {alt} does not exist'}, 404
         domain = alternative.domain_name
         db.session.delete(alternative)
         db.session.commit()

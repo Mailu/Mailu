@@ -8,6 +8,9 @@ import base64
 import sqlalchemy.exc
 import urllib
 
+db = models.db
+
+
 @internal.route("/auth/email")
 def nginx_authentication():
     """ Main authentication endpoint for Nginx email server
@@ -62,6 +65,7 @@ def nginx_authentication():
         utils.limiter.rate_limit_ip(client_ip, username)
     return response
 
+
 @internal.route("/auth/admin")
 def admin_authentication():
     """ Fails if the user is not an authenticated admin.
@@ -71,6 +75,7 @@ def admin_authentication():
         and flask_login.current_user.enabled):
         return ""
     return flask.abort(403)
+
 
 @internal.route("/auth/user")
 def user_authentication():
@@ -107,7 +112,7 @@ def basic_authentication():
             response.headers['Retry-After'] = '60'
             return response
         try:
-            user = models.User.query.get(user_email) if '@' in user_email else None
+            user = db.session.get(models.User, user_email) if '@' in user_email else None
         except sqlalchemy.exc.StatementError as exc:
             exc = str(exc).split('\n', 1)[0]
             app.logger.warn(f'Invalid user {user_email!r}: {exc}')

@@ -29,8 +29,7 @@ Flask-Login==0.6.3
 flask-marshmallow==0.15.0
 Flask-Migrate==4.0.5
 flask-restx==1.1.0
-Flask-SQLAlchemy==2.5.1
-# >2.5.1 bug with parsing models.py. Could otherwise be 3.0.5
+Flask-SQLAlchemy==3.1.1
 Flask-WTF==1.2.1
 frozenlist==1.4.0
 greenlet==3.0.1
@@ -75,7 +74,7 @@ requests==2.31.0
 rpds-py==0.10.6
 six==1.16.0
 socrate @ file:///app/libs/socrate
-SQLAlchemy==1.4.50
+SQLAlchemy==2.0.23
 srslib==0.1.4
 tabulate==0.9.0
 tenacity==8.2.3

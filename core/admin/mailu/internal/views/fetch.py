@@ -4,6 +4,8 @@ from mailu.internal import internal
 import flask
 import datetime
 
+db = models.db
+
 
 @internal.route("/fetch")
 def fetch_list():
@@ -20,16 +22,16 @@ def fetch_list():
             "folders": fetch.folders,
             "username": fetch.username,
             "password": fetch.password
-        } for fetch in models.Fetch.query.all()
+        } for fetch in db.session.execute(db.select(models.Fetch)).all()
     ])
 
 
 @internal.route("/fetch/<fetch_id>", methods=["POST"])
 def fetch_done(fetch_id):
-    fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
+    fetch = db.get_or_404(models.Fetch, fetch_id)
     fetch.last_check = datetime.datetime.now()
     fetch.error_message = str(flask.request.get_json())
     fetch.dont_change_updated_at()
-    models.db.session.add(fetch)
-    models.db.session.commit()
+    db.session.add(fetch)
+    db.session.commit()
     return ""

@@ -4,11 +4,13 @@ from mailu.ui import ui, forms, access
 import flask
 import flask_login
 
+db = models.db
+
 
 @ui.route('/admin/list', methods=['GET'])
 @access.global_admin
 def admin_list():
-    admins = models.User.query.filter_by(global_admin=True)
+    admins = db.session.execute(db.select(models.User).filter_by(global_admin=True)).scalars()
     return flask.render_template('admin/list.html', admins=admins)
 
 
@@ -22,10 +24,10 @@ def admin_create():
         flask_login.current_user.get_managed_emails(include_aliases=False)
     ]
     if form.validate_on_submit():
-        user = models.User.query.get(form.admin.data)
+        user = db.session.get(models.User, form.admin.data)
         if user:
             user.global_admin = True
-            models.db.session.commit()
+            db.session.commit()
             flask.flash('User %s is now admin' % user)
             return flask.redirect(flask.url_for('.admin_list'))
         else:
@@ -37,10 +39,10 @@ def admin_create():
 @access.global_admin
 @access.confirmation_required("delete admin {admin}")
 def admin_delete(admin):
-    user = models.User.query.get(admin)
+    user = db.session.get(models.User, admin)
     if user:
-        user.global_admin  = False
-        models.db.session.commit()
+        user.global_admin = False
+        db.session.commit()
         flask.flash('User %s is no longer admin' % user)
         return flask.redirect(flask.url_for('.admin_list'))
     else:

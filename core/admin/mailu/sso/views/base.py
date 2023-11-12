@@ -12,6 +12,9 @@ import ipaddress
 from urllib.parse import urlparse, urljoin
 from werkzeug.urls import url_unquote
 
+db = models.db
+
+
 @sso.route('/login', methods=['GET', 'POST'])
 def login():
     if flask.request.headers.get(app.config['PROXY_AUTH_HEADER']) and not 'noproxyauth' in flask.request.url:
@@ -70,6 +73,7 @@ def login():
             flask.flash(_('Wrong e-mail or password'), 'error')
     return flask.render_template('login.html', form=form, fields=fields)
 
+
 @sso.route('/pw_change', methods=['GET', 'POST'])
 @access.authenticated
 def pw_change():
@@ -94,13 +98,14 @@ def pw_change():
             flask_login.login_user(user)
             user.set_password(form.pw.data, keep_sessions=set(flask.session))
             user.change_pw_next_login = False
-            models.db.session.commit()
+            db.session.commit()
             flask.current_app.logger.info(f'Forced password change by {user} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
             destination = flask.session.pop('redir_to', None) or app.config['WEB_ADMIN']
             return flask.redirect(destination)
         flask.flash(_("The current password is incorrect!"), "error")
 
     return flask.render_template('pw_change.html', form=form)
+
 
 @sso.route('/logout', methods=['GET'])
 @access.authenticated
@@ -160,14 +165,14 @@ def _proxy():
     except Exception as e:
         flask.current_app.logger.error('Error creating a new user via proxy for %s from %s: %s' % (email, client_ip, str(e)), e)
         return flask.abort(500, 'You don\'t exist. Go away! (%s)' % email)
-    domain = models.Domain.query.get(desireddomain) or flask.abort(500, 'You don\'t exist. Go away! (domain=%s)' % desireddomain)
+    domain = db.session.get(models.Domain, desireddomain) or flask.abort(500, 'You don\'t exist. Go away! (domain=%s)' % desireddomain)
     if not domain.max_users == -1 and len(domain.users) >= domain.max_users:
         flask.current_app.logger.warning('Too many users for domain %s' % domain)
         return flask.abort(500, 'Too many users in (domain=%s)' % domain)
     user = models.User(localpart=localpart, domain=domain)
     user.set_password(secrets.token_urlsafe(), keep_sessions=set(flask.session))
-    models.db.session.add(user)
-    models.db.session.commit()
+    db.session.add(user)
+    db.session.commit()
     flask.session.regenerate()
     flask_login.login_user(user)
     user.send_welcome()

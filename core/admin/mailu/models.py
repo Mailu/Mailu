@@ -1,19 +1,16 @@
 """ Mailu config storage model
 """
 
-import os
 import json
 
 from datetime import date
 from email.mime import text
 from itertools import chain
 
-import flask_sqlalchemy
 import sqlalchemy
 import passlib.context
 import passlib.hash
 import passlib.registry
-import time
 import os
 import smtplib
 import idna
@@ -21,16 +18,18 @@ import dns.resolver
 import dns.exception
 
 from flask import current_app as app
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext import declarative
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm.attributes import flag_modified
 from werkzeug.utils import cached_property
 
 from mailu import dkim, utils
 
 
-db = flask_sqlalchemy.SQLAlchemy()
+db = SQLAlchemy()
 
 
 class IdnaDomain(db.TypeDecorator):
@@ -49,6 +48,7 @@ class IdnaDomain(db.TypeDecorator):
         """ decode punycode domain name to unicode """
         return idna.decode(value)
 
+
 class IdnaEmail(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
@@ -59,7 +59,7 @@ class IdnaEmail(db.TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         """ encode unicode domain part of email address to punycode """
-        if not '@' in value:
+        if '@' not in value:
             raise ValueError('invalid email address (no "@")')
         localpart, domain_name = value.lower().rsplit('@', 1)
         if '@' in localpart:
@@ -70,6 +70,7 @@ class IdnaEmail(db.TypeDecorator):
         """ decode punycode domain part of email to unicode """
         localpart, domain_name = value.rsplit('@', 1)
         return f'{localpart}@{idna.decode(domain_name)}'
+
 
 class CommaSeparatedList(db.TypeDecorator):
     """ Stores a list as a comma-separated string, compatible with Postfix.
@@ -92,6 +93,7 @@ class CommaSeparatedList(db.TypeDecorator):
         """ split comma separated string to list """
         return list(filter(bool, (item.strip() for item in value.split(',')))) if value else []
 
+
 class JSONEncoded(db.TypeDecorator):
     """ Represents an immutable structure as a json-encoded string.
     """
@@ -108,7 +110,8 @@ class JSONEncoded(db.TypeDecorator):
         """ decode json to data """
         return json.loads(value) if value else None
 
-class Base(db.Model):
+
+class Base(DeclarativeBase):
     """ Base class for all models
     """
 
@@ -128,7 +131,7 @@ class Base(db.Model):
     def __str__(self):
         pkey = self.__table__.primary_key.columns.values()[0].name
         if pkey == 'email':
-            # ugly hack for email declared attr. _email is not always up2date
+            # ugly hack for email declared attr. _email is not always up to date
             return str(f'{self.localpart}@{self.domain_name}')
         return str(getattr(self, pkey))
 
@@ -148,6 +151,7 @@ class Base(db.Model):
     # in collections.bulk_replace, but auto-incrementing don't always have
     # a valid primary key, in this case we use the object's id
     __hashed = None
+
     def __hash__(self):
         if self.__hashed is None:
             primary = getattr(self, self.__table__.primary_key.columns.values()[0].name)
@@ -160,7 +164,9 @@ class Base(db.Model):
 
 
 # Many-to-many association table for domain managers
-managers = db.Table('manager', Base.metadata,
+managers = db.Table(
+    'manager',
+    Base.metadata,
     db.Column('domain_name', IdnaDomain, db.ForeignKey('domain.name')),
     db.Column('user_email', IdnaEmail, db.ForeignKey('user.email'))
 )
@@ -169,6 +175,8 @@ managers = db.Table('manager', Base.metadata,
 class Config(Base):
     """ In-database configuration values
     """
+
+    __tablename__ = 'config'
 
     name = db.Column(db.String(255), primary_key=True, nullable=False)
     value = db.Column(JSONEncoded)
@@ -180,6 +188,7 @@ def _save_dkim_keys(session):
         if isinstance(obj, Domain):
             obj.save_dkim_key()
 
+
 class Domain(Base):
     """ A DNS domain that has mail addresses associated to it.
     """
@@ -187,8 +196,12 @@ class Domain(Base):
     __tablename__ = 'domain'
 
     name = db.Column(IdnaDomain, primary_key=True, nullable=False)
-    managers = db.relationship('User', secondary=managers,
-        backref=db.backref('manager_of'), lazy='dynamic')
+    managers = db.relationship(
+        'User',
+        secondary=managers,
+        backref=db.backref('manager_of'),
+        lazy='dynamic'
+    )
     max_users = db.Column(db.Integer, nullable=False, default=-1)
     max_aliases = db.Column(db.Integer, nullable=False, default=-1)
     max_quota_bytes = db.Column(db.BigInteger, nullable=False, default=0)
@@ -434,7 +447,7 @@ class Email(object):
     def resolve_domain(cls, email):
         """ resolves domain alternative to real domain """
         localpart, domain_name = email.rsplit('@', 1) if '@' in email else (None, email)
-        if alternative := Alternative.query.get(domain_name):
+        if alternative := db.session.get(Alternative, domain_name):
             domain_name = alternative.domain_name
         return (localpart, domain_name)
 
@@ -453,10 +466,10 @@ class Email(object):
             else:
                 localpart_stripped = localpart[:pos]
 
-        # is localpart@domain_name or localpart_stripped@domain_name an user?
-        user = User.query.get(f'{localpart}@{domain_name}')
+        # is localpart@domain_name or localpart_stripped@domain_name a user?
+        user = db.session.get(User, f"{localpart}@{domain_name}")
         if not user and localpart_stripped:
-            user = User.query.get(f'{localpart_stripped}@{domain_name}')
+            user = db.session.get(User, f"{localpart_stripped}@{domain_name}")
 
         if user:
             email = f'{localpart}@{domain_name}'
@@ -635,7 +648,7 @@ set() containing the sessions to keep
     def get_managed_domains(self):
         """ return list of domains this user can manage """
         if self.global_admin:
-            return Domain.query.all()
+            return db.session.scalars(db.select(Domain)).all()
         else:
             return self.manager_of
 
@@ -656,12 +669,12 @@ set() containing the sessions to keep
     @classmethod
     def get(cls, email):
         """ find user object for email address """
-        return cls.query.get(email)
+        return db.session.execute(db.select(cls).filter_by(email=email)).scalar_one()
 
     @classmethod
     def login(cls, email, password):
         """ login user when enabled and password is valid """
-        user = cls.query.get(email)
+        user = db.session.execute(db.select(cls).filter_by(email=email)).scalar_one()
         return user if (user and user.enabled and user.check_password(password)) else None
 
 

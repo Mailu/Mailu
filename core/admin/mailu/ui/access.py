@@ -5,6 +5,8 @@ import flask
 import flask_login
 import functools
 
+db = models.db
+
 
 def permissions_wrapper(handler):
     """ Decorator that produces a decorator for checking permissions.
@@ -56,7 +58,7 @@ def domain_admin(args, kwargs, model, key):
     either be Domain or an Email subclass (or any class with a
     ``domain`` attribute which stores a related Domain instance).
     """
-    obj = model.query.get(kwargs[key])
+    obj = db.session.get(model, kwargs[key])
     if obj:
         domain = obj if type(obj) is models.Domain else obj.domain
         return domain in flask_login.current_user.get_managed_domains()
@@ -77,7 +79,7 @@ def owner(args, kwargs, model, key):
     """
     if kwargs[key] is None and model == models.User:
         return True
-    obj = model.query.get(kwargs[key])
+    obj = db.session.get(model, kwargs[key])
     if obj:
         user = obj if type(obj) is models.User else obj.user
         return (
@@ -91,7 +93,6 @@ def authenticated(args, kwargs):
     """ The view is only available to logged in users.
     """
     return True
-
 
 
 def confirmation_required(action):

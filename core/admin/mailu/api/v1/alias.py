@@ -28,7 +28,7 @@ class Aliases(Resource):
     @common.api_token_authorization
     def get(self):
         """ List aliases """
-        return models.Alias.query.all()
+        return db.session.scalars(db.select(models.Alias)).all()
 
     @alias.doc('create_alias')
     @alias.expect(alias_fields)
@@ -41,19 +41,20 @@ class Aliases(Resource):
         """ Create a new alias """
         data = api.payload
 
-        alias_found = models.Alias.query.filter_by(email = data['email']).first()
+        alias_found = db.session.get(models.Alias, data['email'])
         if alias_found:
-          return { 'code': 409, 'message': f'Duplicate alias {data["email"]}'}, 409
+            return {'code': 409, 'message': f'Duplicate alias {data["email"]}'}, 409
 
         alias_model = models.Alias(email=data["email"],destination=data['destination'])
         if 'comment' in data:
-          alias_model.comment = data['comment']
+            alias_model.comment = data['comment']
         if 'wildcard' in data:
-          alias_model.wildcard = data['wildcard']
+            alias_model.wildcard = data['wildcard']
         db.session.add(alias_model)
         db.session.commit()
 
         return {'code': 200, 'message': f'Alias {data["email"]} to destination {data["destination"]} has been created'}, 200
+
 
 @alias.route('/<string:alias>')
 class Alias(Resource):
@@ -64,11 +65,11 @@ class Alias(Resource):
     @common.api_token_authorization
     def get(self, alias):
         """ Find alias """
-        alias_found = models.Alias.query.filter_by(email = alias).first()
+        alias_found = db.session.get(models.Alias, alias)
         if alias_found is None:
-          return { 'code': 404, 'message': f'Alias {alias} cannot be found'}, 404
+            return {'code': 404, 'message': f'Alias {alias} cannot be found'}, 404
         else:
-          return marshal(alias_found,alias_fields), 200
+            return marshal(alias_found, alias_fields), 200
 
     @alias.doc('update_alias')
     @alias.expect(alias_fields_update)
@@ -78,20 +79,20 @@ class Alias(Resource):
     @alias.doc(security='Bearer')
     @common.api_token_authorization
     def patch(self, alias):
-      """ Update alias """
-      data = api.payload
-      alias_found = models.Alias.query.filter_by(email = alias).first()
-      if alias_found is None:
-        return { 'code': 404, 'message': f'Alias {alias} cannot be found'}, 404
-      if 'comment' in data:
-        alias_found.comment = data['comment']
-      if 'destination' in data:
-        alias_found.destination = data['destination']
-      if 'wildcard' in data:
-        alias_found.wildcard = data['wildcard']
-      db.session.add(alias_found)
-      db.session.commit()
-      return {'code': 200, 'message': f'Alias {alias} has been updated'}
+        """ Update alias """
+        data = api.payload
+        alias_found = db.session.get(models.Alias, alias)
+        if alias_found is None:
+            return {'code': 404, 'message': f'Alias {alias} cannot be found'}, 404
+        if 'comment' in data:
+            alias_found.comment = data['comment']
+        if 'destination' in data:
+            alias_found.destination = data['destination']
+        if 'wildcard' in data:
+            alias_found.wildcard = data['wildcard']
+        db.session.add(alias_found)
+        db.session.commit()
+        return {'code': 200, 'message': f'Alias {alias} has been updated'}
 
     @alias.doc('delete_alias')
     @alias.response(200, 'Success', response_fields)
@@ -99,13 +100,14 @@ class Alias(Resource):
     @alias.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, alias):
-      """ Delete alias """
-      alias_found = models.Alias.query.filter_by(email = alias).first()
-      if alias_found is None:
-        return { 'code': 404, 'message': f'Alias {alias} cannot be found'}, 404
-      db.session.delete(alias_found)
-      db.session.commit()
-      return {'code': 200, 'message': f'Alias {alias} has been deleted'}, 200
+        """ Delete alias """
+        alias_found = db.session.get(models.Alias, alias)
+        if alias_found is None:
+            return {'code': 404, 'message': f'Alias {alias} cannot be found'}, 404
+        db.session.delete(alias_found)
+        db.session.commit()
+        return {'code': 200, 'message': f'Alias {alias} has been deleted'}, 200
+
 
 @alias.route('/destination/<string:domain>')
 class AliasWithDest(Resource):
@@ -116,11 +118,11 @@ class AliasWithDest(Resource):
     @common.api_token_authorization
     def get(self, domain):
         """ Find aliases of domain """
-        domain_found = models.Domain.query.filter_by(name=domain).first()
+        domain_found = db.session.get(models.Domain, domain)
         if domain_found is None:
-          return { 'code': 404, 'message': f'Domain {domain} cannot be found'}, 404
+            return {'code': 404, 'message': f'Domain {domain} cannot be found'}, 404
         aliases_found = domain_found.aliases
         if aliases_found.count == 0:
-          return { 'code': 404, 'message': f'No alias can be found for domain {domain}'}, 404
+            return {'code': 404, 'message': f'No alias can be found for domain {domain}'}, 404
         else:
-          return marshal(aliases_found, alias_fields), 200
+            return marshal(aliases_found, alias_fields), 200

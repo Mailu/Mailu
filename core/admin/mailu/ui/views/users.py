@@ -7,17 +7,20 @@ import flask_login
 import wtforms
 import wtforms_components
 
+db = models.db
+
+
 @ui.route('/user/list/<domain_name>', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
 def user_list(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = db.get_or_404(models.Domain, domain_name)
     return flask.render_template('user/list.html', domain=domain)
 
 
 @ui.route('/user/create/<domain_name>', methods=['GET', 'POST'])
 @access.domain_admin(models.Domain, 'domain_name')
 def user_create(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = db.get_or_404(models.Domain, domain_name)
     if not domain.max_users == -1 and len(domain.users) >= domain.max_users:
         flask.flash('Too many users for domain %s' % domain, 'error')
         return flask.redirect(
@@ -41,8 +44,8 @@ def user_create(domain_name):
             user = models.User(domain=domain)
             form.populate_obj(user)
             user.set_password(form.pw.data)
-            models.db.session.add(user)
-            models.db.session.commit()
+            db.session.add(user)
+            db.session.commit()
             user.send_welcome()
             flask.flash('User %s created' % user)
             return flask.redirect(
@@ -55,7 +58,7 @@ def user_create(domain_name):
 @ui.route('/user/edit/<path:user_email>', methods=['GET', 'POST'])
 @access.domain_admin(models.User, 'user_email')
 def user_edit(user_email):
-    user = models.User.query.get(user_email) or flask.abort(404)
+    user = db.get_or_404(models.User, user_email)
     # Handle the case where user quota is more than allowed
     max_quota_bytes = user.domain.max_quota_bytes
     if max_quota_bytes and user.quota_bytes > max_quota_bytes:
@@ -76,7 +79,7 @@ def user_edit(user_email):
         form.populate_obj(user)
         if form.pw.data:
             user.set_password(form.pw.data, keep_sessions=set(flask.session))
-        models.db.session.commit()
+        db.session.commit()
         flask.flash('User %s updated' % user)
         return flask.redirect(
             flask.url_for('.user_list', domain_name=user.domain.name))
@@ -89,13 +92,13 @@ def user_edit(user_email):
 @access.owner(models.User, 'user_email')
 def user_settings(user_email):
     user_email_or_current = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email_or_current) or flask.abort(404)
+    user = db.get_or_404(models.User, user_email_or_current)
     form = forms.UserSettingsForm(obj=user)
     utils.formatCSVField(form.forward_destination)
     if form.validate_on_submit():
-        form.forward_destination.data = form.forward_destination.data.replace(" ","").split(",")
+        form.forward_destination.data = form.forward_destination.data.replace(" ", "").split(",")
         form.populate_obj(user)
-        models.db.session.commit()
+        db.session.commit()
         form.forward_destination.data = ", ".join(form.forward_destination.data)
         flask.flash('Settings updated for %s' % user)
         if user_email:
@@ -103,9 +106,10 @@ def user_settings(user_email):
                 flask.url_for('.user_list', domain_name=user.domain.name))
     return flask.render_template('user/settings.html', form=form, user=user)
 
+
 def _process_password_change(form, user_email):
     user_email_or_current = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email_or_current) or flask.abort(404)
+    user = db.get_or_404(models.User, user_email_or_current)
     if form.validate_on_submit():
         if form.pw.data != form.pw2.data:
             flask.flash('Passwords do not match', 'error')
@@ -115,7 +119,7 @@ def _process_password_change(form, user_email):
                 return flask.render_template('user/password.html', form=form, user=user)
             flask.session.regenerate()
             user.set_password(form.pw.data, keep_sessions=set(flask.session))
-            models.db.session.commit()
+            db.session.commit()
             flask.flash('Password updated for %s' % user)
             if user_email:
                 return flask.redirect(flask.url_for('.user_list',
@@ -124,26 +128,29 @@ def _process_password_change(form, user_email):
             flask.flash('Wrong current password', 'error')
     return flask.render_template('user/password.html', form=form, user=user)
 
+
 @ui.route('/user/password', methods=['GET', 'POST'], defaults={'user_email': None})
 @access.owner(models.User, 'user_email')
 def user_password_change(user_email):
     return _process_password_change(forms.UserPasswordChangeForm(), user_email)
+
 
 @ui.route('/user/password/<path:user_email>', methods=['GET', 'POST'])
 @access.domain_admin(models.User, 'user_email')
 def user_password(user_email):
     return _process_password_change(forms.UserPasswordForm(), user_email)
 
+
 @ui.route('/user/reply', methods=['GET', 'POST'], defaults={'user_email': None})
 @ui.route('/user/reply/<path:user_email>', methods=['GET', 'POST'])
 @access.owner(models.User, 'user_email')
 def user_reply(user_email):
     user_email_or_current = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email_or_current) or flask.abort(404)
+    user = db.get_or_404(models.User, user_email_or_current)
     form = forms.UserReplyForm(obj=user)
     if form.validate_on_submit():
         form.populate_obj(user)
-        models.db.session.commit()
+        db.session.commit()
         flask.flash('Auto-reply message updated for %s' % user)
         if user_email:
             return flask.redirect(
@@ -156,7 +163,7 @@ def user_reply(user_email):
 def user_signup(domain_name=None):
     available_domains = {
         domain.name: domain
-        for domain in models.Domain.query.filter_by(signup_enabled=True).all()
+        for domain in db.session.scalars(db.select(models.Domain).filter_by(signup_enabled=True)).all()
         if domain.max_users == -1 or len(domain.users) < domain.max_users
     }
     if not available_domains:
@@ -184,8 +191,8 @@ def user_signup(domain_name=None):
             user.change_pw_next_login = True
             user.set_password(form.pw.data)
             user.quota_bytes = quota_bytes
-            models.db.session.add(user)
-            models.db.session.commit()
+            db.session.add(user)
+            db.session.commit()
             user.send_welcome()
             flask.flash('Successfully signed up %s' % user)
             return flask.redirect(flask.url_for('.index'))

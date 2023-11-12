@@ -1,6 +1,5 @@
-from flask_restx import Resource, fields, marshal
-import validators, datetime
-import flask
+from flask_restx import Resource, fields
+import validators
 from passlib import pwd
 
 from . import api, response_fields
@@ -40,6 +39,7 @@ token_user_post_response = api.model('TokenPostResponse', {
     'Created': fields.String(description='The date when the token was created', example='John.Doe@example.com', attribute='created_at')
 })
 
+
 @token.route('')
 class Tokens(Resource):
     @token.doc('list_tokens')
@@ -48,7 +48,7 @@ class Tokens(Resource):
     @common.api_token_authorization
     def get(self):
         """List tokens"""
-        return models.Token.query.all()
+        return db.session.scalars(db.select(models.Token)).all()
 
     @token.doc('create_token')
     @token.expect(token_user_fields_post)
@@ -62,8 +62,8 @@ class Tokens(Resource):
         data = api.payload
         email = data['email']
         if not validators.email(email):
-            return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
-        user_found = models.User.query.get(email)
+            return {'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
+        user_found = db.session.get(models.User, email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
         tokens = user_found.tokens
@@ -75,19 +75,20 @@ class Tokens(Resource):
             token_new.ip = data['AuthorizedIP'].replace(' ','').split(',')
         raw_password = pwd.genword(entropy=128, length=32, charset="hex")
         token_new.set_password(raw_password)
-        models.db.session.add(token_new)
+        db.session.add(token_new)
         #apply the changes
         db.session.commit()
-        response_dict  = {
-            'id' : token_new.id,
-            'token' : raw_password,
-            'email' : token_new.user_email,
-            'comment' : token_new.comment,
-            'AuthorizedIP' : token_new.ip,
+        response_dict = {
+            'id': token_new.id,
+            'token': raw_password,
+            'email': token_new.user_email,
+            'comment': token_new.comment,
+            'AuthorizedIP': token_new.ip,
             'Created': str(token_new.created_at),
             }
 
-        return  response_dict
+        return response_dict
+
 
 @token.route('user/<string:email>')
 class Token(Resource):
@@ -96,10 +97,10 @@ class Token(Resource):
     @token.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, email):
-        "Find tokens of user"
+        """Find tokens of user"""
         if not validators.email(email):
-            return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
-        user_found = models.User.query.get(email)
+            return {'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
+        user_found = db.session.get(models.User, email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
         tokens = user_found.tokens
@@ -116,8 +117,8 @@ class Token(Resource):
         """ Create a new token for user"""
         data = api.payload
         if not validators.email(email):
-            return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
-        user_found = models.User.query.get(email)
+            return {'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
+        user_found = db.session.get(models.User, email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
 
@@ -125,21 +126,22 @@ class Token(Resource):
         if 'comment' in data:
             token_new.comment = data['comment']
         if 'AuthorizedIP' in data:
-            token_new.ip = token_new.ip = data['AuthorizedIP'].replace(' ','').split(',')
+            token_new.ip = token_new.ip = data['AuthorizedIP'].replace(' ', '').split(',')
         raw_password = pwd.genword(entropy=128, length=32, charset="hex")
         token_new.set_password(raw_password)
-        models.db.session.add(token_new)
+        db.session.add(token_new)
         #apply the changes
         db.session.commit()
-        response_dict  = {
-            'id' : token_new.id,
-            'token' : raw_password,
-            'email' : token_new.user_email,
-            'comment' : token_new.comment,
-            'AuthorizedIP' : token_new.ip,
+        response_dict = {
+            'id': token_new.id,
+            'token': raw_password,
+            'email': token_new.user_email,
+            'comment': token_new.comment,
+            'AuthorizedIP': token_new.ip,
             'Created': str(token_new.created_at),
             }
-        return  response_dict
+        return response_dict
+
 
 @token.route('/<string:token_id>')
 class Token(Resource):
@@ -148,10 +150,10 @@ class Token(Resource):
     @token.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, token_id):
-        "Find token"
-        token = models.Token.query.get(token_id)
+        """Find token"""
+        token = db.session.get(models.Token, token_id)
         if not token:
-            return { 'code' : 404, 'message' : f'Record cannot be found for id {token_id} or invalid id provided'}, 404
+            return {'code': 404, 'message': f'Record cannot be found for id {token_id} or invalid id provided'}, 404
         return token
 
     @token.doc('delete_token')
@@ -162,9 +164,9 @@ class Token(Resource):
     @common.api_token_authorization
     def delete(self, token_id):
         """ Delete token """
-        token = models.Token.query.get(token_id)
+        token = db.session.get(models.Token, token_id)
         if not token:
-            return { 'code' : 404, 'message' : f'Record cannot be found for id {token_id} or invalid id provided'}, 404
+            return {'code': 404, 'message': f'Record cannot be found for id {token_id} or invalid id provided'}, 404
         db.session.delete(token)
         db.session.commit()
         return {'code': 200, 'message': f'Token with id {token_id} has been deleted'}, 200

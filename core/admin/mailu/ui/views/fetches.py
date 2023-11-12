@@ -6,6 +6,8 @@ import flask
 import flask_login
 import wtforms
 
+db = models.db
+
 
 @ui.route('/fetch/list', methods=['GET', 'POST'], defaults={'user_email': None})
 @ui.route('/fetch/list/<path:user_email>', methods=['GET'])
@@ -14,7 +16,7 @@ def fetch_list(user_email):
     if not app.config['FETCHMAIL_ENABLED']:
         flask.abort(404)
     user_email = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email) or flask.abort(404)
+    user = db.get_or_404(models.User, user_email)
     return flask.render_template('fetch/list.html', user=user)
 
 
@@ -25,7 +27,7 @@ def fetch_create(user_email):
     if not app.config['FETCHMAIL_ENABLED']:
         flask.abort(404)
     user_email = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email) or flask.abort(404)
+    user = db.get_or_404(models.User, user_email)
     form = forms.FetchForm()
     form.password.validators = [wtforms.validators.DataRequired()]
     utils.formatCSVField(form.folders)
@@ -34,8 +36,8 @@ def fetch_create(user_email):
         form.populate_obj(fetch)
         if form.folders.data:
             fetch.folders = form.folders.data.replace(' ','').split(',')
-        models.db.session.add(fetch)
-        models.db.session.commit()
+        db.session.add(fetch)
+        db.session.commit()
         flask.flash('Fetch configuration created')
         return flask.redirect(
             flask.url_for('.fetch_list', user_email=user.email))
@@ -47,7 +49,7 @@ def fetch_create(user_email):
 def fetch_edit(fetch_id):
     if not app.config['FETCHMAIL_ENABLED']:
         flask.abort(404)
-    fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
+    fetch = db.get_or_404(models.Fetch, fetch_id)
     form = forms.FetchForm(obj=fetch)
     utils.formatCSVField(form.folders)
     if form.validate_on_submit():
@@ -56,7 +58,7 @@ def fetch_edit(fetch_id):
         form.populate_obj(fetch)
         if form.folders.data:
             fetch.folders = form.folders.data.replace(' ','').split(',')
-        models.db.session.commit()
+        db.session.commit()
         flask.flash('Fetch configuration updated')
         return flask.redirect(
             flask.url_for('.fetch_list', user_email=fetch.user.email))
@@ -70,10 +72,10 @@ def fetch_edit(fetch_id):
 def fetch_delete(fetch_id):
     if not app.config['FETCHMAIL_ENABLED']:
         flask.abort(404)
-    fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
+    fetch = db.get_or_404(models.Fetch, fetch_id)
     user = fetch.user
-    models.db.session.delete(fetch)
-    models.db.session.commit()
+    db.session.delete(fetch)
+    db.session.commit()
     flask.flash('Fetch configuration delete')
     return flask.redirect(
         flask.url_for('.fetch_list', user_email=user.email))

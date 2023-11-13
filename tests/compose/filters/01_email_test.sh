@@ -1,6 +1,7 @@
 python3 tests/email_test.py message-virus "tests/compose/filters/eicar.com.txt"
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 if [ $? -ne 25 ]; then
   exit 1
 =======
@@ -24,6 +25,13 @@ fi
 python3 tests/email_test.py message-PUA "tests/compose/filters/PotentiallyUnwanted.exe_"
 if [ $? -ne 99 ]; then
 >>>>>>> 6765c45a (simplify)
+=======
+if [ $? -ne 25 ]; then
+  exit 1
+fi
+python3 tests/email_test.py message-PUA "tests/compose/filters/PotentiallyUnwanted.exe_"
+if [ $? -ne 25 ]; then
+>>>>>>> a61f31e7 (Now it should fail earlier)
   exit 1
 fi
 

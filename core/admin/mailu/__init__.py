@@ -12,7 +12,7 @@ import hmac
 
 class NoPingFilter(logging.Filter):
     def filter(self, record):
-        if (record.args['{host}i'] == 'localhost' and record.args['r'] == 'GET /ping HTTP/1.1'):
+        if record.args['r'].endswith(' /ping HTTP/1.1'):
             return False
         if record.args['r'].endswith(' /internal/rspamd/local_domains HTTP/1.1'):
             return False

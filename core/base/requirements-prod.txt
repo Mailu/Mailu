@@ -87,7 +87,7 @@ vobject==0.9.6.1
 watchdog==3.0.0
 Werkzeug===2.3.7
 wrapt==1.15.0
-WTForms==3.1.0
+WTForms==3.1.1
 WTForms-Components==0.10.5
 xmltodict==0.13.0
 yarl==1.9.2

@@ -33,14 +33,18 @@ for i in range(5):
 
         smtp_server.sendmail("admin@mailu.io", "user@mailu.io", msg.as_string())
         smtp_server.quit()
+    except smtplib.SMTPRecipientsRefused:
+            sys.exit(25)
     except smtplib.SMTPDataError as e:
         if e.smtp_code == 451:
             print(f"Not ready attempt {i}")
             time.sleep(5)
             continue
-        sys.exit(25)
+        if e.smtp_code >= 500 and e.smtp_code <600:
+            sys.exit(25)
+        sys.exit(2525)
     except:
-        sys.exit(25)
+        sys.exit(2525)
     break
 
 time.sleep(30)

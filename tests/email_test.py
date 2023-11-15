@@ -21,19 +21,27 @@ if len(sys.argv) == 3:
     part.add_header('Content-Disposition', "attachment; filename=%s" % ntpath.basename(sys.argv[2]))
     msg.attach(part)
 
-try:
-    smtp_server = smtplib.SMTP('localhost')
-    smtp_server.set_debuglevel(1)
-    smtp_server.connect('localhost', 587)
-    smtp_server.ehlo()
-    smtp_server.starttls()
-    smtp_server.ehlo()
-    smtp_server.login("admin@mailu.io", "password")
+for i in range(5):
+    try:
+        smtp_server = smtplib.SMTP('localhost')
+        smtp_server.set_debuglevel(1)
+        smtp_server.connect('localhost', 587)
+        smtp_server.ehlo()
+        smtp_server.starttls()
+        smtp_server.ehlo()
+        smtp_server.login("admin@mailu.io", "password")
 
-    smtp_server.sendmail("admin@mailu.io", "user@mailu.io", msg.as_string())
-    smtp_server.quit()
-except:
-    sys.exit(25)
+        smtp_server.sendmail("admin@mailu.io", "user@mailu.io", msg.as_string())
+        smtp_server.quit()
+    except smtplib.SMTPDataError as e:
+        if e.smtp_code == 451:
+            print(f"Not ready attempt {i}")
+            time.sleep(5)
+            continue
+        sys.exit(25)
+    except:
+        sys.exit(25)
+    break
 
 time.sleep(30)
 

@@ -1,0 +1,1 @@
+Ensure that we do not silently discard PUAs flagged by clamav. Instead we will reject emails.

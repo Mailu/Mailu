@@ -271,7 +271,8 @@ The ``PROXY_PROTOCOL`` (default: unset) allows the the front container to receiv
 the `PROXY protocol`_ (originally introduced in HAProxy, now also configurable in other proxy servers).
 It can be set to:
 
-* ``http`` to accept the ``PROXY`` protocol on nginx's HTTP proxy ports
+* ``https`` to accept the ``PROXY`` protocol on nginx's HTTPS proxy ports
+* ``http`` to accept the ``PROXY`` protocol on nginx's HTTP and HTTPS proxy ports
 * ``mail`` to accept the ``PROXY`` protocol on nginx's mail proxy ports
 * ``all`` to accept the ``PROXY`` protocol on all nginx's HTTP and mail proxy ports
 

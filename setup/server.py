@@ -120,28 +120,10 @@ def build_app(path):
         except ValueError as err:
             flask.flash('Invalid configuration: ' + str(err))
             valid = False
-        if data['webmail_type'] != 'none':
-            if data['webmail_path'] == '':
-                flask.flash('Webmail path cannot be empty when webmail is enabled', 'error')
-                valid = False
-            if data['webmail_path'][0] != '/':
-                flask.flash('Webmail path must start with a leading slash "/"', 'error')
-                valid = False
-        if 'admin_enabled' in data:
-            if data['admin_enabled'] == 'true':
-                if data['admin_path'] == '':
-                    flask.flash('Admin path cannot be empty when admin is enabled', 'error')
-                    valid = False
-                if data['admin_path'][0] != '/':
-                    flask.flash('Admin path must start with a leading slash "/"', 'error')
-                    valid = False
         if 'api_enabled' in data:
             if (data['api_enabled'] == 'true'):
-                if  data['api_path'] == '' or data['api_token'] == '':
-                    flask.flash('API path and API token cannot be empty when API is enabled', 'error')
-                    valid = False
-                if data['api_path'][0] != '/':
-                    flask.flash('API path must start with a leading slash "/"', 'error')
+                if  data['api_token'] == '':
+                    flask.flash('API token cannot be empty when API is enabled', 'error')
                     valid = False
         if valid:
             db.set(data['uid'], json.dumps(data))

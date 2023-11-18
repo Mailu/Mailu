@@ -4,7 +4,7 @@
 <div class="form-group">
   <label>Mailu storage path: </label>
 <!--   Validates path -->
-  <input class="form-control" type="text" name="root" value="/mailu" required pattern="^/[-_A-Za-z0-9]+(/[-_A-Za-z0-9]*)*">
+  <input class="form-control" type="text" name="root" value="/mailu" required pattern="^\/[\-_A-Za-z0-9\.]+(\/[\-_A-Za-z0-9\.]*)*">
 </div>
 
 <p>In the following sections we need to set the postmaster address. This is a combination of the <i>postmaster</i> local part and the <i>main mail domain</i>.
@@ -60,8 +60,8 @@ Or in plain english: if receivers start to classify your mail as spam, this post
 
 <div class="form-check form-check-inline">
   <label class="form-check-label">
-    <input class="form-check-input" type="checkbox" name="disable_statistics" value="True">
-    Opt-out of statistics
+    <input class="form-check-input" type="checkbox" name="statistics_enabled"  value="True">
+    Opt-in for anonymized statistics
   </label>
 </div>
 
@@ -82,8 +82,7 @@ manage your email domains, users, etc.</p>
 
 <div class="form-group">
     <input type="checkbox" name="admin_enabled" value="true" id="admin" checked>
-  	<label>Enable the admin UI (and path to the admin UI)</label>
-    <input class="form-control" type="text" name="admin_path" id="admin_path" style="display: none">
+  	<label>Enable the admin UI</label>
 </div>
 
 <p>The API interface is a RESTful API for changing the Mailu configuration.
@@ -93,14 +92,10 @@ manage your email domains, users, etc.</p>
 
   <div class="form-group">
       <input type="checkbox" name="api_enabled" value="true" id="api_enabled" >
-      <label>Enable the API (and path to the API)</label>
-      <input class="form-control" type="text" name="api_path" id="api_path" style="display: none">
+      <label>Enable the API</label>
+      <br>
       <label name="api_token_label" id="api_token_label">API token</label>
       <input class="form-control" type="text" name="api_token" id="api_token" style="display: none" value="{{ secret(32) }}">
   </div>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
-<script type="text/javascript" src="{{ url_for('static', filename='render.js') }}"></script>
 
 {% endcall %}

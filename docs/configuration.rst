@@ -274,6 +274,13 @@ It can be set to:
 * ``http`` to accept the ``PROXY`` protocol on nginx's HTTP proxy ports
 * ``mail`` to accept the ``PROXY`` protocol on nginx's mail proxy ports
 * ``all`` to accept the ``PROXY`` protocol on all nginx's HTTP and mail proxy ports
+* ``smtp`` to accept the ``PROXY`` protocol on TCP 25 only
+* ``imap`` to accept the ``PROXY`` protocol on TCP 143 only
+* ``pop3`` to accept the ``PROXY`` protocol on TCP 110 only
+* ``submissions`` to accept the ``PROXY`` protocol on TCP 465 only
+* ``submission`` to accept the ``PROXY`` protocol on TCP 587 only
+* ``smtp`` to accept the ``PROXY`` protocol on TCP 995 only
+* ``imaps`` to accept the ``PROXY`` protocol on TCP 993 only
 
 .. _`PROXY protocol`: https://github.com/haproxy/haproxy/blob/master/doc/proxy-protocol.txt
 

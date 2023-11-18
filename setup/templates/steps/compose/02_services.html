@@ -9,7 +9,7 @@ bound to the internal IMAP and SMTP server for users to access their mailbox thr
 the Web. By exposing a complex application such as a Webmail, you should be aware of
 the security implications caused by such an increase of attack surface.<p>
 <div class="form-group">
-  <label>Enable Web email client (and path to the Web email client)</label>
+  <label>Enable Web email client</label>
   <br/>
   <select class="btn btn-primary dropdown-toggle" name="webmail_type" id="webmail">
   	{% for webmailtype in ["none", "roundcube", "snappymail"] %}
@@ -17,9 +17,6 @@ the security implications caused by such an increase of attack surface.<p>
   	{% endfor %}
   </select>
   <p></p>
-  <div class="input-group">
-    <input class="form-control" type="text" name="webmail_path" id="webmail_path" style="display: none">
-  </div>
 </div>
 
 

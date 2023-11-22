@@ -1,11 +1,14 @@
 import hmac
 import logging as log
 import os
+import signal
 import sys
 import re
 from pwd import getpwnam
 import socket
 import tenacity
+import subprocess
+import threading
 
 @tenacity.retry(stop=tenacity.stop_after_attempt(100),
                 wait=tenacity.wait_random(min=2, max=5))
@@ -27,7 +30,7 @@ def _coerce_value(value):
     return value
 
 class LogFilter(object):
-    def __init__(self, stream, re_patterns, log_file):
+    def __init__(self, stream, re_patterns):
         self.stream = stream
         if isinstance(re_patterns, list):
             self.pattern = re.compile('|'.join([f'(?:{pattern})' for pattern in re_patterns]))
@@ -36,7 +39,6 @@ class LogFilter(object):
         else:
             self.pattern = re_patterns
         self.found = False
-        self.log_file = log_file
 
     def __getattr__(self, attr_name):
         return getattr(self.stream, attr_name)
@@ -48,12 +50,6 @@ class LogFilter(object):
             if not self.pattern.search(data):
                 self.stream.write(data)
                 self.stream.flush()
-                if self.log_file:
-                    try:
-                        with open(self.log_file, 'a', encoding='utf-8') as l:
-                            l.write(data)
-                    except:
-                        pass
             else:
                 # caught bad pattern
                 self.found = True
@@ -66,22 +62,29 @@ def _is_compatible_with_hardened_malloc():
         lines = f.readlines()
         for line in lines:
             # See #2764, we need vmovdqu
-            if line.startswith('flags') and ' avx ' not in line:
+            # See #2959, we need vpunpckldq
+            if line.startswith('flags') and ' avx2 ' not in line:
                 return False
             # See #2541
             if line.startswith('Features') and ' lrcpc ' not in line:
                 return False
     return True
 
-def set_env(required_secrets=[], log_filters=[], log_file=None):
-    if log_filters:
-        sys.stdout = LogFilter(sys.stdout, log_filters, log_file)
-        sys.stderr = LogFilter(sys.stderr, log_filters, log_file)
-    log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", 'WARNING'))
 
-    if 'LD_PRELOAD' in os.environ and not _is_compatible_with_hardened_malloc():
-        log.warning('Disabling hardened-malloc on this CPU')
-        del os.environ['LD_PRELOAD']
+def sigterm_handler(_signo, _stack_frame):
+    log.critical("Received SIGTERM, terminating.")
+    sys.exit(143)
+
+def set_env(required_secrets=[], log_filters=[]):
+    if log_filters:
+        sys.stdout = LogFilter(sys.stdout, log_filters)
+        sys.stderr = LogFilter(sys.stderr, log_filters)
+    log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", 'WARNING'))
+    signal.signal(signal.SIGTERM, sigterm_handler)
+
+    if not 'LD_PRELOAD' in os.environ and _is_compatible_with_hardened_malloc():
+        log.warning('Your CPU has Advanced Vector Extensions available, we recommend you enable hardened-malloc earlier in the boot process by adding LD_PRELOAD=/usr/lib/libhardened_malloc.so to your mailu.env')
+        os.environ['LD_PRELOAD'] = '/usr/lib/libhardened_malloc.so'
 
     """ This will set all the environment variables and retains only the secrets we need """
     if 'SECRET_KEY_FILE' in os.environ:
@@ -114,3 +117,24 @@ def drop_privs_to(username='mailu'):
     os.setgid(pwnam.pw_gid)
     os.setuid(pwnam.pw_uid)
     os.environ['HOME'] = pwnam.pw_dir
+
+# forwards text lines from src to dst in an infinite loop
+def forward_text_lines(src, dst):
+    while True:
+        current_line = src.readline()
+        dst.write(current_line)
+
+
+# runs a process and passes its standard/error output to the standard/error output of the current python script
+def run_process_and_forward_output(cmd):
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    stdout_thread = threading.Thread(target=forward_text_lines, args=(process.stdout, sys.stdout))
+    stdout_thread.daemon = True
+    stdout_thread.start()
+
+    stderr_thread = threading.Thread(target=forward_text_lines, args=(process.stderr, sys.stderr))
+    stderr_thread.daemon = True
+    stderr_thread.start()
+
+    process.wait()

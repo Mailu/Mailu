@@ -1,0 +1,731 @@
+# Persian translations for Mailu.
+# Copyright (C) 2023 Mailu
+# This file is distributed under the same license as the Mailu project.
+# Hossein Hosni <hosni.hossein@gmail.com>, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: hosni.hossein@gmail.com\n"
+"POT-Creation-Date: 2023-09-09 00:33+0330\n"
+"PO-Revision-Date: 2023-09-09 01:21+0330\n"
+"Last-Translator: Hossein Hosni <hosni.hossein@gmail.com>\n"
+"Language-Team: Persian <https://translate.tedomum.net/projects/mailu/admin/"
+"en/>\n"
+"Language: fa\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n==0 || n==1);\n"
+"Generated-By: Babel 2.3.4\n"
+"X-Generator: Poedit 3.3.2\n"
+
+#: mailu/sso/forms.py:8 mailu/ui/forms.py:79
+msgid "E-mail"
+msgstr "پست الکترونیک"
+
+#: mailu/sso/forms.py:9 mailu/ui/forms.py:80 mailu/ui/forms.py:93
+#: mailu/ui/forms.py:112 mailu/ui/forms.py:166
+#: mailu/ui/templates/client.html:32 mailu/ui/templates/client.html:57
+msgid "Password"
+msgstr "گذرواژه"
+
+#: mailu/sso/forms.py:10 mailu/sso/forms.py:11 mailu/sso/templates/login.html:4
+#: mailu/ui/templates/sidebar.html:142
+msgid "Sign in"
+msgstr "ورود"
+
+#: mailu/sso/templates/base_sso.html:8 mailu/ui/templates/base.html:8
+msgid "Admin page for"
+msgstr "صفحه مدیریت برای"
+
+#: mailu/sso/templates/base_sso.html:19 mailu/ui/templates/base.html:19
+msgid "toggle sidebar"
+msgstr "نوار کناری را تغییر دهید"
+
+#: mailu/sso/templates/base_sso.html:37 mailu/ui/templates/base.html:37
+msgid "change language"
+msgstr "تغییر زبان"
+
+#: mailu/sso/templates/sidebar_sso.html:4 mailu/ui/templates/sidebar.html:94
+msgid "Go to"
+msgstr "برو به"
+
+#: mailu/sso/templates/sidebar_sso.html:9 mailu/ui/templates/client.html:4
+#: mailu/ui/templates/sidebar.html:50 mailu/ui/templates/sidebar.html:107
+msgid "Client setup"
+msgstr "تنظیمات سرویس‌گیرنده"
+
+#: mailu/sso/templates/sidebar_sso.html:16 mailu/ui/templates/sidebar.html:114
+msgid "Website"
+msgstr "وب سایت"
+
+#: mailu/sso/templates/sidebar_sso.html:22 mailu/ui/templates/sidebar.html:120
+msgid "Help"
+msgstr "راهنما"
+
+#: mailu/sso/templates/sidebar_sso.html:35
+#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:127
+msgid "Register a domain"
+msgstr "ثبت دامنه"
+
+#: mailu/sso/templates/sidebar_sso.html:49 mailu/ui/forms.py:95
+#: mailu/ui/templates/sidebar.html:149 mailu/ui/templates/user/signup.html:4
+#: mailu/ui/templates/user/signup_domain.html:4
+msgid "Sign up"
+msgstr "ثبت‌نام"
+
+#: mailu/ui/forms.py:33 mailu/ui/forms.py:36
+msgid "Invalid email address."
+msgstr "پست‌الکترونیک اشتباه است."
+
+#: mailu/ui/forms.py:45
+msgid "Confirm"
+msgstr "تایید"
+
+#: mailu/ui/forms.py:48 mailu/ui/forms.py:58
+#: mailu/ui/templates/domain/details.html:26
+#: mailu/ui/templates/domain/list.html:19 mailu/ui/templates/relay/list.html:18
+msgid "Domain name"
+msgstr "آدرس دامنه"
+
+#: mailu/ui/forms.py:49
+msgid "Maximum user count"
+msgstr "حداکثر تعداد کاربر"
+
+#: mailu/ui/forms.py:50
+msgid "Maximum alias count"
+msgstr "حداکثر تعداد نام مستعار"
+
+#: mailu/ui/forms.py:51
+msgid "Maximum user quota"
+msgstr "حداکثر سهمیه کاربر"
+
+#: mailu/ui/forms.py:52
+msgid "Enable sign-up"
+msgstr "فعال کردن ثبت نام"
+
+#: mailu/ui/forms.py:53 mailu/ui/forms.py:74 mailu/ui/forms.py:86
+#: mailu/ui/forms.py:132 mailu/ui/forms.py:144
+#: mailu/ui/templates/alias/list.html:22 mailu/ui/templates/domain/list.html:22
+#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:20
+#: mailu/ui/templates/user/list.html:24
+msgid "Comment"
+msgstr "یادداشت"
+
+#: mailu/ui/forms.py:54 mailu/ui/forms.py:68 mailu/ui/forms.py:75
+#: mailu/ui/forms.py:88 mailu/ui/forms.py:136 mailu/ui/forms.py:145
+msgid "Save"
+msgstr "ذخیره"
+
+#: mailu/ui/forms.py:59
+msgid "Initial admin"
+msgstr "مدیر نخستین"
+
+#: mailu/ui/forms.py:60
+msgid "Admin password"
+msgstr "گذرواژه مدیریت"
+
+#: mailu/ui/forms.py:61 mailu/ui/forms.py:81 mailu/ui/forms.py:94
+msgid "Confirm password"
+msgstr "تایید گذرواژه"
+
+#: mailu/ui/forms.py:63
+msgid "Create"
+msgstr "ایجاد"
+
+#: mailu/ui/forms.py:67
+msgid "Alternative name"
+msgstr "نام جایگزین"
+
+#: mailu/ui/forms.py:72
+msgid "Relayed domain name"
+msgstr "نام دامنه میانجی"
+
+#: mailu/ui/forms.py:73 mailu/ui/templates/relay/list.html:19
+msgid "Remote host"
+msgstr "میزبان راه‌دور"
+
+#: mailu/ui/forms.py:82 mailu/ui/templates/user/list.html:23
+#: mailu/ui/templates/user/signup_domain.html:16
+msgid "Quota"
+msgstr "سهمیه"
+
+#: mailu/ui/forms.py:83
+msgid "Allow IMAP access"
+msgstr "دسترسی IMAP مجاز باشد"
+
+#: mailu/ui/forms.py:84
+msgid "Allow POP3 access"
+msgstr "دسترسی POP3 مجاز باشد"
+
+#: mailu/ui/forms.py:85 mailu/ui/forms.py:101
+#: mailu/ui/templates/user/settings.html:15
+msgid "Displayed name"
+msgstr "نام نمایشی"
+
+#: mailu/ui/forms.py:87
+msgid "Enabled"
+msgstr "فعال"
+
+#: mailu/ui/forms.py:92
+msgid "Email address"
+msgstr "پست الکترونیکی"
+
+#: mailu/ui/forms.py:102
+msgid "Enable spam filter"
+msgstr "فعال‌کردن پایش هرزنامه"
+
+#: mailu/ui/forms.py:103
+msgid "Enable marking spam mails as read"
+msgstr "فعال‌سازی علامت‌زدن هرزنامه به عنوان خوانده‌شده"
+
+#: mailu/ui/forms.py:104
+msgid "Spam filter tolerance"
+msgstr "بازه تحمل هرزنامه"
+
+#: mailu/ui/forms.py:105
+msgid "Enable forwarding"
+msgstr "فعال‌سازی بازارسال"
+
+#: mailu/ui/forms.py:106
+msgid "Keep a copy of the emails"
+msgstr "نگهداری رونوشت از پست‌الکترونیک"
+
+#: mailu/ui/forms.py:107 mailu/ui/forms.py:143
+#: mailu/ui/templates/alias/list.html:21
+msgid "Destination"
+msgstr "مقصد"
+
+#: mailu/ui/forms.py:108
+msgid "Save settings"
+msgstr "ذخیره تنظیمات"
+
+#: mailu/ui/forms.py:113
+msgid "Password check"
+msgstr "بررسی گذرواژه"
+
+#: mailu/ui/forms.py:114 mailu/ui/templates/sidebar.html:25
+msgid "Update password"
+msgstr "بروزرسانی گذرواژه"
+
+#: mailu/ui/forms.py:118
+msgid "Enable automatic reply"
+msgstr "فعال‌سازی پاسخگوی‌خودکار"
+
+#: mailu/ui/forms.py:119
+msgid "Reply subject"
+msgstr "موضوع پاسخگویی"
+
+#: mailu/ui/forms.py:120
+msgid "Reply body"
+msgstr "متن پاسخگویی"
+
+#: mailu/ui/forms.py:122
+msgid "Start of vacation"
+msgstr "شروع استراحت"
+
+#: mailu/ui/forms.py:123
+msgid "End of vacation"
+msgstr "پایان استراحت"
+
+#: mailu/ui/forms.py:124
+msgid "Update"
+msgstr "بروزرسانی"
+
+#: mailu/ui/forms.py:129
+msgid "Your token (write it down, as it will never be displayed again)"
+msgstr "کلید شما (کلید را یادداشت کنید، چرا که دوباره نمایش داده نخواهد شد)"
+
+#: mailu/ui/forms.py:134 mailu/ui/templates/token/list.html:21
+msgid "Authorized IP"
+msgstr "Authorized IP"
+
+#: mailu/ui/forms.py:140
+msgid "Alias"
+msgstr "Alias"
+
+#: mailu/ui/forms.py:142
+msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"
+msgstr "استفاده از قواعد اس‌کیو‌ال (برای پوشش الایس‌ها)"
+
+#: mailu/ui/forms.py:149
+msgid "Admin email"
+msgstr "افزودن پست‌الکترونیکی"
+
+#: mailu/ui/forms.py:150 mailu/ui/forms.py:155 mailu/ui/forms.py:168
+msgid "Submit"
+msgstr "ثبت"
+
+#: mailu/ui/forms.py:154
+msgid "Manager email"
+msgstr "مدیریت پست‌الکترونیک"
+
+#: mailu/ui/forms.py:159
+msgid "Protocol"
+msgstr "پرتکل"
+
+#: mailu/ui/forms.py:162
+msgid "Hostname or IP"
+msgstr "نشانی یا آی‌پی"
+
+#: mailu/ui/forms.py:163 mailu/ui/templates/client.html:20
+#: mailu/ui/templates/client.html:45
+msgid "TCP port"
+msgstr "پورت تی‌سی‌پی"
+
+#: mailu/ui/forms.py:164
+msgid "Enable TLS"
+msgstr "فعال‌سازی TLS"
+
+#: mailu/ui/forms.py:165 mailu/ui/templates/client.html:28
+#: mailu/ui/templates/client.html:53 mailu/ui/templates/fetch/list.html:21
+msgid "Username"
+msgstr "نام‌کاربری"
+
+#: mailu/ui/forms.py:167
+msgid "Keep emails on the server"
+msgstr "نگهداری ایمیل در سرور"
+
+#: mailu/ui/forms.py:172
+msgid "Announcement subject"
+msgstr "موضوع آگهی"
+
+#: mailu/ui/forms.py:174
+msgid "Announcement body"
+msgstr "متن آگهی"
+
+#: mailu/ui/forms.py:176
+msgid "Send"
+msgstr "ارسال"
+
+#: mailu/ui/templates/announcement.html:4
+msgid "Public announcement"
+msgstr "آگهی عمومی"
+
+#: mailu/ui/templates/antispam.html:4 mailu/ui/templates/sidebar.html:80
+#: mailu/ui/templates/user/settings.html:19
+msgid "Antispam"
+msgstr "ضدهرزنامه"
+
+#: mailu/ui/templates/antispam.html:8
+msgid "RSPAMD status page"
+msgstr "صفحه گزارش وضعیت RSPAMD"
+
+#: mailu/ui/templates/client.html:8
+msgid "configure your email client"
+msgstr "تنظیمات کاربر پست‌الکترونیک"
+
+#: mailu/ui/templates/client.html:13
+msgid "Incoming mail"
+msgstr "ایمیل ورودی"
+
+#: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:41
+msgid "Mail protocol"
+msgstr "پرتکل ایمیل"
+
+#: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:49
+msgid "Server name"
+msgstr "نام سرور"
+
+#: mailu/ui/templates/client.html:38
+msgid "Outgoing mail"
+msgstr "ایمیل خروجی"
+
+#: mailu/ui/templates/confirm.html:4
+msgid "Confirm action"
+msgstr "تایید دستور"
+
+#: mailu/ui/templates/confirm.html:13
+#, python-format
+msgid "You are about to %(action)s. Please confirm your action."
+msgstr "شما در حال انجام %(action)s هستید. لطفا دستور را تایید کنید."
+
+#: mailu/ui/templates/docker-error.html:4
+msgid "Docker error"
+msgstr "خطای داکر"
+
+#: mailu/ui/templates/docker-error.html:12
+msgid "An error occurred while talking to the Docker server."
+msgstr "خطایی در هنگام ارتباط با سرور داکر به وجود آمده است."
+
+#: mailu/ui/templates/macros.html:129
+msgid "copy to clipboard"
+msgstr "کپی در حافظه"
+
+#: mailu/ui/templates/sidebar.html:15
+msgid "My account"
+msgstr "حساب من"
+
+#: mailu/ui/templates/sidebar.html:19 mailu/ui/templates/user/list.html:37
+msgid "Settings"
+msgstr "تنظیمات"
+
+#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/user/list.html:38
+msgid "Auto-reply"
+msgstr "پاسخ‌گوی خودکار"
+
+#: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:37
+#: mailu/ui/templates/user/list.html:39
+msgid "Fetched accounts"
+msgstr "اکانت‌ها واکشی‌شده"
+
+#: mailu/ui/templates/sidebar.html:43 mailu/ui/templates/token/list.html:4
+msgid "Authentication tokens"
+msgstr "کلیدهای احراز هویت"
+
+#: mailu/ui/templates/sidebar.html:56
+msgid "Administration"
+msgstr "مدیریت"
+
+#: mailu/ui/templates/sidebar.html:62
+msgid "Announcement"
+msgstr "آگهی"
+
+#: mailu/ui/templates/sidebar.html:68
+msgid "Administrators"
+msgstr "مدیران"
+
+#: mailu/ui/templates/sidebar.html:74
+msgid "Relayed domains"
+msgstr "دامنه‌های میانجی"
+
+#: mailu/ui/templates/sidebar.html:88
+msgid "Mail domains"
+msgstr "دامنه‌های ایمیل"
+
+#: mailu/ui/templates/sidebar.html:99
+msgid "Webmail"
+msgstr "پنل‌وب‌ایمیل"
+
+#: mailu/ui/templates/sidebar.html:135
+msgid "Sign out"
+msgstr "خروج"
+
+#: mailu/ui/templates/working.html:4
+msgid "We are still working on this feature!"
+msgstr "ما داریم روی این قابلیت زحمت می‌کشیم :)"
+
+#: mailu/ui/templates/admin/create.html:4
+msgid "Add a global administrator"
+msgstr "افزودن مدیرکل"
+
+#: mailu/ui/templates/admin/list.html:4
+msgid "Global administrators"
+msgstr "مدیران کلی"
+
+#: mailu/ui/templates/admin/list.html:9
+msgid "Add administrator"
+msgstr "افزودن مدیر"
+
+#: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
+#: mailu/ui/templates/alternative/list.html:19
+#: mailu/ui/templates/domain/list.html:17 mailu/ui/templates/fetch/list.html:19
+#: mailu/ui/templates/manager/list.html:19
+#: mailu/ui/templates/relay/list.html:17 mailu/ui/templates/token/list.html:19
+#: mailu/ui/templates/user/list.html:19
+msgid "Actions"
+msgstr "عملیات"
+
+#: mailu/ui/templates/admin/list.html:18 mailu/ui/templates/alias/list.html:20
+#: mailu/ui/templates/manager/list.html:20 mailu/ui/templates/user/list.html:21
+msgid "Email"
+msgstr "پست‌الکترونیک"
+
+#: mailu/ui/templates/admin/list.html:25 mailu/ui/templates/alias/list.html:32
+#: mailu/ui/templates/alternative/list.html:29
+#: mailu/ui/templates/domain/list.html:34 mailu/ui/templates/fetch/list.html:34
+#: mailu/ui/templates/manager/list.html:27
+#: mailu/ui/templates/relay/list.html:30 mailu/ui/templates/token/list.html:30
+#: mailu/ui/templates/user/list.html:34
+msgid "Delete"
+msgstr "حذف"
+
+#: mailu/ui/templates/alias/create.html:4
+msgid "Create alias"
+msgstr "ایجاد الایس"
+
+#: mailu/ui/templates/alias/edit.html:4
+msgid "Edit alias"
+msgstr "ویرایش الایس"
+
+#: mailu/ui/templates/alias/list.html:4
+msgid "Alias list"
+msgstr "لیست الایس‌ها"
+
+#: mailu/ui/templates/alias/list.html:12
+msgid "Add alias"
+msgstr "افزودن الایس"
+
+#: mailu/ui/templates/alias/list.html:23
+#: mailu/ui/templates/alternative/list.html:21
+#: mailu/ui/templates/domain/list.html:23 mailu/ui/templates/fetch/list.html:25
+#: mailu/ui/templates/relay/list.html:21 mailu/ui/templates/token/list.html:22
+#: mailu/ui/templates/user/list.html:25
+msgid "Created"
+msgstr "ایجاد شد"
+
+#: mailu/ui/templates/alias/list.html:24
+#: mailu/ui/templates/alternative/list.html:22
+#: mailu/ui/templates/domain/list.html:24 mailu/ui/templates/fetch/list.html:26
+#: mailu/ui/templates/relay/list.html:22 mailu/ui/templates/token/list.html:23
+#: mailu/ui/templates/user/list.html:26
+msgid "Last edit"
+msgstr "آخرین ویرایش"
+
+#: mailu/ui/templates/alias/list.html:31 mailu/ui/templates/domain/list.html:33
+#: mailu/ui/templates/fetch/list.html:33 mailu/ui/templates/relay/list.html:29
+#: mailu/ui/templates/user/list.html:33
+msgid "Edit"
+msgstr "ویرایش"
+
+#: mailu/ui/templates/alternative/create.html:4
+msgid "Create alternative domain"
+msgstr "ایجاد دامنه‌ی دیگر"
+
+#: mailu/ui/templates/alternative/list.html:4
+msgid "Alternative domain list"
+msgstr "لیست دامنه‌های دیگر"
+
+#: mailu/ui/templates/alternative/list.html:12
+msgid "Add alternative"
+msgstr "افزودن دامنه‌ی دیگر"
+
+#: mailu/ui/templates/alternative/list.html:20
+msgid "Name"
+msgstr "نام"
+
+#: mailu/ui/templates/domain/create.html:4
+#: mailu/ui/templates/domain/list.html:9
+msgid "New domain"
+msgstr "دامنه جدید"
+
+#: mailu/ui/templates/domain/details.html:4
+msgid "Domain details"
+msgstr "مشخصات دامنه"
+
+#: mailu/ui/templates/domain/details.html:15
+msgid "Regenerate keys"
+msgstr "ایجاد مجدد کلید‌ها"
+
+#: mailu/ui/templates/domain/details.html:17
+msgid "Generate keys"
+msgstr "ایجاد کلید‌ها"
+
+#: mailu/ui/templates/domain/details.html:30
+msgid "DNS MX entry"
+msgstr "DNS MX"
+
+#: mailu/ui/templates/domain/details.html:34
+msgid "DNS SPF entries"
+msgstr "DNS SPF"
+
+#: mailu/ui/templates/domain/details.html:40
+msgid "DKIM public key"
+msgstr "کلید عمومی DKIM"
+
+#: mailu/ui/templates/domain/details.html:44
+msgid "DNS DKIM entry"
+msgstr "DNS DKIM"
+
+#: mailu/ui/templates/domain/details.html:48
+msgid "DNS DMARC entry"
+msgstr "DNS DMARC"
+
+#: mailu/ui/templates/domain/details.html:58
+msgid "DNS TLSA entry"
+msgstr "DNS TLSA"
+
+#: mailu/ui/templates/domain/details.html:63
+msgid "DNS client auto-configuration entries"
+msgstr "DNS client auto-configuration"
+
+#: mailu/ui/templates/domain/edit.html:4
+msgid "Edit domain"
+msgstr "ویرایش دامنه"
+
+#: mailu/ui/templates/domain/list.html:4
+msgid "Domain list"
+msgstr "لیست دامنه"
+
+#: mailu/ui/templates/domain/list.html:18
+msgid "Manage"
+msgstr "مدیریت"
+
+#: mailu/ui/templates/domain/list.html:20
+msgid "Mailbox count"
+msgstr "تعداد جعبه ایمیل"
+
+#: mailu/ui/templates/domain/list.html:21
+msgid "Alias count"
+msgstr "تعداد الایس‌ها"
+
+#: mailu/ui/templates/domain/list.html:31
+msgid "Details"
+msgstr "جزئیات"
+
+#: mailu/ui/templates/domain/list.html:38
+msgid "Users"
+msgstr "کاربران"
+
+#: mailu/ui/templates/domain/list.html:39
+msgid "Aliases"
+msgstr "الایس‌ها"
+
+#: mailu/ui/templates/domain/list.html:40
+msgid "Managers"
+msgstr "مدیران"
+
+#: mailu/ui/templates/domain/list.html:42
+msgid "Alternatives"
+msgstr "جایگزین‌ها"
+
+#: mailu/ui/templates/domain/signup.html:13
+msgid ""
+"In order to register a new domain, you must first setup the\n"
+"    domain zone so that the domain <code>MX</code> points to this server"
+msgstr ""
+"برای ثبت دامنه جدید، ابتدا می‌بایست تنظیمات DNS ٔدامنه را به گونه‌ای تنظیم کنید "
+"که رکورد <code>MX</code> آن به سرور ما اشاره کند"
+
+#: mailu/ui/templates/domain/signup.html:18
+msgid ""
+"If you do not know how to setup an <code>MX</code> record for your DNS "
+"zone,\n"
+"    please contact your DNS provider or administrator. Also, please wait a\n"
+"    couple minutes after the <code>MX</code> is set so the local server "
+"cache\n"
+"    expires."
+msgstr ""
+"در صورتی که نمی‌دانید چگونه تنظیمات رکورد <code>MX</code> دامنه خود را انجام "
+"دهید، می‌بایست با فروشنده دامنه خود ارتباط برقرار کنید.\n"
+"همچنین بعد از تنظیم رکورد <code>MX</code> دقایقی را تا اعمال نتیجه آن منتظر "
+"بمانید."
+
+#: mailu/ui/templates/fetch/create.html:4
+msgid "Add a fetched account"
+msgstr "افزودن حساب واکشی"
+
+#: mailu/ui/templates/fetch/edit.html:4
+msgid "Update a fetched account"
+msgstr "بروزرسانی حساب واکشی"
+
+#: mailu/ui/templates/fetch/list.html:12
+msgid "Add an account"
+msgstr "افزودن حساب"
+
+#: mailu/ui/templates/fetch/list.html:20
+msgid "Endpoint"
+msgstr "نشانی"
+
+#: mailu/ui/templates/fetch/list.html:22
+msgid "Keep emails"
+msgstr "نگهداری ایمیل‌ها"
+
+#: mailu/ui/templates/fetch/list.html:23
+msgid "Last check"
+msgstr "آخرین بررسی"
+
+#: mailu/ui/templates/fetch/list.html:24
+msgid "Status"
+msgstr "وضعیت"
+
+#: mailu/ui/templates/fetch/list.html:38
+msgid "yes"
+msgstr "بلی"
+
+#: mailu/ui/templates/fetch/list.html:38
+msgid "no"
+msgstr "خیر"
+
+#: mailu/ui/templates/manager/create.html:4
+msgid "Add a manager"
+msgstr "افزودن مدیری"
+
+#: mailu/ui/templates/manager/list.html:4
+msgid "Manager list"
+msgstr "لیست مدیران"
+
+#: mailu/ui/templates/manager/list.html:12
+msgid "Add manager"
+msgstr "افزودن مدیر"
+
+#: mailu/ui/templates/relay/create.html:4
+msgid "New relay domain"
+msgstr "افزودن دامنه میانجی"
+
+#: mailu/ui/templates/relay/edit.html:4
+msgid "Edit relayed domain"
+msgstr "ویرایش دامنه میانجی"
+
+#: mailu/ui/templates/relay/list.html:4
+msgid "Relayed domain list"
+msgstr "لیست دامنه‌های میانجی"
+
+#: mailu/ui/templates/relay/list.html:9
+msgid "New relayed domain"
+msgstr "دامنه میانجی جدید"
+
+#: mailu/ui/templates/token/create.html:4
+msgid "Create an authentication token"
+msgstr "ایجاد کلید احراز هویت"
+
+#: mailu/ui/templates/token/list.html:12
+msgid "New token"
+msgstr "کلید جدید"
+
+#: mailu/ui/templates/user/create.html:4
+msgid "New user"
+msgstr "کاربر جدید"
+
+#: mailu/ui/templates/user/create.html:15
+msgid "General"
+msgstr "عمومی"
+
+#: mailu/ui/templates/user/create.html:23
+msgid "Features and quotas"
+msgstr "قابلیت‌ها و سهمیه"
+
+#: mailu/ui/templates/user/edit.html:4
+msgid "Edit user"
+msgstr "ویرایش کاربر"
+
+#: mailu/ui/templates/user/list.html:4
+msgid "User list"
+msgstr "لیست کاربران"
+
+#: mailu/ui/templates/user/list.html:12
+msgid "Add user"
+msgstr "افزودن کاربر"
+
+#: mailu/ui/templates/user/list.html:20 mailu/ui/templates/user/settings.html:4
+msgid "User settings"
+msgstr "تنظیمات کاربر"
+
+#: mailu/ui/templates/user/list.html:22
+msgid "Features"
+msgstr "قابلیت‌ها"
+
+#: mailu/ui/templates/user/password.html:4
+msgid "Password update"
+msgstr "بروزرسانی گذرواژه"
+
+#: mailu/ui/templates/user/reply.html:4
+msgid "Automatic reply"
+msgstr "پاسخگوی خودکار"
+
+#: mailu/ui/templates/user/settings.html:27
+msgid "Auto-forward"
+msgstr "بازارسال خودکار"
+
+#: mailu/ui/templates/user/signup_domain.html:8
+msgid "pick a domain for the new account"
+msgstr "انتخاب دامنه برای حساب جدید"
+
+#: mailu/ui/templates/user/signup_domain.html:14
+msgid "Domain"
+msgstr "دامنه"
+
+#: mailu/ui/templates/user/signup_domain.html:15
+msgid "Available slots"
+msgstr "جایگاه‌های موجود"

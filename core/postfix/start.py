@@ -13,8 +13,8 @@ from socrate import system, conf
 system.set_env(log_filters=[
     r'(dis)?connect from localhost\[(\:\:1|127\.0\.0\.1)\]( quit=1 commands=1)?$',
     r'haproxy read\: short protocol header\: QUIT$',
-    r'discarding EHLO keywords\: PIPELINING$',
-    ], log_file=os.environ.get('POSTFIX_LOG_FILE'))
+    r'discarding EHLO keywords\: PIPELINING$'
+    ])
 
 os.system("flock -n /queue/pid/master.pid rm /queue/pid/master.pid")
 
@@ -100,4 +100,5 @@ os.system("/usr/libexec/postfix/post-install meta_directory=/etc/postfix create-
 # Before starting postfix, we need to check permissions on /queue
 # in the event that postfix,postdrop id have changed
 os.system("postfix set-permissions")
-os.system("postfix start-fg")
+cmd = ['postfix', 'start-fg']
+system.run_process_and_forward_output(cmd)

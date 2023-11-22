@@ -1,0 +1,737 @@
+# Ukrainian translations for PROJECT.
+# Copyright (C) 2016 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# Danylo Sydorenko <sydorenkodanylo2021@gmail.com>, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: sydorenkodanylo2021@gmail.com\n"
+"POT-Creation-Date: 2022-05-22 18:47+0200\n"
+"PO-Revision-Date: 2023-08-14 08:19+0300\n"
+"Last-Translator: Danylo Sydorenko <sydorenkodanylo2021@gmail.com>\n"
+"Language-Team: Ukrainian <https://translate.tedomum.net/projects/mailu/admin/"
+"uk/>\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && "
+"(n%100<10 || n%100>=20) ? 1 : 2\n"
+"Generated-By: Babel 2.3.4\n"
+"X-Generator: Poedit 3.3.2\n"
+
+#: mailu/sso/forms.py:8 mailu/ui/forms.py:79
+msgid "E-mail"
+msgstr "Електронна пошта"
+
+#: mailu/sso/forms.py:9 mailu/ui/forms.py:80 mailu/ui/forms.py:93
+#: mailu/ui/forms.py:112 mailu/ui/forms.py:166
+#: mailu/ui/templates/client.html:32 mailu/ui/templates/client.html:57
+msgid "Password"
+msgstr "Пароль"
+
+#: mailu/sso/forms.py:10 mailu/sso/forms.py:11 mailu/sso/templates/login.html:4
+#: mailu/ui/templates/sidebar.html:142
+msgid "Sign in"
+msgstr "Увійти"
+
+#: mailu/sso/templates/base_sso.html:8 mailu/ui/templates/base.html:8
+msgid "Admin page for"
+msgstr "Сторінка адміністратора для"
+
+#: mailu/sso/templates/base_sso.html:19 mailu/ui/templates/base.html:19
+msgid "toggle sidebar"
+msgstr "переключити бічну панель"
+
+#: mailu/sso/templates/base_sso.html:37 mailu/ui/templates/base.html:37
+msgid "change language"
+msgstr "змінити мову"
+
+#: mailu/sso/templates/sidebar_sso.html:4 mailu/ui/templates/sidebar.html:94
+msgid "Go to"
+msgstr "Перейти до"
+
+#: mailu/sso/templates/sidebar_sso.html:9 mailu/ui/templates/client.html:4
+#: mailu/ui/templates/sidebar.html:50 mailu/ui/templates/sidebar.html:107
+msgid "Client setup"
+msgstr "Налаштування клієнта"
+
+#: mailu/sso/templates/sidebar_sso.html:16 mailu/ui/templates/sidebar.html:114
+msgid "Website"
+msgstr "Вебсайт"
+
+#: mailu/sso/templates/sidebar_sso.html:22 mailu/ui/templates/sidebar.html:120
+msgid "Help"
+msgstr "Довідка"
+
+#: mailu/sso/templates/sidebar_sso.html:35
+#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:127
+msgid "Register a domain"
+msgstr "Зареєструвати домен"
+
+#: mailu/sso/templates/sidebar_sso.html:49 mailu/ui/forms.py:95
+#: mailu/ui/templates/sidebar.html:149 mailu/ui/templates/user/signup.html:4
+#: mailu/ui/templates/user/signup_domain.html:4
+msgid "Sign up"
+msgstr "Зареєструватися"
+
+#: mailu/ui/forms.py:33 mailu/ui/forms.py:36
+msgid "Invalid email address."
+msgstr "Недійсна електронна пошта."
+
+#: mailu/ui/forms.py:45
+msgid "Confirm"
+msgstr "Підтвердити"
+
+#: mailu/ui/forms.py:48 mailu/ui/forms.py:58
+#: mailu/ui/templates/domain/details.html:26
+#: mailu/ui/templates/domain/list.html:19 mailu/ui/templates/relay/list.html:18
+msgid "Domain name"
+msgstr "Ім'я домену"
+
+#: mailu/ui/forms.py:49
+msgid "Maximum user count"
+msgstr "Максимальна кількість користувачів"
+
+#: mailu/ui/forms.py:50
+msgid "Maximum alias count"
+msgstr "Максимальна кількість скорочень"
+
+#: mailu/ui/forms.py:51
+msgid "Maximum user quota"
+msgstr "Максимальна квота користувачів"
+
+#: mailu/ui/forms.py:52
+msgid "Enable sign-up"
+msgstr "Увімкнути реєстрацію"
+
+#: mailu/ui/forms.py:53 mailu/ui/forms.py:74 mailu/ui/forms.py:86
+#: mailu/ui/forms.py:132 mailu/ui/forms.py:144
+#: mailu/ui/templates/alias/list.html:22 mailu/ui/templates/domain/list.html:22
+#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:20
+#: mailu/ui/templates/user/list.html:24
+msgid "Comment"
+msgstr "Коментар"
+
+#: mailu/ui/forms.py:54 mailu/ui/forms.py:68 mailu/ui/forms.py:75
+#: mailu/ui/forms.py:88 mailu/ui/forms.py:136 mailu/ui/forms.py:145
+msgid "Save"
+msgstr "Зберегти"
+
+#: mailu/ui/forms.py:59
+msgid "Initial admin"
+msgstr "Початковий адміністратор"
+
+#: mailu/ui/forms.py:60
+msgid "Admin password"
+msgstr "Пароль адміністратора"
+
+#: mailu/ui/forms.py:61 mailu/ui/forms.py:81 mailu/ui/forms.py:94
+msgid "Confirm password"
+msgstr "Підтвердити пароль"
+
+#: mailu/ui/forms.py:63
+msgid "Create"
+msgstr "Створити"
+
+#: mailu/ui/forms.py:67
+msgid "Alternative name"
+msgstr "Альтернативна назва"
+
+#: mailu/ui/forms.py:72
+msgid "Relayed domain name"
+msgstr "Ретрансльоване доменне ім'я"
+
+#: mailu/ui/forms.py:73 mailu/ui/templates/relay/list.html:19
+msgid "Remote host"
+msgstr "Віддалений хост"
+
+#: mailu/ui/forms.py:82 mailu/ui/templates/user/list.html:23
+#: mailu/ui/templates/user/signup_domain.html:16
+msgid "Quota"
+msgstr "Квота"
+
+#: mailu/ui/forms.py:83
+msgid "Allow IMAP access"
+msgstr "Дозволити IMAP-доступ"
+
+#: mailu/ui/forms.py:84
+msgid "Allow POP3 access"
+msgstr "Дозволити POP3-доступ"
+
+#: mailu/ui/forms.py:85 mailu/ui/forms.py:101
+#: mailu/ui/templates/user/settings.html:15
+msgid "Displayed name"
+msgstr "Ім'я, що показується"
+
+#: mailu/ui/forms.py:87
+msgid "Enabled"
+msgstr "Увімкнено"
+
+#: mailu/ui/forms.py:92
+msgid "Email address"
+msgstr "Електронна пошта"
+
+#: mailu/ui/forms.py:102
+msgid "Enable spam filter"
+msgstr "Увімкнути спам-фільтр"
+
+#: mailu/ui/forms.py:103
+msgid "Enable marking spam mails as read"
+msgstr "Позначити спам як прочитане"
+
+#: mailu/ui/forms.py:104
+msgid "Spam filter tolerance"
+msgstr "Толерантність спам-фільтра до спаму"
+
+#: mailu/ui/forms.py:105
+msgid "Enable forwarding"
+msgstr "Увімкнути переадресацію"
+
+#: mailu/ui/forms.py:106
+msgid "Keep a copy of the emails"
+msgstr "Зберігати копії електронних листів"
+
+#: mailu/ui/forms.py:107 mailu/ui/forms.py:143
+#: mailu/ui/templates/alias/list.html:21
+msgid "Destination"
+msgstr "Призначення"
+
+#: mailu/ui/forms.py:108
+msgid "Save settings"
+msgstr "Зберегти налаштування"
+
+#: mailu/ui/forms.py:113
+msgid "Password check"
+msgstr "Перевірка пароля"
+
+#: mailu/ui/forms.py:114 mailu/ui/templates/sidebar.html:25
+msgid "Update password"
+msgstr "Оновити пароль"
+
+#: mailu/ui/forms.py:118
+msgid "Enable automatic reply"
+msgstr "Увімкнути автоматичну відповідь"
+
+#: mailu/ui/forms.py:119
+msgid "Reply subject"
+msgstr "Тема відповіді"
+
+#: mailu/ui/forms.py:120
+msgid "Reply body"
+msgstr "Текст відповіді"
+
+#: mailu/ui/forms.py:122
+msgid "Start of vacation"
+msgstr "Початок відпустки"
+
+#: mailu/ui/forms.py:123
+msgid "End of vacation"
+msgstr "Кінець відпустки"
+
+#: mailu/ui/forms.py:124
+msgid "Update"
+msgstr "Оновити"
+
+#: mailu/ui/forms.py:129
+msgid "Your token (write it down, as it will never be displayed again)"
+msgstr ""
+"Ваш токен (запишіть його, оскільки він більше ніколи не буде відображатися)"
+
+#: mailu/ui/forms.py:134 mailu/ui/templates/token/list.html:21
+msgid "Authorized IP"
+msgstr "Дозволені IP-адреси"
+
+#: mailu/ui/forms.py:140
+msgid "Alias"
+msgstr "Псевдонім"
+
+#: mailu/ui/forms.py:142
+msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"
+msgstr ""
+"Використовуйте синтаксис SQL LIKE (наприклад, для псевдонімів catch-all)"
+
+#: mailu/ui/forms.py:149
+msgid "Admin email"
+msgstr "Пошта адміністратора"
+
+#: mailu/ui/forms.py:150 mailu/ui/forms.py:155 mailu/ui/forms.py:168
+msgid "Submit"
+msgstr "Надіслати"
+
+#: mailu/ui/forms.py:154
+msgid "Manager email"
+msgstr "Електронна пошта менеджера"
+
+#: mailu/ui/forms.py:159
+msgid "Protocol"
+msgstr "Протокол"
+
+#: mailu/ui/forms.py:162
+msgid "Hostname or IP"
+msgstr "Ім'я хоста або IP"
+
+#: mailu/ui/forms.py:163 mailu/ui/templates/client.html:20
+#: mailu/ui/templates/client.html:45
+msgid "TCP port"
+msgstr "Порт TCP"
+
+#: mailu/ui/forms.py:164
+msgid "Enable TLS"
+msgstr "Увімкнути TLS"
+
+#: mailu/ui/forms.py:165 mailu/ui/templates/client.html:28
+#: mailu/ui/templates/client.html:53 mailu/ui/templates/fetch/list.html:21
+msgid "Username"
+msgstr "Ім'я користувача"
+
+#: mailu/ui/forms.py:167
+msgid "Keep emails on the server"
+msgstr "Зберігати копії електронних листів"
+
+#: mailu/ui/forms.py:172
+msgid "Announcement subject"
+msgstr "Тема оголошення"
+
+#: mailu/ui/forms.py:174
+msgid "Announcement body"
+msgstr "Текст оголошення"
+
+#: mailu/ui/forms.py:176
+msgid "Send"
+msgstr "Надіслати"
+
+#: mailu/ui/templates/announcement.html:4
+msgid "Public announcement"
+msgstr "Публічне оголошення"
+
+#: mailu/ui/templates/antispam.html:4 mailu/ui/templates/sidebar.html:80
+#: mailu/ui/templates/user/settings.html:19
+msgid "Antispam"
+msgstr "Антиспам"
+
+#: mailu/ui/templates/antispam.html:8
+msgid "RSPAMD status page"
+msgstr "Сторінка стану RSPAMD"
+
+#: mailu/ui/templates/client.html:8
+msgid "configure your email client"
+msgstr "налаштуйте свій поштовий клієнт"
+
+#: mailu/ui/templates/client.html:13
+msgid "Incoming mail"
+msgstr "Вхідна пошта"
+
+#: mailu/ui/templates/client.html:16 mailu/ui/templates/client.html:41
+msgid "Mail protocol"
+msgstr "Поштовий протокол"
+
+#: mailu/ui/templates/client.html:24 mailu/ui/templates/client.html:49
+msgid "Server name"
+msgstr "Назва серверу"
+
+#: mailu/ui/templates/client.html:38
+msgid "Outgoing mail"
+msgstr "Вихідна пошта"
+
+#: mailu/ui/templates/confirm.html:4
+msgid "Confirm action"
+msgstr "Підтвердити дію"
+
+#: mailu/ui/templates/confirm.html:13
+#, python-format
+msgid "You are about to %(action)s. Please confirm your action."
+msgstr "Ви збираєтеся виконати %(action)s. Будь ласка, підтвердіть вашу дію."
+
+#: mailu/ui/templates/docker-error.html:4
+msgid "Docker error"
+msgstr "Помилка Docker"
+
+#: mailu/ui/templates/docker-error.html:12
+msgid "An error occurred while talking to the Docker server."
+msgstr "Виникла помилка при спілкуванні з сервером Docker."
+
+#: mailu/ui/templates/macros.html:129
+msgid "copy to clipboard"
+msgstr "скопіювати в буфер обміну"
+
+#: mailu/ui/templates/sidebar.html:15
+msgid "My account"
+msgstr "Мій обліковий запис"
+
+#: mailu/ui/templates/sidebar.html:19 mailu/ui/templates/user/list.html:37
+msgid "Settings"
+msgstr "Налаштування"
+
+#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/user/list.html:38
+msgid "Auto-reply"
+msgstr "Автовідповідь"
+
+#: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:37
+#: mailu/ui/templates/user/list.html:39
+msgid "Fetched accounts"
+msgstr "Отримані облікові записи"
+
+#: mailu/ui/templates/sidebar.html:43 mailu/ui/templates/token/list.html:4
+msgid "Authentication tokens"
+msgstr "Токени автентифікації"
+
+#: mailu/ui/templates/sidebar.html:56
+msgid "Administration"
+msgstr "Адміністрація"
+
+#: mailu/ui/templates/sidebar.html:62
+msgid "Announcement"
+msgstr "Оголошення"
+
+#: mailu/ui/templates/sidebar.html:68
+msgid "Administrators"
+msgstr "Адміністратори"
+
+#: mailu/ui/templates/sidebar.html:74
+msgid "Relayed domains"
+msgstr "Передані домени"
+
+#: mailu/ui/templates/sidebar.html:88
+msgid "Mail domains"
+msgstr "Поштові домени"
+
+#: mailu/ui/templates/sidebar.html:99
+msgid "Webmail"
+msgstr "Вебпошта"
+
+#: mailu/ui/templates/sidebar.html:135
+msgid "Sign out"
+msgstr "Вийти"
+
+#: mailu/ui/templates/working.html:4
+msgid "We are still working on this feature!"
+msgstr "Ми все ще працюємо над цією функцією!"
+
+#: mailu/ui/templates/admin/create.html:4
+msgid "Add a global administrator"
+msgstr "Додати глобального адміністратора"
+
+#: mailu/ui/templates/admin/list.html:4
+msgid "Global administrators"
+msgstr "Глобальні адміністратори"
+
+#: mailu/ui/templates/admin/list.html:9
+msgid "Add administrator"
+msgstr "Додати адміністратора"
+
+#: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
+#: mailu/ui/templates/alternative/list.html:19
+#: mailu/ui/templates/domain/list.html:17 mailu/ui/templates/fetch/list.html:19
+#: mailu/ui/templates/manager/list.html:19
+#: mailu/ui/templates/relay/list.html:17 mailu/ui/templates/token/list.html:19
+#: mailu/ui/templates/user/list.html:19
+msgid "Actions"
+msgstr "Дії"
+
+#: mailu/ui/templates/admin/list.html:18 mailu/ui/templates/alias/list.html:20
+#: mailu/ui/templates/manager/list.html:20 mailu/ui/templates/user/list.html:21
+msgid "Email"
+msgstr "Електронна пошта"
+
+#: mailu/ui/templates/admin/list.html:25 mailu/ui/templates/alias/list.html:32
+#: mailu/ui/templates/alternative/list.html:29
+#: mailu/ui/templates/domain/list.html:34 mailu/ui/templates/fetch/list.html:34
+#: mailu/ui/templates/manager/list.html:27
+#: mailu/ui/templates/relay/list.html:30 mailu/ui/templates/token/list.html:30
+#: mailu/ui/templates/user/list.html:34
+msgid "Delete"
+msgstr "Видалити"
+
+#: mailu/ui/templates/alias/create.html:4
+msgid "Create alias"
+msgstr "Створити псевдонім"
+
+#: mailu/ui/templates/alias/edit.html:4
+msgid "Edit alias"
+msgstr "Редагувати псевдонім"
+
+#: mailu/ui/templates/alias/list.html:4
+msgid "Alias list"
+msgstr "Список псевдонімів"
+
+#: mailu/ui/templates/alias/list.html:12
+msgid "Add alias"
+msgstr "Додати псевдонім"
+
+#: mailu/ui/templates/alias/list.html:23
+#: mailu/ui/templates/alternative/list.html:21
+#: mailu/ui/templates/domain/list.html:23 mailu/ui/templates/fetch/list.html:25
+#: mailu/ui/templates/relay/list.html:21 mailu/ui/templates/token/list.html:22
+#: mailu/ui/templates/user/list.html:25
+msgid "Created"
+msgstr "Створено"
+
+#: mailu/ui/templates/alias/list.html:24
+#: mailu/ui/templates/alternative/list.html:22
+#: mailu/ui/templates/domain/list.html:24 mailu/ui/templates/fetch/list.html:26
+#: mailu/ui/templates/relay/list.html:22 mailu/ui/templates/token/list.html:23
+#: mailu/ui/templates/user/list.html:26
+msgid "Last edit"
+msgstr "Останнє редагування від"
+
+#: mailu/ui/templates/alias/list.html:31 mailu/ui/templates/domain/list.html:33
+#: mailu/ui/templates/fetch/list.html:33 mailu/ui/templates/relay/list.html:29
+#: mailu/ui/templates/user/list.html:33
+msgid "Edit"
+msgstr "Редагувати"
+
+#: mailu/ui/templates/alternative/create.html:4
+msgid "Create alternative domain"
+msgstr "Створити альтернативний домен"
+
+#: mailu/ui/templates/alternative/list.html:4
+msgid "Alternative domain list"
+msgstr "Альтернативний список доменів"
+
+#: mailu/ui/templates/alternative/list.html:12
+msgid "Add alternative"
+msgstr "Додати альтернативу"
+
+#: mailu/ui/templates/alternative/list.html:20
+msgid "Name"
+msgstr "Ім'я"
+
+#: mailu/ui/templates/domain/create.html:4
+#: mailu/ui/templates/domain/list.html:9
+msgid "New domain"
+msgstr "Новий домен"
+
+#: mailu/ui/templates/domain/details.html:4
+msgid "Domain details"
+msgstr "Інформація про домен"
+
+#: mailu/ui/templates/domain/details.html:15
+msgid "Regenerate keys"
+msgstr "Регенерувати ключі"
+
+#: mailu/ui/templates/domain/details.html:17
+msgid "Generate keys"
+msgstr "Згенерувати ключі"
+
+#: mailu/ui/templates/domain/details.html:30
+msgid "DNS MX entry"
+msgstr "Запис DNS MX"
+
+#: mailu/ui/templates/domain/details.html:34
+msgid "DNS SPF entries"
+msgstr "Записи DNS SPF"
+
+#: mailu/ui/templates/domain/details.html:40
+msgid "DKIM public key"
+msgstr "Відкритий ключ DKIM"
+
+#: mailu/ui/templates/domain/details.html:44
+msgid "DNS DKIM entry"
+msgstr "Запис DNS DKIM"
+
+#: mailu/ui/templates/domain/details.html:48
+msgid "DNS DMARC entry"
+msgstr "Запис DNS DMARC"
+
+#: mailu/ui/templates/domain/details.html:58
+msgid "DNS TLSA entry"
+msgstr "Запис DNS TLSA"
+
+#: mailu/ui/templates/domain/details.html:63
+msgid "DNS client auto-configuration entries"
+msgstr "Записи автоконфігурації DNS-клієнта"
+
+#: mailu/ui/templates/domain/edit.html:4
+msgid "Edit domain"
+msgstr "Редагувати домен"
+
+#: mailu/ui/templates/domain/list.html:4
+msgid "Domain list"
+msgstr "Список доменів"
+
+#: mailu/ui/templates/domain/list.html:18
+msgid "Manage"
+msgstr "Керувати"
+
+#: mailu/ui/templates/domain/list.html:20
+msgid "Mailbox count"
+msgstr "Кількість поштових скриньок"
+
+#: mailu/ui/templates/domain/list.html:21
+msgid "Alias count"
+msgstr "Кількість псевдонімів"
+
+#: mailu/ui/templates/domain/list.html:31
+msgid "Details"
+msgstr "Подробиці"
+
+#: mailu/ui/templates/domain/list.html:38
+msgid "Users"
+msgstr "Користувачі"
+
+#: mailu/ui/templates/domain/list.html:39
+msgid "Aliases"
+msgstr "Скорочення"
+
+#: mailu/ui/templates/domain/list.html:40
+msgid "Managers"
+msgstr "Менеджери"
+
+#: mailu/ui/templates/domain/list.html:42
+msgid "Alternatives"
+msgstr "Альтернативи"
+
+#: mailu/ui/templates/domain/signup.html:13
+msgid ""
+"In order to register a new domain, you must first setup the\n"
+"    domain zone so that the domain <code>MX</code> points to this server"
+msgstr ""
+"Для того, щоб зареєструвати новий домен, необхідно\n"
+"    спочатку налаштувати доменну <code>MX</code> так,\n"
+"    щоб домен вказував на цей сервер"
+
+#: mailu/ui/templates/domain/signup.html:18
+msgid ""
+"If you do not know how to setup an <code>MX</code> record for your DNS "
+"zone,\n"
+"    please contact your DNS provider or administrator. Also, please wait a\n"
+"    couple minutes after the <code>MX</code> is set so the local server "
+"cache\n"
+"    expires."
+msgstr ""
+"Якщо ви не знаєте, як налаштувати <code>MX</code>-запис для вашої DNS-зони,\n"
+"    зверніться до вашого DNS-провайдера або адміністратора. Також, будь "
+"ласка, \n"
+"    зачекайте кілька хвилин після встановлення MX, щоб закінчився термін дії "
+"кешу\n"
+"    локального сервера."
+
+#: mailu/ui/templates/fetch/create.html:4
+msgid "Add a fetched account"
+msgstr "Додати знайдений обліковий запис"
+
+#: mailu/ui/templates/fetch/edit.html:4
+msgid "Update a fetched account"
+msgstr "Оновити знайдений обліковий запис"
+
+#: mailu/ui/templates/fetch/list.html:12
+msgid "Add an account"
+msgstr "Додати обліковий запис"
+
+#: mailu/ui/templates/fetch/list.html:20
+msgid "Endpoint"
+msgstr "Кінцева точка"
+
+#: mailu/ui/templates/fetch/list.html:22
+msgid "Keep emails"
+msgstr "Зберігати електронні листи"
+
+#: mailu/ui/templates/fetch/list.html:23
+msgid "Last check"
+msgstr "Остання перевірка"
+
+#: mailu/ui/templates/fetch/list.html:24
+msgid "Status"
+msgstr "Статус"
+
+#: mailu/ui/templates/fetch/list.html:38
+msgid "yes"
+msgstr "так"
+
+#: mailu/ui/templates/fetch/list.html:38
+msgid "no"
+msgstr "ні"
+
+#: mailu/ui/templates/manager/create.html:4
+msgid "Add a manager"
+msgstr "Додати менеджера"
+
+#: mailu/ui/templates/manager/list.html:4
+msgid "Manager list"
+msgstr "Список менеджерів"
+
+#: mailu/ui/templates/manager/list.html:12
+msgid "Add manager"
+msgstr "Додати менеджера"
+
+#: mailu/ui/templates/relay/create.html:4
+msgid "New relay domain"
+msgstr "Новий домен ретрансляції"
+
+#: mailu/ui/templates/relay/edit.html:4
+msgid "Edit relayed domain"
+msgstr "Редагувати домен ретрансляції"
+
+#: mailu/ui/templates/relay/list.html:4
+msgid "Relayed domain list"
+msgstr "Список ретрансляційний  доменів"
+
+#: mailu/ui/templates/relay/list.html:9
+msgid "New relayed domain"
+msgstr "Новий ретрансляційний домен"
+
+#: mailu/ui/templates/token/create.html:4
+msgid "Create an authentication token"
+msgstr "Створити токен автентифікації"
+
+#: mailu/ui/templates/token/list.html:12
+msgid "New token"
+msgstr "Новий токен"
+
+#: mailu/ui/templates/user/create.html:4
+msgid "New user"
+msgstr "Новий користувач"
+
+#: mailu/ui/templates/user/create.html:15
+msgid "General"
+msgstr "Основне"
+
+#: mailu/ui/templates/user/create.html:23
+msgid "Features and quotas"
+msgstr "Можливості та квоти"
+
+#: mailu/ui/templates/user/edit.html:4
+msgid "Edit user"
+msgstr "Редагувати користувача"
+
+#: mailu/ui/templates/user/list.html:4
+msgid "User list"
+msgstr "Список користувачів"
+
+#: mailu/ui/templates/user/list.html:12
+msgid "Add user"
+msgstr "Додати користувача"
+
+#: mailu/ui/templates/user/list.html:20 mailu/ui/templates/user/settings.html:4
+msgid "User settings"
+msgstr "Налаштування користувача"
+
+#: mailu/ui/templates/user/list.html:22
+msgid "Features"
+msgstr "Можливості"
+
+#: mailu/ui/templates/user/password.html:4
+msgid "Password update"
+msgstr "Оновити пароль"
+
+#: mailu/ui/templates/user/reply.html:4
+msgid "Automatic reply"
+msgstr "Увімкнути автоматичну відповідь"
+
+#: mailu/ui/templates/user/settings.html:27
+msgid "Auto-forward"
+msgstr "Автоматичне пересилання"
+
+#: mailu/ui/templates/user/signup_domain.html:8
+msgid "pick a domain for the new account"
+msgstr "вибрати домен для нового облікового запису"
+
+#: mailu/ui/templates/user/signup_domain.html:14
+msgid "Domain"
+msgstr "Домен"
+
+#: mailu/ui/templates/user/signup_domain.html:15
+msgid "Available slots"
+msgstr "Наявні слоти"

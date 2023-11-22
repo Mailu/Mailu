@@ -14,6 +14,7 @@ user_fields_get = api.model('UserGet', {
     'password': fields.String(description="Hash of the user's password; Example='$bcrypt-sha256$v=2,t=2b,r=12$fmsAdJbYAD1gGQIE5nfJq.$zLkQUEs2XZfTpAEpcix/1k5UTNPm0jO'"),
     'comment': fields.String(description='A description for the user. This description is shown on the Users page', example='my comment'),
     'quota_bytes': fields.Integer(description='The maximum quota for the user’s email box in bytes', example='1000000000'),
+    'quota_bytes_used': fields.Integer(description='The size of the user’s email box in bytes', example='5000000'),
     'global_admin': fields.Boolean(description='Make the user a global administrator'),
     'enabled': fields.Boolean(description='Enable the user. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail'),
     'change_pw_next_login': fields.Boolean(description='Force the user to change their password at next login'),

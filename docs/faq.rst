@@ -11,8 +11,7 @@ Where to ask questions?
 
 First, please read this FAQ to check if your question is listed here.
 Simple questions are best asked in our `Matrix`_ room.
-For more complex questions, you can always open a `new issue`_ on GitHub.
-We actively monitor the issues list.
+For more complex questions, you can always open a `new discussion`_ on GitHub.
 
 
 My installation is broken!
@@ -33,16 +32,17 @@ I want a new feature or enhancement!
 
 Great! We are always open for suggestions. We currently maintain two tags:
 
-- `Enhancement issues`_: Typically used for optimization of features in the project.
-- `Feature request issues`_: For implementing new functionality,
+- ``type/enhancement``: Typically used for optimization of features in the project.
+- ``type/feature``: For implementing new functionality,
   plugins and applications.
 
-Please check if your idea (or something similar) is already mentioned there.
+Feature requests are discussed on the discussion page of the project (see `feature requests`_).
+Please check if your idea (or something similar) is already mentioned on the project.
 If there is one open, you can choose to vote with a thumbs up, so we can
 estimate the popular demand. Please refrain from writing comments like
 *"me too"* as it clobbers the actual discussion.
 
-If you can't find anything similar, you can open a `new issue`_.
+If you can't find anything similar, you can open a `new feature request`_.
 Please also share (where applicable):
 
 - Use case: how does this improve the project?
@@ -89,8 +89,9 @@ Please click the |sponsor| button on top of our GitHub Page for current possibil
 .. _`Matrix`: https://matrix.to/#/#mailu:tedomum.net
 .. _`open issues`: https://github.com/Mailu/Mailu/issues
 .. _`new issue`: https://github.com/Mailu/Mailu/issues/new
-.. _`Enhancement issues`: https://github.com/Mailu/Mailu/issues?q=is%3Aissue+is%3Aopen+label%3Atype%2Fenhancement
-.. _`Feature request issues`: https://github.com/Mailu/Mailu/issues?q=is%3Aopen+is%3Aissue+label%3Atype%2Ffeature
+.. _`new discussion`: https://github.com/Mailu/Mailu/discussions/categories/user-support
+.. _`feature requests`: https://github.com/Mailu/Mailu/discussions/categories/feature-requests-ideas
+.. _`new feature request`: https://github.com/Mailu/Mailu/discussions/new?category=feature-requests-ideas
 .. _`GitHub`: https://github.com/Mailu/Mailu
 .. _`Community Bridge`: https://funding.communitybridge.org/projects/mailu
 
@@ -192,8 +193,8 @@ This means it can be scaled horizontally. For more information, refer to :ref:`k
 
 *Issue reference:* `165`_, `520`_.
 
-How to achieve HA / failover?
-`````````````````````````````
+How to achieve HA / fail-over?
+``````````````````````````````
 
 The mailboxes and databases for Mailu are kept on the host filesystem under ``$ROOT/``.
 For making the **storage** highly available, all sorts of techniques can be used:
@@ -287,7 +288,7 @@ I want to integrate Nextcloud 15 (and newer) with Mailu
 
 
 If a domain name (e.g. example.com) is specified, then this makes sure that only users from this domain will be allowed to login.
-After successfull login the domain part will be stripped and the rest used as username in Nextcloud. e.g. 'username@example.com' will be 'username' in Nextcloud. Disable this behaviour by changing true (the fifth parameter) to false.
+After successful login the domain part will be stripped and the rest used as username in Nextcloud. e.g. 'username@example.com' will be 'username' in Nextcloud. Disable this behaviour by changing true (the fifth parameter) to false.
 
 *Issue reference:* `575`_.
 
@@ -474,7 +475,7 @@ down and up again. A container restart is not sufficient.
 SMTP Banner from overrides/postfix.cf is ignored
 ````````````````````````````````````````````````
 
-Any mail related connection is proxied by nginx. Therefore the SMTP Banner is also set by nginx. Overwriting in overrides/postfix.cf does not apply.
+Any mail related connection is proxied by the front container. Therefore the SMTP Banner is also set by front container. Overwriting in overrides/postfix.cf does not apply.
 
 *Issue reference:* `1368`_.
 
@@ -496,8 +497,8 @@ Re-starting the smtp container will be required for changes to take effect.
 
 .. _`2213`: https://github.com/Mailu/Mailu/issues/2213
 
-My emails are getting defered, what can I do?
-`````````````````````````````````````````````
+My emails are getting deferred, what can I do?
+``````````````````````````````````````````````
 
 Emails are asynchronous and it's not abnormal for them to be defered sometimes. That being said, Mailu enforces secure connections where possible using DANE and MTA-STS, both of which have the potential to delay indefinitely delivery if something is misconfigured.
 
@@ -754,8 +755,8 @@ Restart the Fail2Ban service.
 Users can't change their password from webmail
 ``````````````````````````````````````````````
 
-All users have the abilty to login to the admin interface. Non-admin users
-have only restricted funtionality such as changing their password and the
+All users have the ability to login to the admin interface. Non-admin users
+have only restricted functionality such as changing their password and the
 spam filter weight settings.
 
 *Issue reference:* `503`_.
@@ -903,6 +904,13 @@ We have seen a fair amount of support requests related to the following:
 
 .. _`netplan does not play nicely with docker`: https://github.com/Mailu/Mailu/issues/2868#issuecomment-1606014184
 
+How can I use Mailu without docker?
+```````````````````````````````````
+
+Running Mailu without docker is not supported. If you want to do so, you need to export an environment variable called ``I_KNOW_MY_SETUP_DOESNT_FIT_REQUIREMENTS_AND_WONT_FILE_ISSUES_WITHOUT_PATCHES`` to the ``admin`` container.
+
+We welcome patches but do not have the bandwidth to test and fix issues related to your unsupported setup. If you do want to help, we welcome new maintainers: please get in touch.
+
 How can I add more languages to roundcube's spellchecker?
 `````````````````````````````````````````````````````````
 
@@ -938,3 +946,64 @@ I see a lot of "Unable to lookup the TLSA record for XXX. Is the DNSSEC zone oka
 There may be multiple causes for it but if you are running docker 24.0.0, odds are you are `experiencing this docker bug`_ and the workaround is to switch to a different version of docker.
 
 .. _`experiencing this docker bug`: https://github.com/Mailu/Mailu/issues/2827
+
+How can I view and export the logs of a Mailu container?
+````````````````````````````````````````````````````````
+
+In some situations, a separate log is required. For example a separate mail log (from postfix) could be required due to legal reasons.
+
+All Mailu containers log the output to journald. The logs are written to journald with the tag:
+
+| mailu-<service name>
+| where <service-name> is the name of the service in the docker-compose.yml file.
+| For example, the service running postfix is called smtp. To view the postfix logs use:
+
+.. code-block:: bash
+
+  journalctl -t mailu-smtp
+
+Note: ``SHIFT+G`` can be used to jump to the end of the log file. ``G`` can be used to jump back to the top of the log file.
+
+To export the log files from journald to the file system, the logs could be imported into a syslog program like ``rsyslog``.
+Via ``rsyslog`` the container specific logs could be written to a separate file using a filter.
+
+Below are the steps for writing the postfix (mail) logs to a log file on the file system.
+
+1. Install the ``rsyslog`` package. Note: on most distributions this program is already installed.
+2. Edit ``/etc/systemd/journald.conf``.
+3. Enable ``ForwardToSyslog=yes``. Note: on most distributions this is already enabled by default. This forwards journald to syslog.
+4. ``sudo touch /var/log/postfix.log``. This step creates the mail log file.
+5. ``sudo chown syslog:syslog /var/log/postfix.log``. This provides rsyslog the permissions for accessing this file.
+6. Create a new config file in ``/etc/rsyslog.d/export-postfix.conf``
+7. Add ``:programname, contains, "mailu-smtp" /var/log/postfix.log``. This instructs rsyslog to write the logs for mailu-smtp to a log file on file system.
+8. ``sudo systemctl restart systemd-journald.service``
+9. ``sudo systemctl restart rsyslog``
+10. All messages from the smtp/postfix container are now logged to ``/var/log/postfix.log``.
+11. Rsyslog does not perform log rotation. The program (package) ``log rotate`` can be used for this task. Install the ``logrotate`` package.
+12. Modify the existing configuration file for rsyslog: ``sudo nano /etc/logrotate.d/rsyslog``
+13. Add at the top add: ``/var/log/postfix.log``. Of course you can also use your own configuration. This is just an example. A complete example for configuring log rotate is:
+
+.. code-block:: bash
+
+  /var/log/postfix.log
+  {
+       rotate 4
+       weekly
+       missingok
+       notifempty
+       compress
+       delaycompress
+       sharedscripts
+       postrotate
+           /usr/lib/rsyslog/rsyslog-rotate
+       endscript
+  }
+
+.. code-block:: bash
+
+  #!/bin/sh
+  #/usr/lib/rsyslog/rsyslog-rotate
+
+  if [ -d /run/systemd/system ]; then
+      systemctl kill -s HUP rsyslog.service
+  fi

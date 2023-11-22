@@ -1,0 +1,4 @@
+Fixed log filter not filtering out log messages for dovecot/nginx/postfix.
+Fixed postfix not logging to standard out.
+Fixed not all containers logging to journald.
+Removed POSTFIX_LOG_FILE functionality. Added documentation on how to achieve the same (log to file) via journald & rsyslogd (see new FAQ entry 'How can I view and export the logs of a Mailu container?').

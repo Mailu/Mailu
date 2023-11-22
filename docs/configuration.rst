@@ -51,8 +51,8 @@ accounts for a specific IP subnet as defined in
 
 The ``AUTH_RATELIMIT_USER`` (default: 50/day) holds a security setting for fighting
 attackers that attempt to guess a user's password (typically using a password
-bruteforce attack). The value defines the limit of distinct authentication attempts
-allowed for any given account within a specific timeframe. Multiple attempts for the
+brute-force attack). The value defines the limit of distinct authentication attempts
+allowed for any given account within a specific time-frame. Multiple attempts for the
 same account with the same password only counts for one.
 
 The ``AUTH_RATELIMIT_EXEMPTION_LENGTH`` (default: 86400) is the number of seconds
@@ -104,7 +104,7 @@ by setting ``INBOUND_TLS_ENFORCE`` to ``True``. Please note that this is forbidd
 internet facing hosts according to e.g. `RFC 3207`_ , because this prevents MTAs without STARTTLS
 support or e.g. mismatching TLS versions to deliver emails to Mailu.
 
-The ``SCAN_MACROS`` (default: True) setting controls whether Mailu will endavour
+The ``SCAN_MACROS`` (default: True) setting controls whether Mailu will endeavor
 to reject emails containing documents with malicious macros. Under the hood, it uses
 `mraptor from oletools`_ to determine whether a macro is malicious or not.
 
@@ -133,11 +133,14 @@ later classify incoming mail based on the custom part.
 The ``DMARC_RUA`` and ``DMARC_RUF`` are DMARC protocol specific values. They hold
 the localpart for DMARC rua and ruf email addresses.
 
-Full-text search is enabled for IMAP is enabled by default. This feature can be disabled
-(e.g. for performance reasons) by setting the optional variable ``FULL_TEXT_SEARCH`` to ``off``.
+The ``FULL_TEXT_SEARCH`` variable (default: 'en') is a comma separated list of
+language codes as defined on `fts_languages`_. This feature can be disabled
+(e.g. for performance reasons) by setting the variable to ``off``.
 
 You can set a global ``DEFAULT_QUOTA`` to be used for mailboxes when the domain has
 no specific quota configured.
+
+.. _`fts_languages`: https://doc.dovecot.org/settings/plugin/fts-plugin/#fts-languages
 
 .. _web_settings:
 
@@ -167,11 +170,11 @@ in the admin interface, while ``SITENAME`` is a customization option for
 every Web interface.
 
 - ``LOGO_BACKGROUND`` sets a custom background colour for the brand logo
-  in the topleft of the main admin interface.
+  in the top-left of the main admin interface.
   For a list of colour codes refer to this page of `w3schools`_.
 
 - ``LOGO_URL`` sets a URL for a custom logo. This logo replaces the Mailu
-  logo in the topleft of the main admin interface.
+  logo in the top-left of the main admin interface.
 
 .. _`w3schools`: https://www.w3schools.com/cssref/css_colors.asp
 
@@ -213,7 +216,10 @@ Depending on your particular deployment you most probably will want to change th
 Advanced settings
 -----------------
 
-The ``API_TOKEN`` (default: None) configures the authentication token.
+
+The ``AUTH_REQUIRE_TOKENS`` (default: False) setting controls whether thick clients can authenticate using passwords or whether they are forced to use tokens/application specific passwords.
+
+The ``API_TOKEN`` (default: None) setting configures the authentication token.
 This token must be passed as request header to the API as authentication token.
 This is a mandatory setting for using the RESTful API.
 
@@ -374,22 +380,6 @@ If ``ROUNDCUBE_PLUGINS`` is not set the following plugins are enabled by default
 To disable all plugins just set ``ROUNDCUBE_PLUGINS`` to ``mailu``.
 
 To configure a plugin add php files named ``*.inc.php`` to roundcube's :ref:`override section <override-label>`.
-
-Mail log settings
------------------
-
-By default, all services log directly to stdout/stderr. Logs can be collected by any docker log processing solution.
-
-Postfix writes the logs to a syslog server which logs to stdout. This is used to filter
-out messages from the healthcheck. In some situations, a separate mail log is required
-(e.g. for legal reasons). The syslog server can be configured to write log files to a volume.
-It can be configured with the following option:
-
-- ``POSTFIX_LOG_FILE``: The file to log the mail log to. When enabled, the syslog server will also log to stdout.
-
-When ``POSTFIX_LOG_FILE`` is enabled, the logrotate program will automatically rotate the
-logs every week and keep 52 logs. To override the logrotate configuration, create the file logrotate.conf
-with the desired configuration in the :ref:`Postfix overrides folder<override-label>`.
 
 .. _header_authentication:
 

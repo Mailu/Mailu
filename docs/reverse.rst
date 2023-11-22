@@ -4,7 +4,7 @@ Using an external reverse proxy
 One of Mailu's use cases is as part of a larger services platform, where maybe
 other Web services are available on other FQDNs served from the same IP address.
 
-In such a configuration, one would usually run a frontend reverse proxy to serve all
+In such a configuration, one would usually run a front-end reverse proxy to serve all
 Web contents based on criteria like the requested hostname (virtual hosts).
 
 .. _traefik_proxy:
@@ -134,4 +134,4 @@ in mailu.env:
   TLS_FLAVOR=mail-letsencrypt
   WEBROOT_REDIRECT=/sso/login
 
-Using the above configuration, Traefik will proxy all the traffic related to Mailu's FQDNs without requiring dupplicate certificates.
+Using the above configuration, Traefik will proxy all the traffic related to Mailu's FQDNs without requiring duplicate certificates.

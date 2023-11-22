@@ -100,7 +100,6 @@ def is_ip_in_subnet(ip, subnets=[]):
 # Application translation
 babel = flask_babel.Babel()
 
-@babel.localeselector
 def get_locale():
     """ selects locale for translation """
     if not app.config['SESSION_COOKIE_NAME'] in flask.request.cookies:
@@ -310,7 +309,7 @@ class MailuSessionConfig:
     # default size of session key parts
     uid_bits = 64 # default if SESSION_KEY_BITS is not set in config
     sid_bits = 128 # for now. must be multiple of 8!
-    time_bits = 32 # for now. must be multiple of 8!  
+    time_bits = 32 # for now. must be multiple of 8!
 
     def __init__(self, app=None):
 
@@ -400,7 +399,7 @@ class MailuSessionInterface(SessionInterface):
             if session.modified:
                 session.delete()
                 response.delete_cookie(
-                    app.session_cookie_name,
+                    app.config['SESSION_COOKIE_NAME'],
                     domain=self.get_cookie_domain(app),
                     path=self.get_cookie_path(app),
                 )
@@ -413,7 +412,7 @@ class MailuSessionInterface(SessionInterface):
         # save session and update cookie if necessary
         if session.save():
             response.set_cookie(
-                app.session_cookie_name,
+               app.config['SESSION_COOKIE_NAME'],
                 session.sid,
                 expires=datetime.now()+timedelta(seconds=app.config['PERMANENT_SESSION_LIFETIME']),
                 httponly=self.get_cookie_httponly(app),
@@ -473,28 +472,29 @@ class MailuSessionExtension:
     def init_app(self, app):
         """ Replace session management of application. """
 
+        redis_session = False
+
         if app.config.get('MEMORY_SESSIONS'):
             # in-memory session store for use in development
             app.session_store = DictStore()
 
         else:
             # redis-based session store for use in production
+            redis_session = True
             app.session_store = RedisStore(
                 redis.StrictRedis().from_url(app.config['SESSION_STORAGE_URL'])
             )
 
+        app.session_config = MailuSessionConfig(app)
+        app.session_interface = MailuSessionInterface()
+        if redis_session:
             # clean expired sessions once on first use in case lifetime was changed
-            def cleaner():
+            with app.app_context():
                 with cleaned.get_lock():
                     if not cleaned.value:
                         cleaned.value = True
                         app.logger.info('cleaning session store')
                         MailuSessionExtension.cleanup_sessions(app)
-
-            app.before_first_request(cleaner)
-
-        app.session_config = MailuSessionConfig(app)
-        app.session_interface = MailuSessionInterface()
 
 cleaned = Value('i', False)
 session = MailuSessionExtension()

@@ -5,6 +5,7 @@ pip-selfcheck.json
 /core/admin/lib*
 /core/admin/bin
 /core/admin/include
+/core/base/.venv
 /docs/lib*
 /docs/bin
 /docs/include

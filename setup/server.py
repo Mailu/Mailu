@@ -10,12 +10,16 @@ import random
 import ipaddress
 import hashlib
 import time
-
+import secrets
+from flask_bootstrap import StaticCDN
 
 version = os.getenv("this_version", "master")
 static_url_path = "/" + version + "/static"
 app = flask.Flask(__name__, static_url_path=static_url_path)
+app.secret_key = secrets.token_hex(16)
 flask_bootstrap.Bootstrap(app)
+# Load our jQuery. Do not use jQuery 1.
+app.extensions['bootstrap']['cdns']['jquery'] = StaticCDN()
 db = redis.StrictRedis(host='redis', port=6379, db=0)
 
 
@@ -90,12 +94,47 @@ def build_app(path):
     def submit():
         data = flask.request.form.copy()
         data['uid'] = str(uuid.uuid4())
+        valid = True
+        try:
+            ipaddress.IPv4Address(data['bind4'])
+        except:
+            flask.flash('Configured IPv4 address is invalid', 'error')
+            valid = False
+        try:
+            ipaddress.IPv6Address(data['bind6'])
+        except:
+            flask.flash('Configured IPv6 address is invalid', 'error')
+            valid = False
+        try:
+            ipaddress.IPv4Network(data['subnet'])
+        except:
+            flask.flash('Configured subnet(IPv4) is invalid', 'error')
+            valid = False
+        try:
+            ipaddress.IPv6Network(data['subnet6'])
+        except:
+            flask.flash('Configured subnet(IPv6) is invalid', 'error')
+            valid = False
         try:
             data['dns'] = str(ipaddress.IPv4Network(data['subnet'], strict=False)[-2])
         except ValueError as err:
-            return "Error while generating files: " + str(err)
-        db.set(data['uid'], json.dumps(data))
-        return flask.redirect(flask.url_for('.setup', uid=data['uid']))
+            flask.flash('Invalid configuration: ' + str(err))
+            valid = False
+        if 'api_enabled' in data:
+            if (data['api_enabled'] == 'true'):
+                if  data['api_token'] == '':
+                    flask.flash('API token cannot be empty when API is enabled', 'error')
+                    valid = False
+        if valid:
+            db.set(data['uid'], json.dumps(data))
+            return flask.redirect(flask.url_for('.setup', uid=data['uid']))
+        else:
+            return flask.render_template(
+                'wizard.html',
+                flavor="compose",
+                steps=sorted(os.listdir(os.path.join(path, "templates", "steps", "compose"))),
+                subnet6=random_ipv6_subnet()
+            )
 
     @prefix_bp.route("/setup/<uid>", methods=["GET"])
     @root_bp.route("/setup/<uid>", methods=["GET"])

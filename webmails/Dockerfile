@@ -19,6 +19,7 @@ RUN set -euxo pipefail \
     aspell-uk aspell-ru aspell-fr aspell-de aspell-en \
   ; rm /etc/nginx/http.d/default.conf \
   ; rm /etc/php81/php-fpm.d/www.conf \
+  ; mkdir -m 700 /root/.gnupg/ \
   ; gpg --import /tmp/snappymail.asc \
   ; gpg --import /tmp/roundcube.asc \
   ; echo extension=snuffleupagus > /etc/php81/conf.d/snuffleupagus.ini \
@@ -26,14 +27,14 @@ RUN set -euxo pipefail \
   ; mkdir -p /run/nginx /conf
 
 # roundcube
-ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.6.1/roundcubemail-1.6.1-complete.tar.gz
-ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v5.0.1/carddav-v5.0.1.tar.gz
+ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.6.5/roundcubemail-1.6.5-complete.tar.gz
+ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v5.1.0/carddav-v5.1.0.tar.gz
 
 RUN set -euxo pipefail \
   ; cd /var/www \
   ; curl -sLo /dev/shm/roundcube.tgz ${ROUNDCUBE_URL} \
   ; curl -sLo /dev/shm/roundcube.tgz.asc ${ROUNDCUBE_URL}.asc \
-  ; gpg --status-fd 1 --verify /dev/shm/roundcube.tgz.asc \
+  ; gpg --status-fd 1 --verify /dev/shm/roundcube.tgz.asc /dev/shm/roundcube.tgz \
   ; tar xzf /dev/shm/roundcube.tgz \
   ; curl -sL ${CARDDAV_URL} | tar xz \
   ; mv roundcubemail-* roundcube \
@@ -52,15 +53,15 @@ COPY roundcube/config/config.inc.carddav.php /var/www/roundcube/plugins/carddav/
 
 # snappymail
 
-ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.26.4/snappymail-2.26.4.tar.gz
+ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.29.1/snappymail-2.29.1.tar.gz
 
 RUN set -euxo pipefail \
   ; mkdir  /var/www/snappymail \
   ; cd /var/www/snappymail \
   ; curl -sLo /dev/shm/snappymail.tgz  ${SNAPPYMAIL_URL} \
   ; curl -sLo /dev/shm/snappymail.tgz.asc  ${SNAPPYMAIL_URL}.asc \
-  ; gpg --status-fd 1 --verify /dev/shm/snappymail.tgz.asc \
-  ; tar xzf /dev/shm/snappymail.tgz
+  ; gpg --status-fd 1 --verify /dev/shm/snappymail.tgz.asc /dev/shm/snappymail.tgz \
+  ; cat /dev/shm/snappymail.tgz | tar xz
 
 # SnappyMail login
 COPY snappymail/login/include.php /var/www/snappymail/

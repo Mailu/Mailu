@@ -25,9 +25,9 @@ To switch to a different database back-end:
 
   1. Drop into a shell inside the admin container as you'll need to execute multiple commands. E.g. `docker exec -i $(docker compose ps -q admin) bash`
 
-  2. Initialize the new database backend: `flask mailu db init`
+  2. Initialize the new database back-end: `flask mailu db init`
 
-  3. Migrate the new database backend to the current state: `flask mailu db upgrade`
+  3. Migrate the new database back-end to the current state: `flask mailu db upgrade`
 
   4. Import the configuration export: `flask mailu config-import -v < /data/mail-config.yml`
 
@@ -216,4 +216,4 @@ Optionally you can remove left-over files which were used by the old database:
 
 .. note::
    Roundcube does not offer a migration tool for moving from SQLite to PostgreSQL.
-   In case roundcube is used, the Mailu setup utility can be used to specify SQLite for the roundcube database backend.
+   In case roundcube is used, the Mailu setup utility can be used to specify SQLite for the roundcube database back-end.

@@ -58,6 +58,10 @@ services:
   resolver:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-{{ version }}}
     env_file: {{ env }}
+    logging:
+      driver: journald
+      options:
+        tag: mailu-resolver
     restart: always
     networks:
       default:
@@ -98,8 +102,16 @@ services:
     volumes:
       - "{{ root }}/mail:/mail"
       - "{{ root }}/overrides/dovecot:/overrides:ro"
+    networks:
+      - default
+    {% if tika_enabled %}
+      - fts_attachments
+    {% endif %}
     depends_on:
       - front
+    {% if tika_enabled %}
+      - fts_attachments
+    {% endif %}
     {% if resolver_enabled %}
       - resolver
     dns:
@@ -129,15 +141,44 @@ services:
   oletools:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-{{ version }}}
     hostname: oletools
+    logging:
+      driver: journald
+      options:
+        tag: mailu-oletools
     restart: always
     networks:
-      - noinet
+      - oletools
     depends_on:
     {% if resolver_enabled %}
       - resolver
     dns:
       - {{ dns }}
     {% endif %}
+{% endif %}
+
+{% if tika_enabled %}
+  fts_attachments:
+    image: ghcr.io/paperless-ngx/tika:2.9.0-full
+    hostname: tika
+    logging:
+      driver: journald
+      options:
+        tag: mailu-tika
+    restart: always
+    networks:
+      - fts_attachments
+    depends_on:
+    {% if resolver_enabled %}
+      - resolver
+    dns:
+      - {{ dns }}
+    {% endif %}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -nv -t1 -O /dev/null http://127.0.0.1:9998/tika || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 {% endif %}
 
   antispam:
@@ -149,10 +190,13 @@ services:
       driver: journald
       options:
         tag: mailu-antispam
-{% if oletools_enabled %}
     networks:
       - default
-      - noinet
+{% if oletools_enabled %}
+      - oletools
+{% endif %}
+{% if antivirus_enabled %}
+      - clamav
 {% endif %}
     volumes:
       - "{{ root }}/filter:/var/lib/rspamd"
@@ -175,23 +219,32 @@ services:
   # Optional services
   {% if antivirus_enabled %}
   antivirus:
-    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}clamav:${MAILU_VERSION:-{{ version }}}
+    image: clamav/clamav-debian:1.2.0-6
     restart: always
-    env_file: {{ env }}
+    logging:
+      driver: journald
+      options:
+        tag: mailu-antivirus
+    networks:
+      - clamav
     volumes:
-      - "{{ root }}/filter:/data"
-    {% if resolver_enabled %}
-    depends_on:
-      - resolver
-    dns:
-      - {{ dns }}
-    {% endif %}
+      - "{{ root }}/filter/clamav:/var/lib/clamav"
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 `cat /tmp/clamd.pid` && kill -0 `cat /tmp/freshclam.pid`"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
   {% endif %}
 
   {% if webdav_enabled %}
   webdav:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}radicale:${MAILU_VERSION:-{{ version }}}
     restart: always
+    logging:
+      driver: journald
+      options:
+        tag: mailu-webdav
     volumes:
       - "{{ root }}/dav:/data"
     networks:
@@ -203,6 +256,10 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}fetchmail:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    logging:
+      driver: journald
+      options:
+        tag: mailu-fetchmail
     volumes:
       - "{{ root }}/data/fetchmail:/data"
     depends_on:
@@ -222,6 +279,10 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-{{ version }}}
     restart: always
     env_file: {{ env }}
+    logging:
+      driver: journald
+      options:
+        tag: mailu-webmail
     volumes:
       - "{{ root }}/webmail:/data"
       - "{{ root }}/overrides/{{ webmail_type }}:/overrides:ro"
@@ -252,8 +313,17 @@ networks:
   webmail:
     driver: bridge
 {% endif %}
+{% if antivirus_enabled %}
+  clamav:
+    driver: bridge
+{% endif %}
 {% if oletools_enabled %}
-  noinet:
+  oletools:
+    driver: bridge
+    internal: true
+{% endif %}
+{% if tika_enabled %}
+  fts_attachments:
     driver: bridge
     internal: true
 {% endif %}

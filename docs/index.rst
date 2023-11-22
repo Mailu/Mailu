@@ -8,8 +8,8 @@ Mailu
 .. image:: https://img.shields.io/github/stars/mailu/mailu.svg?label=github&logo=github&maxAge=2592000
    :target: https://github.com/mailu/mailu
 
-.. image:: https://img.shields.io/docker/pulls/mailu/admin.svg?label=docker&maxAge=2592000
-   :target: https://hub.docker.com/u/mailu/
+.. image:: https://img.shields.io/badge/Mailu-latest_release-blue
+   :target: https://github.com/Mailu/Mailu/releases
 
 .. image:: https://img.shields.io/badge/matrix-%23mailu%3Atedomum.net-7bc9a4.svg
    :target: https://matrix.to/#/#mailu:tedomum.net
@@ -23,8 +23,8 @@ popular groupware.
 
 Main features include:
 
-- **Standard email server**, IMAP and IMAP+, SMTP and Submission with autoconfiguration profiles for clients
-- **Advanced email features**, aliases, domain aliases, custom routing
+- **Standard email server**, IMAP and IMAP+, SMTP and Submission with auto-configuration profiles for clients
+- **Advanced email features**, aliases, domain aliases, custom routing, full-text search of email attachments
 - **Web access**, multiple Webmails and administration interface
 - **User features**, aliases, auto-reply, auto-forward, fetched accounts, managesieve
 - **Admin features**, global admins, announcements, per-domain delegation, quotas

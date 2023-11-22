@@ -1,0 +1,5 @@
+Setup:
+Regular expression for checking the Mailu storage path was invalid.
+Added checks to make sure JavaScript is enabled and that all JS files could be loaded. The setup site malfunctions if this is not the case.
+Added server side validation of entered values in setup.
+Simplified setup by removing the settings for configuring the WEB_* settings. Advanced users can still modify mailu.env.

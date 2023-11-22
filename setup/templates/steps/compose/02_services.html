@@ -9,7 +9,7 @@ bound to the internal IMAP and SMTP server for users to access their mailbox thr
 the Web. By exposing a complex application such as a Webmail, you should be aware of
 the security implications caused by such an increase of attack surface.<p>
 <div class="form-group">
-  <label>Enable Web email client (and path to the Web email client)</label>
+  <label>Enable Web email client</label>
   <br/>
   <select class="btn btn-primary dropdown-toggle" name="webmail_type" id="webmail">
   	{% for webmailtype in ["none", "roundcube", "snappymail"] %}
@@ -17,9 +17,6 @@ the security implications caused by such an increase of attack surface.<p>
   	{% endfor %}
   </select>
   <p></p>
-  <div class="input-group">
-    <input class="form-control" type="text" name="webmail_path" id="webmail_path" style="display: none">
-  </div>
 </div>
 
 
@@ -61,12 +58,16 @@ the security implications caused by such an increase of attack surface.<p>
     Enable oletools
   </label>
 
-  <i>Oletools scans documents in email attachements for malicious macros. It has a much lower memory footprint than a full-fledged anti-virus.</i>
+  <i>Oletools scans documents in email attachments for malicious macros. It has a much lower memory footprint than a full-fledged anti-virus.</i>
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<div class="form-check form-check-inline">
+  <label class="form-check-label">
+    <input class="form-check-input" type="checkbox" name="tika_enabled" value="true">
+    Enable Tika
+  </label>
 
-<script type="text/javascript" src="{{ url_for('static', filename='render.js') }}"></script>
-
+  <i>Tika enables the functionality for searching through attachments. Tika scans documents in email attachments, process (OCR, keyword extraction) and then index them in a way they can be efficiently searched. This requires significant resources (RAM, CPU and storage).</i>
+</div>
 
 {% endcall %}

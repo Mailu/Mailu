@@ -70,6 +70,27 @@ def domain_details(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     return flask.render_template('domain/details.html', domain=domain)
 
+@ui.route('/domain/details/<domain_name>/zonefile', methods=['GET'])
+@access.domain_admin(models.Domain, 'domain_name')
+def domain_download_zonefile(domain_name):
+    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    res = [domain.dns_mx, domain.dns_spf]
+    if domain.dkim_publickey:
+        record = domain.dns_dkim.split('"', 1)[0].strip()
+        txt = f'v=DKIM1; k=rsa; p={domain.dkim_publickey}'
+        txt = ' '.join(f'"{txt[p:p+250]}"' for p in range(0, len(txt), 250))
+        res.append(f'{record} {txt}')
+        res.append(domain.dns_dmarc)
+    if domain.dns_tlsa:
+        res.append(domain.dns_tlsa)
+    res.extend(domain.dns_autoconfig)
+    res.append("")
+    return flask.Response(
+        "\n".join(res),
+        content_type="text/plain",
+        headers={"Content-disposition": f"attachment; filename={domain.name}-zonefile.txt"}
+    )
+
 
 @ui.route('/domain/genkeys/<domain_name>', methods=['GET', 'POST'])
 @access.domain_admin(models.Domain, 'domain_name')

@@ -49,7 +49,6 @@ group "default" {
 
     "webmail",
 
-    "antivirus",
     "fetchmail",
     "resolver",
     "traefik-certdumper",
@@ -207,15 +206,6 @@ target "webmail" {
 # -----------------------------------------------------------------------------------------
 # Optional images
 # -----------------------------------------------------------------------------------------
-target "antivirus" {
-  inherits = ["defaults"]
-  context = "optional/clamav/"
-  contexts = {
-    base = "docker-image://${DOCKER_ORG}/base:${MAILU_VERSION}"
-  }
-  tags = tag("clamav")
-}
-
 target "fetchmail" {
   inherits = ["defaults"]
   context = "optional/fetchmail/"

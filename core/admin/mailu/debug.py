@@ -1,10 +1,11 @@
-import flask_debugtoolbar
+#Note: Currently flask_debugtoolbar is not compatible with flask.
+#import flask_debugtoolbar
 
 from werkzeug.middleware.profiler import ProfilerMiddleware
 
 
 # Debugging toolbar
-toolbar = flask_debugtoolbar.DebugToolbarExtension()
+#toolbar = flask_debugtoolbar.DebugToolbarExtension()
 
 
 # Profiler

@@ -254,7 +254,7 @@ The menu item Antispam opens the Rspamd webgui. For more information how spam fi
 The spam filtering page also contains a section that describes how to create a local blacklist for blocking email messages from specific domains.
 The Rspamd webgui offers basic functions for setting metric actions, scores, viewing statistics and learning.
 
-The following settings are not persisent and are *lost* when the Antispam container is recreated or restarted:
+The following settings are not persistent and are *lost* when the Antispam container is recreated or restarted:
 
 * On the configuration tab, any changes to config files that do not reside in /var/lib or /etc/rspamd/override.d. The last location is mapped to the Mailu overrides folder.
 
@@ -282,7 +282,7 @@ On the `Mail domains` page all the domains served by Mailu are configured. Via t
 Details
 ```````
 
-This page is also accessible for domain managers. On the details page all DNS settings are displayed for configuring your DNS server. It contains information on what to configure as MX record and SPF record. On this page it is also possible to (re-)generate the keys for DKIM and DMARC. The option for generating keys for DKIM and DMARC is only available for global administrators.  After generating the keys for DKIM and DMARC, this page will also show the DNS records for configuring the DKIM/DMARC records on the DNS server.
+This page is also accessible for domain managers. On the details page all DNS settings are displayed for configuring your DNS server. It contains information on what to configure as MX record and SPF record. On this page it is also possible to (re-)generate the keys for DKIM and DMARC. The option for generating keys for DKIM and DMARC is only available for global administrators.  After generating the keys for DKIM and DMARC, this page will also show the DNS records for configuring the DKIM/DMARC records on the DNS server. You can also download a zonefile for easy upload to your nameserver.
 
 
 Edit

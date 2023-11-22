@@ -115,13 +115,13 @@ class Domains(Resource):
         if 'comment' in data:
             domain_new.comment = data['comment']
         if 'max_users' in data:
-            domain_new.comment = data['max_users']
+            domain_new.max_users = data['max_users']
         if 'max_aliases' in data:
-            domain_new.comment = data['max_aliases']
+            domain_new.max_aliases = data['max_aliases']
         if 'max_quota_bytes' in data:
-            domain_new.comment = data['max_quota_bytes']
+            domain_new.max_quota_bytes = data['max_quota_bytes']
         if 'signup_enabled' in data:
-            domain_new.comment = data['signup_enabled']
+            domain_new.signup_enabled = data['signup_enabled']
         models.db.session.add(domain_new)
         #apply the changes
         db.session.commit()
@@ -177,13 +177,13 @@ class Domain(Resource):
         if 'comment' in data:
             domain_found.comment = data['comment']
         if 'max_users' in data:
-            domain_found.comment = data['max_users']
+            domain_found.max_users = data['max_users']
         if 'max_aliases' in data:
-            domain_found.comment = data['max_aliases']
+            domain_found.max_aliases = data['max_aliases']
         if 'max_quota_bytes' in data:
-            domain_found.comment = data['max_quota_bytes']
+            domain_found.max_quota_bytes = data['max_quota_bytes']
         if 'signup_enabled' in data:
-            domain_found.comment = data['signup_enabled']
+            domain_found.signup_enabled = data['signup_enabled']
         models.db.session.add(domain_found)
 
         #apply the changes

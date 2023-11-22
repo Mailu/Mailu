@@ -1,0 +1,1 @@
+Introduce AUTH_REQUIRE_TOKENS to enforce that thick clients use tokens instead of passwords

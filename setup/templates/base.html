@@ -1,11 +1,18 @@
 {% extends "bootstrap/base.html" %}
 {% import "macros.html" as macros %}
+{% from 'bootstrap/utils.html' import flashed_messages %}
 
 {% block title %}Mailu setup{% endblock %}
 
 {% block content %}
-<div class="container">
+
+<div id=no_java_script class="noscriptmsg">
+  JavaScript is not enabled or JavaScript files were blocked. The Mailu setup site does not function when JavaScript is disabled.
+</div>
+
+<div id="container" class="container" style="display:none;">
   <h1>Mailu configuration</h1>
+  {{ flashed_messages() }}
   <p>
     Version
     <select id=version_select onchange="window.location.href=this.value;" class="btn btn-primary dropdown-toggle">
@@ -27,4 +34,11 @@ For production scenarios we recommend to use the stable version.
 
 </div>
 <p></p>
+
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='render.js') }}"></script>
+{{super()}}
 {% endblock %}

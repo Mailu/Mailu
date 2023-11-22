@@ -453,7 +453,9 @@ To manually unblock an IP from the rate limiter do the following on your CLI:
 
 Consider using :ref:`AUTH tokens` for your users. Token-based authentication is exempted from rate limits!
 
-Also have a look at the configuration parameter ``AUTH_RATELIMIT_EXEMPTION``. More on :ref:`Rate limiting<AUTH Ratelimit>`.
+Also have a look at the configuration parameters
+``AUTH_RATELIMIT_EXEMPTION`` and ``AUTH_REQUIRE_TOKENS``. More on
+:ref:`Rate limiting<AUTH Ratelimit>` and :ref:`advanced settings<advanced_settings>`.
 
 *Issue reference:* `2856`_.
 

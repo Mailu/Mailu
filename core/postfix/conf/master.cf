@@ -27,9 +27,9 @@ polite      unix  -       -       n       -       -       smtp
 turtle      unix  -       -       n       -       -       smtp
   -o syslog_name=postfix-turtle
   -o turtle_destination_concurrency_limit=1
-  -o turtle_destination_rate_delay=1
-  -o turtle_destination_recipient_limit=5
-  -o turtle_destination_concurrency_failed_cohort_limit=10
+  -o turtle_destination_rate_delay=5
+  -o turtle_destination_recipient_limit=1
+  -o turtle_destination_concurrency_failed_cohort_limit=1
 
 # Internal postfix services
 pickup    unix  n       -       n       60      1       pickup

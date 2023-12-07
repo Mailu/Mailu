@@ -31,17 +31,17 @@
   <td>{{ macros.clip("dns_mx") }}<pre id="dns_mx" class="pre-config border bg-light">{{ domain.dns_mx }}</pre></td>
 </tr>
 <tr>
-  <th>{% trans %}DNS SPF entries{% endtrans %}</th>
+  <th>{% trans %}DNS SPF entries{% endtrans %} <i class="fa {{ 'fa-check-circle text-success' if domain.check_spf() else 'fa-exclamation-circle text-danger' }}"></i></th>
   <td>{{ macros.clip("dns_spf") }}<pre id="dns_spf" class="pre-config border bg-light">{{ domain.dns_spf }}</pre>
   </td>
 </tr>
 {%- if domain.dkim_publickey %}
 <tr>
-  <th>{% trans %}DNS DKIM entry{% endtrans %}</th>
+  <th>{% trans %}DNS DKIM entry{% endtrans %} <i class="fa {{ 'fa-check-circle text-success' if domain.check_dkim() else 'fa-exclamation-circle text-danger' }}"></i></th>
   <td>{{ macros.clip("dns_dkim") }}<pre id="dns_dkim" class="pre-config border bg-light">{{ domain.dns_dkim }}</pre></td>
 </tr>
 <tr>
-  <th>{% trans %}DNS DMARC entry{% endtrans %}</th>
+  <th>{% trans %}DNS DMARC entry{% endtrans %} <i class="fa {{ 'fa-check-circle text-success' if domain.check_dmarc() else 'fa-exclamation-circle text-danger' }}"></i></th>
   <td>
     {{ macros.clip("dns_dmarc") }}<pre id="dns_dmarc" class="pre-config border bg-light">{{ domain.dns_dmarc }}</pre>
     {{ macros.clip("dns_dmarc_report") }}<pre id="dns_dmarc_report" class="pre-config border bg-light">{{ domain.dns_dmarc_report }}</pre>

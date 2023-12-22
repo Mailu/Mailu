@@ -1,0 +1,1 @@
+Prevent SMTP smuggling; see https://www.mail-archive.com/postfix-users@postfix.org/msg100901.html

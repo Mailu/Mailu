@@ -77,7 +77,7 @@ os.makedirs(base + "configs", exist_ok=True)
 
 conf.jinja("/defaults/default.json", context, "/data/_data_/_default_/domains/default.json")
 conf.jinja("/defaults/application.ini", context, "/data/_data_/_default_/configs/application.ini")
-conf.jinja("/defaults/php.ini", context, "/etc/php81/php.ini")
+conf.jinja("/defaults/php.ini", context, "/etc/php83/php.ini")
 
 # setup permissions
 os.system("chown -R mailu:mailu /data")
@@ -120,6 +120,6 @@ if os.path.exists("/var/run/nginx.pid"):
 system.clean_env()
 
 # run nginx
-os.system("php-fpm81")
+os.system("php-fpm83")
 os.execv("/usr/sbin/nginx", ["nginx", "-g", "daemon off;"])
 

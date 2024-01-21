@@ -50,7 +50,7 @@ sed -E '/^#/d;s:^FROM system$:FROM system AS base:' "${base}/Dockerfile" >Docker
 # assets
 cp "${assets}/package.json" .
 cp -r "${assets}/assets" ./assets
-awk '/new compress/{f=1}!f{print}/}),/{f=0}' <"${assets}/webpack.config.js" >webpack.config.js
+sed '/new compress/,/}),/d' <"${assets}/webpack.config.js" >webpack.config.js
 sed -E '/^#/d;s:^(FROM [^ ]+$):\1 AS assets:' "${assets}/Dockerfile" >>Dockerfile
 
 # admin

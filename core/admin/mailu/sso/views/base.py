@@ -9,8 +9,7 @@ import flask
 import flask_login
 import secrets
 import ipaddress
-from urllib.parse import urlparse, urljoin
-from werkzeug.urls import url_unquote
+from urllib.parse import urlparse, urljoin, unquote
 
 @sso.route('/login', methods=['GET', 'POST'])
 def login():
@@ -120,8 +119,7 @@ def _has_usable_redirect(is_proxied=False):
     if 'homepage' in flask.request.url and not is_proxied:
         return None
     if url := flask.request.args.get('url'):
-        url = url_unquote(url)
-        target = urlparse(urljoin(flask.request.url, url))
+        target = urlparse(urljoin(flask.request.url, unquote(url)))
         if target.netloc == urlparse(flask.request.url).netloc:
             return target.geturl()
     return None

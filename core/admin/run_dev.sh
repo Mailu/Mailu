@@ -140,7 +140,7 @@ ${docker/*\/} exec -it "${DEV_NAME}" /bin/bash
 To update requirements-prod.txt you can build mailu using the dev requirements:
 "$0" --build-arg MAILU_DEPS=dev
 
-And then copy the new dependencies:
+And then copy the new dependencies from a separate shell:
 ${docker/*\/} exec "${DEV_NAME}" pip freeze >$(realpath "${base}")/requirements-new.txt
 
 =============================================================================

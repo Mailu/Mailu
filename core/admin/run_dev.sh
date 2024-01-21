@@ -50,7 +50,7 @@ sed -E '/^#/d;s:^FROM system$:FROM system AS base:' "${base}/Dockerfile" >Docker
 # assets
 cp "${assets}/package.json" .
 cp -r "${assets}/assets" ./assets
-awk '/new compress/{f=1}!f{print}/}),/{f=0}' <"${assets}/webpack.config.js" >webpack.config.js
+sed '/new compress/,/}),/d' <"${assets}/webpack.config.js" >webpack.config.js
 sed -E '/^#/d;s:^(FROM [^ ]+$):\1 AS assets:' "${assets}/Dockerfile" >>Dockerfile
 
 # admin
@@ -137,10 +137,10 @@ ${docker/*\/} exec -it "${DEV_NAME}" /bin/bash
 
 =============================================================================
 
-To update requirements-prod.txt you can build (and test) using:
-${docker/*\/} build --tag "${DEV_NAME}:latest" --build-arg MAILU_DEPS=dev .
+To update requirements-prod.txt you can build mailu using the dev requirements:
+"$0" --build-arg MAILU_DEPS=dev
 
-And then fetch the new dependencies with:
+And then copy the new dependencies from a separate shell:
 ${docker/*\/} exec "${DEV_NAME}" pip freeze >$(realpath "${base}")/requirements-new.txt
 
 =============================================================================

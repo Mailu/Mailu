@@ -47,13 +47,13 @@ class Tokens(Resource):
     @token.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
-        """List tokens"""
+        """List all tokens"""
         return models.Token.query.all()
 
     @token.doc('create_token')
     @token.expect(token_user_fields_post)
-    @token.response(200, 'Success', token_user_post_response)
-    @token.response(400, 'Input validation exception')
+    @token.marshal_with(token_user_post_response, code=200, description='Success', as_list=False, skip_none=True, mask=None)
+    @token.response(400, 'Input validation exception', response_fields)
     @token.response(409, 'Duplicate relay', response_fields)
     @token.doc(security='Bearer')
     @common.api_token_authorization
@@ -92,11 +92,13 @@ class Tokens(Resource):
 @token.route('user/<string:email>')
 class Token(Resource):
     @token.doc('find_tokens_of_user')
-    @token.marshal_with(token_user_fields, as_list=True, skip_none=True, mask=None)
+    @token.marshal_with(token_user_fields, code=200, description='Success', as_list=True, skip_none=True, mask=None)
+    @token.response(400, 'Input validation exception', response_fields)
+    @token.response(404, 'Token not found', response_fields)
     @token.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, email):
-        "Find tokens of user"
+        """ Look up all the tokens of the specified user """
         if not validators.email(email):
             return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
         user_found = models.User.query.get(email)
@@ -108,12 +110,12 @@ class Token(Resource):
     @token.doc('create_token')
     @token.expect(token_user_fields_post2)
     @token.response(200, 'Success', token_user_post_response)
-    @token.response(400, 'Input validation exception')
+    @token.response(400, 'Input validation exception', response_fields)
     @token.response(409, 'Duplicate relay', response_fields)
     @token.doc(security='Bearer')
     @common.api_token_authorization
     def post(self, email):
-        """ Create a new token for user"""
+        """ Create a new token for the specified user"""
         data = api.payload
         if not validators.email(email):
             return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
@@ -144,11 +146,12 @@ class Token(Resource):
 @token.route('/<string:token_id>')
 class Token(Resource):
     @token.doc('find_token')
-    @token.marshal_with(token_user_fields, as_list=True, skip_none=True, mask=None)
+    @token.marshal_with(token_user_fields, code=200, description='Success', as_list=False, skip_none=True, mask=None)
+    @token.response(404, 'Token not found', response_fields)
     @token.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, token_id):
-        "Find token"
+        "Find the specified token"
         token = models.Token.query.get(token_id)
         if not token:
             return { 'code' : 404, 'message' : f'Record cannot be found for id {token_id} or invalid id provided'}, 404
@@ -161,7 +164,7 @@ class Token(Resource):
     @token.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, token_id):
-        """ Delete token """
+        """ Delete the specified token """
         token = models.Token.query.get(token_id)
         if not token:
             return { 'code' : 404, 'message' : f'Record cannot be found for id {token_id} or invalid id provided'}, 404

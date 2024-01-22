@@ -27,22 +27,22 @@ class Relays(Resource):
     @relay.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
-        "List relays"
+        "List all relays"
         return models.Relay.query.all()
 
     @relay.doc('create_relay')
     @relay.expect(relay_fields)
     @relay.response(200, 'Success', response_fields)
-    @relay.response(400, 'Input validation exception')
+    @relay.response(400, 'Input validation exception', response_fields)
     @relay.response(409, 'Duplicate relay', response_fields)
     @relay.doc(security='Bearer')
     @common.api_token_authorization
     def post(self):
-        """ Create relay """
+        """ Create a new relay """
         data = api.payload
 
-        if not validators.domain(name):
-            return { 'code': 400, 'message': f'Relayed domain {name} is not a valid domain'}, 400
+        if not validators.domain(data['name']):
+            return { 'code': 400, 'message': f'Relayed domain {data["name"]} is not a valid domain'}, 400
 
         if common.fqdn_in_use(data['name']):
             return { 'code': 409, 'message': f'Duplicate domain {data["name"]}'}, 409
@@ -58,12 +58,13 @@ class Relays(Resource):
 @relay.route('/<string:name>')
 class Relay(Resource):
     @relay.doc('find_relay')
+    @relay.marshal_with(relay_fields, code=200, description='Success', as_list=False, skip_none=True, mask=None)
     @relay.response(400, 'Input validation exception', response_fields)
     @relay.response(404, 'Relay not found', response_fields)
     @relay.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, name):
-        """ Find relay """
+        """ Look up the specified relay """
         if not validators.domain(name):
             return { 'code': 400, 'message': f'Relayed domain {name} is not a valid domain'}, 400
 
@@ -81,7 +82,7 @@ class Relay(Resource):
     @relay.doc(security='Bearer')
     @common.api_token_authorization
     def patch(self, name):
-        """ Update relay """
+        """ Update the specified relay """
         data = api.payload
 
         if not validators.domain(name):
@@ -107,7 +108,7 @@ class Relay(Resource):
     @relay.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, name):
-        """ Delete relay """
+        """ Delete the specified relay """
         if not validators.domain(name):
             return { 'code': 400, 'message': f'Relayed domain {name} is not a valid domain'}, 400
         relay_found = models.Relay.query.filter_by(name=name).first()

@@ -27,7 +27,7 @@ class Aliases(Resource):
     @alias.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
-        """ List aliases """
+        """ List all aliases """
         return models.Alias.query.all()
 
     @alias.doc('create_alias')
@@ -63,7 +63,7 @@ class Alias(Resource):
     @alias.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, alias):
-        """ Find alias """
+        """ Look up the specified alias """
         alias_found = models.Alias.query.filter_by(email = alias).first()
         if alias_found is None:
           return { 'code': 404, 'message': f'Alias {alias} cannot be found'}, 404
@@ -78,7 +78,7 @@ class Alias(Resource):
     @alias.doc(security='Bearer')
     @common.api_token_authorization
     def patch(self, alias):
-      """ Update alias """
+      """ Update the specfied alias """
       data = api.payload
       alias_found = models.Alias.query.filter_by(email = alias).first()
       if alias_found is None:
@@ -99,7 +99,7 @@ class Alias(Resource):
     @alias.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, alias):
-      """ Delete alias """
+      """ Delete the specified alias """
       alias_found = models.Alias.query.filter_by(email = alias).first()
       if alias_found is None:
         return { 'code': 404, 'message': f'Alias {alias} cannot be found'}, 404
@@ -110,12 +110,12 @@ class Alias(Resource):
 @alias.route('/destination/<string:domain>')
 class AliasWithDest(Resource):
     @alias.doc('find_alias_filter_domain')
-    @alias.response(200, 'Success', alias_fields)
+    @alias.marshal_with(alias_fields, code=200, description='Success' ,as_list=True, skip_none=True, mask=None)
     @alias.response(404, 'Alias or domain not found', response_fields)
     @alias.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, domain):
-        """ Find aliases of domain """
+        """ Look up the aliases of the specified domain """
         domain_found = models.Domain.query.filter_by(name=domain).first()
         if domain_found is None:
           return { 'code': 404, 'message': f'Domain {domain} cannot be found'}, 404
@@ -123,4 +123,4 @@ class AliasWithDest(Resource):
         if aliases_found.count == 0:
           return { 'code': 404, 'message': f'No alias can be found for domain {domain}'}, 404
         else:
-          return marshal(aliases_found, alias_fields), 200
+          return marshal(aliases_found, alias_fields, as_list=True), 200

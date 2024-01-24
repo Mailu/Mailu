@@ -54,7 +54,6 @@ class Tokens(Resource):
     @token.expect(token_user_fields_post)
     @token.marshal_with(token_user_post_response, code=200, description='Success', as_list=False, skip_none=True, mask=None)
     @token.response(400, 'Input validation exception', response_fields)
-    @token.response(409, 'Duplicate relay', response_fields)
     @token.doc(security='Bearer')
     @common.api_token_authorization
     def post(self):
@@ -111,7 +110,6 @@ class Token(Resource):
     @token.expect(token_user_fields_post2)
     @token.response(200, 'Success', token_user_post_response)
     @token.response(400, 'Input validation exception', response_fields)
-    @token.response(409, 'Duplicate relay', response_fields)
     @token.doc(security='Bearer')
     @common.api_token_authorization
     def post(self, email):

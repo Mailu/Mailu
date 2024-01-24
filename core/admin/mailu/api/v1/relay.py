@@ -78,7 +78,6 @@ class Relay(Resource):
     @relay.response(200, 'Success', response_fields)
     @relay.response(400, 'Input validation exception', response_fields)
     @relay.response(404, 'Relay not found', response_fields)
-    @relay.response(409, 'Duplicate relay', response_fields)
     @relay.doc(security='Bearer')
     @common.api_token_authorization
     def patch(self, name):

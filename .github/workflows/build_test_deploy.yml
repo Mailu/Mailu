@@ -418,7 +418,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ["core", "fetchmail", "filters", "webmail", "webdav"]
+        target: ["api", "core", "fetchmail", "filters", "webmail", "webdav"]
         time: ["2"]
         include:
           - target: "filters"

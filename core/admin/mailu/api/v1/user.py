@@ -111,6 +111,10 @@ class Users(Resource):
         domain_found = models.Domain.query.get(domain_name)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain_name} does not exist'}, 404
+        email_found = models.User.query.filter_by(email=data['email']).first()
+        if email_found:
+            return { 'code': 409, 'message': f'User {data["email"]} already exists'}, 409
+
 
         user_new = models.User(email=data['email'])
         if 'raw_password' in data:
@@ -188,7 +192,6 @@ class User(Resource):
     @user.response(200, 'Success', response_fields)
     @user.response(400, 'Input validation exception', response_fields)
     @user.response(404, 'User not found', response_fields)
-    @user.response(409, 'Duplicate user', response_fields)
     @user.doc(security='Bearer')
     @common.api_token_authorization
     def patch(self, email):

@@ -250,7 +250,7 @@ class Domain(Base):
         """ return DMARC report record for mailu server """
         if self.dkim_key:
             domain = app.config['DOMAIN']
-            return f'{self.name}._report._dmarc.{domain}. 600 IN TXT "v=DMARC1"'
+            return f'{self.name}._report._dmarc.{domain}. 600 IN TXT "v=DMARC1;"'
 
     @cached_property
     def dns_autoconfig(self):

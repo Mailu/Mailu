@@ -34,7 +34,7 @@ class mailu extends rcube_plugin
       );
     }
     // sso
-    if (empty($_SESSION['user_id'])) {
+    if (empty($_SESSION['username']) || (!empty($_SERVER['HTTP_X_REMOTE_USER']) && $_SESSION['username'] !== $_SERVER['HTTP_X_REMOTE_USER'])) {
       $args['task'] = 'login';
       $args['action'] = 'login';
     }

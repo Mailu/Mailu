@@ -96,7 +96,7 @@
       <li class="nav-header text-uppercase text-primary" role="none">{% trans %}Go to{% endtrans %}</li>
       {%- if config["WEBMAIL"] != "none" and current_user.is_authenticated %}
       <li class="nav-item" role="none">
-        <a href="{{ config["WEB_WEBMAIL"] }}" class="nav-link" role="menuitem">
+        <a href="{{ url_for('.user_webmail') }}" class="nav-link" role="menuitem">
         <i class="nav-icon far fa-envelope"></i>
         <p>{% trans %}Webmail{% endtrans %}</p>
         </a>

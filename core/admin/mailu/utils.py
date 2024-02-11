@@ -505,7 +505,7 @@ def verify_temp_token(email, token):
         if token.startswith('token-'):
             if sessid := app.session_store.get(token):
                 session = MailuSession(sessid, app)
-                if session.get('_user_id', '') == email:
+                if session.get('webmail_user_email', session.get('_user_id', '')) == email:
                     return True
     except:
         pass

@@ -39,6 +39,9 @@
       {%- if config["FETCHMAIL_ENABLED"] -%}
       <a href="{{ url_for('.fetch_list', user_email=user.email) }}" title="{% trans %}Fetched accounts{% endtrans %}"><i class="fa fa-download"></i></a>&nbsp;
       {%- endif -%}
+      {%- if config["WEBMAIL"] != "none" -%}
+      <a href="{{ url_for('.user_webmail', user_email=user.email) }}" title="{% trans %}Webmail{% endtrans %}" target="_blank"><i class="fa fa-envelope"></i></a>&nbsp;
+      {%- endif -%}
     </td>
     <td>{{ user }}</td>
     <td data-sort="{{ user.allow_spoofing*4 + user.enable_imap*2 + user.enable_pop }}">

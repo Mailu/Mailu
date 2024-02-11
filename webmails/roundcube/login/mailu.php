@@ -35,6 +35,7 @@ class mailu extends rcube_plugin
     }
     // sso
     if (empty($_SESSION['user_id'])) {
+      $args['task'] = 'login';
       $args['action'] = 'login';
     }
     return $args;

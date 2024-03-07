@@ -79,6 +79,11 @@ on:
         default: false
         required: false
         type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.docker_org }}-${{ inputs.pinned_mailu_version }}-${{ inputs.architecture }}
+  cancel-in-progress: true
+
 env:
   HCL_FILE: ./tests/build-ci.hcl
 

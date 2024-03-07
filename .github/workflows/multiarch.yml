@@ -8,8 +8,6 @@ on:
       - master
       - test-*
 
-concurrency: ci-multiarch-${{ github.ref }}
-
 # REQUIRED global variables
 # DOCKER_ORG, docker org used for pushing images.
 env:

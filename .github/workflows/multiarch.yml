@@ -62,7 +62,6 @@ jobs:
         shell: bash
         run: |
           version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
-          echo "RELEASE=true" >> $GITHUB_ENV
           echo "DEPLOY=true" >> $GITHUB_ENV
           echo "RELEASE=true" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION and DEPLOY/RELEASE for staging

@@ -1,0 +1,89 @@
+name: Rebuild Docker images with security updates
+on:
+  schedule:
+    # 5:20 UTC - not 5:00 because top of the hour is "high load" for GitHub Actions
+    # See https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+    - cron: '20 5 * * *'
+
+strategy:
+  fail-fast: false
+  matrix:
+    branch:
+      - master
+      - '2.0'
+
+# REQUIRED global variables
+# DOCKER_ORG, docker org used for pushing images.
+env:
+  DOCKER_ORG: ghcr.io/mailu
+
+jobs:
+# This job calculates all global job variables that are required by all the subsequent jobs.
+# All subsequent jobs will retrieve and use these variables. This way the variables only have to be derived once.
+  derive-variables:
+    name: derive variables
+    runs-on: ubuntu-latest
+    outputs:
+        MAILU_VERSION: ${{ env.MAILU_VERSION }}
+        PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+        BRANCH: ${{ env.BRANCH }}
+        DEPLOY: ${{ env.DEPLOY }}
+        RELEASE: ${{ env.RELEASE }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
+      - name: Derive PINNED_MAILU_VERSION and RELEASE for master
+        if: matrix.branch == 'master'
+        shell: bash
+        run: |
+          echo "PINNED_MAILU_VERSION=$(git rev-parse ${{ matrix.branch }})" >> $GITHUB_ENV
+          echo "RELEASE=false" >> $GITHUB_ENV
+      - name: Derive PINNED_MAILU_VERSION and RELEASE for normal release x.y
+        if: matrix.branch != 'master'
+        shell: bash
+        run: |
+          version=$( git tag --sort=version:refname --list "${{ matrix.branch }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ matrix.branch }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+          echo "RELEASE=true" >> $GITHUB_ENV
+
+  build-test-deploy:
+    needs:
+      - derive-variables
+    uses: ./.github/workflows/build_test_deploy.yml
+    with:
+      architecture: 'linux/amd64,linux/arm64/v8,linux/arm/v7'
+      mailu_version: ${{matrix.branch}}
+      pinned_mailu_version: ${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}
+      docker_org: ${{env.DOCKER_ORG}}
+      branch: ${{matrix.branch}}
+      deploy: true
+      release: ${{needs.derive-variables.outputs.RELEASE}}
+    secrets: inherit
+
+ # This job is watched by bors. It only complets if building,testing and deploy worked.
+  ci-success:
+    name: CI-Done
+    #Returns true when none of the **previous** steps have failed or have been canceled.
+    if: success()
+    needs:
+      - build-test-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: CI/CD succeeded.
+        run: exit 0
+
+################################################
+# Code block that is used as one liner for the step:
+# Derive PINNED_MAILU_VERSION and DEPLOY/RELEASE for normal release x.y
+##!/bin/bash
+#version=$( git tag --sort=version:refname --list "{{ env.MAILU_VERSION }}.*" | tail -1  )
+#root_version=${version%.*}
+#patch_version=${version##*.}
+#if [ "$patch_version" == "" ]
+#then
+#  pinned_version={{ env.MAILU_VERSION }}.0
+#else
+#  pinned_version=$root_version.$(expr $patch_version + 1)
+#fi
+#echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV

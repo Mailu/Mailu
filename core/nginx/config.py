@@ -92,11 +92,15 @@ def format_for_nginx(fullchain, output, strip_CA=args.get('LETSENCRYPT_SHORTCHAI
         chain = x509.load_pem_x509_certificates(f.read())
     builder = PolicyBuilder().store(Store([ISRG_ROOT_X1, ISRG_ROOT_X2]))
     verifier = builder.build_server_verifier(DNSName(chain[0].subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value))
+<<<<<<< HEAD
     try:
         valid_chain = verifier.verify(chain[0], chain[1:])
     except Exception as e:
         log.error(e)
         valid_chain = chain
+=======
+    valid_chain = verifier.verify(chain[0], chain[1:])
+>>>>>>> 86adf074 (Ensure we always send an ISRG root for DANE)
     log.info(f'The certificate chain looks as follows for {fullchain}:')
     indent = '  '
     has_found_PIN = False
@@ -117,7 +121,11 @@ def format_for_nginx(fullchain, output, strip_CA=args.get('LETSENCRYPT_SHORTCHAI
         for cert in valid_chain:
             if strip_CA and (cert.subject.rfc4514_string() in ['CN=ISRG Root X1,O=Internet Security Research Group,C=US', 'CN=ISRG Root X2,O=Internet Security Research Group,C=US']):
                 continue
+<<<<<<< HEAD
             f.write(f'{cert.public_bytes(encoding=Encoding.PEM).decode("ascii").strip()}\n')
+=======
+            f.write(f'{cert.public_bytes(encoding=Encoding.PEM).decode("ascii").strip()}')
+>>>>>>> 86adf074 (Ensure we always send an ISRG root for DANE)
 
 if args['TLS_FLAVOR'] in ['letsencrypt', 'mail-letsencrypt']:
     format_for_nginx('/certs/letsencrypt/live/mailu/fullchain.pem', '/certs/letsencrypt/live/mailu/nginx-chain.pem')

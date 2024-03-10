@@ -133,11 +133,5 @@ if args["TLS"] and not all(os.path.exists(file_path) for file_path in args["TLS"
 conf.jinja("/conf/tls.conf", args, "/etc/nginx/tls.conf")
 conf.jinja("/conf/proxy.conf", args, "/etc/nginx/proxy.conf")
 conf.jinja("/conf/nginx.conf", args, "/etc/nginx/nginx.conf")
-<<<<<<< HEAD
-if os.path.exists("/var/run/nginx.pid"):
-    os.system("nginx -s reload")
-=======
-conf.jinja("/dovecot_conf/login.lua", args, "/etc/dovecot/login.lua")
-conf.jinja("/dovecot_conf/proxy.conf", args, "/etc/dovecot/proxy.conf")
 os.system("killall -q -HUP nginx dovecot")
 >>>>>>> 494147ee (Need newer cryptography)

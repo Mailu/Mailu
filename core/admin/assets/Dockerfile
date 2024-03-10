@@ -8,6 +8,8 @@ COPY package.json ./
 
 RUN set -euxo pipefail \
   ; npm config set update-notifier false \
+  ; echo "#!/bin/sh" >/usr/local/bin/husky \
+  ; chmod +x /usr/local/bin/husky \
   ; npm install --no-audit --no-fund \
   ; sed -i 's/#007bff/#55a5d9/' node_modules/admin-lte/build/scss/_bootstrap-variables.scss \
   ; mkdir assets \

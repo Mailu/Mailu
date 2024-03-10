@@ -1,0 +1,1 @@
+Ensure we always send ISRG_X1 root when LE is configured. Switch to the non-crossigned version as the other one will expire in September

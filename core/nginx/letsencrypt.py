@@ -17,6 +17,7 @@ command = [
     "--keep-until-expiring",
     "--allow-subset-of-names",
     "--renew-with-new-domains",
+    "--preferred-chain 'ISRG Root X1'",
     "--config-dir", "/certs/letsencrypt",
     "--post-hook", "/config.py"
 ]
@@ -32,6 +33,7 @@ command2 = [
     "--allow-subset-of-names",
     "--key-type", "ecdsa",
     "--renew-with-new-domains",
+    "--preferred-chain 'ISRG Root X1'",
     "--config-dir", "/certs/letsencrypt",
     "--post-hook", "/config.py"
 ]

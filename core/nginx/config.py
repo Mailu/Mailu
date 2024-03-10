@@ -92,7 +92,11 @@ def format_for_nginx(fullchain, output, strip_CA=args.get('LETSENCRYPT_SHORTCHAI
         chain = x509.load_pem_x509_certificates(f.read())
     builder = PolicyBuilder().store(Store([ISRG_ROOT_X1, ISRG_ROOT_X2]))
     verifier = builder.build_server_verifier(DNSName(chain[0].subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value))
-    valid_chain = verifier.verify(chain[0], chain[1:])
+    try:
+        valid_chain = verifier.verify(chain[0], chain[1:])
+    except Exception as e:
+        log.error(e)
+        valid_chain = chain
     log.info(f'The certificate chain looks as follows for {fullchain}:')
     indent = '  '
     has_found_PIN = False
@@ -113,7 +117,7 @@ def format_for_nginx(fullchain, output, strip_CA=args.get('LETSENCRYPT_SHORTCHAI
         for cert in valid_chain:
             if strip_CA and (cert.subject.rfc4514_string() in ['CN=ISRG Root X1,O=Internet Security Research Group,C=US', 'CN=ISRG Root X2,O=Internet Security Research Group,C=US']):
                 continue
-            f.write(f'{cert.public_bytes(encoding=Encoding.PEM).decode("ascii").strip()}')
+            f.write(f'{cert.public_bytes(encoding=Encoding.PEM).decode("ascii").strip()}\n')
 
 if args['TLS_FLAVOR'] in ['letsencrypt', 'mail-letsencrypt']:
     format_for_nginx('/certs/letsencrypt/live/mailu/fullchain.pem', '/certs/letsencrypt/live/mailu/nginx-chain.pem')
@@ -131,4 +135,4 @@ conf.jinja("/conf/proxy.conf", args, "/etc/nginx/proxy.conf")
 conf.jinja("/conf/nginx.conf", args, "/etc/nginx/nginx.conf")
 conf.jinja("/dovecot_conf/login.lua", args, "/etc/dovecot/login.lua")
 conf.jinja("/dovecot_conf/proxy.conf", args, "/etc/dovecot/proxy.conf")
-os.system("killall -HUP nginx dovecot")
+os.system("killall -q -HUP nginx dovecot")

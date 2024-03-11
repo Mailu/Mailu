@@ -42,7 +42,7 @@ domain_fields_get = api.model('DomainGet', {
     'dns_dkim': fields.String(Description='DKIM records for domain'),
     'dns_dmarc': fields.String(Description='DMARC record for domain'),
     'dns_dmarc_report': fields.String(Description='DMARC report record for domain'),
-    'dns_tlsa': fields.String(Description='TLSA records for domain'),
+    'dns_tlsa': fields.List(fields.String(Description='TLSA records for domain')),
 })
 
 domain_fields_dns = api.model('DomainDNS', {

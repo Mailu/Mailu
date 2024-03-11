@@ -281,7 +281,7 @@ class Domain(Base):
     def dns_tlsa(self):
         """ return TLSA record for domain when using letsencrypt """
         hostname = app.config['HOSTNAME']
-        if True:# app.config['TLS_FLAVOR'] in ('letsencrypt', 'mail-letsencrypt'):
+        if app.config['TLS_FLAVOR'] in ('letsencrypt', 'mail-letsencrypt'):
             return [
                 # current ISRG Root X1 (RSA 4096, O = Internet Security Research Group, CN = ISRG Root X1) @20210902
                 f'_25._tcp.{hostname}. 86400 IN TLSA 2 1 1 0b9fa5a59eed715c26c1020c711b4f6ec42d58b0015e14337a39dad301c5afc3',

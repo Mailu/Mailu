@@ -81,8 +81,8 @@ def domain_download_zonefile(domain_name):
         txt = ' '.join(f'"{txt[p:p+250]}"' for p in range(0, len(txt), 250))
         res.append(f'{record} {txt}')
         res.append(domain.dns_dmarc)
-    if domain.dns_tlsa:
-        res.append(domain.dns_tlsa)
+    for tlsa in domain.dns_tlsa:
+        res.append(tlsa)
     res.extend(domain.dns_autoconfig)
     res.append("")
     return flask.Response(

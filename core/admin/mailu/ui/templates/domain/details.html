@@ -48,11 +48,14 @@
   </td>
 </tr>
 {%- endif %}
-{%- set tlsa_record=domain.dns_tlsa %}
-{%- if tlsa_record %}
+{%- if domain.dns_tlsa|length > 0 %}
 <tr>
-  <th>{% trans %}DNS TLSA entry{% endtrans %}</br><span class="text-secondary text-xs font-weight-normal">Let's Encrypt</br>ISRG Root X1</span></th>
-  <td>{{ macros.clip("dns_tlsa") }}<pre id="dns_tlsa" class="pre-config border bg-light">{{ tlsa_record }}</pre></td>
+  <th>{% trans %}DNS TLSA entry{% endtrans %}</br><span class="text-secondary text-xs font-weight-normal">Let's Encrypt ISRG Roots</span></th>
+  <td>{{ macros.clip("dns_tlsa") }}<pre id="dns_tlsa" class="pre-config border bg-light">
+{%- for line in domain.dns_tlsa %}
+{{ line }}
+{%- endfor -%}
+  </pre></td>
 </tr>
 {%- endif %}
 <tr>

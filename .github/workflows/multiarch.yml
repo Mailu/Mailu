@@ -4,7 +4,7 @@ on:
     branches:
       - testing
       - staging
-      - '2.0'
+      - '2024.03'
       - master
       - test-*
 

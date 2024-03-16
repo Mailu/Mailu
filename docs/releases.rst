@@ -1,6 +1,23 @@
 Release notes
 =============
 
+Mailu 2024.04 - 2024-03
+----------------------
+
+Mailu 2024.04 is available. To make clear you can only go forward with upgrades, we have changed the version naming scheme to year.month.minor.
+Only between minor versions (2024.03.2 to 2024.03.2) is it safe to downgrade.
+
+Highlights
+``````````
+Document major new features and changes. E.g. Switch for indexing with tika (attachment indexing/ocr)
+
+Upgrading
+`````````
+
+Document steps for upgrading.
+
+
+
 Mailu 2.0 - 2023-04-03
 ----------------------
 

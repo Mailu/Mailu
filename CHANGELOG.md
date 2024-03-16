@@ -1,6 +1,107 @@
 Changelog
 =========
 
+2024.03.0 - 2024-03
+-------------------
+
+For full details see the [releases page](https://mailu.io/2024.03/releases.html)
+
+Upgrade should run fine as long as you generate a new docker-compose.yml file and mailu.env file via setup.mailu.io.
+After that any old settings can be reapplied to mailu.env.
+Before making any changes, carefully read the [configuration reference](https://mailu.io/2.0/configuration.html). New settings have been introduced and some settings have been removed.
+Multiple changes have been made to the docker-compose.yml file and mailu.env file.
+
+.... TODO DESCRIBE ALL NEW FEATURES ....
+
+.... END TODO DESCRIBE ALL NEW FEATURES ....
+
+Please note that once you have upgraded to 2024.03, that you won't be able to roll-back to earlier versions.
+
+After changing mailu.env, it is required to recreate all containers for the changes to be propagated.
+
+- Features: Add support for managesieve ([#81](https://github.com/Mailu/Mailu/issues/81))
+- Features: Enhance RESTful API user retrieval with quota used bytes. This is the current size of the user's email box in bytes. ([#2824](https://github.com/Mailu/Mailu/issues/2824))
+- Features: Implement a feature to force users to change their password
+  Prune all active sessions of users when their password is changed ([#2877](https://github.com/Mailu/Mailu/issues/2877))
+- Features: Add ukrainian translation ([#2936](https://github.com/Mailu/Mailu/issues/2936))
+- Features: Add Traditional Chinese translation ([#2948](https://github.com/Mailu/Mailu/issues/2948))
+- Features: Enhance RESTful API with functionality for managing authentication tokens of users ([#2974](https://github.com/Mailu/Mailu/issues/2974))
+- Features: Add "download zonefile" button to domain configuration and un-split dkim key in dns table ([#3023](https://github.com/Mailu/Mailu/issues/3023))
+- Features: Ensure that we encourage users to also pin ISRG X2 in their TLSA records ([#3191](https://github.com/Mailu/Mailu/issues/3191))
+- Bugfixes: Letsencrypt only works if port 80 is reachable. Users behind reverse-proxies don't read instructions... this makes the common misconfiguration work too. ([#2720](https://github.com/Mailu/Mailu/issues/2720))
+- Bugfixes: Fix breaking bug in config-import command line command.
+  Import yml's containing dkim keys (the element 'dkim_key:') failed to import using `config-import`. ([#2747](https://github.com/Mailu/Mailu/issues/2747))
+- Bugfixes: Fix a bug preventing POP3 from being usable ([#2756](https://github.com/Mailu/Mailu/issues/2756))
+- Bugfixes: Fix downloading attachments through snappymail. ([#2776](https://github.com/Mailu/Mailu/issues/2776))
+- Bugfixes: In front, config.py can be called several times. LD_PRELOAD may have already been removed from ENV ([#2789](https://github.com/Mailu/Mailu/issues/2789))
+- Bugfixes: The SMTP container wasn't logging things like it should
+  The health-check of dovecot was creating zombies
+  Document that COMPRESSION=zstd is now possible (see #2139) ([#2793](https://github.com/Mailu/Mailu/issues/2793))
+- Bugfixes: Allow other supported languages in Roundcube's spellchecker ([#2798](https://github.com/Mailu/Mailu/issues/2798))
+- Bugfixes: Improve auth-related logging ([#2803](https://github.com/Mailu/Mailu/issues/2803))
+- Bugfixes: Fix SCAN_MACROS: OLETOOLS wasn't always enabled/disabled like it should have been ([#2805](https://github.com/Mailu/Mailu/issues/2805))
+- Bugfixes: Healthcheck of clamav image created zombie processes ([#2811](https://github.com/Mailu/Mailu/issues/2811))
+- Bugfixes: Don't send out of office messages to no\-?reply@ ([#2823](https://github.com/Mailu/Mailu/issues/2823))
+- Bugfixes: Authentication failed for email clients when the password contained a non latin-1 character. ([#2837](https://github.com/Mailu/Mailu/issues/2837))
+- Bugfixes: Increase the number of postfix workers, this should reduce the number of time Mailu replies with "451 4.3.2 Internal server error". To be clear, well behaved MTAs will retry so no email have been lost. ([#2869](https://github.com/Mailu/Mailu/issues/2869))
+- Bugfixes: Setup:
+  Regular expression for checking the Mailu storage path was invalid.
+  Added checks to make sure JavaScript is enabled and that all JS files could be loaded. The setup site malfunctions if this is not the case.
+  Added server side validation of entered values in setup.
+  Simplified setup by removing the settings for configuring the WEB_* settings. Advanced users can still modify mailu.env. ([#2890](https://github.com/Mailu/Mailu/issues/2890))
+- Bugfixes: Fix GPG operations from Roundcube - calling gpg with full path was blocked ([#2892](https://github.com/Mailu/Mailu/issues/2892))
+- Bugfixes: Switch the admin container from port 80 to port 8080. This should solve issues related to capabilities not working as expected
+  Document that systemd-resolve may need to be configured to validate DNSSEC
+  Ensure that dovecot is not attempting to bind a v6 socket if SUBNET6 is not configured ([#2906](https://github.com/Mailu/Mailu/issues/2906))
+- Bugfixes: Moving emails to the Junk folder may have created zombies (rspamc)
+  Ensure that the spam reporting works even if the email isn't COPYed to the mailbox ([#2908](https://github.com/Mailu/Mailu/issues/2908))
+- Bugfixes: Ensure that we delete any pre-exising PID files
+  Make Rspamd retry for longer when connecting to clamav ([#2917](https://github.com/Mailu/Mailu/issues/2917))
+- Bugfixes: fix fetchmail when used with POP3: disregard "folders" ([#2928](https://github.com/Mailu/Mailu/issues/2928))
+- Bugfixes: Upgrade to alpine 3.18.4: this will fix a bug whereby musl wasn't retrying using TCP when it received truncated DNS replies from its upstream. In practice, this has been seen in the wild when postfix complains of:
+
+  "Host or domain name not found. Name service error for name=outlook-com.olc.protection.outlook.com type=AAAA: Host found but no data record of requested type" ([#2934](https://github.com/Mailu/Mailu/issues/2934))
+- Bugfixes: forbidden_file_extension.map could not be overridden. This file can be overriden to tweak with file extensions are allowed.
+  The instructions on https://mailu.io/master/antispam.html#can-i-change-the-list-of-authorized-file-attachments work again. ([#2937](https://github.com/Mailu/Mailu/issues/2937))
+- Bugfixes: Fixed log filter not filtering out log messages for dovecot/nginx/postfix.
+  Fixed postfix not logging to standard out.
+  Fixed not all containers logging to journald.
+  Removed POSTFIX_LOG_FILE functionality. Added documentation on how to achieve the same (log to file) via journald & rsyslogd (see new FAQ entry 'How can I view and export the logs of a Mailu container?'). ([#2939](https://github.com/Mailu/Mailu/issues/2939))
+- Bugfixes: Upgrade webmails: roundcube 1.6.3, rcmcarddav 5.1.0, snappymail 2.28.4 ([#2945](https://github.com/Mailu/Mailu/issues/2945))
+- Bugfixes: Update hardened malloc as the original package is not available from alpine anymore.
+  The newer version of hardened malloc requires AVX2: Disable it by default at startup and hint in the logs when it should be enabled instead.
+  Upgrade snappymail to v2.29.1 ([#2959](https://github.com/Mailu/Mailu/issues/2959))
+- Bugfixes: Fix letsencrypt on master ([#2962](https://github.com/Mailu/Mailu/issues/2962))
+- Bugfixes: - Switch from fts-xapian to fts-flatcurve. This should address the problem with indexes getting too big and will be the default in dovecot 2.4
+  - Enable full-text search of email attachments if configured (via Tika: you'll need to re-run setup)
+
+  If you would like more than english to be supported, please ensure you update your FULL_TEXT_SEARCH configuration variable.
+
+  You may also want to dispose of old indexes using a command such as:
+
+  find /mailu/mail -type d -name xapian-indexes -prune -exec rm -r {} \+
+
+  And proactively force a reindexing using:
+
+  docker compose exec imap doveadm fts rescan -A
+  docker compose exec imap doveadm user '*'|while read u; do docker compose exec imap doveadm index -u $u '*'; done ([#2971](https://github.com/Mailu/Mailu/issues/2971))
+- Bugfixes: Ensure that we do not silently discard PUAs flagged by clamav. Instead we will reject emails. ([#3048](https://github.com/Mailu/Mailu/issues/3048))
+- Bugfixes: Slow down the turtle policy (see #3075) ([#3075](https://github.com/Mailu/Mailu/issues/3075))
+- Bugfixes: Ensure we do not block logins from webmails when there is a valid SSO session ([#3094](https://github.com/Mailu/Mailu/issues/3094))
+- Bugfixes: Ensure that the form validator related to forwarding addresses allows for uppercase ([#3095](https://github.com/Mailu/Mailu/issues/3095))
+- Bugfixes: Long term fix against SMTP smuggling (disable bare_newline), see https://www.postfix.org/smtp-smuggling.html ([#3101](https://github.com/Mailu/Mailu/issues/3101))
+- Bugfixes: Add required quotes to traefik-certdumper to ensure that shell characters are usable. ([#3129](https://github.com/Mailu/Mailu/issues/3129))
+- Bugfixes: Add a semicolum to DMARC records ([#3150](https://github.com/Mailu/Mailu/issues/3150))
+- Bugfixes: Fix ooo/sieve replies when proxy protocol is in use ([#3172](https://github.com/Mailu/Mailu/issues/3172))
+- Bugfixes: update Simplified Chinese (zh) translation ([#3175](https://github.com/Mailu/Mailu/issues/3175))
+- Bugfixes: Ensure that nginx and dovecot are reloaded ([#3179](https://github.com/Mailu/Mailu/issues/3179))
+- Bugfixes: Ensure we always send ISRG_X1 root when LE is configured. Switch to the non-crossigned version as the other one will expire in September ([#3187](https://github.com/Mailu/Mailu/issues/3187))
+- Misc:  ([#2059](https://github.com/Mailu/Mailu/issues/2059), [#2215](https://github.com/Mailu/Mailu/issues/2215), [#2644](https://github.com/Mailu/Mailu/issues/2644), [#2744](https://github.com/Mailu/Mailu/issues/2744), [#2748](https://github.com/Mailu/Mailu/issues/2748), [#2772](https://github.com/Mailu/Mailu/issues/2772), [#2829](https://github.com/Mailu/Mailu/issues/2829), [#2841](https://github.com/Mailu/Mailu/issues/2841), [#2847](https://github.com/Mailu/Mailu/issues/2847), [#2852](https://github.com/Mailu/Mailu/issues/2852), [#2918](https://github.com/Mailu/Mailu/issues/2918), [#2935](https://github.com/Mailu/Mailu/issues/2935), [#2950](https://github.com/Mailu/Mailu/issues/2950), [#2955](https://github.com/Mailu/Mailu/issues/2955), [#2977](https://github.com/Mailu/Mailu/issues/2977), [#2985](https://github.com/Mailu/Mailu/issues/2985), [#2990](https://github.com/Mailu/Mailu/issues/2990), [#3007](https://github.com/Mailu/Mailu/issues/3007), [#3024](https://github.com/Mailu/Mailu/issues/3024), [#3032](https://github.com/Mailu/Mailu/issues/3032), [#3097](https://github.com/Mailu/Mailu/issues/3097), [#3130](https://github.com/Mailu/Mailu/issues/3130))
+
+
+2.0.0 - 2023-04-03
+---------------------
+
 For full details see the [releases page](https://mailu.io/2.0/releases.html)
 
 Upgrade should run fine as long as you generate a new docker-compose.yml file and mailu.env file via setup.mailu.io.
@@ -13,8 +114,6 @@ If you use Fail2Ban, then the Fail2Ban intructions have been improved. It is man
 Please note that once you have upgraded to 2.0 you won't be able to roll-back to earlier versions
 
 After changing mailu.env, it is required to recreate all containers for the changes to be propagated.
-
-2.0.0 - 2023-04-03
 
 - Features: Provide auto-configuration files (autodiscover, autoconfig & mobileconfig); Please update your DNS records ([#224](https://github.com/Mailu/Mailu/issues/224))
 - Features: Introduction of the Mailu RESTful API. The full Mailu config can be changed via the Mailu API.
@@ -138,9 +237,9 @@ After changing mailu.env, it is required to recreate all containers for the chan
 - Deprecations and Removals: Remove POD_ADDRESS_RANGE in favor of SUBNET ([#1258](https://github.com/Mailu/Mailu/issues/1258))
 - Misc:  ([#1341](https://github.com/Mailu/Mailu/issues/1341), [#2121](https://github.com/Mailu/Mailu/issues/2121), [#2211](https://github.com/Mailu/Mailu/issues/2211), [#2242](https://github.com/Mailu/Mailu/issues/2242), [#2338](https://github.com/Mailu/Mailu/issues/2338), [#2357](https://github.com/Mailu/Mailu/issues/2357), [#2383](https://github.com/Mailu/Mailu/issues/2383), [#2511](https://github.com/Mailu/Mailu/issues/2511), [#2526](https://github.com/Mailu/Mailu/issues/2526), [#2533](https://github.com/Mailu/Mailu/issues/2533), [#2539](https://github.com/Mailu/Mailu/issues/2539), [#2550](https://github.com/Mailu/Mailu/issues/2550), [#2566](https://github.com/Mailu/Mailu/issues/2566), [#2570](https://github.com/Mailu/Mailu/issues/2570), [#2577](https://github.com/Mailu/Mailu/issues/2577), [#2605](https://github.com/Mailu/Mailu/issues/2605), [#2606](https://github.com/Mailu/Mailu/issues/2606), [#2618](https://github.com/Mailu/Mailu/issues/2618), [#2634](https://github.com/Mailu/Mailu/issues/2634), [#2644](https://github.com/Mailu/Mailu/issues/2644), [#2660](https://github.com/Mailu/Mailu/issues/2660), [#2666](https://github.com/Mailu/Mailu/issues/2666), [#2692](https://github.com/Mailu/Mailu/issues/2692), [#2698](https://github.com/Mailu/Mailu/issues/2698), [#2704](https://github.com/Mailu/Mailu/issues/2704), [#2726](https://github.com/Mailu/Mailu/issues/2726), [#2733](https://github.com/Mailu/Mailu/issues/2733), [#2734](https://github.com/Mailu/Mailu/issues/2734))
 
-Changelog
-=========
 
+1.9.0 - 2021-12-28
+------------------
 For full details see the [releases page](https://mailu.io/1.9/releases.html)
 
 Upgrade should run fine as long as you generate a new compose or stack configuration and upgrade your mailu.env. Please note that once you have upgraded to 1.9 you won't be able to roll-back to earlier versions without resetting user passwords.
@@ -156,7 +255,6 @@ After changing mailu.env, it is required to recreate all containers for the chan
 
 Please note that the shipped image for PostgreSQL database is fully deprecated now. To migrate to the official PostgreSQL image, you can follow our guide [here](https://mailu.io/master/database.html#mailu-postgresql)
 
-1.9.0 - 2021-12-28
 - Features: Document how to setup client autoconfig using an override ([#224](https://github.com/Mailu/Mailu/issues/224))
 - Features: Add support for timezones ([#1154](https://github.com/Mailu/Mailu/issues/1154))
 - Features: Ensure that RCVD_NO_TLS_LAST doesn't add to the spam score (as TLS usage can't be determined) ([#1705](https://github.com/Mailu/Mailu/issues/1705))

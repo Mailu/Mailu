@@ -1,1 +1,0 @@
-Add Traditional Chinese translation

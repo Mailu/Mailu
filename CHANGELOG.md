@@ -6,18 +6,40 @@ Changelog
 
 For full details see the [releases page](https://mailu.io/2024.03/releases.html)
 
-Upgrade should run fine as long as you generate a new docker-compose.yml file and mailu.env file via setup.mailu.io.
-After that any old settings can be reapplied to mailu.env.
-Before making any changes, carefully read the [configuration reference](https://mailu.io/2.0/configuration.html). New settings have been introduced and some settings have been removed.
-Multiple changes have been made to the docker-compose.yml file and mailu.env file.
+For the upgrade create a new docker-compose.yml file and mailu.env file via setup.mailu.io. After that any old settings can be reapplied to mailu.env. Before making any changes, carefully read the [configuration reference](https://mailu.io/2.0/configuration.html). New settings have been introduced and some settings have been removed. Multiple changes have been made to the docker-compose.yml file and mailu.env file. If Tika is enabled, then 1GB to 2GB of extra memory is required.
 
-.... TODO DESCRIBE ALL NEW FEATURES ....
+Before starting the new Mailu deployment, check the following two topics:
+POSTFIX_LOG_FILE has been deprecated and is ignored by Mailu. If POSTFIX_LOG_FILE was used, then refer to the the new FAQ entry `How can I view and export the logs of a Mailu container?` how to configure similar functionality.
 
-.... END TODO DESCRIBE ALL NEW FEATURES ....
+If a reverse proxy is used on the same host, consider switching to traefik using the updated instructions. Refer to `Using an external reverse proxy` on mailu.io. With these updated instructions Mailu will handle requesting all certificates. It is not required anymore to copy certificates from the reverse proxy to Mailu.
+
+After starting the new Mailu deployment, check the following two topics.
+The dovecot indexes should be recreated:
+From `bash` run:
+```
+find /mailu/mail -type d -name xapian-indexes -prune -exec rm -r {} \+
+```
+Via docker compose run (to force reindexing):
+```
+docker compose exec imap doveadm fts rescan -A
+docker compose exec imap doveadm user '*'|while read u; do docker compose exec imap doveadm index -u $u '*'; done
+```
+
+Check if the the hardened memory allocator can be enabled.
+View the admin container logs via `docker compose logs admin`
+```
+WARNING:root:Your CPU has Advanced Vector Extensions available, we recommend you enable hardened-malloc earlier in the boot process by adding LD_PRELOAD=/usr/lib/libhardened_malloc.so to your mailu.env
+```
+
+**Only** if the above message is logged, then the hardened malloc can be enabled by adding the following line to `mailu.env`.
+```
+LD_PRELOAD=/usr/lib/libhardened_malloc.so
+```
+Recreate all docker containers (`docker compose up -d`) for the changes to be propagated.
+
 
 Please note that once you have upgraded to 2024.03, that you won't be able to roll-back to earlier versions.
 
-After changing mailu.env, it is required to recreate all containers for the changes to be propagated.
 
 - Features: Add support for managesieve ([#81](https://github.com/Mailu/Mailu/issues/81))
 - Features: Enhance RESTful API user retrieval with quota used bytes. This is the current size of the user's email box in bytes. ([#2824](https://github.com/Mailu/Mailu/issues/2824))

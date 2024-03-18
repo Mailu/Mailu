@@ -1,20 +1,167 @@
 Release notes
 =============
 
-Mailu 2024.04 - 2024-03
-----------------------
+Mailu 2024.03 - 2024-03
+-----------------------
 
-Mailu 2024.04 is available. To make clear you can only go forward with upgrades, we have changed the version naming scheme to year.month.minor.
-Only between minor versions (2024.03.2 to 2024.03.2) is it safe to downgrade.
+Mailu 2024.04 is available. This release contains new features and many bug fixes. Please at least read the section `upgrading` before attempting to upgrade to the new release.
+
+To make clear you can only go forward with upgrades, we have changed the version naming scheme to Year.Month.Minor.
+It is only possible to downgrade between minor versions (e.g. 2024.03.3 to 2024.03.1).
 
 Highlights
 ``````````
-Document major new features and changes. E.g. Switch for indexing with tika (attachment indexing/ocr)
+
+Managieve sieve support
+Previously the sieve filters could only be edited via the webmail client. It is now also possible to use an external sieve client for manageming the sieve rules. Configure the sieve client to connect to Mailu on the default sieve port 4190.
+
+RESTful API enhancements
+^^^^^^^^^^^^^^^^^^^^^^^^
+The User interface is enhanced with the quota bytes used (quota_bytes_used) attribute. This attribute states the usage (in bytes) of the mailbox. In combination with the attribute quota_bytes, it is possible to check how much storage an user has left via the RESTful API.
+
+The new `token` endpoint allows the management of authentication tokens. It is recommened to create authentication tokens for all users and configure the email clients to use these authentication tokens for connecting to Mailu.
+
+Force password change
+^^^^^^^^^^^^^^^^^^^^^
+A setting is introduced to force an user to change its password. After changing the password, all sessions are invalidated.
+
+This setting can be configured via:
+* Admin webui
+* Mailu cli command `config-import`
+* RESTful API via the User endpoint and attribute `change_pw_next_login`
+
+Translations
+^^^^^^^^^^^^
+
+The following translations for the Admin webui have been added:
+* Chinese
+* Persion (a.k.a Farsi)
+* Ukrainian
+
+All language translations are handled by the community. If you see a translation error for your native language, consider submitting a pull request to address this.
+
+Download zonefile on domain details page
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+On the domain details page a download option is added for downloading the zone file. This zone file can be used to easily import all Mailu DNS settings.
+
+Roundcube spellchecker
+^^^^^^^^^^^^^^^^^^^^^^
+The roundcube spellchecker can be configured to support different languages than English. For how to configure alternative languages, refer to the FAQ entry: `How can I add more languages to roundcube's spellchecker`.
+
+Improved mailbox indexer and full attachment indexing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The dovecot indexer indexes all emails for the server-side search functionality. It is used when searching via the webmail client. In email clients it might be required to enable server-side searching.
+
+The dovecot indexer has been switched from fts-xapian to fts-flatcurve. In the future this will be the new default indexer for dovecot. This indexer is quicker and results in smaller index files.
+
+Apache Tika has been added to Mailu to add support for attachments indexing. As a result the server-side search functionality does not only search through emails, but also through the attachments of emails.
+
+Refer to `FULL_TEXT_SEARCH` in the `configuration reference` to enable indexing for non-English languages.
+
+After upgrading, the new indexes are not automatically created. To create these after upgrading Mailu:
+
+From `bash` run:
+
+.. code-block:: bash
+
+    find /mailu/mail -type d -name xapian-indexes -prune -exec rm -r {} \+
+
+Via docker compose run (to force reindexing):
+
+.. code-block:: bash
+
+    docker compose exec imap doveadm fts rescan -A
+    docker compose exec imap doveadm user '*'|while read u; do docker compose exec imap doveadm index -u $u '*'; done
+
+
+Introduction AUTH_REQUIRE_TOKENS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The environment variable `AUTH_REQUIRE_TOKENS` has been introduced. This setting can be enabled to force  email clients to use authentication tokens (instead of passwords) for authenticating to Mailu. Note that authentication tokens can now also be generated via the RESTful API.
+
+It is recommended to use authentication tokens instead of passwords for connecting email clients to Mailu.
+
+
+Change in behaviour
+```````````````````
+
+POSTFIX_LOG_FILE removed
+^^^^^^^^^^^^^^^^^^^^^^^^
+The setting POSTFIX_LOG_FILE and its functionality has been removed from Mailu. To log to file (for any container) it is possible to use journald and rsyslogd.
+
+The new FAQ entry `How can I view and export the logs of a Mailu container?` describes how log files can be viewed via journald. It also provides instructions for how to install and configure rsyslogd for saving container logs to file system (including log rotation).
+
+The hardened malloc is disabled by default
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Mailu is shipped with a hardened memory allocator. This is a security-focused general purpose memory allocator which provides substantial hardening against heap corruption vulnerabilities.
+
+It can only be enabled when the used CPU supports Advanced Vector Extensions (AVX2 on x86_64, lrcpc on ARM64).
+
+After upgrading Mailu, check the logs of the admin container (`docker compose logs admin`. If it shows the following line, then it can be enabled:
+
+.. code-block:: bash
+
+    WARNING:root:Your CPU has Advanced Vector Extensions available, we recommend you enable hardened-malloc earlier in the boot process by adding LD_PRELOAD=/usr/lib/libhardened_malloc.so to your mailu.env
+
+
+**Only** if the above message is logged, then the hardened malloc can be enabled by adding the following line to `mailu.env`.
+
+.. code-block:: bash
+
+    LD_PRELOAD=/usr/lib/libhardened_malloc.so
+
+Recreate all docker containers (`docker compose up -d`) for the changes to be propagated.
+
+Emails marked by clamav are rejected now. These used to be silently dropped
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In the past emails marked by clamav (the virusscanner) were dropped. Now these emails are rejected. That means that the person who sent the email receives a reply that the email was rejected due to the email being flagged by clamav.
 
 Upgrading
 `````````
 
-Document steps for upgrading.
+Before upgrading
+^^^^^^^^^^^^^^^^
+Via setup.mailu.io generate the new docker-compose.yml file and mailu.env file. If tika is enabled (enabling searching through attachments), then 1 to 2GB of extra RAM memory is required. Re-add any customizations in mailu.env. Before making changes to mailu.env, check the `configuration reference` page on mailu.io. Check if the setting is still in use before adding it to the new `mailu.env` file.
+
+If POSTFIX_LOG_FILE was used, refer to the new FAQ entry `How can I view and export the logs of a Mailu container?` on how to configure similar functionality. POSTFIX_LOG_FILE is deprecated. Mailu will ignore this setting.
+
+If a reverse proxy is used on the same host, consider switching to traefik using the updated instructions. Refer to `Using an external reverse proxy` on mailu.io. With these updated instructions Mailu will handle requesting all certificates. It is not required anymore to copy certificates from the reverse proxy to Mailu.
+
+After upgrading
+^^^^^^^^^^^^^^^
+After upgrading Mailu, perform the followings tasks.
+
+Recreate the dovecot indexes:
+*****************************
+From `bash` run:
+
+.. code-block:: bash
+
+    find /mailu/mail -type d -name xapian-indexes -prune -exec rm -r {} \+
+
+Via docker compose run (to force reindexing):
+
+.. code-block:: bash
+
+    docker compose exec imap doveadm fts rescan -A
+    docker compose exec imap doveadm user '*'|while read u; do docker compose exec imap doveadm index -u $u '*'; done
+
+
+Enabled the hardened memory allocator
+*************************************
+View the admin container logs via `docker compose logs admin`
+
+.. code-block:: bash
+
+    WARNING:root:Your CPU has Advanced Vector Extensions available, we recommend you enable hardened-malloc earlier in the boot process by adding LD_PRELOAD=/usr/lib/libhardened_malloc.so to your mailu.env
+
+
+**Only** if the above message is logged, then the hardened malloc can be enabled by adding the following line to `mailu.env`.
+
+.. code-block:: bash
+
+    LD_PRELOAD=/usr/lib/libhardened_malloc.so
+
+Recreate all docker containers (`docker compose up -d`) for the changes to be propagated.
 
 
 

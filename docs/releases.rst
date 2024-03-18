@@ -4,7 +4,7 @@ Release notes
 Mailu 2024.03 - 2024-03
 -----------------------
 
-Mailu 2024.04 is available. This release contains new features and many bug fixes. Please at least read the section `upgrading` before attempting to upgrade to the new release.
+Mailu 2024.03 is available. This release contains new features and many bug fixes. Please at least read the section `upgrading` before attempting to upgrade to the new release.
 
 To make clear you can only go forward with upgrades, we have changed the version naming scheme to Year.Month.Minor.
 It is only possible to downgrade between minor versions (e.g. 2024.03.3 to 2024.03.1).

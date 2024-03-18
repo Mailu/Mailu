@@ -87,23 +87,23 @@ user_fields_put = api.model('UserUpdate', {
 
 @user.route('')
 class Users(Resource):
-    @user.doc('list_users')
+    @user.doc('list_user')
     @user.marshal_with(user_fields_get, as_list=True, skip_none=True, mask=None)
     @user.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
-        "List users"
+        "List all users"
         return models.User.query.all()
 
     @user.doc('create_user')
     @user.expect(user_fields_post)
     @user.response(200, 'Success', response_fields)
-    @user.response(400, 'Input validation exception')
+    @user.response(400, 'Input validation exception', response_fields)
     @user.response(409, 'Duplicate user', response_fields)
     @user.doc(security='Bearer')
     @common.api_token_authorization
     def post(self):
-        """ Create user """
+        """ Create a new user """
         data = api.payload
         if not validators.email(data['email']):
             return { 'code': 400, 'message': f'Provided email address {data["email"]} is not a valid email address'}, 400
@@ -111,6 +111,10 @@ class Users(Resource):
         domain_found = models.Domain.query.get(domain_name)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain_name} does not exist'}, 404
+        email_found = models.User.query.filter_by(email=data['email']).first()
+        if email_found:
+            return { 'code': 409, 'message': f'User {data["email"]} already exists'}, 409
+
 
         user_new = models.User(email=data['email'])
         if 'raw_password' in data:
@@ -168,12 +172,13 @@ class Users(Resource):
 @user.route('/<string:email>')
 class User(Resource):
     @user.doc('find_user')
+    @user.marshal_with(user_fields_get, code=200, description='Success', as_list=False, skip_none=True, mask=None)
     @user.response(400, 'Input validation exception', response_fields)
     @user.response(404, 'User not found', response_fields)
     @user.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, email):
-        """ Find user """
+        """ Look up the specified user """
         if not validators.email(email):
             return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
 
@@ -187,11 +192,10 @@ class User(Resource):
     @user.response(200, 'Success', response_fields)
     @user.response(400, 'Input validation exception', response_fields)
     @user.response(404, 'User not found', response_fields)
-    @user.response(409, 'Duplicate user', response_fields)
     @user.doc(security='Bearer')
     @common.api_token_authorization
     def patch(self, email):
-        """ Update user """
+        """ Update the specified user """
         data = api.payload
         if not validators.email(email):
             return { 'code': 400, 'message': f'Provided email address {data["email"]} is not a valid email address'}, 400
@@ -258,7 +262,7 @@ class User(Resource):
     @user.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, email):
-        """ Delete user """
+        """ Delete the specified user """
         if not validators.email(email):
             return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
 

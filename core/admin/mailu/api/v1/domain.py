@@ -81,7 +81,7 @@ class Domains(Resource):
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
-        """ List domains """
+        """ List all domains """
         return models.Domain.query.all()
 
     @dom.doc('create_domain')
@@ -131,12 +131,13 @@ class Domains(Resource):
 class Domain(Resource):
 
     @dom.doc('find_domain')
-    @dom.response(200, 'Success', domain_fields)
+    @dom.marshal_with(domain_fields, code=200, description='Success', as_list=False, skip_none=True, mask=None)
+    @dom.response(400, 'Input validation exception', response_fields)
     @dom.response(404, 'Domain not found', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, domain):
-        """ Find domain by name """
+        """ Look up the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
         domain_found = models.Domain.query.get(domain)
@@ -153,7 +154,7 @@ class Domain(Resource):
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def patch(self, domain):
-        """ Update an existing domain """
+        """ Update the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
         domain_found = models.Domain.query.get(domain)
@@ -197,7 +198,7 @@ class Domain(Resource):
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, domain):
-        """ Delete domain """
+        """ Delete the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
         domain_found = models.Domain.query.get(domain)
@@ -216,7 +217,7 @@ class Domain(Resource):
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def post(self, domain):
-        """ Generate new DKIM/DMARC keys for domain """
+        """ Generate new DKIM/DMARC keys for the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
         domain_found = models.Domain.query.get(domain)
@@ -229,13 +230,13 @@ class Domain(Resource):
 @dom.route('/<domain>/manager')
 class Manager(Resource):
     @dom.doc('list_managers')
-    @dom.marshal_with(manager_fields, as_list=True, skip_none=True, mask=None)
+    @dom.marshal_with(manager_fields, code=200, description='Success', as_list=True, skip_none=True, mask=None)
     @dom.response(400, 'Input validation exception', response_fields)
     @dom.response(404, 'domain not found', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, domain):
-        """ List managers of domain """
+        """ List all managers of the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
         if not domain:
@@ -252,7 +253,7 @@ class Manager(Resource):
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def post(self, domain):
-        """ Create a new domain manager """
+        """ Create a new domain manager for the specified domain """
         data = api.payload
         if not validators.email(data['user_email']):
             return {'code': 400, 'message': f'Invalid email address {data["user_email"]}'}, 400
@@ -273,12 +274,13 @@ class Manager(Resource):
 @dom.route('/<domain>/manager/<email>')
 class Domain(Resource):
     @dom.doc('find_manager')
-    @dom.response(200, 'Success', manager_fields)
+    @dom.marshal_with(manager_fields, code=200, description='Success', as_list=False, skip_none=True, mask=None)
+    @dom.response(400, 'Input validation exception', response_fields)
     @dom.response(404, 'Manager not found', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, domain, email):
-        """ Find manager by email address """
+        """ Look up the specified manager of the specified domain """
         if not validators.email(email):
             return {'code': 400, 'message': f'Invalid email address {email}'}, 400
         if not validators.domain(domain):
@@ -304,6 +306,7 @@ class Domain(Resource):
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, domain, email):
+        """ Delete the specified manager of the specified domain """
         if not validators.email(email):
             return {'code': 400, 'message': f'Invalid email address {email}'}, 400
         if not validators.domain(domain):
@@ -324,13 +327,13 @@ class Domain(Resource):
 @dom.route('/<domain>/users')
 class User(Resource):
     @dom.doc('list_user_domain')
-    @dom.marshal_with(user.user_fields_get, as_list=True, skip_none=True, mask=None)
+    @dom.marshal_with(user.user_fields_get, code=200, description='Success', as_list=True, skip_none=True, mask=None)
     @dom.response(400, 'Input validation exception', response_fields)
     @dom.response(404, 'Domain not found', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, domain):
-        """ List users from domain """
+        """ List all the users from the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
         domain_found = models.Domain.query.get(domain)
@@ -346,7 +349,7 @@ class Alternatives(Resource):
     @alt.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
-      """ List alternatives """
+      """ List all alternatives """
       return models.Alternative.query.all()
 
 
@@ -359,7 +362,7 @@ class Alternatives(Resource):
     @alt.doc(security='Bearer')
     @common.api_token_authorization
     def post(self):
-        """ Create new alternative (for domain) """
+        """ Create a new alternative (for domain) """
         data = api.payload
         if not validators.domain(data['name']):
             return { 'code': 400, 'message': f'Alternative domain {data["name"]} is not a valid domain'}, 400
@@ -380,9 +383,12 @@ class Alternatives(Resource):
 class Alternative(Resource):
     @alt.doc('find_alternative')
     @alt.doc(security='Bearer')
+    @alt.marshal_with(alternative_fields, code=200, description='Success' ,as_list=True, skip_none=True, mask=None)
+    @alt.response(400, 'Input validation exception', response_fields)
+    @alt.response(404, 'Alternative not found or missing', response_fields)
     @common.api_token_authorization
     def get(self, alt):
-        """ Find alternative (of domain) """
+        """ Look up the specified alternative (of domain) """
         if not validators.domain(alt):
             return { 'code': 400, 'message': f'Alternative domain {alt} is not a valid domain'}, 400
         alternative = models.Alternative.query.filter_by(name=alt).first()
@@ -398,7 +404,7 @@ class Alternative(Resource):
     @alt.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, alt):
-        """ Delete alternative (for domain) """
+        """ Delete the specified alternative (for domain) """
         if not validators.domain(alt):
             return { 'code': 400, 'message': f'Alternative domain {alt} is not a valid domain'}, 400
         alternative = models.Alternative.query.filter_by(name=alt).scalar()

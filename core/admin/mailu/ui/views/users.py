@@ -150,6 +150,17 @@ def user_reply(user_email):
                 flask.url_for('.user_list', domain_name=user.domain.name))
     return flask.render_template('user/reply.html', form=form, user=user)
 
+@ui.route('/user/webmail', methods=['GET'], defaults={'user_email': None})
+@ui.route('/user/webmail/<path:user_email>', methods=['GET'])
+@access.owner(models.User, 'user_email')
+def user_webmail(user_email):
+    user_email_or_current = user_email or flask_login.current_user.email
+    user = models.User.query.get(user_email_or_current) or flask.abort(404)
+
+    flask.session['webmail_user_email'] = user.get_id()
+
+    return flask.redirect(f'{app.config["WEB_WEBMAIL"]}/sso.php')
+
 
 @ui.route('/user/signup', methods=['GET', 'POST'])
 @ui.route('/user/signup/<domain_name>', methods=['GET', 'POST'])

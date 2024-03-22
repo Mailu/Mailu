@@ -22,7 +22,7 @@ user_fields_get = api.model('UserGet', {
     'enable_pop': fields.Boolean(description='Allow email retrieval via POP3'),
     'allow_spoofing': fields.Boolean(description='Allow the user to spoof the sender (send email as anyone)'),
     'forward_enabled': fields.Boolean(description='Enable auto forwarding'),
-    'forward_destination': fields.List(fields.String(description='Email address to forward emails to'), example='Other@example.com'),
+    'forward_destination': fields.List(fields.String(description='Email address to forward emails to'), example='["Other@example.com"]'),
     'forward_keep': fields.Boolean(description='Keep a copy of the forwarded email in the inbox'),
     'reply_enabled': fields.Boolean(description='Enable automatic replies. This is also known as out of office (ooo) or out of facility (oof) replies'),
     'reply_subject': fields.String(description='Optional subject for the automatic reply', example='Out of office'),
@@ -47,7 +47,7 @@ user_fields_post = api.model('UserCreate', {
     'enable_pop': fields.Boolean(description='Allow email retrieval via POP3'),
     'allow_spoofing': fields.Boolean(description='Allow the user to spoof the sender (send email as anyone)'),
     'forward_enabled': fields.Boolean(description='Enable auto forwarding'),
-    'forward_destination': fields.List(fields.String(description='Email address to forward emails to'), example='Other@example.com'),
+    'forward_destination': fields.List(fields.String(description='Email address to forward emails to'), example='["Other@example.com"]'),
     'forward_keep': fields.Boolean(description='Keep a copy of the forwarded email in the inbox'),
     'reply_enabled': fields.Boolean(description='Enable automatic replies. This is also known as out of office (ooo) or out of facility (oof) replies'),
     'reply_subject': fields.String(description='Optional subject for the automatic reply', example='Out of office'),
@@ -71,7 +71,7 @@ user_fields_put = api.model('UserUpdate', {
     'enable_pop': fields.Boolean(description='Allow email retrieval via POP3'),
     'allow_spoofing': fields.Boolean(description='Allow the user to spoof the sender (send email as anyone)'),
     'forward_enabled': fields.Boolean(description='Enable auto forwarding'),
-    'forward_destination': fields.List(fields.String(description='Email address to forward emails to'), example='Other@example.com'),
+    'forward_destination': fields.List(fields.String(description='Email address to forward emails to'), example='["Other@example.com"]'),
     'forward_keep': fields.Boolean(description='Keep a copy of the forwarded email in the inbox'),
     'reply_enabled': fields.Boolean(description='Enable automatic replies. This is also known as out of office (ooo) or out of facility (oof) replies'),
     'reply_subject': fields.String(description='Optional subject for the automatic reply', example='Out of office'),
@@ -89,6 +89,7 @@ user_fields_put = api.model('UserUpdate', {
 class Users(Resource):
     @user.doc('list_user')
     @user.marshal_with(user_fields_get, as_list=True, skip_none=True, mask=None)
+    @user.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @user.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
@@ -99,6 +100,7 @@ class Users(Resource):
     @user.expect(user_fields_post)
     @user.response(200, 'Success', response_fields)
     @user.response(400, 'Input validation exception', response_fields)
+    @user.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @user.response(409, 'Duplicate user', response_fields)
     @user.doc(security='Bearer')
     @common.api_token_authorization
@@ -111,10 +113,11 @@ class Users(Resource):
         domain_found = models.Domain.query.get(domain_name)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain_name} does not exist'}, 404
+        if not domain_found.max_users == -1 and len(domain_found.users) >= domain_found.max_users:
+            return { 'code': 409, 'message': f'Too many users for domain {domain_name}'}, 409
         email_found = models.User.query.filter_by(email=data['email']).first()
         if email_found:
             return { 'code': 409, 'message': f'User {data["email"]} already exists'}, 409
-
 
         user_new = models.User(email=data['email'])
         if 'raw_password' in data:
@@ -168,12 +171,12 @@ class Users(Resource):
 
         return {'code': 200,'message': f'User {data["email"]} has been created'}, 200
 
-
 @user.route('/<string:email>')
 class User(Resource):
     @user.doc('find_user')
-    @user.marshal_with(user_fields_get, code=200, description='Success', as_list=False, skip_none=True, mask=None)
+    @user.response(200, 'Success', user_fields_get)
     @user.response(400, 'Input validation exception', response_fields)
+    @user.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @user.response(404, 'User not found', response_fields)
     @user.doc(security='Bearer')
     @common.api_token_authorization
@@ -191,6 +194,7 @@ class User(Resource):
     @user.expect(user_fields_put)
     @user.response(200, 'Success', response_fields)
     @user.response(400, 'Input validation exception', response_fields)
+    @user.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @user.response(404, 'User not found', response_fields)
     @user.doc(security='Bearer')
     @common.api_token_authorization
@@ -198,7 +202,7 @@ class User(Resource):
         """ Update the specified user """
         data = api.payload
         if not validators.email(email):
-            return { 'code': 400, 'message': f'Provided email address {data["email"]} is not a valid email address'}, 400
+            return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
         user_found = models.User.query.get(email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
@@ -258,6 +262,7 @@ class User(Resource):
     @user.doc('delete_user')
     @user.response(200, 'Success', response_fields)
     @user.response(400, 'Input validation exception', response_fields)
+    @user.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @user.response(404, 'User not found', response_fields)
     @user.doc(security='Bearer')
     @common.api_token_authorization

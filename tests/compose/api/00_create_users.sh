@@ -1,5 +1,25 @@
 # create user admin@maiu.io
 echo "Create users"
+
+curl --silent --insecure -X 'POST' \
+  'https://localhost/api/v1/domain' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer apitest' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "name": "mailu.io",
+  "comment": "internal domain for testing",
+  "max_users": -1,
+  "max_aliases": -1,
+  "max_quota_bytes": 0,
+  "signup_enabled": false
+}' | grep 200
+
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+echo "Domain mail.io has been created successfully"
+
 curl --silent --insecure -X 'POST' \
   'https://localhost/api/v1/user' \
   -H 'accept: application/json' \

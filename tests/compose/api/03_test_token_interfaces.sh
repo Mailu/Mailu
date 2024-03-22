@@ -2,7 +2,7 @@ echo "start token tests"
 
 # Try creating a token /token
 curl --silent --insecure -X 'POST' \
-  'https://mailutest/api/v1/token' \
+  'https://localhost/api/v1/token' \
   -H 'accept: application/json' \
   -H 'Authorization: apitest' \
   -H 'Content-Type: application/json' \
@@ -21,7 +21,7 @@ echo "created a token for user@mailu.io successfully"
 
 # Try create a token for a specific user /tokenuser/{email}
 curl --silent --insecure -X 'POST' \
-  'https://mailutest/api/v1/tokenuser/user%40mailu.io' \
+  'https://localhost/api/v1/tokenuser/user%40mailu.io' \
   -H 'accept: application/json' \
   -H 'Authorization: apitest' \
   -H 'Content-Type: application/json' \
@@ -35,7 +35,7 @@ echo "created a second token for user@mailu.io successfully"
 
 # Try retrieving all tokens /token. We expect to retrieve 2 in total.
 curl --silent --insecure -X 'GET' \
-  'https://mailutest/api/v1/token' \
+  'https://localhost/api/v1/token' \
   -H 'accept: application/json' \
   -H 'Authorization: apitest' \
   | grep -o "id" | grep -c "id" | grep 2
@@ -46,7 +46,7 @@ echo "Retrieved all tokens (2 in total) successfully"
 
 # Try finding a specific token /token/{token_id}
 curl --silent --insecure -X 'GET' \
-  'https://mailutest/api/v1/token/2' \
+  'https://localhost/api/v1/token/2' \
   -H 'accept: application/json' \
   -H 'Authorization: apitest' \
    | grep '"id": 2'
@@ -57,7 +57,7 @@ echo "Retrieved token with id 2 successfully"
 
 # Try deleting a token /token/{token_id}
 curl --silent --insecure -X 'DELETE' \
-  'https://mailutest/api/v1/token/1' \
+  'https://localhost/api/v1/token/1' \
   -H 'accept: application/json' \
   -H 'Authorization: apitest' \
   | grep 200
@@ -68,7 +68,7 @@ echo "Deleted token with id 1 successfully"
 
 # Try updating a token /token/{token_id}
 curl --silent --insecure -X 'PATCH' \
-  'https://mailutest/api/v1/token/2' \
+  'https://localhost/api/v1/token/2' \
   -H 'accept: application/json' \
   -H 'Authorization: apitest' \
   -H 'Content-Type: application/json' \
@@ -84,7 +84,7 @@ fi
 echo "Updated token with id 2 successfully"
 
 curl --silent --insecure -X 'GET' \
-  'https://mailutest/api/v1/token/2' \
+  'https://localhost/api/v1/token/2' \
   -H 'accept: application/json' \
   -H 'Authorization: apitest' \
    | grep 'comment": "updated_comment"'
@@ -95,7 +95,7 @@ echo "Confirmed that comment field of token with id 2 was correctly updated"
 
 # Try looking up all tokens of a specific user /tokenuser/{email}
 curl --silent --insecure -X 'GET' \
-  'https://mailutest/api/v1/tokenuser/user%40mailu.io' \
+  'https://localhost/api/v1/tokenuser/user%40mailu.io' \
   -H 'accept: application/json' \
   -H 'Authorization: apitest' \
   | grep -o "id" | grep -c "id" | grep 1

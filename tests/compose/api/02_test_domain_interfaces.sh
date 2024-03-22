@@ -58,7 +58,7 @@ echo "Retrieved all domains successfully"
 
 # try create dkim keys
 curl --silent --insecure -X 'POST' \
-  'https://mailutest/api/v1/domain/mailu2.io/dkim' \
+  'https://localhost/api/v1/domain/mailu2.io/dkim' \
   -H 'accept: application/json' \
   -H 'Authorization: apitest' \
   -d '' \
@@ -83,7 +83,7 @@ echo "Domain mailu2.io was deleted successfully"
 
 # try looking up all users of a domain. There should be 2 users.
 curl --silent --insecure -X 'GET' \
-  'https://mailutest/api/v1/domain/mailu.io/users' \
+  'https://localhost/api/v1/domain/mailu.io/users' \
   -H 'accept: application/json' \
   -H 'Authorization: apitest' \
   | grep -o "email" | grep -c "email" | grep 2
@@ -98,7 +98,7 @@ echo "Retrieved all users of domain mailu.io successfully"
 
 #try to create an alternative
 curl --silent --insecure -X 'POST' \
-  'https://mailutest/api/v1/alternative' \
+  'https://localhost/api/v1/alternative' \
   -H 'accept: application/json' \
   -H 'Authorization: apitest' \
   -H 'Content-Type: application/json' \
@@ -126,7 +126,7 @@ echo "Retrieved all alternatives successfully"
 
 # try to check if an alternative exists
 curl --silent --insecure -X 'GET' \
-  'https://mailutest/api/v1/alternative/mailu2.io' \
+  'https://localhost/api/v1/alternative/mailu2.io' \
   -H 'accept: application/json' \
   -H 'Authorization: apitest' \
   | grep '{"name": "mailu2.io", "domain": "mailu.io"}'
@@ -138,7 +138,7 @@ echo "Lookup for alternative mailu2.io was successful"
 
 # try to delete an alternative
 curl --silent --insecure -X 'DELETE' \
-  'https://mailutest/api/v1/alternative/mailu2.io' \
+  'https://localhost/api/v1/alternative/mailu2.io' \
   -H 'accept: application/json' \
   -H 'Authorization: apitest'
 

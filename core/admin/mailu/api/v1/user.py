@@ -109,6 +109,10 @@ class Users(Resource):
         data = api.payload
         if not validators.email(data['email']):
             return { 'code': 400, 'message': f'Provided email address {data["email"]} is not a valid email address'}, 400
+        if 'forward_destination' in data and len(data['forward_destination']) > 0:
+            for dest in data['forward_destination']:
+                if not validators.email(dest):
+                    return { 'code': 400, 'message': f'Provided forward destination email address {dest} is not a valid email address'}, 400
         localpart, domain_name = data['email'].lower().rsplit('@', 1)
         domain_found = models.Domain.query.get(domain_name)
         if not domain_found:
@@ -118,6 +122,9 @@ class Users(Resource):
         email_found = models.User.query.filter_by(email=data['email']).first()
         if email_found:
             return { 'code': 409, 'message': f'User {data["email"]} already exists'}, 409
+        if 'forward_enabled' in data and data['forward_enabled'] is True:
+            if ('forward_destination' in data and len(data['forward_destination']) == 0) or 'forward_destination' not in data:
+                return { 'code': 400, 'message': f'forward_destination is mandatory when forward_enabled is true'}, 400
 
         user_new = models.User(email=data['email'])
         if 'raw_password' in data:
@@ -140,7 +147,7 @@ class Users(Resource):
             user_new.allow_spoofing = data['allow_spoofing']
         if 'forward_enabled' in data:
             user_new.forward_enabled = data['forward_enabled']
-        if 'forward_destination' in data:
+        if 'forward_destination' in data and len(data['forward_destination']) > 0:
             user_new.forward_destination = data['forward_destination']
         if 'forward_keep' in data:
             user_new.forward_keep = data['forward_keep']
@@ -203,9 +210,16 @@ class User(Resource):
         data = api.payload
         if not validators.email(email):
             return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
+        if 'forward_destination' in data and len(data['forward_destination']) > 0:
+            for dest in data['forward_destination']:
+                if not validators.email(dest):
+                    return { 'code': 400, 'message': f'Provided forward destination email address {dest} is not a valid email address'}, 400
         user_found = models.User.query.get(email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
+        if ('forward_enabled' in data and data['forward_enabled'] is True) or ('forward_enabled' not in data and user_found.forward_enabled):
+            if ('forward_destination' in data and len(data['forward_destination']) == 0):
+                return { 'code': 400, 'message': f'forward_destination is mandatory when forward_enabled is true'}, 400
 
         if 'raw_password' in data:
             user_found.set_password(data['raw_password'])
@@ -227,8 +241,9 @@ class User(Resource):
             user_found.allow_spoofing = data['allow_spoofing']
         if 'forward_enabled' in data:
             user_found.forward_enabled = data['forward_enabled']
-        if 'forward_destination' in data:
-            user_found.forward_destination = data['forward_destination']
+        if 'forward_destination' in data and len(data['forward_destination']) > 0:
+            if len(data['forward_destination']) == 0:
+                user_found.forward_destination = data['forward_destination']
         if 'forward_keep' in data:
             user_found.forward_keep = data['forward_keep']
         if 'reply_enabled' in data:

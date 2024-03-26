@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: Mailu\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2022-05-22 18:47+0200\n"
-"PO-Revision-Date: 2024-03-26 08:46+0100\n"
-"Last-Translator: Jaume Barber <jaumebarber@gmail.com>\n"
+"PO-Revision-Date: 2024-03-26 09:07+0100\n"
+"Last-Translator: spoooyders <tech+translate@i2p.cc>\n"
 "Language-Team: \n"
 "Language: be_BY\n"
 "MIME-Version: 1.0\n"
@@ -309,7 +309,7 @@ msgstr "Старонка статусу RSPAMD"
 
 #: mailu/ui/templates/client.html:8
 msgid "configure your email client"
-msgstr "Наладзьце свой паштовы кліент"
+msgstr "наладзьце свой паштовы кліент"
 
 #: mailu/ui/templates/client.html:13
 msgid "Incoming mail"
@@ -348,7 +348,7 @@ msgstr "Адбылася памылка пры зьвяртаньні да сэ�
 
 #: mailu/ui/templates/macros.html:129
 msgid "copy to clipboard"
-msgstr "Скапіраваць у буфэр абмену"
+msgstr "скапіраваць у буфэр абмену"
 
 #: mailu/ui/templates/sidebar.html:15
 msgid "My account"
@@ -373,7 +373,7 @@ msgstr "Аўтэнтыфікацыйныя токены"
 
 #: mailu/ui/templates/sidebar.html:56
 msgid "Administration"
-msgstr "Адміністраваньне "
+msgstr "Адміністраваньне"
 
 #: mailu/ui/templates/sidebar.html:62
 msgid "Announcement"

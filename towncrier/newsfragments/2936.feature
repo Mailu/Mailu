@@ -1,1 +1,0 @@
-Add ukrainian translation

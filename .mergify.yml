@@ -35,18 +35,18 @@ pull_request_rules:
       comment:
         message: bors r+
 
-  - name: Backport to 2.0  branch
+  - name: Backport to 2024.03  branch
     conditions:
       - base=master
       - label=type/backport
     actions:
       backport:
         branches:
-          - '2.0'
+          - '2024.03'
 
   - name: remove outdated reviews
     conditions:
-      - base~=^(master|2.0)$
+      - base~=^(master|2024.03)$
     actions:
       dismiss_reviews:
         approved: True

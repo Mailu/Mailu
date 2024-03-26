@@ -1,1 +1,0 @@
-Add required quotes to traefik-certdumper to ensure that shell characters are usable.

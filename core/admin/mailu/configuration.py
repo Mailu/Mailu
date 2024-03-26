@@ -31,7 +31,7 @@ DEFAULT_CONFIG = {
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     # Statistics management
     'INSTANCE_ID_PATH': '/data/instance',
-    'STATS_ENDPOINT': '20.{}.stats.mailu.io',
+    'STATS_ENDPOINT': '202403.{}.stats.mailu.io',
     # Common configuration variables
     'SECRET_KEY': 'changeMe',
     'DOMAIN': 'mailu.io',

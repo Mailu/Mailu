@@ -40,6 +40,7 @@ token_user_post_response = api.model('TokenPostResponse', {
     'Created': fields.String(description='The date when the token was created', example='John.Doe@example.com', attribute='created_at')
 })
 
+
 @token.route('')
 class Tokens(Resource):
     @token.doc('list_tokens')
@@ -61,7 +62,7 @@ class Tokens(Resource):
         data = api.payload
         email = data['email']
         if not validators.email(email):
-            return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
+            return {'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
         user_found = models.User.query.get(email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
@@ -71,22 +72,23 @@ class Tokens(Resource):
         if 'comment' in data:
             token_new.comment = data['comment']
         if 'AuthorizedIP' in data:
-            token_new.ip = data['AuthorizedIP'].replace(' ','').split(',')
+            token_new.ip = data['AuthorizedIP'].replace(' ', '').split(',')
         raw_password = pwd.genword(entropy=128, length=32, charset="hex")
         token_new.set_password(raw_password)
         models.db.session.add(token_new)
         #apply the changes
         db.session.commit()
-        response_dict  = {
-            'id' : token_new.id,
-            'token' : raw_password,
-            'email' : token_new.user_email,
-            'comment' : token_new.comment,
-            'AuthorizedIP' : token_new.ip,
+        response_dict = {
+            'id': token_new.id,
+            'token': raw_password,
+            'email': token_new.user_email,
+            'comment': token_new.comment,
+            'AuthorizedIP': token_new.ip,
             'Created': str(token_new.created_at),
             }
 
-        return  response_dict
+        return response_dict
+
 
 @token.route('user/<string:email>')
 class Token(Resource):
@@ -99,7 +101,7 @@ class Token(Resource):
     def get(self, email):
         """ Look up all the tokens of the specified user """
         if not validators.email(email):
-            return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
+            return {'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
         user_found = models.User.query.get(email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
@@ -116,7 +118,7 @@ class Token(Resource):
         """ Create a new token for the specified user"""
         data = api.payload
         if not validators.email(email):
-            return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
+            return {'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
         user_found = models.User.query.get(email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
@@ -131,15 +133,16 @@ class Token(Resource):
         models.db.session.add(token_new)
         #apply the changes
         db.session.commit()
-        response_dict  = {
-            'id' : token_new.id,
-            'token' : raw_password,
-            'email' : token_new.user_email,
-            'comment' : token_new.comment,
-            'AuthorizedIP' : token_new.ip,
+        response_dict = {
+            'id': token_new.id,
+            'token': raw_password,
+            'email': token_new.user_email,
+            'comment': token_new.comment,
+            'AuthorizedIP': token_new.ip,
             'Created': str(token_new.created_at),
             }
-        return  response_dict
+        return response_dict
+
 
 @token.route('/<string:token_id>')
 class Token(Resource):
@@ -152,7 +155,7 @@ class Token(Resource):
         "Find the specified token"
         token = models.Token.query.get(token_id)
         if not token:
-            return { 'code' : 404, 'message' : f'Record cannot be found for id {token_id} or invalid id provided'}, 404
+            return {'code': 404, 'message': f'Record cannot be found for id {token_id} or invalid id provided'}, 404
         return token
 
     @token.doc('delete_token')
@@ -165,7 +168,7 @@ class Token(Resource):
         """ Delete the specified token """
         token = models.Token.query.get(token_id)
         if not token:
-            return { 'code' : 404, 'message' : f'Record cannot be found for id {token_id} or invalid id provided'}, 404
+            return {'code': 404, 'message': f'Record cannot be found for id {token_id} or invalid id provided'}, 404
         db.session.delete(token)
         db.session.commit()
         return {'code': 200, 'message': f'Token with id {token_id} has been deleted'}, 200

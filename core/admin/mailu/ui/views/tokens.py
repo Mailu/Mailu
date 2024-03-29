@@ -34,7 +34,7 @@ def token_create(user_email):
         token.set_password(form.raw_password.data)
         form.populate_obj(token)
         if form.ip.data:
-            token.ip = form.ip.data.replace(' ','').split(',')
+            token.ip = form.ip.data.replace(' ', '').split(',')
         else:
             del token.ip
         models.db.session.add(token)

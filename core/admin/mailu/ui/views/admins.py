@@ -39,7 +39,7 @@ def admin_create():
 def admin_delete(admin):
     user = models.User.query.get(admin)
     if user:
-        user.global_admin  = False
+        user.global_admin = False
         models.db.session.commit()
         flask.flash('User %s is no longer admin' % user)
         return flask.redirect(flask.url_for('.admin_list'))

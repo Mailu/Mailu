@@ -8,6 +8,7 @@ import limits.strategies
 import hmac
 import secrets
 
+
 class LimitWrapper(object):
     """ Wraps a limit by providing the storage, item and identifiers
     """

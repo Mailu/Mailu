@@ -11,6 +11,7 @@ import secrets
 import ipaddress
 from urllib.parse import urlparse, urljoin, unquote
 
+
 @sso.route('/login', methods=['GET', 'POST'])
 def login():
     if flask.request.headers.get(app.config['PROXY_AUTH_HEADER']) and not 'noproxyauth' in flask.request.url:
@@ -69,6 +70,7 @@ def login():
             flask.flash(_('Wrong e-mail or password'), 'error')
     return flask.render_template('login.html', form=form, fields=fields)
 
+
 @sso.route('/pw_change', methods=['GET', 'POST'])
 @access.authenticated
 def pw_change():
@@ -101,6 +103,7 @@ def pw_change():
 
     return flask.render_template('pw_change.html', form=form)
 
+
 @sso.route('/logout', methods=['GET'])
 @access.authenticated
 def logout():
@@ -110,6 +113,7 @@ def logout():
     for cookie in ['roundcube_sessauth', 'roundcube_sessid', 'smsession']:
         response.set_cookie(cookie, 'empty', expires=0)
     return response
+
 
 """
 Redirect to the url passed in parameter if any; Ensure that this is not an open-redirect too...
@@ -123,6 +127,7 @@ def _has_usable_redirect(is_proxied=False):
         if target.netloc == urlparse(flask.request.url).netloc:
             return target.geturl()
     return None
+
 
 """
 https://mailu.io/master/configuration.html#header-authentication-using-an-external-proxy

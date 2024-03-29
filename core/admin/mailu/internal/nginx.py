@@ -31,6 +31,7 @@ STATUSES = {
 
 WEBMAIL_PORTS = ['14190', '10143', '10025']
 
+
 def check_credentials(user, password, ip, protocol=None, auth_port=None, source_port=None, raw_user=None):
     if not user or not user.enabled or (protocol == "imap" and not user.enable_imap and not auth_port in WEBMAIL_PORTS) or (protocol == "pop3" and not user.enable_pop):
         app.logger.info(f'Login attempt for: {user or raw_user!r}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: account disabled')
@@ -58,6 +59,7 @@ def check_credentials(user, password, ip, protocol=None, auth_port=None, source_
             return True
     app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: badauth: {utils.truncated_pw_hash(password)}')
     return False
+
 
 def handle_authentication(headers):
     """ Handle an HTTP nginx authentication request
@@ -140,6 +142,7 @@ def get_status(protocol, status):
     """
     status, codes = STATUSES[status]
     return status, codes[protocol]
+
 
 def get_server(protocol, authenticated=False):
     if protocol == 'imap':

@@ -32,7 +32,7 @@ response_fields = api.model('Response', {
 error_fields = api.model('Error', {
     'errors': fields.Nested(api.model('Error_Key', {
         'key': fields.String,
-        'message':fields.String
+        'message': fields.String
     })),
     'message': fields.String,
 })

@@ -65,16 +65,16 @@ def run_migrations_online():
 
     engine = engine_from_config(
         config.get_section(config.config_ini_section),
-        prefix    = 'sqlalchemy.',
-        poolclass = pool.NullPool
+        prefix='sqlalchemy.',
+        poolclass=pool.NullPool
     )
 
     @tenacity.retry(
-        stop   = tenacity.stop_after_attempt(100),
-        wait   = tenacity.wait_random(min=2, max=5),
-        before = tenacity.before_log(logging.getLogger('tenacity.retry'), logging.DEBUG),
-        before_sleep = tenacity.before_sleep_log(logging.getLogger('tenacity.retry'), logging.INFO),
-        after  = tenacity.after_log(logging.getLogger('tenacity.retry'), logging.DEBUG)
+        stop=tenacity.stop_after_attempt(100),
+        wait=tenacity.wait_random(min=2, max=5),
+        before=tenacity.before_log(logging.getLogger('tenacity.retry'), logging.DEBUG),
+        before_sleep=tenacity.before_sleep_log(logging.getLogger('tenacity.retry'), logging.INFO),
+        after=tenacity.after_log(logging.getLogger('tenacity.retry'), logging.DEBUG)
     )
     def try_connect(db):
         return db.connect()
@@ -82,9 +82,9 @@ def run_migrations_online():
     with try_connect(engine) as connection:
 
         context.configure(
-            connection      = connection,
-            target_metadata = target_metadata,
-            process_revision_directives = process_revision_directives,
+            connection=connection,
+            target_metadata=target_metadata,
+            process_revision_directives=process_revision_directives,
             **current_app.extensions['migrate'].configure_args
         )
 
@@ -92,6 +92,7 @@ def run_migrations_online():
             context.run_migrations()
 
     connection.close()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

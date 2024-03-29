@@ -106,14 +106,14 @@ class Users(Resource):
         """ Create a new user """
         data = api.payload
         if not validators.email(data['email']):
-            return { 'code': 400, 'message': f'Provided email address {data["email"]} is not a valid email address'}, 400
+            return {'code': 400, 'message': f'Provided email address {data["email"]} is not a valid email address'}, 400
         localpart, domain_name = data['email'].lower().rsplit('@', 1)
         domain_found = models.Domain.query.get(domain_name)
         if not domain_found:
-            return { 'code': 404, 'message': f'Domain {domain_name} does not exist'}, 404
+            return {'code': 404, 'message': f'Domain {domain_name} does not exist'}, 404
         email_found = models.User.query.filter_by(email=data['email']).first()
         if email_found:
-            return { 'code': 409, 'message': f'User {data["email"]} already exists'}, 409
+            return {'code': 409, 'message': f'User {data["email"]} already exists'}, 409
 
 
         user_new = models.User(email=data['email'])
@@ -166,7 +166,7 @@ class Users(Resource):
         db.session.add(user_new)
         db.session.commit()
 
-        return {'code': 200,'message': f'User {data["email"]} has been created'}, 200
+        return {'code': 200, 'message': f'User {data["email"]} has been created'}, 200
 
 
 @user.route('/<string:email>')
@@ -180,12 +180,12 @@ class User(Resource):
     def get(self, email):
         """ Look up the specified user """
         if not validators.email(email):
-            return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
+            return {'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
 
         email_found = models.User.query.filter_by(email=email).first()
         if email_found is None:
-            return { 'code': 404, 'message': f'User {email} cannot be found'}, 404
-        return  marshal(email_found, user_fields_get), 200
+            return {'code': 404, 'message': f'User {email} cannot be found'}, 404
+        return marshal(email_found, user_fields_get), 200
 
     @user.doc('update_user')
     @user.expect(user_fields_put)
@@ -198,7 +198,7 @@ class User(Resource):
         """ Update the specified user """
         data = api.payload
         if not validators.email(email):
-            return { 'code': 400, 'message': f'Provided email address {data["email"]} is not a valid email address'}, 400
+            return {'code': 400, 'message': f'Provided email address {data["email"]} is not a valid email address'}, 400
         user_found = models.User.query.get(email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
@@ -252,7 +252,7 @@ class User(Resource):
         db.session.add(user_found)
         db.session.commit()
 
-        return {'code': 200,'message': f'User {email} has been updated'}, 200
+        return {'code': 200, 'message': f'User {email} has been updated'}, 200
 
 
     @user.doc('delete_user')
@@ -264,11 +264,11 @@ class User(Resource):
     def delete(self, email):
         """ Delete the specified user """
         if not validators.email(email):
-            return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
+            return {'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
 
         email_found = models.User.query.filter_by(email=email).first()
         if email_found is None:
-            return { 'code': 404, 'message': f'User {email} cannot be found'}, 404
+            return {'code': 404, 'message': f'User {email} cannot be found'}, 404
         db.session.delete(email_found)
         db.session.commit()
-        return { 'code': 200, 'message': f'User {email} has been deleted'}, 200
+        return {'code': 200, 'message': f'User {email} has been deleted'}, 200

@@ -25,6 +25,7 @@ if account is not None and domain is not None and password is not None:
     log.info("Creating initial admin account %s@%s with mode %s", account, domain, mode)
     os.system("flask mailu admin %s %s '%s' --mode %s" % (account, domain, password, mode))
 
+
 def test_unsupported():
     import codecs
     if os.path.isfile(codecs.decode('/.qbpxrerai', 'rot13')) or os.environ.get(codecs.decode('V_XABJ_ZL_FRGHC_QBRFAG_SVG_ERDHVERZRAGF_NAQ_JBAG_SVYR_VFFHRF_JVGUBHG_CNGPURF', 'rot13'), None) or os.environ.get(codecs.decode('ZNVYH_URYZ_PUNEG', 'rot13'), None):
@@ -32,6 +33,7 @@ def test_unsupported():
     log.critical('Your system is not supported. Please start by reading the documentation and then http://www.catb.org/~esr/faqs/smart-questions.html')
     while True:
         time.sleep(5)
+
 
 def test_DNS():
     import dns.resolver
@@ -47,7 +49,7 @@ def test_DNS():
     resolver.flags = dns.flags.AD | dns.flags.RD
     nameservers = resolver.nameservers
     for ns in nameservers:
-        resolver.nameservers=[ns]
+        resolver.nameservers = [ns]
         while True:
             try:
                 result = resolver.resolve('example.org', dns.rdatatype.A, dns.rdataclass.IN, lifetime=10)
@@ -58,6 +60,7 @@ def test_DNS():
                     break
                 log.critical("Your DNS resolver at %s isn't doing DNSSEC validation; Please see https://mailu.io/master/faq.html#the-admin-container-won-t-start-and-its-log-says-critical-your-dns-resolver-isn-t-doing-dnssec-validation.", ns)
             time.sleep(5)
+
 
 test_DNS()
 test_unsupported()
@@ -76,7 +79,7 @@ cmdline = [
 
 # logging
 if log.root.level <= log.INFO:
-	cmdline.extend(["--access-logfile", "-"])
+    cmdline.extend(["--access-logfile", "-"])
 
 cmdline.append("'mailu:create_app()'")
 

@@ -14,4 +14,5 @@ class Profiler(object):
             app.wsgi_app, restrictions=[30]
         )
 
+
 profiler = Profiler()

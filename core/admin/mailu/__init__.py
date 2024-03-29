@@ -10,6 +10,7 @@ import logging
 
 import hmac
 
+
 class NoPingFilter(logging.Filter):
     def filter(self, record):
         if record.args['r'].endswith(' /ping HTTP/1.1'):
@@ -18,6 +19,7 @@ class NoPingFilter(logging.Filter):
             return False
         return True
 
+
 class Logger(glogging.Logger):
     def setup(self, cfg):
         super().setup(cfg)
@@ -25,6 +27,7 @@ class Logger(glogging.Logger):
         # Add filters to Gunicorn logger
         logger = logging.getLogger("gunicorn.access")
         logger.addFilter(NoPingFilter())
+
 
 def create_app_from_config(config):
     """ Create a new application based on the given configuration
@@ -76,9 +79,9 @@ def create_app_from_config(config):
     def inject_defaults():
         signup_domains = models.Domain.query.filter_by(signup_enabled=True).all()
         return dict(
-            signup_domains= signup_domains,
-            config        = app.config,
-            get_locale    = utils.get_locale,
+            signup_domains=signup_domains,
+            config=app.config,
+            get_locale=utils.get_locale,
         )
 
     # Jinja filters

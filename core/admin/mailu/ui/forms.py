@@ -9,6 +9,7 @@ import ipaddress
 
 LOCALPART_REGEX = "^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*$"
 
+
 class DestinationField(fields.SelectMultipleField):
     """ Allow for multiple emails selection from current user choices and
     additional email addresses.
@@ -33,14 +34,16 @@ class DestinationField(fields.SelectMultipleField):
             if not self.validator.match(item):
                 raise validators.ValidationError(_('Invalid email address.'))
 
+
 class MultipleEmailAddressesVerify(object):
-    def __init__(self,message=_('Invalid email address.')):
+    def __init__(self, message=_('Invalid email address.')):
         self.message = message
 
     def __call__(self, form, field):
         pattern = re.compile(r'^([_a-z0-9\-\+]+)(\.[_a-z0-9\-\+]+)*@([a-z0-9\-]{1,}\.)*([a-z]{1,})(,([_a-z0-9\-\+]+)(\.[_a-z0-9\-\+]+)*@([a-z0-9\-]{1,}\.)*([a-z]{2,}))*$', re.IGNORECASE)
         if not pattern.match(field.data.replace(" ", "")):
             raise validators.ValidationError(self.message)
+
 
 class MultipleFoldersVerify(object):
     """ Ensure that we have CSV formated data """
@@ -52,8 +55,10 @@ class MultipleFoldersVerify(object):
         if not pattern.match(field.data.replace(" ", "")):
             raise validators.ValidationError(self.message)
 
+
 class ConfirmationForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Confirm'))
+
 
 class DomainForm(flask_wtf.FlaskForm):
     name = fields.StringField(_('Domain name'), [validators.DataRequired()])
@@ -110,8 +115,10 @@ class UserSignupForm(flask_wtf.FlaskForm):
     pwned = fields.HiddenField(label='', default=-1)
     submit = fields.SubmitField(_('Sign up'))
 
+
 class UserSignupFormCaptcha(UserSignupForm):
     captcha = flask_wtf.RecaptchaField()
+
 
 class UserSettingsForm(flask_wtf.FlaskForm):
     displayed_name = fields.StringField(_('Displayed name'))
@@ -130,12 +137,14 @@ class UserPasswordForm(flask_wtf.FlaskForm):
     pwned = fields.HiddenField(label='', default=-1)
     submit = fields.SubmitField(_('Update password'))
 
+
 class UserPasswordChangeForm(flask_wtf.FlaskForm):
     current_pw = fields.PasswordField(_('Current password'), [validators.DataRequired()])
     pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
     pw2 = fields.PasswordField(_('Password check'), [validators.DataRequired()])
     pwned = fields.HiddenField(label='', default=-1)
     submit = fields.SubmitField(_('Update password'))
+
 
 class UserReplyForm(flask_wtf.FlaskForm):
     reply_enabled = fields.BooleanField(_('Enable automatic reply'))
@@ -166,6 +175,7 @@ class TokenForm(flask_wtf.FlaskForm):
                 ipaddress.ip_network(candidate, False)
         except:
             raise validators.ValidationError('Not a valid list of CIDRs')
+
 
 class AliasForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('Alias'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])

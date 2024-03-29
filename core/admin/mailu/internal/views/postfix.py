@@ -8,9 +8,11 @@ import re
 import sqlalchemy.exc
 import srslib
 
+
 @internal.route("/postfix/dane/<domain_name>")
 def postfix_dane_map(domain_name):
     return flask.jsonify('dane-only') if utils.has_dane_record(domain_name) else flask.abort(404)
+
 
 @internal.route("/postfix/domain/<domain_name>")
 def postfix_mailbox_domain(domain_name):
@@ -36,6 +38,7 @@ def postfix_alias_map(alias):
     if destinations := models.Email.resolve_destination(localpart, domain_name):
         return flask.jsonify(",".join(idna_encode(destinations)))
     return flask.abort(404)
+
 
 @internal.route("/postfix/transport/<path:email>")
 def postfix_transport(email):

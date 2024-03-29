@@ -7,6 +7,7 @@ from functools import wraps
 from flask_restx import abort
 from sqlalchemy.sql.expression import label
 
+
 def fqdn_in_use(name):
     d = models.db.session.query(label('name', models.Domain.name))
     a = models.db.session.query(label('name', models.Alternative.name))
@@ -15,6 +16,7 @@ def fqdn_in_use(name):
     if models.db.session.query(u.exists()).scalar():
         return True
     return False
+
 
 """ Decorator for validating api token for authentication """
 def api_token_authorization(func):

@@ -93,7 +93,6 @@ def authenticated(args, kwargs):
     return True
 
 
-
 def confirmation_required(action):
     """ View decorator that asks for a confirmation first.
     """

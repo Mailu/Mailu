@@ -2,6 +2,7 @@ from wtforms import validators, fields
 from flask_babel import lazy_gettext as _
 import flask_wtf
 
+
 class LoginForm(flask_wtf.FlaskForm):
     class Meta:
         csrf = False
@@ -10,6 +11,7 @@ class LoginForm(flask_wtf.FlaskForm):
     pwned = fields.HiddenField(label='', default=-1)
     submitWebmail = fields.SubmitField(_('Sign in'))
     submitAdmin = fields.SubmitField(_('Sign in'))
+
 
 class PWChangeForm(flask_wtf.FlaskForm):
     oldpw = fields.PasswordField(_('Current password'), [validators.DataRequired()])

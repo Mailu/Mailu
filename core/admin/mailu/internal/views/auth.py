@@ -8,6 +8,7 @@ import base64
 import sqlalchemy.exc
 import urllib
 
+
 @internal.route("/auth/email")
 def nginx_authentication():
     """ Main authentication endpoint for Nginx email server
@@ -62,6 +63,7 @@ def nginx_authentication():
         utils.limiter.rate_limit_ip(client_ip, username)
     return response
 
+
 @internal.route("/auth/admin")
 def admin_authentication():
     """ Fails if the user is not an authenticated admin.
@@ -71,6 +73,7 @@ def admin_authentication():
         and flask_login.current_user.enabled):
         return ""
     return flask.abort(403)
+
 
 @internal.route("/auth/user")
 def user_authentication():

@@ -54,6 +54,7 @@ class IdnaDomain(db.TypeDecorator):
         """ decode punycode domain name to unicode """
         return idna.decode(value)
 
+
 class IdnaEmail(db.TypeDecorator):
     """ Stores a Unicode string in it's IDNA representation (ASCII only)
     """
@@ -76,6 +77,7 @@ class IdnaEmail(db.TypeDecorator):
         localpart, domain_name = value.rsplit('@', 1)
         return f'{localpart}@{idna.decode(domain_name)}'
 
+
 class CommaSeparatedList(db.TypeDecorator):
     """ Stores a list as a comma-separated string, compatible with Postfix.
     """
@@ -97,6 +99,7 @@ class CommaSeparatedList(db.TypeDecorator):
         """ split comma separated string to list """
         return list(filter(bool, (item.strip() for item in value.split(',')))) if value else []
 
+
 class JSONEncoded(db.TypeDecorator):
     """ Represents an immutable structure as a json-encoded string.
     """
@@ -112,6 +115,7 @@ class JSONEncoded(db.TypeDecorator):
     def process_result_value(self, value, dialect):
         """ decode json to data """
         return json.loads(value) if value else None
+
 
 class Base(db.Model):
     """ Base class for all models
@@ -153,6 +157,7 @@ class Base(db.Model):
     # in collections.bulk_replace, but auto-incrementing don't always have
     # a valid primary key, in this case we use the object's id
     __hashed = None
+
     def __hash__(self):
         if self.__hashed is None:
             primary = getattr(self, self.__table__.primary_key.columns.values()[0].name)
@@ -177,6 +182,7 @@ def _save_dkim_keys(session):
     for obj in session.identity_map.values():
         if isinstance(obj, Domain):
             obj.save_dkim_key()
+
 
 def _get_managers():
     return managers

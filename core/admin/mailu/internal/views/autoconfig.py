@@ -4,6 +4,7 @@ from flask import current_app as app
 import flask
 import xmltodict
 
+
 @internal.route("/autoconfig/mozilla")
 def autoconfig_mozilla():
     # https://wiki.mozilla.org/Thunderbird:Autoconfiguration:ConfigFileFormat
@@ -41,6 +42,7 @@ def autoconfig_mozilla():
 </clientConfig>\r\n'''
     return flask.Response(xml, mimetype='text/xml', status=200)
 
+
 @internal.route("/autoconfig/microsoft.json")
 def autoconfig_microsoft_json():
     proto = flask.request.args.get('Protocol', 'Autodiscoverv1')
@@ -50,6 +52,7 @@ def autoconfig_microsoft_json():
         return flask.Response('{'+json+'}', mimetype='application/json', status=200)
     else:
         return flask.abort(404)
+
 
 @internal.route("/autoconfig/microsoft", methods=['POST'])
 def autoconfig_microsoft():
@@ -92,6 +95,7 @@ def autoconfig_microsoft():
         return flask.Response(xml, mimetype='text/xml', status=200)
     except:
         return flask.abort(400)
+
 
 @internal.route("/autoconfig/apple")
 def autoconfig_apple():

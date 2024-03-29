@@ -39,6 +39,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 login = flask_login.LoginManager()
 login.login_view = "sso.login"
 
+
 @login.unauthorized_handler
 def handle_needs_login():
     """ redirect unauthorized requests to login page """
@@ -46,10 +47,12 @@ def handle_needs_login():
         flask.url_for('sso.login', url=flask.request.url)
     )
 
+
 # DNS stub configured to do DNSSEC enabled queries
 resolver = dns.resolver.Resolver()
 resolver.use_edns(0, dns.flags.DO, 1232)
 resolver.flags = dns.flags.AD | dns.flags.RD
+
 
 def has_dane_record(domain, timeout=10):
     try:
@@ -57,7 +60,7 @@ def has_dane_record(domain, timeout=10):
         if result.response.flags & dns.flags.AD:
             for record in result:
                 if isinstance(record, dns.rdtypes.ANY.TLSA.TLSA):
-                    if record.usage in [2,3] and record.selector in [0,1] and record.mtype in [0,1,2]:
+                    if record.usage in [2, 3] and record.selector in [0, 1] and record.mtype in [0, 1, 2]:
                         return True
     except dns.resolver.NoNameservers:
         # If the DNSSEC data is invalid and the DNS resolver is DNSSEC enabled
@@ -73,8 +76,10 @@ def has_dane_record(domain, timeout=10):
         app.logger.info(f'Error while looking up the TLSA record for {domain} {e}')
         pass
 
+
 # Rate limiter
 limiter = limiter.LimitWraperFactory()
+
 
 def extract_network_from_ip(ip):
     n = ipaddress.ip_network(ip)
@@ -83,9 +88,11 @@ def extract_network_from_ip(ip):
     else:
         return str(n.supernet(prefixlen_diff=(128-app.config["AUTH_RATELIMIT_IP_V6_MASK"])).network_address)
 
+
 def is_exempt_from_ratelimits(ip):
     ip = ipaddress.ip_address(ip)
     return any(ip in cidr for cidr in app.config['AUTH_RATELIMIT_EXEMPTION'])
+
 
 def is_ip_in_subnet(ip, subnets=[]):
     if isinstance(subnets, str):
@@ -97,8 +104,10 @@ def is_ip_in_subnet(ip, subnets=[]):
         app.logger.debug(f'Unable to parse {subnets!r}, assuming {ip!r} is not in the set')
         return False
 
+
 # Application translation
 babel = flask_babel.Babel()
+
 
 def get_locale():
     """ selects locale for translation """
@@ -124,11 +133,13 @@ class PrefixMiddleware(object):
         self.app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
         app.wsgi_app = self
 
+
 proxy = PrefixMiddleware()
 
 
 # Data migrate
 migrate = flask_migrate.Migrate()
+
 
 # session store (inspired by https://github.com/mbr/flask-kvsession)
 class RedisStore:
@@ -161,6 +172,7 @@ class RedisStore:
             prefix += b'*'
         return list(self.redis.scan_iter(match=prefix))
 
+
 class DictStore:
     """ Stores session data in a python dict. """
 
@@ -187,6 +199,7 @@ class DictStore:
         if prefix is None:
             return list(self.dict.keys())
         return [key for key in self.dict if key.startswith(prefix)]
+
 
 class MailuSession(CallbackDict, SessionMixin):
     """ Custom flask session storage. """
@@ -303,13 +316,14 @@ class MailuSession(CallbackDict, SessionMixin):
 
         return set_cookie
 
+
 class MailuSessionConfig:
     """ Stores sessions crypto config """
 
     # default size of session key parts
-    uid_bits = 64 # default if SESSION_KEY_BITS is not set in config
-    sid_bits = 128 # for now. must be multiple of 8!
-    time_bits = 32 # for now. must be multiple of 8!
+    uid_bits = 64  # default if SESSION_KEY_BITS is not set in config
+    sid_bits = 128  # for now. must be multiple of 8!
+    time_bits = 32  # for now. must be multiple of 8!
 
     def __init__(self, app=None):
 
@@ -325,7 +339,7 @@ class MailuSessionConfig:
 
         key = want_bytes(app.secret_key)
 
-        self._hmac    = hmac.new(hmac.digest(key, b'SESSION_UID_HASH', digest='sha256'), digestmod='sha256')
+        self._hmac = hmac.new(hmac.digest(key, b'SESSION_UID_HASH', digest='sha256'), digestmod='sha256')
         self._uid_len = uid_bytes
         self._uid_b64 = len(self._encode(bytes(uid_bytes)))
         self._sid_len = sid_bytes
@@ -383,6 +397,7 @@ class MailuSessionConfig:
         except secrets.binascii.Error:
             return None
 
+
 class MailuSessionInterface(SessionInterface):
     """ Custom flask session interface. """
 
@@ -421,6 +436,7 @@ class MailuSessionInterface(SessionInterface):
                 secure=self.get_cookie_secure(app),
                 samesite=self.get_cookie_samesite(app)
             )
+
 
 class MailuSessionExtension:
     """ Server side session handling """
@@ -496,8 +512,10 @@ class MailuSessionExtension:
                         app.logger.info('cleaning session store')
                         MailuSessionExtension.cleanup_sessions(app)
 
+
 cleaned = Value('i', False)
 session = MailuSessionExtension()
+
 
 # this is used by the webmail to authenticate IMAP/SMTP
 def verify_temp_token(email, token):
@@ -510,6 +528,7 @@ def verify_temp_token(email, token):
     except:
         pass
 
+
 def gen_temp_token(email, session):
     token = session.get('webmail_token', 'token-'+secrets.token_urlsafe())
     session['webmail_token'] = token
@@ -518,6 +537,7 @@ def gen_temp_token(email, session):
             app.config['PERMANENT_SESSION_LIFETIME'],
     )
     return token
+
 
 def isBadOrPwned(form):
     try:
@@ -530,6 +550,7 @@ def isBadOrPwned(form):
         return f"This password appears in {breaches} data breaches! It is not unique; please change it."
     return None
 
+
 def formatCSVField(field):
     if not field.data:
         return
@@ -539,11 +560,13 @@ def formatCSVField(field):
         data = field.data
     field.data = ", ".join(data)
 
+
 # All tokens are 32 characters hex lowercase
 def is_app_token(candidate):
     if len(candidate) == 32 and all(c in string.hexdigits[:-6] for c in candidate):
         return True
     return False
+
 
 def truncated_pw_hash(pw):
     return hmac.new(app.truncated_pw_key, bytearray(pw, 'utf-8'), 'sha256').hexdigest()[:6]

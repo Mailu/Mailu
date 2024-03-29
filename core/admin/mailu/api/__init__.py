@@ -2,6 +2,7 @@ from flask import redirect, url_for, Blueprint
 from flask_restx import apidoc
 from . import v1 as APIv1
 
+
 def register(app, web_api_root):
 
     APIv1.app = app
@@ -13,6 +14,7 @@ def register(app, web_api_root):
 
         # add redirect to current api version
         redirect_api = Blueprint('redirect_api', __name__)
+
         @redirect_api.route('/')
         def redir():
             return redirect(url_for(f'{APIv1.blueprint.name}.root'))
@@ -25,6 +27,7 @@ def register(app, web_api_root):
         app.config.RESTX_MASK_SWAGGER = False
     else:
         api = Blueprint('api', __name__)
+
         @api.route('/', defaults={'path': ''})
         @api.route('/<path:path>')
         def api_token_missing(path):

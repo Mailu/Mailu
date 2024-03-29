@@ -38,16 +38,19 @@ ma = Marshmallow()
 
 _model2schema = {}
 
+
 def get_schema(cls=None):
     """ return schema class for model """
     if cls is None:
         return _model2schema.values()
     return _model2schema.get(cls)
 
+
 def mapped(cls):
     """ register schema in model2schema map """
     _model2schema[cls.Meta.model] = cls
     return cls
+
 
 class Logger:
     """ helps with counting and colorizing
@@ -130,13 +133,13 @@ class Logger:
             message = repr(message)
         self.print(f'{action} {target.__table__}: {self.colorize(message)}')
 
-    def _listen_insert(self, mapper, connection, target): # pylint: disable=unused-argument
+    def _listen_insert(self, mapper, connection, target):  # pylint: disable=unused-argument
         """ callback method to track import """
         self._counter.update([('Created', target.__table__.name)])
         if self.verbose:
             self._log('Created', target)
 
-    def _listen_update(self, mapper, connection, target): # pylint: disable=unused-argument
+    def _listen_update(self, mapper, connection, target):  # pylint: disable=unused-argument
         """ callback method to track import """
 
         changes = {}
@@ -189,7 +192,7 @@ class Logger:
             self._log('Deleted', target)
 
     # TODO: _listen_dkim can be removed when dkim keys are stored in database
-    def _listen_dkim(self, session, flush_context): # pylint: disable=unused-argument
+    def _listen_dkim(self, session, flush_context):  # pylint: disable=unused-argument
         """ callback method to track import """
         for target in session.identity_map.values():
             # look at Domains originally loaded from db
@@ -268,7 +271,7 @@ class Logger:
 
         maxlen = max(len(loc) for loc, msg in res)
         res = [f'     - {loc.ljust(maxlen)} : {msg}' for loc, msg in res]
-        errors = f'{len(res)} error{["s",""][len(res)==1]}'
+        errors = f'{len(res)} error{["s", ""][len(res) == 1]}'
         res.insert(0, f'[ValidationError] {errors} occurred during input validation')
 
         return '\n'.join(res)
@@ -306,7 +309,7 @@ class Logger:
         Token.Name.Tag:         ('cyan',    'cyan'),
         Token.Literal.Scalar:   ('green',   'green'),
         Token.Literal.String:   ('green',   'green'),
-        Token.Name.Constant:    ('green',   'green'), # multiline strings
+        Token.Name.Constant:    ('green',   'green'),  # multiline strings
         Token.Keyword.Constant: ('magenta', 'magenta'),
         Token.Literal.Number:   ('magenta', 'magenta'),
         Token.Error:            ('red',     'red'),
@@ -338,15 +341,20 @@ class Logger:
 class _Hidden:
     def __bool__(self):
         return False
+
     def __copy__(self):
         return self
+
     def __deepcopy__(self, _):
         return self
+
     def __eq__(self, other):
         return str(other) == '<hidden>'
+
     def __repr__(self):
         return '<hidden>'
     __str__ = __repr__
+
 
 yaml.add_representer(
     _Hidden,
@@ -355,15 +363,18 @@ yaml.add_representer(
 
 HIDDEN = _Hidden()
 
+
 # multiline attributes
 class _Multiline(str):
     pass
+
 
 yaml.add_representer(
     _Multiline,
     lambda dumper, data: dumper.represent_scalar(u'tag:yaml.org,2002:str', data, style='|')
 
 )
+
 
 # yaml render module
 class RenderYAML:
@@ -392,6 +403,7 @@ class RenderYAML:
                 kwargs[key] = value
 
     _load_defaults = {}
+
     @classmethod
     def loads(cls, *args, **kwargs):
         """ load yaml data from string
@@ -405,12 +417,14 @@ class RenderYAML:
         'allow_unicode': True,
         'sort_keys': False,
     }
+
     @classmethod
     def dumps(cls, *args, **kwargs):
         """ dump data to yaml string
         """
         cls._augment(kwargs, cls._dump_defaults)
         return yaml.dump(*args, **kwargs)
+
 
 # json encoder
 class JSONEncoder(json.JSONEncoder):
@@ -420,6 +434,7 @@ class JSONEncoder(json.JSONEncoder):
         if isinstance(o, _Hidden):
             return str(o)
         return json.JSONEncoder.default(self, o)
+
 
 # json render module
 class RenderJSON:
@@ -435,6 +450,7 @@ class RenderJSON:
                 kwargs[key] = value
 
     _load_defaults = {}
+
     @classmethod
     def loads(cls, *args, **kwargs):
         """ load json data from string
@@ -446,6 +462,7 @@ class RenderJSON:
         'separators': (',',':'),
         'cls': JSONEncoder,
     }
+
     @classmethod
     def dumps(cls, *args, **kwargs):
         """ dump data to json string
@@ -469,6 +486,7 @@ fields.DateTime.SERIALIZATION_FUNCS['rfc3339'] = _rfc3339
 fields.DateTime.DESERIALIZATION_FUNCS['rfc3339'] = fields.DateTime.DESERIALIZATION_FUNCS['iso']
 fields.DateTime.DEFAULT_FORMAT = 'rfc3339'
 
+
 class LazyStringField(fields.String):
     """ Field that serializes a "false" value to the empty string
     """
@@ -477,6 +495,7 @@ class LazyStringField(fields.String):
         """ serialize None to the empty string
         """
         return value if value else ''
+
 
 class CommaSeparatedListField(fields.Raw):
     """ Deserialize a string containing comma-separated values to
@@ -616,6 +635,7 @@ class DkimKeyField(fields.String):
         else:
             return value
 
+
 class PasswordField(fields.Str):
     """ Serialize a hashed password hash by stripping the obsolete {SCHEME}
         Deserialize a plain password or hashed password into a hashed password
@@ -680,6 +700,7 @@ class Storage:
         key = f'{self.__class__.__name__}.{key}'
         return self.context['_track'][key]
 
+
 class BaseOpts(SQLAlchemyAutoSchemaOpts):
     """ Option class with sqla session
     """
@@ -689,6 +710,7 @@ class BaseOpts(SQLAlchemyAutoSchemaOpts):
         if not hasattr(meta, 'sibling'):
             meta.sibling = False
         super(BaseOpts, self).__init__(meta, ordered=ordered)
+
 
 class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
     """ Marshmallow base schema with custom exclude logic
@@ -833,6 +855,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
 
         # patch "delete", "prune" and "default"
         want_prune = []
+
         def patch(count, data):
 
             # we only process objects here
@@ -1240,7 +1263,7 @@ class MailuSchema(Schema, Storage):
         model = models.MailuConfig
         render_module = RenderYAML
 
-        order = ['domain', 'user', 'alias', 'relay'] # 'config'
+        order = ['domain', 'user', 'alias', 'relay']  # 'config'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1251,7 +1274,7 @@ class MailuSchema(Schema, Storage):
                     fieldlist[field] = fieldlist.pop(field)
 
     @pre_load
-    def _clear_config(self, data, many, **kwargs): # pylint: disable=unused-argument
+    def _clear_config(self, data, many, **kwargs):  # pylint: disable=unused-argument
         """ create config object in context if missing
             and clear it if requested
         """
@@ -1259,7 +1282,7 @@ class MailuSchema(Schema, Storage):
             self.context['config'] = models.MailuConfig()
         if self.context.get('clear'):
             self.context['config'].clear(
-                models = {field.nested.opts.model for field in self.fields.values()}
+                models={field.nested.opts.model for field in self.fields.values()}
             )
         return data
 

@@ -95,6 +95,7 @@ DEFAULT_CONFIG = {
     'SUBNET6': None,
 }
 
+
 class ConfigManager:
     """ Naive configuration manager that uses environment only
     """
@@ -118,7 +119,7 @@ class ConfigManager:
             return os.environ.get(key, value)
 
     def __coerce_value(self, value):
-        if isinstance(value, str) and value.lower() in ('true','yes'):
+        if isinstance(value, str) and value.lower() in ('true', 'yes'):
             return True
         elif isinstance(value, str) and value.lower() in ('false', 'no'):
             return False

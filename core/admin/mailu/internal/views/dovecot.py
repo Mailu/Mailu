@@ -7,6 +7,7 @@ import socket
 import os
 import sqlalchemy.exc
 
+
 @internal.route("/dovecot/passdb/<path:user_email>")
 def dovecot_passdb_dict(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
@@ -20,16 +21,18 @@ def dovecot_passdb_dict(user_email):
         "allow_real_nets": ",".join(allow_nets)
     })
 
+
 @internal.route("/dovecot/userdb/")
 def dovecot_userdb_dict_list():
     return flask.jsonify([
         user[0] for user in models.User.query.filter(models.User.enabled.is_(True)).with_entities(models.User.email).all()
     ])
 
+
 @internal.route("/dovecot/userdb/<path:user_email>")
 def dovecot_userdb_dict(user_email):
     try:
-        quota = models.User.query.filter(models.User.email==user_email).with_entities(models.User.quota_bytes).one_or_none() or flask.abort(404)
+        quota = models.User.query.filter(models.User.email == user_email).with_entities(models.User.quota_bytes).one_or_none() or flask.abort(404)
     except sqlalchemy.exc.StatementError as exc:
         flask.abort(404)
     return flask.jsonify({

@@ -20,6 +20,7 @@ relay_fields_update = api.model('RelayUpdate', {
     'comment': fields.String(description='a comment', required=False)
 })
 
+
 @relay.route('')
 class Relays(Resource):
     @relay.doc('list_relays')
@@ -42,10 +43,10 @@ class Relays(Resource):
         data = api.payload
 
         if not validators.domain(data['name']):
-            return { 'code': 400, 'message': f'Relayed domain {data["name"]} is not a valid domain'}, 400
+            return {'code': 400, 'message': f'Relayed domain {data["name"]} is not a valid domain'}, 400
 
         if common.fqdn_in_use(data['name']):
-            return { 'code': 409, 'message': f'Duplicate domain {data["name"]}'}, 409
+            return {'code': 409, 'message': f'Duplicate domain {data["name"]}'}, 409
         relay_model = models.Relay(name=data['name'])
         if 'smtp' in data:
             relay_model.smtp = data['smtp']
@@ -54,6 +55,7 @@ class Relays(Resource):
         db.session.add(relay_model)
         db.session.commit()
         return {'code': 200, 'message': f'Relayed domain {data["name"]} has been created'}, 200
+
 
 @relay.route('/<string:name>')
 class Relay(Resource):
@@ -66,12 +68,12 @@ class Relay(Resource):
     def get(self, name):
         """ Look up the specified relay """
         if not validators.domain(name):
-            return { 'code': 400, 'message': f'Relayed domain {name} is not a valid domain'}, 400
+            return {'code': 400, 'message': f'Relayed domain {name} is not a valid domain'}, 400
 
         relay_found = models.Relay.query.filter_by(name=name).first()
         if relay_found is None:
-            return { 'code': 404, 'message': f'Relayed domain {name} cannot be found'}, 404
-        return  marshal(relay_found, relay_fields), 200
+            return {'code': 404, 'message': f'Relayed domain {name} cannot be found'}, 404
+        return marshal(relay_found, relay_fields), 200
 
     @relay.doc('update_relay')
     @relay.expect(relay_fields_update)
@@ -85,11 +87,11 @@ class Relay(Resource):
         data = api.payload
 
         if not validators.domain(name):
-            return { 'code': 400, 'message': f'Relayed domain {name} is not a valid domain'}, 400
+            return {'code': 400, 'message': f'Relayed domain {name} is not a valid domain'}, 400
 
         relay_found = models.Relay.query.filter_by(name=name).first()
         if relay_found is None:
-            return { 'code': 404, 'message': f'Relayed domain {name} cannot be found'}, 404
+            return {'code': 404, 'message': f'Relayed domain {name} cannot be found'}, 404
 
         if 'smtp' in data:
             relay_found.smtp = data['smtp']
@@ -97,7 +99,7 @@ class Relay(Resource):
             relay_found.comment = data['comment']
         db.session.add(relay_found)
         db.session.commit()
-        return { 'code': 200, 'message': f'Relayed domain {name} has been updated'}, 200
+        return {'code': 200, 'message': f'Relayed domain {name} has been updated'}, 200
 
 
     @relay.doc('delete_relay')
@@ -109,10 +111,10 @@ class Relay(Resource):
     def delete(self, name):
         """ Delete the specified relay """
         if not validators.domain(name):
-            return { 'code': 400, 'message': f'Relayed domain {name} is not a valid domain'}, 400
+            return {'code': 400, 'message': f'Relayed domain {name} is not a valid domain'}, 400
         relay_found = models.Relay.query.filter_by(name=name).first()
         if relay_found is None:
-            return { 'code': 404, 'message': f'Relayed domain {name} cannot be found'}, 404
+            return {'code': 404, 'message': f'Relayed domain {name} cannot be found'}, 404
         db.session.delete(relay_found)
         db.session.commit()
-        return { 'code': 200, 'message': f'Relayed domain {name} has been deleted'}, 200
+        return {'code': 200, 'message': f'Relayed domain {name} has been deleted'}, 200

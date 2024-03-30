@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Mailu\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2022-05-22 18:47+0200\n"
-"PO-Revision-Date: 2024-03-26 09:23+0100\n"
+"PO-Revision-Date: 2024-03-30 11:45+0100\n"
 "Last-Translator: spoooyders <tech+translate@i2p.cc>\n"
 "Language-Team: \n"
 "Language: be_BY\n"
@@ -19,8 +19,8 @@ msgstr ""
 msgid "E-mail"
 msgstr "Электронная пошта"
 
-#: mailu/sso/forms.py:9 mailu/ui/forms.py:80 mailu/ui/forms.py:93
-#: mailu/ui/forms.py:112 mailu/ui/forms.py:166 mailu/ui/templates/client.html:32
+#: mailu/sso/forms.py:9 mailu/ui/forms.py:80 mailu/ui/forms.py:93 mailu/ui/forms.py:112
+#: mailu/ui/forms.py:166 mailu/ui/templates/client.html:32
 #: mailu/ui/templates/client.html:57
 msgid "Password"
 msgstr "Пароль"
@@ -99,8 +99,8 @@ msgstr "Максымальная квота карыстальніка"
 msgid "Enable sign-up"
 msgstr "Дазволіць рэгістрацыю"
 
-#: mailu/ui/forms.py:53 mailu/ui/forms.py:74 mailu/ui/forms.py:86
-#: mailu/ui/forms.py:132 mailu/ui/forms.py:144 mailu/ui/templates/alias/list.html:22
+#: mailu/ui/forms.py:53 mailu/ui/forms.py:74 mailu/ui/forms.py:86 mailu/ui/forms.py:132
+#: mailu/ui/forms.py:144 mailu/ui/templates/alias/list.html:22
 #: mailu/ui/templates/domain/list.html:22 mailu/ui/templates/relay/list.html:20
 #: mailu/ui/templates/token/list.html:20 mailu/ui/templates/user/list.html:24
 msgid "Comment"
@@ -330,8 +330,7 @@ msgstr "Пацьвердзіце дзеяньне"
 #: mailu/ui/templates/confirm.html:13
 #, python-format
 msgid "You are about to %(action)s. Please confirm your action."
-msgstr ""
-"Вы зьбіраецеся зьдзейсьніць %(action)s. Калі ласка пацьвердзіце ваша дзеяньне."
+msgstr "Вы зьбіраецеся зьдзейсьніць %(action)s. Калі ласка пацьвердзіце ваша дзеяньне."
 
 #: mailu/ui/templates/docker-error.html:4
 msgid "Docker error"
@@ -716,3 +715,27 @@ msgstr "Дамен"
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
 msgstr "Наяўныя адтуліны"
+
+#: mailu/ui/templates/client.html:62
+msgid "If you use an Apple device,"
+msgstr "Калі вы выкарыстоўваеце прыладу Apple,"
+
+#: mailu/ui/templates/client.html:63
+msgid "click here to auto-configure it."
+msgstr "націсьніце сюды каб аўтаматычна наладзіць яе."
+
+#: mailu/ui/templates/domain/details.html:19
+msgid "Download zonefile"
+msgstr "Спампаваць файл зоны"
+
+#: mailu/ui/forms.py:134
+msgid "Current password"
+msgstr "Бягучы пароль"
+
+#: mailu/ui/forms.py:102
+msgid "Force password change at next login"
+msgstr "Прымусова зьмяніць пароль пры наступным уваходзе"
+
+#: mailu/ui/forms.py:98
+msgid "Allow the user to spoof the sender (send email as anyone)"
+msgstr "Дазволіць карыстальніку падрабляць адпраўшчыка (адсылаць пошту як хто заўгодна)"

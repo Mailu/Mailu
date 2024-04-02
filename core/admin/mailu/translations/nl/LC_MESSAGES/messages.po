@@ -293,6 +293,14 @@ msgstr "TLS inschakelen"
 msgid "Username"
 msgstr "Gebruikersnaam"
 
+#: mailu/ui/templates/client.html:62
+msgid "If you use an Apple device,"
+msgstr "Indien u een Apple-apparaat gebruikt,"
+
+#: mailu/ui/templates/client.html:63
+msgid "click here to auto-configure it."
+msgstr "kunt u hier klikken om deze automatisch te configureren."
+
 #: mailu/ui/forms.py:167
 msgid "Keep emails on the server"
 msgstr "Behoud de e-mails op de server"

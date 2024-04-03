@@ -167,6 +167,8 @@ Click the submit button to apply settings. With the default polling interval, fe
 Make sure ``FETCHMAIL_ENABLED`` is set to ``true`` in ``mailu.env`` to enable fetching and showing fetchmail in the admin interface.
 
 
+.. _webadministration_authentication_tokens:
+
 Authentication tokens
 ---------------------
 
@@ -320,9 +322,13 @@ This page is also accessible for domain managers. On the users page new users ca
 
 * Settings. Access the settings page of the user. See :ref:`the settings page <webadministration_settings>` for more information.
 
+* Authentication tokens. Access the authentication tokens page of the user. See :ref:`the authentication tokens page <webadministration_authentication_tokens>` for more information.
+
 * Auto-reply. Access the auto-reply page of the user. See the :ref:`auto-reply page <webadministration_auto-reply>` for more information.
 
 * Fetched accounts. Access the fetched accounts page of the user. See the :ref:`fetched accounts page <webadministration_fetched_accounts>` for more information.
+
+* Webmail. Login to webmail as the respective user to access the user's mailbox.
 
 This page also shows an overview of the following settings of an user:
 

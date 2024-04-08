@@ -71,29 +71,22 @@ with open("/etc/resolv.conf") as handle:
     args["RESOLVER"] = f"[{resolver}]" if ":" in resolver else resolver
 
 # Configure PROXY_PROTOCOL
-PROTO_MAIL=['SMTP', 'POP3', 'POP3S', 'IMAP', 'IMAPS', 'SUBMISSION', 'SUBMISSIONS', 'MANAGESIEVE']
+PROTO_MAIL=['25', '110', '995', '143', '993', '587', '465', '4190']
 PROTO_ALL_BUT_HTTP=PROTO_MAIL.copy()
-PROTO_ALL_BUT_HTTP.extend(['HTTPS'])
+PROTO_ALL_BUT_HTTP.extend(['443'])
 PROTO_ALL=PROTO_ALL_BUT_HTTP.copy()
-PROTO_ALL.extend(['HTTP'])
+PROTO_ALL.extend(['80'])
 for item in args.get('PROXY_PROTOCOL', '').split(','):
-    match item:
-        case '25': args['PROXY_PROTOCOL_SMTP']=True; continue
-        case '80': args['PROXY_PROTOCOL_HTTP']=True; continue
-        case '110': args['PROXY_PROTOCOL_POP3']=True; continue
-        case '143': args['PROXY_PROTOCOL_IMAP']=True; continue
-        case '443': args['PROXY_PROTOCOL_HTTPS']=True; continue
-        case '465': args['PROXY_PROTOCOL_SUBMISSIONS']=True; continue
-        case '587': args['PROXY_PROTOCOL_SUBMISSION']=True; continue
-        case '993': args['PROXY_PROTOCOL_IMAPS']=True; continue
-        case '995': args['PROXY_PROTOCOL_POP3S']=True; continue
-        case '4190': args['PROXY_PROTOCOL_MANAGESIEVE']=True; continue
-        case 'mail':
-            for p in PROTO_MAIL: args[f'PROXY_PROTOCOL_{p}']=True; continue
-        case 'all-but-http':
-            for p in PROTO_ALL_BUT_HTTP: args[f'PROXY_PROTOCOL_{p}']=True; continue
-        case 'all':
-            for p in PROTO_ALL: args[f'PROXY_PROTOCOL_{p}']=True; continue
+    if item.isdigit():
+        args[f'PROXY_PROTOCOL_{item}']=True
+    elif item == 'mail':
+        for p in PROTO_MAIL: args[f'PROXY_PROTOCOL_{p}']=True
+    elif item == 'all-but-http':
+        for p in PROTO_ALL_BUT_HTTP: args[f'PROXY_PROTOCOL_{p}']=True
+    elif item == 'all':
+        for p in PROTO_ALL: args[f'PROXY_PROTOCOL_{p}']=True
+    else:
+        log.error(f'Not sure what to do with {item} in PROXY_PROTOCOL ({args.get("PROXY_PROTOCOL")})')
 
 PORTS_REQUIRING_TLS=['443', '465', '993', '995']
 ALL_PORTS='25,80,443,465,587,993,995,4190'
@@ -102,11 +95,10 @@ for item in args.get('PORTS', ALL_PORTS).split(','):
         continue
     args[f'PORT_{item}']=True
 
-for item in args.get('TLS', ALL_PORTS).split(','):
-    if item in PORTS_REQUIRING_TLS:
-        if args['TLS_FLAVOR'] == 'notls':
-            continue
-        args[f'TLS_{item}']=True
+if args['TLS_FLAVOR'] != 'notls':
+    for item in args.get('TLS', ALL_PORTS).split(','):
+        if item in PORTS_REQUIRING_TLS:
+            args[f'TLS_{item}']=True
 
 # TLS configuration
 cert_name = args.get("TLS_CERT_FILENAME", "cert.pem")

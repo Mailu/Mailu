@@ -28,11 +28,8 @@ and add a section like follows:
       - "--entrypoints.web.address=:http"
       - "--entrypoints.websecure.address=:https"
       - "--entrypoints.smtp.address=:smtp"
-      - "--entrypoints.submission.address=:submission"
       - "--entrypoints.submissions.address=:submissions"
-      - "--entrypoints.imap.address=:imap"
       - "--entrypoints.imaps.address=:imaps"
-      - "--entrypoints.pop3.address=:pop3"
       - "--entrypoints.pop3s.address=:pop3s"
       - "--entrypoints.sieve.address=:sieve"
       # - "--api.insecure=true"
@@ -42,11 +39,8 @@ and add a section like follows:
       - "80:80"
       - "443:443"
       - "465:465"
-      - "587:587"
       - "993:993"
       - "995:995"
-      - "110:110"
-      - "143:143"
       - "4190:4190"
       # The Web UI (enabled by --api.insecure=true)
       # - "8080:8080"
@@ -80,35 +74,17 @@ and then add the following to the front section:
       - "traefik.tcp.services.smtp.loadbalancer.server.port=25"
       - "traefik.tcp.services.smtp.loadbalancer.proxyProtocol.version=2"
 
-      - "traefik.tcp.routers.submission.rule=HostSNI(`*`)"
-      - "traefik.tcp.routers.submission.entrypoints=submission"
-      - "traefik.tcp.routers.submission.service=submission"
-      - "traefik.tcp.services.submission.loadbalancer.server.port=587"
-      - "traefik.tcp.services.submission.loadbalancer.proxyProtocol.version=2"
-
       - "traefik.tcp.routers.submissions.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.submissions.entrypoints=submissions"
       - "traefik.tcp.routers.submissions.service=submissions"
       - "traefik.tcp.services.submissions.loadbalancer.server.port=465"
       - "traefik.tcp.services.submissions.loadbalancer.proxyProtocol.version=2"
 
-      - "traefik.tcp.routers.imap.rule=HostSNI(`*`)"
-      - "traefik.tcp.routers.imap.entrypoints=imap"
-      - "traefik.tcp.routers.imap.service=imap"
-      - "traefik.tcp.services.imap.loadbalancer.server.port=143"
-      - "traefik.tcp.services.imap.loadbalancer.proxyProtocol.version=2"
-
       - "traefik.tcp.routers.imaps.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.imaps.entrypoints=imaps"
       - "traefik.tcp.routers.imaps.service=imaps"
       - "traefik.tcp.services.imaps.loadbalancer.server.port=993"
       - "traefik.tcp.services.imaps.loadbalancer.proxyProtocol.version=2"
-
-      - "traefik.tcp.routers.pop3.rule=HostSNI(`*`)"
-      - "traefik.tcp.routers.pop3.entrypoints=pop3"
-      - "traefik.tcp.routers.pop3.service=pop3"
-      - "traefik.tcp.services.pop3.loadbalancer.server.port=110"
-      - "traefik.tcp.services.pop3.loadbalancer.proxyProtocol.version=2"
 
       - "traefik.tcp.routers.pop3s.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.pop3s.entrypoints=pop3s"
@@ -129,9 +105,9 @@ in mailu.env:
 .. code-block:: docker
 
   REAL_IP_FROM=192.168.203.0/24
-  PROXY_PROTOCOL=all-but-http
+  PROXY_PROTOCOL=25,443,465,993,995,4190
   TRAEFIK_VERSION=v2
-  TLS_FLAVOR=mail-letsencrypt
+  TLS_FLAVOR=letsencrypt
   WEBROOT_REDIRECT=/sso/login
 
 Using the above configuration, Traefik will proxy all the traffic related to Mailu's FQDNs without requiring duplicate certificates.

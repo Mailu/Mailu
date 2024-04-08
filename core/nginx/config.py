@@ -89,7 +89,7 @@ for item in args.get('PROXY_PROTOCOL', '').split(','):
         log.error(f'Not sure what to do with {item} in PROXY_PROTOCOL ({args.get("PROXY_PROTOCOL")})')
 
 PORTS_REQUIRING_TLS=['443', '465', '993', '995']
-ALL_PORTS='25,80,443,465,587,993,995,4190'
+ALL_PORTS='25,80,443,465,993,995,4190'
 for item in args.get('PORTS', ALL_PORTS).split(','):
     if item in PORTS_REQUIRING_TLS and args['TLS_FLAVOR'] == 'notls':
         continue

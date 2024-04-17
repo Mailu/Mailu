@@ -24,6 +24,7 @@ relay_fields_update = api.model('RelayUpdate', {
 class Relays(Resource):
     @relay.doc('list_relays')
     @relay.marshal_with(relay_fields, as_list=True, skip_none=True, mask=None)
+    @relay.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @relay.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
@@ -34,6 +35,7 @@ class Relays(Resource):
     @relay.expect(relay_fields)
     @relay.response(200, 'Success', response_fields)
     @relay.response(400, 'Input validation exception', response_fields)
+    @relay.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @relay.response(409, 'Duplicate relay', response_fields)
     @relay.doc(security='Bearer')
     @common.api_token_authorization
@@ -58,8 +60,9 @@ class Relays(Resource):
 @relay.route('/<string:name>')
 class Relay(Resource):
     @relay.doc('find_relay')
-    @relay.marshal_with(relay_fields, code=200, description='Success', as_list=False, skip_none=True, mask=None)
+    @relay.response(200, 'Success', relay_fields)
     @relay.response(400, 'Input validation exception', response_fields)
+    @relay.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @relay.response(404, 'Relay not found', response_fields)
     @relay.doc(security='Bearer')
     @common.api_token_authorization
@@ -77,6 +80,7 @@ class Relay(Resource):
     @relay.expect(relay_fields_update)
     @relay.response(200, 'Success', response_fields)
     @relay.response(400, 'Input validation exception', response_fields)
+    @relay.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @relay.response(404, 'Relay not found', response_fields)
     @relay.doc(security='Bearer')
     @common.api_token_authorization
@@ -103,6 +107,7 @@ class Relay(Resource):
     @relay.doc('delete_relay')
     @relay.response(200, 'Success', response_fields)
     @relay.response(400, 'Input validation exception', response_fields)
+    @relay.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @relay.response(404, 'Relay not found', response_fields)
     @relay.doc(security='Bearer')
     @common.api_token_authorization

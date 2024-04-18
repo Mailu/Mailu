@@ -24,19 +24,11 @@ def api_token_authorization(func):
         if utils.limiter.should_rate_limit_ip(client_ip):
             abort(429, 'Too many attempts from your IP (rate-limit)' )
         if not request.headers.get('Authorization'):
-            abort(401, 'A valid Bearer token is expected which is provided as request header')
-        #Client provides 'Authentication: Bearer <token>'
-        if (' ' in request.headers.get('Authorization')
-                and not hmac.compare_digest(request.headers.get('Authorization'), 'Bearer ' + v1.api_token)):
+            abort(401, 'A valid Authorization header is mandatory')
+        if (not hmac.compare_digest(request.headers.get('Authorization').removeprefix('Bearer '), v1.api_token)):
             utils.limiter.rate_limit_ip(client_ip)
             flask.current_app.logger.warn(f'Invalid API token provided by {client_ip}.')
-            abort(403, 'A valid Bearer token is expected which is provided as request header')
-        #Client provides 'Authentication: <token>'
-        elif (' ' not in request.headers.get('Authorization')
-                and not hmac.compare_digest(request.headers.get('Authorization'), v1.api_token)):
-            utils.limiter.rate_limit_ip(client_ip)
-            flask.current_app.logger.warn(f'Invalid API token provided by {client_ip}.')
-            abort(403, 'A valid Bearer token is expected which is provided as request header')
+            abort(403, 'Invalid API token')
         flask.current_app.logger.info(f'Valid API token provided by {client_ip}.')
         return func(*args, **kwds)
     return decorated_function

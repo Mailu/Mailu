@@ -25,7 +25,7 @@ def api_token_authorization(func):
             abort(429, 'Too many attempts from your IP (rate-limit)' )
         if not request.headers.get('Authorization'):
             abort(401, 'A valid Authorization header is mandatory')
-        if (not hmac.compare_digest(request.headers.get('Authorization').removeprefix('Bearer '), v1.api_token)):
+        if len(v1.api_token) < 4 or not hmac.compare_digest(request.headers.get('Authorization').removeprefix('Bearer '), v1.api_token):
             utils.limiter.rate_limit_ip(client_ip)
             flask.current_app.logger.warn(f'Invalid API token provided by {client_ip}.')
             abort(403, 'Invalid API token')

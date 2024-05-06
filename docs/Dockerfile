@@ -8,6 +8,7 @@ COPY requirements.txt /requirements.txt
 COPY . /docs
 
 RUN set -euxo pipefail \
+  ; machine="$(uname -m)" \
   ; deps="gcc musl-dev" \
   ; [[ "${machine}" != x86_64 ]] && \
       deps="${deps} cargo" \

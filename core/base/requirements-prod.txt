@@ -32,8 +32,13 @@ Flask-WTF==1.2.1
 frozenlist==1.4.1
 greenlet==3.0.3
 gunicorn==22.0.0
+<<<<<<< HEAD
 idna==3.7
 importlib-resources==6.4.0
+=======
+idna==3.6
+importlib-resources==6.1.1
+>>>>>>> 5b5d526d (Fix CVE-2024-1135)
 infinity==1.5
 intervals==0.9.2
 itsdangerous==2.2.0

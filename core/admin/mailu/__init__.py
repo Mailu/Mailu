@@ -11,7 +11,14 @@ import logging
 import hmac
 
 class NoPingFilter(logging.Filter):
+    skipAccessLogs = False
+
+    def __init__(self, filterAccessLogs=False):
+        self.skipAccessLogs = filterAccessLogs
+
     def filter(self, record):
+        if self.skipAccessLogs and record.args['r'].endswith(' HTTP/1.1'):
+            return False
         if record.args['r'].endswith(' /ping HTTP/1.1'):
             return False
         if record.args['r'].endswith(' /internal/rspamd/local_domains HTTP/1.1'):
@@ -24,7 +31,7 @@ class Logger(glogging.Logger):
 
         # Add filters to Gunicorn logger
         logger = logging.getLogger("gunicorn.access")
-        logger.addFilter(NoPingFilter())
+        logger.addFilter(NoPingFilter(logger.getEffectiveLevel()>logging.DEBUG))
 
 def create_app_from_config(config):
     """ Create a new application based on the given configuration

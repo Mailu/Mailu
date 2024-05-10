@@ -1,0 +1,1 @@
+Ensure that sending emails to invalid addresses with an '@' in localpart is permanently and not temporarily rejected.

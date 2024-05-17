@@ -31,6 +31,6 @@ if spamtest :percent :value "gt" :comparator "i;ascii-numeric" "{{ user.spam_thr
 
 {% if user.reply_active %}
 if not address :localpart :contains ["From","Reply-To"] ["noreply","no-reply"]{
-  vacation :days 1 {% if user.displayed_name != "" %}:from "{{ user.displayed_name }} <{{ user.email }}>"{% endif %} :subject "{{ user.reply_subject }}" "{{ user.reply_body }}";
+  vacation :days 1 {% if user.displayed_name != "" %}:from "{{ user.displayed_name | replace("\"", "\\\"") }} <{{ user.email | replace("\"", "\\\"") }}>"{% endif %} :subject "{{ user.reply_subject | replace("\"", "\\\"") }}" "{{ user.reply_body | replace("\"", "\\\"") }}";
 }
 {% endif %}

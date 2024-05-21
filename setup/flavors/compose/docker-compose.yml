@@ -158,7 +158,7 @@ services:
 
 {% if tika_enabled %}
   fts_attachments:
-    image: ghcr.io/paperless-ngx/tika:2.9.1-full
+    image: apache/tika:2.9.2-alpha-multi-arch-full
     hostname: tika
     logging:
       driver: journald

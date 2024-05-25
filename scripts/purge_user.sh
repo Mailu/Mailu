@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # get id of running admin container
-admin="$(docker compose ps admin --format=json | jq -r '.ID')"
+admin="$(docker compose -p mailu ps admin --format=json | jq -r '.ID')"
 if [[ -z "${admin}" ]]; then
 	echo "Sorry, can't find running mailu admin container."
 	echo "You need to start this in the path containing your docker-compose.yml."
@@ -24,7 +24,7 @@ declare -A users=()
 while read line; do
 	users[${line#* }]="${line/ *}"
 done < <(
-	docker compose exec -T admin \
+	docker compose -p mailu exec -T admin \
 		flask mailu config-export -j user.email user.enabled \
 	2>/dev/null | jq -r '.user[] | "\(.enabled) \(.email)"'
 )
@@ -58,7 +58,7 @@ fi
 
 # is roundcube webmail in use?
 webmail=false
-docker compose exec webmail test -e /data/roundcube.db 2>/dev/null && webmail=true
+docker compose -p mailu exec webmail test -e /data/roundcube.db 2>/dev/null && webmail=true
 
 # output actions
 if ${unknown}; then
@@ -67,7 +67,7 @@ if ${unknown}; then
 		[[ "${users[${email}]}" == "unknown" ]] || continue
 		echo -n "rm -rf '${storage}/mail/${email}'"
 		${webmail} && \
-			echo -n " && docker compose exec -T webmail su mailu -c \"/var/www/roundcube/bin/deluser.sh --host=front '${email}'\""
+			echo -n " && docker compose -p mailu exec -T webmail su mailu -c \"/var/www/roundcube/bin/deluser.sh --host=front '${email}'\""
 		echo
 	done
 	echo
@@ -76,9 +76,9 @@ if ${disabled}; then
 	echo "# To purge disabled users, run:"
 	for email in "${!users[@]}"; do
 		[[ "${users[${email}]}" == "disabled" ]] || continue
-		echo -n "docker compose exec -T admin flask mailu user-delete -r '${email}' && rm -rf '${storage}/mail/${email}'"
+		echo -n "docker compose -p mailu exec -T admin flask mailu user-delete -r '${email}' && rm -rf '${storage}/mail/${email}'"
 		${webmail} && \
-			echo -n " && docker compose exec -T webmail su mailu -c \"/var/www/roundcube/bin/deluser.sh --host=front '${email}'\""
+			echo -n " && docker compose -p mailu exec -T webmail su mailu -c \"/var/www/roundcube/bin/deluser.sh --host=front '${email}'\""
 		echo
 	done
 	echo

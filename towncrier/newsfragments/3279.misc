@@ -1,1 +1,2 @@
 Switch to alpine 3.20, remove a dependency on edge for dovecot
+Ensure we user normalizer-icu in all languages

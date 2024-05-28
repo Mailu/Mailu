@@ -20,7 +20,6 @@ RUN set -euxo pipefail \
     aspell-uk aspell-ru aspell-fr aspell-de aspell-en \
   ; rm /etc/nginx/http.d/default.conf \
   ; rm /etc/php83/php-fpm.d/www.conf \
-  ; ln -s /usr/bin/php83 /usr/bin/php \
   ; mkdir -m 700 /root/.gnupg/ \
   ; gpg --import /tmp/snappymail.asc \
   ; gpg --import /tmp/roundcube.asc \

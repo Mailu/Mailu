@@ -3,7 +3,7 @@
 # base system image (intermediate)
 # Note when updating the alpine tag, first manually run the workflow .github/workflows/mirror.yml.
 # Just run the workflow with the tag that must be synchronised.
-ARG DISTRO=ghcr.io/mailu/alpine:3.19.1
+ARG DISTRO=ghcr.io/mailu/alpine:3.20
 FROM $DISTRO as system
 
 ENV TZ=Etc/UTC LANG=C.UTF-8
@@ -66,8 +66,6 @@ RUN set -euxo pipefail \
   ; rm -rf src/tests/*php7*/ src/tests/*session*/ src/tests/broken_configuration/ src/tests/*cookie* src/tests/upload_validation/ \
   ; apk add --virtual .build-deps php83-dev php83-cgi php83-simplexml php83-xml pcre-dev build-base php83-pear php83-openssl re2c \
   ; pecl83 install vld-beta \
-  ; ln -s /usr/bin/phpize83 /usr/bin/phpize \
-  ; ln -s /usr/bin/php-config83 /usr/bin/php-config \
   ; make -j $(grep -c processor /proc/cpuinfo) release \
   ; cp src/.libs/snuffleupagus.so /app \
   ; rm -rf /root/.cargo /tmp/*.pem /root/.cache

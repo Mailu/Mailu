@@ -14,7 +14,7 @@ POSTFIX_LOG_FILE has been deprecated and is ignored by Mailu. If POSTFIX_LOG_FIL
 If a reverse proxy is used on the same host, consider switching to traefik using the updated instructions. Refer to `Using an external reverse proxy` on mailu.io. With these updated instructions Mailu will handle requesting all certificates. It is not required anymore to copy certificates from the reverse proxy to Mailu.
 
 After starting the new Mailu deployment, check the following two topics.
-The dovecot indexes should be recreated:
+The dovecot full-text-search indexes should be recreated:
 From `bash` run:
 ```
 find /mailu/mail -type d -name xapian-indexes -prune -exec rm -r {} \+
@@ -31,14 +31,14 @@ View the admin container logs via `docker compose logs admin`
 WARNING:root:Your CPU has Advanced Vector Extensions available, we recommend you enable hardened-malloc earlier in the boot process by adding LD_PRELOAD=/usr/lib/libhardened_malloc.so to your mailu.env
 ```
 
-**Only** if the above message is logged, then the hardened malloc can be enabled by adding the following line to `mailu.env`.
+**Only** if the above message is logged, then the hardened malloc can be enabled sooner by adding the following line to `mailu.env`.
 ```
 LD_PRELOAD=/usr/lib/libhardened_malloc.so
 ```
 Recreate all docker containers (`docker compose up -d`) for the changes to be propagated.
 
 
-Please note that once you have upgraded to 2024.06, that you won't be able to roll-back to earlier versions.
+Please note that once you have upgraded to 2024.06, you won't be able to roll-back to earlier versions.
 
 
 - Features: Introduce new settings for configuring proxying and TLS. Disable POP3, IMAP and SUBMISSION by default, see https://nostarttls.secvuln.info/

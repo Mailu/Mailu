@@ -46,7 +46,7 @@ The following translations for the Admin webui have been added:
 All language translations are handled by the community. If you see a translation error for your native language, consider submitting a pull request to address this.
 
 Download zonefile on domain details page
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 On the domain details page a download option is added for downloading the zone file. This zone file can be used to easily import all Mailu DNS settings.
 
 Roundcube spellchecker
@@ -85,6 +85,14 @@ The environment variable `AUTH_REQUIRE_TOKENS` has been introduced. This setting
 
 It is recommended to use authentication tokens instead of passwords for connecting email clients to Mailu as verifying them is less resource intensive server-side and they are not subject to rate limits (since they cannot be brute-forced online by a potential attacker).
 
+Improved PROXY PROTOCOL and open ports settings
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It is now possible to explicitly configure what ports must use the PROXY PROTOCOL. Refer to PROXY_PROTOCOL in the configuration reference for more information.
+
+The newly introduced PORTS variable can be used to configure what service should be enabled. efer to PORTS in the configuration reference for more information.
+
+
 Change in behaviour
 ```````````````````
 
@@ -98,6 +106,18 @@ The new FAQ entry `How can I view and export the logs of a Mailu container?` des
 Emails marked by clamav are rejected now. These used to be silently dropped
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 In the past emails marked by clamav (the virusscanner) were dropped. Now these emails are rejected. That means that the person who sent the email receives a reply that the email was rejected due to the email being flagged by clamav.
+
+STARTTLS ports disabled by default
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+By default the STARTTLS ports are disabled. That means that the ports for the following protocols are closed:
+
+* IMAP (143)
+* POP3 (110)
+* Submission (587)
+
+For more information why only enabled implicit TLS is safer than also allowing opportunistic TLS, please refer to `https://nostarttls.secvuln.info <https://nostarttls.secvuln.info/>`_ .
+To re-enable these ports, use the PORTS variable. For more information refer to the configuration reference.
+
 
 Upgrading
 `````````

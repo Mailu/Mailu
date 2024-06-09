@@ -1,5 +1,5 @@
 Added missing translations for Dutch, German and French.
-4 new strings were introduced after 2.0. These must be translated for all languages.
+6 new strings were introduced after 2.0. These must be translated for all languages.
 If this translation is missing for your native language, please submit a PR with the translation,
 or open a new issue where you mention the translated strings.
 
@@ -19,3 +19,11 @@ msgstr "translation of password change at next login"
 #: mailu/ui/forms.py:98
 msgid "Allow the user to spoof the sender (send email as anyone)"
 msgstr "translation of Allow the user to spoof the sender (send email as anyone)"
+
+#: mailu/ui/templates/client.html:62
+msgid "If you use an Apple device,"
+msgstr "translation of If you use an Apple device,"
+
+#: mailu/ui/templates/client.html:63
+msgid "click here to auto-configure it."
+msgstr "translation of click here to auto-configure it."

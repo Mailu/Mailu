@@ -41,6 +41,12 @@ Recreate all docker containers (`docker compose up -d`) for the changes to be pr
 Please note that once you have upgraded to 2024.06, that you won't be able to roll-back to earlier versions.
 
 
+- Features: Introduce new settings for configuring proxying and TLS. Disable POP3, IMAP and SUBMISSION by default, see https://nostarttls.secvuln.info/
+  - Drop TLS_FLAVOR=mail-*
+  - Change the meaning of PROXY_PROTOCOL, introduce PORTS
+  - Disable POP3, IMAP and SUBMISSION ports by default, to re-enable ensure PORTS include 110, 143 and 587
+  - MANAGESIEVE with implicit TLS is not a thing clients support... so 4190 is enabled by default. ([#3061](https://github.com/Mailu/Mailu/issues/3061))
+- Features: Add belarusian translation ([#3207](https://github.com/Mailu/Mailu/issues/3207))
 - Features: Add support for managesieve ([#81](https://github.com/Mailu/Mailu/issues/81))
 - Features: Enhance RESTful API user retrieval with quota used bytes. This is the current size of the user's email box in bytes. ([#2824](https://github.com/Mailu/Mailu/issues/2824))
 - Features: Implement a feature to force users to change their password
@@ -118,6 +124,43 @@ Please note that once you have upgraded to 2024.06, that you won't be able to ro
 - Bugfixes: update Simplified Chinese (zh) translation ([#3175](https://github.com/Mailu/Mailu/issues/3175))
 - Bugfixes: Ensure that nginx and dovecot are reloaded ([#3179](https://github.com/Mailu/Mailu/issues/3179))
 - Bugfixes: Ensure we always send ISRG_X1 root when LE is configured. Switch to the non-crossigned version as the other one will expire in September ([#3187](https://github.com/Mailu/Mailu/issues/3187))
+- Bugfixes: Added missing translations for Dutch, German and French.
+  6 new strings were introduced after 2.0. These must be translated for all languages.
+  If this translation is missing for your native language, please submit a PR with the translation,
+  or open a new issue where you mention the translated strings.
+
+  The missing translations are:
+  #: mailu/ui/templates/domain/details.html:19
+  msgid "Download zonefile"
+  msgstr "translation of Download zonefile"
+
+  #: mailu/ui/forms.py:134
+  msgid "Current password"
+  msgstr "translation of Current password"
+
+  #: mailu/ui/forms.py:102
+  msgid "Force password change at next login"
+  msgstr "translation of password change at next login"
+
+  #: mailu/ui/forms.py:98
+  msgid "Allow the user to spoof the sender (send email as anyone)"
+  msgstr "translation of Allow the user to spoof the sender (send email as anyone)"
+
+  #: mailu/ui/templates/client.html:62
+  msgid "If you use an Apple device,"
+  msgstr "translation of If you use an Apple device,"
+
+  #: mailu/ui/templates/client.html:63
+  msgid "click here to auto-configure it."
+  msgstr "translation of click here to auto-configure it." ([#3029](https://github.com/Mailu/Mailu/issues/3029))
+- Bugfixes: When "Enable marking spam mails as read" was disabled, new spam messages were still marked as read.
+  Updated documentation with the setting "Enable marking spam mails as read". ([#3068](https://github.com/Mailu/Mailu/issues/3068))
+- Bugfixes: Some RESTful API interfaces were incorrectly documented. ([#3113](https://github.com/Mailu/Mailu/issues/3113))
+- Bugfixes: Fix purge_user.sh ([#3238](https://github.com/Mailu/Mailu/issues/3238))
+- Bugfixes: Fix CVE-2024-1135 ([#3251](https://github.com/Mailu/Mailu/issues/3251))
+- Bugfixes: Fix a bug preventing double quotes from being used in ooo messages ([#3260](https://github.com/Mailu/Mailu/issues/3260))
+- Bugfixes: Updated roundcube to version 1.6.7 ([#3261](https://github.com/Mailu/Mailu/issues/3261))
+- Misc:  ([#3279](https://github.com/Mailu/Mailu/issues/3279))
 - Misc:  ([#2059](https://github.com/Mailu/Mailu/issues/2059), [#2215](https://github.com/Mailu/Mailu/issues/2215), [#2644](https://github.com/Mailu/Mailu/issues/2644), [#2744](https://github.com/Mailu/Mailu/issues/2744), [#2748](https://github.com/Mailu/Mailu/issues/2748), [#2772](https://github.com/Mailu/Mailu/issues/2772), [#2829](https://github.com/Mailu/Mailu/issues/2829), [#2841](https://github.com/Mailu/Mailu/issues/2841), [#2847](https://github.com/Mailu/Mailu/issues/2847), [#2852](https://github.com/Mailu/Mailu/issues/2852), [#2918](https://github.com/Mailu/Mailu/issues/2918), [#2935](https://github.com/Mailu/Mailu/issues/2935), [#2950](https://github.com/Mailu/Mailu/issues/2950), [#2955](https://github.com/Mailu/Mailu/issues/2955), [#2977](https://github.com/Mailu/Mailu/issues/2977), [#2985](https://github.com/Mailu/Mailu/issues/2985), [#2990](https://github.com/Mailu/Mailu/issues/2990), [#3007](https://github.com/Mailu/Mailu/issues/3007), [#3024](https://github.com/Mailu/Mailu/issues/3024), [#3032](https://github.com/Mailu/Mailu/issues/3032), [#3097](https://github.com/Mailu/Mailu/issues/3097), [#3130](https://github.com/Mailu/Mailu/issues/3130))
 
 

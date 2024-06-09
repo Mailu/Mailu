@@ -12,7 +12,7 @@ It can also be manually configured via mailu.env:
 
 * ``API`` - Expose the API interface (value: true, false)
 * ``WEB_API`` - Path to the API interface
-* ``API_TOKEN`` - API token for authentication
+* ``API_TOKEN`` - API token for authentication (with minimum length of 3 characters)
 
 For more information refer to the detailed descriptions in the
 :ref:`configuration reference <advanced_settings>`.

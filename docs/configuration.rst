@@ -218,6 +218,7 @@ Advanced settings
 The ``AUTH_REQUIRE_TOKENS`` (default: False) setting controls whether thick clients can authenticate using passwords or whether they are forced to use tokens/application specific passwords.
 
 The ``API_TOKEN`` (default: None) setting configures the authentication token.
+The minimum length is 3 characters.
 This token must be passed as request header to the API as authentication token.
 This is a mandatory setting for using the RESTful API.
 

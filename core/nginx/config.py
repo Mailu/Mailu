@@ -70,6 +70,36 @@ with open("/etc/resolv.conf") as handle:
     resolver = content[content.index("nameserver") + 1]
     args["RESOLVER"] = f"[{resolver}]" if ":" in resolver else resolver
 
+# Configure PROXY_PROTOCOL
+PROTO_MAIL=['25', '110', '995', '143', '993', '587', '465', '4190']
+PROTO_ALL_BUT_HTTP=PROTO_MAIL.copy()
+PROTO_ALL_BUT_HTTP.extend(['443'])
+PROTO_ALL=PROTO_ALL_BUT_HTTP.copy()
+PROTO_ALL.extend(['80'])
+for item in args.get('PROXY_PROTOCOL', '').split(','):
+    if item.isdigit():
+        args[f'PROXY_PROTOCOL_{item}']=True
+    elif item == 'mail':
+        for p in PROTO_MAIL: args[f'PROXY_PROTOCOL_{p}']=True
+    elif item == 'all-but-http':
+        for p in PROTO_ALL_BUT_HTTP: args[f'PROXY_PROTOCOL_{p}']=True
+    elif item == 'all':
+        for p in PROTO_ALL: args[f'PROXY_PROTOCOL_{p}']=True
+    else:
+        log.error(f'Not sure what to do with {item} in PROXY_PROTOCOL ({args.get("PROXY_PROTOCOL")})')
+
+PORTS_REQUIRING_TLS=['443', '465', '993', '995']
+ALL_PORTS='25,80,443,465,993,995,4190'
+for item in args.get('PORTS', ALL_PORTS).split(','):
+    if item in PORTS_REQUIRING_TLS and args['TLS_FLAVOR'] == 'notls':
+        continue
+    args[f'PORT_{item}']=True
+
+if args['TLS_FLAVOR'] != 'notls':
+    for item in args.get('TLS', ALL_PORTS).split(','):
+        if item in PORTS_REQUIRING_TLS:
+            args[f'TLS_{item}']=True
+
 # TLS configuration
 cert_name = args.get("TLS_CERT_FILENAME", "cert.pem")
 keypair_name = args.get("TLS_KEYPAIR_FILENAME", "key.pem")
@@ -128,6 +158,8 @@ if args['TLS_FLAVOR'] in ['letsencrypt', 'mail-letsencrypt']:
 if args["TLS"] and not all(os.path.exists(file_path) for file_path in args["TLS"]):
     print("Missing cert or key file, disabling TLS")
     args["TLS_ERROR"] = "yes"
+
+args['TLS_PERMISSIVE'] = str(args.get('TLS_PERMISSIVE')).lower() not in ('false', 'no')
 
 # Build final configuration paths
 conf.jinja("/conf/tls.conf", args, "/etc/nginx/tls.conf")

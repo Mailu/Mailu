@@ -31,18 +31,14 @@ Sets the ``TLS_FLAVOR`` to one of the following
 values:
 
 - ``cert`` is the default and requires certificates to be setup manually;
-- ``letsencrypt`` will use the *Letsencrypt!* CA to generate automatic certificates;
-- ``mail`` is similar to ``cert`` except that TLS will only be served for
-  emails (IMAP and SMTP), not HTTP (use it behind reverse proxies);
-- ``mail-letsencrypt`` is similar to ``letsencrypt`` except that TLS will only be served for
-  emails (IMAP and SMTP), not HTTP (use it behind reverse proxies);
+- ``letsencrypt`` will use the *Letsencrypt!* CA to obtain certificates automatically;
 - ``notls`` will disable TLS, this is not recommended except for testing.
 
 .. note::
 
   When using *Letsencrypt!* you have to make sure that the DNS ``A`` and ``AAAA`` records for the
-  all hostnames mentioned in the ``HOSTNAMES`` variable match with the ip addresses of you server.
-  Or else certificate generation will fail! See also: :ref:`dns_setup`.
+  all hostnames mentioned in the ``HOSTNAMES`` variable match with the ip addresses of you server
+  or else certificate generation will fail! See also: :ref:`dns_setup`.
 
 Bind address
 ````````````
@@ -91,7 +87,7 @@ Finish setting up TLS
 Mailu relies heavily on TLS and must have a key pair and a certificate
 available, at least for the hostname configured in the ``mailu.env`` file.
 
-If you set ``TLS_FLAVOR`` to ``cert`` or ``mail`` then you must create a ``certs`` directory
+If you set ``TLS_FLAVOR`` to ``cert`` then you must create a ``certs`` directory
 in your root path and setup a key-certificate pair there:
 
 - ``cert.pem`` contains the certificate (override with ``TLS_CERT_FILENAME``),

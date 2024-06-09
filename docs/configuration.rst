@@ -62,8 +62,7 @@ The ``AUTH_RATELIMIT_EXEMPTION`` (default: '') is a comma separated list of netw
 CIDRs that won't be subject to any form of rate limiting. Specifying ``0.0.0.0/0, ::/0``
 there is a good way to disable rate limiting altogether.
 
-The ``TLS_FLAVOR`` sets how Mailu handles TLS connections. Setting this value to
-``notls`` will cause Mailu not to serve any web content! More on :ref:`tls_flavor`.
+The ``TLS_FLAVOR`` sets how Mailu obtains a x509 certificate. More on :ref:`tls_flavor`.
 
 The ``DEFAULT_SPAM_THRESHOLD`` (default: 80) is the default spam tolerance used when creating a new user.
 
@@ -249,9 +248,20 @@ but slows down the performance of modern devices.
 
 .. _`android handsets older than 7.1.1`: https://community.letsencrypt.org/t/production-chain-changes/150739
 
-The ``TLS_PERMISSIVE`` (default: true) setting controls whether ciphers and protocols offered on port 25 for STARTTLS are optimized for maximum compatibility. We **strongly recommend** that you do **not** change this setting on the basis that any encryption beats no encryption. If you are subject to compliance requirements and are not afraid of losing emails as a result of artificially reducing compatibility, set it to 'false'. Keep in mind that servers that are running a software stack old enough to not be compatible with the current TLS requirements will either a) deliver in plaintext b) bounce emails c) silently drop emails; moreover, modern servers will benefit from various downgrade protections (DOWNGRD, RFC7507) making the security argument mostly a moot point.
+The ``TLS_PERMISSIVE`` (default: true) setting controls whether ciphers and protocols offered on port 25
+for STARTTLS are optimized for maximum compatibility. We **strongly recommend** that you do **not** change
+this setting on the basis that any encryption beats no encryption. If you are subject to compliance
+requirements and are not afraid of losing emails as a result of artificially reducing compatibility,
+set it to 'false'. Keep in mind that servers that are running a software stack old enough to not be
+compatible with the current TLS requirements will either a) deliver in plaintext b) bounce emails
+c) silently drop emails; moreover, modern servers will benefit from various downgrade protections
+(DOWNGRD, RFC7507) making the security argument mostly a moot point.
 
-The ``COMPRESSION`` (default: unset) setting controls whether emails are stored compressed at rest on disk. Valid values are ``gz``, ``bz2`` or ``zstd`` and additional settings can be configured via ``COMPRESSION_LEVEL``, see `zlib_save_level`_ for accepted values. If the underlying filesystem supports compression natively you should use it instead of this setting as it will be more efficient and will improve compatibility with 3rd party tools.
+The ``COMPRESSION`` (default: unset) setting controls whether emails are stored compressed at rest on disk.
+Valid values are ``gz``, ``bz2`` or ``zstd`` and additional settings can be configured via
+``COMPRESSION_LEVEL``, see `zlib_save_level`_ for accepted values. If the underlying filesystem
+supports compression natively you should use it instead of this setting as it will be more efficient
+and will improve compatibility with 3rd party tools.
 
 .. _`zlib_save_level`: https://doc.dovecot.org/settings/plugin/zlib-plugin/#plugin_setting-zlib-zlib_save_level
 
@@ -268,13 +278,13 @@ The ``TZ`` sets the timezone Mailu will use. The timezone naming convention usua
 
 .. _`TZ database name`: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
-The ``PROXY_PROTOCOL`` (default: unset) allows the the front container to receive TCP and HTTP connections with
-the `PROXY protocol`_ (originally introduced in HAProxy, now also configurable in other proxy servers).
-It can be set to:
 
-* ``http`` to accept the ``PROXY`` protocol on nginx's HTTP proxy ports
-* ``mail`` to accept the ``PROXY`` protocol on nginx's mail proxy ports
-* ``all`` to accept the ``PROXY`` protocol on all nginx's HTTP and mail proxy ports
+The ``PORTS`` (default: '25,80,443,465,993,995,4190') setting determines which services should be enabled. It is a comma delimited list of ports numbers.
+If you need to re-enable IMAP, POP3 and Submission, you can append '110,143,587' to that list.
+
+The ``PROXY_PROTOCOL`` (default: unset) setting allows the the front container to receive TCP and HTTP connections with
+the `PROXY protocol`_ (originally introduced in HAProxy, now also configurable in other proxy servers).
+It can be set to a comma delimited list of ports on which it should be enabled.
 
 .. _`PROXY protocol`: https://github.com/haproxy/haproxy/blob/master/doc/proxy-protocol.txt
 

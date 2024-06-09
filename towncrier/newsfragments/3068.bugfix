@@ -1,0 +1,2 @@
+When "Enable marking spam mails as read" was disabled, new spam messages were still marked as read.
+Updated documentation with the setting "Enable marking spam mails as read".

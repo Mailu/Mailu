@@ -1,5 +1,5 @@
 # Convert .rst files to .html in temporary build container
-FROM python:3.12.0-alpine3.18 AS build
+FROM python:3.12.3-alpine3.19 AS build
 
 ARG version=master
 ENV VERSION=$version
@@ -7,16 +7,24 @@ ENV VERSION=$version
 COPY requirements.txt /requirements.txt
 COPY . /docs
 
-RUN apk add --no-cache --virtual .build-deps \
-    gcc musl-dev \
- && pip3 install -r /requirements.txt \
- && mkdir -p /build/$VERSION \
- && sphinx-build -W /docs /build/$VERSION \
- && apk del .build-deps
+RUN set -euxo pipefail \
+  ; machine="$(uname -m)" \
+  ; deps="gcc musl-dev" \
+  ; [[ "${machine}" != x86_64 ]] && \
+      deps="${deps} cargo" \
+  ; apk add --no-cache --virtual .build-deps ${deps} \
+  ; [[ "${machine}" == armv7* ]] && \
+      mkdir -p /root/.cargo/registry/index && \
+      git clone --bare https://github.com/rust-lang/crates.io-index.git /root/.cargo/registry/index/github.com-1285ae84e5963aae \
+  ; pip3 install -r /requirements.txt \
+  ; mkdir -p /build/$VERSION \
+  ; sphinx-build -W /docs /build/$VERSION \
+  ; apk del .build-deps \
+  ; rm -rf /root/.cargo
 
 
 # Build nginx deployment image including generated html
-FROM nginx:1.25.3-alpine
+FROM nginx:1.25.5-alpine
 
 ARG version=master
 ARG pinned_version=master

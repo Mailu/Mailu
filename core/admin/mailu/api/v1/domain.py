@@ -16,7 +16,7 @@ domain_fields = api.model('Domain', {
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
-    'alternatives': fields.List(fields.String(attribute='name', description='FQDN', example='example2.com')),
+    'alternatives': fields.List(fields.String(attribute='name', description='FQDN'), example='["example.com"]'),
 })
 
 domain_fields_update = api.model('DomainUpdate', {
@@ -25,17 +25,18 @@ domain_fields_update = api.model('DomainUpdate', {
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
-    'alternatives': fields.List(fields.String(attribute='name', description='FQDN', example='example2.com')),
+    'alternatives': fields.List(fields.String(attribute='name', description='FQDN'), example='["example.com"]'),
 })
 
 domain_fields_get = api.model('DomainGet', {
     'name': fields.String(description='FQDN (e.g. example.com)', example='example.com', required=True),
     'comment': fields.String(description='a comment'),
+    'managers': fields.List(fields.String(attribute='email', description='manager of domain')),
     'max_users': fields.Integer(description='maximum number of users', min=-1, default=-1),
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
-    'alternatives': fields.List(fields.String(attribute='name', description='FQDN', example='example2.com')),
+    'alternatives': fields.List(fields.String(attribute='name', description='FQDN'), example='["example.com"]'),
     'dns_autoconfig': fields.List(fields.String(description='DNS client auto-configuration entry')),
     'dns_mx': fields.String(Description='MX record for domain'),
     'dns_spf': fields.String(Description='SPF record for domain'),
@@ -56,8 +57,7 @@ domain_fields_dns = api.model('DomainDNS', {
 })
 
 manager_fields = api.model('Manager', {
-    'domain_name': fields.String(description='domain managed by manager'),
-    'user_email': fields.String(description='email address of manager'),
+    'managers': fields.List(fields.String(attribute='email', description='manager of domain')),
 })
 
 manager_fields_create = api.model('ManagerCreate', {
@@ -78,16 +78,18 @@ alternative_fields = api.model('AlternativeDomain', {
 class Domains(Resource):
     @dom.doc('list_domain')
     @dom.marshal_with(domain_fields_get, as_list=True, skip_none=True, mask=None)
+    @dom.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
-        """ List domains """
+        """ List all domains """
         return models.Domain.query.all()
 
     @dom.doc('create_domain')
     @dom.expect(domain_fields)
     @dom.response(200, 'Success', response_fields)
     @dom.response(400, 'Input validation exception', response_fields)
+    @dom.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @dom.response(409, 'Duplicate domain/alternative name', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
@@ -131,14 +133,16 @@ class Domains(Resource):
 class Domain(Resource):
 
     @dom.doc('find_domain')
-    @dom.response(200, 'Success', domain_fields)
+    @dom.response(200, 'Success', domain_fields_get)
+    @dom.response(400, 'Input validation exception', response_fields)
+    @dom.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @dom.response(404, 'Domain not found', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, domain):
-        """ Find domain by name """
+        """ Look up the specified domain """
         if not validators.domain(domain):
-            return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
+            return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 200
         domain_found = models.Domain.query.get(domain)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
@@ -148,16 +152,17 @@ class Domain(Resource):
     @dom.expect(domain_fields_update)
     @dom.response(200, 'Success', response_fields)
     @dom.response(400, 'Input validation exception', response_fields)
+    @dom.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @dom.response(404, 'Domain not found', response_fields)
     @dom.response(409, 'Duplicate domain/alternative name', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def patch(self, domain):
-        """ Update an existing domain """
+        """ Update the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
         domain_found = models.Domain.query.get(domain)
-        if not domain:
+        if not domain_found:
             return { 'code': 404, 'message': f'Domain {data["name"]} does not exist'}, 404
         data = api.payload
 
@@ -171,7 +176,7 @@ class Domain(Resource):
                 if not validators.domain(item):
                     return { 'code': 400, 'message': f'Alternative domain {item} is not a valid domain'}, 400
             for item in data['alternatives']:
-                alternative = models.Alternative(name=item, domain_name=data['name'])
+                alternative = models.Alternative(name=item, domain_name=domain)
                 models.db.session.add(alternative)
 
         if 'comment' in data:
@@ -193,15 +198,16 @@ class Domain(Resource):
     @dom.doc('delete_domain')
     @dom.response(200, 'Success', response_fields)
     @dom.response(400, 'Input validation exception', response_fields)
+    @dom.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @dom.response(404, 'Domain not found', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, domain):
-        """ Delete domain """
+        """ Delete the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
         domain_found = models.Domain.query.get(domain)
-        if not domain:
+        if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
         db.session.delete(domain_found)
         db.session.commit()
@@ -212,11 +218,12 @@ class Domain(Resource):
     @dom.doc('generate_dkim')
     @dom.response(200, 'Success', response_fields)
     @dom.response(400, 'Input validation exception', response_fields)
+    @dom.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @dom.response(404, 'Domain not found', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def post(self, domain):
-        """ Generate new DKIM/DMARC keys for domain """
+        """ Generate new DKIM/DMARC keys for the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
         domain_found = models.Domain.query.get(domain)
@@ -229,30 +236,32 @@ class Domain(Resource):
 @dom.route('/<domain>/manager')
 class Manager(Resource):
     @dom.doc('list_managers')
-    @dom.marshal_with(manager_fields, as_list=True, skip_none=True, mask=None)
+    @dom.response(200, 'Success', manager_fields)
     @dom.response(400, 'Input validation exception', response_fields)
+    @dom.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @dom.response(404, 'domain not found', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, domain):
-        """ List managers of domain """
+        """ List all managers of the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        if not domain:
+        domain_found = models.Domain.query.get(domain)
+        if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
-        domain = models.Domain.query.filter_by(name=domain)
-        return domain.managers
+        return marshal(domain_found, manager_fields), 200
 
     @dom.doc('create_manager')
     @dom.expect(manager_fields_create)
     @dom.response(200, 'Success', response_fields)
     @dom.response(400, 'Input validation exception', response_fields)
+    @dom.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @dom.response(404, 'User or domain not found', response_fields)
     @dom.response(409, 'Duplicate domain manager', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def post(self, domain):
-        """ Create a new domain manager """
+        """ Create a new domain manager for the specified domain """
         data = api.payload
         if not validators.email(data['user_email']):
             return {'code': 400, 'message': f'Invalid email address {data["user_email"]}'}, 400
@@ -273,12 +282,14 @@ class Manager(Resource):
 @dom.route('/<domain>/manager/<email>')
 class Domain(Resource):
     @dom.doc('find_manager')
-    @dom.response(200, 'Success', manager_fields)
+    @dom.response(200, 'Success', response_fields)
+    @dom.response(400, 'Input validation exception', response_fields)
+    @dom.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @dom.response(404, 'Manager not found', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, domain, email):
-        """ Find manager by email address """
+        """ Check if the specified user is a manager of the specified domain """
         if not validators.email(email):
             return {'code': 400, 'message': f'Invalid email address {email}'}, 400
         if not validators.domain(domain):
@@ -292,7 +303,7 @@ class Domain(Resource):
         if user in domain.managers:
             for manager in domain.managers:
                 if manager.email == email:
-                    return marshal(manager, manager_fields),200
+                    return { 'code': 200, 'message': f'User {email} is a manager of the domain {domain}'}, 200
         else:
             return { 'code': 404, 'message': f'User {email} is not a manager of the domain {domain}'}, 404
 
@@ -300,10 +311,12 @@ class Domain(Resource):
     @dom.doc('delete_manager')
     @dom.response(200, 'Success', response_fields)
     @dom.response(400, 'Input validation exception', response_fields)
+    @dom.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @dom.response(404, 'Manager not found', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, domain, email):
+        """ Delete the specified manager of the specified domain """
         if not validators.email(email):
             return {'code': 400, 'message': f'Invalid email address {email}'}, 400
         if not validators.domain(domain):
@@ -324,29 +337,31 @@ class Domain(Resource):
 @dom.route('/<domain>/users')
 class User(Resource):
     @dom.doc('list_user_domain')
-    @dom.marshal_with(user.user_fields_get, as_list=True, skip_none=True, mask=None)
+    @dom.response(200, 'Success', user.user_fields_get)
     @dom.response(400, 'Input validation exception', response_fields)
+    @dom.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @dom.response(404, 'Domain not found', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def get(self, domain):
-        """ List users from domain """
+        """ List all the users from the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
         domain_found = models.Domain.query.get(domain)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
-        return  models.User.query.filter_by(domain=domain_found).all()
+        return  marshal(models.User.query.filter_by(domain=domain_found).all(), user.user_fields_get),200
 
 @alt.route('')
 class Alternatives(Resource):
 
     @alt.doc('list_alternative')
     @alt.marshal_with(alternative_fields, as_list=True, skip_none=True, mask=None)
+    @alt.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @alt.doc(security='Bearer')
     @common.api_token_authorization
     def get(self):
-      """ List alternatives """
+      """ List all alternatives """
       return models.Alternative.query.all()
 
 
@@ -354,12 +369,13 @@ class Alternatives(Resource):
     @alt.expect(alternative_fields)
     @alt.response(200, 'Success', response_fields)
     @alt.response(400, 'Input validation exception', response_fields)
+    @alt.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @alt.response(404, 'Domain not found or missing', response_fields)
     @alt.response(409, 'Duplicate alternative domain name', response_fields)
     @alt.doc(security='Bearer')
     @common.api_token_authorization
     def post(self):
-        """ Create new alternative (for domain) """
+        """ Create a new alternative (for domain) """
         data = api.payload
         if not validators.domain(data['name']):
             return { 'code': 400, 'message': f'Alternative domain {data["name"]} is not a valid domain'}, 400
@@ -380,9 +396,13 @@ class Alternatives(Resource):
 class Alternative(Resource):
     @alt.doc('find_alternative')
     @alt.doc(security='Bearer')
+    @alt.response(200, 'Success', alternative_fields)
+    @alt.response(400, 'Input validation exception', response_fields)
+    @alt.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
+    @alt.response(404, 'Alternative not found or missing', response_fields)
     @common.api_token_authorization
     def get(self, alt):
-        """ Find alternative (of domain) """
+        """ Look up the specified alternative (of domain) """
         if not validators.domain(alt):
             return { 'code': 400, 'message': f'Alternative domain {alt} is not a valid domain'}, 400
         alternative = models.Alternative.query.filter_by(name=alt).first()
@@ -393,12 +413,13 @@ class Alternative(Resource):
     @alt.doc('delete_alternative')
     @alt.response(200, 'Success', response_fields)
     @alt.response(400, 'Input validation exception', response_fields)
+    @alt.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @alt.response(404, 'Alternative/Domain not found or missing', response_fields)
     @alt.response(409, 'Duplicate domain name', response_fields)
     @alt.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, alt):
-        """ Delete alternative (for domain) """
+        """ Delete the specified alternative (for domain) """
         if not validators.domain(alt):
             return { 'code': 400, 'message': f'Alternative domain {alt} is not a valid domain'}, 400
         alternative = models.Alternative.query.filter_by(name=alt).scalar()

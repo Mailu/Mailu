@@ -307,6 +307,14 @@ msgstr "Antispam"
 msgid "RSPAMD status page"
 msgstr "RSPAMD Statusseite"
 
+#: mailu/ui/templates/client.html:62
+msgid "If you use an Apple device,"
+msgstr "Falls es sich um ein Apple-Gerät handelt,"
+
+#: mailu/ui/templates/client.html:63
+msgid "click here to auto-configure it."
+msgstr "kann dieses hier automatisch eingerichtet werden."
+
 #: mailu/ui/templates/client.html:8
 msgid "configure your email client"
 msgstr "Informationen zur Einrichtung Ihres Email-Clients"

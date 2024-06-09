@@ -28,7 +28,7 @@
 </thead>
 <tbody>
   {%- for user in domain.users %}
-  <tr{% if not user.enabled %} class="warning"{% endif %}>
+  <tr{% if not user.enabled %} class="text-muted"{% endif %}>
     <td>
       <a href="{{ url_for('.user_edit', user_email=user.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fas fa-pencil-alt"></i></a>&nbsp;
     </td>

@@ -3,7 +3,7 @@
     "IMAP": {
         "host": "{{ FRONT_ADDRESS }}",
         "port": 10143,
-        "secure": 2,
+        "secure": 3,
         "shortLogin": false,
         "ssl": {
             "verify_peer": false,
@@ -20,7 +20,7 @@
     "SMTP": {
         "host": "{{ FRONT_ADDRESS }}",
         "port": 10025,
-        "secure": 2,
+        "secure": 3,
         "shortLogin": false,
         "ssl": {
             "verify_peer": false,
@@ -37,7 +37,7 @@
     "Sieve": {
         "host": "{{ FRONT_ADDRESS }}",
         "port": 14190,
-        "type": 2,
+        "type": 3,
         "shortLogin": false,
         "ssl": {
             "verify_peer": false,

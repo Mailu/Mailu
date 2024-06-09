@@ -17,7 +17,7 @@ This means it is not possible to switch the database back-end used by roundcube 
 
 To switch to a different database back-end:
 
-1. Run config-export to export the configuration. E.g. `docker compose exec admin flask mailu config-export --secrets --output /data/mail-config.yml`
+1. Run config-export to export the configuration. E.g. `docker compose exec admin flask mailu config-export --secrets --output-file /data/mail-config.yml`
 2. Set up your new database server. Refer to the subsequent sections for tips for creating the database.
 3. Modify the database settings (SQLAlchemy database URL) in mailu.env. Refer to the :ref:`configuration guide (link) <db_settings>` for the exact settings.
 4. Start your Mailu deployment.

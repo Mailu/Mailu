@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # get id of running admin container
-admin="$(docker compose ps admin --format=json | jq -r '.[].ID')"
+admin="$(docker compose ps admin --format=json | jq -r '.ID')"
 if [[ -z "${admin}" ]]; then
 	echo "Sorry, can't find running mailu admin container."
 	echo "You need to start this in the path containing your docker-compose.yml."

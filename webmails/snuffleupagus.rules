@@ -71,6 +71,7 @@ sp.disable_function.function("include").drop()
 
 # Prevent `system`-related injections
 sp.disable_function.function("system").param("command").value_r("[$|;&`\\n\\(\\)\\\\]").drop();
+sp.disable_function.function("exec_shell").filename_r("/var/www/snappymail/snappymail/v/[0-9]+\.[0-9]+\.[0-9]+/app/libraries/snappymail/gpg/base.php").allow();
 sp.disable_function.function("shell_exec").param("command").value_r("[$|;&`\\n\\(\\)\\\\]").drop();
 sp.disable_function.function("exec").param("command").value_r("[$|;&`\\n\\(\\)\\\\]").drop();
 # This is **very** broad but doing better is non-straightforward
@@ -91,17 +92,18 @@ sp.disable_function.function("ini_get").filename("/var/www/roundcube/plugins/man
 sp.disable_function.function("ini_get").param("option").value("allow_url_fopen").drop();
 sp.disable_function.function("ini_get").param("option").value("open_basedir").drop();
 sp.disable_function.function("ini_get").param("option").value_r("suhosin").drop();
+sp.disable_function.function("function_exists").filename_r("/var/www/snappymail/snappymail/v/[0-9]+\.[0-9]+\.[0-9]+/app/libraries/snappymail/gpg/base.php").allow();
 sp.disable_function.function("function_exists").param("function").value("eval").drop();
 sp.disable_function.function("function_exists").param("function").value("exec").drop();
 sp.disable_function.function("function_exists").param("function").value("system").drop();
 sp.disable_function.function("function_exists").param("function").value("shell_exec").drop();
 sp.disable_function.function("function_exists").param("function").value("proc_open").drop();
 sp.disable_function.function("function_exists").param("function").value("passthru").drop();
+sp.disable_function.function("is_callable").filename_r("/var/www/snappymail/snappymail/v/[0-9]+\.[0-9]+\.[0-9]+/app/libraries/snappymail/gpg/base.php").allow();
 sp.disable_function.function("is_callable").param("value").value("eval").drop();
 sp.disable_function.function("is_callable").param("value").value("exec").drop();
 sp.disable_function.function("is_callable").param("value").value("system").drop();
 sp.disable_function.function("is_callable").param("value").value("shell_exec").drop();
-sp.disable_function.function("is_callable").filename_r("^/var/www/snappymail/snappymail/v/[0-9]+\.[0-9]+\.[0-9]+/app/libraries/snappymail/pgp/gpg\.php$").param("value").value("proc_open").allow();
 sp.disable_function.function("is_callable").param("value").value("proc_open").drop();
 sp.disable_function.function("is_callable").param("value").value("passthru").drop();
 

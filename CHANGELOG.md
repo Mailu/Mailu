@@ -1,10 +1,10 @@
 Changelog
 =========
 
-2024.03.0 - 2024-03
+2024.06.0 - 2024-06
 -------------------
 
-For full details see the [releases page](https://mailu.io/2024.03/releases.html)
+For full details see the [releases page](https://mailu.io/2024.06/releases.html)
 
 For the upgrade create a new docker-compose.yml file and mailu.env file via setup.mailu.io. After that any old settings can be reapplied to mailu.env. Before making any changes, carefully read the [configuration reference](https://mailu.io/2.0/configuration.html). New settings have been introduced and some settings have been removed. Multiple changes have been made to the docker-compose.yml file and mailu.env file. If Tika is enabled, then 1GB to 2GB of extra memory is required.
 
@@ -22,7 +22,7 @@ find /mailu/mail -type d -name xapian-indexes -prune -exec rm -r {} \+
 Via docker compose run (to force reindexing):
 ```
 docker compose exec imap doveadm fts rescan -A
-docker compose exec imap doveadm user '*'|while read u; do docker compose exec imap doveadm index -u $u '*'; done
+docker compose exec imap doveadm user '*'|while read u; do echo "re-indexing $u";docker compose exec -T imap doveadm index -u $u '*'; done
 ```
 
 Check if the the hardened memory allocator can be enabled.
@@ -38,7 +38,7 @@ LD_PRELOAD=/usr/lib/libhardened_malloc.so
 Recreate all docker containers (`docker compose up -d`) for the changes to be propagated.
 
 
-Please note that once you have upgraded to 2024.03, that you won't be able to roll-back to earlier versions.
+Please note that once you have upgraded to 2024.06, that you won't be able to roll-back to earlier versions.
 
 
 - Features: Add support for managesieve ([#81](https://github.com/Mailu/Mailu/issues/81))

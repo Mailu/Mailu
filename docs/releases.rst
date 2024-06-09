@@ -1,31 +1,34 @@
 Release notes
 =============
 
-Mailu 2024.03 - 2024-03
+Mailu 2024.06 - 2024-06
 -----------------------
 
-Mailu 2024.03 is available. This release contains new features and many bug fixes. Please at least read the section `upgrading` before attempting to upgrade to the new release.
+Mailu 2024.06 is available. This release contains new features and many bug fixes. Please at least read the section `upgrading` before attempting to upgrade to the new release.
 
 To make clear you can only go forward with upgrades, we have changed the version naming scheme to Year.Month.Minor.
-It is only possible to downgrade between minor versions (e.g. 2024.03.3 to 2024.03.1).
+It is only possible to downgrade between minor versions (e.g. 2024.06.3 to 2024.06.1).
 
 Highlights
 ``````````
 
-Managieve sieve support
-Previously the sieve filters could only be edited via the webmail client. It is now also possible to use an external sieve client for manageming the sieve rules. Configure the sieve client to connect to Mailu on the default sieve port 4190.
+Managesieve sieve support
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It is now also possible to use `an external sieve client <http://sieve.info/clients>`_ for managing sieve rules using port 4190. Previously sieve filters could only be edited through webmails.
 
 RESTful API enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^
 The User interface is enhanced with the quota bytes used (quota_bytes_used) attribute. This attribute states the usage (in bytes) of the mailbox. In combination with the attribute quota_bytes, it is possible to check how much storage an user has left via the RESTful API.
 
-The new `token` endpoint allows the management of authentication tokens. It is recommened to create authentication tokens for all users and configure the email clients to use these authentication tokens for connecting to Mailu.
+The new `token` endpoint allows the management of authentication tokens. It is **strongly** recommended to create authentication tokens for all users and to configure email clients to use these authentication tokens for connecting to Mailu instead of user passwords. Tokens are not subject to rate-limiting and are verified server-side in a less resource intensive way. Their usage can be enforced using the newly introduced `AUTH_REQUIRE_TOKENS <https://mailu.io/master/configuration.html#advanced-settings>`_ setting.
 
 Force password change
 ^^^^^^^^^^^^^^^^^^^^^
-A setting is introduced to force an user to change its password. After changing the password, all sessions are invalidated.
+This new feature has been introduced to coerce a user into changing his password. When a password is changed, all associated sessions are invalidated.
 
 This setting can be configured via:
+
 * Admin webui
 * Mailu cli command `config-import`
 * RESTful API via the User endpoint and attribute `change_pw_next_login`
@@ -34,9 +37,11 @@ Translations
 ^^^^^^^^^^^^
 
 The following translations for the Admin webui have been added:
-* Chinese
-* Persion (a.k.a Farsi)
-* Ukrainian
+
+* Chinese - thanks to `tryweb <https://github.com/tryweb>`_ and `darkclip <https://github.com/darkclip>`_
+* Persion - (a.k.a Farsi) `hosni <https://github.com/hosni>`_
+* Ukrainian - thanks to `Prosta4okua <https://github.com/Prosta4okua>`_
+* Belarusian - thanks to `spoooyders <https://github.com/spoooyders>`_
 
 All language translations are handled by the community. If you see a translation error for your native language, consider submitting a pull request to address this.
 
@@ -50,11 +55,11 @@ The roundcube spellchecker can be configured to support different languages than
 
 Improved mailbox indexer and full attachment indexing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The dovecot indexer indexes all emails for the server-side search functionality. It is used when searching via the webmail client. In email clients it might be required to enable server-side searching.
+Full Text Search has now been improved and server-side search has been enabled by default on webmails. Other email clients may need to be reconfigured to ensure searches are performed server-side.
 
 The dovecot indexer has been switched from fts-xapian to fts-flatcurve. In the future this will be the new default indexer for dovecot. This indexer is quicker and results in smaller index files.
 
-Apache Tika has been added to Mailu to add support for attachments indexing. As a result the server-side search functionality does not only search through emails, but also through the attachments of emails.
+Apache Tika has been added to Mailu to add support for attachments indexing. The server-side search functionality now crawls through both emails and their attachments (including office documents, PDFs, images via OCR).
 
 Refer to `FULL_TEXT_SEARCH` in the `configuration reference` to enable indexing for non-English languages.
 
@@ -71,15 +76,14 @@ Via docker compose run (to force reindexing):
 .. code-block:: bash
 
     docker compose exec imap doveadm fts rescan -A
-    docker compose exec imap doveadm user '*'|while read u; do docker compose exec imap doveadm index -u $u '*'; done
+    docker compose exec imap doveadm user '*'|while read u; do echo "re-indexing $u";docker compose exec -T imap doveadm index -u $u '*'; done
 
 
 Introduction AUTH_REQUIRE_TOKENS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The environment variable `AUTH_REQUIRE_TOKENS` has been introduced. This setting can be enabled to force  email clients to use authentication tokens (instead of passwords) for authenticating to Mailu. Note that authentication tokens can now also be generated via the RESTful API.
 
-It is recommended to use authentication tokens instead of passwords for connecting email clients to Mailu.
-
+It is recommended to use authentication tokens instead of passwords for connecting email clients to Mailu as verifying them is less resource intensive server-side and they are not subject to rate limits (since they cannot be brute-forced online by a potential attacker).
 
 Change in behaviour
 ```````````````````
@@ -90,26 +94,6 @@ The setting POSTFIX_LOG_FILE and its functionality has been removed from Mailu. 
 
 The new FAQ entry `How can I view and export the logs of a Mailu container?` describes how log files can be viewed via journald. It also provides instructions for how to install and configure rsyslogd for saving container logs to file system (including log rotation).
 
-The hardened malloc is disabled by default
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Mailu is shipped with a hardened memory allocator. This is a security-focused general purpose memory allocator which provides substantial hardening against heap corruption vulnerabilities.
-
-It can only be enabled when the used CPU supports Advanced Vector Extensions (AVX2 on x86_64, lrcpc on ARM64).
-
-After upgrading Mailu, check the logs of the admin container (`docker compose logs admin`. If it shows the following line, then it can be enabled:
-
-.. code-block:: bash
-
-    WARNING:root:Your CPU has Advanced Vector Extensions available, we recommend you enable hardened-malloc earlier in the boot process by adding LD_PRELOAD=/usr/lib/libhardened_malloc.so to your mailu.env
-
-
-**Only** if the above message is logged, then the hardened malloc can be enabled by adding the following line to `mailu.env`.
-
-.. code-block:: bash
-
-    LD_PRELOAD=/usr/lib/libhardened_malloc.so
-
-Recreate all docker containers (`docker compose up -d`) for the changes to be propagated.
 
 Emails marked by clamav are rejected now. These used to be silently dropped
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -143,7 +127,7 @@ Via docker compose run (to force reindexing):
 .. code-block:: bash
 
     docker compose exec imap doveadm fts rescan -A
-    docker compose exec imap doveadm user '*'|while read u; do docker compose exec imap doveadm index -u $u '*'; done
+    docker compose exec imap doveadm user '*'|while read u; do echo "re-indexing $u";docker compose exec -T imap doveadm index -u $u '*'; done
 
 
 Enabled the hardened memory allocator

@@ -51,7 +51,7 @@ On the domain details page a download option is added for downloading the zone f
 
 Roundcube spellchecker
 ^^^^^^^^^^^^^^^^^^^^^^
-The roundcube spellchecker can be configured to support different languages than English. For how to configure alternative languages, refer to the FAQ entry: `How can I add more languages to roundcube's spellchecker`.
+The roundcube spellchecker can be configured to support languages other than English. To configure alternative languages, please refer to the FAQ entry: `How can I add more languages to roundcube's spellchecker`.
 
 Improved mailbox indexer and full attachment indexing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

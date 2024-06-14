@@ -1,7 +1,11 @@
 type = "controller";
 bind_socket = "*:11334";
 password = "mailu";
-secure_ip = "{{ SUBNET }}";
+{% for e in SUBNET.split(",") %}
+secure_ip = "{{ e }}";
+{% endfor %}
 {%- if SUBNET6 %}
-secure_ip = "{{ SUBNET6 }}";
+{% for e in SUBNET6.split(",") %}
+secure_ip = "{{ e }}";
+{% endfor %}
 {%- endif %}

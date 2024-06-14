@@ -11,9 +11,9 @@ import sqlalchemy.exc
 def dovecot_passdb_dict(user_email):
     user = models.User.query.get(user_email) or flask.abort(404)
     allow_nets = []
-    allow_nets.append(app.config["SUBNET"])
+    allow_nets.extend(app.config["SUBNET"].split(","))
     if app.config["SUBNET6"]:
-        allow_nets.append(app.config["SUBNET6"])
+        allow_nets.extend(app.config["SUBNET6"].split(","))
     return flask.jsonify({
         "password": None,
         "nopassword": "Y",

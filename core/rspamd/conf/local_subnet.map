@@ -1,2 +1,6 @@
-{{ SUBNET }}
-{{ SUBNET6 }}
+{% for e in SUBNET.split(",") %}
+{{ e }}
+{% endfor %}
+{% for e in SUBNET6.split(",") %}
+{{ e }}
+{% endfor %}

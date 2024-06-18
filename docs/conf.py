@@ -38,8 +38,8 @@ html_context = {
     'github_version': version,
     'stable_version': '2024.06',
     'versions': [
-        ('2.0', '/2.0/'),
         ('2024.06', '/2024.06/'),
+        ('2.0', '/2.0/'),
         ('master', '/master/')
     ],
     'conf_py_path': '/docs/'

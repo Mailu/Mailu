@@ -1,1 +1,0 @@
-Authentication failed for email clients when the password contained a non latin-1 character.

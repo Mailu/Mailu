@@ -1,6 +1,174 @@
 Release notes
 =============
 
+Mailu 2024.06 - 2024-06
+-----------------------
+
+Mailu 2024.06 is available. This release contains new features and many bug fixes. Please at least read the section `upgrading` before attempting to upgrade to the new release.
+
+To make clear you can only go forward with upgrades, we have changed the version naming scheme to Year.Month.Minor.
+It is only possible to downgrade between minor versions (e.g. 2024.06.3 to 2024.06.1).
+
+Highlights
+``````````
+
+Managesieve sieve support
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It is now also possible to use `an external sieve client <http://sieve.info/clients>`_ for managing sieve rules using port 4190. Previously sieve filters could only be edited through webmails.
+
+RESTful API enhancements
+^^^^^^^^^^^^^^^^^^^^^^^^
+The User interface is enhanced with the quota bytes used (quota_bytes_used) attribute. This attribute states the usage (in bytes) of the mailbox. In combination with the attribute quota_bytes, it is possible to check how much storage an user has left via the RESTful API.
+
+The new `token` endpoint allows the management of authentication tokens. It is **strongly** recommended to create authentication tokens for all users and to configure email clients to use these authentication tokens for connecting to Mailu instead of user passwords. Tokens are not subject to rate-limiting and are verified server-side in a less resource intensive way. Their usage can be enforced using the newly introduced `AUTH_REQUIRE_TOKENS <https://mailu.io/master/configuration.html#advanced-settings>`_ setting.
+
+Force password change
+^^^^^^^^^^^^^^^^^^^^^
+This new feature has been introduced to coerce a user into changing his password. When a password is changed, all associated sessions are invalidated.
+
+This setting can be configured via:
+
+* Admin webui
+* Mailu cli command `config-import`
+* RESTful API via the User endpoint and attribute `change_pw_next_login`
+
+Translations
+^^^^^^^^^^^^
+
+The following translations for the Admin webui have been added:
+
+* Chinese - thanks to `tryweb <https://github.com/tryweb>`_ and `darkclip <https://github.com/darkclip>`_
+* Persion - (a.k.a Farsi) `hosni <https://github.com/hosni>`_
+* Ukrainian - thanks to `Prosta4okua <https://github.com/Prosta4okua>`_
+* Belarusian - thanks to `spoooyders <https://github.com/spoooyders>`_
+
+All language translations are handled by the community. If you see a translation error for your native language, consider submitting a pull request to address this.
+
+Download zonefile on domain details page
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+On the domain details page a download option is added for downloading the zone file. This zone file can be used to easily import all Mailu DNS settings.
+
+Roundcube spellchecker
+^^^^^^^^^^^^^^^^^^^^^^
+The roundcube spellchecker can be configured to support languages other than English. To configure alternative languages, please refer to the FAQ entry: `How can I add more languages to roundcube's spellchecker`.
+
+Improved mailbox indexer and full attachment indexing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Full Text Search has now been improved and server-side search has been enabled by default on webmails. Other email clients may need to be reconfigured to ensure searches are performed server-side.
+
+The dovecot indexer has been switched from fts-xapian to fts-flatcurve. In the future this will be the new default indexer for dovecot. This indexer is quicker and results in smaller index files.
+
+Apache Tika has been added to Mailu to add support for attachments indexing. The server-side search functionality now crawls through both emails and their attachments (including office documents, PDFs, images via OCR).
+
+Refer to `FULL_TEXT_SEARCH` in the `configuration reference` to enable indexing for non-English languages.
+
+After upgrading, the new indexes are not automatically created. To create these after upgrading Mailu:
+
+From `bash` run:
+
+.. code-block:: bash
+
+    find /mailu/mail -type d -name xapian-indexes -prune -exec rm -r {} \+
+
+Via docker compose run (to force reindexing):
+
+.. code-block:: bash
+
+    docker compose exec imap doveadm fts rescan -A
+    docker compose exec imap doveadm user '*'|while read u; do echo "re-indexing $u";docker compose exec -T imap doveadm index -u $u '*'; done
+
+
+Introduction AUTH_REQUIRE_TOKENS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The environment variable `AUTH_REQUIRE_TOKENS` has been introduced. This setting can be enabled to force  email clients to use authentication tokens (instead of passwords) for authenticating to Mailu. Note that authentication tokens can now also be generated via the RESTful API.
+
+It is recommended to use authentication tokens instead of passwords for connecting email clients to Mailu as verifying them is less resource intensive server-side and they are not subject to rate limits (since they cannot be brute-forced online by a potential attacker).
+
+Improved PROXY PROTOCOL and open ports settings
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It is now possible to explicitly configure what ports must use the PROXY PROTOCOL. Refer to PROXY_PROTOCOL in the configuration reference for more information.
+
+The newly introduced PORTS variable can be used to configure what service should be enabled. efer to PORTS in the configuration reference for more information.
+
+
+Change in behaviour
+```````````````````
+
+POSTFIX_LOG_FILE removed
+^^^^^^^^^^^^^^^^^^^^^^^^
+The setting POSTFIX_LOG_FILE and its functionality has been removed from Mailu. To log to file (for any container) it is possible to use journald and rsyslogd.
+
+The new FAQ entry `How can I view and export the logs of a Mailu container?` describes how log files can be viewed via journald. It also provides instructions for how to install and configure rsyslogd for saving container logs to file system (including log rotation).
+
+
+Emails marked by clamav are rejected now. These used to be silently dropped
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In the past emails marked by clamav (the virusscanner) were dropped. Now these emails are rejected. That means that the person who sent the email receives a reply that the email was rejected due to the email being flagged by clamav.
+
+STARTTLS ports disabled by default
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+By default the STARTTLS ports are disabled. That means that the ports for the following protocols are closed:
+
+* IMAP (143)
+* POP3 (110)
+* Submission (587)
+
+For more information why only enabled implicit TLS is safer than also allowing opportunistic TLS, please refer to `https://nostarttls.secvuln.info <https://nostarttls.secvuln.info/>`_ .
+To re-enable these ports, use the PORTS variable. For more information refer to the configuration reference.
+
+
+Upgrading
+`````````
+
+Before upgrading
+^^^^^^^^^^^^^^^^
+Via setup.mailu.io generate the new docker-compose.yml file and mailu.env file. If tika is enabled (enabling searching through attachments), then 1 to 2GB of extra RAM memory is required. Re-add any customizations in mailu.env. Before making changes to mailu.env, check the `configuration reference` page on mailu.io. Check if the setting is still in use before adding it to the new `mailu.env` file.
+
+If POSTFIX_LOG_FILE was used, refer to the new FAQ entry `How can I view and export the logs of a Mailu container?` on how to configure similar functionality. POSTFIX_LOG_FILE is deprecated. Mailu will ignore this setting.
+
+If a reverse proxy is used on the same host, consider switching to traefik using the updated instructions. Refer to `Using an external reverse proxy` on mailu.io. With these updated instructions Mailu will handle requesting all certificates. It is not required anymore to copy certificates from the reverse proxy to Mailu.
+
+After upgrading
+^^^^^^^^^^^^^^^
+After upgrading Mailu, perform the followings tasks.
+
+Recreate the dovecot indexes:
+*****************************
+From `bash` run:
+
+.. code-block:: bash
+
+    find /mailu/mail -type d -name xapian-indexes -prune -exec rm -r {} \+
+
+Via docker compose run (to force reindexing):
+
+.. code-block:: bash
+
+    docker compose exec imap doveadm fts rescan -A
+    docker compose exec imap doveadm user '*'|while read u; do echo "re-indexing $u";docker compose exec -T imap doveadm index -u $u '*'; done
+
+
+Enabled the hardened memory allocator
+*************************************
+View the admin container logs via `docker compose logs admin`
+
+.. code-block:: bash
+
+    WARNING:root:Your CPU has Advanced Vector Extensions available, we recommend you enable hardened-malloc earlier in the boot process by adding LD_PRELOAD=/usr/lib/libhardened_malloc.so to your mailu.env
+
+
+**Only** if the above message is logged, then the hardened malloc can be enabled by adding the following line to `mailu.env`.
+
+.. code-block:: bash
+
+    LD_PRELOAD=/usr/lib/libhardened_malloc.so
+
+Recreate all docker containers (`docker compose up -d`) for the changes to be propagated.
+
+
+
 Mailu 2.0 - 2023-04-03
 ----------------------
 

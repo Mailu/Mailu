@@ -14,7 +14,7 @@ def postfix_dane_map(domain_name):
 
 @internal.route("/postfix/domain/<domain_name>")
 def postfix_mailbox_domain(domain_name):
-    if re.match("^\[.*\]$", domain_name):
+    if re.match(r'^\[.*\]$', domain_name):
         return flask.abort(404)
     domain = models.Domain.query.get(domain_name) or \
              models.Alternative.query.get(domain_name) or \
@@ -39,7 +39,7 @@ def postfix_alias_map(alias):
 
 @internal.route("/postfix/transport/<path:email>")
 def postfix_transport(email):
-    if email == '*' or re.match("(^|.*@)\[.*\]$", email):
+    if email == '*' or re.match(r'(^|.*@)\[.*\]$', email):
         return flask.abort(404)
     _, domain_name = models.Email.resolve_domain(email)
     relay = models.Relay.query.get(domain_name) or flask.abort(404)

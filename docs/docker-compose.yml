@@ -1,7 +1,6 @@
 # This file is used to test the mailu/docs website
 # Deployment files can be found on github.com/mailu/infra
 
-version: '3'
 
 services:
   docs:

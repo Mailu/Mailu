@@ -1,6 +1,5 @@
 # WARNING: this file is being deprecated over the new setup utility, found at https://setup.mailu.io
 
-version: '2'
 
 services:
 

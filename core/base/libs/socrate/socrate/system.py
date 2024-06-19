@@ -33,7 +33,7 @@ class LogFilter(object):
     def __init__(self, stream, re_patterns):
         self.stream = stream
         if isinstance(re_patterns, list):
-            self.pattern = re.compile('|'.join([f'(?:{pattern})' for pattern in re_patterns]))
+            self.pattern = re.compile('|'.join([fr'(?:{pattern})' for pattern in re_patterns]))
         elif isinstance(re_patterns, str):
             self.pattern = re.compile(re_patterns)
         else:

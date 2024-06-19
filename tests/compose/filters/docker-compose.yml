@@ -2,7 +2,6 @@
 # Please read the documentation before attempting any change.
 # Generated for compose flavor
 
-version: '3.6'
 
 services:
 

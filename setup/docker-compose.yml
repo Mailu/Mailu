@@ -1,7 +1,6 @@
 # This file is used to test the mailu/setup utility
 # Deployment files can be found on github.com/mailu/infra
 
-version: '3.6'
 
 services:
   redis:

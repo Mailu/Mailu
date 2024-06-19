@@ -3,8 +3,6 @@
 # Please read the documentation before attempting any change.
 # Generated for {{ flavor }} flavor
 
-version: '2.2'
-
 services:
 
   # External dependencies

@@ -76,7 +76,7 @@ PROTO_ALL_BUT_HTTP=PROTO_MAIL.copy()
 PROTO_ALL_BUT_HTTP.extend(['443'])
 PROTO_ALL=PROTO_ALL_BUT_HTTP.copy()
 PROTO_ALL.extend(['80'])
-for item in args.get('PROXY_PROTOCOL', None).split(','):
+for item in args.get('PROXY_PROTOCOL', '').split(','):
     if item.isdigit():
         args[f'PROXY_PROTOCOL_{item}']=True
     elif item == 'mail':
@@ -85,6 +85,8 @@ for item in args.get('PROXY_PROTOCOL', None).split(','):
         for p in PROTO_ALL_BUT_HTTP: args[f'PROXY_PROTOCOL_{p}']=True
     elif item == 'all':
         for p in PROTO_ALL: args[f'PROXY_PROTOCOL_{p}']=True
+    elif item == '':
+        pass
     else:
         log.error(f'Not sure what to do with {item} in PROXY_PROTOCOL ({args.get("PROXY_PROTOCOL")})')
 

@@ -259,16 +259,16 @@ class Domain(Base):
         """ return list of auto configuration records (RFC6186) """
         hostname = app.config['HOSTNAME']
         protocols = [
-            ('imap', 143, 20),
-            ('pop3', 110, 20),
-            ('submission', 587, 20),
+            ('imap', 143, 20 if 143 in app.config['PORTS'].split(',') else 0),
+            ('pop3', 110, 20 if 110 in app.config['PORTS'].split(',') else 0),
+            ('submission', 587, 20 if 587 in app.config['PORTS'].split(',') else 0),
         ]
         if app.config['TLS_FLAVOR'] != 'notls':
             protocols.extend([
-                ('autodiscover', 443, 10),
-                ('submissions', 465, 10),
-                ('imaps', 993, 10),
-                ('pop3s', 995, 10),
+                ('autodiscover', 443, 10 if 443 in app.config['PORTS'].split(',') else 0),
+                ('submissions', 465, 10 if 465 in app.config['PORTS'].split(',') else 0),
+                ('imaps', 993, 10 if 993 in app.config['PORTS'].split(',') else 0),
+                ('pop3s', 995, 10 if 995 in app.config['PORTS'].split(',') else 0),
             ])
 
         return [

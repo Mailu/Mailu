@@ -118,13 +118,13 @@ def clean_env():
     PROTO_ALL.extend(['80'])
     for item in os.environ.get('PROXY_PROTOCOL', '').split(','):
         if item.isdigit():
-            os.environ[f'PROXY_PROTOCOL_{item}']=True
+            os.environ[f'PROXY_PROTOCOL_{item}']='True'
         elif item == 'mail':
-            for p in PROTO_MAIL: os.environ[f'PROXY_PROTOCOL_{p}']=True
+            for p in PROTO_MAIL: os.environ[f'PROXY_PROTOCOL_{p}']='True'
         elif item == 'all-but-http':
-            for p in PROTO_ALL_BUT_HTTP: os.environ[f'PROXY_PROTOCOL_{p}']=True
+            for p in PROTO_ALL_BUT_HTTP: os.environ[f'PROXY_PROTOCOL_{p}']='True'
         elif item == 'all':
-            for p in PROTO_ALL: os.environ[f'PROXY_PROTOCOL_{p}']=True
+            for p in PROTO_ALL: os.environ[f'PROXY_PROTOCOL_{p}']='True'
         elif item == '':
             pass
         else:
@@ -135,12 +135,12 @@ def clean_env():
     for item in os.environ.get('PORTS', ALL_PORTS).split(','):
         if item in PORTS_REQUIRING_TLS and os.environ['TLS_FLAVOR'] == 'notls':
             continue
-        os.environ[f'PORT_{item}']=True
+        os.environ[f'PORT_{item}']='True'
 
     if os.environ['TLS_FLAVOR'] != 'notls':
         for item in os.environ.get('TLS', ALL_PORTS).split(','):
             if item in PORTS_REQUIRING_TLS:
-                os.environ[f'TLS_{item}']=True
+                os.environ[f'TLS_{item}']='True'
 
 def drop_privs_to(username='mailu'):
     pwnam = getpwnam(username)

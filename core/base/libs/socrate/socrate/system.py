@@ -133,11 +133,11 @@ def clean_env():
     PORTS_REQUIRING_TLS=['443', '465', '993', '995']
     ALL_PORTS='25,80,443,465,993,995,4190'
     for item in os.environ.get('PORTS', ALL_PORTS).split(','):
-        if item in PORTS_REQUIRING_TLS and os.environ['TLS_FLAVOR'] == 'notls':
+        if item in PORTS_REQUIRING_TLS and os.environ.get('TLS_FLAVOR','') == 'notls':
             continue
         os.environ[f'PORT_{item}']='True'
 
-    if os.environ['TLS_FLAVOR'] != 'notls':
+    if os.environ.get('TLS_FLAVOR', '') != 'notls':
         for item in os.environ.get('TLS', ALL_PORTS).split(','):
             if item in PORTS_REQUIRING_TLS:
                 os.environ[f'TLS_{item}']='True'

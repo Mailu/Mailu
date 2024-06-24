@@ -280,7 +280,7 @@ The ``TZ`` sets the timezone Mailu will use. The timezone naming convention usua
 
 
 The ``PORTS`` (default: '25,80,443,465,993,995,4190') setting determines which services should be enabled. It is a comma delimited list of ports numbers.
-If you need to re-enable IMAP, POP3 and Submission, you can append '110,143,587' to that list.
+If you need to re-enable IMAP, POP3 and Submission, you can append '110,143,587' to that list. Please note that ports 25,465 and 993 cannot be disabled.
 
 The ``PROXY_PROTOCOL`` (default: unset) setting allows the the front container to receive TCP and HTTP connections with
 the `PROXY protocol`_ (originally introduced in HAProxy, now also configurable in other proxy servers).

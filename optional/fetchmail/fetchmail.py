@@ -60,7 +60,7 @@ def run(debug):
                 protocol=fetch["protocol"],
                 host=escape_rc_string(fetch["host"]),
                 port=fetch["port"],
-                smtphost=f'{os.environ["FRONT_ADDRESS"]}' if fetch['scan'] else f'{os.environ["FRONT_ADDRESS"]}/2525',
+                smtphost=f'{os.environ["HOSTNAMES"].split(",")[0]}' if fetch['scan'] and os.environ.get('PROXY_PROTOCOL_25', False) else f'{os.environ["FRONT_ADDRESS"]}' if fetch['scan'] else f'{os.environ["FRONT_ADDRESS"]}/2525',
                 username=escape_rc_string(fetch["username"]),
                 password=escape_rc_string(fetch["password"]),
                 options=options,

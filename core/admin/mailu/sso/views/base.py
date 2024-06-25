@@ -130,6 +130,7 @@ https://mailu.io/master/configuration.html#header-authentication-using-an-extern
 def _proxy():
     proxy_ip = flask.request.headers.get('X-Forwarded-By', flask.request.remote_addr)
     ip = ipaddress.ip_address(proxy_ip)
+    client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
     if not any(ip in cidr for cidr in app.config['PROXY_AUTH_WHITELIST']):
         flask.current_app.logger.error(f'Login failed by proxy - not on whitelist: from {client_ip} through {flask.request.remote_addr}.')
         return flask.abort(500, '%s is not on PROXY_AUTH_WHITELIST' % proxy_ip)

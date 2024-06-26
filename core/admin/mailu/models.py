@@ -257,23 +257,23 @@ class Domain(Base):
     @cached_property
     def dns_autoconfig(self):
         """ return list of auto configuration records (RFC6186) """
-        ports = {port.strip() for port in app.config['PORTS'].split(',')}
+        ports = {int(port.strip()) for port in app.config['PORTS'].split(',')}.union({465, 993})
         hostname = app.config['HOSTNAME']
         protocols = [
-            ('imap', 143, 20 if '143' in ports else 0),
-            ('pop3', 110, 20 if '110' in ports else 0),
-            ('submission', 587, 20 if '587' in ports else 0),
+            ('imap', 143, 20),
+            ('pop3', 110, 20),
+            ('submission', 587, 20),
         ]
         if app.config['TLS_FLAVOR'] != 'notls':
             protocols.extend([
-                ('autodiscover', 443, 10 if '443' in ports else 0),
+                ('autodiscover', 443, 10),
                 ('submissions', 465, 10),
                 ('imaps', 993, 10),
-                ('pop3s', 995, 10 if '995' in ports else 0),
+                ('pop3s', 995, 10),
             ])
 
         return [
-            f'_{proto}._tcp.{self.name}. 600 IN SRV {prio} 1 {port} {hostname}.'
+            f'_{proto}._tcp.{self.name}. 600 IN SRV {prio} 1 {port} {hostname}.' if port in ports else f'_{proto}._tcp.{self.name}. 600 IN SRV 0 0 0 .'
             for proto, port, prio
             in protocols
         ]+[f'autoconfig.{self.name}. 600 IN CNAME {hostname}.']

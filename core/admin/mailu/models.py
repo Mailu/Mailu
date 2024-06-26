@@ -17,6 +17,7 @@ import time
 import logging
 import os
 import smtplib
+import re
 import idna
 import dns.resolver
 import dns.exception
@@ -337,6 +338,46 @@ class Domain(Base):
             return any(
                 rset.exchange.to_text().rstrip('.') in hostnames
                 for rset in dns.resolver.resolve(self.name, 'MX')
+            )
+        except dns.exception.DNSException:
+            return False
+
+    def check_spf(self):
+        """ checks if SPF record for domain points to mailu host """
+        try:
+            hostnames = app.config['HOSTNAMES'].replace(',', '|')
+            return any(
+                re.search(f'^"v=spf1 mx a:{hostnames} [?+-~]all"$', rset.to_text())
+                for rset in dns.resolver.resolve(self.name, 'TXT')
+            )
+        except dns.exception.DNSException:
+            return False
+
+    def check_dkim(self):
+        """ checks if DKIM record for domain points to mailu host """
+        try:
+            selector = app.config['DKIM_SELECTOR']
+            return any(
+                rset.to_text() == f'"v=DKIM1; k=rsa; p={self.dkim_publickey}"'
+                for rset in dns.resolver.resolve(f'{selector}._domainkey.{self.name}.', 'TXT')
+            )
+        except dns.exception.DNSException:
+            return False
+
+    def check_dmarc(self):
+        """ checks if DMARC record for domain points to mailu host """
+        domain = app.config['DOMAIN']
+        try:
+            return (
+                    any(
+                        rset.to_text().startswith('"v=DMARC1;')
+                        for rset in dns.resolver.resolve(f'_dmarc.{self.name}.', 'TXT')
+                    )
+                    and
+                    any(
+                        rset.to_text() == '"v=DMARC1"'
+                        for rset in dns.resolver.resolve(f'{self.name}._report._dmarc.{domain}.', 'TXT')
+                    )
             )
         except dns.exception.DNSException:
             return False

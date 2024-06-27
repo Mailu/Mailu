@@ -257,6 +257,7 @@ class Domain(Base):
     @cached_property
     def dns_autoconfig(self):
         """ return list of auto configuration records (RFC6186) """
+        ports = {int(port.strip()) for port in app.config['PORTS'].split(',')}.union({465, 993})
         hostname = app.config['HOSTNAME']
         protocols = [
             ('imap', 143, 20),
@@ -272,7 +273,7 @@ class Domain(Base):
             ])
 
         return [
-            f'_{proto}._tcp.{self.name}. 600 IN SRV {prio} 1 {port} {hostname}.'
+            f'_{proto}._tcp.{self.name}. 600 IN SRV {prio} 1 {port} {hostname}.' if port in ports else f'_{proto}._tcp.{self.name}. 600 IN SRV 0 0 0 .'
             for proto, port, prio
             in protocols
         ]+[f'autoconfig.{self.name}. 600 IN CNAME {hostname}.']

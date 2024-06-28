@@ -1,0 +1,92 @@
+digraph mailu {
+    label = "Mailu";
+    fontname = "arial";
+    
+    node [shape = box; fontname = "arial"; fontsize = 8; style = filled; color = "#d3edea";];
+    splines = "compound";
+    // node [shape = "box"; fontsize = "10";];
+    edge [fontsize = "8";];
+    
+    # Components
+    internet [label = "Internet";];
+    proxy [label = "Optional proxy"; shape = "polygon"];
+    front [label = "Front";];
+    admin [label = "Admin";];
+    smtp [label = "SMTP";];
+    redis [label = "Redis";];
+    antispam [label = "Antispam";];
+    antivirus [label = "Anti-Virus";];
+    imap [label = "IMAP";];
+    webdav [label = "WebDAV";];
+    webmail [label = "Webmail";];
+    fetchmail [label = "Fetchmail";];
+    oletools [label = "Oletools"];
+    fts_attachments [label = "Tika"];
+    # proxy from internet
+    internet -> proxy [label = "25/tcp";];
+    internet -> proxy [label = "80/tcp";];
+    internet -> proxy [label = "443/tcp";];
+    internet -> proxy [label = "465/tcp";];
+    internet -> proxy [label = "587/tcp";];
+    internet -> proxy [label = "110/tcp";];
+    internet -> proxy [label = "995/tcp";];
+    internet -> proxy [label = "143/tcp";];
+    internet -> proxy [label = "993/tcp";];
+    internet -> proxy [label = "4190/tcp";];
+    
+    # Front from proxy
+    proxy -> front [label = "25/tcp";];
+    proxy -> front [label = "80/tcp";];
+    proxy -> front [label = "443/tcp";];
+    proxy -> front [label = "465/tcp";];
+    proxy -> front [label = "587/tcp";];
+    proxy -> front [label = "110/tcp";];
+    proxy -> front [label = "995/tcp";];
+    proxy -> front [label = "143/tcp";];
+    proxy -> front [label = "993/tcp";];
+    proxy -> front [label = "4190/tcp";];
+    
+    front -> front [label = "8008/tcp";];
+    front -> front [label = "8000/tcp";];
+    front -> admin [label = "8080/tcp";];
+    front -> imap [label = "4190/tcp";];
+    front -> imap [label = "143/tcp";];
+    front -> imap [label = "110/tcp";];
+    front -> smtp [label = "25/tcp";];
+    front -> smtp [label = "10025/tcp";];
+    front -> webmail [label = "80/tcp";];
+    front -> antispam [label = "11334/tcp";];
+    front -> webdav [label = "5232/tcp";];
+    
+    smtp -> admin [label = "8080/tcp";];
+    smtp -> front [label = "2525/tcp";];
+    smtp -> antispam [label = "11332/tcp";];
+    
+    imap -> admin [label = "8080/tcp";];
+    imap -> antispam [label = "11334/tcp";];
+    imap -> proxy [label = "25/tcp";];
+    imap -> fts_attachments [label = "9998/tcp";];
+    
+    webmail -> front [label = "14190/tcp";];
+    webmail -> front [label = "10025/tcp";];
+    webmail -> front [label = "10143/tcp";];
+    # carddav
+    webmail -> proxy [label = "443/tcp";];
+    
+    admin -> redis [label = "6379/tcp";];
+    admin -> front [label = "2525/tcp";];
+    
+    antispam -> redis [label = "6379/tcp";];
+    antispam -> admin [label = "8080/tcp";];
+    antispam -> oletools [label = "11343/tcp";];
+    antispam -> antivirus [label = "3310/tcp";];
+    
+    fetchmail -> admin [label = "8080/tcp"]
+    fetchmail -> proxy [label = "25/tcp"]
+    fetchmail -> front [label = "2525/tcp"]
+    #
+    # those don't need internet:
+    # oletools
+    # fts_attachments
+    # redis
+}

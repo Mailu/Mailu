@@ -81,3 +81,4 @@ the version of Mailu that you are running.
     contributors/database
     contributors/memo
     contributors/localization
+    contributors/firewalling

@@ -167,6 +167,8 @@ Click the submit button to apply settings. With the default polling interval, fe
 Make sure ``FETCHMAIL_ENABLED`` is set to ``true`` in ``mailu.env`` to enable fetching and showing fetchmail in the admin interface.
 
 
+.. _AUTH tokens:
+
 Authentication tokens
 ---------------------
 

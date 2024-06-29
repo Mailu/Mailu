@@ -95,6 +95,7 @@ digraph mailu {
     front -> front [label = "8000/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> admin [label = "8080/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> imap [label = "4190/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> imap [label = "2525/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> imap [label = "143/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> imap [label = "110/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> smtp [label = "25/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];

@@ -1,89 +1,134 @@
 digraph mailu {
-    label = "Mailu";
+    label = "Mailu network flows";
     fontname = "arial";
     
-    node [shape = box; fontname = "arial"; fontsize = 8; style = filled; color = "#d3edea";];
+    node [shape = record; fontname = "arial"; fontsize = 8; style = filled; color = "#d3edea";];
     splines = "compound";
     // node [shape = "box"; fontsize = "10";];
-    edge [fontsize = "8";];
+    edge [fontsize = 8; arrowsize = 0.5;];
     
     # Components
-    internet [label = "Internet";];
-    proxy [label = "Optional proxy"; shape = "polygon"];
-    front [label = "Front";];
-    admin [label = "Admin";];
-    smtp [label = "SMTP";];
-    redis [label = "Redis";];
-    antispam [label = "Antispam";];
-    antivirus [label = "Anti-Virus";];
-    imap [label = "IMAP";];
-    webdav [label = "WebDAV";];
-    webmail [label = "Webmail";];
-    fetchmail [label = "Fetchmail";];
-    oletools [label = "Oletools"];
-    fts_attachments [label = "Tika"];
-    # proxy from internet
-    internet -> proxy [label = "25/tcp";];
-    internet -> proxy [label = "80/tcp";];
-    internet -> proxy [label = "443/tcp";];
-    internet -> proxy [label = "465/tcp";];
-    internet -> proxy [label = "587/tcp";];
-    internet -> proxy [label = "110/tcp";];
-    internet -> proxy [label = "995/tcp";];
-    internet -> proxy [label = "143/tcp";];
-    internet -> proxy [label = "993/tcp";];
-    internet -> proxy [label = "4190/tcp";];
-    
+    internet [label = "Internet"; color = "red";];
+    proxy [label = "Proxy (optional)"; color = "darkorange";];
+    front [label="Front"; color="dodgerblue";];
+    admin [label="Admin"; color="green"; fontcolor="white";];
+    smtp [label="SMTP"; color="orchid";];
+    redis [label="Redis"; color="turquoise";];
+    antispam [label="Antispam"; color="magenta";];
+    antivirus [label="Antivirus"; color="purple"; fontcolor="white";];
+    imap [label="IMAP"; color="cyan";];
+    webdav [label="WebDAV"; color="yellow";];
+    webmail [label="Webmail"; color="darkgoldenrod";];
+    fetchmail [label="Fetchmail"; color="chocolate";];
+    oletools [label="Oletools"; color="limegreen";];
+    fts_attachments [label="Tika"; color="sienna";];
+
+    rankdir=LR;
+    {rank=min; internet};
+    // {rank=3; proxy};
+    // {rank=4; front};
+    // {rank=same; admin smtp redis antispam antivirus imap};
+    {rank=max; fetchmail};
+
+    # Proxy from internet
+
+    internet -> proxy [
+        color="red";
+        fontcolor="red";
+        label = <
+        <TABLE BORDER="0" CELLBORDER="1" CELLPADDING="1">
+            <TR>
+                <TD>80/tcp</TD>
+                <TD>443/tcp</TD>
+            </TR>
+            <TR>
+                <TD>25/tcp</TD>
+                <TD>465/tcp</TD>
+            </TR>
+            <TR>
+                <TD>587/tcp</TD>
+                <TD>110/tcp</TD>
+            </TR>
+            <TR>
+                <TD>995/tcp</TD>
+                <TD>143/tcp</TD>
+            </TR>
+            <TR>
+                <TD>993/tcp</TD>
+                <TD>4190/tcp</TD>
+            </TR>
+        </TABLE>
+        >;
+    ];
+
     # Front from proxy
-    proxy -> front [label = "25/tcp";];
-    proxy -> front [label = "80/tcp";];
-    proxy -> front [label = "443/tcp";];
-    proxy -> front [label = "465/tcp";];
-    proxy -> front [label = "587/tcp";];
-    proxy -> front [label = "110/tcp";];
-    proxy -> front [label = "995/tcp";];
-    proxy -> front [label = "143/tcp";];
-    proxy -> front [label = "993/tcp";];
-    proxy -> front [label = "4190/tcp";];
+    proxy -> front [
+        color="darkorange";
+        fontcolor="darkorange";
+        label = <
+        <TABLE BORDER="0" CELLBORDER="1" CELLPADDING="1">
+            <TR>
+                <TD>80/tcp</TD>
+                <TD>443/tcp</TD>
+            </TR>
+            <TR>
+                <TD>25/tcp</TD>
+                <TD>465/tcp</TD>
+            </TR>
+            <TR>
+                <TD>587/tcp</TD>
+                <TD>110/tcp</TD>
+            </TR>
+            <TR>
+                <TD>995/tcp</TD>
+                <TD>143/tcp</TD>
+            </TR>
+            <TR>
+                <TD>993/tcp</TD>
+                <TD>4190/tcp</TD>
+            </TR>
+        </TABLE>
+        >;
+    ];
     
-    front -> front [label = "8008/tcp";];
-    front -> front [label = "8000/tcp";];
-    front -> admin [label = "8080/tcp";];
-    front -> imap [label = "4190/tcp";];
-    front -> imap [label = "143/tcp";];
-    front -> imap [label = "110/tcp";];
-    front -> smtp [label = "25/tcp";];
-    front -> smtp [label = "10025/tcp";];
-    front -> webmail [label = "80/tcp";];
-    front -> antispam [label = "11334/tcp";];
-    front -> webdav [label = "5232/tcp";];
+    front -> front [label = "8008/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> front [label = "8000/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> admin [label = "8080/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> imap [label = "4190/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> imap [label = "143/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> imap [label = "110/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> smtp [label = "25/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> smtp [label = "10025/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> webmail [label = "80/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> antispam [label = "11334/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> webdav [label = "5232/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     
-    smtp -> admin [label = "8080/tcp";];
-    smtp -> front [label = "2525/tcp";];
-    smtp -> antispam [label = "11332/tcp";];
+    smtp -> admin [label = "8080/tcp"; color="orchid"; fontcolor="orchid";];
+    smtp -> front [label = "2525/tcp"; color="orchid"; fontcolor="orchid";];
+    smtp -> antispam [label = "11332/tcp"; color="orchid"; fontcolor="orchid";];
     
-    imap -> admin [label = "8080/tcp";];
-    imap -> antispam [label = "11334/tcp";];
-    imap -> proxy [label = "25/tcp";];
-    imap -> fts_attachments [label = "9998/tcp";];
+    imap -> admin [label = "8080/tcp"; color="cyan"; fontcolor="cyan";];
+    imap -> antispam [label = "11334/tcp"; color="cyan"; fontcolor="cyan";];
+    imap -> proxy [label = "25/tcp"; color="cyan"; fontcolor="cyan";];
+    imap -> fts_attachments [label = "9998/tcp"; color="cyan"; fontcolor="cyan";];
     
-    webmail -> front [label = "14190/tcp";];
-    webmail -> front [label = "10025/tcp";];
-    webmail -> front [label = "10143/tcp";];
+    webmail -> front [label = "14190/tcp"; color="darkgoldenrod"; fontcolor="darkgoldenrod";];
+    webmail -> front [label = "10025/tcp"; color="darkgoldenrod"; fontcolor="darkgoldenrod";];
+    webmail -> front [label = "10143/tcp"; color="darkgoldenrod"; fontcolor="darkgoldenrod";];
     # carddav
-    webmail -> proxy [label = "443/tcp";];
+    webmail -> proxy [label = "443/tcp"; color="darkgoldenrod"; fontcolor="darkgoldenrod";];
     
-    admin -> redis [label = "6379/tcp";];
-    admin -> front [label = "2525/tcp";];
+    admin -> redis [label = "6379/tcp"; color="green"; fontcolor="green";];
+    admin -> front [label = "2525/tcp"; color="green"; fontcolor="green";];
     
-    antispam -> redis [label = "6379/tcp";];
-    antispam -> admin [label = "8080/tcp";];
-    antispam -> oletools [label = "11343/tcp";];
-    antispam -> antivirus [label = "3310/tcp";];
+    antispam -> redis [label = "6379/tcp"; color="magenta"; fontcolor="magenta";];
+    antispam -> admin [label = "8080/tcp"; color="magenta"; fontcolor="magenta";];
+    antispam -> oletools [label = "11343/tcp"; color="magenta"; fontcolor="magenta";];
+    antispam -> antivirus [label = "3310/tcp"; color="magenta"; fontcolor="magenta";];
     
-    fetchmail -> admin [label = "8080/tcp"]
-    fetchmail -> proxy [label = "25/tcp"]
-    fetchmail -> front [label = "2525/tcp"]
+    fetchmail -> admin [label = "8080/tcp"; color="chocolate"; fontcolor="chocolate";];
+    fetchmail -> proxy [label = "25/tcp"; color="chocolate"; fontcolor="chocolate";];
+    fetchmail -> front [label = "2525/tcp"; color="chocolate"; fontcolor="chocolate";];
     #
     # those don't need internet:
     # oletools

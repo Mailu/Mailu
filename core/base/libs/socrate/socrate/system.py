@@ -108,8 +108,39 @@ def set_env(required_secrets=[], log_filters=[]):
            }
 
 def clean_env():
-    """ remove all secret keys """
+    """ remove all secret keys, normalize PROXY_PROTOCOL """
     [os.environ.pop(key, None) for key in os.environ.keys() if key.endswith("_KEY")]
+    # Configure PROXY_PROTOCOL
+    PROTO_MAIL=['25', '110', '995', '143', '993', '587', '465', '4190']
+    PROTO_ALL_BUT_HTTP=PROTO_MAIL.copy()
+    PROTO_ALL_BUT_HTTP.extend(['443'])
+    PROTO_ALL=PROTO_ALL_BUT_HTTP.copy()
+    PROTO_ALL.extend(['80'])
+    for item in os.environ.get('PROXY_PROTOCOL', '').split(','):
+        if item.isdigit():
+            os.environ[f'PROXY_PROTOCOL_{item}']='True'
+        elif item == 'mail':
+            for p in PROTO_MAIL: os.environ[f'PROXY_PROTOCOL_{p}']='True'
+        elif item == 'all-but-http':
+            for p in PROTO_ALL_BUT_HTTP: os.environ[f'PROXY_PROTOCOL_{p}']='True'
+        elif item == 'all':
+            for p in PROTO_ALL: os.environ[f'PROXY_PROTOCOL_{p}']='True'
+        elif item == '':
+            pass
+        else:
+            log.error(f'Not sure what to do with {item} in PROXY_PROTOCOL ({args.get("PROXY_PROTOCOL")})')
+
+    PORTS_REQUIRING_TLS=['443', '465', '993', '995']
+    ALL_PORTS='25,80,443,465,993,995,4190'
+    for item in os.environ.get('PORTS', ALL_PORTS).split(','):
+        if item in PORTS_REQUIRING_TLS and os.environ.get('TLS_FLAVOR','') == 'notls':
+            continue
+        os.environ[f'PORT_{item}']='True'
+
+    if os.environ.get('TLS_FLAVOR', '') != 'notls':
+        for item in os.environ.get('TLS', ALL_PORTS).split(','):
+            if item in PORTS_REQUIRING_TLS:
+                os.environ[f'TLS_{item}']='True'
 
 def drop_privs_to(username='mailu'):
     pwnam = getpwnam(username)

@@ -9,6 +9,7 @@ pip-selfcheck.json
 /docs/lib*
 /docs/bin
 /docs/include
+/docs/contributors/mailu-network-diagram.svg
 /docs/_build
 /.env
 /.venv

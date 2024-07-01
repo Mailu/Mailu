@@ -1,0 +1,1 @@
+Postfix 3.9 has changed the default for smtpd_forbid_unauth_pipelining. We need it to be allowed for XCLIENT to work.

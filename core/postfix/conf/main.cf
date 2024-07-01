@@ -26,6 +26,7 @@ podop = socketmap:unix:/tmp/podop.socket:
 postscreen_upstream_proxy_protocol = haproxy
 compatibility_level=3.6
 smtpd_forbid_bare_newline=yes
+smtpd_forbid_unauth_pipelining=no
 
 # Only accept virtual emails
 mydestination =

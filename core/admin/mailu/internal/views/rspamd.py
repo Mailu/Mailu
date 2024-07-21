@@ -24,6 +24,15 @@ def rspamd_dkim_key(domain_name):
                     'selector': flask.current_app.config.get('DKIM_SELECTOR', 'dkim'),
                 }
             )
+    elif domain := models.Alternative.query.get(domain_name):
+        if key := domain.domain.dkim_key:
+            selectors.append(
+                {
+                    'domain'  : domain.name,
+                    'key'     : key.decode('utf8'),
+                    'selector': flask.current_app.config.get('DKIM_SELECTOR', 'dkim'),
+                }
+            )
     return flask.jsonify({'data': {'selectors': selectors}})
 
 @internal.route("/rspamd/local_domains", methods=['GET'])

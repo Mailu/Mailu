@@ -355,6 +355,54 @@ class Alternative(Base):
     domain = db.relationship(Domain,
         backref=db.backref('alternatives', cascade='all, delete-orphan'))
 
+    @property
+    def dns_dkim(self):
+        """ return DKIM record for domain """
+        if self.domain.dkim_key:
+            selector = app.config['DKIM_SELECTOR']
+            return f'{selector}._domainkey.{self.name}. 600 IN TXT "v=DKIM1; k=rsa; p={self.domain.dkim_publickey}"'
+
+    @cached_property
+    def dns_dmarc(self):
+        """ return DMARC record for domain """
+        if self.domain.dkim_key:
+            domain = app.config['DOMAIN']
+            rua = app.config['DMARC_RUA']
+            rua = f' rua=mailto:{rua}@{domain};' if rua else ''
+            ruf = app.config['DMARC_RUF']
+            ruf = f' ruf=mailto:{ruf}@{domain};' if ruf else ''
+            return f'_dmarc.{self.name}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
+
+    @cached_property
+    def dns_dmarc_report(self):
+        """ return DMARC report record for mailu server """
+        if self.domain.dkim_key:
+            domain = app.config['DOMAIN']
+            return f'{self.name}._report._dmarc.{domain}. 600 IN TXT "v=DMARC1;"'
+
+    @cached_property
+    def dns_mx(self):
+        """ return MX record for domain """
+        hostname = app.config['HOSTNAME']
+        return f'{self.name}. 600 IN MX 10 {hostname}.'
+
+    @cached_property
+    def dns_spf(self):
+        """ return SPF record for domain """
+        hostname = app.config['HOSTNAME']
+        return f'{self.name}. 600 IN TXT "v=spf1 mx a:{hostname} ~all"'
+
+    def check_mx(self):
+        """ checks if MX record for domain points to mailu host """
+        try:
+            hostnames = set(app.config['HOSTNAMES'].split(','))
+            return any(
+                rset.exchange.to_text().rstrip('.') in hostnames
+                for rset in dns.resolver.resolve(self.name, 'MX')
+            )
+        except dns.exception.DNSException:
+            return False
+
 
 class Relay(Base):
     """ Relayed mail domain.

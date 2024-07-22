@@ -545,6 +545,10 @@ msgstr "DNS TLSA Eintrag"
 msgid "DNS client auto-configuration entries"
 msgstr "DNS Einträge für die automatische Client-Konfiguration"
 
+#: mailu/ui/templates/domain/details.html:71
+msgid "Alternative Domain name"
+msgstr "Alternativer Domain Name"
+
 #: mailu/ui/templates/domain/edit.html:4
 msgid "Edit domain"
 msgstr "Domain bearbeiten"

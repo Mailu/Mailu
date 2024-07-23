@@ -23,8 +23,8 @@ import dns.exception
 # [OIDC] Import Flask-Login
 import flask_login
 
-from flask import current_app as app
-from flask import session
+# [OIDC] Import the session extension
+from flask import current_app as app, session
 from sqlalchemy.ext import declarative
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect

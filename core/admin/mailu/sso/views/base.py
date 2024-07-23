@@ -17,8 +17,13 @@ def login():
         return _proxy()
 
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
+    # [OIDC] Remove all characters that are not digits or dots from the client_ip
+    client_ip = ''.join(c for c in client_ip if c.isdigit() or c == '.')
     client_port = flask.request.headers.get('X-Real-Port', None)
     form = forms.LoginForm()
+
+    # [OIDC] Parse the device cookie for rate limiting
+    device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
 
     fields = []
 
@@ -68,7 +73,7 @@ def login():
                 destination = app.config['WEB_ADMIN']
             elif form.submitWebmail.data:
                 destination = app.config['WEB_WEBMAIL']
-        device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
+        # [OIDC] device_cookie and device_cookie_username are already set
         username = form.email.data
         if not utils.is_app_token(form.pw.data):
             if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):

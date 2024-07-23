@@ -1,10 +1,10 @@
 <!-- markdownlint-disable MD033 MD041 MD042 -->
 <p align="center">
-  <img src="docs/assets/logomark.png" alt="Mailu" width="128" style="vertical-align: middle" />
-  <span style="font-size: 4rem; margin-inline: 1rem; opacity: .8; vertical-align: middle">+</span>
-  <img src="docs/assets/oidc.svg" alt="OIDC" width="128" style="vertical-align: middle" />
+  <img src="docs/assets/logomark.png" alt="Mailu" width="128" />
+  <img src="docs/assets/plus.svg" alt="+" width="96" />
+  <img src="docs/assets/oidc.svg" alt="OIDC" width="128" />
 </p>
-<h1 align="center" style="border-bottom: none">Mailu-OIDC</h1>
+<h1 align="center">Mailu-OIDC</h1>
 <p align="center">
   Multi-container mail server landscape<br />
   featuring OpenID Connect authentication

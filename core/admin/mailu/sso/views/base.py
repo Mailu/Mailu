@@ -17,10 +17,14 @@ def login():
         return _proxy()
 
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
-    # [OIDC] Remove all characters that are not digits or dots from the client_ip
-    client_ip = ''.join(c for c in client_ip if c.isdigit() or c == '.')
     client_port = flask.request.headers.get('X-Real-Port', None)
     form = forms.LoginForm()
+
+    # [OIDC] Make sure the client_ip is an alphanumeric string containing only digits and dots
+    if client_ip is None or not client_ip.isalnum():
+        client_ip = flask.request.remote_addr
+    else:
+        client_ip = ''.join(c for c in client_ip if c.isdigit() or c == '.')
 
     # [OIDC] Parse the device cookie for rate limiting
     device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))

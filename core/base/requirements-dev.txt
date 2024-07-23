@@ -56,3 +56,5 @@ requests
 # optional/radicale
 radicale
 
+# [OIDC] OpenID Connect
+oic

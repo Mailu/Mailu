@@ -48,6 +48,16 @@ DEFAULT_CONFIG = {
     'AUTH_RATELIMIT_EXEMPTION': '',
     'AUTH_RATELIMIT_EXEMPTION_LENGTH': 86400,
     'DISABLE_STATISTICS': False,
+    # [OIDC] OpenID Connect settings
+    'OIDC_ENABLED': False,
+    'OIDC_PROVIDER_INFO_URL': 'https://localhost/info',
+    'OIDC_CLIENT_ID': 'mailu',
+    'OIDC_CLIENT_SECRET': 'secret',
+    'OIDC_BUTTON_NAME': 'OpenID Connect',
+    'OIDC_VERIFY_SSL': True,
+    'OIDC_CHANGE_PASSWORD_REDIRECT_ENABLED': True,
+    'OIDC_CHANGE_PASSWORD_REDIRECT_URL': None,
+    'OIDC_REDIRECT_URL': None,
     # Mail settings
     'DMARC_RUA': None,
     'DMARC_RUF': None,

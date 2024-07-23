@@ -19,12 +19,15 @@
           <p>{% trans %}Settings{% endtrans %}</p>
         </a>
       </li>
+      <!-- [OIDC] Custom change_password url -->
+      {%- if oic_client.change_password() or not current_user.is_oidc_user %}
       <li class="nav-item" role="none">
-        <a href="{{ url_for('.user_password_change') }}" class="nav-link" role="menuitem">
+        <a href="{{ oic_client.change_password() if current_user.is_oidc_user else url_for('.user_password_change') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fa fa-lock"></i>
           <p>{% trans %}Update password{% endtrans %}</p>
         </a>
       </li>
+      {%- endif %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.user_reply') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fa fa-plane"></i>

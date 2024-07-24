@@ -13,7 +13,8 @@ concurrency: ci-multiarch-${{ github.ref }}
 # REQUIRED global variables
 # DOCKER_ORG, docker org used for pushing images.
 env:
-  DOCKER_ORG: ghcr.io/mailu
+  # [OIDC] Required for pushing images to ghcr.io
+  DOCKER_ORG: ghcr.io/heviat
 
 jobs:
 # This job calculates all global job variables that are required by all the subsequent jobs.

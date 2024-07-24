@@ -20,7 +20,43 @@ def login():
     client_port = flask.request.headers.get('X-Real-Port', None)
     form = forms.LoginForm()
 
+    # [OIDC] Make sure the client_ip is an alphanumeric string containing only digits and dots
+    if client_ip is None or not client_ip.isalnum():
+        client_ip = flask.request.remote_addr
+    else:
+        client_ip = ''.join(c for c in client_ip if c.isdigit() or c == '.')
+
+    # [OIDC] Parse the device cookie for rate limiting
+    device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
+
     fields = []
+
+    # [OIDC] Add the OIDC login flow
+    if 'code' in flask.request.args:
+        username, sub, id_token, token_response = utils.oic_client.exchange_code(flask.request.query_string.decode())
+        
+        if username is None:
+            utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)
+            flask.current_app.logger.warn(f'Login failed for {username} from {client_ip}.')
+            flask.flash('Wrong e-mail or password', 'error')
+            # TODO: Check if this is the correct way to handle this
+            return flask.render_template('login.html', form=form, fields=fields, openId=app.config['OIDC_ENABLED'], openIdEndpoint=utils.oic_client.get_redirect_url())
+        
+        user = models.User.get(username)
+        if user is None:
+            user = models.User.create(username)
+        
+        flask.session['openid_token'] = token_response
+        flask.session['openid_sub'] = sub
+        flask.session['openid_id_token'] = id_token
+        flask.session.regenerate()
+
+        flask_login.login_user(user)
+
+        response = redirect(app.config['WEB_ADMIN'])
+        response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
+        flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')
+        return response
 
     if 'url' in flask.request.args and not 'homepage' in flask.request.url:
         fields.append(form.submitAdmin)
@@ -41,7 +77,7 @@ def login():
                 destination = app.config['WEB_ADMIN']
             elif form.submitWebmail.data:
                 destination = app.config['WEB_WEBMAIL']
-        device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
+        # [OIDC] device_cookie and device_cookie_username are already set
         username = form.email.data
         if not utils.is_app_token(form.pw.data):
             if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
@@ -67,7 +103,8 @@ def login():
             utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username, form.pw.data) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip, username)
             flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: failed: badauth: {utils.truncated_pw_hash(form.pw.data)}')
             flask.flash(_('Wrong e-mail or password'), 'error')
-    return flask.render_template('login.html', form=form, fields=fields)
+    # [OIDC] Forward the OIDC data to the login template
+    return flask.render_template('login.html', form=form, fields=fields, openId=app.config['OIDC_ENABLED'], openIdEndpoint=utils.oic_client.get_redirect_url())
 
 @sso.route('/pw_change', methods=['GET', 'POST'])
 @access.authenticated
@@ -110,6 +147,15 @@ def logout():
     for cookie in ['roundcube_sessauth', 'roundcube_sessid', 'smsession']:
         response.set_cookie(cookie, 'empty', expires=0)
     return response
+
+# [OIDC] Add the backchannel logout endpoint
+@sso.route('/backchannel-logout', methods=['POST'])
+def backchannel_logout():
+    if not utils.oic_client.is_enabled():
+        return flask.abort(404)
+    if not utils.oic_client.backchannel_logout(flask.request.form):
+        return flask.abort(400)
+    return {'code': 200, 'message': 'Backchannel logout successful.'}, 200
 
 """
 Redirect to the url passed in parameter if any; Ensure that this is not an open-redirect too...

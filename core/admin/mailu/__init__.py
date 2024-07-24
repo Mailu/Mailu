@@ -53,6 +53,10 @@ def create_app_from_config(config):
     utils.proxy.init_app(app)
     utils.migrate.init_app(app, models.db)
 
+    # [OIDC] Initialize the OIDC extension if enabled
+    if app.config['OIDC_ENABLED']:
+        utils.oic_client.init_app(app)
+
     app.device_cookie_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('DEVICE_COOKIE_KEY', 'utf-8'), 'sha256').digest()
     app.temp_token_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('WEBMAIL_TEMP_TOKEN_KEY', 'utf-8'), 'sha256').digest()
     app.srs_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('SRS_KEY', 'utf-8'), 'sha256').digest()
@@ -85,6 +89,8 @@ def create_app_from_config(config):
         return dict(
             signup_domains= signup_domains,
             config        = app.config,
+            # [OIDC] Inject the OIDC client
+            oic_client    = utils.oic_client,
             get_locale    = utils.get_locale,
         )
 

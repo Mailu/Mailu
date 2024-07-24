@@ -48,6 +48,8 @@ marshmallow-sqlalchemy==1.0.0
 msoffcrypto-tool==5.4.0
 multidict==6.0.5
 mysql-connector-python==8.4.0
+# [OIDC] pyoidc: https://github.com/CZ-NIC/pyoidc/
+oic==1.7.0
 olefile==0.47
 oletools==0.60.1
 packaging==24.0

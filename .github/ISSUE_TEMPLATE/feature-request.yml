@@ -1,0 +1,61 @@
+name: Feature Request
+description: File a feature request to suggest new functionality.
+title: "Allow setting up multiple OIDC providers / Allow configuring OIDC from the admin panel / ..."
+labels: ["enhancement"]
+assignees: ["encotric",  "wombosvideo"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature Request
+
+        Thank you for opening an issue with Mailu-OIDC. Please understand that feature requests are meant for requesting new functionality only. The feature request should provide clear details of the new feature and the reason for the implementation.
+
+        Before you open your issue
+
+        - Check if no issue or pull-request for this already exists.
+        - Check the [Mailu-OIDC](https://github.com/heviat/Mailu-OIDC) or [Mailu](https://mailu.io/master/) documentation and [FAQ](https://mailu.io/master/faq.html). (Tip, use the search function on the Mailu documentation page)
+        - You understand `Mailu-OIDC` is maintained by volunteers in their **free time** — be concise, civil and accept that delays can occur.
+        - The title of the issue should be short and simple. It should contain specific terms related to the actual enhancement. Be specific while writing the title.
+
+        ## Environment & Version
+
+        Keep in mind that new features will be considered for the latest version of Mailu-OIDC only. They will not be backported to older versions.
+
+        ## Feature Description
+  - type: textarea
+    id: problem
+    attributes:
+      label: Related Problem
+      description: If your feature request is related to a problem, please provide a clear and concise description of what the problem is.
+  - type: textarea
+    id: improvement
+    attributes:
+      label: Improvement Description
+      description: Explain the feature in a few sentences. What should be implemented? Why is it important?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: If applicable, describe any alternative solutions or features you've considered.
+  - type: markdown
+    attributes:
+      value: |
+        ## Additional Information
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation Details
+      description: If you have an idea of how the feature could be implemented, please provide details here.
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context about the feature request here.
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Inspirational Screenshots
+      description: If applicable, add screenshots to help explain the feature request. This can be a mockup of the desired behavior or screenshots from other software.

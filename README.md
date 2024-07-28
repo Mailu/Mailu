@@ -57,12 +57,10 @@ Main features include:
 
 ### Replacing Docker Images
 
-Every Docker image from the organization [`mailu`](https://hub.docker.com/u/mailu)
-must be replaced with an image from the organization [`heviat`](https://github.com/orgs/heviat/packages)
-at GitHub Container Registry - e.g. [`mailu/admin`](https://hub.docker.com/r/mailu/admin)
-becomes [`ghcr.io/heviat/admin`](https://ghcr.io/heviat/admin). To do so, you
-can simply place a `.env` file in the project directory and set `DOCKER_ORG`
-and `MAILU_VERSION` environment variables matching our Docker images:
+To use the OIDC-enabled Mailu images, the Docker images have to be downloaded
+from `ghcr.io/heviat` instead of `ghcr.io/mailu`. To do so, you can simply
+place a `.env` file in the installation directory and set `DOCKER_ORG` and
+`MAILU_VERSION` environment variables matching our Docker images:
 
 Example `.env` file:
 

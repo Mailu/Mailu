@@ -92,13 +92,15 @@ def user_settings(user_email):
     user = models.User.query.get(user_email_or_current) or flask.abort(404)
     form = forms.UserSettingsForm(obj=user)
     utils.formatCSVField(form.forward_destination)
+    form.forward_enabled.data = bool(flask.request.form.get('forward_enabled', False))
     if form.validate_on_submit():
-        if form.forward_enabled.data and (form.forward_destination.data in ['', None] or type(form.forward_destination.data) is list):
+        if form.forward_enabled and (form.forward_destination.data in ['', None] or type(form.forward_destination.data) is list):
             flask.flash('Destination email address is missing', 'error')
-            user.forward_enabled = True
-            return flask.render_template('user/settings.html', form=form, user=user)
-        if form.forward_enabled.data:
-            form.forward_destination.data = form.forward_destination.data.replace(" ","").split(",")
+            return flask.redirect(
+                flask.url_for('.user_settings', user=user.email))
+        if not user.forward_enabled and not flask.request.form.get('forward_destination', None):
+            form.forward_destination.data = ""
+        form.forward_destination.data = form.forward_destination.data.replace(" ","").split(",")
         form.populate_obj(user)
         models.db.session.commit()
         form.forward_destination.data = ", ".join(form.forward_destination.data)
@@ -107,8 +109,8 @@ def user_settings(user_email):
             return flask.redirect(
                 flask.url_for('.user_list', domain_name=user.domain.name))
     elif form.is_submitted() and not form.validate():
-        user.forward_enabled = form.forward_enabled.data
-        return flask.render_template('user/settings.html', form=form, user=user)
+            return flask.redirect(
+                flask.url_for('.user_settings', user=user.email))
     return flask.render_template('user/settings.html', form=form, user=user)
 
 def _process_password_change(form, user_email):

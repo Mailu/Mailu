@@ -86,7 +86,7 @@ properties are needed in `mailu.env`:
 | `OIDC_BUTTON_NAME`                      | Label text for the "login-with-OpenID" button                                                                       | `OpenID Connect`          |
 | `OIDC_VERIFY_SSL`                       | Disable TLS certificate verification for the OIDC client                                                            | `True` \| `False`         |
 | `OIDC_CHANGE_PASSWORD_REDIRECT_ENABLED` | If enabled, OIDC users will have an button to get redirect to their OIDC provider to change their password          | `True` \| `False`         |
-| `OIDC_CHANGE_PASSWORD_REDIRECT_URL`     | Defaults to provider issuer url appended by `/.well-known/password-change`.                                         | [https://`host`/pw-change]() |
+| `OIDC_CHANGE_PASSWORD_REDIRECT_URL`     | Defaults to provider issuer url appended by `/.well-known/change-password`.                                         | [https://`host`/pw-change]() |
 
 Here is a snippet for easy copy paste:
 
@@ -111,7 +111,7 @@ OIDC_BUTTON_NAME=OpenID Connect
 OIDC_VERIFY_SSL=True
 # Enable redirect to OIDC provider for password change. Possible values: True, False
 OIDC_CHANGE_PASSWORD_REDIRECT_ENABLED=True
-# Redirect URL for password change. Defaults to provider issuer url appended by /.well-known/password-change
+# Redirect URL for password change. Defaults to provider issuer url appended by /.well-known/change-password
 OIDC_CHANGE_PASSWORD_REDIRECT_URL=https://oidc.example.com/pw-change
 ```
 

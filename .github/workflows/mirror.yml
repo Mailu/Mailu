@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Helper to convert docker org to lowercase
         id: string
-        uses: ASzc/change-string-case-action@v5
+        uses: ASzc/change-string-case-action@v6
         with:
           string: ${{ github.repository_owner }}
       - name: Mirror images

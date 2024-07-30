@@ -94,7 +94,7 @@ def user_settings(user_email):
     utils.formatCSVField(form.forward_destination)
     if form.validate_on_submit():
         user.forward_enabled = bool(flask.request.form.get('forward_enabled', False))
-        if form.forward_enabled and (form.forward_destination.data in ['', None] or type(form.forward_destination.data) is list):
+        if form.forward_enabled and not form.forward_destination.data:
             flask.flash('Destination email address is missing', 'error')
             return flask.redirect(
                 flask.url_for('.user_settings', user_email=user_email))

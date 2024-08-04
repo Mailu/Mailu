@@ -1,3 +1,4 @@
 Update to a newer clamav 1.2.3-45
 Update to snappymail 2.36.4
+Update to roundcube 1.6.8 (CVE-2024-42009, CVE-2024-42008, CVE-2024-42010)
 Add a new DNS entry for autodiscover (old MUA autoconfiguration)

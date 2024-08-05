@@ -137,8 +137,8 @@ The following steps have to be taken to configure an additional symbol (rule) th
 
    The symbol is only displayed if the symbol has no pre-filter (action= line) configured. Changes made in this screen are not saved to the configuration file.
 
-5. Check if the map is available. In rspamd webgui to to configuration, a map is available with the path:
-   /etc/rspamd/override.d/blacklist.inc	Senders domain part is on the local blacklist
+5. Check if the map is available. In rspamd webgui go to configuration, a map is available with the path:
+   /overrides/blacklist.inc	Senders domain part is on the local blacklist
 
    .. image:: assets/screenshots/RspamdMapBlacklist.png
 

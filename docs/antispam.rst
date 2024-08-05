@@ -113,7 +113,7 @@ The following steps have to be taken to configure an additional symbol (rule) th
    * soft reject: temporarily delay message (this is used, for instance, to greylist or rate-limit messages)
 
    To move an email message to the Junk (Spam) folder, a score of 15 can be used in combination with the action "add header".
-   The above example configuration will reject all emails send from domains that are listed in '/etc/rspamd/override.d/blacklist.inc'.
+   The above example configuration will reject all emails send from domains that are listed in '/overrides/blacklist.inc'.
 
 
 2. In the Rspamd overrides folder create a map that contains the domains to be blocked. You can use # to add comments.
@@ -137,12 +137,12 @@ The following steps have to be taken to configure an additional symbol (rule) th
 
    The symbol is only displayed if the symbol has no pre-filter (action= line) configured. Changes made in this screen are not saved to the configuration file.
 
-5. Check if the map is available. In rspamd webgui to to configuration. A map is available with the path:
+5. Check if the map is available. In rspamd webgui to to configuration, a map is available with the path:
    /etc/rspamd/override.d/blacklist.inc	Senders domain part is on the local blacklist
 
    .. image:: assets/screenshots/RspamdMapBlacklist.png
 
-   When clicking on this map, you can live-edit the map via the GUI. Changes are effective immediately. Only changes made to maps in the overrides folder are persistent. Changes made to other maps will be reverted when the Rspamd container is recreated. It is also possible to make direct changes to the map on filesystem. These changes are also effective immediately.
+   When clicking on this map, you can live-edit the map via the GUI. Please note that only changes made to maps in the ``/overrides`` folder are persistent as changes made interractively though the GUI will be reverted when the Rspamd container is recreated. All changes (whether through the GUI or on the filesystem) are effective immediately.
 
 For more information on using the multimap filter see the official `multimap documentation`_ of Rspamd.
 

@@ -2,4 +2,4 @@ recommonmark==0.7.1
 Sphinx==7.3.7
 sphinx-autobuild==2024.4.16
 sphinx-rtd-theme==2.0.0
-docutils==0.20.1
+docutils==0.21.2

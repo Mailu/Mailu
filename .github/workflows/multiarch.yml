@@ -83,7 +83,9 @@ jobs:
       - derive-variables
     uses: ./.github/workflows/build_test_deploy.yml
     with:
-      architecture: 'linux/amd64,linux/arm64/v8,linux/arm/v7'
+      # linux/arm64/v8,linux/arm/v7 will be added when GitHub hosted arm64 runners are available by the end of 2024
+      # https://github.blog/news-insights/product-news/arm64-on-github-actions-powering-faster-more-efficient-build-systems/
+      architecture: 'linux/amd64'
       mailu_version: ${{needs.derive-variables.outputs.MAILU_VERSION}}
       pinned_mailu_version: ${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}
       docker_org: ${{needs.derive-variables.outputs.DOCKER_ORG}}

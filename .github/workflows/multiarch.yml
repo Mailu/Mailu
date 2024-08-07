@@ -24,7 +24,7 @@ jobs:
         MAILU_VERSION: ${{ env.MAILU_VERSION }}
         PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
         DOCKER_ORG: ${{ env.DOCKER_ORG_DERIVED }}
-        BRANCH: ${{ env.BRANCH }}
+        BRANCH: ${{ env.BRANCH}}
         DEPLOY: ${{ env.DEPLOY }}
         RELEASE: ${{ env.RELEASE }}
     steps:
@@ -36,23 +36,12 @@ jobs:
         shell: bash
         run: |
           echo "BRANCH=${GITHUB_REF_NAME}" >> $GITHUB_ENV
-        #For branch TESTING, we set the image tag to pr-xxxx
-      - name: Derive MAILU_VERSION and PINNED_MAILU_VERSION and DEPLOY/RELEASE for branch testing
-        if: env.BRANCH == 'testing'
+      - name: Derive MAILU_VERSION and DEPLOY/RELEASE for development branches
         shell: bash
         env:
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          BRANCH: ${{ github.ref_name }}
         run: |
-          echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "PINNED_MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "DOCKER_ORG_DERIVED=${{ env.DOCKER_ORG }}" >> $GITHUB_ENV
-          echo "DEPLOY=true" >> $GITHUB_ENV
-          echo "RELEASE=false" >> $GITHUB_ENV
-      - name: Derive MAILU_VERSION and DEPLOY/RELEASE for other branches than testing
-        if: env.BRANCH != 'testing'
-        shell: bash
-        run: |
-          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION="${BRANCH////-} >> $GITHUB_ENV
           echo "DOCKER_ORG_DERIVED=${{ env.DOCKER_ORG }}" >> $GITHUB_ENV
           echo "DEPLOY=true" >> $GITHUB_ENV
           echo "RELEASE=false" >> $GITHUB_ENV

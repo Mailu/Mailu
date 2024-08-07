@@ -99,8 +99,8 @@ jobs:
       pinned_mailu_version: ${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}
       docker_org: ${{needs.derive-variables.outputs.DOCKER_ORG}}
       branch: ${{needs.derive-variables.outputs.BRANCH}}
-      deploy: ${{needs.derive-variables.outputs.DEPLOY}}
-      release: ${{needs.derive-variables.outputs.RELEASE}}
+      deploy: ${{needs.derive-variables.outputs.DEPLOY == 'true'}}
+      release: ${{needs.derive-variables.outputs.RELEASE == 'true'}}
     secrets: inherit
 
  # This job is watched by bors. It only complets if building,testing and deploy worked.

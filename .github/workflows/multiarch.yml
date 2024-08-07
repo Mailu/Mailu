@@ -1,6 +1,9 @@
 name: start-linux-multiarch
 on:
   pull_request:
+    branches:
+      - main
+      - oidc
   merge_group:
 
 concurrency: ci-multiarch-${{ github.ref }}

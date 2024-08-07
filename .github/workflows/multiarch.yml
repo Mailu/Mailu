@@ -1,12 +1,7 @@
 name: start-linux-multiarch
 on:
-  push:
-    branches:
-      - testing
-      - staging
-      - '2024.06'
-      - master
-      - test-*
+  pull_request:
+  merge_group:
 
 concurrency: ci-multiarch-${{ github.ref }}
 

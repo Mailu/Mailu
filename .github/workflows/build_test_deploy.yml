@@ -39,12 +39,12 @@ on:
         description: Deploy to container registry. Happens for all branches but staging. Use string true or false.
         default: true
         required: false
-        type: string
+        type: boolean
       release:
         description: Tag and create the github release. Use string true or false.
         default: false
         required: false
-        type: string
+        type: boolean
 
   workflow_dispatch:
     inputs:
@@ -73,12 +73,12 @@ on:
         description: Deploy to container registry. Happens for all branches but staging. Use string true or false.
         default: true
         required: false
-        type: string
+        type: boolean
       release:
         description: Tag and create the github release. Use string true or false.
         default: false
         required: false
-        type: string
+        type: boolean
 env:
   HCL_FILE: ./tests/build-ci.hcl
 

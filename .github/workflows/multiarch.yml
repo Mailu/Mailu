@@ -24,7 +24,7 @@ jobs:
         MAILU_VERSION: ${{ env.MAILU_VERSION }}
         PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
         DOCKER_ORG: ${{ env.DOCKER_ORG_DERIVED }}
-        BRANCH: ${{ env.GITHUB_REF_NAME }}
+        BRANCH: ${{ github.ref_name }}
         DEPLOY: ${{ env.DEPLOY }}
         RELEASE: ${{ env.RELEASE }}
     steps:

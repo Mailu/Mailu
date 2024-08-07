@@ -2,7 +2,7 @@ name: start-linux-multiarch
 on:
   pull_request:
     branches:
-      - main
+      - master
       - oidc
   merge_group:
 

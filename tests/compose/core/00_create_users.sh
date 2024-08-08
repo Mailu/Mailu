@@ -8,5 +8,5 @@ docker compose -f tests/compose/core/docker-compose.yml exec -T admin flask mail
 docker compose -f tests/compose/core/docker-compose.yml exec -T admin flask mailu admin admin mailu.io 'password' --mode=update || exit 1
 docker compose -f tests/compose/core/docker-compose.yml exec -T admin flask mailu user user mailu.io 'password' || exit 1
 docker compose -f tests/compose/core/docker-compose.yml exec -T admin flask mailu user 'user/with/slash' mailu.io 'password' || exit 1
-docker compose -f tests/compose/core/docker-compose.yml exec -T admin flask mailu user 'user_UTF8' mailu.io 'password€' || exit 1
+docker compose -f tests/compose/core/docker-compose.yml exec -T admin flask mailu user 'user_UTF8' mailu.io 'pass%e9word€' || exit 1
 echo "User testing successful!"

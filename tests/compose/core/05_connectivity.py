@@ -8,7 +8,7 @@ import managesieve
 
 SERVER='localhost'
 USERNAME='user_UTF8@mailu.io'
-PASSWORD='password€'
+PASSWORD='pass%e9word€'
 #https://github.com/python/cpython/issues/73936
 #SMTPlib does not support UTF8 passwords.
 USERNAME_ASCII='user@mailu.io'

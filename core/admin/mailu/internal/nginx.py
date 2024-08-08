@@ -91,20 +91,14 @@ def handle_authentication(headers):
     # Authenticated user
     elif method in ['plain', 'login']:
         is_valid_user = False
-        # According to RFC2616 section 3.7.1 and PEP 3333, HTTP headers should
-        # be ASCII and are generally considered ISO8859-1. However when passing
-        # the password, nginx does not transcode the input UTF string, thus
-        # we need to manually decode.
-        raw_user_email = urllib.parse.unquote(headers["Auth-User"])
-        raw_password = urllib.parse.unquote(headers["Auth-Pass"])
         user_email = 'invalid'
         password = 'invalid'
         try:
-            user_email = raw_user_email.encode("iso8859-1").decode("utf8")
-            password = raw_password.encode("iso8859-1").decode("utf8")
+            user_email = urllib.parse.unquote(headers["Auth-User"])
+            password = urllib.parse.unquote(headers["Auth-Pass"])
             ip = urllib.parse.unquote(headers["Client-Ip"])
         except:
-            app.logger.warn(f'Received undecodable user/password from nginx: {raw_user_email!r}/{raw_password!r}')
+            app.logger.warn(f'Received undecodable user/password from nginx: {headers["Auth-User"]!r}/{headers["Auth-Pass"]!r}')
         else:
             try:
                 user = models.User.query.get(user_email) if '@' in user_email else None

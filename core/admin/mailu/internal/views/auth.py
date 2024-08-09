@@ -49,7 +49,7 @@ def nginx_authentication():
         if not is_port_25:
             utils.limiter.exempt_ip_from_ratelimits(client_ip)
     elif is_valid_user:
-        password = urllib.parse.unquote(headers.get('Auth-Pass', None))
+        password = urllib.parse.unquote(headers.get('Auth-Pass', ''))
         utils.limiter.rate_limit_user(username, client_ip, password=password)
     elif not is_from_webmail:
         utils.limiter.rate_limit_ip(client_ip, username)

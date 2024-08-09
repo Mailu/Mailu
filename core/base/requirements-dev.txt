@@ -1,6 +1,6 @@
 # core/base
-libs/podop
-libs/socrate
+-e libs/podop
+-e libs/socrate
 
 # core/admin
 alembic

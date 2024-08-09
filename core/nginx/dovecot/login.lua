@@ -10,18 +10,28 @@ local http_client = dovecot.http.client {
     max_attempts = 3;
 }
 
+-- on the other end we use urllib.parse.unquote()
+function urlEncode(str)
+    return str:gsub("[^%w_.-~]", function(c)
+        return string.format("%%%02X", string.byte(c))
+    end)
+end
+
 function auth_passdb_lookup(req)
   local auth_request = http_client:request {
     url = "http://{{ ADMIN_ADDRESS }}:8080/internal/auth/email";
   }
   auth_request:add_header('Auth-Port', req.local_port)
-  auth_request:add_header('Auth-User', req.user)
+  local user = urlEncode(req.user)
+  auth_request:add_header('Auth-User', user)
   if req.password ~= nil
   then
-    auth_request:add_header('Auth-Pass', req.password)
+    local password = urlEncode(req.password)
+    auth_request:add_header('Auth-Pass', password)
   end
   auth_request:add_header('Auth-Protocol', req.service)
-  auth_request:add_header('Client-IP', req.remote_ip)
+  local client_ip = urlEncode(req.remote_ip)
+  auth_request:add_header('Client-Ip', client_ip)
   auth_request:add_header('Client-Port', req.remote_port)
   auth_request:add_header('Auth-SSL', req.secured)
   auth_request:add_header('Auth-Method', req.mechanism)

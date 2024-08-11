@@ -63,4 +63,36 @@
   </pre></td>
 </tr>
 {%- endcall %}
+
+{%- for alternative in domain.alternatives %}
+
+{%- call macros.table(datatable=False) %}
+<tr>
+  <th>{% trans %}Alternative Domain name{% endtrans %}</th>
+  <td>{{ alternative.name }}</td>
+</tr>
+<tr>
+  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa {{ 'fa-check-circle text-success' if alternative.check_mx() else 'fa-exclamation-circle text-danger' }}"></i></th>
+  <td>{{ macros.clip("dns_mx") }}<pre id="dns_mx" class="pre-config border bg-light">{{ alternative.dns_mx }}</pre></td>
+</tr>
+<tr>
+  <th>{% trans %}DNS SPF entries{% endtrans %}</th>
+  <td>{{ macros.clip("dns_spf") }}<pre id="dns_spf" class="pre-config border bg-light">{{ alternative.dns_spf }}</pre>
+  </td>
+</tr>
+{%- if alternative.domain.dkim_publickey %}
+<tr>
+  <th>{% trans %}DNS DKIM entry{% endtrans %}</th>
+  <td>{{ macros.clip("dns_dkim") }}<pre id="dns_dkim" class="pre-config border bg-light">{{ alternative.dns_dkim }}</pre></td>
+</tr>
+<tr>
+  <th>{% trans %}DNS DMARC entry{% endtrans %}</th>
+  <td>
+    {{ macros.clip("dns_dmarc") }}<pre id="dns_dmarc" class="pre-config border bg-light">{{ alternative.dns_dmarc }}</pre>
+    {{ macros.clip("dns_dmarc_report") }}<pre id="dns_dmarc_report" class="pre-config border bg-light">{{ alternative.dns_dmarc_report }}</pre>
+  </td>
+</tr>
+{%- endif %}
+{%- endcall %}
+{%- endfor %}
 {%- endblock %}

@@ -201,7 +201,7 @@ msgstr "Zugriff via POP3 erlauben"
 
 #: mailu/ui/forms.py:98
 msgid "Allow the user to spoof the sender (send email as anyone)"
-msgstr ""
+msgstr "Dem Benutzer ermöglichen, den Absender zu fälschen (E-Mail als jedermann senden)"
 
 #: mailu/ui/forms.py:99 mailu/ui/forms.py:117
 #: mailu/ui/templates/user/settings.html:15

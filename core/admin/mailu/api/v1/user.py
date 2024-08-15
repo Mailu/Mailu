@@ -242,8 +242,7 @@ class User(Resource):
         if 'forward_enabled' in data:
             user_found.forward_enabled = data['forward_enabled']
         if 'forward_destination' in data and len(data['forward_destination']) > 0:
-            if len(data['forward_destination']) == 0:
-                user_found.forward_destination = data['forward_destination']
+            user_found.forward_destination = data['forward_destination']
         if 'forward_keep' in data:
             user_found.forward_keep = data['forward_keep']
         if 'reply_enabled' in data:

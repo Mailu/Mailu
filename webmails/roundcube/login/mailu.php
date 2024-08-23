@@ -43,16 +43,6 @@ class mailu extends rcube_plugin
       $currentUser = $_SESSION['username'];
       $originalUser = $_SESSION['mailu_original_username'];
 
-      $link = html::a(
-        sprintf('%s/user/webmail', $rcmail->config->get('support_url')),
-        $this->gettext([
-          'name' => 'impersonationwarninglink',
-          'vars' => [
-            'email' => html::quote($originalUser),
-          ],
-        ]),
-      );
-
       $this->api->output->add_header(html::tag(
         'div',
         'boxwarning',
@@ -60,7 +50,6 @@ class mailu extends rcube_plugin
           'name' => 'impersonationwarning',
           'vars' => [
             'email' => html::quote($currentUser),
-            'link' => $link,
           ],
         ]),
       ));

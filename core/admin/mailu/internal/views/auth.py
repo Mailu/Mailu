@@ -73,7 +73,11 @@ def user_authentication():
         and flask_login.current_user.enabled):
         response = flask.Response()
         original_email = flask_login.current_user.get_id()
-        email = flask.session.get('webmail_user_email', original_email)
+
+        email = flask.request.headers.get('X-User-Email', original_email)
+        if (email != original_email and not utils.is_owner(original_email, email)):
+            return flask.abort(403)
+
         response.headers["X-User"] = models.IdnaEmail.process_bind_param(flask_login, email, "")
         response.headers["X-User-Token"] = utils.gen_temp_token(email, flask.session)
         response.headers["X-Original-User"] = models.IdnaEmail.process_bind_param(flask_login, original_email, "")

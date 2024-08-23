@@ -15,7 +15,7 @@ $config['enable_spellcheck'] = true;
 $config['spellcheck_engine'] = 'pspell';
 $config['spellcheck_languages'] = array('en'=>'English (US)', 'uk'=>'English (UK)', 'de'=>'Deutsch', 'fr'=>'French', 'ru'=>'Russian');
 $config['session_lifetime'] = {{ (((PERMANENT_SESSION_LIFETIME | default(10800)) | int)/3600) | int }};
-$config['request_path'] = '{{ WEB_WEBMAIL or "none" }}';
+$config['request_path'] = $_SERVER['HTTP_X_REMOTE_BASE_URL'];
 $config['trusted_host_patterns'] = [ {{ HOSTNAMES.split(",") | map("tojson") | join(',') }}];
 
 {% if (FULL_TEXT_SEARCH or '').lower() not in ['off', 'false', '0'] %}

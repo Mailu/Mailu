@@ -168,9 +168,6 @@ def user_webmail(user_email):
 
     flask.session['webmail_user_email'] = user.get_id()
 
-    if (user_email):
-        return flask.render_template('webmail_impersonation.html', user_email=user_email)
-
     return flask.redirect(f'{app.config["WEB_WEBMAIL"]}/sso.php')
 
 

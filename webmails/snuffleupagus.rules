@@ -39,7 +39,9 @@ sp.disable_function.function("chmod").param("permissions").value("438").drop();
 sp.disable_function.function("chmod").param("permissions").value("511").drop();
 
 # Prevent various `mail`-related vulnerabilities
+# Uncommend the second rule if you're using php8.3+
 sp.disable_function.function("mail").param("additional_parameters").value_r("\\-").drop();
+sp.disable_function.function("mail").param("additional_params").value_r("\\-").drop();
 
 # Since it's now burned, me might as well mitigate it publicly
 sp.disable_function.function("putenv").param("assignment").value_r("LD_").drop()
@@ -52,8 +54,7 @@ sp.disable_function.function("putenv").param("assignment").value_r("GCONV_").dro
 sp.disable_function.function("extract").param("array").value_r("^_").drop()
 sp.disable_function.function("extract").param("flags").value("0").drop()
 
-# This is also burned:
-# ini_set('open_basedir','..');chdir('..');…;chdir('..');ini_set('open_basedir','/');echo(file_get_contents('/etc/passwd'));
+# See https://dustri.org/b/ini_set-based-open_basedir-bypass.html
 # Since we have no way of matching on two parameters at the same time, we're
 # blocking calls to open_basedir altogether: nobody is using it via ini_set anyway.
 # Moreover, there are non-public bypasses that are also using this vector ;)
@@ -118,6 +119,10 @@ sp.disable_function.function("curl_setopt").param("value").value("2").allow();
 # `81` is SSL_VERIFYHOST and `64` SSL_VERIFYPEER
 sp.disable_function.function("curl_setopt").param("option").value("64").drop().alias("Please don't turn CURLOPT_SSL_VERIFYCLIENT off.");
 sp.disable_function.function("curl_setopt").param("option").value("81").drop().alias("Please don't turn CURLOPT_SSL_VERIFYHOST off.");
+
+# Ensure that file:// protocol is not allowed in CURL
+sp.disable_function.function("curl_setopt").param("value").value_r("file://").drop().alias("file:// protocol is disabled");
+sp.disable_function.function("curl_init").param("url").value_r("file://").drop().alias("file:// protocol is disabled");
 
 # File upload
 sp.disable_function.function("move_uploaded_file").param("to").value_r("\\.ph").drop();

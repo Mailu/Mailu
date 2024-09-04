@@ -34,9 +34,27 @@ class mailu extends rcube_plugin
       );
     }
     // sso
-    if (empty($_SESSION['user_id'])) {
+    if (empty($_SESSION['username']) || (!empty($_SERVER['HTTP_X_REMOTE_USER']) && $_SESSION['username'] !== $_SERVER['HTTP_X_REMOTE_USER'])) {
+      $args['task'] = 'login';
       $args['action'] = 'login';
     }
+
+    if (!$rcmail->output->framed && !empty($_SESSION['mailu_original_username']) && $_SESSION['mailu_original_username'] !== $_SESSION['username']) {
+      $currentUser = $_SESSION['username'];
+      $originalUser = $_SESSION['mailu_original_username'];
+
+      $this->api->output->add_header(html::tag(
+        'div',
+        'boxwarning',
+        $this->gettext([
+          'name' => 'impersonationwarning',
+          'vars' => [
+            'email' => html::quote($currentUser),
+          ],
+        ]),
+      ));
+    }
+
     return $args;
   }
 
@@ -54,6 +72,8 @@ class mailu extends rcube_plugin
 
     $args['user'] = $_SERVER['HTTP_X_REMOTE_USER'];
     $args['pass'] = $_SERVER['HTTP_X_REMOTE_USER_TOKEN'];
+
+    $_SESSION['mailu_original_username'] = $_SERVER['HTTP_X_REMOTE_ORIGINAL_USER'];
 
     $args['cookiecheck'] = false;
     $args['valid'] = true;

@@ -19,7 +19,7 @@ import string
 import time
 
 from multiprocessing import Value
-from mailu import limiter
+from mailu import limiter, models
 from flask import current_app as app
 
 import flask
@@ -499,14 +499,24 @@ class MailuSessionExtension:
 cleaned = Value('i', False)
 session = MailuSessionExtension()
 
+def is_owner(owner_email, user_email):
+    owner = models.User.query.get(owner_email)
+    user = models.User.query.get(user_email)
+    if (not owner or not user):
+        return False
+
+    return (
+        user.email == owner.email
+        or user.domain in owner.get_managed_domains()
+    )
+
 # this is used by the webmail to authenticate IMAP/SMTP
 def verify_temp_token(email, token):
     try:
         if token.startswith('token-'):
             if sessid := app.session_store.get(token):
                 session = MailuSession(sessid, app)
-                if session.get('_user_id', '') == email:
-                    return True
+                return is_owner(session.get('_user_id'), email)
     except:
         pass
 

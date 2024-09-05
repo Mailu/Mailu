@@ -24,7 +24,7 @@ def user_create(domain_name):
             flask.url_for('.user_list', domain_name=domain.name))
     form = forms.UserForm()
     form.pw.validators = [wtforms.validators.DataRequired()]
-    form.quota_bytes.default = app.config['DEFAULT_QUOTA']
+    form.quota_bytes.default = int(app.config['DEFAULT_QUOTA'])
     if domain.max_quota_bytes:
         form.quota_bytes.validators = [
             wtforms.validators.NumberRange(max=domain.max_quota_bytes)]

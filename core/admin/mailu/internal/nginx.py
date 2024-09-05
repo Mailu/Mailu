@@ -19,6 +19,9 @@ STATUSES = {
     }),
     "encryption": ("Must issue a STARTTLS command first", {
         "smtp": "530 5.7.0"
+        "submission": "530 5.7.0",
+        "pop3": "-ERR Authentication canceled.",
+        "sieve": "ENCRYPT-NEEDED"
     }),
     "ratelimit": ("Temporary authentication failure (rate-limit)", {
         "imap": "LIMIT",

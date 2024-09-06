@@ -72,7 +72,7 @@ def handle_authentication(headers):
     # Incoming mail, no authentication
     if method in ['', 'none'] and protocol in ['smtp', 'lmtp']:
         server, port = get_server(protocol, False)
-        if app.config["INBOUND_TLS_ENFORCE"]:
+        if app.config["INBOUND_TLS_ENFORCE"] and protocol == 'smtp':
             if "Auth-SSL" in headers and headers["Auth-SSL"] == "on":
                 return {
                     "Auth-Status": "OK",

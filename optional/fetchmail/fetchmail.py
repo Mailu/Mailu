@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import base64
 import time
 import os
 from pathlib import Path
@@ -32,6 +33,21 @@ poll "{host}" proto {protocol}  port {port}
     {lmtp}
 """
 
+def imaputf7encode(s):
+    """"Encode a string into RFC2060 aka IMAP UTF7"""
+    s=s.replace('&','&-')
+    iters=iter(s)
+    unipart=out=''
+    for c in s:
+        if 0x20<=ord(c)<=0x7f :
+            if unipart!='' :
+                out+='&'+base64.b64encode(unipart.encode('utf-16-be')).decode('ascii').rstrip('=')+'-'
+                unipart=''
+            out+=c
+        else : unipart+=c
+    if unipart!='' :
+        out+='&'+base64.b64encode(unipart.encode('utf-16-be')).decode('ascii').rstrip('=')+'-'
+    return out
 
 def escape_rc_string(arg):
     return "".join("\\x%2x" % ord(char) for char in arg)
@@ -54,7 +70,7 @@ def run(debug):
             options = "options antispam 501, 504, 550, 553, 554"
             options += " ssl" if fetch["tls"] else ""
             options += " keep" if fetch["keep"] else " fetchall"
-            folders = "folders %s" % ((','.join('"' + item + '"' for item in fetch['folders'])) if fetch['folders'] else '"INBOX"')
+            folders = "folders %s" % ((','.join('"' + imaputf7encode(item) + '"' for item in fetch['folders'])) if fetch['folders'] else '"INBOX"')
             fetchmailrc += RC_LINE.format(
                 user_email=escape_rc_string(fetch["user_email"]),
                 protocol=fetch["protocol"],

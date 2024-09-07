@@ -67,7 +67,7 @@ smtp_host_lookup = dns
 smtp_dns_support_level = dnssec
 delay_warning_time = 5m
 smtp_tls_loglevel = 1
-notify_classes = resource, software, delay
+notify_classes = resource, software
 
 ###############
 # Virtual

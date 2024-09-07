@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import base64
+import binascii
 import time
 import os
 from pathlib import Path
@@ -34,20 +34,18 @@ poll "{host}" proto {protocol}  port {port}
 """
 
 def imaputf7encode(s):
-    """"Encode a string into RFC2060 aka IMAP UTF7"""
-    s=s.replace('&','&-')
-    iters=iter(s)
-    unipart=out=''
-    for c in s:
-        if 0x20<=ord(c)<=0x7f :
-            if unipart!='' :
-                out+='&'+base64.b64encode(unipart.encode('utf-16-be')).decode('ascii').rstrip('=')+'-'
-                unipart=''
-            out+=c
-        else : unipart+=c
-    if unipart!='' :
-        out+='&'+base64.b64encode(unipart.encode('utf-16-be')).decode('ascii').rstrip('=')+'-'
-    return out
+    """Encode a string into RFC2060 aka IMAP UTF7"""
+    out = ''
+    enc = ''
+    for c in s.replace('&','&-') + 'X':
+        if '\x20' <= c <= '\x7f':
+            if enc:
+                out += f'&{binascii.b2a_base64(enc.encode("utf-16-be")).rstrip(b"\n=").replace(b"/", b",").decode("ascii")}-'
+                enc = ''
+            out += c
+        else:
+            enc += c
+    return out[:-1]
 
 def escape_rc_string(arg):
     return "".join("\\x%2x" % ord(char) for char in arg)

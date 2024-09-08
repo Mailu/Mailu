@@ -130,6 +130,7 @@ sp.disable_function.function("move_uploaded_file").param("to").value_r("\\.ht").
 
 # Logging lockdown
 sp.disable_function.function("ini_set").param("option").value_r("error_log").drop()
+sp.disable_function.function("ini_set").param("option").value_r("display_errors").filename_r("/var/www/snappymail/snappymail/v/[0-9]+\.[0-9]+\.[0-9]+/app/libraries/snappymail/shutdown.php").allow();
 sp.disable_function.function("ini_set").param("option").value_r("display_errors").drop()
 
 sp.auto_cookie_secure.enable();

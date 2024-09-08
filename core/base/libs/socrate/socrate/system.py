@@ -158,7 +158,7 @@ def forward_text_lines(src, dst):
 
 # runs a process and passes its standard/error output to the standard/error output of the current python script
 def run_process_and_forward_output(cmd):
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8')
 
     stdout_thread = threading.Thread(target=forward_text_lines, args=(process.stdout, sys.stdout))
     stdout_thread.daemon = True

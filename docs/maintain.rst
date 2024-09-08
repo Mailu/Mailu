@@ -47,6 +47,7 @@ In the case of *certbot* you could write a script to be executed as `deploy hook
   cp /etc/letsencrypt/live/domain.com/privkey.pem /mailu/certs/key.pem || exit 1
   cp /etc/letsencrypt/live/domain.com/fullchain.pem /mailu/certs/cert.pem || exit 1
   docker exec mailu_front_1 nginx -s reload
+  docker exec mailu_front_1 doveadm reload
 
 And the certbot command you will use in crontab would look something like:
 

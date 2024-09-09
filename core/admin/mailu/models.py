@@ -685,7 +685,7 @@ in clear-text regardless of the presence of the cache.
 set() containing the sessions to keep
         """
         self.password = password if raw else User.get_password_context().hash(password)
-        if keep_sessions is not True:
+        if keep_sessions is not True and self.email is not None:
             utils.MailuSessionExtension.prune_sessions(uid=self.email, keep=keep_sessions)
 
     def get_managed_domains(self):

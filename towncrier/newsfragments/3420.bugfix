@@ -1,0 +1,1 @@
+The reload functionality of nginx/dovecot upon change of the certificates failed with an error.

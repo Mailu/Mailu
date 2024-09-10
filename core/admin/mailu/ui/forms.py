@@ -1,4 +1,5 @@
 from wtforms import validators, fields, widgets
+from wtforms.validators import ValidationError
 from wtforms_components import fields as fields_
 from flask_babel import lazy_gettext as _
 
@@ -8,6 +9,10 @@ import re
 import ipaddress
 
 LOCALPART_REGEX = r'^[a-zA-Z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&\'*+/=?^_`{|}~-]+)*$'
+
+def checkStrippable(form, field):
+    if field.data.startswith(' ') or field.data.endswith(' '):
+        raise ValidationError(_('Passwords should not start or end with whitespaces'))
 
 class DestinationField(fields.SelectMultipleField):
     """ Allow for multiple emails selection from current user choices and
@@ -68,7 +73,7 @@ class DomainForm(flask_wtf.FlaskForm):
 class DomainSignupForm(flask_wtf.FlaskForm):
     name = fields.StringField(_('Domain name'), [validators.DataRequired()])
     localpart = fields.StringField(_('Initial admin'), [validators.DataRequired()])
-    pw = fields.PasswordField(_('Admin password'), [validators.DataRequired()])
+    pw = fields.PasswordField(_('Admin password'), [validators.DataRequired(), checkStrippable])
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
     pwned = fields.HiddenField(label='', default=-1)
     captcha = flask_wtf.RecaptchaField()
@@ -90,7 +95,7 @@ class RelayForm(flask_wtf.FlaskForm):
 class UserForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('E-mail'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
     pw = fields.PasswordField(_('Password'))
-    pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
+    pw2 = fields.PasswordField(_('Confirm password'), [checkStrippable, validators.EqualTo('pw')])
     pwned = fields.HiddenField(label='', default=-1)
     quota_bytes = fields_.IntegerSliderField(_('Quota'), default=10**9)
     enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)
@@ -105,7 +110,7 @@ class UserForm(flask_wtf.FlaskForm):
 
 class UserSignupForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('Email address'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)])
-    pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
+    pw = fields.PasswordField(_('Password'), [validators.DataRequired(), checkStrippable])
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
     pwned = fields.HiddenField(label='', default=-1)
     submit = fields.SubmitField(_('Sign up'))
@@ -132,7 +137,7 @@ class UserPasswordForm(flask_wtf.FlaskForm):
 
 class UserPasswordChangeForm(flask_wtf.FlaskForm):
     current_pw = fields.PasswordField(_('Current password'), [validators.DataRequired()])
-    pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
+    pw = fields.PasswordField(_('Password'), [validators.DataRequired(), checkStrippable])
     pw2 = fields.PasswordField(_('Password check'), [validators.DataRequired()])
     pwned = fields.HiddenField(label='', default=-1)
     submit = fields.SubmitField(_('Update password'))

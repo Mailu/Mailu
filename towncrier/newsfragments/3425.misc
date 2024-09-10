@@ -1,0 +1,1 @@
+Warn if passwords set from the UI contain leading or trailing whitespaces (see #3425)

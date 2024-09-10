@@ -8,6 +8,10 @@
 {{ domain }}
 {%- endblock %}
 
+{%- block main_action %}
+<a class="btn btn-primary float-right" href="{{ url_for('.manager_list', domain_name=domain.name) }}">{% trans %}Back to{% endtrans %} {% trans %}Manager list{% endtrans %}</a>
+{%- endblock %}
+
 {%- block content %}
 {%- call macros.card() %}
 <form class="form" method="post" role="form">

@@ -64,7 +64,7 @@ test_unsupported()
 
 cmdline = [
     "gunicorn",
-    "--threads", f"{CPU_COUNT}",
+    "--threads", f"{os.environ.get('CPU_COUNT', 1)}",
     # If SUBNET6 is defined, gunicorn must listen on IPv6 as well as IPv4
     "-b", f"{'[::]' if os.environ.get('SUBNET6') else '0.0.0.0'}:8080",
     "--logger-class mailu.Logger",

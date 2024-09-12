@@ -258,8 +258,8 @@ correct syntax. The following file names will be taken as override configuration
    - ``logrotate.conf`` as ``$ROOT/overrides/postfix/logrotate.conf`` - Replaces the logrotate.conf file used for rotating ``POSTFIX_LOG_FILE``.
 - `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory.
 - `Nginx`_ :
-  - All ``*.conf`` files in the ``nginx`` sub-directory.
-  - ``proxy.conf`` in the ``nginx/dovecot`` sub-directory.
+   - All ``*.conf`` files in the ``nginx`` sub-directory.
+   - ``proxy.conf`` in the ``nginx/dovecot`` sub-directory.
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
 - `Roundcube`_ - All ``*.inc.php`` files in the ``roundcube`` sub directory.
 

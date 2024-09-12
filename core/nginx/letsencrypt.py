@@ -57,6 +57,7 @@ while True:
                 break
         except Exception as e:
             log.error(f"Exception while fetching {target}!", exc_info = e)
+            time.sleep(15)
 
     subprocess.call(command)
     subprocess.call(command2)

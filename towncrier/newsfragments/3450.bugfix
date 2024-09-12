@@ -1,0 +1,2 @@
+Ensure we can do more than 100 parallel sessions.
+Allow dovecot's config to be overriden in front too

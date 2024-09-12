@@ -141,6 +141,8 @@ def clean_env():
         for item in os.environ.get('TLS', ALL_PORTS).split(','):
             if item in PORTS_REQUIRING_TLS:
                 os.environ[f'TLS_{item}']='True'
+    if 'CPU_COUNT' not in os.environ:
+        os.environ['CPU_COUNT'] = str(os.cpu_count())
 
 def drop_privs_to(username='mailu'):
     pwnam = getpwnam(username)

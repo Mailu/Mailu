@@ -6,12 +6,13 @@ from flask_babel import lazy_gettext as _
 import flask_login
 import flask_wtf
 import re
+import string
 import ipaddress
 
 LOCALPART_REGEX = r'^[a-zA-Z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&\'*+/=?^_`{|}~-]+)*$'
 
 def checkStrippable(form, field):
-    if field.data.startswith(' ') or field.data.endswith(' '):
+    if field.data != field.data.strip(string.whitespace):
         raise ValidationError(_('Passwords should not start or end with whitespaces'))
 
 class DestinationField(fields.SelectMultipleField):

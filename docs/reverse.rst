@@ -165,7 +165,7 @@ The contents for the static configuration file. The static configuration file mu
       address: :993
     mailu-pop3s:
       address: :995
-    mailu-smtps:
+    mailu-submissions:
       address: :465
     mailu-sieve:
       address: :4190
@@ -180,7 +180,7 @@ The contents for the static configuration file. The static configuration file mu
     filePath: "/var/log/traefik.log"
 
 
-This is the contents for the dynamic configuration. You can use and filename you want.
+This is the contents for the dynamic configuration. You can use any filename you want.
 The extension must end with .yml and the file must be placed in the configured directory for
 dynamic configuration files.
 
@@ -210,11 +210,11 @@ dynamic configuration files.
         service: "mailu-websecure"
         tls:
           passthrough: true
-      mailu-smtp:
+      mailu-submissions:
         entryPoints:
-          - mailu-smtp
+          - mailu-submissions
         rule: "HostSNI(`*`)"
-        service: "mailu-smtp"
+        service: "mailu-submissions"
       mailu-imaps:
         entryPoints:
           - mailu-imaps
@@ -229,11 +229,11 @@ dynamic configuration files.
         service: "mailu-pop3s"
         tls:
           passthrough: true
-      mailu-smtps:
+      mailu-submissions:
         entryPoints:
-          - mailu-smtps
+          - mailu-submissions
         rule: "HostSNI(`*`)"
-        service: "mailu-smtps"
+        service: "mailu-submissions"
         tls:
           passthrough: true
       mailu-sieve:
@@ -254,7 +254,7 @@ dynamic configuration files.
             version: 2
           servers:
             - address: "mailu-server:25"
-      mailu-smtps:
+      mailu-submissions:
         loadBalancer:
           proxyProtocol:
             version: 2

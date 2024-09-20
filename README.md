@@ -28,6 +28,15 @@ Main features include:
 
 ![Domains](docs/assets/screenshots/domains.png)
 
+Self-Host Mailu
+============
+
+### Elestio
+
+You can deploy Mailu on Elestio using one-click deployment. Elestio supports Mailu by providing revenue share so go ahead and click below to deploy and use Mailu.
+
+[![Deploy on Elestio](https://elest.io/images/logos/deploy-to-elestio-btn.png)](https://elest.io/open-source/mailu)
+
 Contributing
 ============
 

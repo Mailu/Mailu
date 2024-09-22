@@ -22,6 +22,7 @@ command = [
     "--preferred-challenges", "http", "--http-01-port", "8008",
     "--keep-until-expiring",
     "--allow-subset-of-names",
+    "--key-type", "rsa",
     "--renew-with-new-domains",
     "--config-dir", "/certs/letsencrypt",
     "--post-hook", "/config.py"

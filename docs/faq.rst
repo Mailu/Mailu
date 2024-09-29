@@ -670,7 +670,7 @@ Please note that the provided example will block the subnet from sending any ema
 
   # Fail2Ban configuration file
   [Definition]
-  failregex = : Authentication attempt from <HOST>(?: for (?:[^ ]+@[^ ]+))? has been rate-limited\.$
+  failregex = ^\s?\S+ mailu\-admin\[\d+\]: \[\S+ \S+\] WARNING in limiter: Authentication attempt from <HOST>(?: for (?:[^ ]+@[^ ]+))? has been rate-limited\.$
   ignoreregex =
   journalmatch = CONTAINER_TAG=mailu-admin
 

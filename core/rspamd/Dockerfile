@@ -17,7 +17,7 @@ COPY start.py /
 RUN echo $VERSION >/version
 
 #EXPOSE 11332/tcp 11334/tcp 11335/tcp
-HEALTHCHECK --start-period=350s CMD curl -skfLo /dev/null http://localhost:11334/
+HEALTHCHECK --start-period=350s CMD curl -m3 -skfLo /dev/null http://localhost:11334/
 
 VOLUME ["/var/lib/rspamd"]
 

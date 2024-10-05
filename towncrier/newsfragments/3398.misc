@@ -1,0 +1,2 @@
+Disable HARDENED_MALLOC unless the requirements are met
+Ensure the healthchecks timeout

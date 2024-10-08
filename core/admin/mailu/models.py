@@ -20,6 +20,7 @@ import smtplib
 import idna
 import dns.resolver
 import dns.exception
+import re
 
 from flask import current_app as app
 from sqlalchemy.ext import declarative
@@ -343,6 +344,53 @@ class Domain(Base):
             return False
 
 
+    def check_spf(self):
+        """ checks if SPF record for domain points to mailu host """
+        try:
+            hostnames = app.config['HOSTNAMES'].replace(',', '|')
+            return any(
+                re.search(f'^"v=spf1 mx a:({hostnames}) [?+-~]all"$', rset.to_text())
+                for rset in dns.resolver.resolve(self.name, 'TXT')
+            )
+        except dns.exception.DNSException:
+            return False
+
+
+    def check_dkim(self):
+        """ checks if DKIM record for domain points to mailu host """
+        try:
+            selector = app.config['DKIM_SELECTOR']
+            return any(
+                rset.to_text().replace('" "', '') == f'"v=DKIM1; k=rsa; p={self.dkim_publickey}"'
+                for rset in dns.resolver.resolve(f'{selector}._domainkey.{self.name}.', 'TXT')
+            )
+        except dns.exception.DNSException:
+            return False
+
+
+    def check_dmarc(self):
+        """ checks if DMARC record for domain points to mailu host """
+        try:
+            return any(
+                rset.to_text().startswith('"v=DMARC1;')
+                for rset in dns.resolver.resolve(f'_dmarc.{self.name}.', 'TXT')
+            )
+        except dns.exception.DNSException:
+            return False
+
+
+    def check_dmarc_report(self):
+        """ checks if DMARC Report record for domain points to mailu host """
+        app_config_domain = app.config['DOMAIN']
+        try:
+            return any(
+                rset.to_text() == '"v=DMARC1"'
+                for rset in dns.resolver.resolve(f'{self.name}._report._dmarc.{app_config_domain}.', 'TXT')
+            )
+        except dns.exception.DNSException:
+            return False
+
+
 class Alternative(Base):
     """ Alternative name for a served domain.
         The name "domain alias" was avoided to prevent some confusion.
@@ -399,6 +447,53 @@ class Alternative(Base):
             return any(
                 rset.exchange.to_text().rstrip('.') in hostnames
                 for rset in dns.resolver.resolve(self.name, 'MX')
+            )
+        except dns.exception.DNSException:
+            return False
+
+
+    def check_spf(self):
+        """ checks if SPF record for domain points to mailu host """
+        try:
+            hostnames = app.config['HOSTNAMES'].replace(',', '|')
+            return any(
+                re.search(f'^"v=spf1 mx a:({hostnames}) [?+-~]all"$', rset.to_text())
+                for rset in dns.resolver.resolve(self.name, 'TXT')
+            )
+        except dns.exception.DNSException:
+            return False
+
+
+    def check_dkim(self):
+        """ checks if DKIM record for domain points to mailu host """
+        try:
+            selector = app.config['DKIM_SELECTOR']
+            return any(
+                rset.to_text().replace('" "', '') == f'"v=DKIM1; k=rsa; p={self.domain.dkim_publickey}"'
+                for rset in dns.resolver.resolve(f'{selector}._domainkey.{self.name}.', 'TXT')
+            )
+        except dns.exception.DNSException:
+            return False
+
+
+    def check_dmarc(self):
+        """ checks if DMARC record for domain points to mailu host """
+        try:
+            return any(
+                rset.to_text().startswith('"v=DMARC1;')
+                for rset in dns.resolver.resolve(f'_dmarc.{self.name}.', 'TXT')
+            )
+        except dns.exception.DNSException:
+            return False
+
+
+    def check_dmarc_report(self):
+        """ checks if DMARC Report record for domain points to mailu host """
+        app_config_domain = app.config['DOMAIN']
+        try:
+            return any(
+                rset.to_text() == '"v=DMARC1"'
+                for rset in dns.resolver.resolve(f'{self.name}._report._dmarc.{app_config_domain}.', 'TXT')
             )
         except dns.exception.DNSException:
             return False

@@ -50,7 +50,7 @@ def alternative_delete(alternative):
 
 @ui.route('/alternative/<alternative>/check/mx', methods=['GET'])
 @access.domain_admin(models.Alternative, 'alternative')
-def check_mx(alternative):
+def alternative_check_mx(alternative):
     alternative = models.Alternative.query.get(alternative) or flask.abort(404)
     result = alternative.check_mx()
     return flask.redirect("/static/success.png" if result else "/static/failed.png")
@@ -58,7 +58,7 @@ def check_mx(alternative):
 
 @ui.route('/alternative/<alternative>/check/spf', methods=['GET'])
 @access.domain_admin(models.Alternative, 'alternative')
-def check_spf(alternative):
+def alternative_check_spf(alternative):
     alternative = models.Alternative.query.get(alternative) or flask.abort(404)
     result = alternative.check_spf()
     return flask.redirect("/static/success.png" if result else "/static/failed.png")
@@ -66,7 +66,7 @@ def check_spf(alternative):
 
 @ui.route('/alternative/<alternative>/check/dkim', methods=['GET'])
 @access.domain_admin(models.Alternative, 'alternative')
-def check_dkim(alternative):
+def alternative_check_dkim(alternative):
     alternative = models.Alternative.query.get(alternative) or flask.abort(404)
     result = alternative.check_dkim()
     return flask.redirect("/static/success.png" if result else "/static/failed.png")
@@ -74,7 +74,7 @@ def check_dkim(alternative):
 
 @ui.route('/alternative/<alternative>/check/dmarc', methods=['GET'])
 @access.domain_admin(models.Alternative, 'alternative')
-def check_dmarc(alternative):
+def alternative_check_dmarc(alternative):
     alternative = models.Alternative.query.get(alternative) or flask.abort(404)
     result = alternative.check_dmarc()
     return flask.redirect("/static/success.png" if result else "/static/failed.png")
@@ -82,7 +82,7 @@ def check_dmarc(alternative):
 
 @ui.route('/alternative/<alternative>/check/dmarcreport', methods=['GET'])
 @access.domain_admin(models.Alternative, 'alternative')
-def check_dmarc_report(alternative):
+def alternative_check_dmarc_report(alternative):
     alternative = models.Alternative.query.get(alternative) or flask.abort(404)
     result = alternative.check_dmarc_report()
     return flask.redirect("/static/success.png" if result else "/static/failed.png")

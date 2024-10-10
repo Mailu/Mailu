@@ -149,7 +149,7 @@ def domain_signup(domain_name=None):
 
 @ui.route('/domain/<domain_name>/check/mx', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
-def check_mx(domain_name):
+def domain_check_mx(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     result = domain.check_mx()
     return flask.redirect("/static/success.png" if result else "/static/failed.png")
@@ -157,7 +157,7 @@ def check_mx(domain_name):
 
 @ui.route('/domain/<domain_name>/check/spf', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
-def check_spf(domain_name):
+def domain_check_spf(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     result = domain.check_spf()
     return flask.redirect("/static/success.png" if result else "/static/failed.png")
@@ -165,7 +165,7 @@ def check_spf(domain_name):
 
 @ui.route('/domain/<domain_name>/check/dkim', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
-def check_dkim(domain_name):
+def domain_check_dkim(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     result = domain.check_dkim()
     return flask.redirect("/static/success.png" if result else "/static/failed.png")
@@ -173,7 +173,7 @@ def check_dkim(domain_name):
 
 @ui.route('/domain/<domain_name>/check/dmarc', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
-def check_dmarc(domain_name):
+def domain_check_dmarc(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     result = domain.check_dmarc()
     return flask.redirect("/static/success.png" if result else "/static/failed.png")
@@ -181,7 +181,7 @@ def check_dmarc(domain_name):
 
 @ui.route('/domain/<domain_name>/check/dmarcreport', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
-def check_dmarc_report(domain_name):
+def domain_check_dmarc_report(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
     result = domain.check_dmarc_report()
     return flask.redirect("/static/success.png" if result else "/static/failed.png")

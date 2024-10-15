@@ -1,0 +1,1 @@
+HTTP/2 does not require ipv6; in fact it does not require SSL certs either

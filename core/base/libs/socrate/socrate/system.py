@@ -50,10 +50,11 @@ class LogFilter(object):
                 self.stream.flush()
             self.buffer = rest
 
-    def close(self):
+    def flush(self):
+        # write out buffer on flush even if it's not a complete line
         if self.buffer and not self.pattern.search(self.buffer):
             self.stream.buffer.write(self.buffer)
-        self.stream.close()
+        self.stream.flush()
 
 def _is_compatible_with_hardened_malloc():
     with open('/proc/version', 'r') as f:
@@ -177,4 +178,7 @@ def run_process_and_forward_output(cmd):
     stderr_thread.daemon = True
     stderr_thread.start()
 
-    return process.wait()
+    rc = process.wait()
+    sys.stdout.flush()
+    sys.stderr.flush()
+    return rc

@@ -21,6 +21,9 @@ function sha1(string) {
 }
 
 function hibpCheck(pwd) {
+    if (pwd === null || pwd === undefined || pwd.length === 0) {
+	    return;
+    }
     // We hash the pwd first
     sha1(pwd).then(function(hash){
         // We send the first 5 chars of the hash to hibp's API

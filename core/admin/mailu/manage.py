@@ -481,3 +481,16 @@ def setmanager(domain_name, user_name='manager'):
     domain.managers.append(manageruser)
     db.session.add(domain)
     db.session.commit()
+
+
+@mailu.command()
+@click.argument('domain_name')
+@with_appcontext
+def gendkim(domain_name):
+    """ Generate dkim key for domain_name
+    """
+    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain.generate_dkim_key()
+    models.db.session.add(domain)
+    models.db.session.commit()
+    print(f"Generated dkim pubkey for {domain_name}:\n{domain.dkim_publickey}")

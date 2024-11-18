@@ -18,6 +18,7 @@ context = {}
 context.update(env)
 
 context["MAX_FILESIZE"] = str(int(int(env.get("MESSAGE_SIZE_LIMIT", "50000000")) * 0.66 / 1048576))
+context["MEMORY_LIMIT"] = str(int(env.get("WEBMAIL_MEMORY_LIMIT", "256")))
 
 # Get the first DNS server
 with open("/etc/resolv.conf") as handle:

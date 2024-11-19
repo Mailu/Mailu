@@ -104,7 +104,7 @@ def user(localpart, domain_name, password):
         localpart=localpart,
         domain=domain,
         global_admin=False,
-        change_pw_next_login=True,
+        change_pw_next_login=False,
     )
     user.set_password(password)
     db.session.add(user)
@@ -123,7 +123,7 @@ def password(localpart, domain_name, password):
     user  = models.User.query.get(email)
     if user:
         user.set_password(password)
-        user.change_pw_next_login=True
+        user.change_pw_next_login=False
     else:
         print(f'User {email} not found.')
     db.session.commit()

@@ -9,7 +9,7 @@
 # If the env var is not set, then the default value is used
 #-----------------------------------------------------------------------------------------
 variable "DOCKER_ORG" {
-  default = "mailu"
+  default = "cetmail"
 }
 variable "DOCKER_PREFIX" {
   default = ""

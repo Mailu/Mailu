@@ -698,6 +698,7 @@ def isBadOrPwned(form):
 
 def formatCSVField(field):
     if not field.data:
+        field.data = ''
         return
     if isinstance(field.data,str):
         data = field.data.replace(" ","").split(",")

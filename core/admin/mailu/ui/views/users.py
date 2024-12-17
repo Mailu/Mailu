@@ -24,7 +24,7 @@ def user_create(domain_name):
             flask.url_for('.user_list', domain_name=domain.name))
     form = forms.UserForm()
     form.pw.validators = [wtforms.validators.DataRequired()]
-    form.quota_bytes.default = app.config['DEFAULT_QUOTA']
+    form.quota_bytes.default = int(app.config['DEFAULT_QUOTA'])
     if domain.max_quota_bytes:
         form.quota_bytes.validators = [
             wtforms.validators.NumberRange(max=domain.max_quota_bytes)]
@@ -93,12 +93,12 @@ def user_settings(user_email):
     form = forms.UserSettingsForm(obj=user)
     utils.formatCSVField(form.forward_destination)
     if form.validate_on_submit():
-        if form.forward_enabled.data and (form.forward_destination.data in ['', None] or type(form.forward_destination.data) is list):
+        user.forward_enabled = bool(flask.request.form.get('forward_enabled', False))
+        if user.forward_enabled and not form.forward_destination.data:
             flask.flash('Destination email address is missing', 'error')
-            user.forward_enabled = True
-            return flask.render_template('user/settings.html', form=form, user=user)
-        if form.forward_enabled.data:
-            form.forward_destination.data = form.forward_destination.data.replace(" ","").split(",")
+            return flask.redirect(
+                flask.url_for('.user_settings', user_email=user_email))
+        form.forward_destination.data = form.forward_destination.data.replace(" ","").split(",")
         form.populate_obj(user)
         models.db.session.commit()
         form.forward_destination.data = ", ".join(form.forward_destination.data)
@@ -107,8 +107,9 @@ def user_settings(user_email):
             return flask.redirect(
                 flask.url_for('.user_list', domain_name=user.domain.name))
     elif form.is_submitted() and not form.validate():
-        user.forward_enabled = form.forward_enabled.data
-        return flask.render_template('user/settings.html', form=form, user=user)
+            flask.flash('Error validating the form', 'error')
+            return flask.redirect(
+                flask.url_for('.user_settings', user_email=user_email))
     return flask.render_template('user/settings.html', form=form, user=user)
 
 def _process_password_change(form, user_email):

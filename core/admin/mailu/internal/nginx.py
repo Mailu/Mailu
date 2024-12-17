@@ -18,7 +18,11 @@ STATUSES = {
         "sieve": "AuthFailed"
     }),
     "encryption": ("Must issue a STARTTLS command first", {
-        "smtp": "530 5.7.0"
+        "imap": "PRIVACYREQUIRED",
+        "smtp": "530 5.7.0",
+        "submission": "530 5.7.0",
+        "pop3": "-ERR Authentication canceled.",
+        "sieve": "ENCRYPT-NEEDED"
     }),
     "ratelimit": ("Temporary authentication failure (rate-limit)", {
         "imap": "LIMIT",
@@ -68,7 +72,7 @@ def handle_authentication(headers):
     # Incoming mail, no authentication
     if method in ['', 'none'] and protocol in ['smtp', 'lmtp']:
         server, port = get_server(protocol, False)
-        if app.config["INBOUND_TLS_ENFORCE"]:
+        if app.config["INBOUND_TLS_ENFORCE"] and protocol == 'smtp':
             if "Auth-SSL" in headers and headers["Auth-SSL"] == "on":
                 return {
                     "Auth-Status": "OK",
@@ -91,20 +95,14 @@ def handle_authentication(headers):
     # Authenticated user
     elif method in ['plain', 'login']:
         is_valid_user = False
-        # According to RFC2616 section 3.7.1 and PEP 3333, HTTP headers should
-        # be ASCII and are generally considered ISO8859-1. However when passing
-        # the password, nginx does not transcode the input UTF string, thus
-        # we need to manually decode.
-        raw_user_email = urllib.parse.unquote(headers["Auth-User"])
-        raw_password = urllib.parse.unquote(headers["Auth-Pass"])
         user_email = 'invalid'
         password = 'invalid'
         try:
-            user_email = raw_user_email.encode("iso8859-1").decode("utf8")
-            password = raw_password.encode("iso8859-1").decode("utf8")
+            user_email = urllib.parse.unquote(headers["Auth-User"])
+            password = urllib.parse.unquote(headers["Auth-Pass"])
             ip = urllib.parse.unquote(headers["Client-Ip"])
         except:
-            app.logger.warn(f'Received undecodable user/password from nginx: {raw_user_email!r}/{raw_password!r}')
+            app.logger.warn(f'Received undecodable user/password from front: {headers.get("Auth-User", "")!r}')
         else:
             try:
                 user = models.User.query.get(user_email) if '@' in user_email else None

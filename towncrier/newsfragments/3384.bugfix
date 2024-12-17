@@ -1,0 +1,1 @@
+Ensure that file:// protocol is not allowed in CURL

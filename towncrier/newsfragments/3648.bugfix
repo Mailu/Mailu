@@ -1,0 +1,1 @@
+Upgrade snappymail to v2.38.2 ; this is a security fix for GHSA-2rq7-79vp-ffxm (mXSS)

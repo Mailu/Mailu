@@ -29,7 +29,6 @@ def nginx_authentication():
         response.headers['Auth-Status'] = status
         response.headers['Auth-Error-Code'] = code
         return response
-    raw_password = urllib.parse.unquote(headers['Auth-Pass']) if 'Auth-Pass' in headers else ''
     headers = nginx.handle_authentication(flask.request.headers)
     response = flask.Response()
     for key, value in headers.items():
@@ -50,14 +49,8 @@ def nginx_authentication():
         if not is_port_25:
             utils.limiter.exempt_ip_from_ratelimits(client_ip)
     elif is_valid_user:
-        password = None
-        try:
-            password = raw_password.encode("iso8859-1").decode("utf8")
-        except:
-            app.logger.warn(f'Received undecodable password for {username} from nginx: {raw_password!r}')
-            utils.limiter.rate_limit_user(username, client_ip, password=None)
-        else:
-            utils.limiter.rate_limit_user(username, client_ip, password=password)
+        password = urllib.parse.unquote(headers.get('Auth-Pass', ''))
+        utils.limiter.rate_limit_user(username, client_ip, password=password)
     elif not is_from_webmail:
         utils.limiter.rate_limit_ip(client_ip, username)
     return response

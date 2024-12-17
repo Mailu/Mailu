@@ -31,30 +31,29 @@ def _coerce_value(value):
 
 class LogFilter(object):
     def __init__(self, stream, re_patterns):
-        self.stream = stream
-        if isinstance(re_patterns, list):
-            self.pattern = re.compile('|'.join([fr'(?:{pattern})' for pattern in re_patterns]))
-        elif isinstance(re_patterns, str):
-            self.pattern = re.compile(re_patterns)
-        else:
-            self.pattern = re_patterns
-        self.found = False
+        self.stream  = stream
+        self.pattern = re.compile(b'|'.join([b''.join([b'(?:', pattern, b')']) for pattern in re_patterns]))
+        self.buffer  = b''
 
     def __getattr__(self, attr_name):
         return getattr(self.stream, attr_name)
 
     def write(self, data):
-        if data == '\n' and self.found:
-            self.found = False
-        else:
-            if not self.pattern.search(data):
-                self.stream.write(data)
+        if type(data) is str:
+            data = data.encode('utf-8')
+        self.buffer += data
+        while b'\n' in self.buffer:
+            line, cr, rest = self.buffer.partition(b'\n')
+            if not self.pattern.search(line):
+                self.stream.buffer.write(line)
+                self.stream.buffer.write(cr)
                 self.stream.flush()
-            else:
-                # caught bad pattern
-                self.found = True
+            self.buffer = rest
 
     def flush(self):
+        # write out buffer on flush even if it's not a complete line
+        if self.buffer and not self.pattern.search(self.buffer):
+            self.stream.buffer.write(self.buffer)
         self.stream.flush()
 
 def _is_compatible_with_hardened_malloc():
@@ -100,7 +99,7 @@ def set_env(required_secrets=[], log_filters=[]):
     for secret in required_secrets:
         os.environ[f'{secret}_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray(secret, 'utf-8'), 'sha256').hexdigest()
 
-    os.system('find /run -xdev -type f -name \*.pid -print -delete')
+    os.system(r'find /run -xdev -type f -name \*.pid -print -delete')
 
     return {
             key: _coerce_value(os.environ.get(key, value))
@@ -108,8 +107,41 @@ def set_env(required_secrets=[], log_filters=[]):
            }
 
 def clean_env():
-    """ remove all secret keys """
+    """ remove all secret keys, normalize PROXY_PROTOCOL """
     [os.environ.pop(key, None) for key in os.environ.keys() if key.endswith("_KEY")]
+    # Configure PROXY_PROTOCOL
+    PROTO_MAIL=['25', '110', '995', '143', '993', '587', '465', '4190']
+    PROTO_ALL_BUT_HTTP=PROTO_MAIL.copy()
+    PROTO_ALL_BUT_HTTP.extend(['443'])
+    PROTO_ALL=PROTO_ALL_BUT_HTTP.copy()
+    PROTO_ALL.extend(['80'])
+    for item in os.environ.get('PROXY_PROTOCOL', '').split(','):
+        if item.isdigit():
+            os.environ[f'PROXY_PROTOCOL_{item}']='True'
+        elif item == 'mail':
+            for p in PROTO_MAIL: os.environ[f'PROXY_PROTOCOL_{p}']='True'
+        elif item == 'all-but-http':
+            for p in PROTO_ALL_BUT_HTTP: os.environ[f'PROXY_PROTOCOL_{p}']='True'
+        elif item == 'all':
+            for p in PROTO_ALL: os.environ[f'PROXY_PROTOCOL_{p}']='True'
+        elif item == '':
+            pass
+        else:
+            log.error(f'Not sure what to do with {item} in PROXY_PROTOCOL ({args.get("PROXY_PROTOCOL")})')
+
+    PORTS_REQUIRING_TLS=['443', '465', '993', '995']
+    ALL_PORTS='25,80,443,465,993,995,4190'
+    for item in os.environ.get('PORTS', ALL_PORTS).split(','):
+        if item in PORTS_REQUIRING_TLS and os.environ.get('TLS_FLAVOR','') == 'notls':
+            continue
+        os.environ[f'PORT_{item}']='True'
+
+    if os.environ.get('TLS_FLAVOR', '') != 'notls':
+        for item in os.environ.get('TLS', ALL_PORTS).split(','):
+            if item in PORTS_REQUIRING_TLS:
+                os.environ[f'TLS_{item}']='True'
+    if 'CPU_COUNT' not in os.environ:
+        os.environ['CPU_COUNT'] = str(os.cpu_count())
 
 def drop_privs_to(username='mailu'):
     pwnam = getpwnam(username)
@@ -127,7 +159,7 @@ def forward_text_lines(src, dst):
 
 # runs a process and passes its standard/error output to the standard/error output of the current python script
 def run_process_and_forward_output(cmd):
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     stdout_thread = threading.Thread(target=forward_text_lines, args=(process.stdout, sys.stdout))
     stdout_thread.daemon = True
@@ -137,4 +169,7 @@ def run_process_and_forward_output(cmd):
     stderr_thread.daemon = True
     stderr_thread.start()
 
-    process.wait()
+    rc = process.wait()
+    sys.stdout.flush()
+    sys.stderr.flush()
+    return rc

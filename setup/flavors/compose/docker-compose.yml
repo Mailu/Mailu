@@ -217,7 +217,7 @@ services:
   # Optional services
   {% if antivirus_enabled %}
   antivirus:
-    image: clamav/clamav-debian:1.2.0-6
+    image: clamav/clamav-debian:1.2.3-45
     restart: always
     logging:
       driver: journald

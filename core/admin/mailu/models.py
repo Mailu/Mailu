@@ -279,7 +279,7 @@ class Domain(Base):
             f'_{proto}._tcp.{self.name}. 600 IN SRV {prio} 1 {port} {hostname}.' if port in ports else f'_{proto}._tcp.{self.name}. 600 IN SRV 0 0 0 .'
             for proto, port, prio
             in protocols
-        ]+[f'autoconfig.{self.name}. 600 IN CNAME {hostname}.']
+        ]+[f'autoconfig.{self.name}. 600 IN CNAME {hostname}.', f'autodiscover.{self.name}. 600 IN CNAME {hostname}.']
 
     @cached_property
     def dns_tlsa(self):
@@ -680,7 +680,7 @@ in clear-text regardless of the presence of the cache.
 set() containing the sessions to keep
         """
         self.password = password if raw else User.get_password_context().hash(password)
-        if keep_sessions is not True:
+        if keep_sessions is not True and self.email is not None:
             utils.MailuSessionExtension.prune_sessions(uid=self.email, keep=keep_sessions)
 
     def get_managed_domains(self):

@@ -111,3 +111,87 @@ in mailu.env:
   WEBROOT_REDIRECT=/sso/login
 
 Using the above configuration, Traefik will proxy all the traffic related to Mailu's FQDNs without requiring duplicate certificates.
+
+.. _caddy_proxy:
+
+Caddy as reverse proxy
+----------------------
+
+This setup is suitable for when you want to serve Wordpress or other web-facing applications (on port 80 and 443)
+on your domains from the same machine as Mailu.
+
+This setup is simpler than using Traefik, and only deals with the reverse proxying of the web-facing applications,
+leaving MailU to serve the ports related to sendmail and its related services (25, 110, 143, 465, 587, 993, 995, 4190).
+
+.. note::
+  In the following example, I assume that MailU is set up in `/opt/mailu` and Wordpress in `/opt/wordpress`.
+
+In your docker-compose.yml, remove 80 and 443 from the `ports` section of the `front` container.
+
+Create a standalone docker-compose file for Caddy, in `/opt/caddy` with something similar to the following:
+
+.. code-block:: yaml
+
+  services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    volumes:
+      - "/opt/caddy/conf:/etc/caddy"
+      - "/opt/caddy/data:/data"
+      - /opt/mailu/certs/letsencrypt:/certs:ro
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    dns:
+      - 192.168.203.254
+    networks:
+      - mailu_default
+      - wordpress_default
+  networks:
+  mailu_default:
+    external: true
+  wordpress_default:
+    external: true
+
+The volumes section is important, as it mounts the Let's Encrypt certificates into the container (readonly), so
+that Caddy can use them to serve the SSL certificates. Also note that the caddy container is on the same network
+as the front and wordpress containers, so that it can reach them.
+
+In `/opt/caddy/conf/`, create a file called `Caddyfile` with the following contents:
+
+.. code-block:: text
+
+  # Handle ACME challenge requests before applying the HTTP to HTTPS redirection
+  http:// {
+    handle /.well-known/acme-challenge/* {
+      reverse_proxy front:80
+    }
+    # Redirect all other HTTP traffic to HTTPS
+    handle {
+      redir https://{host}{uri}
+    }
+  }
+
+  mail.your_domain_name.com {
+    tls /certs/live/mailu/fullchain.pem /certs/live/mailu/privkey.pem
+    reverse_proxy front:80
+  }
+  www.your_domain_name.com {
+    tls /certs/live/mailu/fullchain.pem /certs/live/mailu/privkey.pem
+    reverse_proxy wordpress:80
+  }
+  your_domain_name.com {
+    tls /certs/live/mailu/fullchain.pem /certs/live/mailu/privkey.pem
+    reverse_proxy wordpress:80
+  }
+
+The first few lines are for handling the ACME challenge requests before applying the HTTP to HTTPS redirection.
+Note that this setup leaves the responsibility of managing and refreshing the Let's Encrypt certificates to Mailu,
+and Caddy will only be responsible for serving the SSL certificates given to it.
+
+If you are serving multiple web-facing applications using different names, you can add thoose names
+to the `Caddyfile` as well, reverse-proxying them to the correct container and port for each application,
+and make sure that the container is accessible from the Caddy container by adding its network to the
+networks section of the Caddy container's Docker Compose file.

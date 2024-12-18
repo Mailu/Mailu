@@ -176,15 +176,21 @@ In `/opt/caddy/conf/`, create a file called `Caddyfile` with the following conte
 
   mail.your_domain_name.com {
     tls /certs/live/mailu/fullchain.pem /certs/live/mailu/privkey.pem
-    reverse_proxy front:80
+    reverse_proxy front:80 {
+      header_up X-Real-IP {remote}
+    }
   }
   www.your_domain_name.com {
     tls /certs/live/mailu/fullchain.pem /certs/live/mailu/privkey.pem
-    reverse_proxy wordpress:80
+    reverse_proxy wordpress:80 {
+      header_up X-Real-IP {remote}
+    }
   }
   your_domain_name.com {
     tls /certs/live/mailu/fullchain.pem /certs/live/mailu/privkey.pem
-    reverse_proxy wordpress:80
+    reverse_proxy wordpress:80 {
+      header_up X-Real-IP {remote}
+    }
   }
 
 The first few lines are for handling the ACME challenge requests before applying the HTTP to HTTPS redirection.
@@ -195,3 +201,13 @@ If you are serving multiple web-facing applications using different names, you c
 to the `Caddyfile` as well, reverse-proxying them to the correct container and port for each application,
 and make sure that the container is accessible from the Caddy container by adding its network to the
 networks section of the Caddy container's Docker Compose file.
+
+In addition, make sure to add the following to the `mailu.env` file:
+
+.. code-block:: docker
+
+  REAL_IP_FROM=192.168.203.0/24
+  REAL_IP_HEADER=X-Forwarded-For
+
+This ensures that the X-Forwarded-For header is used to determine the client IP address, instead of the
+local IP address of the Caddy container (and will interact properly with the builtin rate-limiting).

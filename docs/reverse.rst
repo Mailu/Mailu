@@ -211,8 +211,8 @@ In `/opt/caddy/conf/`, create a file called `Caddyfile` with the following conte
     import acme
     import mta-sts
     reverse_proxy {args[0]} {
-      header_up X-Real-IP {remote_ip}
-      header_up X-Real-Port {http.request.remote.port}
+      header_up X-Real-IP {remote_host}
+      header_up X-Real-Port {remote_port}
     }
   }
 

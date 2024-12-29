@@ -465,7 +465,7 @@ jobs:
   deploy:
     name: Deploy images
     # Deploying is not required for staging
-    if: inputs.deploy == 'true'
+    if: inputs.deploy == true
     runs-on: ubuntu-latest
     needs:
       - build
@@ -534,7 +534,7 @@ jobs:
 
 #This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.
   tag-release:
-    if: inputs.release == 'true'
+    if: inputs.release == true
     runs-on: ubuntu-latest
     needs:
       - deploy

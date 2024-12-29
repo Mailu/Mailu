@@ -93,8 +93,8 @@ jobs:
       pinned_mailu_version: ${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}
       docker_org: ${{needs.derive-variables.outputs.DOCKER_ORG}}
       branch: ${{needs.derive-variables.outputs.BRANCH}}
-      deploy: ${{needs.derive-variables.outputs.DEPLOY == 'true'}}
-      release: ${{needs.derive-variables.outputs.RELEASE == 'true'}}
+      deploy: ${{needs.derive-variables.outputs.DEPLOY}}
+      release: ${{needs.derive-variables.outputs.RELEASE}}
     secrets: inherit
 
 ################################################

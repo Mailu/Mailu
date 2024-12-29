@@ -4,6 +4,9 @@ on:
     branches:
       - master
       - oidc
+  push:
+    branches:
+      - '2024.06'
   merge_group:
 
 concurrency: ci-multiarch-${{ github.ref }}

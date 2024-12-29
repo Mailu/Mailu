@@ -20,8 +20,11 @@ import smtplib
 import idna
 import dns.resolver
 import dns.exception
+# [OIDC] Import Flask-Login
+import flask_login
 
-from flask import current_app as app
+# [OIDC] Import the session extension
+from flask import current_app as app, session
 from sqlalchemy.ext import declarative
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
@@ -532,7 +535,8 @@ class User(Base, Email):
     change_pw_next_login = db.Column(db.Boolean, nullable=False, default=False)
 
     # Flask-login attributes
-    is_authenticated = True
+    # [OIDC] See is_authenticated property below
+    _is_authenticated = True
     is_active = True
     is_anonymous = False
 
@@ -550,6 +554,36 @@ class User(Base, Email):
             return ','.join(result)
         else:
             return self.email
+
+    # [OIDC] is_authenticated property getter
+    @property
+    def is_authenticated(self):
+        if 'oidc_token' not in session:
+            return self._is_authenticated
+        token = utils.oic_client.check_validity(self.openid_token)
+        if token is None:
+            flask_login.logout_user()
+            session.destroy()
+            return False
+        session['openid_token'] = token
+        return True
+    
+    # [OIDC] is_authenticated property setter
+    @is_authenticated.setter
+    def is_authenticated(self, value):
+        if 'oidc_token' not in session:
+            self._is_authenticated = value
+    
+    # [OIDC] is_oidc_user property getter
+    @property
+    def is_oidc_user(self):
+        """ check if the user is registered through OpenID Connect """
+        return self.password is None or self.password == 'openid'
+
+    # [OIDC] OpenID Connect token
+    @property
+    def oidc_token(self):
+        return session['oidc_token']
 
     @property
     def reply_active(self):
@@ -595,6 +629,15 @@ class User(Base, Email):
         """
         if password == '':
             return False
+
+        # [OIDC] Check if the user is an OIDC user
+        if self.is_oidc_user:
+            return False
+        
+        # [OIDC] Check if the user is authenticated with OIDC
+        if utils.oic_client.is_enabled() and 'openid_token' in session:
+            return self.is_authenticated()
+        
         cache_result = self._credential_cache.get(self.get_id())
         current_salt = self.password.split('$')[3] if len(self.password.split('$')) == 5 else None
         if cache_result and current_salt:
@@ -665,6 +708,29 @@ set() containing the sessions to keep
     def get(cls, email):
         """ find user object for email address """
         return cls.query.get(email)
+
+    # [OIDC] Create a new user
+    @classmethod
+    def create(cls, email, password='openid'):
+        """ create a new user """
+        email = email.split('@', 1)
+        domain = Domain.query.get(email[1])
+        
+        if domain is None:
+            domain = Domain(name=email[1])
+            db.session.add(domain)
+        
+        user = User(
+            localpart=email[0],
+            domain=domain,
+            global_admin=False
+        )
+
+        user.set_password(password, password == 'openid')
+        db.session.add(user)
+        db.session.commit()
+
+        return user
 
     @classmethod
     def login(cls, email, password):

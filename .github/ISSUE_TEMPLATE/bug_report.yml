@@ -1,0 +1,108 @@
+name: Bug Report
+description: File a bug report to report a problem with Mailu-OIDC.
+title: "`TLS_FLAVOR=notls` not working / Redirect to provider's login page broken / ..."
+labels: ["bug"]
+assignees: ["encotric",  "wombosvideo"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Bug Report
+
+        Thank you for opening an issue with Mailu-OIDC. Please understand that bug reports are meant for bugs only. The bug report should provide clear replication steps and logs.
+
+        Before you open your issue
+
+        - Check if no issue or pull-request for this already exists.
+        - Check the [Mailu-OIDC](https://github.com/heviat/Mailu-OIDC) or [Mailu](https://mailu.io/master/) documentation and [FAQ](https://mailu.io/master/faq.html). (Tip, use the search function on the Mailu documentation page)
+        - You understand `Mailu-OIDC` is maintained by volunteers in their **free time** — be concise, civil and accept that delays can occur.
+        - The title of the issue should be short and simple. It should contain specific terms related to the actual issue. Be specific while writing the title.
+
+        ## Environment & Version
+  - type: dropdown
+    id: version
+    attributes:
+      label: Version
+      description: "Use `docker ps -a | grep mailu | awk '{print $2}' | cut -d: -f2` to get the version you are running or `grep MAILU_VERSION docker-compose.yml mailu.env` from the config file."
+      options:
+        - '2024.06'
+        - 'master'
+        - Not sure
+        - Not listed
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      multiple: true
+      options:
+        - Linux
+        - Windows
+        - Mac
+        - Unlisted
+  - type: input
+    id: docker-compose-version
+    attributes:
+      label: Docker Compose Version
+      description: Run `docker compose version` to get the version.
+      placeholder: ex. v2.27.1-desktop.1
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        If you are not using Docker Compose do not file any new issue here.
+        Kubernetes related issues belong to <https://github.com/Mailu/helm-charts/issues>. There is no official support for Kubernetes in `Mailu-OIDC`.
+        If you are not using Docker Compose or Kubernetes, create a new thread on user support in [disussions](https://github.com/Mailu/Mailu/discussions/categories/user-support).
+        Non-bug reports (or bug reports that do not follow the template) are moved to [disussions](https://github.com/heviat/Mailu-OIDC/discussions).
+
+        ## Bug Description
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Explain the bug in a few words. It should be clear what the unexpected behaviour is. Share it in an easy-to-understand language.
+    validations:
+      required: true
+  - type: textarea
+    id: replication
+    attributes:
+      label: Replication Steps
+      description: Provide a step-by-step guide to replicate the bug. This should be clear and concise.
+      placeholder: ex. 1. Go to '...'
+      value: |
+        1. 
+        2. 
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed Behaviour
+      description: What is the actual behaviour you observed?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behaviour
+      description: What is the expected behaviour?
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ## Diagnostic Information
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: |
+        You can get the logs via `docker logs <container name> --tail 1000`.
+        For example for the admin container: `docker logs mailu_admin_1 --tail 1000`
+        or using docker compose `docker compose -f /mailu/docker-compose.yml logs --tail 1000 admin`
+
+        If you can find the relevant section, please share only the parts that seem relevant.
+      render: shell

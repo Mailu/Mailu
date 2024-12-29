@@ -1,6 +1,9 @@
+# Contributors
+
 Most contributors are listed on Github at:
 
- https://github.com/Mailu/Mailu/graphs/contributors
+[Mailu Contributors Graph](https://github.com/Mailu/Mailu/graphs/contributors)
+and [Mailu-OIDC Contributors Graph](https://github.com/heviat/Mailu-OIDC/graphs/contributors)
 
 If you contribute time, code or resources to the project, feel free to add
 your name, pseudonym, and any contact information you feel is relevant to

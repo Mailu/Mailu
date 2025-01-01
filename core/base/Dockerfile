@@ -53,7 +53,7 @@ ENV \
 
 RUN set -euxo pipefail \
   ;  machine="$(uname -m)" \
-  ; deps="build-base gcc libffi-dev python3-dev" \
+  ; deps="build-base gcc libffi-dev python3-dev mariadb-dev" \
   ; [[ "${machine}" != x86_64 ]] && \
       deps="${deps} cargo git libretls-dev mariadb-connector-c-dev postgresql-dev" \
   ; apk add --virtual .build-deps ${deps} \

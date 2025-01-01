@@ -22,6 +22,7 @@ gunicorn
 idna
 itsdangerous
 limits
+mariadb
 marshmallow
 marshmallow-sqlalchemy
 mysql-connector-python

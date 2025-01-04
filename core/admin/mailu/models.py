@@ -384,7 +384,7 @@ class Domain(Base):
         app_config_domain = app.config['DOMAIN']
         try:
             return any(
-                rset.to_text() == '"v=DMARC1"'
+                rset.to_text().startswith('"v=DMARC1;')
                 for rset in dns.resolver.resolve(f'{self.name}._report._dmarc.{app_config_domain}.', 'TXT')
             )
         except dns.exception.DNSException:
@@ -492,7 +492,7 @@ class Alternative(Base):
         app_config_domain = app.config['DOMAIN']
         try:
             return any(
-                rset.to_text() == '"v=DMARC1"'
+                rset.to_text().startswith('"v=DMARC1;')
                 for rset in dns.resolver.resolve(f'{self.name}._report._dmarc.{app_config_domain}.', 'TXT')
             )
         except dns.exception.DNSException:

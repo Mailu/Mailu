@@ -986,3 +986,13 @@ Below are the steps for writing the postfix (mail) logs to a log file on the fil
   if [ -d /run/systemd/system ]; then
       systemctl kill -s HUP rsyslog.service
   fi
+
+
+Admin container fails to connect to external MariaDB database
+`````````````````````````````````````````````````````````````
+
+If the admin container is `unable to connect to an external MariaDB database due to incompatible collation`_, you may need to change the ``SQLALCHEMY_DATABASE_URI`` setting to ensure the right connector is used.
+
+MariaDB has no support for utf8mb4_0900_ai_ci which is the new default since MySQL version 8.0.
+
+.. _`unable to connect to an external MariaDB database due to incompatible collation`: https://github.com/Mailu/Mailu/issues/3449

@@ -3,7 +3,7 @@
 # base system image (intermediate)
 # Note when updating the alpine tag, first manually run the workflow .github/workflows/mirror.yml.
 # Just run the workflow with the tag that must be synchronised.
-ARG DISTRO=ghcr.io/mailu/alpine:3.20
+ARG DISTRO=ghcr.io/mailu/alpine:3.21.0
 FROM $DISTRO as system
 
 ENV TZ=Etc/UTC LANG=C.UTF-8
@@ -27,7 +27,7 @@ CMD /bin/bash
 FROM system as build
 
 ARG MAILU_DEPS=prod
-ARG SNUFFLEUPAGUS_VERSION=0.10.0
+ARG SNUFFLEUPAGUS_VERSION=0.11.0
 
 ENV VIRTUAL_ENV=/app/venv
 
@@ -53,7 +53,7 @@ ENV \
 
 RUN set -euxo pipefail \
   ;  machine="$(uname -m)" \
-  ; deps="build-base gcc libffi-dev python3-dev" \
+  ; deps="build-base gcc libffi-dev python3-dev mariadb-dev" \
   ; [[ "${machine}" != x86_64 ]] && \
       deps="${deps} cargo git libretls-dev mariadb-connector-c-dev postgresql-dev" \
   ; apk add --virtual .build-deps ${deps} \

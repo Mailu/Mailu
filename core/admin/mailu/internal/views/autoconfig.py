@@ -180,4 +180,4 @@ def autoconfig_apple():
 <integer>1</integer>
 </dict>
 </plist>\r\n'''
-    return flask.Response(xml, mimetype='text/xml', status=200)
+    return flask.Response(xml, content_type='application/x-apple-aspen-config', status=200)

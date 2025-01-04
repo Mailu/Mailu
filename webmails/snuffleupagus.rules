@@ -26,6 +26,8 @@ sp.readonly_exec.enable();
 # PHP has a lot of wrappers, most of them aren't usually useful, you should
 # only enable the ones you're using.
 sp.wrappers_whitelist.list("file,php,phar,mailsosubstreams,mailsoliteral,mailsotempfile,mailsobinary");
+# The "php" wrapper can be further filtered: we probably don't want 'filter' nor 'fd'
+sp.wrappers_whitelist.php_list("stdout,stdin,stderr,input,output,memory,temp");
 
 # Prevent sloppy comparisons.
 sp.sloppy_comparison.enable();

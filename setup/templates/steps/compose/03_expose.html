@@ -10,8 +10,8 @@ IP addresses in order to expose its public services. You must at least set up
 an IPv4 or an IPv6 address if you wish to access Mailu.</p>
 
 <p><span class="label label-warning">Warning</span> You must use specific addresses, please
-avoid generic all-interfaces addresses like <code>0.0.0.0</code> or <code>::</code>.
-<a href="https://mailu.io/{{ version }}/compose/setup.html#bind-address">How to find these addresses.</a></p>
+avoid generic all-interfaces addresses like <code>0.0.0.0</code> or <code>::</code>. If you still want to use generic addresses you <b>MUST</b> disable <code>userland-proxy</code>; failing to do so will turn your Mailu installation into an open-relay.
+<a href="https://mailu.io/{{ version }}/compose/setup.html#bind-address">How to find these addresses.</a> <a href="https://mailu.io/{{ version }}/faq.html#how-to-make-ipv6-work">How to disable userland-proxy.</a></p>
 
 <div class="form-group">
   <label>IPv4 listen address</label>

@@ -31,7 +31,7 @@ def autoconfig_mozilla():
 <username>%EMAILADDRESS%</username>
 <authentication>password-cleartext</authentication>
 <addThisServer>true</addThisServer>
-<useGlobalPreferredServer>true</useGlobalPreferredServer>
+<useGlobalPreferredServer>false</useGlobalPreferredServer>
 </outgoingServer>
 
 <documentation url="https://{hostname}/admin/client">

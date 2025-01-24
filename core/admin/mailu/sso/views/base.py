@@ -31,6 +31,17 @@ def login():
 
     fields = []
 
+    if 'url' in flask.request.args and not 'homepage' in flask.request.url:
+        fields.append(form.submitAdmin)
+    else:
+        form.submitAdmin.label.text = form.submitAdmin.label.text + ' Admin'
+        form.submitWebmail.label.text = form.submitWebmail.label.text + ' Webmail'
+        if str(app.config["WEBMAIL"]).upper() != "NONE":
+            fields.append(form.submitWebmail)
+        if str(app.config["ADMIN"]).upper() != "FALSE":
+            fields.append(form.submitAdmin)
+    fields = [fields]
+
     # [OIDC] Add the OIDC login flow
     if 'code' in flask.request.args:
         username, sub, id_token, token_response = utils.oic_client.exchange_code(flask.request.query_string.decode())
@@ -136,7 +147,7 @@ def pw_change():
             return flask.redirect(destination)
         flask.flash(_("The current password is incorrect!"), "error")
 
-    return flask.render_template('pw_change.html', form=form)
+    return flask.render_template('pw_change.html', form=form, fields=[])
 
 @sso.route('/logout', methods=['GET'])
 @access.authenticated

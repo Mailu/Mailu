@@ -69,17 +69,6 @@ def login():
         flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')
         return response
 
-    if 'url' in flask.request.args and not 'homepage' in flask.request.url:
-        fields.append(form.submitAdmin)
-    else:
-        form.submitAdmin.label.text = form.submitAdmin.label.text + ' Admin'
-        form.submitWebmail.label.text = form.submitWebmail.label.text + ' Webmail'
-        if str(app.config["WEBMAIL"]).upper() != "NONE":
-            fields.append(form.submitWebmail)
-        if str(app.config["ADMIN"]).upper() != "FALSE":
-            fields.append(form.submitAdmin)
-    fields = [fields]
-
     if form.validate_on_submit():
         if destination := _has_usable_redirect():
             pass

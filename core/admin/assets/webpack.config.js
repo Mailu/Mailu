@@ -9,10 +9,11 @@ module.exports = {
     mode: 'production',
     entry: {
         app: {
-            import: ['./assets/app.css', './assets/mailu.png', './assets/app.js'],
+            import: ['./assets/app.css', './assets/app.js'],
             dependOn: 'vendor',
         },
         vendor: './assets/vendor.js',
+        logo: './assets/mailu.png',
     },
     output: {
         path: path.resolve(__dirname, 'static/'),

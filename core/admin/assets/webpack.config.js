@@ -60,6 +60,7 @@ module.exports = {
     ],
     optimization: {
         minimize: true,
+        runtimeChunk: 'single',
         minimizer: [
             new terse(),
             new mini({

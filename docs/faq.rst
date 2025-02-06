@@ -996,3 +996,16 @@ If the admin container is `unable to connect to an external MariaDB database due
 MariaDB has no support for utf8mb4_0900_ai_ci which is the new default since MySQL version 8.0.
 
 .. _`unable to connect to an external MariaDB database due to incompatible collation`: https://github.com/Mailu/Mailu/issues/3449
+
+Why is Rspamd giving me an "Illegal instruction" error ?
+`````````````````````````````````````````````````````````
+
+On Linux amd64 (x84_64), if the antispam container is crashing and gives you an `Illegal instruction` error, you may have a CPU that lacks support of the ``SSE4.2`` instruction set.
+The more modern and FOSS ``vectorscan`` library used by rspamd superseeded the now closed source Intel ``hyperscan`` library in Alpine Linux, and since August 2024 it requires the ``SSE4.2`` instruction set to work properly.
+
+Pre-2013 Intel Atom CPUs (Like N2800 or D425), Intel pre-Nehalem architectures and AMD pre-Bulldozer architectures does not support ``SSE4.2``.
+
+A workaround to this issue is to use a x86_32 (or i686) version of rspamd, because the ``vectorscan`` library is only used on 64-bit capable systems.
+Note that this may stop working in the future, as 32-bit software support is being progressively dropped.
+
+*Issue reference:* `3713`_.

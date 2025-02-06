@@ -15,7 +15,7 @@ RUN set -euxo pipefail \
   ; addgroup -Sg ${MAILU_GID} mailu \
   ; adduser -Sg ${MAILU_UID} -G mailu -h /app -g "mailu app" -s /bin/bash mailu \
   ; apk add --no-cache bash ca-certificates curl python3 tzdata \
-  ; ! [[ "$(uname -m)" == x86_64 ]] \
+  ; ! [[ "$(apk --print-arch)" == x86_64 ]] \
     || apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc
 
 WORKDIR /app
@@ -52,10 +52,10 @@ ENV \
   SNUFFLEUPAGUS_URL="https://github.com/jvoisin/snuffleupagus/archive/refs/tags/v${SNUFFLEUPAGUS_VERSION}.tar.gz"
 
 RUN set -euxo pipefail \
-  ;  machine="$(uname -m)" \
+  ;  machine="$(apk --print-arch)" \
   ; deps="build-base gcc libffi-dev python3-dev mariadb-dev" \
   ; [[ "${machine}" != x86_64 ]] && \
-      deps="${deps} cargo git libretls-dev mariadb-connector-c-dev postgresql-dev" \
+      deps="${deps} rust cargo git libretls-dev mariadb-connector-c-dev postgresql-dev" \
   ; apk add --virtual .build-deps ${deps} \
   ; [[ "${machine}" == armv7* ]] && \
       mkdir -p /root/.cargo/registry/index && \

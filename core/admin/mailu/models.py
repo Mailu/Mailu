@@ -560,12 +560,12 @@ class User(Base, Email):
     def is_authenticated(self):
         if 'oidc_token' not in session:
             return self._is_authenticated
-        token = utils.oic_client.check_validity(self.openid_token)
+        token = utils.oic_client.check_validity(self.oidc_token)
         if token is None:
             flask_login.logout_user()
             session.destroy()
             return False
-        session['openid_token'] = token
+        session['oidc_token'] = token
         return True
     
     # [OIDC] is_authenticated property setter
@@ -635,7 +635,7 @@ class User(Base, Email):
             return False
         
         # [OIDC] Check if the user is authenticated with OIDC
-        if utils.oic_client.is_enabled() and 'openid_token' in session:
+        if utils.oic_client.is_enabled() and 'oidc_token' in session:
             return self.is_authenticated()
         
         cache_result = self._credential_cache.get(self.get_id())

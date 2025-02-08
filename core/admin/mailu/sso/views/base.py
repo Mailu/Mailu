@@ -13,7 +13,7 @@ from urllib.parse import urlparse, urljoin, unquote
 
 @sso.route('/login', methods=['GET', 'POST'])
 def login():
-    if flask.request.headers.get(app.config['PROXY_AUTH_HEADER']) and not 'noproxyauth' in flask.request.url:
+    if flask.request.headers.get(app.config['PROXY_AUTH_HEADER']) and 'noproxyauth' not in flask.request.url:
         return _proxy()
 
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
@@ -31,7 +31,7 @@ def login():
 
     fields = []
 
-    if 'url' in flask.request.args and not 'homepage' in flask.request.url:
+    if 'url' in flask.request.args and 'homepage' not in flask.request.url:
         fields.append(form.submitAdmin)
     else:
         form.submitAdmin.label.text = form.submitAdmin.label.text + ' Admin'
@@ -48,7 +48,7 @@ def login():
         
         if username is None:
             utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)
-            flask.current_app.logger.warn(f'Login failed for {username} from {client_ip}.')
+            flask.current_app.logger.warning(f'Login failed for {username} from {client_ip}.')
             flask.flash('Wrong e-mail or password', 'error')
             # TODO: Check if this is the correct way to handle this
             return flask.render_template('login.html', form=form, fields=fields, openId=app.config['OIDC_ENABLED'], openIdEndpoint=utils.oic_client.get_redirect_url())
@@ -57,9 +57,9 @@ def login():
         if user is None:
             user = models.User.create(username)
         
-        flask.session['openid_token'] = token_response
-        flask.session['openid_sub'] = sub
-        flask.session['openid_id_token'] = id_token
+        flask.session['oidc_token'] = token_response
+        flask.session['oidc_sub'] = sub
+        flask.session['oidc_id_token'] = id_token
         flask.session.regenerate()
 
         flask_login.login_user(user)
@@ -68,17 +68,6 @@ def login():
         response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
         flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')
         return response
-
-    if 'url' in flask.request.args and not 'homepage' in flask.request.url:
-        fields.append(form.submitAdmin)
-    else:
-        form.submitAdmin.label.text = form.submitAdmin.label.text + ' Admin'
-        form.submitWebmail.label.text = form.submitWebmail.label.text + ' Webmail'
-        if str(app.config["WEBMAIL"]).upper() != "NONE":
-            fields.append(form.submitWebmail)
-        if str(app.config["ADMIN"]).upper() != "FALSE":
-            fields.append(form.submitAdmin)
-    fields = [fields]
 
     if form.validate_on_submit():
         if destination := _has_usable_redirect():

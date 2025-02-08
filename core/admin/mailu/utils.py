@@ -42,7 +42,7 @@ from oic.utils.authn.client import CLIENT_AUTHN_METHOD
 from oic.utils.settings import OicClientSettings
 from oic import rndstr
 from oic.exception import MessageException, NotForMe
-from oic.oauth2.message import ROPCAccessTokenRequest, AccessTokenResponse
+from oic.oauth2.message import ROPCAccessTokenRequest, AccessTokenResponse, ErrorResponse
 from oic.oic.message import AuthorizationResponse, RegistrationResponse, EndSessionRequest, BackChannelLogoutRequest
 from oic.oauth2.grant import Token
 
@@ -190,7 +190,16 @@ class OicClient:
 
     def exchange_code(self, query):
         aresp = self.client.parse_response(AuthorizationResponse, info=query, sformat="urlencoded")
+
+        if not isinstance(aresp, AuthorizationResponse):
+            flask.current_app.logger.warning('[OIDC] No authorization response or invalid response')
+            return None, None, None, None
+
+        has_state = "state" in flask.session
+        is_state_valid = "state" in aresp and aresp["state"] == flask.session["state"] if has_state else None
+
         if not ("state" in flask.session and aresp["state"] == flask.session["state"]):
+            flask.current_app.logger.warning(f'[OIDC] has_state: {has_state}, is_state_valid: {is_state_valid}')
             return None, None, None, None
         args = {
             "code": aresp["code"]
@@ -199,9 +208,19 @@ class OicClient:
             request_args=args,
             authn_method="client_secret_basic")
         
+        if not isinstance(response, AccessTokenResponse):
+            flask.current_app.logger.warning(f'[OIDC] No access token or invalid response: {response}')
+            return None, None, None, None
+
+        has_id_token = "id_token" in response
+        has_nonce = "nonce" in flask.session
+        is_id_token_valid = "nonce" in response["id_token"] and response["id_token"]["nonce"] == flask.session["nonce"] if has_id_token and has_nonce else None
+        
         if "id_token" not in response or response["id_token"]["nonce"] != flask.session["nonce"]:
+            flask.current_app.logger.warning(f'[OIDC] has_id_token: {has_id_token}, has_nonce: {has_nonce}, is_id_token_valid: {is_id_token_valid}')
             return None, None, None, None
         if 'access_token' not in response or not isinstance(response, AccessTokenResponse):
+            flask.current_app.logger.warning('[OIDC] No access token or invalid response')
             return None, None, None, None
         user_response = self.client.do_user_info_request(
             access_token=response['access_token'])
@@ -629,7 +648,7 @@ class MailuSessionExtension:
             if key not in keep and not key.startswith(b'token-'):
                 # [OIDC] Prune sessions by sub
                 session = MailuSession(key, app) if sub is not None else None
-                if sub is None or ('openid_sub' in session and session['openid_sub'] == sub):
+                if sub is None or ('oidc_sub' in session and session['oidc_sub'] == sub):
                     app.session_store.delete(key)
                     count += 1
 

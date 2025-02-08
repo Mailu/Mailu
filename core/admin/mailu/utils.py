@@ -283,6 +283,7 @@ class OicClient:
         return uri
     
     def backchannel_logout(self, body):
+        # TODO: Finish backchannel logout implementation
         req = BackChannelLogoutRequest().from_dict(body)
 
         kwargs = {"aud": self.client.client_id, "iss": self.client.issuer, "keyjar": self.client.keyjar}

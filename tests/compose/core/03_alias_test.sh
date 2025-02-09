@@ -1,3 +1,5 @@
+set -e
+
 cat << EOF | docker compose -f tests/compose/core/docker-compose.yml exec -T admin flask mailu config-update -v 1
 aliases:
   - localpart: alltheusers

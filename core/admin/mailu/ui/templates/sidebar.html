@@ -24,7 +24,7 @@
       <li class="nav-item" role="none">
         <a href="{{ oic_client.change_password() if current_user.is_oidc_user else url_for('.user_password_change') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fa fa-lock"></i>
-          <p>{% trans %}Update password{% endtrans %}</p>
+          <p>{% trans %}Update password{% endtrans %}{% if current_user.is_oidc_user %} <i class="fas fa-external-link-alt text-xs"></i>{% endif %}</p>
         </a>
       </li>
       {%- endif %}

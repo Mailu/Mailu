@@ -221,7 +221,7 @@ The minimum length is 3 characters.
 This token must be passed as request header to the API as authentication token.
 This is a mandatory setting for using the RESTful API.
 
-The ``CREDENTIAL_ROUNDS`` (default: 12) setting is the number of rounds used by the
+The ``CREDENTIAL_ROUNDS`` (default: 13) setting is the number of rounds used by the
 password hashing scheme. The number of rounds can be reduced in case faster
 authentication is needed or increased when additional protection is desired.
 Keep in mind that this is a mitigation against offline attacks on password hashes,

@@ -19,7 +19,7 @@ def resolve_hostname(hostname):
     try:
         return sorted(socket.getaddrinfo(hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM, 0, socket.AI_PASSIVE), key=lambda s:s[0])[0][4][0]
     except Exception as e:
-        log.warn("Unable to lookup '%s': %s",hostname,e)
+        log.warning("Unable to lookup '%s': %s",hostname,e)
         raise e
 
 def _coerce_value(value):

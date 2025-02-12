@@ -12,7 +12,7 @@ require "spamtestplus";
 require "editheader";
 require "index";
 
-if header :index 2 :matches "Received" "from * by * for <*>; *"
+if header :index 3 :matches "Received" "from * by * for <*>; *"
 {
   deleteheader "Delivered-To";
   addheader "Delivered-To" "<${3}>";

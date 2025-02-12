@@ -2,6 +2,7 @@ import smtplib
 import imaplib
 import time
 import sys
+import email
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -45,6 +46,14 @@ for user in ['user@mailu.io', 'admin@mailu.io', 'user/with/slash@mailu.io']:
         print("Success: Mail is in aliassed inbox", user)
     else:
         print("Failed receiving email in aliassed inbox", user)
+        sys.exit(99)
+
+    message = email.message_from_string(str(data[0][1]))
+
+    if message.get('delivered-to') == user:
+        print("Success: Delivered-To is the same as the mailbox", user)
+    else:
+        print("Failed Delivered-To does not match the mailbox", user)
         sys.exit(99)
 
     typ, data = imap_server.search(None, 'ALL')

@@ -48,6 +48,7 @@ for user in ['user@mailu.io', 'admin@mailu.io', 'user/with/slash@mailu.io']:
         print("Failed receiving email in aliassed inbox", user)
         sys.exit(99)
 
+    print(str(data[0][1]))
     message = email.message_from_string(str(data[0][1]))
 
     if message.get('delivered-to') == user:

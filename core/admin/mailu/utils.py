@@ -173,8 +173,10 @@ class OicClient:
     def get_redirect_url(self):
         if not self.is_enabled():
             return None
+        
         flask.session["state"] = rndstr()
         flask.session["nonce"] = rndstr()
+
         args = {
             "client_id": self.client.client_id,
             "response_type": ["code"],
@@ -193,24 +195,26 @@ class OicClient:
 
         if not isinstance(aresp, AuthorizationResponse):
             flask.current_app.logger.warning('[OIDC] No authorization response or invalid response')
-            return None, None, None, None
+            raise Exception('No authorization response or invalid response')
 
         has_state = "state" in flask.session
         is_state_valid = "state" in aresp and aresp["state"] == flask.session["state"] if has_state else None
 
         if not ("state" in flask.session and aresp["state"] == flask.session["state"]):
             flask.current_app.logger.warning(f'[OIDC] has_state: {has_state}, is_state_valid: {is_state_valid}')
-            return None, None, None, None
-        args = {
-            "code": aresp["code"]
-        }
-        response = self.client.do_access_token_request(state=aresp["state"],
-            request_args=args,
-            authn_method="client_secret_basic")
+            raise Exception('Invalid state')
+        
+        response = self.client.do_access_token_request(
+            state = aresp["state"],
+            request_args = {
+                "code": aresp["code"]
+            },
+            authn_method = "client_secret_basic"
+        )
         
         if not isinstance(response, AccessTokenResponse):
             flask.current_app.logger.warning(f'[OIDC] No access token or invalid response: {response}')
-            return None, None, None, None
+            raise Exception('No access token or invalid response')
 
         has_id_token = "id_token" in response
         has_nonce = "nonce" in flask.session
@@ -218,30 +222,16 @@ class OicClient:
         
         if "id_token" not in response or response["id_token"]["nonce"] != flask.session["nonce"]:
             flask.current_app.logger.warning(f'[OIDC] has_id_token: {has_id_token}, has_nonce: {has_nonce}, is_id_token_valid: {is_id_token_valid}')
-            return None, None, None, None
+            raise Exception('Invalid id token')
+        
         if 'access_token' not in response or not isinstance(response, AccessTokenResponse):
             flask.current_app.logger.warning('[OIDC] No access token or invalid response')
-            return None, None, None, None
+            raise Exception('No access token or invalid response')
+        
         user_response = self.client.do_user_info_request(
             access_token=response['access_token'])
-        return user_response['email'], user_response['sub'], response["id_token"], response
-
-
-    def get_token(self, username, password):
-        args = {
-            "username": username,
-            "password": password,
-            "client_id": self.extension_client.client_id,
-            "client_secret": self.extension_client.client_secret,
-            "grant_type": "password"
-        }
-        url, body, ht_args, csi = self.extension_client.request_info(ROPCAccessTokenRequest,
-                request_args=args, method="POST")
-        response = self.extension_client.request_and_return(url, AccessTokenResponse, "POST", body, "json", "", ht_args)
-        if isinstance(response, AccessTokenResponse):
-            return response
-        return None
         
+        return user_response['email'], user_response['sub'], response["id_token"], response
 
     def get_user_info(self, token):
         return self.client.do_user_info_request(
@@ -263,25 +253,10 @@ class OicClient:
                 return response
             else:
                 return None
-        except Exception as e:
-            print(e)
+        except Exception as err:
+            self.app.logger.error(err)
             return None
 
-    def logout(self, id_token):
-        state = rndstr()
-        flask.session['state'] = state
-
-        args = {
-            "state": state,
-            "id_token_hint": id_token,
-            "post_logout_redirect_uri": self.redirect_url + "/sso/logout",
-            "client_id": self.client.client_id
-        }
-
-        request = self.client.construct_EndSessionRequest(request_args=args)
-        uri, body, h_args, cis = self.client.uri_and_body(EndSessionRequest, method="GET", request_args=args, cis=request)
-        return uri
-    
     def backchannel_logout(self, body):
         # TODO: Finish backchannel logout implementation
         req = BackChannelLogoutRequest().from_dict(body)

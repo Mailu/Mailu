@@ -44,29 +44,34 @@ def login():
 
     # [OIDC] Add the OIDC login flow
     if 'code' in flask.request.args:
-        username, sub, id_token, token_response = utils.oic_client.exchange_code(flask.request.query_string.decode())
+        try:
+            username, sub, id_token, token_response = utils.oic_client.exchange_code(flask.request.query_string.decode())
         
-        if username is None:
-            utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)
-            flask.current_app.logger.warning(f'Login failed for {username} from {client_ip}.')
-            flask.flash('Wrong e-mail or password', 'error')
-            # TODO: Check if this is the correct way to handle this
-            return flask.render_template('login.html', form=form, fields=fields, openId=app.config['OIDC_ENABLED'], openIdEndpoint=utils.oic_client.get_redirect_url())
-        
-        user = models.User.get(username)
-        if user is None:
-            user = models.User.create(username)
-        
-        flask.session['oidc_token'] = token_response
-        flask.session['oidc_sub'] = sub
-        flask.session['oidc_id_token'] = id_token
-        flask.session.regenerate()
+            if username is None:
+                utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)
+                flask.current_app.logger.warning(f'Login failed for {username} from {client_ip}.')
+                flask.flash('Wrong e-mail or password', 'error')
+                # TODO: Check if this is the correct way to handle this
+                return flask.render_template('login.html', form=form, fields=fields, openId=app.config['OIDC_ENABLED'], openIdEndpoint=utils.oic_client.get_redirect_url())
+            
+            user = models.User.get(username)
+            if user is None:
+                user = models.User.create(username)
 
-        flask_login.login_user(user)
+            flask.session.regenerate()
 
-        response = redirect(app.config['WEB_ADMIN'])
-        response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
-        flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')
+            flask.session['oidc_token'] = token_response
+            flask.session['oidc_sub'] = sub
+            flask.session['oidc_id_token'] = id_token
+
+            flask_login.login_user(user)
+
+            response = redirect(app.config['WEB_ADMIN'])
+            response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
+            flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')
+        except Exception as e:
+            flask.flash(str(e), 'error')
+
         return response
 
     if form.validate_on_submit():

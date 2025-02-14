@@ -14,6 +14,10 @@ RUN set -euxo pipefail \
 COPY conf/ /conf/
 COPY start.py /
 
+# To be removed once https://gitlab.alpinelinux.org/alpine/aports/-/issues/16914 is resolved
+RUN sed -i '179,185d' /etc/rspamd/modules.d/rbl.conf
+RUN sed -i '384,388d' /etc/rspamd/scores.d/rbl_group.conf
+
 RUN echo $VERSION >/version
 
 #EXPOSE 11332/tcp 11334/tcp 11335/tcp

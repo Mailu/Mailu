@@ -83,7 +83,7 @@ jobs:
 # This is used by the next build job.
   targets:
     name: create targets
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.targets.outputs.matrix }}
     steps:
@@ -257,7 +257,7 @@ jobs:
       fail-fast: false
       matrix:
         target: ${{ fromJson(needs.targets.outputs.matrix) }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
      contents: read
      packages: write
@@ -405,7 +405,7 @@ jobs:
   tests:
     name: tests
     if: contains(inputs.architecture, 'linux/amd64')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
      contents: read
      packages: read
@@ -462,10 +462,10 @@ jobs:
     name: Deploy images
     # Deploying is not required for staging
     if: inputs.deploy == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - build
-     # - build-arm
+      - build-arm
       - tests
     strategy:
       fail-fast: false
@@ -531,7 +531,7 @@ jobs:
 #This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.
   tag-release:
     if: inputs.release == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - deploy
     steps:

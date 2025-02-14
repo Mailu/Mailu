@@ -4,10 +4,6 @@
 #    Username of docker login for logging in docker for pulling images (higher pull rate limit)
 # ${{ secrets.Docker_Password }}
 #    Password of docker login for logging in docker for pulling images (higher pull rate limit)
-# ${{ secrets.Docker_Login2 }}
-#    Second Username of docker login for logging in docker for pulling images (higher pull rate limit)
-# ${{ secrets.Docker_Password2 }}
-#    Second Password of docker login for logging in docker for pulling images (higher pull rate limit)
 ################################################
 
 name: build-test-deploy
@@ -219,8 +215,8 @@ jobs:
           PINNED_LABEL_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           ARCH: linux/arm64/v8,linux/arm/v7
           BUILDER: ${{ steps.uuid.outputs.uuid }}
-          DOCKER_LOGIN2: ${{ secrets.Docker_Login2 }}
-          DOCKER_PASSW2: ${{ secrets.Docker_Password2 }}
+          DOCKER_LOGIN: ${{ secrets.Docker_Login }}
+          DOCKER_PASSW: ${{ secrets.Docker_Password }}
           BUILDX_NO_DEFAULT_ATTESTATIONS: 1
         uses: nick-fields/retry@v3
         with:
@@ -232,7 +228,7 @@ jobs:
             set -euxo pipefail \
               ; /usr/bin/docker info \
               ; echo "${{ github.token }}" |        docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
-              ; echo "$DOCKER_PASSW2" |    docker login --username "$DOCKER_LOGIN2" --password-stdin \
+              ; echo "$DOCKER_PASSW" |    docker login --username "$DOCKER_LOGIN" --password-stdin \
               ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} \
               || echo "builder does not exist" \
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \
@@ -339,7 +335,7 @@ jobs:
       fail-fast: false
       matrix:
         target: ${{ fromJson(needs.targets.outputs.matrix) }}
-    runs-on: self-hosted
+    runs-on: ubuntu-24.04-arm
     permissions:
      contents: read
      packages: write
@@ -374,8 +370,8 @@ jobs:
           PINNED_LABEL_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           ARCH: linux/arm64/v8,linux/arm/v7
           BUILDER: ${{ steps.uuid.outputs.uuid }}
-          DOCKER_LOGIN2: ${{ secrets.Docker_Login2 }}
-          DOCKER_PASSW2: ${{ secrets.Docker_Password2 }}
+          DOCKER_LOGIN: ${{ secrets.Docker_Login }}
+          DOCKER_PASSW: ${{ secrets.Docker_Password }}
           BUILDX_NO_DEFAULT_ATTESTATIONS: 1
         uses: nick-fields/retry@v3
         with:
@@ -387,7 +383,7 @@ jobs:
             set -euxo pipefail \
               ; /usr/bin/docker info \
               ; echo "${{ github.token }}" |        docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
-              ; echo "$DOCKER_PASSW2" |    docker login --username "$DOCKER_LOGIN2" --password-stdin \
+              ; echo "$DOCKER_PASSW" |    docker login --username "$DOCKER_LOGIN" --password-stdin \
               ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} \
               || echo "builder does not exist" \
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \

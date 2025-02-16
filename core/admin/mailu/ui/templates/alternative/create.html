@@ -7,3 +7,7 @@
 {%- block subtitle %}
 {{ domain }}
 {%- endblock %}
+
+{%- block main_action %}
+<a class="btn btn-primary float-right" href="{{ url_for('.alternative_list', domain_name=domain.name) }}">{% trans %}Back to{% endtrans %} {% trans %}Alternative domain list{% endtrans %}</a>
+{%- endblock %}

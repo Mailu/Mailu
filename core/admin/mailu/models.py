@@ -248,6 +248,15 @@ class Domain(Base):
             return f'_dmarc.{self.name}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
 
     @cached_property
+    def dns_dmarc_report_needed(self):
+        """ return true if DMARC report record is needed """
+        domain = app.config['DOMAIN']
+        if self.name != domain:
+            return True
+        else:
+            return False
+
+    @cached_property
     def dns_dmarc_report(self):
         """ return DMARC report record for mailu server """
         if self.dkim_key:
@@ -372,6 +381,15 @@ class Alternative(Base):
             ruf = app.config['DMARC_RUF']
             ruf = f' ruf=mailto:{ruf}@{domain};' if ruf else ''
             return f'_dmarc.{self.name}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
+
+    @cached_property
+    def dns_dmarc_report_needed(self):
+        """ return true if DMARC report record is needed """
+        domain = app.config['DOMAIN']
+        if self.name != domain:
+            return True
+        else:
+            return False
 
     @cached_property
     def dns_dmarc_report(self):

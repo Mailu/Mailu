@@ -2,6 +2,7 @@ from mailu import models
 from mailu.internal import internal
 
 import flask
+import idna
 
 def vault_error(*messages, status=404):
     return flask.make_response(flask.jsonify({'errors':messages}), status)
@@ -19,7 +20,16 @@ def rspamd_dkim_key(domain_name):
         if key := domain.dkim_key:
             selectors.append(
                 {
-                    'domain'  : domain.name,
+                    'domain'  : idna.encode(domain.name.lower()).decode('ascii'),
+                    'key'     : key.decode('utf8'),
+                    'selector': flask.current_app.config.get('DKIM_SELECTOR', 'dkim'),
+                }
+            )
+    elif domain := models.Alternative.query.get(domain_name):
+        if key := domain.domain.dkim_key:
+            selectors.append(
+                {
+                    'domain'  : idna.encode(domain.name.lower()).decode('ascii'),
                     'key'     : key.decode('utf8'),
                     'selector': flask.current_app.config.get('DKIM_SELECTOR', 'dkim'),
                 }

@@ -992,6 +992,7 @@ Admin container fails to connect to external MariaDB database
 `````````````````````````````````````````````````````````````
 
 If the admin container is `unable to connect to an external MariaDB database due to incompatible collation`_, you may need to change the ``SQLALCHEMY_DATABASE_URI`` setting to ensure the right connector is used.
+Alternatively, you may set ``DB_APPENDIX`` accordingly. For example: ``?collation=utf8mb4_unicode_ci`` is appended as is just after the database name in case DB_TYPE and related values are set.
 
 MariaDB has no support for utf8mb4_0900_ai_ci which is the new default since MySQL version 8.0.
 

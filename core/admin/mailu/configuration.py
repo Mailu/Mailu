@@ -25,6 +25,7 @@ DEFAULT_CONFIG = {
     'DB_PW': None,
     'DB_HOST': 'database',
     'DB_NAME': 'mailu',
+    'DB_APPENDIX': '',
     'SQLITE_DATABASE_FILE': 'data/main.db',
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
     'SQLALCHEMY_DATABASE_URI_ROUNDCUBE': 'sqlite:////data/roundcube.db',
@@ -102,8 +103,8 @@ class ConfigManager:
 
     DB_TEMPLATES = {
         'sqlite': 'sqlite:////{SQLITE_DATABASE_FILE}',
-        'postgresql': 'postgresql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}',
-        'mysql': 'mysql+mysqlconnector://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}',
+        'postgresql': 'postgresql://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}{DB_APPENDIX}',
+        'mysql': 'mysql+mysqlconnector://{DB_USER}:{DB_PW}@{DB_HOST}/{DB_NAME}{DB_APPENDIX}',
     }
 
     def __init__(self):

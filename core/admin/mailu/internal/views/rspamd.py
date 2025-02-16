@@ -25,8 +25,6 @@ def rspamd_dkim_key(domain_name):
                     'selector': flask.current_app.config.get('DKIM_SELECTOR', 'dkim'),
                 }
             )
-<<<<<<< HEAD
-=======
     elif domain := models.Alternative.query.get(domain_name):
         if key := domain.domain.dkim_key:
             selectors.append(
@@ -36,7 +34,6 @@ def rspamd_dkim_key(domain_name):
                     'selector': flask.current_app.config.get('DKIM_SELECTOR', 'dkim'),
                 }
             )
->>>>>>> 35ffcb07 (added idna function to perform puny encoding on IDN domains)
     return flask.jsonify({'data': {'selectors': selectors}})
 
 @internal.route("/rspamd/local_domains", methods=['GET'])

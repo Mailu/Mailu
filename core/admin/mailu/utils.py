@@ -1,10 +1,14 @@
 """ Mailu admin app utilities
 """
 
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+from datetime import datetime, timedelta
+import hmac
+import ipaddress
+from multiprocessing import Value
+import pickle
+import secrets
+import string
+import time
 
 import dns.resolver
 import dns.exception
@@ -13,38 +17,20 @@ import dns.rdtypes
 import dns.rdatatype
 import dns.rdataclass
 
-import hmac
-import secrets
-import string
-import time
-
-from multiprocessing import Value
-from mailu import limiter
-from flask import current_app as app
-
 import flask
+from flask import current_app as app
+from flask.sessions import SessionMixin, SessionInterface
 import flask_login
 import flask_migrate
 import flask_babel
-import ipaddress
+
 import redis
 
-from datetime import datetime, timedelta
-from flask.sessions import SessionMixin, SessionInterface
 from itsdangerous.encoding import want_bytes
 from werkzeug.datastructures import CallbackDict
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-# [OIDC] Import the OIDC related modules
-from oic.oic import Client
-from oic.extension.client import Client as ExtensionClient
-from oic.utils.authn.client import CLIENT_AUTHN_METHOD
-from oic.utils.settings import OicClientSettings
-from oic import rndstr
-from oic.exception import MessageException, NotForMe
-from oic.oauth2.message import ROPCAccessTokenRequest, AccessTokenResponse, ErrorResponse
-from oic.oic.message import AuthorizationResponse, RegistrationResponse, EndSessionRequest, BackChannelLogoutRequest
-from oic.oauth2.grant import Token
+from mailu import limiter, oidc
 
 # Login configuration
 login = flask_login.LoginManager()
@@ -137,152 +123,8 @@ class PrefixMiddleware(object):
 
 proxy = PrefixMiddleware()
 
-# [OIDC] Client class
-class OicClient:
-    "Redirects user to OpenID Provider if configured"
-
-    def __init__(self):
-        self.app = None
-        self.client = None
-        self.extension_client = None
-        self.registration_response = None
-        self.change_password_redirect_enabled = True,
-        self.change_password_url = None
-
-    def init_app(self, app):
-        self.app = app
-
-        settings = OicClientSettings()
-            
-        settings.verify_ssl = app.config['OIDC_VERIFY_SSL']
-
-        self.change_password_redirect_enabled = app.config['OIDC_CHANGE_PASSWORD_REDIRECT_ENABLED']
-
-        self.client = Client(client_authn_method=CLIENT_AUTHN_METHOD,settings=settings)
-        self.client.provider_config(app.config['OIDC_PROVIDER_INFO_URL'])
-    
-        self.extension_client = ExtensionClient(client_authn_method=CLIENT_AUTHN_METHOD,settings=settings)
-        self.extension_client.provider_config(app.config['OIDC_PROVIDER_INFO_URL'])
-        self.change_password_url = app.config['OIDC_CHANGE_PASSWORD_REDIRECT_URL'] or (self.client.issuer + '/.well-known/change-password')
-        self.redirect_url = app.config['OIDC_REDIRECT_URL'] or ("https://" + self.app.config['HOSTNAME'])
-        info = {"client_id": app.config['OIDC_CLIENT_ID'], "client_secret": app.config['OIDC_CLIENT_SECRET'], "redirect_uris": [ self.redirect_url + "/sso/login" ]}
-        client_reg = RegistrationResponse(**info)
-        self.client.store_registration_info(client_reg)
-        self.extension_client.store_registration_info(client_reg)
-
-    def get_redirect_url(self):
-        if not self.is_enabled():
-            return None
-        
-        flask.session["state"] = rndstr()
-        flask.session["nonce"] = rndstr()
-
-        args = {
-            "client_id": self.client.client_id,
-            "response_type": ["code"],
-            "scope": ["openid", "email"],
-            "nonce": flask.session["nonce"],
-            "redirect_uri": self.redirect_url + "/sso/login",
-            "state": flask.session["state"]
-        }
-
-        auth_req = self.client.construct_AuthorizationRequest(request_args=args)
-        login_url = auth_req.request(self.client.authorization_endpoint)
-        return login_url
-
-    def exchange_code(self, query):
-        aresp = self.client.parse_response(AuthorizationResponse, info=query, sformat="urlencoded")
-
-        if not isinstance(aresp, AuthorizationResponse):
-            flask.current_app.logger.warning('[OIDC] No authorization response or invalid response')
-            raise Exception('No authorization response or invalid response')
-
-        has_state = "state" in flask.session
-        is_state_valid = "state" in aresp and aresp["state"] == flask.session["state"] if has_state else None
-
-        if not ("state" in flask.session and aresp["state"] == flask.session["state"]):
-            flask.current_app.logger.warning(f'[OIDC] has_state: {has_state}, is_state_valid: {is_state_valid}')
-            raise Exception('Invalid state')
-        
-        response = self.client.do_access_token_request(
-            state = aresp["state"],
-            request_args = {
-                "code": aresp["code"]
-            },
-            authn_method = "client_secret_basic"
-        )
-        
-        if not isinstance(response, AccessTokenResponse):
-            flask.current_app.logger.warning(f'[OIDC] No access token or invalid response: {response}')
-            raise Exception('No access token or invalid response')
-
-        has_id_token = "id_token" in response
-        has_nonce = "nonce" in flask.session
-        is_id_token_valid = "nonce" in response["id_token"] and response["id_token"]["nonce"] == flask.session["nonce"] if has_id_token and has_nonce else None
-        
-        if "id_token" not in response or response["id_token"]["nonce"] != flask.session["nonce"]:
-            flask.current_app.logger.warning(f'[OIDC] has_id_token: {has_id_token}, has_nonce: {has_nonce}, is_id_token_valid: {is_id_token_valid}')
-            raise Exception('Invalid id token')
-        
-        if 'access_token' not in response or not isinstance(response, AccessTokenResponse):
-            flask.current_app.logger.warning('[OIDC] No access token or invalid response')
-            raise Exception('No access token or invalid response')
-        
-        user_response = self.client.do_user_info_request(
-            access_token=response['access_token'])
-        
-        return user_response['email'], user_response['sub'], response["id_token"], response
-
-    def get_user_info(self, token):
-        return self.client.do_user_info_request(
-            access_token=token['access_token'])
-
-    def check_validity(self, token):
-        if 'exp' in token['id_token'] and token['id_token']['exp'] > time.time():
-            return token
-        else:
-            return self.refresh_token(token)
-    
-    def refresh_token(self, token):
-        try:
-            args = {
-                "refresh_token": token['refresh_token']
-            }
-            response = self.client.do_access_token_refresh(request_args=args, token=Token(token))
-            if isinstance(response, AccessTokenResponse):
-                return response
-            else:
-                return None
-        except Exception as err:
-            self.app.logger.error(err)
-            return None
-
-    def backchannel_logout(self, body):
-        # TODO: Finish backchannel logout implementation
-        req = BackChannelLogoutRequest().from_dict(body)
-
-        kwargs = {"aud": self.client.client_id, "iss": self.client.issuer, "keyjar": self.client.keyjar}
-
-        try:
-            req.verify(**kwargs)
-        except (MessageException, ValueError, NotForMe) as err:
-            self.app.logger.error(err)
-            return False
-
-        sub = req["logout_token"]["sub"]
-
-        if sub is not None and sub != '':
-            MailuSessionExtension.prune_sessions(None, None, self.app, sub)
-        
-        return True
-        
-    def is_enabled(self):
-        return self.app is not None and self.app.config['OIDC_ENABLED']
-    
-    def change_password(self):
-        return self.change_password_url if self.change_password_redirect_enabled else None
-
-oic_client = OicClient()
+# OIDC client
+oic_client = oidc.OicClient()
 
 # Data migrate
 migrate = flask_migrate.Migrate()

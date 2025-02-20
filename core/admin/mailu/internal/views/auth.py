@@ -103,7 +103,7 @@ def basic_authentication():
             user = models.User.query.get(user_email) if '@' in user_email else None
         except sqlalchemy.exc.StatementError as exc:
             exc = str(exc).split('\n', 1)[0]
-            app.logger.warn(f'Invalid user {user_email!r}: {exc}')
+            app.logger.warning(f'Invalid user {user_email!r}: {exc}')
         else:
             if user is not None and nginx.check_credentials(user, password.decode('utf-8'), client_ip, "web", flask.request.headers.get('X-Real-Port', None), user_email):
                 response = flask.Response()

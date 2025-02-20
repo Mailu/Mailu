@@ -49,7 +49,7 @@ class LimitWraperFactory(object):
         client_network = utils.extract_network_from_ip(ip)
         is_rate_limited = self.is_subject_to_rate_limits(ip) and not limiter.test(client_network)
         if is_rate_limited:
-            app.logger.warn(f'Authentication attempt from {ip} has been rate-limited.')
+            app.logger.warning(f'Authentication attempt from {ip} has been rate-limited.')
         return is_rate_limited
 
     def rate_limit_ip(self, ip, username=None):
@@ -65,7 +65,7 @@ class LimitWraperFactory(object):
         limiter = self.get_limiter(app.config["AUTH_RATELIMIT_USER"], 'auth-user')
         is_rate_limited = self.is_subject_to_rate_limits(ip) and not limiter.test(device_cookie if device_cookie_name == username else username)
         if is_rate_limited:
-            app.logger.warn(f'Authentication attempt from {ip} for {username} has been rate-limited.')
+            app.logger.warning(f'Authentication attempt from {ip} for {username} has been rate-limited.')
         return is_rate_limited
 
     def rate_limit_user(self, username, ip, device_cookie=None, device_cookie_name=None, password=''):
@@ -78,10 +78,10 @@ class LimitWraperFactory(object):
             limiter.hit(device_cookie if device_cookie_name == username else username)
             self.rate_limit_ip(ip, username)
 
-    """ Device cookies as described on:
-    https://owasp.org/www-community/Slow_Down_Online_Guessing_Attacks_with_Device_Cookies
-    """
-    def parse_device_cookie(self, cookie):
+    def parse_device_cookie(self, cookie: str):
+        """ Device cookies as described on:
+        https://owasp.org/www-community/Slow_Down_Online_Guessing_Attacks_with_Device_Cookies
+        """
         try:
             login, nonce, _ = cookie.split('$')
             if hmac.compare_digest(cookie, self.device_cookie(login, nonce)):
@@ -90,11 +90,11 @@ class LimitWraperFactory(object):
             pass
         return None, None
 
-    """ Device cookies don't require strong crypto:
-        72bits of nonce, 96bits of signature is more than enough
-        and these values avoid padding in most cases
-    """
     def device_cookie(self, username, nonce=None):
+        """ Device cookies don't require strong crypto:
+            72bits of nonce, 96bits of signature is more than enough
+            and these values avoid padding in most cases
+        """
         if not nonce:
             nonce = secrets.token_urlsafe(9)
         sig = str(base64.urlsafe_b64encode(hmac.new(app.device_cookie_key, bytearray(f'device_cookie|{username}|{nonce}', 'utf-8'), 'sha256').digest()[20:]), 'utf-8')

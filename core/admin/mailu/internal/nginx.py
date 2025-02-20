@@ -105,13 +105,13 @@ def handle_authentication(headers):
             password = urllib.parse.unquote(headers["Auth-Pass"])
             ip = urllib.parse.unquote(headers["Client-Ip"])
         except:
-            app.logger.warn(f'Received undecodable user/password from front: {headers.get("Auth-User", "")!r}')
+            app.logger.warning(f'Received undecodable user/password from front: {headers.get("Auth-User", "")!r}')
         else:
             try:
                 user = models.User.query.get(user_email) if '@' in user_email else None
             except sqlalchemy.exc.StatementError as exc:
                 exc = str(exc).split('\n', 1)[0]
-                app.logger.warn(f'Invalid user {user_email!r}: {exc}')
+                app.logger.warning(f'Invalid user {user_email!r}: {exc}')
             else:
                 is_valid_user = user is not None
                 ip = urllib.parse.unquote(headers["Client-Ip"])

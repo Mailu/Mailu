@@ -111,17 +111,17 @@ class OicClient:
             # TODO: Decide what to do with the error response
 
             self.app.logger.debug(f"[OIDC] Error response in authorization: {auth_response}")
-            return None
+            raise Exception("Error response in authorization")
 
         if "state" not in flask.session:
             self.app.logger.warning("[OIDC] No state in session")
-            return None
+            raise Exception("No state in session")
 
         if flask.session["state"] != auth_response["state"]:
             self.app.logger.warning(
                 f"[OIDC] State mismatch: expected {flask.session['state']}, got {auth_response['state']}"
             )
-            return None
+            raise Exception("State mismatch")
 
         return auth_response["code"]
 
@@ -143,19 +143,19 @@ class OicClient:
             self.app.logger.warning(
                 f"[OIDC] No access token or invalid response: {token_response}"
             )
-            return None
+            raise Exception("No access token or invalid response")
 
         if "id_token" not in token_response:
             self.app.logger.warning("[OIDC] No id token in response")
-            return None
+            raise Exception("No id token in response")
 
         if token_response["id_token"]["nonce"] != flask.session["nonce"]:
             self.app.logger.warning("[OIDC] Nonce mismatch")
-            return None
+            raise Exception("Nonce mismatch")
 
         if "access_token" not in token_response:
             self.app.logger.warning("[OIDC] No access token or invalid response")
-            return None
+            raise Exception("No access token or invalid response")
 
         return token_response
 
@@ -166,11 +166,11 @@ class OicClient:
 
         auth_response_code = self._get_authorization_code(query)
         if not auth_response_code:
-            return None, None, None, None
+            raise Exception("Error response in authorization")
 
         token_response = self._get_id_and_access_tokens(auth_response_code)
         if not token_response:
-            return None, None, None, None
+            raise Exception("Error response in token")
 
         user_info_response = self.get_user_info(token_response)
         if not isinstance(user_info_response, OpenIDSchema):
@@ -178,7 +178,7 @@ class OicClient:
             # TODO: Decide what to do with the error response
 
             self.app.logger.debug("[OIDC] Error response in user info")
-            return None, None, None, None
+            raise Exception("Error response in user info")
 
         return (
             user_info_response["email"],

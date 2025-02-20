@@ -69,10 +69,9 @@ def login():
             response = redirect(app.config['WEB_ADMIN'])
             response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
             flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')
+            return response
         except Exception as e:
             flask.flash(str(e), 'error')
-
-        return response
 
     if form.validate_on_submit():
         if destination := _has_usable_redirect():

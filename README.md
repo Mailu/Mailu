@@ -77,7 +77,7 @@ properties are needed in `mailu.env`:
 |             Property Name               |                                                      Description                                                    |           Example         |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------- |
 | `OIDC_ENABLED`                          | Enable OpenID Connect                                                                                               | `True` \| `False`         |
-| `OIDC_PROVIDER_INFO_URL`                | OpenID Connect provider configuration url (aka. _well-known_ url)                                                   | [https://`host`:`port`/auth/realms/`realm`/.well-known/openid-configuration]() |
+| `OIDC_PROVIDER_INFO_URL`                | OpenID Connect provider information url (without `/.well-known/openid-configuration` suffix)                        | [https://`host`:`port`/auth/realms/`realm`]() |
 | `OIDC_REDIRECT_URL`                     | OpenID Connect custom redirect URL if HOSTNAME not matching your login url                                          | [https://`host`]()        |
 | `OIDC_CLIENT_ID`                        | OpenID Connect Client ID for Mailu                                                                                  | `6779ef20e75817b79602`    |
 | `OIDC_CLIENT_SECRET`                    | OpenID Connect Client Secret for Mailu                                                                              | `3d66bbd6d0a69af62de7...` |

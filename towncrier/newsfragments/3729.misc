@@ -1,0 +1,1 @@
+Add optional DB_APPENDIX configuration parameter which is appended as is to the postgresql or mysql URI

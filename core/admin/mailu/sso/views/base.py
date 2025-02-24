@@ -51,8 +51,7 @@ def login():
                 utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip)
                 flask.current_app.logger.warning(f'Login failed for {username} from {client_ip}.')
                 flask.flash('Wrong e-mail or password', 'error')
-                # TODO: Check if this is the correct way to handle this
-                return flask.render_template('login.html', form=form, fields=fields, openId=app.config['OIDC_ENABLED'], openIdEndpoint=utils.oic_client.get_redirect_url())
+                return render_oidc_template(form, fields)
             
             user = models.User.get(username)
             if user is None:
@@ -86,10 +85,10 @@ def login():
         if not utils.is_app_token(form.pw.data):
             if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
                 flask.flash(_('Too many attempts from your IP (rate-limit)'), 'error')
-                return flask.render_template('login.html', form=form, fields=fields)
+                return render_oidc_template(form, fields)
             if utils.limiter.should_rate_limit_user(username, client_ip, device_cookie, device_cookie_username):
                 flask.flash(_('Too many attempts for this user (rate-limit)'), 'error')
-                return flask.render_template('login.html', form=form, fields=fields)
+                return render_oidc_template(form, fields)
         user = models.User.login(username, form.pw.data)
         if user:
             flask.session.regenerate()
@@ -108,7 +107,7 @@ def login():
             flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: failed: badauth: {utils.truncated_pw_hash(form.pw.data)}')
             flask.flash(_('Wrong e-mail or password'), 'error')
     # [OIDC] Forward the OIDC data to the login template
-    return flask.render_template('login.html', form=form, fields=fields, openId=app.config['OIDC_ENABLED'], openIdEndpoint=utils.oic_client.get_redirect_url())
+    return render_oidc_template(form, fields)
 
 @sso.route('/pw_change', methods=['GET', 'POST'])
 @access.authenticated
@@ -222,3 +221,10 @@ def _proxy():
     user.send_welcome()
     flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
     return flask.redirect(url)
+
+def render_oidc_template(form, fields):
+    redirect_url = utils.oic_client.get_redirect_url()
+    oidc_enabled = utils.oic_client.is_enabled()
+    if redirect_url is None:
+        oidc_enabled = False
+    return flask.render_template('login.html', form=form, fields=fields, openId=oidc_enabled, openIdEndpoint=redirect_url)

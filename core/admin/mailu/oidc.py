@@ -31,6 +31,7 @@ from oic.oauth2.grant import Token
 class OicClient:
     """OpenID Connect Client"""
 
+    ready: bool = False
     app: Optional[flask.Flask] = None
     client: Optional[Client] = None
     extension_client: Optional[ExtensionClient] = None
@@ -38,6 +39,33 @@ class OicClient:
     enable_change_password_redirect: bool = True
     change_password_url: Optional[str] = None
     redirect_url: Optional[str] = None
+
+    def receive_provider_info(self):
+        self.app.logger.info("[OIDC] Getting provider config..")
+        try:
+            self.client.provider_config(self.app.config["OIDC_PROVIDER_INFO_URL"])
+            self.extension_client.provider_config(self.app.config["OIDC_PROVIDER_INFO_URL"])
+
+            self.change_password_url = self.app.config["OIDC_CHANGE_PASSWORD_REDIRECT_URL"] or (
+            self.client.issuer + "/.well-known/change-password"
+            )
+            self.redirect_url = self.app.config["OIDC_REDIRECT_URL"] or (
+                "https://" + self.app.config["HOSTNAME"]
+            )
+
+            client_reg = RegistrationResponse(
+                client_id=self.app.config["OIDC_CLIENT_ID"],
+                client_secret=self.app.config["OIDC_CLIENT_SECRET"],
+                redirect_uris=[f"{self.redirect_url}/sso/login"],
+            )
+            self.client.store_registration_info(client_reg)
+            self.extension_client.store_registration_info(client_reg)
+
+            self.ready = True
+        except Exception as e:
+            self.app.logger.warning(f"[OIDC] Error getting provider config: {e}")
+            self.app.logger.warning(f"[OIDC] Retrying with the next request..")
+        return self.ready
 
     def init_app(self, app: flask.Flask):
         """Initialize OIDC client"""
@@ -51,31 +79,16 @@ class OicClient:
         )
 
         self.client = Client(client_authn_method=CLIENT_AUTHN_METHOD, settings=settings)
-        self.client.provider_config(app.config["OIDC_PROVIDER_INFO_URL"])
-
         self.extension_client = ExtensionClient(
             client_authn_method=CLIENT_AUTHN_METHOD, settings=settings
         )
-        self.extension_client.provider_config(app.config["OIDC_PROVIDER_INFO_URL"])
-
-        self.change_password_url = app.config["OIDC_CHANGE_PASSWORD_REDIRECT_URL"] or (
-            self.client.issuer + "/.well-known/change-password"
-        )
-        self.redirect_url = app.config["OIDC_REDIRECT_URL"] or (
-            "https://" + app.config["HOSTNAME"]
-        )
-
-        client_reg = RegistrationResponse(
-            client_id=app.config["OIDC_CLIENT_ID"],
-            client_secret=app.config["OIDC_CLIENT_SECRET"],
-            redirect_uris=[f"{self.redirect_url}/sso/login"],
-        )
-        self.client.store_registration_info(client_reg)
-        self.extension_client.store_registration_info(client_reg)
 
     def get_redirect_url(self) -> Optional[str]:
         """Get the redirect URL"""
         if not self.is_enabled():
+            return None
+        
+        if not self.ready and self.receive_provider_info() == False:
             return None
 
         flask.session["state"] = rndstr()
@@ -164,6 +177,9 @@ class OicClient:
     ) -> tuple[str, str, str, AccessTokenResponse] | tuple[None, None, None, None]:
         """Exchange the code for the token"""
 
+        if not self.ready and self.receive_provider_info() == False:
+            return None, None, None, None
+
         auth_response_code = self._get_authorization_code(query)
         if not auth_response_code:
             raise Exception("Error response in authorization")
@@ -186,30 +202,6 @@ class OicClient:
             token_response["id_token"],
             token_response,
         )
-
-    def get_token(self, username: str, password: str) -> Optional[AccessTokenResponse]:
-        """Get the token from the username and password"""
-
-        args = {
-            "username": username,
-            "password": password,
-            "client_id": self.extension_client.client_id,
-            "client_secret": self.extension_client.client_secret,
-            "grant_type": "password",
-        }
-        url, body, ht_args, _ = self.extension_client.request_info(
-            ROPCAccessTokenRequest, request_args=args, method="POST"
-        )
-        response = self.extension_client.request_and_return(
-            url, AccessTokenResponse, "POST", body, "json", "", ht_args
-        )
-        if isinstance(response, AccessTokenResponse):
-            return response
-
-        # If this line is reached, response is an ErrorResponse
-        # TODO: Decide what to do with the error response
-
-        return None
 
     def get_user_info(
         self, token: AccessTokenResponse
@@ -244,29 +236,6 @@ class OicClient:
         except Exception as e:
             flask.current_app.logger.error(f"Error refreshing token: {e}")
         return None
-
-    def logout(self, id_token: str) -> str:
-        """
-        Logout the user
-
-        :param id_token: The id token to be used for logout
-        :return: The logout URL
-        """
-
-        state = rndstr()
-        flask.session["state"] = state
-
-        args = {
-            "state": state,
-            "id_token_hint": id_token,
-            "post_logout_redirect_uri": self.redirect_url + "/sso/logout",
-            "client_id": self.client.client_id,
-        }
-
-        request = self.client.construct_EndSessionRequest(request_args=args)
-        # TODO: Check if identical: uri = request.request(self.client.end_session_endpoint)
-        uri, _, _, _ = self.client.uri_and_body(EndSessionRequest, request, "GET", args)
-        return uri
 
     def backchannel_logout(self, body):
         """

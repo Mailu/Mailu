@@ -385,6 +385,7 @@ class Alternative(Base):
 
     @cached_property
     def dns_dmarc_report_needed(self):
+        return self.name != app.config['DOMAIN']
         """ return true if DMARC report record is needed """
         domain = app.config['DOMAIN']
         if self.name != domain:

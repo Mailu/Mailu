@@ -1,2 +1,1 @@
-type = "normal";
 enabled = false;

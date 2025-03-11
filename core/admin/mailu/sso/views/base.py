@@ -65,7 +65,7 @@ def login():
 
             flask_login.login_user(user)
 
-            response = redirect(app.config['WEB_ADMIN'])
+            response = redirect(flask.session['redirect_to'] if 'redirect_to' in flask.session else app.config['WEB_ADMIN'])
             response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
             flask.current_app.logger.info(f'Login succeeded for {username} from {client_ip}.')
             return response
@@ -135,7 +135,7 @@ def pw_change():
             user.change_pw_next_login = False
             models.db.session.commit()
             flask.current_app.logger.info(f'Forced password change by {user} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
-            destination = flask.session.pop('redir_to', None) or app.config['WEB_ADMIN']
+            destination = flask.session.pop('redirect_to', None) or app.config['WEB_ADMIN']
             return flask.redirect(destination)
         flask.flash(_("The current password is incorrect!"), "error")
 
@@ -224,6 +224,9 @@ def _proxy():
 
 def render_oidc_template(form, fields):
     redirect_url = utils.oic_client.get_redirect_url()
+    if 'url' in flask.request.args:
+        flask.session['redirect_to'] = flask.request.args.get('url')
+    
     oidc_enabled = utils.oic_client.is_enabled()
     if redirect_url is None:
         oidc_enabled = False

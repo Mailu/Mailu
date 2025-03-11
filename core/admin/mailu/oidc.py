@@ -6,6 +6,7 @@ import flask
 
 # [OIDC] Import the OIDC related modules
 from oic.oic import Client
+from oic.exception import PyoidcError
 from oic.extension.client import Client as ExtensionClient
 from oic.utils.authn.client import CLIENT_AUTHN_METHOD
 from oic.utils.settings import OicClientSettings
@@ -25,7 +26,6 @@ from oic.oic.message import (
     UserInfoErrorResponse,
 )
 from oic.oauth2.grant import Token
-
 
 # [OIDC] Client class
 class OicClient:
@@ -64,7 +64,7 @@ class OicClient:
             self.ready = True
         except Exception as e:
             self.app.logger.warning(f"[OIDC] Error getting provider config: {e}")
-            self.app.logger.warning(f"[OIDC] Retrying with the next request..")
+            self.app.logger.warning("[OIDC] Retrying with the next request..")
         return self.ready
 
     def init_app(self, app: flask.Flask):
@@ -120,21 +120,18 @@ class OicClient:
         )
 
         if not isinstance(auth_response, AuthorizationResponse):
-            # If this line is reached, auth_response is an ErrorResponse
-            # TODO: Decide what to do with the error response
-
             self.app.logger.debug(f"[OIDC] Error response in authorization: {auth_response}")
-            raise Exception("Error response in authorization")
+            raise PyoidcError("Error response in authorization")
 
         if "state" not in flask.session:
             self.app.logger.warning("[OIDC] No state in session")
-            raise Exception("No state in session")
+            raise PyoidcError("No state in session")
 
         if flask.session["state"] != auth_response["state"]:
             self.app.logger.warning(
                 f"[OIDC] State mismatch: expected {flask.session['state']}, got {auth_response['state']}"
             )
-            raise Exception("State mismatch")
+            raise PyoidcError("State mismatch")
 
         return auth_response["code"]
 
@@ -156,19 +153,19 @@ class OicClient:
             self.app.logger.warning(
                 f"[OIDC] No access token or invalid response: {token_response}"
             )
-            raise Exception("No access token or invalid response")
+            raise PyoidcError("No access token or invalid response")
 
         if "id_token" not in token_response:
             self.app.logger.warning("[OIDC] No id token in response")
-            raise Exception("No id token in response")
+            raise PyoidcError("No id token in response")
 
         if token_response["id_token"]["nonce"] != flask.session["nonce"]:
             self.app.logger.warning("[OIDC] Nonce mismatch")
-            raise Exception("Nonce mismatch")
+            raise PyoidcError("Nonce mismatch")
 
         if "access_token" not in token_response:
             self.app.logger.warning("[OIDC] No access token or invalid response")
-            raise Exception("No access token or invalid response")
+            raise PyoidcError("No access token or invalid response")
 
         return token_response
 
@@ -182,19 +179,16 @@ class OicClient:
 
         auth_response_code = self._get_authorization_code(query)
         if not auth_response_code:
-            raise Exception("Error response in authorization")
+            raise PyoidcError("Error response in authorization")
 
         token_response = self._get_id_and_access_tokens(auth_response_code)
         if not token_response:
-            raise Exception("Error response in token")
+            raise PyoidcError("Error response in token")
 
         user_info_response = self.get_user_info(token_response)
         if not isinstance(user_info_response, OpenIDSchema):
-            # If this line is reached, user_info_response is an ErrorResponse
-            # TODO: Decide what to do with the error response
-
             self.app.logger.debug("[OIDC] Error response in user info")
-            raise Exception("Error response in user info")
+            raise PyoidcError("Error response in user info")
 
         return (
             user_info_response["email"],
@@ -231,8 +225,6 @@ class OicClient:
             if isinstance(response, AccessTokenResponse):
                 return response
 
-            # If this line is reached, response is an ErrorResponse
-            # TODO: Decide what to do with the error response
         except Exception as e:
             flask.current_app.logger.error(f"Error refreshing token: {e}")
         return None

@@ -90,7 +90,7 @@ def owner(args, kwargs, model, key):
 def authenticated(args, kwargs):
     """ The view is only available to logged in users.
     """
-    return True
+    return flask_login.current_user.is_authenticated
 
 
 

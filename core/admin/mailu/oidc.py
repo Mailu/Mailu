@@ -207,7 +207,7 @@ class OicClient:
         self, token: AccessTokenResponse
     ) -> OpenIDSchema | UserInfoErrorResponse | ErrorResponse:
         """Get user info from the token"""
-        return self.client.do_user_info_request(access_token=token["access_token"])
+        return self.client.do_user_info_request(token=token["access_token"])
 
     def check_validity(
         self, token: AccessTokenResponse

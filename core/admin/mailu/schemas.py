@@ -1148,7 +1148,7 @@ class TokenSchema(BaseSchema):
         sibling = True
 
     password = PasswordField(required=True, metadata={'model': models.User})
-    hash_password = fields.Boolean(load_only=True, missing=False)
+    hash_password = fields.Boolean(load_only=True, load_default=False)
 
 
 @mapped
@@ -1193,7 +1193,7 @@ class UserSchema(BaseSchema):
     fetches = fields.Nested(FetchSchema, many=True)
 
     password = PasswordField(required=True, metadata={'model': models.User})
-    hash_password = fields.Boolean(load_only=True, missing=False)
+    hash_password = fields.Boolean(load_only=True, load_default=False)
 
 
 @mapped

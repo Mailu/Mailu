@@ -221,20 +221,20 @@ class Domain(Base):
     def dns_mx(self):
         """ return MX record for domain """
         hostname = app.config['HOSTNAME']
-        return f'{self.name}. 600 IN MX 10 {hostname}.'
+        return f'{idna.encode(self.name.lower()).decode('ascii')}. 600 IN MX 10 {idna.encode(hostname.lower()).decode('ascii')}.'
 
     @cached_property
     def dns_spf(self):
         """ return SPF record for domain """
         hostname = app.config['HOSTNAME']
-        return f'{self.name}. 600 IN TXT "v=spf1 mx a:{hostname} ~all"'
+        return f'{idna.encode(self.name.lower()).decode('ascii')}. 600 IN TXT "v=spf1 mx a:{idna.encode(hostname.lower()).decode('ascii')} ~all"'
 
     @property
     def dns_dkim(self):
         """ return DKIM record for domain """
         if self.dkim_key:
             selector = app.config['DKIM_SELECTOR']
-            return f'{selector}._domainkey.{self.name}. 600 IN TXT "v=DKIM1; k=rsa; p={self.dkim_publickey}"'
+            return f'{selector}._domainkey.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN TXT "v=DKIM1; k=rsa; p={self.dkim_publickey}"'
 
     @cached_property
     def dns_dmarc(self):
@@ -242,17 +242,22 @@ class Domain(Base):
         if self.dkim_key:
             domain = app.config['DOMAIN']
             rua = app.config['DMARC_RUA']
-            rua = f' rua=mailto:{rua}@{domain};' if rua else ''
+            rua = f' rua=mailto:{rua}@{idna.encode(domain.lower()).decode('ascii')};' if rua else ''
             ruf = app.config['DMARC_RUF']
-            ruf = f' ruf=mailto:{ruf}@{domain};' if ruf else ''
-            return f'_dmarc.{self.name}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
+            ruf = f' ruf=mailto:{ruf}@{idna.encode(domain.lower()).decode('ascii')};' if ruf else ''
+            return f'_dmarc.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
+
+    @cached_property
+    def dns_dmarc_report_needed(self):
+        """ return true if DMARC report record is needed """
+        return self.name != app.config['DOMAIN']
 
     @cached_property
     def dns_dmarc_report(self):
         """ return DMARC report record for mailu server """
         if self.dkim_key:
             domain = app.config['DOMAIN']
-            return f'{self.name}._report._dmarc.{domain}. 600 IN TXT "v=DMARC1;"'
+            return f'{idna.encode(self.name.lower()).decode('ascii')}._report._dmarc.{idna.encode(domain.lower()).decode('ascii')}. 600 IN TXT "v=DMARC1;"'
 
     @cached_property
     def dns_autoconfig(self):
@@ -273,10 +278,10 @@ class Domain(Base):
             ])
 
         return [
-            f'_{proto}._tcp.{self.name}. 600 IN SRV {prio} 1 {port} {hostname}.' if port in ports else f'_{proto}._tcp.{self.name}. 600 IN SRV 0 0 0 .'
+            f'_{proto}._tcp.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN SRV {prio} 1 {port} {hostname}.' if port in ports else f'_{proto}._tcp.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN SRV 0 0 0 .'
             for proto, port, prio
             in protocols
-        ]+[f'autoconfig.{self.name}. 600 IN CNAME {hostname}.', f'autodiscover.{self.name}. 600 IN CNAME {hostname}.']
+        ]+[f'autoconfig.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN CNAME {idna.encode(hostname.lower()).decode('ascii')}.', f'autodiscover.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN CNAME {idna.encode(hostname.lower()).decode('ascii')}.']
 
     @cached_property
     def dns_tlsa(self):
@@ -285,9 +290,9 @@ class Domain(Base):
         if app.config['TLS_FLAVOR'] in ('letsencrypt', 'mail-letsencrypt'):
             return [
                 # current ISRG Root X1 (RSA 4096, O = Internet Security Research Group, CN = ISRG Root X1) @20210902
-                f'_25._tcp.{hostname}. 86400 IN TLSA 2 1 1 0b9fa5a59eed715c26c1020c711b4f6ec42d58b0015e14337a39dad301c5afc3',
+                f'_25._tcp.{idna.encode(hostname.lower()).decode('ascii')}. 86400 IN TLSA 2 1 1 0b9fa5a59eed715c26c1020c711b4f6ec42d58b0015e14337a39dad301c5afc3',
                 # current ISRG Root X2 (ECDSA P-384, O = Internet Security Research Group, CN = ISRG Root X2) @20240311
-                f'_25._tcp.{hostname}. 86400 IN TLSA 2 1 1 762195c225586ee6c0237456e2107dc54f1efc21f61a792ebd515913cce68332',
+                f'_25._tcp.{idna.encode(hostname.lower()).decode('ascii')}. 86400 IN TLSA 2 1 1 762195c225586ee6c0237456e2107dc54f1efc21f61a792ebd515913cce68332',
             ]
         return []
 
@@ -360,7 +365,7 @@ class Alternative(Base):
         """ return DKIM record for domain """
         if self.domain.dkim_key:
             selector = app.config['DKIM_SELECTOR']
-            return f'{selector}._domainkey.{self.name}. 600 IN TXT "v=DKIM1; k=rsa; p={self.domain.dkim_publickey}"'
+            return f'{selector}._domainkey.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN TXT "v=DKIM1; k=rsa; p={self.domain.dkim_publickey}"'
 
     @cached_property
     def dns_dmarc(self):
@@ -368,29 +373,34 @@ class Alternative(Base):
         if self.domain.dkim_key:
             domain = app.config['DOMAIN']
             rua = app.config['DMARC_RUA']
-            rua = f' rua=mailto:{rua}@{domain};' if rua else ''
+            rua = f' rua=mailto:{rua}@{idna.encode(domain.lower()).decode('ascii')};' if rua else ''
             ruf = app.config['DMARC_RUF']
-            ruf = f' ruf=mailto:{ruf}@{domain};' if ruf else ''
-            return f'_dmarc.{self.name}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
+            ruf = f' ruf=mailto:{ruf}@{idna.encode(domain.lower()).decode('ascii')};' if ruf else ''
+            return f'_dmarc.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN TXT "v=DMARC1; p=reject;{rua}{ruf} adkim=s; aspf=s"'
+
+    @cached_property
+    def dns_dmarc_report_needed(self):
+        """ return true if DMARC report record is needed """
+        return self.name != app.config['DOMAIN']
 
     @cached_property
     def dns_dmarc_report(self):
         """ return DMARC report record for mailu server """
         if self.domain.dkim_key:
             domain = app.config['DOMAIN']
-            return f'{self.name}._report._dmarc.{domain}. 600 IN TXT "v=DMARC1;"'
+            return f'{idna.encode(self.name.lower()).decode('ascii')}._report._dmarc.{idna.encode(domain.lower()).decode('ascii')}. 600 IN TXT "v=DMARC1;"'
 
     @cached_property
     def dns_mx(self):
         """ return MX record for domain """
         hostname = app.config['HOSTNAME']
-        return f'{self.name}. 600 IN MX 10 {hostname}.'
+        return f'{idna.encode(self.name.lower()).decode('ascii')}. 600 IN MX 10 {idna.encode(hostname.lower()).decode('ascii')}.'
 
     @cached_property
     def dns_spf(self):
         """ return SPF record for domain """
         hostname = app.config['HOSTNAME']
-        return f'{self.name}. 600 IN TXT "v=spf1 mx a:{hostname} ~all"'
+        return f'{idna.encode(self.name.lower()).decode('ascii')}. 600 IN TXT "v=spf1 mx a:{idna.encode(hostname.lower()).decode('ascii')} ~all"'
 
     def check_mx(self):
         """ checks if MX record for domain points to mailu host """

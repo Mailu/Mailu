@@ -32,4 +32,4 @@ HEALTHCHECK --start-period=60s CMD curl -m3 -skfLo /dev/null http://127.0.0.1:10
 
 VOLUME ["/certs", "/overrides"]
 
-CMD /start.py
+CMD ["/start.py"]

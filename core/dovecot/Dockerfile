@@ -20,4 +20,4 @@ HEALTHCHECK CMD kill -0 `cat /run/dovecot/master.pid`
 
 VOLUME ["/mail"]
 
-CMD /start.py
+CMD ["/start.py"]

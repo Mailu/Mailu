@@ -28,4 +28,4 @@ HEALTHCHECK CMD curl -m3 -skfLo /dev/null http://localhost:8080/ping
 VOLUME ["/data","/dkim"]
 
 ENV FLASK_APP=mailu
-CMD /start.py
+CMD ["/start.py"]

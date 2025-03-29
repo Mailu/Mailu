@@ -21,4 +21,4 @@ HEALTHCHECK --start-period=350s CMD curl -m3 -skfLo /dev/null http://localhost:1
 
 VOLUME ["/var/lib/rspamd"]
 
-CMD /start.py
+CMD ["/start.py"]

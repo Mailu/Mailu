@@ -81,8 +81,20 @@ def domain_download_zonefile(domain_name):
         txt = ' '.join(f'"{txt[p:p+250]}"' for p in range(0, len(txt), 250))
         res.append(f'{record} {txt}')
         res.append(domain.dns_dmarc)
+        if domain.dns_dmarc_report_needed:
+            res.append(domain.dns_dmarc_report)
     res.extend(domain.dns_tlsa)
     res.extend(domain.dns_autoconfig)
+    for alternative in domain.alternatives:
+        res.extend([alternative.dns_mx, alternative.dns_spf])
+        if alternative.domain.dkim_publickey:
+            record = alternative.dns_dkim.split('"', 1)[0].strip()
+            txt = f'v=DKIM1; k=rsa; p={alternative.domain.dkim_publickey}'
+            txt = ' '.join(f'"{txt[p:p+250]}"' for p in range(0, len(txt), 250))
+            res.append(f'{record} {txt}')
+            res.append(alternative.dns_dmarc)
+            if alternative.dns_dmarc_report_needed:
+                res.append(alternative.dns_dmarc_report)
     res.append("")
     return flask.Response(
         "\n".join(res),

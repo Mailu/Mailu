@@ -1,0 +1,1 @@
+Upgrade roundcube to 1.6.11. For the record, Mailu is not vulnerable to CVE-2025-49113, thanks to Snuffleupagus (see https://snuffleupagus.readthedocs.io/config.html#unserialize-noclass)

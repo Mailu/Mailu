@@ -84,7 +84,7 @@ account on the server.
 The ``RELAYNETS`` (default: unset) is a comma delimited list of network addresses
 for which mail is relayed for with no authentication required. This should be
 used with great care as misconfigurations may turn your Mailu instance into an
-open-relay!
+open-relay! Make sure clients are using port 25 with no authentication.
 
 The ``RELAYHOST`` is an optional address to use as a smarthost for all outgoing
 mail in following format: ``[HOST]:PORT``. ``RELAYUSER`` and ``RELAYPASSWORD``

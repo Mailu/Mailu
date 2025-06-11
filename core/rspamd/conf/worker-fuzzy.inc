@@ -1,4 +1,3 @@
-type = "fuzzy";
 bind_socket = "*:11335";
 count = 1;
 backend = "redis";

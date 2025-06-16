@@ -110,6 +110,8 @@ def postfix_recipient_map(recipient):
 
     This is meant for bounces to go back to the original sender.
     """
+    if recipient.count('@') > 1 or recipient.startswith('"'):
+        return flask.abort(404)
     srs = srslib.SRS(flask.current_app.srs_key)
     if srslib.SRS.is_srs_address(recipient):
         try:

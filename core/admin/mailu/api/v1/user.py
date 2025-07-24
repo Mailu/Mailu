@@ -1,9 +1,20 @@
 from flask_restx import Resource, fields, marshal
 import validators, datetime
+import os
+import tempfile
+from flask import request, send_file, current_app as app
+from werkzeug.utils import secure_filename
+from werkzeug.exceptions import BadRequest
 
 from . import api, response_fields
 from .. import common
 from ... import models
+from ...utils.avatar import (
+    allowed_file, validate_image_file, process_avatar_image, 
+    generate_avatar_filename, get_avatar_storage_path,
+    generate_initials_avatar, get_avatar_info, delete_avatar_file
+)
+from ...utils.vcard import generate_user_vcard, get_user_vcard_headers
 
 db = models.db
 
@@ -13,8 +24,8 @@ user_fields_get = api.model('UserGet', {
     'email': fields.String(description='The email address of the user', example='John.Doe@example.com', attribute='_email'),
     'password': fields.String(description="Hash of the user's password; Example='$bcrypt-sha256$v=2,t=2b,r=12$fmsAdJbYAD1gGQIE5nfJq.$zLkQUEs2XZfTpAEpcix/1k5UTNPm0jO'"),
     'comment': fields.String(description='A description for the user. This description is shown on the Users page', example='my comment'),
-    'quota_bytes': fields.Integer(description='The maximum quota for the user’s email box in bytes', example='1000000000'),
-    'quota_bytes_used': fields.Integer(description='The size of the user’s email box in bytes', example='5000000'),
+    'quota_bytes': fields.Integer(description='The maximum quota for the user\'s email box in bytes', example='1000000000'),
+    'quota_bytes_used': fields.Integer(description='The size of the user\'s email box in bytes', example='5000000'),
     'global_admin': fields.Boolean(description='Make the user a global administrator'),
     'enabled': fields.Boolean(description='Enable the user. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail'),
     'change_pw_next_login': fields.Boolean(description='Force the user to change their password at next login'),
@@ -33,6 +44,8 @@ user_fields_get = api.model('UserGet', {
     'spam_enabled': fields.Boolean(description='Enable the spam filter'),
     'spam_mark_as_read': fields.Boolean(description='Enable marking spam mails as read'),
     'spam_threshold': fields.Integer(description='The user defined spam filter tolerance', example='80'),
+    'avatar_filename': fields.String(description='Filename of the user avatar image', example='avatar_12345678_abcd1234.jpg'),
+    'avatar_url': fields.String(description='URL to access the user avatar', example='/admin/api/v1/user/john.doe@example.com/avatar'),
 })
 
 user_fields_post = api.model('UserCreate', {
@@ -288,6 +301,183 @@ class User(Resource):
         email_found = models.User.query.filter_by(email=email).first()
         if email_found is None:
             return { 'code': 404, 'message': f'User {email} cannot be found'}, 404
+        
+        # Delete user's avatar if it exists
+        if email_found.avatar_filename:
+            email_found.delete_avatar()
+        
         db.session.delete(email_found)
         db.session.commit()
         return { 'code': 200, 'message': f'User {email} has been deleted'}, 200
+
+
+@user.route('/<string:email>/avatar')
+class UserAvatar(Resource):
+    @user.doc('get_user_avatar')
+    @user.response(200, 'Avatar image')
+    @user.response(400, 'Input validation exception', response_fields)
+    @user.response(404, 'User or avatar not found', response_fields)
+    def get(self, email):
+        """ Get user's avatar image """
+        if not validators.email(email):
+            return {'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
+
+        user_found = models.User.query.get(email)
+        if not user_found:
+            return {'code': 404, 'message': f'User {email} cannot be found'}, 404
+
+        # Check if user has uploaded avatar
+        if user_found.avatar_filename:
+            avatar_path = user_found.avatar_path
+            if avatar_path and os.path.exists(avatar_path):
+                return send_file(avatar_path, mimetype='image/jpeg')
+
+        # Generate initials-based avatar
+        initials = user_found.get_avatar_initials()
+        avatar_img = generate_initials_avatar(initials)
+        
+        # Save to temporary file and return
+        temp_file = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+        avatar_img.save(temp_file.name, 'PNG')
+        temp_file.close()
+        
+        try:
+            return send_file(temp_file.name, mimetype='image/png', as_attachment=False)
+        finally:
+            # Clean up temp file
+            try:
+                os.unlink(temp_file.name)
+            except OSError:
+                pass
+
+    @user.doc('upload_user_avatar')
+    @user.response(200, 'Avatar uploaded successfully', response_fields)
+    @user.response(400, 'Invalid file or validation error', response_fields)
+    @user.response(404, 'User not found', response_fields)
+    @user.response(413, 'File too large', response_fields)
+    @user.doc(security='Bearer')
+    @common.api_token_authorization
+    def post(self, email):
+        """ Upload avatar for user """
+        if not validators.email(email):
+            return {'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
+
+        user_found = models.User.query.get(email)
+        if not user_found:
+            return {'code': 404, 'message': f'User {email} cannot be found'}, 404
+
+        # Check if file was uploaded
+        if 'avatar' not in request.files:
+            return {'code': 400, 'message': 'No avatar file provided'}, 400
+
+        file = request.files['avatar']
+        if file.filename == '':
+            return {'code': 400, 'message': 'No file selected'}, 400
+
+        if not allowed_file(file.filename):
+            return {'code': 400, 'message': 'Invalid file type. Allowed: PNG, JPG, JPEG, WebP'}, 400
+
+        # Save uploaded file to temporary location
+        filename = secure_filename(file.filename)
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        file.save(temp_file.name)
+
+        try:
+            # Validate uploaded file
+            is_valid, error_msg = validate_image_file(temp_file.name)
+            if not is_valid:
+                return {'code': 400, 'message': error_msg}, 400
+
+            # Generate avatar filename and storage path
+            storage_path = get_avatar_storage_path()
+            avatar_filename = generate_avatar_filename(email, filename)
+            avatar_path = os.path.join(storage_path, avatar_filename)
+
+            # Process and save avatar
+            success, error_msg = process_avatar_image(temp_file.name, avatar_path)
+            if not success:
+                return {'code': 400, 'message': error_msg}, 400
+
+            # Delete old avatar if exists
+            if user_found.avatar_filename:
+                user_found.delete_avatar()
+
+            # Update user record
+            user_found.avatar_filename = avatar_filename
+            db.session.commit()
+
+            return {'code': 200, 'message': f'Avatar uploaded successfully for user {email}'}, 200
+
+        finally:
+            # Clean up temporary file
+            try:
+                os.unlink(temp_file.name)
+            except OSError:
+                pass
+
+    @user.doc('delete_user_avatar')
+    @user.response(200, 'Avatar deleted successfully', response_fields)
+    @user.response(400, 'Input validation exception', response_fields)
+    @user.response(404, 'User not found', response_fields)
+    @user.doc(security='Bearer')
+    @common.api_token_authorization
+    def delete(self, email):
+        """ Delete user's avatar """
+        if not validators.email(email):
+            return {'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
+
+        user_found = models.User.query.get(email)
+        if not user_found:
+            return {'code': 404, 'message': f'User {email} cannot be found'}, 404
+
+        if user_found.avatar_filename:
+            user_found.delete_avatar()
+            db.session.commit()
+            return {'code': 200, 'message': f'Avatar deleted successfully for user {email}'}, 200
+        else:
+            return {'code': 404, 'message': f'User {email} has no avatar to delete'}, 404
+
+
+@user.route('/<string:email>/avatar/info')
+class UserAvatarInfo(Resource):
+    @user.doc('get_user_avatar_info')
+    @user.response(200, 'Avatar information')
+    @user.response(400, 'Input validation exception', response_fields)
+    @user.response(404, 'User not found', response_fields)
+    @user.doc(security='Bearer')
+    @common.api_token_authorization
+    def get(self, email):
+        """ Get avatar information for user """
+        if not validators.email(email):
+            return {'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
+
+        user_found = models.User.query.get(email)
+        if not user_found:
+            return {'code': 404, 'message': f'User {email} cannot be found'}, 404
+
+        avatar_info = get_avatar_info(user_found)
+        return {'code': 200, 'data': avatar_info}, 200
+
+
+@user.route('/<string:email>/vcard')
+class UserVCard(Resource):
+    @user.doc('get_user_vcard')
+    @user.response(200, 'User vCard with avatar')
+    @user.response(400, 'Input validation exception', response_fields)
+    @user.response(404, 'User not found', response_fields)
+    def get(self, email):
+        """ Get vCard for user including avatar """
+        if not validators.email(email):
+            return {'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
+
+        user_found = models.User.query.get(email)
+        if not user_found:
+            return {'code': 404, 'message': f'User {email} cannot be found'}, 404
+
+        vcard_data = generate_user_vcard(user_found)
+        headers = get_user_vcard_headers()
+        
+        return app.response_class(
+            vcard_data,
+            headers=headers
+        )

@@ -54,6 +54,7 @@ oletools==0.60.1
 packaging==24.0
 passlib==1.7.4
 pcodedmp==1.2.6
+Pillow==10.3.0
 podop @ file:///app/libs/podop
 postfix-mta-sts-resolver==1.4.0
 psycopg2-binary==2.9.9

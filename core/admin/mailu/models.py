@@ -578,6 +578,9 @@ class User(Base, Email):
     spam_mark_as_read = db.Column(db.Boolean, nullable=False, default=True)
     spam_threshold = db.Column(db.Integer, nullable=False, default=lambda:int(app.config.get("DEFAULT_SPAM_THRESHOLD", 80)))
     change_pw_next_login = db.Column(db.Boolean, nullable=False, default=False)
+    
+    # Avatar settings
+    avatar_filename = db.Column(db.String(255), nullable=True, default=None)
 
     # Flask-login attributes
     is_authenticated = True
@@ -719,6 +722,48 @@ set() containing the sessions to keep
         """ login user when enabled and password is valid """
         user = cls.query.get(email)
         return user if (user and user.enabled and user.check_password(password)) else None
+
+    @property
+    def avatar_path(self):
+        """ return filesystem path to user's avatar """
+        if self.avatar_filename:
+            return os.path.join(app.config.get('AVATAR_STORAGE_PATH', '/data/avatars'), self.avatar_filename)
+        return None
+
+    @property
+    def avatar_url(self):
+        """ return URL path to user's avatar """
+        if self.avatar_filename:
+            return f'/admin/api/v1/user/{self.email}/avatar'
+        return None
+
+    def get_avatar_initials(self):
+        """ generate avatar initials from display name or email """
+        if self.displayed_name:
+            words = self.displayed_name.strip().split()
+            if len(words) >= 2:
+                return (words[0][0] + words[-1][0]).upper()
+            elif len(words) == 1:
+                return words[0][:2].upper()
+        
+        # Fallback to email localpart
+        localpart = self.localpart
+        if len(localpart) >= 2:
+            return localpart[:2].upper()
+        elif len(localpart) == 1:
+            return localpart.upper() + localpart.upper()
+        return "??"
+
+    def delete_avatar(self):
+        """ delete user's avatar from filesystem """
+        if self.avatar_filename:
+            avatar_path = self.avatar_path
+            if avatar_path and os.path.exists(avatar_path):
+                try:
+                    os.unlink(avatar_path)
+                except OSError:
+                    pass  # File deletion failed, but continue
+            self.avatar_filename = None
 
 
 class Alias(Base, Email):

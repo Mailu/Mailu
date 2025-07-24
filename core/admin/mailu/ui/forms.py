@@ -2,6 +2,7 @@ from wtforms import validators, fields, widgets
 from wtforms.validators import ValidationError
 from wtforms_components import fields as fields_
 from flask_babel import lazy_gettext as _
+from flask_wtf.file import FileField, FileAllowed
 
 import flask_login
 import flask_wtf
@@ -213,3 +214,14 @@ class AnnouncementForm(flask_wtf.FlaskForm):
     announcement_body = fields.StringField(_('Announcement body'),
         [validators.DataRequired()], widget=widgets.TextArea())
     submit = fields.SubmitField(_('Send'))
+
+
+class UserAvatarForm(flask_wtf.FlaskForm):
+    avatar = FileField(_('Avatar image'), [
+        FileAllowed(['png', 'jpg', 'jpeg', 'webp'], _('Only PNG, JPG, JPEG and WebP files are allowed'))
+    ])
+    submit = fields.SubmitField(_('Upload avatar'))
+
+
+class UserAvatarDeleteForm(flask_wtf.FlaskForm):
+    submit = fields.SubmitField(_('Delete avatar'))

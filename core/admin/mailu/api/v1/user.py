@@ -336,19 +336,13 @@ class UserAvatar(Resource):
         initials = user_found.get_avatar_initials()
         avatar_img = generate_initials_avatar(initials)
         
-        # Save to temporary file and return
-        temp_file = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-        avatar_img.save(temp_file.name, 'PNG')
-        temp_file.close()
+        # Save to memory buffer and return
+        from io import BytesIO
+        avatar_buffer = BytesIO()
+        avatar_img.save(avatar_buffer, 'PNG')
+        avatar_buffer.seek(0)  # Reset buffer pointer to the beginning
         
-        try:
-            return send_file(temp_file.name, mimetype='image/png', as_attachment=False)
-        finally:
-            # Clean up temp file
-            try:
-                os.unlink(temp_file.name)
-            except OSError:
-                pass
+        return send_file(avatar_buffer, mimetype='image/png', as_attachment=False)
 
     @user.doc('upload_user_avatar')
     @user.response(200, 'Avatar uploaded successfully', response_fields)

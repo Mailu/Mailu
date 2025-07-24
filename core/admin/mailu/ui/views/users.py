@@ -290,18 +290,10 @@ def user_avatar_image(user_email):
     initials = user.get_avatar_initials()
     avatar_img = avatar.generate_initials_avatar(initials)
     
-    # Save to temporary file and return
-    temp_file = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-    avatar_img.save(temp_file.name, 'PNG')
-    temp_file.close()
+    # Save to memory buffer and return
+    from io import BytesIO
+    avatar_buffer = BytesIO()
+    avatar_img.save(avatar_buffer, 'PNG')
+    avatar_buffer.seek(0)  # Reset buffer pointer to the beginning
     
-    def cleanup_temp_file():
-        try:
-            os.unlink(temp_file.name)
-        except OSError:
-            pass
-    
-    # Return file and clean up after response
-    response = flask.send_file(temp_file.name, mimetype='image/png', as_attachment=False)
-    response.call_on_close(cleanup_temp_file)
-    return response
+    return flask.send_file(avatar_buffer, mimetype='image/png', as_attachment=False)

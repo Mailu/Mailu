@@ -5,7 +5,13 @@ Generates vCard data with avatar support for email clients
 
 import base64
 import os
+import io
 from flask import current_app
+
+try:
+    from . import avatar
+except ImportError:
+    avatar = None
 
 # Avatar configuration - inline to avoid import issues
 INCLUDE_AVATAR_IN_VCARD = True  # Include avatar in vCard exports
@@ -48,14 +54,12 @@ def generate_user_vcard(user):
                 avatar_data = None
         
         # If no uploaded avatar, generate initials avatar
-        if avatar_data is None:
+        if avatar_data is None and avatar is not None:
             try:
-                from . import avatar
                 initials = user.get_avatar_initials()
                 avatar_img = avatar.generate_initials_avatar(initials)
                 
                 # Convert PIL image to bytes
-                import io
                 img_buffer = io.BytesIO()
                 avatar_img.save(img_buffer, format='PNG')
                 avatar_data = img_buffer.getvalue()

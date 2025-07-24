@@ -93,6 +93,25 @@ def process_avatar_image(file_path, output_path):
         return False, f"Error processing image: {str(e)}"
 
 
+def _load_font_with_fallback(font_size):
+    """ Load font with fallback chain for better error handling """
+    font_paths = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/usr/share/fonts/TTF/arial.ttf",
+        "/System/Library/Fonts/Arial.ttf",  # macOS
+        "/usr/share/fonts/liberation/LiberationSans-Bold.ttf",  # Common Linux
+    ]
+    
+    for font_path in font_paths:
+        try:
+            return ImageFont.truetype(font_path, font_size)
+        except OSError:
+            continue
+    
+    # Use default font as final fallback
+    return ImageFont.load_default()
+
+
 def generate_initials_avatar(initials, size=AVATAR_SIZE, background_color=None):
     """ Generate an avatar image with user initials """
     if background_color is None:
@@ -111,16 +130,8 @@ def generate_initials_avatar(initials, size=AVATAR_SIZE, background_color=None):
     # Calculate font size (roughly 40% of image height)
     font_size = int(size[1] * 0.4)
     
-    try:
-        # Try to use a system font
-        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
-    except OSError:
-        try:
-            # Fallback to another common font
-            font = ImageFont.truetype("/usr/share/fonts/TTF/arial.ttf", font_size)
-        except OSError:
-            # Use default font
-            font = ImageFont.load_default()
+    # Load font with fallback chain
+    font = _load_font_with_fallback(font_size)
     
     # Get text bounding box
     bbox = draw.textbbox((0, 0), initials, font=font)

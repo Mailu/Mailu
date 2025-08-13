@@ -1,0 +1,1 @@
+Fix a bug preventing user "forward_destination" to be updated with a PATCH request

@@ -22,6 +22,9 @@ linux/arm64v8 or linux/armv7 hardware, so it
 should run on pretty much any cloud server as long as enough power is
 provided.
 
+On x86_64, check that your processor supports the ``SSE4.2`` instruction set.
+For example, pre-2013 Intel Atom CPUs lacks ``SSE4.2`` support. See :ref:`faq`.
+
 You should also have at least a DNS hostname and a DNS name for receiving
 emails. Some instructions are provided on the matter in the article
 :ref:`dns_setup`.

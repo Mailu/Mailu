@@ -46,6 +46,7 @@ watchdog
 
 # core/postfix
 postfix-mta-sts-resolver
+uvloop
 
 # core/oletools
 python-magic
@@ -56,4 +57,3 @@ requests
 
 # optional/radicale
 radicale
-

@@ -83,8 +83,17 @@ env:
   HCL_FILE: ./tests/build-ci.hcl
 
 jobs:
-# This job calculates what images must be build. It reads the build.hcl file and then outputs all targets (images) in it.
-# This is used by the next build job.
+  validate-dockerfiles:
+    name: Validate Dockerfiles
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate build configuration
+        uses: docker/build-push-action@v6
+        with:
+          call: check
+
+  # This job calculates what images must be build. It reads the build.hcl file and then outputs all targets (images) in it.
+  # This is used by the next build job.
   targets:
     name: create targets
     runs-on: ubuntu-latest

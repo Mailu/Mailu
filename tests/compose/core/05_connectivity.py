@@ -119,7 +119,7 @@ def test_managesieve(server, username, password):
     except managesieve.MANAGESIEVE.abort:
         pass
 
-    m=managesieve.MANAGESIEVE(server, use_tls=True)
+    m=managesieve.MANAGESIEVE(server, use_tls=True, tls_verify=False)
     if m.login('', username, 'wrongpass') != 'NO':
         print(f'Authenticating to sieve://{username}:{password}@{server}:4190/ with wrong creds has worked!')
         sys.exit(108)

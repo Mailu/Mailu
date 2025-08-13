@@ -1,0 +1,7 @@
+Place ClamAV files under `mailu/clamav` instead of `mailu/filter/clamav` such that they can be modified by ClamAV
+itself.
+
+Users will want to change their `docker-compose.yml` accordingly and remove `mailu/filter/clamav` after upgrade.
+
+Also ClamAV image tag increased to `1.4` instead of specific (older) release, users will need to update it manually as
+well and keep it updated over time.

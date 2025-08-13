@@ -31,7 +31,7 @@ def autoconfig_mozilla():
 <username>%EMAILADDRESS%</username>
 <authentication>password-cleartext</authentication>
 <addThisServer>true</addThisServer>
-<useGlobalPreferredServer>true</useGlobalPreferredServer>
+<useGlobalPreferredServer>false</useGlobalPreferredServer>
 </outgoingServer>
 
 <documentation url="https://{hostname}/admin/client">
@@ -180,4 +180,4 @@ def autoconfig_apple():
 <integer>1</integer>
 </dict>
 </plist>\r\n'''
-    return flask.Response(xml, mimetype='text/xml', status=200)
+    return flask.Response(xml, content_type='application/x-apple-aspen-config', status=200)

@@ -133,6 +133,7 @@ in mailu.env:
 
 Using the above configuration, Traefik will proxy all the traffic related to Mailu's FQDNs without requiring duplicate certificates.
 
+
 Traefik as reverse proxy (different host)
 -----------------------------------------
 
@@ -292,6 +293,7 @@ In the mailu.env file add the following:
 
 
 Using the above configuration, Traefik will proxy all the traffic related to Mailu's FQDNs without requiring duplicate certificates.
+
 
 .. _caddy_proxy:
 

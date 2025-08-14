@@ -66,7 +66,7 @@ def run(debug):
         for fetch in fetches:
             fetchmailrc = ""
             options = "options antispam 501, 504, 550, 553, 554"
-            options += " ssl" if fetch["tls"] else ""
+            options += " ssl" if fetch["tls"] else " sslproto \'\'"
             options += " keep" if fetch["keep"] else " fetchall"
             folders = f"folders {",".join(f'"{imaputf7encode(item).replace('"',r"\34")}"' for item in fetch["folders"]) or '"INBOX"'}"
             fetchmailrc += RC_LINE.format(

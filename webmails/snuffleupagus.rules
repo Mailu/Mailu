@@ -141,11 +141,11 @@ sp.disable_function.function("ini_set").param("option").value_r("display_errors"
 sp.disable_function.function("ini_set").param("option").value_r("display_errors").drop();
 
 # Classic webshells patterns
-sp.disable_function.function("system>base64_decode").drop();
-sp.disable_function.function("shell_exec>base64_decode").drop();
-sp.disable_function.function("exec>base64_decode").drop();
-sp.disable_function.function("passthru>base64_decode").drop();
-sp.disable_function.function("proc_open>base64_decode").drop();
+#sp.disable_function.function("system>base64_decode").drop();
+#sp.disable_function.function("shell_exec>base64_decode").drop();
+#sp.disable_function.function("exec>base64_decode").drop();
+#sp.disable_function.function("passthru>base64_decode").drop();
+#sp.disable_function.function("proc_open>base64_decode").drop();
 # TODO: enable this for real
 sp.eval_blacklist.list("system,exec,shell_exec,passthru,proc_open").simulation();
 

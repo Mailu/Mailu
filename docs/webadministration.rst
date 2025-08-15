@@ -284,7 +284,7 @@ On the `Mail domains` page all the domains served by Mailu are configured. Via t
 Details
 ```````
 
-This page is also accessible for domain managers. On the details page all DNS settings are displayed for configuring your DNS server. It contains information on what to configure as MX record and SPF record. On this page it is also possible to (re-)generate the keys for DKIM and DMARC. The option for generating keys for DKIM and DMARC is only available for global administrators.  After generating the keys for DKIM and DMARC, this page will also show the DNS records for configuring the DKIM/DMARC records on the DNS server. You can also download a zonefile for easy upload to your nameserver.
+This page is also accessible for domain managers. On the details page all DNS settings are displayed for configuring your DNS server. It contains information on what to configure as MX record and SPF record. On this page it is also possible to (re-)generate the keys for DKIM and DMARC. The option for generating keys for DKIM and DMARC is only available for global administrators.  After generating the keys for DKIM and DMARC, this page will also show the DNS records for configuring the DKIM/DMARC records on the DNS server. If you have configured alternative domains (see `Alternatives` below), you will find the MX, SPF, DKIM, and DMARC records of the alternative domains below the entries of the main domain. You can also download a zonefile for easy upload to your nameserver.
 
 
 Edit

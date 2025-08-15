@@ -2,7 +2,7 @@
     "IMAP": {
         "host": "{{ FRONT_ADDRESS }}",
         "port": 10143,
-        "type": 2,
+        "type": 0,
         "timeout": 300,
         "shortLogin": false,
         "lowerLogin": true,
@@ -41,7 +41,7 @@
     "SMTP": {
         "host": "{{ FRONT_ADDRESS }}",
         "port": 10025,
-        "type": 2,
+        "type": 0,
         "timeout": 60,
         "shortLogin": false,
         "lowerLogin": true,
@@ -70,7 +70,7 @@
     "Sieve": {
         "host": "{{ FRONT_ADDRESS }}",
         "port": 14190,
-        "type": 2,
+        "type": 0,
         "timeout": 10,
         "shortLogin": false,
         "lowerLogin": true,

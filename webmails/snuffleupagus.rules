@@ -132,8 +132,10 @@ sp.disable_function.function("curl_init").param("url").value_r("file://").drop()
 # File upload
 sp.disable_function.function("move_uploaded_file").param("to").value_r("\\.ph").drop();
 sp.disable_function.function("move_uploaded_file").param("to").value_r("\\.ht").drop();
+sp.disable_function.function("move_uploaded_file").param("to").value_r("\\.inc").drop();
 sp.disable_function.function("move_uploaded_file").param("destination").value_r("\\.ph").drop();
 sp.disable_function.function("move_uploaded_file").param("destination").value_r("\\.ht").drop();
+sp.disable_function.function("move_uploaded_file").param("destination").value_r("\\.inc").drop();
 
 # Logging lockdown
 sp.disable_function.function("ini_set").param("option").value_r("error_log").drop();
@@ -141,13 +143,13 @@ sp.disable_function.function("ini_set").param("option").value_r("display_errors"
 sp.disable_function.function("ini_set").param("option").value_r("display_errors").drop();
 
 # Classic webshells patterns
+# Those create SIGSEGV on arm64 for some reason
 #sp.disable_function.function("system>base64_decode").drop();
 #sp.disable_function.function("shell_exec>base64_decode").drop();
 #sp.disable_function.function("exec>base64_decode").drop();
 #sp.disable_function.function("passthru>base64_decode").drop();
 #sp.disable_function.function("proc_open>base64_decode").drop();
-# TODO: enable this for real
-sp.eval_blacklist.list("system,exec,shell_exec,passthru,proc_open").simulation();
+sp.eval_blacklist.list("system,exec,shell_exec,passthru,proc_open");
 
 sp.auto_cookie_secure.enable();
 # TODO: consider encrypting the cookies?

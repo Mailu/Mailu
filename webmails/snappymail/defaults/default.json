@@ -1,10 +1,20 @@
 {
-    "name": "*",
     "IMAP": {
         "host": "{{ FRONT_ADDRESS }}",
         "port": 10143,
-        "secure": 3,
+        "type": 0,
+        "timeout": 300,
         "shortLogin": false,
+        "lowerLogin": true,
+        "stripLogin": "",
+        "sasl": [
+            "SCRAM-SHA3-512",
+            "SCRAM-SHA-512",
+            "SCRAM-SHA-256",
+            "SCRAM-SHA-1",
+            "PLAIN",
+            "LOGIN"
+        ],
         "ssl": {
             "verify_peer": false,
             "verify_peer_name": false,
@@ -13,15 +23,37 @@
             "disable_compression": true,
             "security_level": 1
         },
-	{% if (FULL_TEXT_SEARCH or '').lower() not in ['off', 'false', '0'] %}
-        "fast_simple_search": "false"
-	{% endif %}
+        "use_expunge_all_on_delete": false,
+        "fast_simple_search": {% if (FULL_TEXT_SEARCH or '').lower() not in ['off', 'false', '0'] %}true{% else %}false{% endif %},
+        "force_select": false,
+        "message_all_headers": false,
+        "message_list_limit": 10000,
+        "search_filter": "",
+        "spam_headers": "",
+        "virus_headers": "",
+        "disabled_capabilities": [
+            "METADATA",
+            "OBJECTID",
+            "PREVIEW",
+            "STATUS=SIZE"
+        ]
     },
     "SMTP": {
         "host": "{{ FRONT_ADDRESS }}",
         "port": 10025,
-        "secure": 3,
+        "type": 0,
+        "timeout": 60,
         "shortLogin": false,
+        "lowerLogin": true,
+        "stripLogin": "",
+        "sasl": [
+            "SCRAM-SHA3-512",
+            "SCRAM-SHA-512",
+            "SCRAM-SHA-256",
+            "SCRAM-SHA-1",
+            "PLAIN",
+            "LOGIN"
+        ],
         "ssl": {
             "verify_peer": false,
             "verify_peer_name": false,
@@ -32,22 +64,35 @@
         },
         "useAuth": true,
         "setSender": false,
-        "usePhpMail": false
+        "usePhpMail": false,
+        "authPlainLine": false
     },
     "Sieve": {
         "host": "{{ FRONT_ADDRESS }}",
         "port": 14190,
-        "type": 3,
+        "type": 0,
+        "timeout": 10,
         "shortLogin": false,
+        "lowerLogin": true,
+        "stripLogin": "",
+        "sasl": [
+            "SCRAM-SHA3-512",
+            "SCRAM-SHA-512",
+            "SCRAM-SHA-256",
+            "SCRAM-SHA-1",
+            "PLAIN",
+            "LOGIN"
+        ],
         "ssl": {
             "verify_peer": false,
             "verify_peer_name": false,
-            "allow_self_signed": true,
+            "allow_self_signed": false,
             "SNI_enabled": true,
             "disable_compression": true,
             "security_level": 1
         },
-        "enabled": true
+        "enabled": true,
+        "authLiteral": true
     },
     "whiteList": ""
 }

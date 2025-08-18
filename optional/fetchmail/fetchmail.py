@@ -69,6 +69,7 @@ def run(debug):
             if "OPTIONS" in os.environ: options += f' {os.environ["OPTIONS"]}'
             options += " ssl" if fetch["tls"] else ""
             options += " keep" if fetch["keep"] else " fetchall"
+            options += " invisible" if fetch["invisible"] else ""
             folders = f"folders {",".join(f'"{imaputf7encode(item).replace('"',r"\34")}"' for item in fetch["folders"]) or '"INBOX"'}"
             fetchmailrc += RC_LINE.format(
                 user_email=escape_rc_string(fetch["user_email"]),

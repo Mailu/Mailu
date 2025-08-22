@@ -144,11 +144,11 @@ sp.disable_function.function("ini_set").param("option").value_r("display_errors"
 
 # Classic webshells patterns
 # Those create SIGSEGV on arm64 for some reason
-#sp.disable_function.function("system>base64_decode").drop();
-#sp.disable_function.function("shell_exec>base64_decode").drop();
-#sp.disable_function.function("exec>base64_decode").drop();
-#sp.disable_function.function("passthru>base64_decode").drop();
-#sp.disable_function.function("proc_open>base64_decode").drop();
+sp.disable_function.function("system>base64_decode").drop();
+sp.disable_function.function("shell_exec>base64_decode").drop();
+sp.disable_function.function("exec>base64_decode").drop();
+sp.disable_function.function("passthru>base64_decode").drop();
+sp.disable_function.function("proc_open>base64_decode").drop();
 sp.eval_blacklist.list("system,exec,shell_exec,passthru,proc_open");
 
 sp.auto_cookie_secure.enable();
@@ -156,6 +156,8 @@ sp.auto_cookie_secure.enable();
 # TODO: ensure this is up to date
 sp.cookie.name("roundcube_sessauth").samesite("strict");
 sp.cookie.name("roundcube_sessid").samesite("strict");
+sp.cookie.name("smtoken").samesite("strict");
+sp.cookie.name("smctoken").samesite("strict");
 sp.ini_protection.policy_silent_fail();
 
 # roundcube uses unserialize() everywhere.

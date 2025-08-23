@@ -2,7 +2,13 @@
   {%- if current_user.is_authenticated %}
   <div class="user-panel mt-3 pb-3 mb-3 d-flex" title="{{ current_user }}">
     <div class="image">
-      <div class="div-circle elevation-2"><i class="fa fa-user text-lg text-dark"></i></div>
+      {%- if current_user.avatar_filename %}
+      <img src="{{ url_for('ui.user_avatar_image', user_email=current_user.email) }}" class="img-circle elevation-2" alt="User Image" style="width: 33px; height: 33px;">
+      {%- else %}
+      <div class="div-circle elevation-2" style="width: 33px; height: 33px; background-color: #007bff; color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; font-size: 14px;">
+        {{ current_user.get_avatar_initials() }}
+      </div>
+      {%- endif %}
     </div>
     <div class="info">
       <a href="{{ url_for('.user_settings') }}" class="d-block">{{ current_user.displayed_name or current_user }}</a>

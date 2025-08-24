@@ -1,0 +1,2 @@
+Fix "passphrase changed" errors in snappymail. You may need to run:
+   find webmail/_data_/_default_/storage/ -name .cryptkey -delete

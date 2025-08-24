@@ -161,7 +161,7 @@ You can add a fetched account by clicking on the `Add an account` button on the 
 
 * Scan emails. When ticked, all the fetched emails will go through the local filters (rspamd, clamav, ...).
 
-* Keep original metadata (fetchmail invisible). When ticked, tries to make Mailu's fetchmail instance invisible. Normally, fetchmail behaves like any other MTA would -- it generates a Received header into each message describing its place in the chain of transmission, and tells the MTA it forwards to that the mail came from the machine fetchmail itself is running on. If the invisible option is on, the Received header is suppressed and fetchmail tries to spoof the MTA it forwards to into thinking it came directly from the mail server host.
+* Keep original metadata (fetchmail --invisible). When ticked, tries to make Mailu's fetchmail instance invisible. Normally, fetchmail behaves like any other MTA would -- it generates a Received header into each message describing its place in the chain of transmission, and tells the MTA it forwards to that the mail came from the machine fetchmail itself is running on. If the invisible option is on, the Received header is suppressed and fetchmail tries to spoof the MTA it forwards to into thinking it came directly from the mail server host.
 
 * Folders. A comma separated list of folders to fetch from the server. This is optional, by default only the INBOX will be pulled.
 

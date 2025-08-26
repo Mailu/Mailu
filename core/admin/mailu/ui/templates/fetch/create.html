@@ -8,24 +8,32 @@
 {{ user }}
 {%- endblock %}
 
+{%- block main_action %}
+<a class="btn btn-primary float-right" href="{{ url_for('.fetch_list') }}">{% trans %}Back to{% endtrans %} {% trans %}Fetched accounts{% endtrans %}</a>
+{%- endblock %}
+
 {%- block content %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {%- call macros.card(title="Remote server") %}
   {{ macros.form_field(form.protocol) }}
+  {%- if form.host.data %}
   {{ macros.form_fields((form.host, form.port)) }}
+  {%- else %}
+  {{ macros.form_fields((form.host, form.port), autofocus=true, autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false") }}
+  {%- endif %}
   {{ macros.form_field(form.tls) }}
   {%- endcall %}
 
   {%- call macros.card(title="Authentication") %}
-  {{ macros.form_field(form.username) }}
+  {{ macros.form_field(form.username, autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false") }}
   {{ macros.form_field(form.password) }}
   {%- endcall %}
 
   {%- call macros.card(title="Settings") %}
   {{ macros.form_field(form.keep) }}
   {{ macros.form_field(form.scan) }}
-  {{ macros.form_field(form.folders) }}
+  {{ macros.form_field(form.folders, autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false") }}
   {%- endcall %}
 
   {{ macros.form_field(form.submit) }}

@@ -3,3 +3,7 @@
 {%- block title %}
 {% trans %}New relay domain{% endtrans %}
 {%- endblock %}
+
+{%- block main_action %}
+<a class="btn btn-primary float-right" href="{{ url_for('.relay_list') }}">{% trans %}Back to{% endtrans %} {% trans %}Relayed domain list{% endtrans %}</a>
+{%- endblock %}

@@ -1,0 +1,1 @@
+Upgrade Tika to latest to fix CVE-2025-54988 (XXE). You will need to run setup again for the fix to be applied! This is defence in depth rather than something critical as on docker deployments there is no impact.

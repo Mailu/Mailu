@@ -203,6 +203,7 @@ class FetchForm(flask_wtf.FlaskForm):
     password = fields.PasswordField(_('Password'))
     keep = fields.BooleanField(_('Keep emails on the server'))
     scan = fields.BooleanField(_('Rescan emails locally'))
+    invisible = fields.BooleanField(_('Keep original metadata (fetchmail invisible)'))
     folders = fields.StringField(_('Folders to fetch on the server'), [validators.Optional(), MultipleFoldersVerify()], default='INBOX,Junk')
     submit = fields.SubmitField(_('Submit'))
 

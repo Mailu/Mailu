@@ -27,6 +27,7 @@ marshmallow
 marshmallow-sqlalchemy
 mysql-connector-python
 passlib
+Pillow
 psycopg2-binary
 Pygments
 PyYAML

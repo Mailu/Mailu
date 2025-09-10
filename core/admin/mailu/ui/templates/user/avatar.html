@@ -1,0 +1,95 @@
+{%- extends "base.html" %}
+
+{%- block title %}
+{% trans %}User avatar{% endtrans %}
+{%- endblock %}
+
+{%- block subtitle %}
+{{ user }}
+{%- endblock %}
+
+{%- block content %}
+<div class="row">
+  <div class="col-md-6">
+    {%- call macros.card(title=_("Current Avatar")) %}
+    <div class="text-center mb-3">
+      {% if avatar_info.has_avatar %}
+        <img src="{{ url_for('.user_avatar_image', user_email=user.email) }}" 
+             alt="User Avatar" 
+             class="rounded-circle img-thumbnail"
+             style="width: 150px; height: 150px; object-fit: cover;">
+        <p class="mt-2 text-muted">{{ _('Uploaded avatar') }}</p>
+      {% else %}
+        <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-primary text-white" 
+             style="width: 150px; height: 150px; font-size: 60px; font-weight: bold;">
+          {{ avatar_info.initials }}
+        </div>
+        <p class="mt-2 text-muted">{{ _('Generated from initials') }}</p>
+      {% endif %}
+    </div>
+    {%- endcall %}
+  </div>
+  
+  <div class="col-md-6">
+    {%- call macros.card(title=_("Upload New Avatar")) %}
+    <form method="post" enctype="multipart/form-data" role="form">
+      {{ upload_form.hidden_tag() }}
+      <div class="mb-3">
+        {{ macros.form_field(upload_form.avatar, accept="image/png,image/jpeg,image/jpg,image/webp") }}
+        <small class="form-text text-muted">
+          {{ _('Supported formats: PNG, JPG, JPEG, WebP. Maximum size: 2MB.') }}
+        </small>
+      </div>
+      {{ macros.form_field(upload_form.submit, class="btn btn-primary") }}
+    </form>
+    {%- endcall %}
+    
+    {% if avatar_info.has_avatar %}
+    {%- call macros.card(title=_("Delete Avatar"), theme="danger") %}
+    <form method="post" role="form">
+      {{ delete_form.hidden_tag() }}
+      <p class="text-muted">{{ _('This will permanently delete your uploaded avatar and return to generated initials.') }}</p>
+      {{ macros.form_field(delete_form.submit, class="btn btn-danger", 
+                          onclick="return confirm('" + _('Are you sure you want to delete your avatar?') + "')") }}
+    </form>
+    {%- endcall %}
+    {% endif %}
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col">
+    <a href="{{ url_for('.user_settings', user_email=user.email if user.email != current_user.email else None) }}" 
+       class="btn btn-secondary">
+      <i class="fa fa-arrow-left"></i> {{ _('Back to Settings') }}
+    </a>
+  </div>
+</div>
+{%- endblock %}
+
+{%- block script %}
+<script>
+// Preview uploaded image before submitting
+document.getElementById('avatar').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // Create preview if it doesn't exist
+            let preview = document.getElementById('avatar-preview');
+            if (!preview) {
+                preview = document.createElement('img');
+                preview.id = 'avatar-preview';
+                preview.className = 'rounded-circle img-thumbnail mt-2';
+                preview.style.width = '100px';
+                preview.style.height = '100px';
+                preview.style.objectFit = 'cover';
+                e.target.parentNode.appendChild(preview);
+            }
+            preview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{%- endblock %}

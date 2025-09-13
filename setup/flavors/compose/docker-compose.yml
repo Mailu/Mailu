@@ -156,7 +156,7 @@ services:
 
 {% if tika_enabled %}
   fts_attachments:
-    image: apache/tika:2.9.2.1-full
+    image: apache/tika:latest-full
     hostname: tika
     logging:
       driver: journald
@@ -227,12 +227,6 @@ services:
       - clamav
     volumes:
       - "{{ root }}/clamav:/var/lib/clamav"
-    healthcheck:
-      test: ["CMD-SHELL", "kill -0 `cat /tmp/clamd.pid` && kill -0 `cat /tmp/freshclam.pid`"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
   {% endif %}
 
   {% if webdav_enabled %}

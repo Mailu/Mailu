@@ -111,6 +111,8 @@ $('document').ready(function() {
     var d = $(document.documentElement);
     $('.dataTable').DataTable({
         'responsive': true,
+        'stateSave': true,
+        'lengthMenu': [[10, 25, 50, 75, 100, -1], [10, 25, 50, 75, 100, '∞']],
         language: {
             url: d.data('static') + d.attr('lang') + '.json',
         },

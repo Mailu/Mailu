@@ -40,6 +40,8 @@ address.
 The ``WILDCARD_SENDERS`` setting is a comma delimited list of user email addresses
 that are allowed to send emails from any existing address (spoofing the sender).
 
+.. _AUTH Ratelimit:
+
 The ``AUTH_RATELIMIT_IP`` (default: 5/hour) holds a security setting for fighting
 attackers that attempt a password spraying attack. The value defines the limit of
 authentication attempts that will be processed on **distinct** non-existing
@@ -82,7 +84,7 @@ account on the server.
 The ``RELAYNETS`` (default: unset) is a comma delimited list of network addresses
 for which mail is relayed for with no authentication required. This should be
 used with great care as misconfigurations may turn your Mailu instance into an
-open-relay!
+open-relay! Make sure clients are using port 25 with no authentication.
 
 The ``RELAYHOST`` is an optional address to use as a smarthost for all outgoing
 mail in following format: ``[HOST]:PORT``. ``RELAYUSER`` and ``RELAYPASSWORD``

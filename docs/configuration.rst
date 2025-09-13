@@ -132,6 +132,12 @@ later classify incoming mail based on the custom part.
 The ``DMARC_RUA`` and ``DMARC_RUF`` are DMARC protocol specific values. They hold
 the localpart for DMARC rua and ruf email addresses.
 
+``DMARC_SEND_REPORTS`` (default: false) enables automated DMARC aggregate report 
+generation and sending using Rspamd 3.0+. When enabled, Mailu will automatically 
+generate and send daily DMARC aggregate reports to domains that request them via 
+their DMARC policy records. Reports are sent at 2 AM daily for the previous day's 
+email traffic from ``POSTMASTER@DOMAIN``.
+
 The ``FULL_TEXT_SEARCH`` variable (default: 'en') is a comma separated list of
 language codes as defined on `fts_languages`_. This feature can be disabled
 (e.g. for performance reasons) by setting the variable to ``off``.

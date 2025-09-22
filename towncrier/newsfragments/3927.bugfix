@@ -1,0 +1,1 @@
+Fix an edge case in the process scheduler, where stdio handlers would hang and consume 100% CPU each if the process had any children that failed to stop. Also introduces a workaround for handling invalid UTF-8 in logs.

@@ -19,7 +19,7 @@ fetchmail -N \
     --idfile /data/fetchids --uidl \
     --pidfile /dev/shm/fetchmail.pid \
     --sslcertck --sslcertpath /etc/ssl/certs \
-    -f {}
+    {} -f {}
 """
 
 
@@ -55,7 +55,8 @@ def fetchmail(fetchmailrc):
     with tempfile.NamedTemporaryFile() as handler:
         handler.write(fetchmailrc.encode("utf8"))
         handler.flush()
-        command = FETCHMAIL.format(shlex.quote(handler.name))
+        if "FETCHMAIL_OPTIONS" in os.environ: fetchmail_custom_options = f'{ os.environ["FETCHMAIL_OPTIONS"]}' else fetchmail_custom_options = ""
+        command = FETCHMAIL.format(fetchmail_custom_options, shlex.quote(handler.name))
         output = subprocess.check_output(command, shell=True)
         return output
 
@@ -66,10 +67,9 @@ def run(debug):
         for fetch in fetches:
             fetchmailrc = ""
             options = "options antispam 501, 504, 550, 553, 554"
-            if "FETCHMAIL_OPTIONS" in os.environ: options += f'{ os.environ["FETCHMAIL_OPTIONS"]}'
+            if "FETCHMAIL_POLL_OPTIONS" in os.environ: options += f'{ os.environ["FETCHMAIL_POLL_OPTIONS"]}'
             options += " ssl" if fetch["tls"] else " sslproto \'\'"
             options += " keep" if fetch["keep"] else " fetchall"
-            options += " invisible" if fetch["invisible"] else ""
             folders = f"folders {",".join(f'"{imaputf7encode(item).replace('"',r"\34")}"' for item in fetch["folders"]) or '"INBOX"'}"
             fetchmailrc += RC_LINE.format(
                 user_email=escape_rc_string(fetch["user_email"]),

@@ -55,7 +55,7 @@ def fetchmail(fetchmailrc):
     with tempfile.NamedTemporaryFile() as handler:
         handler.write(fetchmailrc.encode("utf8"))
         handler.flush()
-        if "FETCHMAIL_OPTIONS" in os.environ: fetchmail_custom_options = f'{ os.environ["FETCHMAIL_OPTIONS"]}' else fetchmail_custom_options = ""
+        fetchmail_custom_options = os.environ.get("FETCHMAIL_OPTIONS", "")
         command = FETCHMAIL.format(fetchmail_custom_options, shlex.quote(handler.name))
         output = subprocess.check_output(command, shell=True)
         return output

@@ -13,7 +13,6 @@ def fetch_list():
             "tls": fetch.tls,
             "keep": fetch.keep,
             "scan": fetch.scan,
-            "invisible": fetch.invisible,
             "user_email": fetch.user_email,
             "protocol": fetch.protocol,
             "host": fetch.host,

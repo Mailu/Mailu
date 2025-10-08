@@ -63,6 +63,15 @@ the security implications caused by such an increase of attack surface.<p>
 
 <div class="form-check form-check-inline">
   <label class="form-check-label">
+    <input class="form-check-input" type="checkbox" name="dmarc_reports_enabled" value="true">
+    Enable DMARC aggregate reports
+  </label>
+
+  <i>Automatically generate and send daily DMARC aggregate reports to domains that request them. Helps other organizations monitor email authentication for their domains.</i>
+</div>
+
+<div class="form-check form-check-inline">
+  <label class="form-check-label">
     <input class="form-check-input" type="checkbox" name="tika_enabled" value="true">
     Enable Tika
   </label>

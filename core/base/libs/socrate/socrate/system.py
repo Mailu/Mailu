@@ -9,6 +9,7 @@ import socket
 import tenacity
 import subprocess
 import threading
+import time
 
 @tenacity.retry(stop=tenacity.stop_after_attempt(100),
                 wait=tenacity.wait_random(min=2, max=5))
@@ -154,12 +155,14 @@ def drop_privs_to(username='mailu'):
 def forward_text_lines(src, dst):
     while True:
         current_line = src.readline()
+        if not current_line:
+            return
         dst.write(current_line)
 
 
 # runs a process and passes its standard/error output to the standard/error output of the current python script
 def run_process_and_forward_output(cmd):
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, errors='replace')
 
     stdout_thread = threading.Thread(target=forward_text_lines, args=(process.stdout, sys.stdout))
     stdout_thread.daemon = True
@@ -169,7 +172,11 @@ def run_process_and_forward_output(cmd):
     stderr_thread.daemon = True
     stderr_thread.start()
 
-    rc = process.wait()
-    sys.stdout.flush()
-    sys.stderr.flush()
-    return rc
+    while True:
+        rc = process.poll()
+        if rc is not None or threading.active_count() < 3:
+            sys.stdout.flush()
+            sys.stderr.flush()
+            os._exit(rc if rc > 0 else 143)
+
+        time.sleep(1)

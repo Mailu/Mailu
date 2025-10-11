@@ -20,7 +20,7 @@ RUN set -euxo pipefail \
 
 WORKDIR /app
 
-CMD /bin/bash
+CMD ["/bin/bash"]
 
 
 # build virtual env (intermediate)

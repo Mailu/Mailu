@@ -115,13 +115,6 @@ jobs:
      packages: write
     steps:
       - uses: actions/checkout@v4
-      - id: get_path
-        run: |
-          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
-      - uses: docker/build-push-action@v6
-        with:
-          file: ${{ steps.get_path.outputs.dockerfile }}
-          call: check
       - name: Retrieve global variables
         shell: bash
         run: |
@@ -134,6 +127,13 @@ jobs:
       - uses: crazy-max/ghaction-github-runtime@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
+        with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
+          call: check
       - name: Helper to convert docker org to lowercase
         id: string
         uses: ASzc/change-string-case-action@v6
@@ -196,13 +196,6 @@ jobs:
      packages: write
     steps:
       - uses: actions/checkout@v4
-      - id: get_path
-        run: |
-          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
-      - uses: docker/build-push-action@v6
-        with:
-          file: ${{ steps.get_path.outputs.dockerfile }}
-          call: check
       - name: Retrieve global variables
         shell: bash
         run: |
@@ -213,12 +206,21 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - uses: crazy-max/ghaction-github-runtime@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
+        with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
+          call: check
       - name: Helper to convert docker org to lowercase
         id: string
         uses: ASzc/change-string-case-action@v6
         with:
           string: ${{ github.repository_owner }}
-      #This is to prevent to shared runners from generating the same uuid
+      # This is to prevent to shared runners from generating the same uuid
       - name: Get unique random number
         id: uuid
         run: |
@@ -279,13 +281,6 @@ jobs:
      packages: write
     steps:
       - uses: actions/checkout@v4
-      - id: get_path
-        run: |
-          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
-      - uses: docker/build-push-action@v6
-        with:
-          file: ${{ steps.get_path.outputs.dockerfile }}
-          call: check
       - name: Retrieve global variables
         shell: bash
         run: |
@@ -298,6 +293,13 @@ jobs:
       - uses: crazy-max/ghaction-github-runtime@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
+        with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
+          call: check
       - name: Helper to convert docker org to lowercase
         id: string
         uses: ASzc/change-string-case-action@v6
@@ -363,13 +365,6 @@ jobs:
      packages: write
     steps:
       - uses: actions/checkout@v4
-      - id: get_path
-        run: |
-          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
-      - uses: docker/build-push-action@v6
-        with:
-          file: ${{ steps.get_path.outputs.dockerfile }}
-          call: check
       - name: Retrieve global variables
         shell: bash
         run: |
@@ -380,12 +375,21 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - uses: crazy-max/ghaction-github-runtime@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
+        with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
+          call: check
       - name: Helper to convert docker org to lowercase
         id: string
         uses: ASzc/change-string-case-action@v6
         with:
           string: ${{ github.repository_owner }}
-      #This is to prevent to shared runners from generating the same uuid
+      # This is to prevent to shared runners from generating the same uuid
       - name: Get unique random number
         id: uuid
         run: |

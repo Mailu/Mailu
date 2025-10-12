@@ -83,24 +83,14 @@ env:
   HCL_FILE: ./tests/build-ci.hcl
 
 jobs:
-  validate-dockerfiles:
-    name: Validate Dockerfiles
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Validate build configuration
-        uses: docker/build-push-action@v6
-        with:
-          call: check
-
   # This job calculates what images must be build. It reads the build.hcl file and then outputs all targets (images) in it.
-  # This is used by the next build job.
+  # This is used by the following build jobs.
   targets:
     name: create targets
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.targets.outputs.matrix }}
+      files: ${{ steps.targets.outputs.files }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -111,6 +101,32 @@ jobs:
       - name: Show matrix
         run: |
           echo ${{ steps.targets.outputs.matrix }}
+      - name: Create files list
+        id: files
+        run: |
+          echo files=$(docker buildx bake -f ${{env.HCL_FILE}} --print | jq -cr '[.target[] | "\(.context)/\(.dockerfile)"]') >> $GITHUB_OUTPUT
+      - name: Show files
+        run: |
+          echo ${{ steps.targets.outputs.files }}
+
+# This job validates the Dockerfiles
+  validate-dockerfiles:
+    name: Validate Dockerfiles
+    runs-on: ubuntu-latest
+    needs:
+      - targets
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJson(needs.targets.outputs.files) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate build configuration
+        uses: docker/build-push-action@v6
+        with:
+          file: ${{ matrix.dockerfile }}
+          call: check
 
 # This job builds the base and assets images. The build cache is stored in the ghcr.io registry.
   build-base-assets-x64:

@@ -115,9 +115,12 @@ jobs:
      packages: write
     steps:
       - uses: actions/checkout@v4
-      - name: Validate build configuration
-        uses: docker/build-push-action@v6
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
         with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
           call: check
       - name: Retrieve global variables
         shell: bash
@@ -194,9 +197,12 @@ jobs:
      packages: write
     steps:
       - uses: actions/checkout@v4
-      - name: Validate build configuration
-        uses: docker/build-push-action@v6
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
         with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
           call: check
       - name: Retrieve global variables
         shell: bash
@@ -275,9 +281,12 @@ jobs:
      packages: write
     steps:
       - uses: actions/checkout@v4
-      - name: Validate build configuration
-        uses: docker/build-push-action@v6
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
         with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
           call: check
       - name: Retrieve global variables
         shell: bash
@@ -357,9 +366,12 @@ jobs:
      packages: write
     steps:
       - uses: actions/checkout@v4
-      - name: Validate build configuration
-        uses: docker/build-push-action@v6
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
         with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
           call: check
       - name: Retrieve global variables
         shell: bash

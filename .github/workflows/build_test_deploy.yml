@@ -100,14 +100,14 @@ jobs:
           echo matrix=$(docker buildx bake -f ${{env.HCL_FILE}} --print | jq -cr '.group.default.targets') >> $GITHUB_OUTPUT
       - name: Show matrix
         run: |
-          echo ${{ steps.targets.outputs.matrix }}
+          echo '${{ steps.targets.outputs.matrix }}'
       - name: Create files list
         id: files
         run: |
           echo files=$(docker buildx bake -f ${{env.HCL_FILE}} --print | jq -cr '[.target[] | "\(.context)/\(.dockerfile)"]') >> $GITHUB_OUTPUT
       - name: Show files
         run: |
-          echo ${{ steps.files.outputs.files }}
+          echo '${{ steps.files.outputs.files }}'
 
 # This job validates the Dockerfiles
   validate-dockerfiles:

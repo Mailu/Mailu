@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.targets.outputs.matrix }}
-      files: ${{ steps.targets.outputs.files }}
+      files: ${{ steps.files.outputs.files }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -107,7 +107,7 @@ jobs:
           echo files=$(docker buildx bake -f ${{env.HCL_FILE}} --print | jq -cr '[.target[] | "\(.context)/\(.dockerfile)"]') >> $GITHUB_OUTPUT
       - name: Show files
         run: |
-          echo ${{ steps.targets.outputs.files }}
+          echo ${{ steps.files.outputs.files }}
 
 # This job validates the Dockerfiles
   validate-dockerfiles:

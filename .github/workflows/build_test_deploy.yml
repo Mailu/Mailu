@@ -118,7 +118,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ${{ fromJson(needs.targets.outputs.files) }}
+        dockerfile: ${{ fromJson(needs.targets.outputs.files) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -44,7 +44,9 @@
   <th>{% trans %}DNS DMARC entry{% endtrans %}</th>
   <td>
     {{ macros.clip("dns_dmarc") }}<pre id="dns_dmarc" class="pre-config border bg-light">{{ domain.dns_dmarc }}</pre>
+    {%- if domain.dns_dmarc_report_needed %}
     {{ macros.clip("dns_dmarc_report") }}<pre id="dns_dmarc_report" class="pre-config border bg-light">{{ domain.dns_dmarc_report }}</pre>
+    {%- endif %}
   </td>
 </tr>
 {%- endif %}
@@ -89,7 +91,9 @@
   <th>{% trans %}DNS DMARC entry{% endtrans %}</th>
   <td>
     {{ macros.clip("dns_dmarc") }}<pre id="dns_dmarc" class="pre-config border bg-light">{{ alternative.dns_dmarc }}</pre>
+    {%- if alternative.dns_dmarc_report_needed %}
     {{ macros.clip("dns_dmarc_report") }}<pre id="dns_dmarc_report" class="pre-config border bg-light">{{ alternative.dns_dmarc_report }}</pre>
+    {%- endif %}
   </td>
 </tr>
 {%- endif %}

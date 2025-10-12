@@ -29,7 +29,7 @@ RUN set -euxo pipefail \
 
 # roundcube
 ENV ROUNDCUBE_URL https://github.com/roundcube/roundcubemail/releases/download/1.6.11/roundcubemail-1.6.11-complete.tar.gz
-ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v5.1.0/carddav-v5.1.0.tar.gz
+ENV CARDDAV_URL https://github.com/mstilkerich/rcmcarddav/releases/download/v5.1.1/carddav-v5.1.1.tar.gz
 
 RUN set -euxo pipefail \
   ; cd /var/www \

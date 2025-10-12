@@ -18,7 +18,7 @@ Or in plain English: if receivers start to classify your mail as spam, this post
   </label>
 <!--   Validates domain name -->
   <input class="form-control" type="text" name="domain" placeholder="e.g. mailu.io"
-  		required pattern="^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$">
+         required pattern="^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$">
 </div>
 
 <div class="form-group">
@@ -30,9 +30,9 @@ Or in plain English: if receivers start to classify your mail as spam, this post
   <label>Choose how you wish to handle security <a href="https://mailu.io/{{ version }}/compose/setup.html#tls-certificates">TLS certificates</a></label>
   <br/>
   <select class="btn btn-primary dropdown-toggle" name="tls_flavor">
-  	{% for tlsflavor in ["letsencrypt", "cert", "notls", "mail", "mail-letsencrypt"] %}
-  	<option value="{{ tlsflavor }}" >{{ tlsflavor }}</option>
-  	{% endfor %}
+  {% for tlsflavor in ["letsencrypt", "cert", "notls"] %}
+    <option value="{{ tlsflavor }}" >{{ tlsflavor }}</option>
+  {% endfor %}
   </select>
 </div>
 
@@ -46,8 +46,7 @@ Or in plain English: if receivers start to classify your mail as spam, this post
 <div class="form-group">
   <label>Authentication rate limit per user</label>
   <!--   Validates number input only -->
-  <p><input class="form-control" style="width: 9%; display: inline;" type="number" name="auth_ratelimit_user"
-  		value="50" required > / day
+  <p><input class="form-control" style="width: 9%; display: inline;" type="number" name="auth_ratelimit_user" value="50" required > / day
   </p>
 </div>
 
@@ -74,15 +73,15 @@ Or in plain English: if receivers start to classify your mail as spam, this post
   <label>Linked Website URL</label>
 <!--   Validates url with or without https:// -->
   <input class="form-control" type="url" name="website" value="https://mailu.io" required
-		pattern="^(https?://)?([a-zA-Z0-9]([a-zA-ZäöüÄÖÜ0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$">
+         pattern="^(https?://)?([a-zA-Z0-9]([a-zA-ZäöüÄÖÜ0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$">
 </div>
 
 <p>The admin interface is the main Mailu-specific bit, it provides tools to
 manage your email domains, users, etc.</p>
 
 <div class="form-group">
-    <input type="checkbox" name="admin_enabled" value="true" id="admin" checked>
-  	<label>Enable the admin UI</label>
+  <input type="checkbox" name="admin_enabled" value="true" id="admin" checked>
+  <label>Enable the admin UI</label>
 </div>
 
 <p>The API interface is a RESTful API for changing the Mailu configuration.
@@ -91,11 +90,11 @@ manage your email domains, users, etc.</p>
   It is not possible to use the API without an API token.</p>
 
   <div class="form-group">
-      <input type="checkbox" name="api_enabled" value="true" id="api_enabled" >
-      <label>Enable the API</label>
-      <br>
-      <label name="api_token_label" id="api_token_label">API token</label>
-      <input class="form-control" type="text" name="api_token" id="api_token" style="display: none" value="{{ secret(32) }}">
+    <input type="checkbox" name="api_enabled" value="true" id="api_enabled" >
+    <label>Enable the API</label>
+    <br>
+    <label name="api_token_label" id="api_token_label">API token</label>
+    <input class="form-control" type="text" name="api_token" id="api_token" style="display: none" value="{{ secret(32) }}">
   </div>
 
 {% endcall %}

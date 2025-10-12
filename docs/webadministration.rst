@@ -161,6 +161,8 @@ You can add a fetched account by clicking on the `Add an account` button on the 
 
 * Scan emails. When ticked, all the fetched emails will go through the local filters (rspamd, clamav, ...).
 
+* Keep original metadata (fetchmail --invisible). When ticked, tries to make Mailu's fetchmail instance invisible. Normally, fetchmail behaves like any other MTA would -- it generates a Received header into each message describing its place in the chain of transmission, and tells the MTA it forwards to that the mail came from the machine fetchmail itself is running on. If the invisible option is on, the Received header is suppressed and fetchmail tries to spoof the MTA it forwards to into thinking it came directly from the mail server host.
+
 * Folders. A comma separated list of folders to fetch from the server. This is optional, by default only the INBOX will be pulled.
 
 Click the submit button to apply settings. With the default polling interval, fetchmail will start polling the email account after ``FETCHMAIL_DELAY``.
@@ -284,7 +286,7 @@ On the `Mail domains` page all the domains served by Mailu are configured. Via t
 Details
 ```````
 
-This page is also accessible for domain managers. On the details page all DNS settings are displayed for configuring your DNS server. It contains information on what to configure as MX record and SPF record. On this page it is also possible to (re-)generate the keys for DKIM and DMARC. The option for generating keys for DKIM and DMARC is only available for global administrators.  After generating the keys for DKIM and DMARC, this page will also show the DNS records for configuring the DKIM/DMARC records on the DNS server. You can also download a zonefile for easy upload to your nameserver.
+This page is also accessible for domain managers. On the details page all DNS settings are displayed for configuring your DNS server. It contains information on what to configure as MX record and SPF record. On this page it is also possible to (re-)generate the keys for DKIM and DMARC. The option for generating keys for DKIM and DMARC is only available for global administrators.  After generating the keys for DKIM and DMARC, this page will also show the DNS records for configuring the DKIM/DMARC records on the DNS server. If you have configured alternative domains (see `Alternatives` below), you will find the MX, SPF, DKIM, and DMARC records of the alternative domains below the entries of the main domain. You can also download a zonefile for easy upload to your nameserver.
 
 
 Edit

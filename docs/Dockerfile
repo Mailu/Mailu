@@ -1,5 +1,5 @@
 # Convert .rst files to .html in temporary build container
-FROM python:3.12.3-alpine3.19 AS build
+FROM python:3.13.6-alpine3.22 AS build
 
 ARG version=master
 ENV VERSION=$version
@@ -25,7 +25,7 @@ RUN set -euxo pipefail \
 
 
 # Build nginx deployment image including generated html
-FROM nginx:1.25.5-alpine
+FROM nginx:1.29.0-alpine
 
 ARG version=master
 ARG pinned_version=master

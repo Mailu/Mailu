@@ -1,0 +1,1 @@
+Remove OCSP stapling by Nginx because Let's Encrypt has dropped OCSP support

@@ -87,12 +87,36 @@ def is_exempt_from_ratelimits(ip):
     ip = ipaddress.ip_address(ip)
     return any(ip in cidr for cidr in app.config['AUTH_RATELIMIT_EXEMPTION'])
 
+def get_ASN(ip, timeout=5):
+    try:
+        ip = ipaddress.ip_address(ip)
+        if ip.is_private: return None
+        if ip.version == 6:
+            origin = 'origin6'
+            reverse = ip.reverse_pointer.rstrip('.ip6.arpa')
+        else:
+            origin = 'origin'
+            reverse = ip.reverse_pointer.rstrip('.in-addr.arpa')
+        answer = resolver.resolve(f'{reverse}.{origin}.asn.cymru.com', dns.rdatatype.TXT,dns.rdataclass.IN, lifetime=timeout)
+        return 'ASN'+(str(answer[0]).lstrip('"').split(' ')[0])
+    except dns.exception.Timeout:
+        app.logger.warn(f'Timeout while resolving the ASN for {ip} ({timeout}s).')
+    except (dns.resolver.NXDOMAIN, dns.name.EmptyLabel):
+        pass # this is expected, no TXT returned for internal IPs for instance
+    except Exception as e:
+        app.logger.info(f'Error while looking up the ASN {ip} {e}')
+    return None
+
 def is_ip_in_subnet(ip, subnets=[]):
-    if isinstance(subnets, str):
-        subnets = [subnets]
+    asn_list = []
+    network_list = []
+
+    for subnet in subnets:
+        (asn_list if subnet.upper().startswith('ASN') else network_list).append(subnet)
+
     ip = ipaddress.ip_address(ip)
     try:
-        return any(ip in cidr for cidr in [ipaddress.ip_network(subnet, strict=False) for subnet in subnets])
+        return any(ip in cidr for cidr in [ipaddress.ip_network(subnet, strict=False) for subnet in network_list]) or (get_ASN(ip) in asn_list if asn_list else None)
     except:
         app.logger.debug(f'Unable to parse {subnets!r}, assuming {ip!r} is not in the set')
         return False

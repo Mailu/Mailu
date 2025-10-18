@@ -36,7 +36,7 @@ token_user_post_response = api.model('TokenPostResponse', {
     'token': fields.String(description='The created authentication token for the user.', example='2caf6607de5129e4748a2c061aee56f2', attribute='password'),
     'email': fields.String(description='The email address of the user', example='John.Doe@example.com', attribute='user_email'),
     'comment': fields.String(description='A description for the token. This description is shown on the Authentication tokens page', example='my comment'),
-    'AuthorizedIP': fields.List(fields.String(description='White listed IP addresses or networks that may use this token.', example="203.0.113.0/24")),
+    'AuthorizedIP': fields.List(fields.String(description='White listed IP addresses, networks or ASN numbers that may use this token.', example="203.0.113.0/24,ASN1234")),
     'Created': fields.String(description='The date when the token was created', example='John.Doe@example.com', attribute='created_at')
 })
 
@@ -79,7 +79,8 @@ class Tokens(Resource):
             token_new.ip = data['AuthorizedIP']
             for ip in token_new.ip:
                 if (not validators.ip_address.ipv4(ip,cidr=True, strict=False, host_bit=False) and
-                    not validators.ip_address.ipv6(ip,cidr=True, strict=False, host_bit=False)):
+                    not validators.ip_address.ipv6(ip,cidr=True, strict=False, host_bit=False) and
+                    not ip.upper().startswith('ASN')):
                     return { 'code': 400, 'message': f'Provided AuthorizedIP {ip} in {token_new.ip} is invalid'}, 400
         raw_password = pwd.genword(entropy=128, length=32, charset="hex")
         token_new.set_password(raw_password)

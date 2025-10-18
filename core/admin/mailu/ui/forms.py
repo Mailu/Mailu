@@ -169,7 +169,7 @@ class TokenForm(flask_wtf.FlaskForm):
             return True
         try:
             for candidate in field.data.replace(' ','').split(','):
-                ipaddress.ip_network(candidate, False)
+                candidate.upper().startswith('ASN') or ipaddress.ip_network(candidate, False)
         except:
             raise validators.ValidationError('Not a valid list of CIDRs')
 

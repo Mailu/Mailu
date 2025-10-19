@@ -184,7 +184,7 @@ After saving the application token it is not possible anymore to view the unique
 
 The comment field can be used to enter a description for the authentication token. For example the name of the application the application token is created for.
 
-In the Authorized IP field a comma separated list of white listed IP addresses, networks or ASN numbers (prefixed with 'ASN', for instance 'ASN1234') can be entered. When the field is set, the application token can only be used when the IP address of the client matches what is in the field.
+In the Authorized IP field a comma separated list of white listed IP addresses, networks or ASN numbers (prefixed with 'AS', for instance 'AS1234') can be entered. When the field is set, the application token can only be used when the IP address of the client matches what is in the field.
 When no IP address is entered, there is no restriction on IP address.
 
 

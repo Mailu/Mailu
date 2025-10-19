@@ -98,7 +98,7 @@ def get_ASN(ip, timeout=5):
             origin = 'origin'
             reverse = ip.reverse_pointer.rstrip('.in-addr.arpa')
         answer = resolver.resolve(f'{reverse}.{origin}.asn.cymru.com', dns.rdatatype.TXT,dns.rdataclass.IN, lifetime=timeout)
-        return 'ASN'+(str(answer[0]).lstrip('"').split(' ')[0])
+        return 'AS'+(str(answer[0]).lstrip('"').split(' ')[0])
     except dns.exception.Timeout:
         app.logger.warn(f'Timeout while resolving the ASN for {ip} ({timeout}s).')
     except (dns.resolver.NXDOMAIN, dns.name.EmptyLabel):
@@ -112,7 +112,7 @@ def is_ip_in_subnet(ip, subnets=[]):
     network_list = []
 
     for subnet in subnets:
-        (asn_list if subnet.upper().startswith('ASN') else network_list).append(subnet)
+        (asn_list if subnet.upper().startswith('AS') else network_list).append(subnet)
 
     ip = ipaddress.ip_address(ip)
     try:

@@ -1,1 +1,1 @@
-Upgrade clamav to 1.5, use the lighter base-image
+Use clamav's lighter base-image

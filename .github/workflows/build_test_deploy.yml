@@ -83,8 +83,8 @@ env:
   HCL_FILE: ./tests/build-ci.hcl
 
 jobs:
-# This job calculates what images must be build. It reads the build.hcl file and then outputs all targets (images) in it.
-# This is used by the next build job.
+  # This job calculates what images must be build. It reads the build.hcl file and then outputs all targets (images) in it.
+  # This is used by the following build jobs.
   targets:
     name: create targets
     runs-on: ubuntu-latest
@@ -127,6 +127,13 @@ jobs:
       - uses: crazy-max/ghaction-github-runtime@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
+        with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
+          call: check
       - name: Helper to convert docker org to lowercase
         id: string
         uses: ASzc/change-string-case-action@v6
@@ -157,17 +164,16 @@ jobs:
           command: |
             set -euxo pipefail \
               ; /usr/bin/docker info \
-              ; echo "${{ github.token }}" |        docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
-              ; echo "$DOCKER_PASSW" |   docker login --username "$DOCKER_LOGIN" --password-stdin \
-              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} \
-              || echo "builder does not exist" \
+              ; echo "${{ github.token }}" | docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
+              ; echo "$DOCKER_PASSW" | docker login --username "$DOCKER_LOGIN" --password-stdin \
+              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} || echo "builder does not exist" \
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
               --file ./tests/build-ci.hcl \
               --set *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache \
               --set *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache,mode=max \
               --set *.platform=${{ env.ARCH }} ${{ matrix.target }} \
-              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }}
+              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} || true
       - name: cleanup docker buildx instance after failure of build step
         if: ${{ failure() }}
         shell: bash
@@ -200,12 +206,21 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - uses: crazy-max/ghaction-github-runtime@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
+        with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
+          call: check
       - name: Helper to convert docker org to lowercase
         id: string
         uses: ASzc/change-string-case-action@v6
         with:
           string: ${{ github.repository_owner }}
-      #This is to prevent to shared runners from generating the same uuid
+      # This is to prevent to shared runners from generating the same uuid
       - name: Get unique random number
         id: uuid
         run: |
@@ -231,17 +246,16 @@ jobs:
           command: |
             set -euxo pipefail \
               ; /usr/bin/docker info \
-              ; echo "${{ github.token }}" |        docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
-              ; echo "$DOCKER_PASSW2" |    docker login --username "$DOCKER_LOGIN2" --password-stdin \
-              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} \
-              || echo "builder does not exist" \
+              ; echo "${{ github.token }}" | docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
+              ; echo "$DOCKER_PASSW2" | docker login --username "$DOCKER_LOGIN2" --password-stdin \
+              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} || echo "builder does not exist" \
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
               --file ./tests/build-ci.hcl \
               --set *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache-arm \
               --set *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache-arm,mode=max \
               --set *.platform=${{ env.ARCH }} ${{ matrix.target }} \
-              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }}
+              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} || true
       - name: cleanup docker buildx instance after failure of build step
         if: ${{ failure() }}
         shell: bash
@@ -279,6 +293,13 @@ jobs:
       - uses: crazy-max/ghaction-github-runtime@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
+        with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
+          call: check
       - name: Helper to convert docker org to lowercase
         id: string
         uses: ASzc/change-string-case-action@v6
@@ -309,17 +330,16 @@ jobs:
           command: |
             set -euxo pipefail \
               ; /usr/bin/docker info \
-              ; echo "${{ github.token }}" |        docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
-              ; echo "$DOCKER_PASSW" |   docker login --username "$DOCKER_LOGIN" --password-stdin \
-              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} \
-              || echo "builder does not exist" \
+              ; echo "${{ github.token }}" | docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
+              ; echo "$DOCKER_PASSW" | docker login --username "$DOCKER_LOGIN" --password-stdin \
+              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} || echo "builder does not exist" \
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
               --file ./tests/build-ci.hcl \
               --set *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache \
               --set *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache,mode=max \
               --set *.platform=${{ env.ARCH }} ${{ matrix.target }} \
-              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }}
+              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} || true
       - name: cleanup docker buildx instance after failure of build step
         if: ${{ failure() }}
         shell: bash
@@ -355,12 +375,21 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - uses: crazy-max/ghaction-github-runtime@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
+        with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
+          call: check
       - name: Helper to convert docker org to lowercase
         id: string
         uses: ASzc/change-string-case-action@v6
         with:
           string: ${{ github.repository_owner }}
-      #This is to prevent to shared runners from generating the same uuid
+      # This is to prevent to shared runners from generating the same uuid
       - name: Get unique random number
         id: uuid
         run: |
@@ -386,17 +415,16 @@ jobs:
           command: |
             set -euxo pipefail \
               ; /usr/bin/docker info \
-              ; echo "${{ github.token }}" |        docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
-              ; echo "$DOCKER_PASSW2" |    docker login --username "$DOCKER_LOGIN2" --password-stdin \
-              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} \
-              || echo "builder does not exist" \
+              ; echo "${{ github.token }}" | docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
+              ; echo "$DOCKER_PASSW2" | docker login --username "$DOCKER_LOGIN2" --password-stdin \
+              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} || echo "builder does not exist" \
               ; /usr/bin/docker buildx create --name builder-${{ env.BUILDER }} --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
               --file ./tests/build-ci.hcl \
               --set *.cache-from=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache-arm \
               --set *.cache-to=type=registry,ref=ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:buildcache-arm,mode=max \
               --set *.platform=${{ env.ARCH }} ${{ matrix.target }} \
-              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }}
+              ; /usr/bin/docker buildx rm builder-${{ env.BUILDER }} || true
       - name: cleanup docker buildx instance after failure of build step
         if: ${{ failure() }}
         shell: bash

@@ -3,8 +3,8 @@
 # cert dumper image
 FROM ldez/traefik-certs-dumper
 
-ENV TZ Etc/UTC
-ENV LANG C.UTF-8
+ENV TZ=Etc/UTC
+ENV LANG=C.UTF-8
 
 ARG VERSION
 LABEL version=$VERSION

@@ -14,6 +14,33 @@
 
   {%- call macros.card(title=_("Displayed name")) %}
   {{ macros.form_field(form.displayed_name) }}
+  <div class="row mt-2">
+    <div class="col-12">
+      <div class="form-group">
+        <label class="form-label">{{ _('Profile Avatar') }}</label>
+        <div class="d-flex align-items-center">
+          <div class="mr-3">
+            {%- if user.avatar_filename %}
+            <img src="{{ url_for('.user_avatar_image', user_email=user.email) }}" 
+                 class="img-circle" 
+                 alt="Avatar" 
+                 style="width: 40px; height: 40px;">
+            {%- else %}
+            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                 style="width: 40px; height: 40px; font-weight: bold;">
+              {{ user.get_avatar_initials() }}
+            </div>
+            {%- endif %}
+          </div>
+          <a href="{{ url_for('.user_avatar', user_email=user.email if user.email != current_user.email else None) }}" 
+             class="btn btn-sm btn-outline-secondary">
+            <i class="fa fa-edit"></i> {{ _('Manage Avatar') }}
+          </a>
+        </div>
+        <small class="form-text text-muted">{{ _('Upload or change your profile picture') }}</small>
+      </div>
+    </div>
+  </div>
   {%- endcall %}
 
   {%- call macros.card(title=_("Antispam")) %}

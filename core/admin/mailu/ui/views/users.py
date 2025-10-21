@@ -1,11 +1,15 @@
 from mailu import models, utils
 from mailu.ui import ui, access, forms
+from mailu.utils import avatar
 from flask import current_app as app
 
 import flask
 import flask_login
 import wtforms
 import wtforms_components
+import tempfile
+import os
+from werkzeug.utils import secure_filename
 
 @ui.route('/user/list/<domain_name>', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
@@ -199,3 +203,97 @@ def user_signup(domain_name=None):
             flask.flash('Successfully signed up %s' % user)
             return flask.redirect(flask.url_for('.index'))
     return flask.render_template('user/signup.html', domain=domain, form=form)
+
+
+@ui.route('/user/avatar', methods=['GET', 'POST'], defaults={'user_email': None})
+@ui.route('/user/avatar/<path:user_email>', methods=['GET', 'POST'])
+@access.owner(models.User, 'user_email')
+def user_avatar(user_email):
+    """ Handle user avatar upload and display """
+    user_email_or_current = user_email or flask_login.current_user.email
+    user = models.User.query.get(user_email_or_current) or flask.abort(404)
+    
+    upload_form = forms.UserAvatarForm()
+    delete_form = forms.UserAvatarDeleteForm()
+    
+    if upload_form.validate_on_submit() and upload_form.avatar.data:
+        file = upload_form.avatar.data
+        
+        if not avatar.allowed_file(file.filename):
+            flask.flash('Invalid file type. Allowed: PNG, JPG, JPEG, WebP', 'error')
+        else:
+            # Save to temporary file for validation
+            temp_file = tempfile.NamedTemporaryFile(delete=False)
+            file.save(temp_file.name)
+            
+            try:
+                # Validate the uploaded file
+                is_valid, error_msg = avatar.validate_image_file(temp_file.name)
+                if not is_valid:
+                    flask.flash(error_msg, 'error')
+                else:
+                    # Generate filename and storage path
+                    storage_path = avatar.get_avatar_storage_path()
+                    avatar_filename = avatar.generate_avatar_filename(user.email, file.filename)
+                    avatar_path = os.path.join(storage_path, avatar_filename)
+                    
+                    # Process and save avatar
+                    success, error_msg = avatar.process_avatar_image(temp_file.name, avatar_path)
+                    if success:
+                        # Delete old avatar if exists
+                        if user.avatar_filename:
+                            user.delete_avatar()
+                        
+                        # Update user record
+                        user.avatar_filename = avatar_filename
+                        models.db.session.commit()
+                        flask.flash('Avatar uploaded successfully', 'success')
+                    else:
+                        flask.flash(error_msg, 'error')
+            finally:
+                # Clean up temporary file
+                try:
+                    os.unlink(temp_file.name)
+                except OSError:
+                    pass
+    
+    elif delete_form.validate_on_submit():
+        if user.avatar_filename:
+            user.delete_avatar()
+            models.db.session.commit()
+            flask.flash('Avatar deleted successfully', 'success')
+        else:
+            flask.flash('No avatar to delete', 'warning')
+    
+    # Get avatar info for display
+    avatar_info = avatar.get_avatar_info(user)
+    
+    return flask.render_template('user/avatar.html', 
+                               user=user, 
+                               upload_form=upload_form,
+                               delete_form=delete_form,
+                               avatar_info=avatar_info)
+
+
+@ui.route('/user/<path:user_email>/avatar/image')
+def user_avatar_image(user_email):
+    """ Serve user avatar image """
+    user = models.User.query.get(user_email) or flask.abort(404)
+    
+    # Check if user has uploaded avatar
+    if user.avatar_filename:
+        avatar_path = user.avatar_path
+        if avatar_path and os.path.exists(avatar_path):
+            return flask.send_file(avatar_path, mimetype='image/jpeg')
+    
+    # Generate initials-based avatar
+    initials = user.get_avatar_initials()
+    avatar_img = avatar.generate_initials_avatar(initials)
+    
+    # Save to memory buffer and return
+    from io import BytesIO
+    avatar_buffer = BytesIO()
+    avatar_img.save(avatar_buffer, 'PNG')
+    avatar_buffer.seek(0)  # Reset buffer pointer to the beginning
+    
+    return flask.send_file(avatar_buffer, mimetype='image/png', as_attachment=False)

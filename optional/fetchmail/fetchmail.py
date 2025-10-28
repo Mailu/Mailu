@@ -12,6 +12,7 @@ import requests
 from socrate import system
 import sys
 import traceback
+from multiprocessing import Process
 
 
 FETCHMAIL = """
@@ -61,48 +62,55 @@ def fetchmail(fetchmailrc):
         return output
 
 
+def worker(debug, fetch):
+    fetchmailrc = ""
+    options = "options antispam 501, 504, 550, 553, 554"
+    if "FETCHMAIL_POLL_OPTIONS" in os.environ: options += f' {os.environ["FETCHMAIL_POLL_OPTIONS"]}'
+    options += " ssl" if fetch["tls"] else " sslproto \'\'"
+    options += " keep" if fetch["keep"] else " fetchall"
+    folders = f"folders {",".join(f'"{imaputf7encode(item).replace('"',r"\34")}"' for item in fetch["folders"]) or '"INBOX"'}"
+    fetchmailrc += RC_LINE.format(
+        user_email=escape_rc_string(fetch["user_email"]),
+        protocol=fetch["protocol"],
+        host=escape_rc_string(fetch["host"]),
+        port=fetch["port"],
+        smtphost=f'{os.environ["HOSTNAMES"].split(",")[0]}' if fetch['scan'] and os.environ.get('PROXY_PROTOCOL_25', False) else f'{os.environ["FRONT_ADDRESS"]}' if fetch['scan'] else f'{os.environ["FRONT_ADDRESS"]}/2525',
+        username=escape_rc_string(fetch["username"]),
+        password=escape_rc_string(fetch["password"]),
+        options=options,
+        folders='' if fetch['protocol'] == 'pop3' else folders,
+        lmtp='' if fetch['scan'] else 'lmtp',
+    )
+    if debug:
+        print(fetchmailrc)
+    try:
+        print(fetchmail(fetchmailrc))
+        error_message = ""
+    except subprocess.CalledProcessError as error:
+        error_message = error.output.decode("utf8")
+        # No mail is not an error
+        if not error_message.startswith("fetchmail: No mail"):
+            print(error_message)
+        user_info = "for %s at %s" % (fetch["user_email"], fetch["host"])
+        # Number of messages seen is not a error as well
+        if ("messages" in error_message and
+                "(seen " in error_message and
+                user_info in error_message):
+            print(error_message)
+    finally:
+        requests.post("http://{}:8080/internal/fetch/{}".format(os.environ['ADMIN_ADDRESS'],fetch['id']),
+            json=error_message.split('\n')[0]
+        )
+
+
 def run(debug):
     try:
         fetches = requests.get(f"http://{os.environ['ADMIN_ADDRESS']}:8080/internal/fetch").json()
         for fetch in fetches:
-            fetchmailrc = ""
-            options = "options antispam 501, 504, 550, 553, 554"
-            if "FETCHMAIL_POLL_OPTIONS" in os.environ: options += f' {os.environ["FETCHMAIL_POLL_OPTIONS"]}'
-            options += " ssl" if fetch["tls"] else " sslproto \'\'"
-            options += " keep" if fetch["keep"] else " fetchall"
-            folders = f"folders {",".join(f'"{imaputf7encode(item).replace('"',r"\34")}"' for item in fetch["folders"]) or '"INBOX"'}"
-            fetchmailrc += RC_LINE.format(
-                user_email=escape_rc_string(fetch["user_email"]),
-                protocol=fetch["protocol"],
-                host=escape_rc_string(fetch["host"]),
-                port=fetch["port"],
-                smtphost=f'{os.environ["HOSTNAMES"].split(",")[0]}' if fetch['scan'] and os.environ.get('PROXY_PROTOCOL_25', False) else f'{os.environ["FRONT_ADDRESS"]}' if fetch['scan'] else f'{os.environ["FRONT_ADDRESS"]}/2525',
-                username=escape_rc_string(fetch["username"]),
-                password=escape_rc_string(fetch["password"]),
-                options=options,
-                folders='' if fetch['protocol'] == 'pop3' else folders,
-                lmtp='' if fetch['scan'] else 'lmtp',
-            )
-            if debug:
-                print(fetchmailrc)
-            try:
-                print(fetchmail(fetchmailrc))
-                error_message = ""
-            except subprocess.CalledProcessError as error:
-                error_message = error.output.decode("utf8")
-                # No mail is not an error
-                if not error_message.startswith("fetchmail: No mail"):
-                    print(error_message)
-                user_info = "for %s at %s" % (fetch["user_email"], fetch["host"])
-                # Number of messages seen is not a error as well
-                if ("messages" in error_message and
-                        "(seen " in error_message and
-                        user_info in error_message):
-                    print(error_message)
-            finally:
-                requests.post("http://{}:8080/internal/fetch/{}".format(os.environ['ADMIN_ADDRESS'],fetch['id']),
-                    json=error_message.split('\n')[0]
-                )
+            p = Process(target=worker, args=(debug,fetch,))
+            p.start()
+            p.join()
+
     except Exception:
         traceback.print_exc()
 

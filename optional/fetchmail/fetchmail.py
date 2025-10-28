@@ -57,6 +57,7 @@ def fetchmail(fetchmailrc):
         handler.write(fetchmailrc.encode("utf8"))
         handler.flush()
         fetchmail_custom_options = os.environ.get("FETCHMAIL_OPTIONS", "")
+        print(FETCHMAIL.format(fetchmail_custom_options, shlex.quote(handler.name)))
         command = FETCHMAIL.format(fetchmail_custom_options, shlex.quote(handler.name))
         output = subprocess.check_output(command, shell=True)
         return output

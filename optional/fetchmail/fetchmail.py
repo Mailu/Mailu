@@ -17,8 +17,8 @@ from multiprocessing import Process
 
 FETCHMAIL = """
 fetchmail -N \
-    --idfile /data/fetchids --uidl \
-    --pidfile /dev/shm/fetchmail.pid \
+    --idfile /data/fetchids{} --uidl \
+    --pidfile /dev/shm/fetchmail{}.pid \
     --sslcertck --sslcertpath /etc/ssl/certs \
     {} -f {}
 """
@@ -52,18 +52,18 @@ def escape_rc_string(arg):
     return "".join("\\x%2x" % ord(char) for char in arg)
 
 
-def fetchmail(fetchmailrc):
+def fetchmail(fetchmailrc, fetch_instance_name):
     with tempfile.NamedTemporaryFile() as handler:
         handler.write(fetchmailrc.encode("utf8"))
         handler.flush()
         fetchmail_custom_options = os.environ.get("FETCHMAIL_OPTIONS", "")
-        print(FETCHMAIL.format(fetchmail_custom_options, shlex.quote(handler.name)))
-        command = FETCHMAIL.format(fetchmail_custom_options, shlex.quote(handler.name))
+        print(FETCHMAIL.format(fetch_instance_name, fetch_instance_name, fetchmail_custom_options, ""))
+        command = FETCHMAIL.format(fetch_instance_name, fetch_instance_name, fetchmail_custom_options, shlex.quote(handler.name))
         output = subprocess.check_output(command, shell=True)
         return output
 
 
-def worker(debug, fetch):
+def worker(debug, fetch, fetch_instance_name):
     fetchmailrc = ""
     options = "options antispam 501, 504, 550, 553, 554"
     if "FETCHMAIL_POLL_OPTIONS" in os.environ: options += f' {os.environ["FETCHMAIL_POLL_OPTIONS"]}'
@@ -85,7 +85,7 @@ def worker(debug, fetch):
     if debug:
         print(fetchmailrc)
     try:
-        print(fetchmail(fetchmailrc))
+        print(fetchmail(fetchmailrc, fetch_instance_name))
         error_message = ""
     except subprocess.CalledProcessError as error:
         error_message = error.output.decode("utf8")
@@ -108,21 +108,31 @@ def run(debug):
     try:
         fetches = requests.get(f"http://{os.environ['ADMIN_ADDRESS']}:8080/internal/fetch").json()
         for fetch in fetches:
-            p = Process(target=worker, args=(debug,fetch,))
+            id_fetchmail = getpwnam('fetchmail')
+            fetch_instance_name = "%s" % (fetch["user_email"])
+            fetchids_path = "/data/fetchids" + fetch_instance_name
+            Path(fetchids_path).touch()
+            os.chown(fetchids_path, id_fetchmail.pw_uid, id_fetchmail.pw_gid)
+            os.chown("/data/", id_fetchmail.pw_uid, id_fetchmail.pw_gid)
+            os.chmod(fetchids_path, 0o700)
+            # system.drop_privs_to('fetchmail') not sure why this does not work: "no permission"
+            # instead:
+            pwnam = getpwnam('fetchmail')
+            os.setgroups([])
+            os.setgid(pwnam.pw_gid)
+            os.setuid(pwnam.pw_uid)
+            os.environ['HOME'] = pwnam.pw_dir
+
+            print("Starting worker for user: ")
+            print(fetch_instance_name)
+            p = Process(target=worker, args=(debug,fetch,fetch_instance_name,))
             p.start()
-            p.join()
 
     except Exception:
         traceback.print_exc()
 
 
 if __name__ == "__main__":
-    id_fetchmail = getpwnam('fetchmail')
-    Path('/data/fetchids').touch()
-    os.chown("/data/fetchids", id_fetchmail.pw_uid, id_fetchmail.pw_gid)
-    os.chown("/data/", id_fetchmail.pw_uid, id_fetchmail.pw_gid)
-    os.chmod("/data/fetchids", 0o700)
-    system.drop_privs_to('fetchmail')
     config = system.set_env()
     while True:
         delay = int(os.environ.get('FETCHMAIL_DELAY', 60))

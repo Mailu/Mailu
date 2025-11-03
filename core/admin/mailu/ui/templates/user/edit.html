@@ -7,3 +7,17 @@
 {%- block subtitle %}
 {{ user }}
 {%- endblock %}
+
+{%- block actions %}
+<form method="POST" action="{{ url_for('user_delete', user_id=user.id) }}"
+      onsubmit="return confirm('Are you sure you want to delete this user?');"
+      style="margin-top: 1em;">
+    <!-- Add CSRF token if your framework supports it: -->
+    {% if csrf_token %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% endif %}
+    <button type="submit" class="btn btn-danger">
+        Delete User
+    </button>
+</form>
+{%- endblock %}

@@ -13,12 +13,14 @@ from socrate import system
 import sys
 import traceback
 from multiprocessing import Process
+import re
+import pathlib
 
 
 FETCHMAIL = """
 fetchmail -N \
-    --idfile /data/fetchids{} --uidl \
-    --pidfile /dev/shm/fetchmail{}.pid \
+    --idfile {}/fetchids --uidl \
+    --pidfile {}/fetchmail.pid \
     --sslcertck --sslcertpath /etc/ssl/certs \
     {} -f {}
 """
@@ -52,18 +54,31 @@ def escape_rc_string(arg):
     return "".join("\\x%2x" % ord(char) for char in arg)
 
 
-def fetchmail(fetchmailrc, fetch_instance_name):
+def fetchmail(fetchmailrc, fetchmailhome):
     with tempfile.NamedTemporaryFile() as handler:
         handler.write(fetchmailrc.encode("utf8"))
         handler.flush()
         fetchmail_custom_options = os.environ.get("FETCHMAIL_OPTIONS", "")
-        print(FETCHMAIL.format(fetch_instance_name, fetch_instance_name, fetchmail_custom_options, ""))
-        command = FETCHMAIL.format(fetch_instance_name, fetch_instance_name, fetchmail_custom_options, shlex.quote(handler.name))
+        print(FETCHMAIL.format(fetchmailhome, fetchmailhome, fetchmail_custom_options, ""))
+        command = FETCHMAIL.format(fetchmailhome, fetchmailhome, fetchmail_custom_options, shlex.quote(handler.name))
         output = subprocess.check_output(command, shell=True)
         return output
 
 
-def worker(debug, fetch, fetch_instance_name):
+def worker(debug, fetch, fetchmailhome):
+    id_fetchmail = getpwnam('fetchmail')
+    print('{} Setting $FETCHMAILHOME to {}'.format(time.strftime("%b %d %H:%M:%S"), fetchmailhome))
+    os.environ["FETCHMAILHOME"] = fetchmailhome
+    fetchids_path = fetchmailhome + "/fetchids"
+    if not os.path.exists(fetchmailhome):
+        os.makedirs(fetchmailhome)
+    Path(fetchids_path).touch()
+    os.chown(fetchids_path, id_fetchmail.pw_uid, id_fetchmail.pw_gid)
+    os.chown(fetchmailhome, id_fetchmail.pw_uid, id_fetchmail.pw_gid)
+    os.chown("/data/", id_fetchmail.pw_uid, id_fetchmail.pw_gid)
+    os.chmod(fetchids_path, 0o700)
+    system.drop_privs_to('fetchmail')
+
     fetchmailrc = ""
     options = "options antispam 501, 504, 550, 553, 554"
     if "FETCHMAIL_POLL_OPTIONS" in os.environ: options += f' {os.environ["FETCHMAIL_POLL_OPTIONS"]}'
@@ -85,7 +100,7 @@ def worker(debug, fetch, fetch_instance_name):
     if debug:
         print(fetchmailrc)
     try:
-        print(fetchmail(fetchmailrc, fetch_instance_name))
+        print(fetchmail(fetchmailrc, fetchmailhome))
         error_message = ""
     except subprocess.CalledProcessError as error:
         error_message = error.output.decode("utf8")
@@ -107,26 +122,17 @@ def worker(debug, fetch, fetch_instance_name):
 def run(debug):
     try:
         fetches = requests.get(f"http://{os.environ['ADMIN_ADDRESS']}:8080/internal/fetch").json()
+        processes = []
         for fetch in fetches:
-            id_fetchmail = getpwnam('fetchmail')
-            fetch_instance_name = "%s" % (fetch["user_email"])
-            fetchids_path = "/data/fetchids" + fetch_instance_name
-            Path(fetchids_path).touch()
-            os.chown(fetchids_path, id_fetchmail.pw_uid, id_fetchmail.pw_gid)
-            os.chown("/data/", id_fetchmail.pw_uid, id_fetchmail.pw_gid)
-            os.chmod(fetchids_path, 0o700)
-            # system.drop_privs_to('fetchmail') not sure why this does not work: "no permission"
-            # instead:
-            pwnam = getpwnam('fetchmail')
-            os.setgroups([])
-            os.setgid(pwnam.pw_gid)
-            os.setuid(pwnam.pw_uid)
-            os.environ['HOME'] = pwnam.pw_dir
-
-            print("Starting worker for user: ")
-            print(fetch_instance_name)
-            p = Process(target=worker, args=(debug,fetch,fetch_instance_name,))
-            p.start()
+            # Defining instance name with username and host to trigger an error if same mailbox is fetched for multiple users
+            fetch_instance_name = "%s" % (fetch["username"] + "_" + fetch["host"])
+            fetchmailhome = "/data/" + re.sub(r'[^a-zA-Z0-9\s]', '', fetch_instance_name)
+            # Start worker for fetch if no other worker is already running on this (can recover/restart failed workers in idle mode or avoids conflicts if FETCHMAIL_DELAY is too short and previous non-idle process still runs)
+            if not os.path.exists(fetchmailhome + "/fetchmail.pid"):
+                print('{} Starting worker for mailbox: {}'.format(time.strftime("%b %d %H:%M:%S"), fetch_instance_name))
+                p = Process(target=worker, args=(debug,fetch,fetchmailhome,))
+                p.start()
+                processes.append(p)
 
     except Exception:
         traceback.print_exc()
@@ -134,10 +140,13 @@ def run(debug):
 
 if __name__ == "__main__":
     config = system.set_env()
+    # Remove any stale lockfiles in /data
+    lockfiles = pathlib.Path("/data")
+    for item in lockfiles.rglob("fetchmail.pid"):
+        os.remove(item)
+    # Give other containers some time to start before starting fetchmail
+    time.sleep(20)
     while True:
-        delay = int(os.environ.get('FETCHMAIL_DELAY', 60))
-        print("Sleeping for {} seconds".format(delay))
-        time.sleep(delay)
 
         if not config.get('FETCHMAIL_ENABLED', True):
             print("Fetchmail disabled, skipping...")
@@ -145,3 +154,7 @@ if __name__ == "__main__":
 
         run(config.get('DEBUG', False))
         sys.stdout.flush()
+
+        delay = int(os.environ.get('FETCHMAIL_DELAY', 60))
+        print("Sleeping for {} seconds".format(delay))
+        time.sleep(delay)

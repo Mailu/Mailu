@@ -1,0 +1,2 @@
+Ban all user-agents that contain "bot"; this may help against the smartscreen false positives
+Add a /ads.txt to prevent ads from being bought for the FQDN

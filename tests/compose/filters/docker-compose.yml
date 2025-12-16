@@ -90,7 +90,7 @@ services:
 
   # Optional services
   antivirus:
-    image: clamav/clamav-debian:1.2.0-6
+    image: clamav/clamav-debian:1.4_base
     restart: always
     logging:
       driver: journald
@@ -100,12 +100,6 @@ services:
       - clamav
     volumes:
       - "/mailu/clamav:/var/lib/clamav"
-    healthcheck:
-      test: ["CMD-SHELL", "kill -0 `cat /tmp/clamd.pid` && kill -0 `cat /tmp/freshclam.pid`"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
 
   resolver:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-local}

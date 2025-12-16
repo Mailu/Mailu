@@ -101,6 +101,53 @@ def create_app_from_config(config):
         return ''
     app.route('/ping')(ping)
 
+    # Register well-known URIs for avatar and vCard discovery (RFC 5785)
+    def wellknown_avatar(email):
+        """Well-known URI for avatar discovery"""
+        from mailu import models
+        import flask
+        user = models.User.query.get(email)
+        if not user:
+            flask.abort(404)
+        avatar_url = flask.url_for('api_v1.user_user_avatar', email=email, _external=True)
+        return flask.redirect(avatar_url, code=302)
+    
+    def wellknown_vcard(email):
+        """Well-known URI for vCard discovery"""
+        from mailu import models
+        import flask
+        user = models.User.query.get(email)
+        if not user:
+            flask.abort(404)
+        vcard_url = flask.url_for('api_v1.user_user_v_card', email=email, _external=True)
+        return flask.redirect(vcard_url, code=302)
+    
+    def wellknown_user_services():
+        """Discovery endpoint for user services"""
+        import flask
+        base_url = flask.request.url_root.rstrip('/')
+        services = {
+            "avatar": {
+                "description": "User avatar service",
+                "url_template": f"{base_url}/.well-known/avatar/{{email}}",
+                "direct_url_template": f"{base_url}/api/v1/user/{{email}}/avatar",
+                "format": "image/png or image/jpeg",
+                "authentication": "none"
+            },
+            "vcard": {
+                "description": "User vCard service with avatar",
+                "url_template": f"{base_url}/.well-known/vcard/{{email}}",
+                "direct_url_template": f"{base_url}/api/v1/user/{{email}}/vcard",
+                "format": "text/vcard",
+                "authentication": "none"
+            }
+        }
+        return flask.jsonify(services)
+    
+    app.route('/.well-known/avatar/<path:email>')(wellknown_avatar)
+    app.route('/.well-known/vcard/<path:email>')(wellknown_vcard)
+    app.route('/.well-known/user-services')(wellknown_user_services)
+
     # Import views
     from mailu import ui, internal, sso, api
     app.register_blueprint(ui.ui, url_prefix=app.config['WEB_ADMIN'])

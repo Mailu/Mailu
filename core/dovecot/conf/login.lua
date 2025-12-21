@@ -27,12 +27,29 @@ function setRequestHeadersFromDovecotRequest(auth_request, req)
         local password = urlEncode(req.password)
         auth_request:add_header('Auth-Pass', password)
     end
-    auth_request:add_header('Auth-Protocol', req.service)
-    local client_ip = urlEncode(req.remote_ip)
-    auth_request:add_header('Client-Ip', client_ip)
-    auth_request:add_header('Client-Port', req.remote_port)
-    auth_request:add_header('Auth-SSL', req.secured)
-    auth_request:add_header('Auth-Method', req.mechanism)
+    if req.service ~= nil
+    then
+        auth_request:add_header('Auth-Protocol', req.service)
+    end
+
+    if req.remote_ip ~= nil
+    then
+        local client_ip = urlEncode(req.remote_ip)
+        auth_request:add_header('Client-Ip', client_ip)
+    end
+    if req.remote_port ~= nil
+    then
+        auth_request:add_header('Client-Port', req.remote_port)
+    end
+
+    if req.secured ~= nil
+    then
+        auth_request:add_header('Auth-SSL', req.secured)
+    end
+    if req.mechanism ~= nil
+    then
+        auth_request:add_header('Auth-Method', req.mechanism)
+    end
 end
 
 function formatJsonToKeyValueString(json_str)

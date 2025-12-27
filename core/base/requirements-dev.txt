@@ -35,6 +35,7 @@ SQLAlchemy
 srslib
 tabulate
 tenacity
+tld
 validators
 Werkzeug
 wonderwords
@@ -45,8 +46,6 @@ xmltodict
 # core/nginx
 watchdog
 
-# Add tld for improved hostname parsing
-tld
 
 # core/postfix
 postfix-mta-sts-resolver

@@ -40,7 +40,7 @@ if os.environ.get('DMARC_SEND_REPORTS', 'false').lower() == 'true':
     with open('/etc/periodic/daily/dmarc-reports', 'w') as f:
         f.write('#!/bin/sh\n')
         f.write('# Send DMARC reports for yesterday\n')
-        f.write('su rspamd -s /bin/sh -c "/usr/bin/rspamadm dmarc_report $(date -d @$(($(date -u +%s)-86400)) +%Y%m%d)" >/var/log/dmarc-reports.log 2>&1\n')
+        f.write('su rspamd -s /bin/sh -c "/usr/bin/rspamadm dmarc_report $(date -d @$(($(date +%s)-86400)) +%Y%m%d)" >/var/log/dmarc-reports.log 2>&1\n')
     # make executable
     os.chmod('/etc/periodic/daily/dmarc-reports', 0o755)
     # start crond

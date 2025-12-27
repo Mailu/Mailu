@@ -1,13 +1,13 @@
 """Add Anonymous Email Service (anonmail) fields and domain_access table
 
-Revision ID: abcd1234abcd
+Revision ID: 31f40da48c01
 Revises: 0ba45693748d
-Create Date: 2025-12-23 00:00:00.000000
+Create Date: 2025-12-27 18:32:02.429849
 
 """
 
 # revision identifiers, used by Alembic.
-revision = 'abcd1234abcd'
+revision = '31f40da48c01'
 down_revision = '0ba45693748d'
 
 from alembic import op

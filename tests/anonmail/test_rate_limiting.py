@@ -20,8 +20,8 @@ def test_rate_limiting_triggers_429_after_retries(app, client, create_user_and_t
         user, token = create_user_and_token(email='rl@example.com', token_str='d' * 32)
         grant_domain_access('example.com', user=user)
 
-        # Use malformed token to trigger rate-limiter increments (invalid format -> 401)
-        headers = {'Authorization': 'Bearer invalid-token-format'}
+        # Use malformed credentials to trigger rate-limiter increments (invalid format -> 401)
+        headers = {'Authentication': 'rl@example.com:invalid-token-format'}
         rv1 = client.post('/api/alias/random/new', headers=headers, json={})
         assert rv1.status_code in (401, 403)
 

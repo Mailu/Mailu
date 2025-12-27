@@ -40,18 +40,9 @@ def upgrade():
         sa.UniqueConstraint('domain_name', 'user_email', name='uq_domain_access_user')
     )
 
-    # Add token_lookup_hash for fast token authentication
-    with op.batch_alter_table('token') as batch:
-        batch.add_column(sa.Column('token_lookup_hash', sa.String(length=64), nullable=True))
-        batch.create_index('ix_token_lookup_hash', ['token_lookup_hash'], unique=True)
 
 
 def downgrade():
-    # Drop token_lookup_hash
-    with op.batch_alter_table('token') as batch:
-        batch.drop_index('ix_token_lookup_hash')
-        batch.drop_column('token_lookup_hash')
-
     # Drop domain_access
     op.drop_table('domain_access')
 

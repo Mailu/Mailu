@@ -9,8 +9,6 @@ from email.mime import text
 from itertools import chain
 
 import flask_sqlalchemy
-import hashlib
-import hmac
 import sqlalchemy
 import passlib.context
 import passlib.hash
@@ -27,6 +25,7 @@ from sqlalchemy.ext import declarative
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy import event
 from werkzeug.utils import cached_property
 
 from mailu import dkim, utils
@@ -798,6 +797,22 @@ class Alias(Base, Email):
         return None
 
 
+@event.listens_for(db.session, 'before_commit')
+def disable_aliases_on_user_deactivation(session):
+    """ Disable all anon aliases when a user account is deactivated """
+    # Check all modified/new user objects in the session
+    for obj in list(session.new) + list(session.dirty):
+        if isinstance(obj, User) and obj.enabled is False:
+            # Update all aliases owned by this user using raw SQL
+            # We use raw SQL to avoid triggering the computed email column
+            session.execute(
+                sqlalchemy.text(
+                    'UPDATE alias SET disabled=1 WHERE owner_email=:email'
+                ),
+                {'email': obj.email}
+            )
+
+
 class Token(Base):
     """ A token is an application password for a given user.
     """
@@ -810,7 +825,6 @@ class Token(Base):
     user = db.relationship(User,
         backref=db.backref('tokens', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
-    token_lookup_hash = db.Column(db.String(64), nullable=True, unique=True, index=True)
     ip = db.Column(CommaSeparatedList, nullable=True, default=list)
 
     def check_password(self, password):
@@ -826,23 +840,10 @@ class Token(Base):
             return False
         
         result = passlib.hash.pbkdf2_sha256.verify(password, self.password)
-        
-        # Backfill lookup hash for existing tokens
-        if result and not self.token_lookup_hash:
-            # Use SECRET_KEY (guaranteed to be set) to HMAC the token for indexed lookup
-            key = app.config['SECRET_KEY']
-            self.token_lookup_hash = hmac.new(key.encode(), password.encode(), hashlib.sha256).hexdigest()
-            db.session.add(self)
-            db.session.commit()
-        
         return result
 
     def set_password(self, password):
         """ sets password using pbkdf2_sha256 (1 round) """
-        # Store lookup hash (HMAC-SHA256 if server key configured, else SHA-256)
-        # Use SECRET_KEY (guaranteed to be set) to create HMAC-SHA256 lookup hash
-        key = app.config['SECRET_KEY']
-        self.token_lookup_hash = hmac.new(key.encode(), password.encode(), hashlib.sha256).hexdigest()
         # tokens have 128bits of entropy, they are not bruteforceable
         self.password = passlib.hash.pbkdf2_sha256.using(rounds=1).hash(password)
 

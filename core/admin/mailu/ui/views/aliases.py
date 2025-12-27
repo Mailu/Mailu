@@ -118,7 +118,7 @@ def anonalias_create():
         
         localpart = None
         for _ in range(max_retries):
-            candidate = utils.generate_anonymous_alias_localpart(hostname=hostname, mode='word')
+            candidate = utils.generate_anonymous_alias_localpart(hostname=hostname)
             email_candidate = f"{candidate}@{domain_name}"
             if not models.Alias.query.filter_by(email=email_candidate).first() and not models.User.query.filter_by(email=email_candidate).first():
                 localpart = candidate
@@ -232,7 +232,7 @@ def alias_generate():
     
     localpart = None
     for _ in range(max_retries):
-        candidate = utils.generate_anonymous_alias_localpart(hostname=hostname, mode='word')
+        candidate = utils.generate_anonymous_alias_localpart(hostname=hostname)
         email_candidate = f"{candidate}@{domain_name}"
         if not models.Alias.query.filter_by(email=email_candidate).first() and not models.User.query.filter_by(email=email_candidate).first():
             localpart = candidate

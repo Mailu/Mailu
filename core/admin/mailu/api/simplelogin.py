@@ -10,15 +10,11 @@ from datetime import datetime as dt
 from . import common
 from mailu import models, utils
 import flask
+import secrets
 
 blueprint = Blueprint('simplelogin', __name__)
 
 authorization = {
-    'Bearer': {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': 'Authorization'
-    },
     'Authentication': {
         'type': 'apiKey',
         'in': 'header',
@@ -32,7 +28,7 @@ api = Api(
     version='1.0',
     validate=True,
     authorizations=authorization,
-    security=['Bearer', 'Authentication'],
+    security=['Authentication'],
     doc=False  # Disable docs for this compatibility endpoint
 )
 
@@ -66,16 +62,18 @@ class RandomAlias(Resource):
         note = data.get('note')
         hostname = request.args.get('hostname')
 
-        # Find first domain with anonmail access
-        domain_name = None
+        # Find all domains with anonmail access
+        accessible_domains = []
         for d in models.Domain.query.all():
             if (g.user.global_admin or models.has_domain_access(d.name, user=g.user) or 
                 (d.anonmail_enabled and g.user.domain and d.name == g.user.domain.name)):
-                domain_name = d.name
-                break
+                accessible_domains.append(d.name)
 
-        if not domain_name:
+        if not accessible_domains:
             return {'code': 403, 'message': 'You do not have access to any domains for creating aliases'}, 403
+
+        # Select random domain from accessible domains
+        domain_name = secrets.choice(accessible_domains)
 
         if hostname and not note:
             note = f'Website: {hostname}'
@@ -83,7 +81,7 @@ class RandomAlias(Resource):
         # Generate unique alias localpart
         localpart = None
         for _ in range(flask.current_app.config.get('ANONMAIL_MAX_RETRIES', 10)):
-            candidate = utils.generate_anonymous_alias_localpart(hostname=hostname, mode='word')
+            candidate = utils.generate_anonymous_alias_localpart(hostname=hostname)
             email_candidate = f"{candidate}@{domain_name}"
             if not models.Alias.query.filter_by(email=email_candidate).first() and not models.User.query.filter_by(email=email_candidate).first():
                 localpart = candidate
@@ -116,6 +114,7 @@ class RandomAlias(Resource):
             'note': alias_model.comment or '',
             'creation_date': alias_model.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'creation_timestamp': int(dt.combine(alias_model.created_at, dt.min.time()).timestamp()),
+            # These stats are not tracked, return 0
             'nb_forward': 0,
             'nb_block': 0,
             'nb_reply': 0

@@ -45,6 +45,9 @@ xmltodict
 # core/nginx
 watchdog
 
+# Add tld for improved hostname parsing
+tld
+
 # core/postfix
 postfix-mta-sts-resolver
 uvloop

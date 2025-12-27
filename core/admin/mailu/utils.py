@@ -18,6 +18,8 @@ import secrets
 import string
 import time
 from urllib.parse import urlparse
+from tld import get_tld
+from tld import exceptions as tld_exceptions
 
 from multiprocessing import Value
 from mailu import limiter
@@ -568,20 +570,14 @@ def generate_anonymous_alias_localpart(hostname=None, mode="word"):
         The localpart string (without @domain)
     """
 
-    # Extract prefix from hostname if provided
     hostname_prefix = None
     if hostname:
-        # Parse hostname and extract main domain part (e.g., www.groupon.com -> groupon)
-        parsed = urlparse(hostname if '://' in hostname else f'//{hostname}')
-        # Prefer parsed.hostname (strips userinfo and port), fallback to netloc/path
-        host = parsed.hostname or (parsed.netloc or parsed.path).split('/')[0]
-        # Remove any trailing port if present
-        hostname_clean = host.split(':')[-1] if host else ''
-        parts = hostname_clean.split('.') if hostname_clean else []
-        hostname_prefix = (parts[-2] if len(parts) >= 2 else parts[0]) if parts else None
-        # Sanitize: keep only alphanumeric
-        if hostname_prefix:
-            hostname_prefix = ''.join(c for c in hostname_prefix.lower() if c.isalnum())
+        host_with_scheme = hostname if '://' in hostname else f'http://{hostname}'
+        obj = get_tld(host_with_scheme, as_object=True, fix_protocol=True)
+        if obj is not None:
+            hostname_prefix = obj.domain
+    if hostname_prefix:
+        hostname_prefix = ''.join(c for c in hostname_prefix.lower() if c.isalnum())
 
     # Default random token (used for uuid mode and when no hostname is provided)
     random_part = secrets.token_urlsafe(12)

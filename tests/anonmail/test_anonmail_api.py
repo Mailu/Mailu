@@ -90,7 +90,7 @@ def test_hostname_prefix_extraction(app, client, create_user_and_token, grant_do
             ('www.groupon.com', 'groupon'),
             ('https://www.amazon.com/some/path', 'amazon'),
             ('shop.example.org', 'example'),
-            ('subdomain.test.co.uk', 'co'),  # gets second-to-last part
+            ('subdomain.test.co.uk', 'test'),  # gets second-to-last part (test)
             ('single.com', 'single'),
         ]
         

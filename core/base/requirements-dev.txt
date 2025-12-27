@@ -37,6 +37,7 @@ tabulate
 tenacity
 validators
 Werkzeug
+wonderwords
 WTForms
 WTForms-Components
 xmltodict

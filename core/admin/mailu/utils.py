@@ -17,6 +17,7 @@ import hmac
 import secrets
 import string
 import time
+from urllib.parse import urlparse
 
 from multiprocessing import Value
 from mailu import limiter
@@ -28,6 +29,7 @@ import flask_migrate
 import flask_babel
 import ipaddress
 import redis
+from wonderwords import RandomWord
 
 from datetime import datetime, timedelta
 from flask.sessions import SessionMixin, SessionInterface
@@ -548,3 +550,67 @@ def is_app_token(candidate):
 
 def truncated_pw_hash(pw):
     return hmac.new(app.truncated_pw_key, bytearray(pw, 'utf-8'), 'sha256').hexdigest()[:6]
+
+
+
+def generate_anonymous_alias_localpart(hostname=None, mode="word"):
+    """Generate a localpart for an anonymous alias.
+
+    Pattern:
+    - With hostname: hostname_prefix.randomword@domain (e.g., groupon.banana@domain)
+    - Without hostname: random_token@domain
+
+    Args:
+        hostname: Optional website hostname (e.g., 'www.groupon.com', 'https://example.com/path')
+        mode: 'word' or 'uuid' (only used when hostname is provided)
+
+    Returns:
+        The localpart string (without @domain)
+    """
+
+    # Extract prefix from hostname if provided
+    hostname_prefix = None
+    if hostname:
+        # Parse hostname and extract main domain part (e.g., www.groupon.com -> groupon)
+        parsed = urlparse(hostname if '://' in hostname else f'//{hostname}')
+        # Prefer parsed.hostname (strips userinfo and port), fallback to netloc/path
+        host = parsed.hostname or (parsed.netloc or parsed.path).split('/')[0]
+        # Remove any trailing port if present
+        hostname_clean = host.split(':')[-1] if host else ''
+        parts = hostname_clean.split('.') if hostname_clean else []
+        hostname_prefix = (parts[-2] if len(parts) >= 2 else parts[0]) if parts else None
+        # Sanitize: keep only alphanumeric
+        if hostname_prefix:
+            hostname_prefix = ''.join(c for c in hostname_prefix.lower() if c.isalnum())
+
+    # Default random token (used for uuid mode and when no hostname is provided)
+    random_part = secrets.token_urlsafe(12)
+
+    if hostname_prefix:
+        if mode == "word":
+            random_part = None
+            try:
+                rw = RandomWord()
+                # Get a random word with length between 5-10 characters
+                candidate = rw.word(word_min_length=5, word_max_length=10)
+                if candidate and isinstance(candidate, str):
+                    w = candidate.strip().lower()
+                    if w.isalpha():
+                        random_part = w
+            except Exception:
+                random_part = None
+
+            # Fallback: consonant-vowel pattern if wonderwords unavailable or no suitable word found
+            if random_part is None:
+                def fallback_word(length=8):
+                    consonants = "bcdfghjklmnprstvwxyz"
+                    vowels = "aeiou"
+                    return "".join(
+                        secrets.choice(consonants if i % 2 == 0 else vowels) for i in range(length)
+                    )
+
+                random_part = fallback_word()
+        return f"{hostname_prefix}.{random_part}"
+
+    # No hostname: return short random token
+    return random_part

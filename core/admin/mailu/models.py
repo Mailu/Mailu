@@ -9,11 +9,12 @@ from email.mime import text
 from itertools import chain
 
 import flask_sqlalchemy
+import hashlib
+import hmac
 import sqlalchemy
 import passlib.context
 import passlib.hash
 import passlib.registry
-import time
 import logging
 import os
 import smtplib
@@ -195,6 +196,8 @@ class Domain(Base):
     max_aliases = db.Column(db.Integer, nullable=False, default=-1)
     max_quota_bytes = db.Column(db.BigInteger, nullable=False, default=0)
     signup_enabled = db.Column(db.Boolean, nullable=False, default=False)
+    # Anonymous Email Service integration: enable domain to accept API-generated aliases
+    anonmail_enabled = db.Column(db.Boolean, nullable=False, default=False)
 
     _dkim_key = None
     _dkim_key_on_disk = None
@@ -742,12 +745,18 @@ class Alias(Base, Email):
     wildcard = db.Column(db.Boolean, nullable=False, default=False)
     destination = db.Column(CommaSeparatedList, nullable=False, default=list)
 
+    # Anonymous Email Service metadata
+    hostname = db.Column(db.String(255), nullable=True)
+    owner_email = db.Column(db.String(255), db.ForeignKey('user.email'), nullable=True)
+    owner = db.relationship('User', backref=db.backref('owned_aliases', cascade='all, delete-orphan'))
+    disabled = db.Column(db.Boolean, nullable=False, default=False)
+
     @classmethod
     def resolve(cls, localpart, domain_name):
         """ find aliases matching email address localpart@domain_name """
 
         alias_preserve_case = cls.query.filter(
-                sqlalchemy.and_(cls.domain_name == domain_name,
+                sqlalchemy.and_(cls.domain_name == domain_name, cls.disabled == False,
                     sqlalchemy.or_(
                         sqlalchemy.and_(
                             cls.wildcard == False,
@@ -762,7 +771,7 @@ class Alias(Base, Email):
 
         localpart_lower = localpart.lower() if localpart else None
         alias_lower_case = cls.query.filter(
-                sqlalchemy.and_(cls.domain_name == domain_name,
+                sqlalchemy.and_(cls.domain_name == domain_name, cls.disabled == False,
                     sqlalchemy.or_(
                         sqlalchemy.and_(
                             cls.wildcard == False,
@@ -801,6 +810,7 @@ class Token(Base):
     user = db.relationship(User,
         backref=db.backref('tokens', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
+    token_lookup_hash = db.Column(db.String(64), nullable=True, unique=True, index=True)
     ip = db.Column(CommaSeparatedList, nullable=True, default=list)
 
     def check_password(self, password):
@@ -814,10 +824,25 @@ class Token(Base):
                 db.session.commit()
                 return True
             return False
-        return passlib.hash.pbkdf2_sha256.verify(password, self.password)
+        
+        result = passlib.hash.pbkdf2_sha256.verify(password, self.password)
+        
+        # Backfill lookup hash for existing tokens
+        if result and not self.token_lookup_hash:
+            # Use SECRET_KEY (guaranteed to be set) to HMAC the token for indexed lookup
+            key = app.config['SECRET_KEY']
+            self.token_lookup_hash = hmac.new(key.encode(), password.encode(), hashlib.sha256).hexdigest()
+            db.session.add(self)
+            db.session.commit()
+        
+        return result
 
     def set_password(self, password):
         """ sets password using pbkdf2_sha256 (1 round) """
+        # Store lookup hash (HMAC-SHA256 if server key configured, else SHA-256)
+        # Use SECRET_KEY (guaranteed to be set) to create HMAC-SHA256 lookup hash
+        key = app.config['SECRET_KEY']
+        self.token_lookup_hash = hmac.new(key.encode(), password.encode(), hashlib.sha256).hexdigest()
         # tokens have 128bits of entropy, they are not bruteforceable
         self.password = passlib.hash.pbkdf2_sha256.using(rounds=1).hash(password)
 
@@ -861,6 +886,46 @@ managers = db.Table('manager', Base.metadata,
     db.Column('domain_name', IdnaDomain, db.ForeignKey(Domain.name)),
     db.Column('user_email', IdnaEmail, db.ForeignKey(User.email))
 )
+
+
+class DomainAccess(Base):
+    """Per-user access grant to use Anonymous Email Service API for a domain"""
+
+    __tablename__ = 'domain_access'
+    __table_args__ = (
+        db.UniqueConstraint('domain_name', 'user_email', name='uq_domain_access_user'),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    domain_name = db.Column(IdnaDomain, db.ForeignKey(Domain.name), nullable=False)
+    domain = db.relationship(Domain, backref=db.backref('domain_accesses', cascade='all, delete-orphan'))
+    user_email = db.Column(IdnaEmail, db.ForeignKey(User.email), nullable=True)
+    user = db.relationship(User, backref=db.backref('domain_accesses', cascade='all, delete-orphan'), foreign_keys=[user_email])
+
+    def __repr__(self):
+        return f'<DomainAccess {self.domain_name} for {self.user_email}>'
+
+
+def has_domain_access(domain_name, user=None):
+    """Return True if the given user has access to domain_name.
+    Administrators implicitly have access to all domains.
+    """
+    if user is not None and getattr(user, 'global_admin', False):
+        return True
+    
+    if user is not None:
+        domain = Domain.query.get(domain_name)
+        if domain and domain.managers.filter_by(email=user.email).first():
+            return True
+
+    if user is None:
+        return False
+
+    query = DomainAccess.query.filter(
+        DomainAccess.domain_name == domain_name,
+        DomainAccess.user_email == user.email
+    )
+    return db.session.query(query.exists()).scalar()
 
 
 class MailuConfig:

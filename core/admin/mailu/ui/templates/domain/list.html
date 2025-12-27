@@ -22,6 +22,7 @@
     <th>{% trans %}Quota{% endtrans %}</th>
     <th>{% trans %}Comment{% endtrans %}</th>
     <th>{% trans %}Enable sign-up{% endtrans %}</th>
+    <th>{% trans %}Anonymous Email Service{% endtrans %}</th>
     <th>{% trans %}Created{% endtrans %}</th>
     <th>{% trans %}Last edit{% endtrans %}</th>
   </tr>
@@ -39,6 +40,7 @@
     <td>
       <a href="{{ url_for('.user_list', domain_name=domain.name) }}" title="{% trans %}Users{% endtrans %}"><i class="far fa-envelope"></i></a>&nbsp;
       <a href="{{ url_for('.alias_list', domain_name=domain.name) }}" title="{% trans %}Aliases{% endtrans %}"><i class="fa fa-at"></i></a>&nbsp;
+      <a href="{{ url_for('.domain_access_list', domain_name=domain.name) }}" title="{% trans %}Manage anonmail access{% endtrans %}"><i class="fa fa-user-secret"></i></a>&nbsp;
       <a href="{{ url_for('.manager_list', domain_name=domain.name) }}" title="{% trans %}Managers{% endtrans %}"><i class="fa fa-user"></i></a>&nbsp;
       {%- if current_user.global_admin %}
       <a href="{{ url_for('.alternative_list', domain_name=domain.name) }}" title="{% trans %}Alternatives{% endtrans %}"><i class="fa fa-asterisk"></i></a>&nbsp;
@@ -50,6 +52,7 @@
     <td data-sort="{{ domain.max_quota_bytes }}">{{ (domain.max_quota_bytes | filesizeformat) if domain.max_quota_bytes else '∞' }}</td>
     <td>{{ domain.comment or '' }}</td>
     <td data-sort="{{ domain.signup_enabled }}">{% if domain.signup_enabled %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
+    <td data-sort="{{ domain.anonmail_enabled }}">{% if domain.anonmail_enabled %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
     <td data-order="{{ domain.created_at or '0000-00-00' }}">{{ domain.created_at | format_date }}</td>
     <td data-order="{{ domain.updated_at or '0000-00-00' }}">{{ domain.updated_at | format_date }}</td>
   </tr>

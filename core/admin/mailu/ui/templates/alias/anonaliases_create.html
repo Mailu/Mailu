@@ -1,0 +1,17 @@
+{%- extends "base.html" %}
+
+{%- block title %}
+{% trans %}Generate Anonymous Alias{% endtrans %}
+{%- endblock %}
+
+{%- block content %}
+{%- call macros.card() %}
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {{ macros.form_field(form.domain) }}
+  {{ macros.form_field(form.hostname) }}
+  {{ macros.form_field(form.note) }}
+  {{ macros.form_field(form.submit) }}
+</form>
+{%- endcall %}
+{%- endblock %}

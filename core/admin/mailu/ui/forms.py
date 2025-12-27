@@ -67,6 +67,7 @@ class DomainForm(flask_wtf.FlaskForm):
     max_aliases = fields_.IntegerField(_('Maximum alias count'), [validators.NumberRange(min=-1)], default=10)
     max_quota_bytes = fields_.IntegerSliderField(_('Maximum user quota'), default=0)
     signup_enabled = fields.BooleanField(_('Enable sign-up'), default=False)
+    anonmail_enabled = fields.BooleanField(_('Enable Global Anonymous Email Service'), default=False)
     comment = fields.StringField(_('Comment'))
     submit = fields.SubmitField(_('Save'))
 
@@ -190,6 +191,18 @@ class AdminForm(flask_wtf.FlaskForm):
 class ManagerForm(flask_wtf.FlaskForm):
     manager = fields.SelectField(_('Manager email'))
     submit = fields.SubmitField(_('Submit'))
+
+
+class DomainAccessForm(flask_wtf.FlaskForm):
+    user = fields.SelectField(_('User email'))
+    submit = fields.SubmitField(_('Grant access'))
+
+
+class AnonymousAliasForm(flask_wtf.FlaskForm):
+    domain = fields.SelectField(_('Domain'), [validators.DataRequired()])
+    hostname = fields.StringField(_('Hostname (optional)'), [validators.Optional()])
+    note = fields.StringField(_('Note (optional)'), [validators.Optional()])
+    submit = fields.SubmitField(_('Generate alias'))
 
 
 class FetchForm(flask_wtf.FlaskForm):

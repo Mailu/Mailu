@@ -26,8 +26,6 @@ def api_token_authorization(func):
         if utils.limiter.should_rate_limit_ip(client_ip):
             abort(429, 'Too many attempts from your IP (rate-limit)' )
         if not request.headers.get('Authorization'):
-            if flask_login.current_user.is_authenticated and flask_login.current_user.global_admin:
-                return func(*args, **kwds)
             abort(401, 'A valid Authorization header is mandatory')
         if len(v1.api_token) < 4 or not hmac.compare_digest(request.headers.get('Authorization').removeprefix('Bearer '), v1.api_token):
             utils.limiter.rate_limit_ip(client_ip)

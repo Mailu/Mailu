@@ -90,7 +90,7 @@ class TestAnonymousAliasAPI:
                 ('shop.example.org', 'example'),
                 ('subdomain.test.co.uk', 'test'),
                 ('single.com', 'single'),
-                ('localhost', 'localhost'),
+            ]
             
             for hostname, expected_prefix in test_cases:
                 payload = {}

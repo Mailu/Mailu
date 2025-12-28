@@ -4,7 +4,6 @@ from flask import current_app as app
 
 import flask
 import flask_login
-import validators
 import wtforms_components
 
 

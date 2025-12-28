@@ -17,16 +17,21 @@ def checkStrippable(form, field):
 
 class DestinationField(fields.SelectMultipleField):
     """ Allow for multiple emails selection from current user choices and
-    additional email addresses.
+    additional email addresses. Anonymous aliases are filtered out.
     """
 
     validator = re.compile(r'^.+@([^.@][^@]+)$', re.IGNORECASE)
 
     def iter_choices(self):
-        managed = [
-            str(email)
-            for email in flask_login.current_user.get_managed_emails()
-        ]
+        from .. import models
+        
+        managed = []
+        for email in flask_login.current_user.get_managed_emails():
+            # Filter out anonymous aliases (those with owner_email set)
+            if isinstance(email, models.Alias) and email.owner_email is not None:
+                continue
+            managed.append(str(email))
+        
         for email in managed:
             selected = self.data is not None and self.coerce(email) in self.data
             yield (email, email, selected)

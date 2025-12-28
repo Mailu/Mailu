@@ -838,9 +838,7 @@ class Token(Base):
                 db.session.commit()
                 return True
             return False
-        
-        result = passlib.hash.pbkdf2_sha256.verify(password, self.password)
-        return result
+        return passlib.hash.pbkdf2_sha256.verify(password, self.password)
 
     def set_password(self, password):
         """ sets password using pbkdf2_sha256 (1 round) """

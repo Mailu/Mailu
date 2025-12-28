@@ -40,8 +40,8 @@
     <td>
       <a href="{{ url_for('.user_list', domain_name=domain.name) }}" title="{% trans %}Users{% endtrans %}"><i class="far fa-envelope"></i></a>&nbsp;
       <a href="{{ url_for('.alias_list', domain_name=domain.name) }}" title="{% trans %}Aliases{% endtrans %}"><i class="fa fa-at"></i></a>&nbsp;
-      <a href="{{ url_for('.domain_access_list', domain_name=domain.name) }}" title="{% trans %}Manage anonmail access{% endtrans %}"><i class="fa fa-user-secret"></i></a>&nbsp;
       <a href="{{ url_for('.manager_list', domain_name=domain.name) }}" title="{% trans %}Managers{% endtrans %}"><i class="fa fa-user"></i></a>&nbsp;
+      <a href="{{ url_for('.domain_access_list', domain_name=domain.name) }}" title="{% trans %}Anonalias Access{% endtrans %}"><i class="fa fa-user-secret"></i></a>&nbsp;
       {%- if current_user.global_admin %}
       <a href="{{ url_for('.alternative_list', domain_name=domain.name) }}" title="{% trans %}Alternatives{% endtrans %}"><i class="fa fa-asterisk"></i></a>&nbsp;
       {%- endif %}

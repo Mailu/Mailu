@@ -1,5 +1,6 @@
-// AdminLTE
-window.$ = window.jQuery = require('admin-lte/plugins/jquery/jquery.min.js');
+// AdminLTE - bundled jquery is broken in dev?
+window.$ = window.jQuery = require('jquery');
+
 import 'admin-lte/plugins/bootstrap/js/bootstrap.bundle.min.js';
 import 'admin-lte/build/scss/adminlte.scss';
 import 'admin-lte/build/js/AdminLTE.js';
@@ -18,7 +19,6 @@ import 'admin-lte/plugins/datatables/jquery.dataTables.min.js';
 import 'admin-lte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js';
 import 'admin-lte/plugins/datatables-responsive/js/dataTables.responsive.min.js';
 import 'admin-lte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js';
-import modules from "./*.json";
 
 // clipboard.js
 window.ClipboardJS = require('clipboard/dist/clipboard.min.js');

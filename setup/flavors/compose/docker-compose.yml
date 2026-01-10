@@ -156,7 +156,7 @@ services:
 
 {% if tika_enabled %}
   fts_attachments:
-    image: apache/tika:2.9.2.1-full
+    image: apache/tika:latest-full
     hostname: tika
     logging:
       driver: journald
@@ -217,7 +217,7 @@ services:
   # Optional services
   {% if antivirus_enabled %}
   antivirus:
-    image: clamav/clamav-debian:1.4
+    image: clamav/clamav-debian:1.4_base
     restart: always
     logging:
       driver: journald

@@ -115,3 +115,48 @@ def basic_authentication():
     response = flask.Response(status=401)
     response.headers["WWW-Authenticate"] = 'Basic realm="Login Required"'
     return response
+
+
+@internal.route("/auth/password", methods=['POST'])
+def password_change():
+    """ Password change endpoint for webmail.
+        Expects JSON with: email, old_password, new_password, confirm_password
+        Authenticates using the old password.
+    """
+    # Get password data from request
+    data = flask.request.get_json()
+    if not data:
+        return flask.jsonify({'success': False, 'message': 'No data provided'}), 400
+    
+    user_email = data.get('email')
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+    confirm_password = data.get('confirm_password')
+    
+    if not user_email or not old_password or not new_password or not confirm_password:
+        return flask.jsonify({'success': False, 'message': 'Missing required fields'}), 400
+    
+    # Verify user exists
+    user = models.User.query.get(user_email)
+    if not user:
+        return flask.jsonify({'success': False, 'message': 'User not found'}), 404
+    
+    if new_password != confirm_password:
+        return flask.jsonify({'success': False, 'message': 'New passwords do not match'}), 400
+    
+    if old_password == new_password:
+        return flask.jsonify({'success': False, 'message': 'New password must be different from old password'}), 400
+    
+    # Verify old password - this is the authentication
+    if not user.check_password(old_password):
+        return flask.jsonify({'success': False, 'message': 'Current password is incorrect'}), 401
+    
+    # Set the new password
+    user.set_password(new_password)
+    user.change_pw_next_login = False
+    models.db.session.commit()
+    
+    client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
+    app.logger.info(f'Password changed by {user_email} from webmail at {client_ip}')
+    
+    return flask.jsonify({'success': True, 'message': 'Password changed successfully'}), 200

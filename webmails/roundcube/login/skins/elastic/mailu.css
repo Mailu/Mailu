@@ -9,12 +9,38 @@
   color: #fff;
   background-color: #45555c;
 }
+
+/* Password change button */
+#taskmenu a.button-password:before {
+  content: "\f084"; /* Font Awesome key icon */
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  font-size: 18px;
+}
+#taskmenu a.button-password {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 8px;
+}
+#taskmenu a.button-password.selected, #taskmenu a.button-password.selected:hover, #taskmenu a.button-password:hover {
+  color: #fff;
+  background-color: #45555c;
+}
+
 @media screen and (max-width: 480px) {
   #taskmenu a.button-mailu {
     background-position: 0px;
     background-size: 40px 40px;
   }
   #taskmenu a.button-mailu.selected, #taskmenu a.button-mailu.selected:hover, #taskmenu a.button-mailu:hover {
+    color: #000;
+    background-color: #ececec;
+  }
+  #taskmenu a.button-password:before {
+    font-size: 24px;
+  }
+  #taskmenu a.button-password.selected, #taskmenu a.button-password.selected:hover, #taskmenu a.button-password:hover {
     color: #000;
     background-color: #ececec;
   }

@@ -73,6 +73,9 @@ $config['enigma_pgp_homedir'] = '/data/gpg';
 // configure mailu button
 $config['show_mailu_button'] = {{ 'true' if ADMIN and WEB_ADMIN else 'false' }};
 
+// configure password change button - always enabled
+$config['show_password_button'] = true;
+
 // set From header for DKIM signed message delivery reports
 $config['mdn_use_from'] = true;
 

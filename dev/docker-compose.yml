@@ -39,6 +39,7 @@ services:
       - "$ROOT/dkim:/dkim"
       - "../core/admin/start.py:/start.py:ro"
       - "../core/admin/mailu/sso/forms.py:/app/mailu/sso/forms.py:ro"
+      - "../core/admin/mailu/internal/views/auth.py:/app/mailu/internal/views/auth.py:ro"
     depends_on:
       - redis
 
@@ -74,6 +75,25 @@ services:
     depends_on:
       - front
       - resolver
+
+  # Webmail
+  webmail:
+    image: ghcr.io/mailu/webmail:${VERSION}
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/webmail:/data"
+      - "../webmails/roundcube/login/mailu.php:/var/www/roundcube/plugins/mailu/mailu.php:ro"
+      - "../webmails/roundcube/login/localization/en_US.inc:/var/www/roundcube/plugins/mailu/localization/en_US.inc:ro"
+      - "../webmails/roundcube/login/skins/elastic/mailu.css:/var/www/roundcube/plugins/mailu/skins/elastic/mailu.css:ro"
+      - "../webmails/roundcube/login/skins/classic/mailu.css:/var/www/roundcube/plugins/mailu/skins/classic/mailu.css:ro"
+      - "../webmails/roundcube/login/skins/larry/mailu.css:/var/www/roundcube/plugins/mailu/skins/larry/mailu.css:ro"
+      - "../webmails/roundcube/login/skins/elastic/templates/password.html:/var/www/roundcube/plugins/mailu/skins/elastic/templates/password.html:ro"
+      - "../webmails/roundcube/login/skins/classic/templates/password.html:/var/www/roundcube/plugins/mailu/skins/classic/templates/password.html:ro"
+      - "../webmails/roundcube/login/skins/larry/templates/password.html:/var/www/roundcube/plugins/mailu/skins/larry/templates/password.html:ro"
+      - "../webmails/roundcube/config/config.inc.php:/conf/config.inc.php:ro"
+    depends_on:
+      - front
 
   # Dependencies
   redis:

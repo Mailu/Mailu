@@ -56,7 +56,7 @@ $config['managesieve_mbox_encoding'] = 'UTF8';
 
 // roundcube customization
 $config['product_name'] = 'Mailu Webmail';
-$config['logo_image'] = '/webmail/logo.png';
+$config['skin_logo'] = 'skins/elastic/images/calapan-logo.png';
 {%- if ADMIN and WEB_ADMIN %}
 $config['support_url'] = '../..{{ WEB_ADMIN }}';
 {%- endif %}

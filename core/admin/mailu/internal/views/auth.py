@@ -160,3 +160,24 @@ def password_change():
     app.logger.info(f'Password changed by {user_email} from webmail at {client_ip}')
     
     return flask.jsonify({'success': True, 'message': 'Password changed successfully'}), 200
+
+
+@internal.route("/auth/check-admin", methods=['POST'])
+def check_admin():
+    """ Check if a user is a global administrator.
+        Expects JSON with: email
+        Returns: {is_admin: true/false}
+    """
+    data = flask.request.get_json()
+    if not data or 'email' not in data:
+        return flask.jsonify({'is_admin': False}), 400
+    
+    user_email = data.get('email')
+    user = models.User.query.get(user_email)
+    
+    if not user:
+        return flask.jsonify({'is_admin': False}), 200
+    
+    is_admin = user.global_admin and user.enabled
+    
+    return flask.jsonify({'is_admin': is_admin}), 200

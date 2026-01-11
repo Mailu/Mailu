@@ -32,8 +32,8 @@ class mailu extends rcube_plugin
     if (!$rcmail->output->framed) {
       $this->include_stylesheet($this->local_skin_path() . '/mailu.css');
       
-      // mailu admin button
-      if ($rcmail->config->get('show_mailu_button', false)) {
+      // mailu admin button - only show for admins
+      if ($rcmail->config->get('show_mailu_button', false) && $this->is_admin()) {
         $this->add_button([
             'type'       => 'link',
             'href'       => $rcmail->config->get('support_url'),
@@ -50,6 +50,48 @@ class mailu extends rcube_plugin
       $args['action'] = 'login';
     }
     return $args;
+  }
+  
+  // Check if current user is a global admin
+  private function is_admin()
+  {
+    // Check if we already cached this in the session
+    if (isset($_SESSION['mailu_is_admin'])) {
+      return $_SESSION['mailu_is_admin'];
+    }
+    
+    $rcmail = rcmail::get_instance();
+    $user_email = $rcmail->get_user_name();
+    
+    if (empty($user_email)) {
+      return false;
+    }
+    
+    // Call internal API to check admin status
+    $data = json_encode(array('email' => $user_email));
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, 'http://admin:8080/internal/auth/check-admin');
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+    curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+    
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    $is_admin = false;
+    if ($response !== false && $http_code === 200) {
+      $result = json_decode($response, true);
+      $is_admin = isset($result['is_admin']) ? $result['is_admin'] : false;
+    }
+    
+    // Cache the result in session
+    $_SESSION['mailu_is_admin'] = $is_admin;
+    
+    return $is_admin;
   }
   
   // Add password change to settings menu
@@ -127,12 +169,18 @@ class mailu extends rcube_plugin
       'value' => $rcmail->gettext('save')
     ));
     
+    $cancel = html::tag('button', array(
+      'type' => 'button',
+      'class' => 'button',
+      'onclick' => "location.href='./?_task=mail'; return false;"
+    ), $rcmail->gettext('cancel'));
+    
     $out = html::div(array('class' => 'box'),
       html::div(array('class' => 'boxtitle'), $this->gettext('changepassword')) .
       html::div(array('class' => 'boxcontent'),
         $form_start .
         $table->show() .
-        html::p(array('class' => 'formbuttons footerleft'), $submit) .
+        html::p(array('class' => 'formbuttons footerleft'), $submit . ' ' . $cancel) .
         $form_end
       )
     );

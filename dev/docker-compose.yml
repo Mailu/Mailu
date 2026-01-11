@@ -92,6 +92,7 @@ services:
       - "../webmails/roundcube/login/skins/classic/templates/password.html:/var/www/roundcube/plugins/mailu/skins/classic/templates/password.html:ro"
       - "../webmails/roundcube/login/skins/larry/templates/password.html:/var/www/roundcube/plugins/mailu/skins/larry/templates/password.html:ro"
       - "../webmails/roundcube/config/config.inc.php:/conf/config.inc.php:ro"
+      - "../webmails/roundcube/logo.png:/var/www/roundcube/logo.png:ro"
     depends_on:
       - front
 

@@ -125,15 +125,13 @@ docker compose -f /path/to/prod/docker-compose.yml exec admin \
 ---
 
 ## Verify
-- Admin Panel: `https://mail.lgucalapan.ph:8443/admin` (or `http://mail.lgucalapan.ph:8080/admin`)
-- Webmail: `https://mail.lgucalapan.ph:8443/webmail`
+- Admin Panel: `https://mail.lgucalapan.ph/admin`
+- Webmail: `https://mail.lgucalapan.ph/webmail`
 
-Note: Currently using ports 8080 (HTTP) and 8443 (HTTPS) to avoid conflict with Dokploy's reverse proxy on ports 80/443. For production with proper domain routing through Dokploy's Traefik, see "Traefik Integration" section below.
-
-Quick checks:
+Quick checks (after Domains → `mail.lgucalapan.ph` routes to container `front:80` in Dokploy):
 ```bash
-curl -I http://mail.lgucalapan.ph:8080/admin
-curl -I http://mail.lgucalapan.ph:8080/webmail
+curl -I https://mail.lgucalapan.ph/admin
+curl -I https://mail.lgucalapan.ph/webmail
 nc -zv mail.lgucalapan.ph 25
 ```
 
@@ -146,17 +144,11 @@ nc -zv mail.lgucalapan.ph 25
 
 ---
 
-## Traefik Integration (Optional - For Production Domain Routing)
+## Traefik Integration (Recommended for Production)
 
 If you want to access the mail server via standard ports (80/443) through Dokploy's Traefik reverse proxy:
 
-1. **Remove port bindings** for 80/443 from `docker-compose.yml`:
-   ```yaml
-   ports:
-     # - "8080:80"   # Comment these out
-     # - "8443:443"
-     - "110:110"     # Keep mail ports
-   ```
+1. We already removed 80/443 host bindings from `docker-compose.yml`.
 
 2. **Configure Dokploy Domains** in the Service settings:
    - Add domain: `mail.lgucalapan.ph`

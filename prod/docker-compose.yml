@@ -10,8 +10,6 @@ services:
     environment:
       - TLS_FLAVOR=${TLS_FLAVOR:-cert}
     ports:
-      - "8080:80"
-      - "8443:443"
       - "110:110"
       - "143:143"
       - "993:993"

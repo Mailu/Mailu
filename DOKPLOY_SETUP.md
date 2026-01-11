@@ -1,273 +1,114 @@
-# Quick Dokploy Setup Guide
+# Dokploy Service Setup (Compose: Docker Compose)
 
-## 🚀 5-Minute Dokploy Configuration
+This guide matches Dokploy’s current Service UI (Compose → Docker Compose) and maps each field to this repository.
 
-### Prerequisites
-- Dokploy installed and running on 72.60.43.21
-- GitHub account with access to `bonitobonita24/mailserver-lgucalapanph`
-- Domain `lgucalapan.ph` with DNS configured
-
----
-
-## Step 1: Create New Application in Dokploy
-
-1. Open Dokploy Dashboard
-2. Click **"Create Application"** or **"New Project"**
-3. Select **GitHub** as source
-4. Click **"Authenticate with GitHub"** (if not already)
+## Prerequisites
+- Dokploy running on 72.60.43.21
+- GitHub access to repository: `bonitobonita24/mailserver-lgucalapanph`
+- DNS records prepared for `lgucalapan.ph`
 
 ---
 
-## Step 2: Configure Repository
+## Create Service (Compose → Docker Compose)
 
+Inside your Project, click **Create Service** and choose:
+- **Type**: Compose
+- **Compose Type**: Docker Compose
+
+### Provider section (as in the screenshot)
+- **Source**: GitHub
+- **GitHub Account**: Select your account
 - **Repository**: `bonitobonita24/mailserver-lgucalapanph`
 - **Branch**: `master`
-- **Root Directory**: Leave blank (or `.` for root)
+- **Compose Path**: `./prod/docker-compose.yml`
+- **Trigger Type**: `On Push`
+- **Watch Paths** (optional): `prod/**`  
+  Use this to trigger only when production files change.
+- **Enable Submodules**: Off (unless you use them)
+- **Autodeploy**: On
+- Click **Save**
+
+This uses the production compose file at [prod/docker-compose.yml](prod/docker-compose.yml).
 
 ---
 
-## Step 3: Set Build Configuration
+## Environment tab
 
-### Build Settings:
-| Field | Value |
-|-------|-------|
-| **Build Command** | `docker compose -f prod/docker-compose.yml build` |
-| **Start Command** | `docker compose -f prod/docker-compose.yml up -d` |
-| **Stop Command** | `docker compose -f prod/docker-compose.yml down` |
-| **Compose File** | `prod/docker-compose.yml` |
+Our compose services reference an env file with `env_file: .env`. Because the **Compose Path** is `./prod/docker-compose.yml`, the `.env` it refers to is [prod/.env](prod/.env).
 
----
+You can choose one of the following:
+- Recommended: Copy variables from [prod/.env](prod/.env) into Dokploy’s **Environment** tab (safer for secrets), or
+- Quick start: Keep [prod/.env](prod/.env) in the repo (already present), and update values via commits.
 
-## Step 4: Environment Variables
-
-Click **"Add Environment Variable"** and copy from `prod/.env`:
-
-| Variable | Value |
-|----------|-------|
-| `ROOT` | `/mailu` |
-| `VERSION` | `2024.06` |
-| `SECRET_KEY` | `<generate-new-secure-key>` |
-| `DOMAIN` | `lgucalapan.ph` |
-| `HOSTNAMES` | `mail.lgucalapan.ph` |
-| `SITENAME` | `Calapan City Mail` |
-| `LOGO_URL` | `/static/mailu.png` |
-| `LOGO_BACKGROUND` | `#0D47A1` |
-| `COMPOSE_PROJECT_NAME` | `calapan-mailu` |
-
-*See `prod/.env` for complete list of variables*
+Critical values to review in production:
+- `SECRET_KEY` — replace with a secure random string
+- `DOMAIN=lgucalapan.ph`
+- `HOSTNAMES=mail.lgucalapan.ph`
+- `SITENAME=Calapan City Mail`
+- `LOGO_URL=/static/mailu.png`
+- `COMPOSE_PROJECT_NAME=calapan-mailu`
 
 ---
 
-## Step 5: Configure Volumes
-
-Click **"Add Volume"** and create:
-
-| Volume Name | Mount Path | Purpose |
-|------------|-----------|---------|
-| `mailu-data` | `/mailu/data` | Database & configs |
-| `mailu-mail` | `/mailu/mail` | Email storage |
-| `mailu-certs` | `/mailu/certs` | SSL certificates |
-| `mailu-dkim` | `/mailu/dkim` | DKIM keys |
-| `mailu-filter` | `/mailu/filter` | Antispam data |
-| `mailu-redis` | `/mailu/redis` | Redis cache |
-| `mailu-webmail` | `/mailu/webmail` | Webmail data |
+## Deploy section
+- Toggle **Autodeploy** ON
+- Click **Deploy** to start the stack
+- Use **Logs** to watch service output (admin, webmail, smtp, imap, antispam, antivirus, resolver, redis)
 
 ---
 
-## Step 6: Configure Ports
-
-Expose the following ports:
-
-| Port | Protocol | Service |
-|------|----------|---------|
-| `25` | TCP | SMTP |
-| `80` | TCP | HTTP (nginx) |
-| `110` | TCP | POP3 |
-| `143` | TCP | IMAP |
-| `443` | TCP | HTTPS (nginx) |
-| `465` | TCP | SMTPS |
-| `587` | TCP | Submission |
-| `993` | TCP | IMAPS |
-| `995` | TCP | POP3S |
+## DNS and TLS
+- A: `mail.lgucalapan.ph` → `72.60.43.21`
+- MX: `lgucalapan.ph` → `mail.lgucalapan.ph` (priority 10)
+- SPF: `v=spf1 mx ~all`
+- DMARC: `_dmarc` → `v=DMARC1; p=none;`
+- Certificates: Place in `/mailu/certs/` or use Let’s Encrypt (TLS_FLAVOR=cert)
 
 ---
 
-## Step 7: Advanced Settings
-
-### Auto-restart:
-- ✅ Enable **"Restart Policy"** → `unless-stopped`
-- ✅ Enable **"Auto-restart on failure"**
-
-### Logging:
-- ✅ Enable **"JSON File Logging"**
-- ✅ Set max size to `10m` to prevent disk bloat
-
-### GitHub Webhook:
-- ✅ Enable **"Auto-deploy on push"**
-- ✅ Branch: `master`
-- This makes deployments automatic when code is pushed!
-
----
-
-## Step 8: Deploy
-
-Click **"Deploy"** or **"Build & Deploy"**
-
-Watch the logs:
-```
-Building images...
-Starting services...
-Initializing database...
-✓ Deployment successful
-```
-
----
-
-## Step 9: SSH Into Server & Create Admin
-
-After deployment succeeds:
+## First admin user
+After the services are up, create the admin account:
 
 ```bash
-# SSH to server
 ssh root@72.60.43.21
-
-# Create admin user (generates random password)
-docker compose -f /path/to/prod/docker-compose.yml \
-  exec admin \
+docker compose -f /path/to/prod/docker-compose.yml exec admin \
   flask mailu admin admin@lgucalapan.ph $(openssl rand -base64 32)
 ```
 
 ---
 
-## Step 10: Test Services
+## Verify
+- Admin Panel: `https://mail.lgucalapan.ph/admin`
+- Webmail: `https://mail.lgucalapan.ph/webmail`
 
-### Test Admin Panel:
+Quick checks:
 ```bash
 curl -I https://mail.lgucalapan.ph/admin
-# Should return: HTTP/2 302 (redirect to login)
-```
-
-### Test Webmail:
-```bash
 curl -I https://mail.lgucalapan.ph/webmail
-# Should return: HTTP/2 200
+nc -zv mail.lgucalapan.ph 25
 ```
 
-### Test SMTP:
-```bash
-nc -zv mail.lgucalapan.ph 25
-# Should return: Connection successful
-```
+---
+
+## Notes
+- The admin logo is mounted by compose: the file `Calapan_City_Logo.png` becomes `/static/mailu.png` via the admin container’s static path and `LOGO_URL=/static/mailu.png`.
+- The compose file already maps the Roundcube/SnappyMail logo where applicable.
+- Autodeploy with **Trigger Type: On Push** will rebuild/restart whenever you push to `master`. Limiting **Watch Paths** to `prod/**` reduces unnecessary deploys.
 
 ---
 
 ## Troubleshooting
-
-### Services won't start:
 ```bash
-# SSH to server
-ssh root@72.60.43.21
-
-# Check logs
+# Show admin logs
 docker compose -f prod/docker-compose.yml logs -f admin
 
-# Restart
-docker compose -f prod/docker-compose.yml restart
-```
+# Restart a service
+docker compose -f prod/docker-compose.yml restart admin
 
-### Logo not showing:
-- ✅ Verify file exists: `../Calapan_City_Logo.png`
-- ✅ Check docker-compose volume mounts
-- ✅ Clear browser cache (Ctrl+Shift+Delete)
-
-### Port already in use:
-```bash
-# Check what's using the port
-lsof -i :25  # or other port
-kill -9 <PID>
-```
-
----
-
-## Automatic Updates via GitHub
-
-Now whenever you push to `master`:
-
-1. GitHub webhook triggers Dokploy
-2. Dokploy pulls latest code
-3. Docker images rebuild
-4. Services restart automatically
-5. `/mailu` volume persists all data
-
-**Example workflow:**
-```bash
-# Make changes locally
-git add .
-git commit -m "Update mail config"
-git push origin master
-
-# Dokploy automatically:
-# → Rebuilds images
-# → Restarts containers
-# → No manual deployment needed!
-```
-
----
-
-## Monitoring
-
-### View Logs in Dokploy:
-1. Open application dashboard
-2. Click **"Logs"** tab
-3. Select service: `admin`, `webmail`, `smtp`, `imap`, etc.
-4. Watch real-time logs
-
-### Check Service Status:
-```bash
-ssh root@72.60.43.21
+# Check running containers
 docker ps | grep calapan
 ```
 
 ---
 
-## Backup & Maintenance
-
-### Daily Backup Script:
-```bash
-cat > /etc/cron.daily/mailu-backup << 'EOF'
-#!/bin/bash
-BACKUP_DIR="/backups/mailu"
-mkdir -p $BACKUP_DIR
-tar -czf $BACKUP_DIR/mailu-$(date +%Y-%m-%d).tar.gz /mailu
-find $BACKUP_DIR -type f -mtime +30 -delete  # Keep 30 days
-EOF
-
-chmod +x /etc/cron.daily/mailu-backup
-```
-
-### Update Mailu Version:
-1. Edit `prod/.env` and change `VERSION`
-2. Push to GitHub
-3. Dokploy automatically rebuilds with new version
-
----
-
-## Support Resources
-
-- **Mailu Docs**: https://mailu.io/
-- **Dokploy Docs**: https://dokploy.com/
-- **GitHub Repo**: https://github.com/Mailu/Mailu
-- **Issues**: https://github.com/Mailu/Mailu/issues
-
----
-
-**✨ Your mail server is now production-ready!**
-
-**Domain**: mail.lgucalapan.ph  
-**IP**: 72.60.43.21  
-**Auto-deployment**: Enabled via GitHub  
-**Logo**: Calapan City Logo configured  
-
----
-
-*Generated: January 2026*
+Generated: January 2026

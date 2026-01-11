@@ -124,13 +124,15 @@ docker compose -f /path/to/prod/docker-compose.yml exec admin \
 ---
 
 ## Verify
-- Admin Panel: `https://mail.lgucalapan.ph/admin`
-- Webmail: `https://mail.lgucalapan.ph/webmail`
+- Admin Panel: `https://mail.lgucalapan.ph:8443/admin` (or `http://mail.lgucalapan.ph:8080/admin`)
+- Webmail: `https://mail.lgucalapan.ph:8443/webmail`
+
+Note: Currently using ports 8080 (HTTP) and 8443 (HTTPS) to avoid conflict with Dokploy's reverse proxy on ports 80/443. For production with proper domain routing through Dokploy's Traefik, see "Traefik Integration" section below.
 
 Quick checks:
 ```bash
-curl -I https://mail.lgucalapan.ph/admin
-curl -I https://mail.lgucalapan.ph/webmail
+curl -I http://mail.lgucalapan.ph:8080/admin
+curl -I http://mail.lgucalapan.ph:8080/webmail
 nc -zv mail.lgucalapan.ph 25
 ```
 
@@ -140,6 +142,28 @@ nc -zv mail.lgucalapan.ph 25
 - The admin logo is mounted by compose: the file `Calapan_City_Logo.png` becomes `/static/mailu.png` via the admin container’s static path and `LOGO_URL=/static/mailu.png`.
 - The compose file already maps the Roundcube/SnappyMail logo where applicable.
 - Autodeploy with **Trigger Type: On Push** will rebuild/restart whenever you push to `master`. Limiting **Watch Paths** to `prod/**` reduces unnecessary deploys.
+
+---
+
+## Traefik Integration (Optional - For Production Domain Routing)
+
+If you want to access the mail server via standard ports (80/443) through Dokploy's Traefik reverse proxy:
+
+1. **Remove port bindings** for 80/443 from `docker-compose.yml`:
+   ```yaml
+   ports:
+     # - "8080:80"   # Comment these out
+     # - "8443:443"
+     - "110:110"     # Keep mail ports
+   ```
+
+2. **Configure Dokploy Domains** in the Service settings:
+   - Add domain: `mail.lgucalapan.ph`
+   - Container: `front`
+   - Container Port: `80`
+   - SSL: Enable Let's Encrypt
+
+3. Traefik will handle SSL termination and route traffic to the front container.
 
 ---
 

@@ -36,6 +36,9 @@ services:
     volumes:
       - "$ROOT/certs:/certs"
       - "$ROOT/overrides/nginx:/overrides:ro"
+    networks:
+      - default
+      - dokploy-network
 
   resolver:
     image: ghcr.io/mailu/unbound:${VERSION}
@@ -128,3 +131,5 @@ networks:
       driver: default
       config:
         - subnet: $SUBNET
+  dokploy-network:
+    external: true

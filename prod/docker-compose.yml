@@ -1,0 +1,108 @@
+version: '2.2'
+
+services:
+
+  # Core services
+  front:
+    image: ghcr.io/mailu/nginx:${VERSION}
+    restart: always
+    env_file: .env
+    logging:
+      driver: json-file
+    ports:
+      - "80:80"
+      - "443:443"
+      - "110:110"
+      - "143:143"
+      - "993:993"
+      - "995:995"
+      - "25:25"
+      - "465:465"
+      - "587:587"
+    volumes:
+      - "$ROOT/certs:/certs"
+      - "$ROOT/overrides/nginx:/overrides:ro"
+
+  resolver:
+    image: ghcr.io/mailu/unbound:${VERSION}
+    restart: always
+    env_file: .env
+    networks:
+      - default
+
+  admin:
+    image: ghcr.io/mailu/admin:${VERSION}
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/data:/data"
+      - "$ROOT/dkim:/dkim"
+    depends_on:
+      - redis
+
+  imap:
+    image: ghcr.io/mailu/dovecot:${VERSION}
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/mail:/mail"
+      - "$ROOT/overrides/dovecot:/overrides:ro"
+    depends_on:
+      - front
+
+  smtp:
+    image: ghcr.io/mailu/postfix:${VERSION}
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/mailqueue:/queue"
+      - "$ROOT/overrides/postfix:/overrides:ro"
+    depends_on:
+      - front
+      - resolver
+
+  antispam:
+    image: ghcr.io/mailu/rspamd:${VERSION}
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/filter:/var/lib/rspamd"
+      - "$ROOT/dkim:/dkim:ro"
+      - "$ROOT/overrides/rspamd:/etc/rspamd/override.d:ro"
+    depends_on:
+      - front
+      - resolver
+
+  # Optional Services (Enabled in Prod usually)
+  antivirus:
+    image: ghcr.io/mailu/clamav:${VERSION}
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/filter:/data"
+    depends_on:
+      - front
+
+  webmail:
+    image: ghcr.io/mailu/snappymail:${VERSION}
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/webmail:/data"
+    depends_on:
+      - imap
+
+  # Dependencies
+  redis:
+    image: redis:alpine
+    restart: always
+    volumes:
+      - "$ROOT/redis:/data"
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: $SUBNET

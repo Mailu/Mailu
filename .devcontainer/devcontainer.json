@@ -1,0 +1,23 @@
+{
+	"name": "Mailu Dev",
+	"image": "mcr.microsoft.com/devcontainers/python:3",
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"version": "latest",
+			"enableNonRootDocker": "true",
+			"moby": "true"
+		}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-azuretools.vscode-docker",
+				"ms-python.python"
+			]
+		}
+	},
+	"remoteEnv": {
+		"DOCKER_BUILDKIT": "1"
+	},
+    "forwardPorts": [80, 443, 8080]
+}

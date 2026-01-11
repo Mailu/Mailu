@@ -17,3 +17,7 @@ pip-selfcheck.json
 /.idea
 /.vscode
 qemu-arm-static
+
+# Mailu Dev/Prod
+dev/data/
+prod/.env

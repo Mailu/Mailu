@@ -8,8 +8,8 @@ services:
     logging:
       driver: json-file
     environment:
-      - TLS_FLAVOR=${TLS_FLAVOR:-cert}
-      - MESSAGE_SIZE_LIMIT=${MESSAGE_SIZE_LIMIT}
+      - TLS_FLAVOR=cert
+      - MESSAGE_SIZE_LIMIT=50000000
     labels:
       - "traefik.enable=true"
       # HTTPS router

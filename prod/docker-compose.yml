@@ -9,6 +9,21 @@ services:
       driver: json-file
     environment:
       - TLS_FLAVOR=${TLS_FLAVOR:-cert}
+    labels:
+      - "traefik.enable=true"
+      # HTTPS router
+      - "traefik.http.routers.mailu.rule=Host(${HOSTNAMES})"
+      - "traefik.http.routers.mailu.entrypoints=websecure"
+      - "traefik.http.routers.mailu.tls=true"
+      - "traefik.http.routers.mailu.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}"
+      - "traefik.http.routers.mailu.service=mailu"
+      - "traefik.http.services.mailu.loadbalancer.server.port=80"
+      # HTTP -> HTTPS redirect
+      - "traefik.http.routers.mailu-http.rule=Host(${HOSTNAMES})"
+      - "traefik.http.routers.mailu-http.entrypoints=web"
+      - "traefik.http.routers.mailu-http.middlewares=mailu-https-redirect"
+      - "traefik.http.middlewares.mailu-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.mailu-https-redirect.redirectscheme.permanent=true"
     ports:
       - "110:110"
       - "143:143"

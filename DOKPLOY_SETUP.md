@@ -51,6 +51,7 @@ Application variables (used by containers at runtime):
 - `LOGO_URL=/static/mailu.png`
 - `LOGO_BACKGROUND=#0D47A1`
 - `COMPOSE_PROJECT_NAME=calapan-mailu`
+- (Optional) `TRAEFIK_CERT_RESOLVER=letsencrypt` — only if your Dokploy Traefik uses a non-default resolver name
 - (Optional) `POSTMASTER=admin`, `TLS_FLAVOR=cert`, `AUTH_RATELIMIT=5/minute`, `DISABLE_STATISTICS=False`, `ADMIN=true`, `WEBMAIL=roundcube`, `WEBDAV=none`, `ANTIVIRUS=none`, `SKIP_DNSSEC_CHECKS=true`
 
 Tip: You may still keep [prod/.env](prod/.env) for reference, but Dokploy’s **Environment** tab should contain the values above so builds and mounts work.
@@ -73,6 +74,7 @@ SITENAME=Calapan City Mail
 LOGO_URL=/static/mailu.png
 LOGO_BACKGROUND=#0D47A1
 COMPOSE_PROJECT_NAME=calapan-mailu
+TRAEFIK_CERT_RESOLVER=letsencrypt
 
 # Optional but recommended for parity with prod/.env
 POSTMASTER=admin
@@ -148,13 +150,15 @@ nc -zv mail.lgucalapan.ph 25
 
 If you want to access the mail server via standard ports (80/443) through Dokploy's Traefik reverse proxy:
 
-1. We already removed 80/443 host bindings from `docker-compose.yml`.
+1. We already removed 80/443 host bindings and added Traefik labels in `docker-compose.yml` under the `front` service. Traefik will route Host(`mail.lgucalapan.ph`) to the container on port 80 and redirect HTTP→HTTPS automatically.
 
-2. **Configure Dokploy Domains** in the Service settings:
-   - Add domain: `mail.lgucalapan.ph`
-   - Container: `front`
-   - Container Port: `80`
-   - SSL: Enable Let's Encrypt
+2. Option A — Labels only (preferred): If your Dokploy Traefik is configured to honor Docker labels for Compose services, no extra UI config is required. Ensure DNS for `mail.lgucalapan.ph` points to this server and Traefik can reach the service network.
+
+3. Option B — Dokploy Domains UI: If labels are not honored in your setup, configure Domains:
+  - Domain: `mail.lgucalapan.ph`
+  - Container: `front`
+  - Container Port: `80`
+  - SSL: Enable Let's Encrypt
 
 3. Traefik will handle SSL termination and route traffic to the front container.
 

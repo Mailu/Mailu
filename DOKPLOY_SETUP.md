@@ -36,17 +36,63 @@ This uses the production compose file at [prod/docker-compose.yml](prod/docker-c
 
 Our compose services reference an env file with `env_file: .env`. Because the **Compose Path** is `./prod/docker-compose.yml`, the `.env` it refers to is [prod/.env](prod/.env).
 
-You can choose one of the following:
-- Recommended: Copy variables from [prod/.env](prod/.env) into Dokploy’s **Environment** tab (safer for secrets), or
-- Quick start: Keep [prod/.env](prod/.env) in the repo (already present), and update values via commits.
+Important: Docker Compose variable interpolation (e.g. `${VERSION}` and `${ROOT}` in images and volumes) reads from the **Service Environment** in Dokploy, not from `env_file`. To avoid blank tags and missing mounts, set these in the **Environment** tab:
 
-Critical values to review in production:
-- `SECRET_KEY` — replace with a secure random string
+Required variables for Compose resolution:
+- `VERSION=2024.06`
+- `ROOT=/mailu`
+- `SUBNET=192.168.203.0/24`
+
+Application variables (used by containers at runtime):
+- `SECRET_KEY` — set a secure random string
 - `DOMAIN=lgucalapan.ph`
 - `HOSTNAMES=mail.lgucalapan.ph`
 - `SITENAME=Calapan City Mail`
 - `LOGO_URL=/static/mailu.png`
+- `LOGO_BACKGROUND=#0D47A1`
 - `COMPOSE_PROJECT_NAME=calapan-mailu`
+- (Optional) `POSTMASTER=admin`, `TLS_FLAVOR=cert`, `AUTH_RATELIMIT=5/minute`, `DISABLE_STATISTICS=False`, `ADMIN=true`, `WEBMAIL=snappymail`, `WEBDAV=none`, `ANTIVIRUS=clamav`
+
+Tip: You may still keep [prod/.env](prod/.env) for reference, but Dokploy’s **Environment** tab should contain the values above so builds and mounts work.
+
+Common error and fix:
+- If logs show warnings like `The "VERSION" variable is not set` or `Detected: 0 mounts`, set `VERSION`, `ROOT`, and `SUBNET` in the Environment tab, then redeploy.
+
+### Environment quick-paste (Dokploy → Service → Environment)
+Copy these into the Environment tab so Compose interpolation and runtime config both work:
+
+```env
+VERSION=2024.06
+ROOT=/mailu
+SUBNET=192.168.203.0/24
+
+SECRET_KEY=CHANGE_ME_TO_A_SECURE_RANDOM_VALUE
+DOMAIN=lgucalapan.ph
+HOSTNAMES=mail.lgucalapan.ph
+SITENAME=Calapan City Mail
+LOGO_URL=/static/mailu.png
+LOGO_BACKGROUND=#0D47A1
+COMPOSE_PROJECT_NAME=calapan-mailu
+
+# Optional but recommended for parity with prod/.env
+POSTMASTER=admin
+TLS_FLAVOR=cert
+AUTH_RATELIMIT=5/minute
+DISABLE_STATISTICS=False
+ADMIN=true
+WEBMAIL=snappymail
+WEBDAV=none
+ANTIVIRUS=clamav
+```
+
+### Service UI field checklist
+- Source: GitHub
+- Repository: `bonitobonita24/mailserver-lgucalapanph`
+- Branch: `master`
+- Compose Path: `./prod/docker-compose.yml`
+- Trigger Type: `On Push`
+- Watch Paths: `prod/**` (optional)
+- Autodeploy: `On`
 
 ---
 

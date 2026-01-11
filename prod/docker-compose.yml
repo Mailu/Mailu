@@ -76,14 +76,15 @@ services:
       - resolver
 
   # Optional Services (Enabled in Prod usually)
-  antivirus:
-    image: ghcr.io/mailu/clamav:${VERSION}
-    restart: always
-    env_file: .env
-    volumes:
-      - "$ROOT/filter:/data"
-    depends_on:
-      - front
+  # NOTE: ClamAV image not available for version 2024.06, disabled for now
+  # antivirus:
+  #   image: ghcr.io/mailu/clamav:${VERSION}
+  #   restart: always
+  #   env_file: .env
+  #   volumes:
+  #     - "$ROOT/filter:/data"
+  #   depends_on:
+  #     - front
 
   webmail:
     image: ghcr.io/mailu/webmail:${VERSION}

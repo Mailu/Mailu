@@ -82,7 +82,7 @@ DISABLE_STATISTICS=False
 ADMIN=true
 WEBMAIL=roundcube
 WEBDAV=none
-ANTIVIRUS=clamav
+ANTIVIRUS=none
 ```
 
 ### Service UI field checklist

@@ -51,7 +51,7 @@ Application variables (used by containers at runtime):
 - `LOGO_URL=/static/mailu.png`
 - `LOGO_BACKGROUND=#0D47A1`
 - `COMPOSE_PROJECT_NAME=calapan-mailu`
-- (Optional) `POSTMASTER=admin`, `TLS_FLAVOR=cert`, `AUTH_RATELIMIT=5/minute`, `DISABLE_STATISTICS=False`, `ADMIN=true`, `WEBMAIL=snappymail`, `WEBDAV=none`, `ANTIVIRUS=clamav`
+- (Optional) `POSTMASTER=admin`, `TLS_FLAVOR=cert`, `AUTH_RATELIMIT=5/minute`, `DISABLE_STATISTICS=False`, `ADMIN=true`, `WEBMAIL=roundcube`, `WEBDAV=none`, `ANTIVIRUS=none`, `SKIP_DNSSEC_CHECKS=true`
 
 Tip: You may still keep [prod/.env](prod/.env) for reference, but Dokploy’s **Environment** tab should contain the values above so builds and mounts work.
 
@@ -83,6 +83,7 @@ ADMIN=true
 WEBMAIL=roundcube
 WEBDAV=none
 ANTIVIRUS=none
+SKIP_DNSSEC_CHECKS=true
 ```
 
 ### Service UI field checklist

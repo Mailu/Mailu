@@ -7,6 +7,8 @@ services:
     env_file: .env
     logging:
       driver: json-file
+    environment:
+      - TLS_FLAVOR=${TLS_FLAVOR:-cert}
     ports:
       - "8080:80"
       - "8443:443"

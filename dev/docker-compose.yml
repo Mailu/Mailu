@@ -37,6 +37,8 @@ services:
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/dkim:/dkim"
+      - "../core/admin/start.py:/start.py:ro"
+      - "../core/admin/mailu/sso/forms.py:/app/mailu/sso/forms.py:ro"
     depends_on:
       - redis
 

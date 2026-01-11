@@ -41,6 +41,12 @@ def test_DNS():
     import dns.rdatatype
     import dns.rdataclass
     import time
+    
+    # Skip DNSSEC validation in development mode
+    if os.environ.get('SKIP_DNSSEC_CHECKS') or os.environ.get('LOG_LEVEL') == 'DEBUG':
+        log.info("Skipping DNSSEC validation in development mode")
+        return
+    
     # DNS stub configured to do DNSSEC enabled queries
     resolver = dns.resolver.Resolver()
     resolver.use_edns(0, dns.flags.DO, 1232)

@@ -86,6 +86,7 @@ WEBMAIL=roundcube
 WEBDAV=none
 ANTIVIRUS=none
 SKIP_DNSSEC_CHECKS=true
+MESSAGE_SIZE_LIMIT=50000000
 ```
 
 ### Service UI field checklist

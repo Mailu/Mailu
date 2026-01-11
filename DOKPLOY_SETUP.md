@@ -80,7 +80,7 @@ TLS_FLAVOR=cert
 AUTH_RATELIMIT=5/minute
 DISABLE_STATISTICS=False
 ADMIN=true
-WEBMAIL=snappymail
+WEBMAIL=roundcube
 WEBDAV=none
 ANTIVIRUS=clamav
 ```

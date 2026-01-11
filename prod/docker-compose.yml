@@ -86,7 +86,7 @@ services:
       - front
 
   webmail:
-    image: ghcr.io/mailu/snappymail:${VERSION}
+    image: ghcr.io/mailu/webmail:${VERSION}
     restart: always
     env_file: .env
     volumes:

@@ -9,6 +9,7 @@ services:
       driver: json-file
     environment:
       - TLS_FLAVOR=${TLS_FLAVOR:-cert}
+      - MESSAGE_SIZE_LIMIT=${MESSAGE_SIZE_LIMIT}
     labels:
       - "traefik.enable=true"
       # HTTPS router

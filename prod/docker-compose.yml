@@ -54,6 +54,8 @@ services:
     image: ghcr.io/mailu/admin:${VERSION}
     restart: always
     env_file: .env
+    environment:
+      - SKIP_DNSSEC_CHECKS=true
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/dkim:/dkim"

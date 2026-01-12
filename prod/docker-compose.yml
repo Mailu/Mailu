@@ -62,6 +62,7 @@ services:
       - "../core/admin/start.py:/start.py:ro"
       - "../core/admin/mailu/sso/forms.py:/app/mailu/sso/forms.py:ro"
       - "../core/admin/mailu/internal/views/auth.py:/app/mailu/internal/views/auth.py:ro"
+      - "../core/admin/mailu/utils.py:/app/mailu/utils.py:ro"
       - "../Calapan_City_Logo.png:/app/mailu/static/mailu.png:ro"
     depends_on:
       - redis

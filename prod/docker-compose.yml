@@ -8,8 +8,10 @@ services:
     logging:
       driver: json-file
     environment:
-      - TLS_FLAVOR=cert
+      - TLS_FLAVOR=mail
       - MESSAGE_SIZE_LIMIT=50000000
+      - REAL_IP_HEADER=X-Forwarded-For
+      - REAL_IP_FROM=10.0.0.0/8
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=dokploy-network"

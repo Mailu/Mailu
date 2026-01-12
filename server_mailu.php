@@ -229,12 +229,14 @@ class mailu extends rcube_plugin
       // Update the stored password for current session
       $_SESSION['password'] = $rcmail->encrypt($newpasswd);
       // Redirect to mail inbox after successful password change
-      $rcmail->output->redirect(array('_task' => 'mail'));
+      header('Location: ./?_task=mail&_passwdchanged=1');
+      exit();
     } else {
       $message = isset($result['message']) ? $result['message'] : $this->gettext('errorsaving');
       $rcmail->output->command('display_message', $message, 'error');
-      $this->password_form();
     }
+    
+    $this->password_form();
   }
   
   // Call internal API for password change

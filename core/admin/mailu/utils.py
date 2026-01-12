@@ -521,13 +521,14 @@ def gen_temp_token(email, session):
 
 def isBadOrPwned(form):
     try:
-        if len(form.pw.data) < 8:
-            return "This password is too short."
-        breaches = int(form.pwned.data)
+        if len(form.pw.data) < 5:
+            return "This password is too short (minimum 5 characters)."
+        # Pwned password check disabled - allow any password
+        # breaches = int(form.pwned.data)
     except ValueError:
-        breaches = -1
-    if breaches > 0:
-        return f"This password appears in {breaches} data breaches! It is not unique; please change it."
+        pass
+    # if breaches > 0:
+    #     return f"This password appears in {breaches} data breaches! It is not unique; please change it."
     return None
 
 def formatCSVField(field):

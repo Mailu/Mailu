@@ -117,11 +117,7 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/webmail:/data"
-      - "../webmails/roundcube/login/mailu.php:/var/www/roundcube/plugins/mailu/mailu.php:ro"
-      - "../webmails/roundcube/login/templates:/var/www/roundcube/plugins/mailu/templates:ro"
-      - "../webmails/roundcube/login/skins/elastic/templates:/var/www/roundcube/plugins/mailu/skins/elastic/templates:ro"
-      - "../webmails/roundcube/login/skins/larry/templates:/var/www/roundcube/plugins/mailu/skins/larry/templates:ro"
-      - "../webmails/roundcube/login/skins/classic/templates:/var/www/roundcube/plugins/mailu/skins/classic/templates:ro"
+      - "../webmails/roundcube/login:/var/www/roundcube/plugins/mailu:ro"
       - "../webmails/roundcube/config/config.inc.php:/conf/config.inc.php:ro"
       - "../Calapan_City_Logo.png:/var/www/roundcube/skins/elastic/images/calapan-logo.png:ro"
     depends_on:

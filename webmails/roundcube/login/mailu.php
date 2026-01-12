@@ -32,18 +32,18 @@ class mailu extends rcube_plugin
     if (!$rcmail->output->framed) {
       $this->include_stylesheet($this->local_skin_path() . '/mailu.css');
       
-      // mailu admin button - only show for admins
-      if ($rcmail->config->get('show_mailu_button', false) && $this->is_admin()) {
-        $this->add_button([
-            'type'       => 'link',
-            'href'       => $rcmail->config->get('support_url'),
-            'class'      => 'button-mailu',
-            'label'      => 'mailu.mailu',
-            'tabindex'   => '0',
-            'innerclass' => 'button-inner',
-          ], 'taskbar'
-        );
-      }
+      // mailu admin button - disabled
+      // if ($rcmail->config->get('show_mailu_button', false) && $this->is_admin()) {
+      //   $this->add_button([
+      //       'type'       => 'link',
+      //       'href'       => $rcmail->config->get('support_url'),
+      //       'class'      => 'button-mailu',
+      //       'label'      => 'mailu.mailu',
+      //       'tabindex'   => '0',
+      //       'innerclass' => 'button-inner',
+      //     ], 'taskbar'
+      //   );
+      // }
     }
     // sso
     if (empty($_SESSION['user_id'])) {

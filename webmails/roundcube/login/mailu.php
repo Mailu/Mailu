@@ -19,7 +19,7 @@ class mailu extends rcube_plugin
     
     // password change in settings
     $rcmail = rcmail::get_instance();
-    if ($rcmail->task == 'settings' && $rcmail->config->get('show_password_button', true)) {
+    if ($this->rcmail->config->get('show_password_button', true)) {
       $this->add_hook('settings_actions', array($this, 'settings_actions'));
       $this->register_action('plugin.mailu-password', array($this, 'password_form'));
       $this->register_action('plugin.mailu-password-save', array($this, 'password_save'));

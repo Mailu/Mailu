@@ -284,7 +284,7 @@ msgstr "Aktualisieren"
 
 #: mailu/ui/forms.py:152
 msgid "Your token (write it down, as it will never be displayed again)"
-msgstr "Token (bitte speichern, da er hier nach nicht mehr angezeigt wird)"
+msgstr "Token (bitte speichern, da er später nicht mehr angezeigt wird)"
 
 #: mailu/ui/forms.py:157 mailu/ui/templates/token/list.html:22
 msgid "Authorized IP"
@@ -817,4 +817,3 @@ msgstr "Domain"
 #: mailu/ui/templates/user/signup_domain.html:16
 msgid "Available slots"
 msgstr "Verfügbare Plätze"
-

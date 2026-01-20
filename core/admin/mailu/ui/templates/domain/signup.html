@@ -5,7 +5,6 @@
 {%- endblock %}
 
 {%- block content %}
-
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
 
@@ -24,12 +23,14 @@
 
   {%- call macros.card() %}
   {%- if form.localpart %}
-  {{ macros.form_fields((form.localpart, form.name), append='<span class="input-group-text">@</span>') }}
-  {{ macros.form_fields((form.pw, form.pw2)) }}
+    {{ macros.form_fields((form.localpart, form.name), append='<span class="input-group-text">@</span>', autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false") }}
+    {{ macros.form_fields((form.pw, form.pw2)) }}
   {%- else %}
-  {{ macros.form_field(form.name) }}
+    {{ macros.form_field(form.name) }}
   {%- endif %}
-  {{ macros.form_field(form.captcha) }}
+  {%- if form.captcha %}
+    {{ macros.form_field(form.captcha, autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false") }}
+  {%- endif %}
   {{ macros.form_field(form.submit) }}
   {%- endcall %}
 </form>

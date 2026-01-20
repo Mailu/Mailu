@@ -5,5 +5,5 @@
 {%- endblock %}
 
 {%- block subtitle %}
-{{ user }}
+#{{ fetch.id }}: {{ fetch.protocol }}{{ 's' if fetch.tls else '' }}://{{ fetch.host }}:{{ fetch.port }}
 {%- endblock %}

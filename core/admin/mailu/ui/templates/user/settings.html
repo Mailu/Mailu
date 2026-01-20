@@ -13,7 +13,7 @@
   {{ form.hidden_tag() }}
 
   {%- call macros.card(title=_("Displayed name")) %}
-  {{ macros.form_field(form.displayed_name) }}
+  {{ macros.form_field(form.displayed_name, autofocus=True) }}
   {%- endcall %}
 
   {%- call macros.card(title=_("Antispam")) %}

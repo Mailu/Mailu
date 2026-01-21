@@ -46,11 +46,11 @@ class IdnaDomain(db.TypeDecorator):
     cache_ok = True
     python_type = str
 
-    def process_bind_param(self, value, dialect):
+    def process_bind_param(self, value, dialect) -> str:
         """ encode unicode domain name to punycode """
         return idna.encode(value.lower()).decode('ascii')
 
-    def process_result_value(self, value, dialect):
+    def process_result_value(self, value, dialect) -> str:
         """ decode punycode domain name to unicode """
         return idna.decode(value)
 
@@ -62,7 +62,7 @@ class IdnaEmail(db.TypeDecorator):
     cache_ok = True
     python_type = str
 
-    def process_bind_param(self, value, dialect):
+    def process_bind_param(self, value, dialect) -> str:
         """ encode unicode domain part of email address to punycode """
         if not '@' in value:
             raise ValueError('invalid email address (no "@")')
@@ -71,7 +71,7 @@ class IdnaEmail(db.TypeDecorator):
             raise ValueError('email local part must not contain "@"')
         return f'{localpart}@{idna.encode(domain_name).decode("ascii")}'
 
-    def process_result_value(self, value, dialect):
+    def process_result_value(self, value, dialect) -> str:
         """ decode punycode domain part of email to unicode """
         localpart, domain_name = value.rsplit('@', 1)
         return f'{localpart}@{idna.decode(domain_name)}'
@@ -84,7 +84,7 @@ class CommaSeparatedList(db.TypeDecorator):
     cache_ok = True
     python_type = list
 
-    def process_bind_param(self, value, dialect):
+    def process_bind_param(self, value, dialect) -> str:
         """ join list of items to comma separated string """
         if not isinstance(value, (list, tuple, set)):
             raise TypeError('Must be a list of strings')
@@ -93,7 +93,7 @@ class CommaSeparatedList(db.TypeDecorator):
                 raise ValueError('list item must not contain ","')
         return ','.join(sorted(set(value)))
 
-    def process_result_value(self, value, dialect):
+    def process_result_value(self, value, dialect) -> list:
         """ split comma separated string to list """
         return list(filter(bool, (item.strip() for item in value.split(',')))) if value else []
 
@@ -105,11 +105,11 @@ class JSONEncoded(db.TypeDecorator):
     cache_ok = True
     python_type = str
 
-    def process_bind_param(self, value, dialect):
+    def process_bind_param(self, value, dialect) -> str | None:
         """ encode data as json """
         return json.dumps(value) if value else None
 
-    def process_result_value(self, value, dialect):
+    def process_result_value(self, value, dialect) -> object | None:
         """ decode json to data """
         return json.loads(value) if value else None
 
@@ -130,14 +130,14 @@ class Base(db.Model):
     updated_at = db.Column(db.Date, nullable=True, onupdate=date.today)
     comment = db.Column(db.String(255), nullable=True, default='')
 
-    def __str__(self):
+    def __str__(self) -> str:
         pkey = self.__table__.primary_key.columns.values()[0].name
         if pkey == 'email':
             # ugly hack for email declared attr. _email is not always up2date
             return str(f'{self.localpart}@{self.domain_name}')
         return str(getattr(self, pkey))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {str(self)!r}>'
 
     def __eq__(self, other):
@@ -153,13 +153,13 @@ class Base(db.Model):
     # in collections.bulk_replace, but auto-incrementing don't always have
     # a valid primary key, in this case we use the object's id
     __hashed = None
-    def __hash__(self):
+    def __hash__(self) -> int:
         if self.__hashed is None:
             primary = getattr(self, self.__table__.primary_key.columns.values()[0].name)
             self.__hashed = id(self) if primary is None else hash(primary)
         return self.__hashed
 
-    def dont_change_updated_at(self):
+    def dont_change_updated_at(self) -> None:
         """ Mark updated_at as modified, but keep the old date when updating the model"""
         flag_modified(self, 'updated_at')
 
@@ -172,7 +172,7 @@ class Config(Base):
     value = db.Column(JSONEncoded)
 
 
-def _save_dkim_keys(session):
+def _save_dkim_keys(session) -> None:
     """ store DKIM keys after commit """
     for obj in session.identity_map.values():
         if isinstance(obj, Domain):
@@ -206,7 +206,7 @@ class Domain(Base):
             selector=app.config['DKIM_SELECTOR']
         )
 
-    def save_dkim_key(self):
+    def save_dkim_key(self) -> None:
         """ save changed DKIM key to disk """
         if self._dkim_key != self._dkim_key_on_disk:
             file_path = self._dkim_file()
@@ -218,26 +218,26 @@ class Domain(Base):
             self._dkim_key_on_disk = self._dkim_key
 
     @cached_property
-    def dns_mx(self):
+    def dns_mx(self) -> str:
         """ return MX record for domain """
         hostname = app.config['HOSTNAME']
         return f'{idna.encode(self.name.lower()).decode('ascii')}. 600 IN MX 10 {idna.encode(hostname.lower()).decode('ascii')}.'
 
     @cached_property
-    def dns_spf(self):
+    def dns_spf(self) -> str:
         """ return SPF record for domain """
         hostname = app.config['HOSTNAME']
         return f'{idna.encode(self.name.lower()).decode('ascii')}. 600 IN TXT "v=spf1 mx a:{idna.encode(hostname.lower()).decode('ascii')} ~all"'
 
     @property
-    def dns_dkim(self):
+    def dns_dkim(self) -> str:
         """ return DKIM record for domain """
         if self.dkim_key:
             selector = app.config['DKIM_SELECTOR']
             return f'{selector}._domainkey.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN TXT "v=DKIM1; k=rsa; p={self.dkim_publickey}"'
 
     @cached_property
-    def dns_dmarc(self):
+    def dns_dmarc(self) -> str:
         """ return DMARC record for domain """
         if self.dkim_key:
             domain = app.config['DOMAIN']
@@ -253,14 +253,14 @@ class Domain(Base):
         return self.name != app.config['DOMAIN']
 
     @cached_property
-    def dns_dmarc_report(self):
+    def dns_dmarc_report(self) -> str:
         """ return DMARC report record for mailu server """
         if self.dkim_key:
             domain = app.config['DOMAIN']
             return f'{idna.encode(self.name.lower()).decode('ascii')}._report._dmarc.{idna.encode(domain.lower()).decode('ascii')}. 600 IN TXT "v=DMARC1;"'
 
     @cached_property
-    def dns_autoconfig(self):
+    def dns_autoconfig(self) -> list[str]:
         """ return list of auto configuration records (RFC6186) """
         ports = {int(port.strip()) for port in app.config['PORTS'].split(',')}.union({465, 993})
         hostname = app.config['HOSTNAME']
@@ -284,7 +284,7 @@ class Domain(Base):
         ]+[f'autoconfig.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN CNAME {idna.encode(hostname.lower()).decode('ascii')}.', f'autodiscover.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN CNAME {idna.encode(hostname.lower()).decode('ascii')}.']
 
     @cached_property
-    def dns_tlsa(self):
+    def dns_tlsa(self)-> list[str] | list:
         """ return TLSA record for domain when using letsencrypt """
         hostname = app.config['HOSTNAME']
         if app.config['TLS_FLAVOR'] in ('letsencrypt', 'mail-letsencrypt'):
@@ -309,7 +309,7 @@ class Domain(Base):
         return self._dkim_key if self._dkim_key else None
 
     @dkim_key.setter
-    def dkim_key(self, value):
+    def dkim_key(self, value) -> None:
         """ set private DKIM key """
         old_key = self.dkim_key
         self._dkim_key = value if value is not None else b''
@@ -324,11 +324,11 @@ class Domain(Base):
         if dkim_key:
             return dkim.strip_key(dkim_key).decode('utf8')
 
-    def generate_dkim_key(self):
+    def generate_dkim_key(self) -> None:
         """ generate new DKIM key """
         self.dkim_key = dkim.gen_key()
 
-    def has_email(self, localpart):
+    def has_email(self, localpart) -> bool:
         """ checks if localpart is configured for domain """
         localpart = localpart.lower()
         for email in chain(self.users, self.aliases):
@@ -336,7 +336,7 @@ class Domain(Base):
                 return True
         return False
 
-    def check_mx(self):
+    def check_mx(self) -> bool:
         """ checks if MX record for domain points to mailu host """
         try:
             hostnames = set(app.config['HOSTNAMES'].split(','))
@@ -361,14 +361,14 @@ class Alternative(Base):
         backref=db.backref('alternatives', cascade='all, delete-orphan'))
 
     @property
-    def dns_dkim(self):
+    def dns_dkim(self) -> str:
         """ return DKIM record for domain """
         if self.domain.dkim_key:
             selector = app.config['DKIM_SELECTOR']
             return f'{selector}._domainkey.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN TXT "v=DKIM1; k=rsa; p={self.domain.dkim_publickey}"'
 
     @cached_property
-    def dns_dmarc(self):
+    def dns_dmarc(self) -> str:
         """ return DMARC record for domain """
         if self.domain.dkim_key:
             domain = app.config['DOMAIN']
@@ -384,25 +384,25 @@ class Alternative(Base):
         return self.name != app.config['DOMAIN']
 
     @cached_property
-    def dns_dmarc_report(self):
+    def dns_dmarc_report(self) -> str:
         """ return DMARC report record for mailu server """
         if self.domain.dkim_key:
             domain = app.config['DOMAIN']
             return f'{idna.encode(self.name.lower()).decode('ascii')}._report._dmarc.{idna.encode(domain.lower()).decode('ascii')}. 600 IN TXT "v=DMARC1;"'
 
     @cached_property
-    def dns_mx(self):
+    def dns_mx(self) -> str:
         """ return MX record for domain """
         hostname = app.config['HOSTNAME']
         return f'{idna.encode(self.name.lower()).decode('ascii')}. 600 IN MX 10 {idna.encode(hostname.lower()).decode('ascii')}.'
 
     @cached_property
-    def dns_spf(self):
+    def dns_spf(self) -> str:
         """ return SPF record for domain """
         hostname = app.config['HOSTNAME']
         return f'{idna.encode(self.name.lower()).decode('ascii')}. 600 IN TXT "v=spf1 mx a:{idna.encode(hostname.lower()).decode('ascii')} ~all"'
 
-    def check_mx(self):
+    def check_mx(self) -> bool:
         """ checks if MX record for domain points to mailu host """
         try:
             hostnames = set(app.config['HOSTNAMES'].split(','))
@@ -444,7 +444,7 @@ class Email(object):
     def _email(cls):
         """ the complete email address (localpart@domain) """
 
-        def updater(ctx):
+        def updater(ctx) -> str:
             key = f'{cls.__tablename__}_email'
             if key in ctx.current_parameters:
                 return ctx.current_parameters[key]
@@ -460,28 +460,28 @@ class Email(object):
         return self._email
 
     @email.setter
-    def email(self, value):
+    def email(self, value) -> None:
         """ setter for email - sets _email, localpart and domain_name at once """
         self._email = value.lower()
         self.localpart, self.domain_name = self._email.rsplit('@', 1)
 
     @staticmethod
-    def _update_localpart(target, value, *_):
+    def _update_localpart(target, value, *_) -> None:
         if target.domain_name:
             target._email = f'{value}@{target.domain_name}'
 
     @staticmethod
-    def _update_domain_name(target, value, *_):
+    def _update_domain_name(target, value, *_) -> None:
         if target.localpart:
             target._email = f'{target.localpart}@{value}'
 
     @classmethod
-    def __declare_last__(cls):
+    def __declare_last__(cls) -> None:
         # gets called after mappings are completed
         sqlalchemy.event.listen(cls.localpart, 'set', cls._update_localpart, propagate=True)
         sqlalchemy.event.listen(cls.domain_name, 'set', cls._update_domain_name, propagate=True)
 
-    def sendmail(self, subject, body):
+    def sendmail(self, subject, body) -> bool:
         """ send an email to the address """
         try:
             f_addr = f'{app.config["POSTMASTER"]}@{idna.encode(app.config["DOMAIN"]).decode("ascii")}'
@@ -688,7 +688,7 @@ in clear-text regardless of the presence of the cache.
             self._credential_cache[self.get_id()] = (self.password.split('$')[3], passlib.hash.pbkdf2_sha256.using(rounds=1).hash(password))
         return result
 
-    def set_password(self, password, raw=False, keep_sessions=None):
+    def set_password(self, password, raw=False, keep_sessions=None) -> None:
         """ Set password for user and destroy all web sessions except those in keep_sessions
             @password: plain text password to encrypt (or, if raw is True: the hash itself)
             @keep_sessions: True if all the sessions should be preserved, otherwise a
@@ -705,7 +705,7 @@ set() containing the sessions to keep
         else:
             return self.manager_of
 
-    def get_managed_emails(self, include_aliases=True):
+    def get_managed_emails(self, include_aliases=True) -> list:
         """ returns list of email addresses this user can manage """
         emails = []
         for domain in self.get_managed_domains():
@@ -714,7 +714,7 @@ set() containing the sessions to keep
                 emails.extend(domain.aliases)
         return emails
 
-    def send_welcome(self):
+    def send_welcome(self) -> None:
         """ send welcome email to user """
         if app.config['WELCOME']:
             self.sendmail(app.config['WELCOME_SUBJECT'], app.config['WELCOME_BODY'])
@@ -803,7 +803,7 @@ class Token(Base):
     password = db.Column(db.String(255), nullable=False)
     ip = db.Column(CommaSeparatedList, nullable=True, default=list)
 
-    def check_password(self, password):
+    def check_password(self, password) -> bool:
         """ verifies password against stored hash
             and updates hash if outdated
         """
@@ -816,12 +816,12 @@ class Token(Base):
             return False
         return passlib.hash.pbkdf2_sha256.verify(password, self.password)
 
-    def set_password(self, password):
+    def set_password(self, password) -> None:
         """ sets password using pbkdf2_sha256 (1 round) """
         # tokens have 128bits of entropy, they are not bruteforceable
         self.password = passlib.hash.pbkdf2_sha256.using(rounds=1).hash(password)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<Token #{self.id}: {self.comment or self.ip or self.password}>'
 
 
@@ -849,7 +849,7 @@ class Fetch(Base):
     last_check = db.Column(db.DateTime, nullable=True)
     error = db.Column(db.String(1023), nullable=True)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f'<Fetch #{self.id}: {self.protocol}{"s" if self.tls else ""}:'
             f'//{self.username}@{self.host}:{self.port}>'
@@ -873,39 +873,39 @@ class MailuConfig:
             of a sqlalchemy model
         """
 
-        def __init__(self, model : db.Model):
+        def __init__(self, model : db.Model) -> None:
             self.model = model
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return f'<{self.model.__name__}-Collection>'
 
         @cached_property
-        def _items(self):
+        def _items(self) -> dict:
             return {
                 inspect(item).identity: item
                 for item in self.model.query.all()
             }
 
-        def __len__(self):
+        def __len__(self) -> int:
             return len(self._items)
 
-        def __iter__(self):
+        def __iter__(self) -> iter:
             return iter(self._items.values())
 
         def __getitem__(self, key):
             return self._items[key]
 
-        def __setitem__(self, key, item):
+        def __setitem__(self, key, item) -> None:
             if not isinstance(item, self.model):
                 raise TypeError(f'expected {self.model.name}')
             if key != inspect(item).identity:
                 raise ValueError(f'item identity != key {key!r}')
             self._items[key] = item
 
-        def __delitem__(self, key):
+        def __delitem__(self, key) -> None:
             del self._items[key]
 
-        def append(self, item, update=False):
+        def append(self, item, update=False) -> None:
             """ list-like append """
             if not isinstance(item, self.model):
                 raise TypeError(f'expected {self.model.name}')
@@ -915,7 +915,7 @@ class MailuConfig:
                     raise ValueError(f'item {key!r} already present in collection')
             self._items[key] = item
 
-        def extend(self, items, update=False):
+        def extend(self, items, update=False) -> None:
             """ list-like extend """
             add = {}
             for item in items:
@@ -940,7 +940,7 @@ class MailuConfig:
             """ dict-like popitem """
             return self._items.popitem()
 
-        def remove(self, item):
+        def remove(self, item) -> None:
             """ list-like remove """
             if not isinstance(item, self.model):
                 raise TypeError(f'expected {self.model.name}')
@@ -949,7 +949,7 @@ class MailuConfig:
                 raise ValueError(f'item {key!r} not found in collection')
             del self._items[key]
 
-        def clear(self):
+        def clear(self) -> None:
             """ dict-like clear """
             while True:
                 try:
@@ -957,7 +957,7 @@ class MailuConfig:
                 except IndexError:
                     break
 
-        def update(self, items):
+        def update(self, items) -> None:
             """ dict-like update """
             for key, item in items:
                 if not isinstance(item, self.model):
@@ -979,7 +979,7 @@ class MailuConfig:
             self._items[key] = item
             return item
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         # section-name -> attr
         self._sections = {
@@ -1006,7 +1006,7 @@ class MailuConfig:
             return model.model
         return model
 
-    def _add(self, items, section, update):
+    def _add(self, items, section, update) -> None:
 
         model = self._get_model(section)
         if isinstance(items, self._models):
@@ -1020,15 +1020,15 @@ class MailuConfig:
                 raise ValueError(f'{what} can not be added to section {section!r}')
             self._sections[type(item)].append(item, update=update)
 
-    def add(self, items, section=None):
+    def add(self, items, section=None) -> None:
         """ add item to config """
         self._add(items, section, update=False)
 
-    def update(self, items, section=None):
+    def update(self, items, section=None) -> None:
         """ add or replace item in config """
         self._add(items, section, update=True)
 
-    def remove(self, items, section=None):
+    def remove(self, items, section=None) -> None:
         """ remove item from config """
         model = self._get_model(section)
         if isinstance(items, self._models):
@@ -1046,13 +1046,13 @@ class MailuConfig:
                 raise ValueError(f'{what} can not be removed from section {section!r}')
             self._sections[type(item)].remove(item,)
 
-    def clear(self, models=None):
+    def clear(self, models=None) -> None:
         """ remove complete configuration """
         for model in self._models:
             if models is None or model in models:
                 db.session.query(model).delete()
 
-    def check(self):
+    def check(self) -> None:
         """ check for duplicate domain names """
         dup = set()
         for fqdn in chain(

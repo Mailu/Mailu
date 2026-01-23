@@ -71,7 +71,6 @@ def alias_delete(alias):
 @ui.route('/anonalias/list', methods=['GET'])
 @access.authenticated
 def anonalias_list():
-    # Renders the Anonymous Aliases UI
     user = flask_login.current_user
     has_access = user.global_admin
     if not has_access:
@@ -80,7 +79,7 @@ def anonalias_list():
                 has_access = True
                 break
     
-    # Query user's anonymous aliases
+    # Query user's anonymous aliases, standard aliases do not have an owner_email
     aliases = models.Alias.query.filter_by(owner_email=user.email).all()
     
     return flask.render_template('alias/anonaliases.html', has_access=has_access, aliases=aliases)
@@ -108,11 +107,7 @@ def anonalias_create():
         domain_name = form.domain.data
         hostname = form.hostname.data
         note = form.note.data
-        
-        # determine destinations (default to user email)
         destination = [user.email]
-        
-        # generate alias
         max_retries = app.config.get('ANONMAIL_MAX_RETRIES', 10)
         
         localpart = None

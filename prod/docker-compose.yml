@@ -136,8 +136,4 @@ networks:
   default:
     driver: bridge
     ipam:
-      driver: default
-      config:
-        - subnet: $SUBNET
-  dokploy-network:
     external: true

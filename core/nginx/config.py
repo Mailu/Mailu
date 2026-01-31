@@ -90,7 +90,8 @@ def format_for_nginx(fullchain, output, strip_CA=args.get('LETSENCRYPT_SHORTCHAI
     chain=[]
     with open(fullchain, 'rb') as f:
         chain = x509.load_pem_x509_certificates(f.read())
-    builder = PolicyBuilder().store(Store([ISRG_ROOT_X1, ISRG_ROOT_X2]))
+    builder = PolicyBuilder().store(Store([ISRG_ROOT_X1, ISRG_ROOT_X2])).time(chain[0].not_valid_before_utc)
+
     verifier = builder.build_server_verifier(DNSName(chain[0].subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value))
     try:
         valid_chain = verifier.verify(chain[0], chain[1:])

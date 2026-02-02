@@ -34,6 +34,18 @@ while True:
         pass
     log.warning("Admin is not up just yet, retrying in 1 second")
 
+# Configure DMARC reporting cron job
+if os.environ.get('DMARC_SEND_REPORTS', 'false').lower() == 'true':
+    # Create cron job for daily DMARC reporting
+    with open('/etc/periodic/daily/dmarc-reports', 'w') as f:
+        f.write('#!/bin/sh\n')
+        f.write('# Send DMARC reports for yesterday\n')
+        f.write('su rspamd -s /bin/sh -c "/usr/bin/rspamadm dmarc_report $(date -d @$(($(date +%s)-86400)) +%Y%m%d)" >/var/log/dmarc-reports.log 2>&1\n')
+    # make executable
+    os.chmod('/etc/periodic/daily/dmarc-reports', 0o755)
+    # start crond
+    os.system("/usr/sbin/crond")
+
 # Run rspamd
 os.system("mkdir -m 755 -p /run/rspamd")
 os.system("chown rspamd:rspamd /run/rspamd")

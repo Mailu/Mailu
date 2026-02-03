@@ -84,8 +84,10 @@ visitor==0.1.3
 vobject==0.9.7
 watchdog==4.0.0
 Werkzeug==3.0.3
+wonderwords==3.0.1
 wrapt==1.16.0
 WTForms==3.1.2
 WTForms-Components==0.10.5
 xmltodict==0.13.0
 yarl==1.9.4
+tld==0.13.1

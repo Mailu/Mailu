@@ -64,6 +64,10 @@
 {%- endfor -%}
   </pre></td>
 </tr>
+<tr>
+  <th>{% trans %}Anonymous Email Service{% endtrans %}</th>
+  <td>{% if domain.anonmail_enabled %}{% trans %}enabled{% endtrans %}{% else %}{% trans %}disabled{% endtrans %}{% endif %}</td>
+</tr>
 {%- endcall %}
 
 {%- for alternative in domain.alternatives %}

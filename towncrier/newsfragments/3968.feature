@@ -1,0 +1,1 @@
+Adds a feature to automatically create E-Mail aliases for website logins

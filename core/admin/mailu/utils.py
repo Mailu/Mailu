@@ -17,6 +17,8 @@ import hmac
 import secrets
 import string
 import time
+from tld import get_tld
+from tld import exceptions as tld_exceptions
 
 from multiprocessing import Value
 from mailu import limiter
@@ -28,6 +30,7 @@ import flask_migrate
 import flask_babel
 import ipaddress
 import redis
+from wonderwords import RandomWord
 
 from datetime import datetime, timedelta
 from flask.sessions import SessionMixin, SessionInterface
@@ -548,3 +551,79 @@ def is_app_token(candidate):
 
 def truncated_pw_hash(pw):
     return hmac.new(app.truncated_pw_key, bytearray(pw, 'utf-8'), 'sha256').hexdigest()[:6]
+
+
+
+def generate_anonymous_alias_localpart(hostname=None):
+    """Generate a localpart for an anonymous alias.
+
+    Pattern:
+    - With hostname: hostname_prefix.randomword (e.g., groupon.banana)
+    - Without hostname: random_token
+
+    Args:
+        hostname: Optional website hostname (e.g., 'www.groupon.com', 'https://example.com/path')
+
+    Returns:
+        The localpart string (without @domain)
+    """
+
+    hostname_prefix = None
+    if hostname:
+        host_with_scheme = hostname if '://' in hostname else f'http://{hostname}'
+        try:
+            obj = get_tld(host_with_scheme, as_object=True, fix_protocol=True)
+            if obj is not None:
+                hostname_prefix = obj.domain
+        except (tld_exceptions.TldDomainNotFound, tld_exceptions.TldBadUrl):
+            hostname_prefix = None
+    
+    if hostname_prefix:
+        hostname_prefix = ''.join(c for c in hostname_prefix.lower() if c.isalnum())
+
+        # Try to get a random word for hostname-based aliases
+        random_part = None
+        try:
+            rw = RandomWord()
+            candidate = rw.word(word_min_length=5, word_max_length=10)
+            if candidate and isinstance(candidate, str):
+                w = candidate.strip().lower()
+                if w.isalpha():
+                    random_part = w
+        except Exception:
+            # Fallback to random token if word generation fails
+            random_part = secrets.token_urlsafe(10)
+
+        return f"{hostname_prefix}.{random_part}"
+
+    # No hostname: return short random token
+    return secrets.token_urlsafe(12)
+
+
+def check_credentials_for_api(user, password, ip):
+    """Check credentials for API authentication using app tokens only.
+    
+    This function validates that the provided password is an app token for the user.
+    Direct password authentication is NOT supported for API access - users must use tokens.
+    
+    Args:
+        user: The User model object
+        password: The app token to verify
+        ip: The IP address of the client
+        
+    Returns:
+        True if the token is valid, False otherwise
+    """
+    if not user or not user.enabled:
+        return False
+    
+    # Only allow app tokens, not passwords
+    if is_app_token(password):
+        for token in user.tokens:
+            if token.check_password(password):
+                if not token.ip or is_ip_in_subnet(ip, token.ip):
+                    return True
+                else:
+                    return False  # Token is valid but IP is restricted
+    
+    return False

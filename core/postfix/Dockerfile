@@ -19,4 +19,4 @@ HEALTHCHECK --start-period=30s CMD ! /usr/libexec/postfix/master -t
 
 VOLUME ["/queue"]
 
-CMD /start.py
+CMD ["/start.py"]

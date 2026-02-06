@@ -54,7 +54,7 @@ COPY roundcube/config/config.inc.carddav.php /var/www/roundcube/plugins/carddav/
 
 # snappymail
 
-ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.38.2/snappymail-2.38.2.tar.gz
+ENV SNAPPYMAIL_URL=https://github.com/the-djmaze/snappymail/releases/download/v2.38.2/snappymail-2.38.2.tar.gz
 
 RUN set -euxo pipefail \
   ; mkdir  /var/www/snappymail \
@@ -92,7 +92,7 @@ COPY snuffleupagus.rules /etc/snuffleupagus.rules.tpl
 VOLUME /data
 VOLUME /overrides
 
-CMD /start.py
+CMD ["/start.py"]
 
 HEALTHCHECK CMD curl -m3 -f -L http://localhost/ping || exit 1
 

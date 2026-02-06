@@ -34,4 +34,4 @@ ENV \
     OLEFY_DEL_TMP="1" \
     OLEFY_DEL_TMP_FAILED="1"
 
-CMD /start.py
+CMD ["/start.py"]

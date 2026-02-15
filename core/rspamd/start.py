@@ -35,7 +35,7 @@ while True:
     log.warning("Admin is not up just yet, retrying in 1 second")
 
 # Configure DMARC reporting cron job
-if os.environ.get('DMARC_SEND_REPORTS', 'false').lower() == 'true':
+if env.get('DMARC_SEND_REPORTS', False):
     # Create cron job for daily DMARC reporting
     with open('/etc/periodic/daily/dmarc-reports', 'w') as f:
         f.write('#!/bin/sh\n')

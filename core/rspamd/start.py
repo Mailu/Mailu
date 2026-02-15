@@ -36,15 +36,18 @@ while True:
 
 # Configure DMARC reporting cron job
 if env.get('DMARC_SEND_REPORTS', False):
+    log.info("DMARC reporting is enabled, configuring daily cron job")
     # Create cron job for daily DMARC reporting
     with open('/etc/periodic/daily/dmarc-reports', 'w') as f:
         f.write('#!/bin/sh\n')
         f.write('# Send DMARC reports for yesterday\n')
-        f.write('su rspamd -s /bin/sh -c "/usr/bin/rspamadm dmarc_report $(date -d @$(($(date +%s)-86400)) +%Y%m%d)" >/var/log/dmarc-reports.log 2>&1\n')
+        f.write('su rspamd -s /bin/sh -c "/usr/bin/rspamadm dmarc_report $(date -d @$(($(date +%s)-86400)) +%Y%m%d)" >>/proc/1/fd/1 2>&1\n')
     # make executable
     os.chmod('/etc/periodic/daily/dmarc-reports', 0o755)
     # start crond
     os.system("/usr/sbin/crond")
+else:
+    log.info("DMARC reporting is disabled")
 
 # Run rspamd
 os.system("mkdir -m 755 -p /run/rspamd")

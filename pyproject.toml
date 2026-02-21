@@ -6,21 +6,3 @@
     title_format = "v{version} - {project_date}"
     issue_format = "[#{issue}](https://github.com/Mailu/Mailu/issues/{issue})"
     start_string = "<!-- TOWNCRIER -->"
-
-[tool.ruff.lint]
-    ignore = [
-        "E401",  # multiple imports on one line
-        "E402",  # module level import not at top of file
-        "E701",  # Multiple statements on one line (colon)
-        "E712",  # Avoid equality comparisons to True; use {cond}: for truth checks
-        "E713",  # Test for membership should be not in
-        "E722",  # do not use bare except
-        "E731",  # do not assign a lambda expression, use a def
-        "E741",  # Ambiguous variable name: {name}
-        "F401",  # module imported but unused
-        "F403",  # 'from module import *' used; unable to detect undefined names
-        "F541",  # f-string is missing placeholders
-        "F811",  # redefinition of unused name from line N
-        "F821",  # undefined name
-        "F841",  # local variable assigned but never used
-    ]

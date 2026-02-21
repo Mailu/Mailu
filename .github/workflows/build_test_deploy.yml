@@ -92,10 +92,10 @@ jobs:
         with:
           args: "--version"
       - name: Ruff Lint
-        run: ruff check
+        run: ruff check $(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }} -- '*.py')
       - name: Ruff Format
         if: success() || failure() # We want to run this step even if the previous step fails, to show the formatting errors.
-        run: ruff format --check --diff
+        run: ruff format --check --diff $(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }} -- '*.py')
 
 # This job calculates what images must be build. It reads the build.hcl file and then outputs all targets (images) in it.
 # This is used by the next build job.

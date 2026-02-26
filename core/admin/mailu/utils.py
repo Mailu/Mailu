@@ -93,7 +93,7 @@ def is_ip_in_subnet(ip, subnets=[]):
     ip = ipaddress.ip_address(ip)
     try:
         return any(ip in cidr for cidr in [ipaddress.ip_network(subnet, strict=False) for subnet in subnets])
-    except:
+    except Exception:
         app.logger.debug(f'Unable to parse {subnets!r}, assuming {ip!r} is not in the set')
         return False
 
@@ -507,7 +507,7 @@ def verify_temp_token(email, token):
                 session = MailuSession(sessid, app)
                 if session.get('_user_id', '') == email:
                     return True
-    except:
+    except Exception:
         pass
 
 def gen_temp_token(email, session):

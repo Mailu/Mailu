@@ -86,7 +86,7 @@ class LimitWraperFactory(object):
             login, nonce, _ = cookie.split('$')
             if hmac.compare_digest(cookie, self.device_cookie(login, nonce)):
                 return nonce, login
-        except:
+        except Exception:
             pass
         return None, None
 

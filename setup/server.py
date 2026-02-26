@@ -97,22 +97,22 @@ def build_app(path):
         valid = True
         try:
             ipaddress.IPv4Address(data['bind4'])
-        except:
+        except Exception:
             flask.flash('Configured IPv4 address is invalid', 'error')
             valid = False
         try:
             ipaddress.IPv6Address(data['bind6'])
-        except:
+        except Exception:
             flask.flash('Configured IPv6 address is invalid', 'error')
             valid = False
         try:
             ipaddress.IPv4Network(data['subnet'])
-        except:
+        except Exception:
             flask.flash('Configured subnet(IPv4) is invalid', 'error')
             valid = False
         try:
             ipaddress.IPv6Network(data['subnet6'])
-        except:
+        except Exception:
             flask.flash('Configured subnet(IPv6) is invalid', 'error')
             valid = False
         try:

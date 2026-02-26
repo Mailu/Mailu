@@ -90,7 +90,7 @@ def autoconfig_microsoft():
         </Response>
     </Autodiscover>'''
         return flask.Response(xml, mimetype='text/xml', status=200)
-    except:
+    except Exception:
         return flask.abort(400)
 
 @internal.route("/autoconfig/apple")

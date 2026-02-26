@@ -22,7 +22,7 @@ try:
 
     smtp_server.sendmail("admin@mailu.io", "alltheusers@mailu.io", msg.as_string())
     smtp_server.quit()
-except:
+except Exception:
     sys.exit(25)
 
 time.sleep(30)

@@ -173,7 +173,7 @@ class TokenForm(flask_wtf.FlaskForm):
         try:
             for candidate in field.data.replace(' ','').split(','):
                 ipaddress.ip_network(candidate, False)
-        except:
+        except Exception:
             raise validators.ValidationError('Not a valid list of CIDRs')
 
 class AliasForm(flask_wtf.FlaskForm):

@@ -30,7 +30,7 @@ while True:
     try:
         if requests.get(healthcheck,timeout=2).ok:
             break
-    except:
+    except Exception:
         pass
     log.warning("Admin is not up just yet, retrying in 1 second")
 

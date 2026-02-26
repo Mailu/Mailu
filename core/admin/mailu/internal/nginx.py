@@ -104,7 +104,7 @@ def handle_authentication(headers):
             user_email = urllib.parse.unquote(headers["Auth-User"])
             password = urllib.parse.unquote(headers["Auth-Pass"])
             ip = urllib.parse.unquote(headers["Client-Ip"])
-        except:
+        except Exception:
             app.logger.warn(f'Received undecodable user/password from front: {headers.get("Auth-User", "")!r}')
         else:
             try:
@@ -161,7 +161,7 @@ def get_server(protocol, authenticated=False):
     try:
         # test if hostname is already resolved to an ip address
         ipaddress.ip_address(hostname)
-    except:
+    except Exception:
         # hostname is not an ip address - so we need to resolve it
         hostname = system.resolve_hostname(hostname)
     return hostname, port

@@ -43,7 +43,7 @@ for i in range(5):
         if e.smtp_code >= 500 and e.smtp_code <600:
             sys.exit(25)
         sys.exit(2525)
-    except:
+    except Exception:
         sys.exit(2525)
     break
 
@@ -52,7 +52,7 @@ time.sleep(30)
 try:
     imap_server = imaplib.IMAP4_SSL('localhost')
     imap_server.login('user@mailu.io', 'password')
-except:
+except Exception:
     sys.exit(110)
 
 stat, count = imap_server.select('inbox')

@@ -392,6 +392,53 @@ Mailu can serve an `MTA-STS policy`_; To configure it you will need to:
 .. _`1798`: https://github.com/Mailu/Mailu/issues/1798
 .. _`MTA-STS policy`: https://datatracker.ietf.org/doc/html/rfc8461
 
+
+.. _contact_info:
+
+How do I comply with comply with contact requirements of German ISPs?
+`````````````````````````````````````````````````````````````````````
+
+Some (German) ISPs demand directly available contact information, e.g. https://postmaster.t-online.de/index.en.html#t4
+
+This can be achieved by an nginx override, e.g. `overrides/nginx/contact.conf`
+
+.. code-block:: bash
+
+  location ^~ /contact {
+    return 200 '<!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Kontaktdaten für 'DOMAIN'</title>
+      </head>
+      <body>
+        <h1>Kontakt</h1>
+        <h3>Name</h3>
+        Max Mustermann
+        <h3>Anschrift</h3>
+       Musterstraße 42
+       45678 Musterstadt
+      <h3>Telefon</h3>
+      1111111111111
+    </body>
+    </html>
+    ";
+    add_header Content-Type text/html;
+  }
+
+and overriding the website link in `mailu.env`
+
+.. code-block:: bash
+
+  # Website name
+  SITENAME="Kontaktdaten"
+
+  # Linked Website URL
+  WEBSITE=https://<domain>/contact
+
+
+.. _`3957`: https://github.com/Mailu/Mailu/issues/3957
+
 Technical issues
 ----------------
 

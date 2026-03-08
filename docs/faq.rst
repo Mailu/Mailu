@@ -402,7 +402,7 @@ Some (German) ISPs demand directly available contact information, e.g. https://p
 
 This can be achieved by an nginx override, e.g. `overrides/nginx/contact.conf`
 
-.. code-block:: bash
+.. code-block:: nginx
 
   location ^~ /contact {
     return 200 '<!DOCTYPE html>

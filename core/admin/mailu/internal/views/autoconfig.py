@@ -59,7 +59,7 @@ def autoconfig_microsoft():
         xmlRequest = (flask.request.data).decode("utf-8")
         xml = xmltodict.parse(xmlRequest[xmlRequest.find('<'):xmlRequest.rfind('>')+1])
         schema = xml['Autodiscover']['Request']['AcceptableResponseSchema']
-        if schema != 'http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a':
+        if not schema.startswith('http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006'):
             return flask.abort(404)
         email = xml['Autodiscover']['Request']['EMailAddress']
         xml = f'''<?xml version="1.0" encoding="utf-8" ?>

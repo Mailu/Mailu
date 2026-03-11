@@ -26,7 +26,7 @@
 </thead>
 <tbody>
   {%- for alias in domain.aliases %}
-  <tr>
+  <tr {% if alias.owner_email %}class="table-secondary" title="{% trans %}Anonymous Alias{% endtrans %}"{% endif %}>
     <td>
       <a href="{{ url_for('.alias_edit', alias=alias.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil-alt"></i></a>&nbsp;
       <a href="{{ url_for('.alias_delete', alias=alias.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>

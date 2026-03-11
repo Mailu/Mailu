@@ -1,0 +1,27 @@
+{%- extends "base.html" %}
+
+{%- block title %}
+{% trans %}Grant Anonymous Email Access{% endtrans %}
+{%- endblock %}
+
+{%- block subtitle %}
+{{ domain.name }}
+{%- endblock %}
+
+{%- block main_action %}
+<a class="btn btn-secondary float-right" href="{{ url_for('.domain_access_list', domain_name=domain.name) }}">{% trans %}Back to list{% endtrans %}</a>
+{%- endblock %}
+
+{%- block content %}
+<div class="row">
+  <div class="col-lg-6 col-xs-12">
+    {%- call macros.card(title=_('Grant access')) %}
+      <form class="form" method="POST" role="form">
+        {{ form.hidden_tag() }}
+        {{ macros.form_field(form.user) }}
+        {{ macros.form_field(form.submit) }}
+      </form>
+    {%- endcall %}
+  </div>
+</div>
+{%- endblock %}

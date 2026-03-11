@@ -1,7 +1,9 @@
+import flask
+import flask_login
 from flask_restx import Resource, fields, marshal
 from . import api, response_fields
 from .. import common
-from ... import models
+from ... import models, utils
 import validators
 
 db = models.db
@@ -11,13 +13,18 @@ alias = api.namespace('alias', description='Alias operations')
 alias_fields_update = alias.model('AliasUpdate', {
     'comment': fields.String(description='a comment'),
     'destination': fields.List(fields.String(description='alias email address', example='user@example.com')),
-    'wildcard': fields.Boolean(description='enable SQL Like wildcard syntax')
+    'wildcard': fields.Boolean(description='enable SQL Like wildcard syntax'),
+    'hostname': fields.String(description='optional website hostname'),
+    'disabled': fields.Boolean(description='whether the alias is disabled')
 })
 
 alias_fields = alias.inherit('Alias',alias_fields_update, {
   'email': fields.String(description='the alias email address', example='user@example.com', required=True),
   'destination': fields.List(fields.String(description='destination email address', example='user@example.com', required=True)),
-
+  'hostname': fields.String(description='optional website hostname'),
+  'owner_email': fields.String(description='user email that owns this anonymous alias'),
+  'disabled': fields.Boolean(description='whether the alias is disabled'),
+  'created_at': fields.Date(description='creation date')
 })
 
 
@@ -163,3 +170,79 @@ class AliasWithDest(Resource):
           return { 'code': 404, 'message': f'No alias can be found for domain {domain}'}, 404
         else:
           return marshal(aliases_found, alias_fields), 200
+
+@alias.route('/me')
+class AnonAliases(Resource):
+    @alias.doc('list_anonaliases')
+    @alias.marshal_with(alias_fields, as_list=True, skip_none=True)
+    @alias.doc(security='Bearer')
+    @common.api_token_authorization
+    def get(self):
+        """List anonymous aliases created by the current user"""
+        user_email = flask.g.user.email if hasattr(flask.g, 'user') else flask_login.current_user.email
+        return models.Alias.query.filter_by(owner_email=user_email).all()
+
+
+@alias.route('/me/<string:alias>')
+class AnonAlias(Resource):
+    @alias.doc('delete_anonalias')
+    @alias.response(200, 'Success', response_fields)
+    @alias.response(400, 'Input validation exception', response_fields)
+    @alias.doc(security='Bearer')
+    @common.api_token_authorization
+    def delete(self, alias):
+        """Permanently delete the specified alias"""
+        if not validators.email(alias):
+            return {'code': 400, 'message': f'Provided alias (email address) {alias} is not a valid email address'}, 400
+        user_email = flask.g.user.email if hasattr(flask.g, 'user') else flask_login.current_user.email
+        alias_found = models.Alias.query.filter_by(email=alias, owner_email=user_email).first()
+        if not alias_found:
+            return {'code': 404, 'message': f'Alias {alias} cannot be found'}, 404
+        db.session.delete(alias_found)
+        db.session.commit()
+        return {'code': 200, 'message': f'Alias {alias} has been deleted'}, 200
+
+    @alias.expect(alias_fields_update)
+    @alias.doc('update_anonalias')
+    @alias.response(200, 'Success', response_fields)
+    @common.api_token_authorization
+    def patch(self, alias):
+        """Modify an alias (toggle disabled, update note/hostname/destination)"""
+        data = api.payload or {}
+        if not validators.email(alias):
+            return {'code': 400, 'message': f'Provided alias (email address) {alias} is not a valid email address'}, 400
+        user_email = flask.g.user.email if hasattr(flask.g, 'user') else flask_login.current_user.email
+        alias_found = models.Alias.query.filter_by(email=alias, owner_email=user_email).first()
+        if not alias_found:
+            return {'code': 404, 'message': f'Alias {alias} cannot be found'}, 404
+        
+        if 'comment' in data:
+            alias_found.comment = data['comment']
+        if 'destination' in data:
+            for dest in data['destination']:
+                if not validators.email(dest):
+                    return {'code': 400, 'message': f'Provided destination email address {dest} is not a valid email address'}, 400
+                if not models.User.query.get(dest):
+                    return {'code': 404, 'message': f'Provided destination email address {dest} does not exist'}, 404
+            alias_found.destination = data['destination']
+        if 'wildcard' in data:
+            alias_found.wildcard = data['wildcard']
+        if 'hostname' in data:
+            alias_found.hostname = data['hostname'] or ""
+        if 'disabled' in data:
+            alias_found.disabled = bool(data['disabled'])
+        db.session.add(alias_found)
+        db.session.commit()
+        return {'code': 200, 'message': f'Alias {alias} has been updated'}
+
+
+@alias.route('/domains/available')
+class AvailableDomains(Resource):
+    @alias.doc('available_domains')
+    @alias.response(200, 'Success', fields.List(fields.String))
+    @alias.response(401, 'Authorization header missing', response_fields)
+    @alias.doc(security='Bearer')
+    @common.api_token_authorization
+    def get(self):
+        """Return all available domains"""
+        return [d.name for d in models.Domain.query.all()], 200

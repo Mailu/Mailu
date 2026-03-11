@@ -48,6 +48,8 @@ DEFAULT_CONFIG = {
     'AUTH_RATELIMIT_USER': '50/day',
     'AUTH_RATELIMIT_EXEMPTION': '',
     'AUTH_RATELIMIT_EXEMPTION_LENGTH': 86400,
+    # Anonymous Email Service (anonmail) defaults
+    'ANONMAIL_MAX_RETRIES': 10,
     'DISABLE_STATISTICS': False,
     # Mail settings
     'DMARC_RUA': None,

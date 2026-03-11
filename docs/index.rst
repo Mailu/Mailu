@@ -68,6 +68,7 @@ the version of Mailu that you are running.
     maintain
     webadministration
     antispam
+    anonmail
     cli
     api
 

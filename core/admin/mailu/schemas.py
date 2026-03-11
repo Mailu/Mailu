@@ -1113,6 +1113,9 @@ class DomainSchema(BaseSchema):
         include_relationships = True
         exclude = ['users', 'managers', 'aliases']
 
+        # Anonymous Email Service domain flags
+        anonmail_enabled = fields.Boolean(load_default=False, dump_default=False)
+
         include_by_context = {
             ('dns',): {'dkim_publickey', 'dns_mx', 'dns_spf', 'dns_dkim', 'dns_dmarc'},
         }
@@ -1212,6 +1215,12 @@ class AliasSchema(BaseSchema):
 
     email = fields.String(required=True)
     destination = CommaSeparatedListField()
+
+    # Anonymous Email Service metadata
+    note = fields.String(allow_none=True)
+    hostname = fields.String(allow_none=True)
+    owner_email = fields.String(allow_none=True, dump_only=True)
+    disabled = fields.Boolean(load_default=False, dump_default=False)
 
 
 @mapped

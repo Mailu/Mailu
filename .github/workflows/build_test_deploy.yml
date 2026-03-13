@@ -83,8 +83,8 @@ env:
   HCL_FILE: ./tests/build-ci.hcl
 
 jobs:
-# This job calculates what images must be build. It reads the build.hcl file and then outputs all targets (images) in it.
-# This is used by the next build job.
+  # This job calculates what images must be build. It reads the build.hcl file and then outputs all targets (images) in it.
+  # This is used by the following build jobs.
   targets:
     name: create targets
     runs-on: ubuntu-latest
@@ -115,6 +115,13 @@ jobs:
      packages: write
     steps:
       - uses: actions/checkout@v4
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
+        with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
+          call: check
       - name: Retrieve global variables
         shell: bash
         run: |
@@ -190,6 +197,13 @@ jobs:
      packages: write
     steps:
       - uses: actions/checkout@v4
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
+        with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
+          call: check
       - name: Retrieve global variables
         shell: bash
         run: |
@@ -267,6 +281,13 @@ jobs:
      packages: write
     steps:
       - uses: actions/checkout@v4
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
+        with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
+          call: check
       - name: Retrieve global variables
         shell: bash
         run: |
@@ -345,6 +366,13 @@ jobs:
      packages: write
     steps:
       - uses: actions/checkout@v4
+      - id: get_path
+        run: |
+          echo dockerfile="$(docker buildx bake -f ${{env.HCL_FILE}} --print ${{ matrix.target }} | jq -r '.target[] | "\(.context)/\(.dockerfile)"')" >> $GITHUB_OUTPUT
+      - uses: docker/build-push-action@v6
+        with:
+          file: ${{ steps.get_path.outputs.dockerfile }}
+          call: check
       - name: Retrieve global variables
         shell: bash
         run: |

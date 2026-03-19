@@ -52,6 +52,7 @@ DEFAULT_CONFIG = {
     # Mail settings
     'DMARC_RUA': None,
     'DMARC_RUF': None,
+    'DMARC_SEND_REPORTS': False,
     'WELCOME': False,
     'WELCOME_SUBJECT': 'Dummy welcome topic',
     'WELCOME_BODY': 'Dummy welcome body',

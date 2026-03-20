@@ -133,6 +133,58 @@ in mailu.env:
 
 Using the above configuration, Traefik will proxy all the traffic related to Mailu's FQDNs without requiring duplicate certificates.
 
+If you want to have separate subdomains for e.g. small web apps, and want to use letsencrypt to provide certificates
+for both, you can add the following to the commands section of `reverse-proxy`
+
+.. code-block:: yaml
+
+      - "--certificatesresolvers.letsencrypt.acme.email=<contact email>"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=false"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+
+It is important to use the TLS challenge here and disable HTTP challenge so that internal letsencrypt handling and traefik
+don't interfere.
+
+You should also add a dedicated network for traefik to be used by the 'external' subdomains.
+
+.. code-block:: yaml
+
+    networks:
+      - default
+      - webmail
+      - traefik-proxy
+
+The external `docker-compose.yaml` could look like this:
+
+.. code-block:: yaml
+
+    services:
+      subdomain:
+        image: nginx:alpine
+        restart: unless-stopped
+        volumes:
+          - ./resources/frontend:/usr/share/nginx/html:ro
+        labels:
+          - "traefik.enable=true"
+          - "traefik.http.routers.subdomain.rule=Host(`subdomain.domain.com`)"
+          - "traefik.http.routers.subdomain.entrypoints=websecure"
+          - "traefik.http.routers.subdomain.tls=true"
+          - "traefik.http.routers.subdomain.tls.certresolver=letsencrypt"
+          - "traefik.http.services.subdomain.loadbalancer.server.port=80"
+          # HTTP → HTTPS redirect
+          - "traefik.http.routers.subdomain-http.rule=Host(`subdomain.domain.com`)"
+          - "traefik.http.routers.subdomain-http.entrypoints=web"
+          - "traefik.http.routers.subdomain-http.middlewares=redirect-https"
+          - "traefik.http.middlewares.redirect-https.redirectscheme.scheme=https"
+    
+        networks:
+          - traefik-proxy
+    
+    networks:
+      traefik-proxy:
+        external: true
+
 
 Traefik as reverse proxy (different host)
 -----------------------------------------

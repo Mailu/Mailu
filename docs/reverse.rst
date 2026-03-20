@@ -293,3 +293,153 @@ In the mailu.env file add the following:
 
 
 Using the above configuration, Traefik will proxy all the traffic related to Mailu's FQDNs without requiring duplicate certificates.
+
+
+.. _caddy_proxy:
+
+Alternative: Using Caddy as reverse proxy
+-----------------------------------------
+
+This setup is suitable for when you want to serve Wordpress or other web-facing applications (on port 80 and 443)
+on your domains from the same machine as Mailu.
+
+Using Caddy like this will only reverse-proxy the web-facing applications,
+leaving MailU to serve the ports related to sendmail and its related services (25, 110, 143, 465, 587, 993, 995, 4190).
+
+.. note::
+  In the following example, I assume that MailU is set up in `/opt/mailu` and Wordpress in `/opt/wordpress`.
+
+In your docker-compose.yml, remove 80 and 443 from the `ports` section of the `front` container.
+
+Create a standalone docker-compose file for Caddy, in `/opt/caddy` with something similar to the following:
+
+.. code-block:: yaml
+
+  services:
+    caddy:
+      image: caddy:2
+      restart: unless-stopped
+      volumes:
+        - "/opt/caddy/conf:/etc/caddy"
+        - "/opt/caddy/data:/data"
+        - /opt/mailu/certs/letsencrypt:/certs:ro
+      ports:
+        - "80:80"
+        - "443:443"
+        - "443:443/udp"
+      healthcheck:
+        test:
+          - "CMD"
+          - "sh"
+          - "-c"
+          - >
+            echo -e 'GET /health HTTP/1.1\r\nHost:
+            localhost\r\nConnection: close\r\n\r\n' |
+            nc localhost 80 | grep -q 'HTTP/1.1 200 OK'
+        interval: 30s
+        timeout: 5s
+        retries: 3
+      dns:
+        - 192.168.203.254
+      networks:
+        - mailu_default
+        - wordpress_default
+  networks:
+    mailu_default:
+      external: true
+    wordpress_default:
+      external: true
+
+The volumes section is important, as it mounts the Let's Encrypt certificates into the container (readonly), so
+that Caddy can use them to serve the SSL certificates. Also note that the caddy container is on the same network
+as the front and wordpress containers, so that it can reach them.
+
+In `/opt/caddy/conf/`, create a file called `Caddyfile` with the following contents:
+
+.. code-block:: caddy
+
+
+  {
+    auto_https disable_redirects
+  }
+
+  (healthcheck) {
+    handle /health {
+      respond "OK"
+    }
+  }
+  (acme) {
+    handle /.well-known/acme-challenge/* {
+      reverse_proxy front:80
+    }
+  }
+  (mta-sts) {
+    handle /.well-known/mta-sts.txt {
+      respond <<MTA_STS
+        version: STSv1
+        mode: enforce
+        max_age: 604800
+        mx: mail.example.com
+
+        MTA_STS 200
+    }
+  }
+  (tls_certs) {
+    tls /certs/live/mailu/fullchain.pem /certs/live/mailu/privkey.pem
+    tls /certs/live/mailu-ecdsa/fullchain.pem /certs/live/mailu-ecdsa/privkey.pem
+  }
+
+  (proxy_to) {
+    import tls_certs
+    import acme
+    import mta-sts
+    reverse_proxy {args[0]} {
+      header_up X-Forwarded-For {remote_host}:{remote_port}
+      header_up X-Real-IP {remote_host}
+      header_up X-Real-Port {remote_port}
+    }
+  }
+
+  # Handle ACME challenge requests and MTA-STS first
+  http:// {
+    import healthcheck
+    import acme
+    import mta-sts
+    # Redirect all other HTTP traffic to HTTPS
+    handle {
+      redir https://{host}{uri}
+    }
+  }
+
+  www.example.com, example.com {
+    import proxy_to wordpress:80
+  }
+
+  mail.example.com, mta-sts.example.com {
+    handle /*.mobileconfig {
+      reverse_proxy front:80 {
+        header_down Content-Type application/x-apple-aspen-config
+      }
+    }
+    import proxy_to front:80
+  }
+
+This Caddy configuration handles ACME challenge and MTA-STS queries before applying HTTP to HTTPS redirection.
+
+Note that this setup leaves the responsibility of managing and refreshing the Let's Encrypt certificates to Mailu,
+and Caddy will only be responsible for serving the SSL certificates given to it.
+
+If you are serving multiple web-facing applications using different names, you can add those names
+to the `Caddyfile` as well, reverse-proxying them to the correct container and port for each application,
+and make sure that the container is accessible from the Caddy container by adding its network to the
+networks section of the Caddy container's Docker Compose file.
+
+In addition, make sure to add the following to the `mailu.env` file:
+
+.. code-block:: docker
+
+  REAL_IP_FROM=192.168.203.0/24
+  REAL_IP_HEADER=X-Forwarded-For
+
+This ensures that the X-Forwarded-For header is used to determine the client IP address, instead of the
+local IP address of the Caddy container (and will interact properly with the builtin rate-limiting).

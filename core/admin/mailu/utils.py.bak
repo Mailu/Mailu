@@ -35,8 +35,6 @@ from itsdangerous.encoding import want_bytes
 from werkzeug.datastructures import CallbackDict
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from mailu import limiter, oidc
-
 # Login configuration
 login = flask_login.LoginManager()
 login.login_view = "sso.login"
@@ -128,8 +126,6 @@ class PrefixMiddleware(object):
 
 proxy = PrefixMiddleware()
 
-# OIDC client
-oic_client = oidc.OicClient()
 
 # Data migrate
 migrate = flask_migrate.Migrate()
@@ -453,9 +449,8 @@ class MailuSessionExtension:
 
         return count
 
-    # [OIDC] Prune sessions by user id
     @staticmethod
-    def prune_sessions(uid=None, keep=None, app=None, sub=None):
+    def prune_sessions(uid=None, keep=None, app=None):
         """ Remove sessions
             uid: remove all sessions (NONE) or sessions belonging to a specific user
             keep: keep listed sessions
@@ -469,11 +464,8 @@ class MailuSessionExtension:
         count = 0
         for key in app.session_store.list(prefix):
             if key not in keep and not key.startswith(b'token-'):
-                # [OIDC] Prune sessions by sub
-                session = MailuSession(key, app) if sub is not None else None
-                if sub is None or ('oidc_sub' in session and session['oidc_sub'] == sub):
-                    app.session_store.delete(key)
-                    count += 1
+                app.session_store.delete(key)
+                count += 1
 
         return count
 

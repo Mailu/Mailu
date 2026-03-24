@@ -1,0 +1,1 @@
+"""Anonmail tests package."""

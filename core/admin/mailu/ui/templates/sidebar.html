@@ -45,6 +45,12 @@
           <p>{% trans %}Authentication tokens{% endtrans %}</p>
         </a>
       </li>
+      <li class="nav-item" role="none">
+        <a href="{{ url_for('.anonalias_list') }}" class="nav-link" role="menuitem">
+          <i class="nav-icon fas fa-user-secret"></i>
+          <p>{% trans %}Anonymous Aliases{% endtrans %}</p>
+        </a>
+      </li>
       {%- if current_user.is_authenticated %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.client') }}" class="nav-link" role="menuitem">

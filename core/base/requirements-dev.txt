@@ -35,8 +35,10 @@ SQLAlchemy
 srslib
 tabulate
 tenacity
+tld
 validators
 Werkzeug
+wonderwords
 WTForms
 WTForms-Components
 xmltodict

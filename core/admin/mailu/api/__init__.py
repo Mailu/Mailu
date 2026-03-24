@@ -1,6 +1,7 @@
 from flask import redirect, url_for, Blueprint
 from flask_restx import apidoc
 from . import v1 as APIv1
+from . import simplelogin
 
 def register(app, web_api_root):
 
@@ -9,6 +10,8 @@ def register(app, web_api_root):
     apidoc.apidoc.url_prefix = f'{web_api_root}/v{int(APIv1.VERSION)}'
     APIv1.api_token = app.config['API_TOKEN']
     if app.config['API_TOKEN'] != '':
+        # Register SimpleLogin-compatible endpoint (non-versioned for Bitwarden)
+        app.register_blueprint(simplelogin.blueprint, url_prefix=f'{web_api_root}')
         app.register_blueprint(APIv1.blueprint, url_prefix=f'{web_api_root}/v{int(APIv1.VERSION)}')
 
         # add redirect to current api version

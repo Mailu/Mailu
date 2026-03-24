@@ -1,0 +1,65 @@
+{%- extends "base.html" %}
+
+{%- block title %}
+{% trans %}Anonymous Aliases{% endtrans %}
+{%- endblock %}
+
+{%- block subtitle %}
+{% trans %}Anonymous Email Service (Anonymous Aliases){% endtrans %}
+{%- endblock %}
+
+{%- block main_action %}
+{% if has_access %}
+<a class="btn btn-primary float-right" href="{{ url_for('.anonalias_create') }}">{% trans %}Generate alias{% endtrans %}</a>
+{% endif %}
+{%- endblock %}
+
+{%- block content %}
+{% if not has_access %}
+<div class="alert alert-info">
+  {% trans %}You do not have access to any domains for creating anonymous aliases. Please contact your administrator to grant you access.{% endtrans %}
+</div>
+{% endif %}
+{%- call macros.table(order='[[6,"desc"]]') %}
+<thead>
+  <tr>
+    <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}Alias{% endtrans %}</th>
+    <th>{% trans %}Domain{% endtrans %}</th>
+    <th>{% trans %}Destination{% endtrans %}</th>
+    <th>{% trans %}Note{% endtrans %}</th>
+    <th>{% trans %}Hostname{% endtrans %}</th>
+    <th>{% trans %}Created{% endtrans %}</th>
+    <th>{% trans %}Status{% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
+  {%- for alias in aliases %}
+  <tr{% if alias.disabled %} class="text-muted"{% endif %}>
+    <td>
+      {% if alias.disabled %}
+      <a href="{{ url_for('.anonalias_enable', alias_email=alias.email) }}" title="{% trans %}Enable{% endtrans %}"><i class="fa fa-check"></i></a>&nbsp;
+      {% else %}
+      <a href="{{ url_for('.anonalias_disable', alias_email=alias.email) }}" title="{% trans %}Disable{% endtrans %}"><i class="fa fa-ban"></i></a>&nbsp;
+      {% endif %}
+      <a href="#" onclick="navigator.clipboard.writeText('{{ alias.email }}'); return false;" title="{% trans %}Copy{% endtrans %}"><i class="fa fa-copy"></i></a>&nbsp;
+      <a href="{{ url_for('.anonalias_delete', alias_email=alias.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+    </td>
+    <td>{{ alias.email }}</td>
+    <td>{{ alias.email.split('@')[1] }}</td>
+    <td>{{ alias.destination|join(', ') or '-' }}</td>
+    <td>{{ alias.comment or '' }}</td>
+    <td>{{ alias.hostname or '' }}</td>
+    <td data-sort="{{ alias.created_at or '0000-00-00' }}">{{ alias.created_at | format_date }}</td>
+    <td>
+      {% if not alias.disabled %}
+        <span class="badge bg-success">{% trans %}Active{% endtrans %}</span>
+      {% else %}
+        <span class="badge bg-secondary">{% trans %}Disabled{% endtrans %}</span>
+      {% endif %}
+    </td>
+  </tr>
+  {%- endfor %}
+</tbody>
+{%- endcall %}
+{%- endblock %}

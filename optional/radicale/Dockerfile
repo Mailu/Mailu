@@ -15,4 +15,4 @@ HEALTHCHECK CMD ["/bin/sh", "-c", "ps ax | grep [/]radicale.conf"]
 
 VOLUME ["/data"]
 
-CMD radicale -S -C /radicale.conf
+CMD ["radicale", "-S", "-C", "/radicale.conf"]

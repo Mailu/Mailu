@@ -1,8 +1,11 @@
 # Two-Factor Authentication (TOTP) — Planning Document
 
-**Status:** Planning  
+> **Note for reviewers:** This planning document is included for review context only.
+> It should be removed before merging, or moved to the wiki/issue discussion if preferred.
+
+**Status:** Implemented  
 **Date:** 2026-04-02  
-**Branch:** TBD (e.g. `feat-2fa-totp`)  
+**Branch:** `feat-2fa-totp`  
 **Upstream:** Mailu has zero 2FA support today  
 **Upstream Issues:** [#783](https://github.com/Mailu/Mailu/issues/783) (Redesign auth systems), [#2222](https://github.com/Mailu/Mailu/issues/2222) (2FA/SSO considerations)
 

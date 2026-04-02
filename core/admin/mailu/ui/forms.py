@@ -211,6 +211,16 @@ class FetchForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Submit'))
 
 
+class UserTOTPSetupForm(flask_wtf.FlaskForm):
+    code = fields.StringField(_('Verification code'), [validators.DataRequired(), validators.Length(min=6, max=6)], render_kw={'autocomplete': 'one-time-code', 'inputmode': 'numeric', 'pattern': '[0-9]*', 'maxlength': '6'}|AUTOFOCUS)
+    submit = fields.SubmitField(_('Enable two-factor authentication'))
+
+class UserTOTPDisableForm(flask_wtf.FlaskForm):
+    password = fields.PasswordField(_('Current password'), [validators.DataRequired()])
+    code = fields.StringField(_('Authentication code'), [validators.DataRequired(), validators.Length(min=6, max=6)], render_kw={'autocomplete': 'one-time-code', 'inputmode': 'numeric', 'pattern': '[0-9]*', 'maxlength': '6'})
+    submit = fields.SubmitField(_('Disable two-factor authentication'))
+
+
 class AnnouncementForm(flask_wtf.FlaskForm):
     announcement_subject = fields.StringField(_('Announcement subject'),
         [validators.DataRequired()], render_kw=AUTOFOCUS)

@@ -6,6 +6,10 @@ import flask
 import flask_login
 import wtforms
 import wtforms_components
+import pyotp
+import segno
+import io
+import base64
 
 @ui.route('/user/list/<domain_name>', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
@@ -159,6 +163,77 @@ def user_reply(user_email):
                 flask.url_for('.user_list', domain_name=user.domain.name))
     return flask.render_template('user/reply.html', form=form, user=user)
 
+
+@ui.route('/user/2fa', methods=['GET', 'POST'], defaults={'user_email': None})
+@ui.route('/user/2fa/<path:user_email>', methods=['GET', 'POST'])
+@access.owner(models.User, 'user_email')
+def user_2fa_setup(user_email):
+    user_email_or_current = user_email or flask_login.current_user.email
+    user = models.User.query.get(user_email_or_current) or flask.abort(404)
+
+    # if 2FA already enabled, show disable form
+    if user.totp_enabled:
+        form = forms.UserTOTPDisableForm()
+        if form.validate_on_submit():
+            if models.User.login(user.email, form.password.data) and user.verify_totp(form.code.data.strip()):
+                user.disable_2fa()
+                models.db.session.commit()
+                flask.flash(_('Two-factor authentication disabled'))
+                return flask.redirect(flask.url_for('.user_settings', user_email=user_email))
+            else:
+                flask.flash(_('Invalid password or authentication code'), 'error')
+        return flask.render_template('user/2fa_setup.html', form=form, user=user, enabled=True)
+
+    # setup flow: generate or retrieve pending secret
+    setup_form = forms.UserTOTPSetupForm()
+    if 'totp_setup_secret' not in flask.session:
+        flask.session['totp_setup_secret'] = pyotp.random_base32()
+    secret = flask.session['totp_setup_secret']
+
+    # generate QR code
+    provisioning_uri = pyotp.TOTP(secret).provisioning_uri(
+        name=user.email,
+        issuer_name=app.config.get('SITENAME', 'Mailu')
+    )
+    qr = segno.make(provisioning_uri)
+    buf = io.BytesIO()
+    qr.save(buf, kind='svg', scale=4)
+    qr_data = buf.getvalue().decode()
+
+    if setup_form.validate_on_submit():
+        code = setup_form.code.data.strip()
+        if pyotp.TOTP(secret).verify(code, valid_window=1):
+            # save encrypted secret and enable 2FA
+            user.set_totp_secret(secret)
+            user.totp_enabled = True
+            # generate backup codes
+            for old_code in list(user.backup_codes):
+                models.db.session.delete(old_code)
+            backup_codes = models.BackupCode.generate_codes(user)
+            models.db.session.commit()
+            flask.session.pop('totp_setup_secret', None)
+            response = flask.make_response(
+                flask.render_template('user/2fa_backup_codes.html', user=user, backup_codes=backup_codes))
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            return response
+        else:
+            flask.flash(_('Invalid verification code, please try again'), 'error')
+
+    return flask.render_template('user/2fa_setup.html', form=setup_form, user=user,
+        enabled=False, qr_data=qr_data, secret=secret)
+
+@ui.route('/user/2fa/reset/<path:user_email>', methods=['POST'])
+@access.domain_admin(models.User, 'user_email')
+def user_2fa_reset(user_email):
+    """ Admin-initiated 2FA reset: disables TOTP and deletes all backup codes. """
+    user = models.User.query.get(user_email) or flask.abort(404)
+    if user.totp_enabled:
+        user.disable_2fa()
+        models.db.session.commit()
+        flask.current_app.logger.info(f'2FA reset for {user} by {flask_login.current_user}')
+        flask.flash(_('Two-factor authentication has been reset for %s') % user)
+    return flask.redirect(flask.url_for('.user_edit', user_email=user_email))
 
 @ui.route('/user/signup', methods=['GET', 'POST'])
 @ui.route('/user/signup/<domain_name>', methods=['GET', 'POST'])

@@ -20,6 +20,10 @@ import smtplib
 import idna
 import dns.resolver
 import dns.exception
+import base64
+import hashlib
+
+from cryptography.fernet import Fernet, InvalidToken
 
 from flask import current_app as app
 from sqlalchemy.ext import declarative
@@ -589,6 +593,10 @@ class User(Base, Email):
     spam_threshold = db.Column(db.Integer, nullable=False, default=lambda:int(app.config.get("DEFAULT_SPAM_THRESHOLD", 80)))
     change_pw_next_login = db.Column(db.Boolean, nullable=False, default=False)
 
+    # TOTP two-factor authentication
+    totp_secret = db.Column(db.String(255), nullable=True, default=None)
+    totp_enabled = db.Column(db.Boolean, nullable=False, default=False)
+
     # Flask-login attributes
     is_authenticated = True
     is_active = True
@@ -697,6 +705,43 @@ set() containing the sessions to keep
         self.password = password if raw else User.get_password_context().hash(password)
         if keep_sessions is not True and self.email is not None:
             utils.MailuSessionExtension.prune_sessions(uid=self.email, keep=keep_sessions)
+
+    @staticmethod
+    def _get_fernet():
+        """ derive a Fernet key from SECRET_KEY for encrypting TOTP secrets """
+        key = hashlib.sha256(app.config['SECRET_KEY'].encode()).digest()
+        return Fernet(base64.urlsafe_b64encode(key))
+
+    def get_totp_secret(self):
+        """ decrypt and return the TOTP shared secret, or None """
+        if not self.totp_secret:
+            return None
+        try:
+            return User._get_fernet().decrypt(self.totp_secret.encode()).decode()
+        except InvalidToken:
+            return None
+
+    def set_totp_secret(self, secret):
+        """ encrypt and store a TOTP shared secret """
+        if secret is None:
+            self.totp_secret = None
+        else:
+            self.totp_secret = User._get_fernet().encrypt(secret.encode()).decode()
+
+    def verify_totp(self, code):
+        """ verify a 6-digit TOTP code against the stored secret """
+        import pyotp
+        secret = self.get_totp_secret()
+        if not secret:
+            return False
+        return pyotp.TOTP(secret).verify(code, valid_window=1)
+
+    def disable_2fa(self):
+        """ disable TOTP 2FA and remove all backup codes """
+        self.totp_secret = None
+        self.totp_enabled = False
+        for code in list(self.backup_codes):
+            db.session.delete(code)
 
     def get_managed_domains(self):
         """ return list of domains this user can manage """
@@ -823,6 +868,40 @@ class Token(Base):
 
     def __repr__(self):
         return f'<Token #{self.id}: {self.comment or self.ip or self.password}>'
+
+
+class BackupCode(Base):
+    """ A single-use backup code for TOTP 2FA recovery.
+    """
+
+    __tablename__ = 'backup_code'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_email = db.Column(db.String(255), db.ForeignKey(User.email),
+        nullable=False)
+    user = db.relationship(User,
+        backref=db.backref('backup_codes', cascade='all, delete-orphan'))
+    code_hash = db.Column(db.String(255), nullable=False)
+
+    def check_code(self, code):
+        """ verify a backup code against the stored hash """
+        return passlib.hash.pbkdf2_sha256.verify(code, self.code_hash)
+
+    @staticmethod
+    def generate_codes(user, count=10):
+        """ generate backup codes, store hashed, return plaintext list """
+        import secrets
+        codes = []
+        for _ in range(count):
+            raw = secrets.token_hex(4)
+            code = f'{raw[:4]}-{raw[4:]}'
+            backup = BackupCode(
+                user_email=user.email,
+                code_hash=passlib.hash.pbkdf2_sha256.using(rounds=1).hash(code)
+            )
+            db.session.add(backup)
+            codes.append(code)
+        return codes
 
 
 class Fetch(Base):

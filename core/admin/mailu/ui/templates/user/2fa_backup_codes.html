@@ -1,0 +1,26 @@
+{%- extends "base.html" %}
+
+{%- block title %}
+{% trans %}Backup recovery codes{% endtrans %}
+{%- endblock %}
+
+{%- block subtitle %}
+{{ user }}
+{%- endblock %}
+
+{%- block content %}
+{%- call macros.card(title=_("Two-factor authentication enabled"), theme="success") %}
+<p>{% trans %}Two-factor authentication has been enabled on your account.{% endtrans %}</p>
+<p><strong>{% trans %}Save these backup codes in a safe place. Each code can only be used once. They will not be shown again.{% endtrans %}</strong></p>
+<div class="bg-light p-3 rounded my-3">
+  <ul class="list-unstyled text-monospace text-center mb-0" style="font-size: 1.2em; line-height: 2;">
+    {%- for code in backup_codes %}
+    <li>{{ code }}</li>
+    {%- endfor %}
+  </ul>
+</div>
+<div class="text-center">
+  <a href="{{ url_for('.user_settings') }}" class="btn btn-primary">{% trans %}I have saved my codes{% endtrans %}</a>
+</div>
+{%- endcall %}
+{%- endblock %}

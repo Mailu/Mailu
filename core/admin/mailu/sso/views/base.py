@@ -9,6 +9,7 @@ import flask
 import flask_login
 import secrets
 import ipaddress
+import time
 from urllib.parse import urlparse, urljoin, unquote
 
 @sso.route('/login', methods=['GET', 'POST'])
@@ -52,6 +53,15 @@ def login():
                 return flask.render_template('login.html', form=form, fields=fields)
         user = models.User.login(username, form.pw.data)
         if user:
+            # check if 2FA is enabled — defer full login until TOTP verified
+            if user.totp_enabled:
+                flask.session.regenerate()
+                flask.session['pending_2fa_user'] = user.email
+                flask.session['pending_2fa_destination'] = destination
+                flask.session['pending_2fa_time'] = time.time()
+                flask.session['pending_2fa_pwned'] = form.pwned.data
+                flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: success: password, pending 2FA')
+                return flask.redirect(flask.url_for('sso.login_2fa'))
             flask.session.regenerate()
             flask_login.login_user(user)
             if user.change_pw_next_login:
@@ -68,6 +78,77 @@ def login():
             flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: failed: badauth: {utils.truncated_pw_hash(form.pw.data)}')
             flask.flash(_('Wrong e-mail or password'), 'error')
     return flask.render_template('login.html', form=form, fields=fields)
+
+@sso.route('/2fa', methods=['GET', 'POST'])
+def login_2fa():
+    """ Verify TOTP code or backup code after successful password authentication. """
+    client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
+    client_port = flask.request.headers.get('X-Real-Port', None)
+
+    # validate pending 2FA session
+    pending_email = flask.session.get('pending_2fa_user')
+    pending_time = flask.session.get('pending_2fa_time', 0)
+    if not pending_email or (time.time() - pending_time) > 300:
+        flask.session.pop('pending_2fa_user', None)
+        flask.session.pop('pending_2fa_destination', None)
+        flask.session.pop('pending_2fa_time', None)
+        flask.session.pop('pending_2fa_pwned', None)
+        flask.session.pop('totp_setup_secret', None)
+        flask.flash(_('Session expired, please sign in again'), 'error')
+        return flask.redirect(flask.url_for('sso.login'))
+
+    user = models.User.query.get(pending_email)
+    if not user or not user.enabled:
+        flask.session.pop('pending_2fa_user', None)
+        return flask.redirect(flask.url_for('sso.login'))
+
+    # rate limiting on 2FA attempts (reuse existing limiter)
+    device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
+    if utils.limiter.should_rate_limit_ip(client_ip):
+        flask.flash(_('Too many attempts from your IP (rate-limit)'), 'error')
+        return flask.render_template('2fa_verify.html', form=forms.TOTPVerifyForm())
+
+    form = forms.TOTPVerifyForm()
+
+    if form.validate_on_submit():
+        code = form.code.data.strip().replace('-', '')
+        verified = False
+
+        if form.submitCode.data:
+            # TOTP code verification
+            verified = user.verify_totp(code)
+        elif form.submitBackup.data:
+            # backup code verification — constant-time loop (no early break)
+            matched_backup = None
+            for backup in user.backup_codes:
+                if backup.check_code(code):
+                    matched_backup = backup
+            if matched_backup:
+                models.db.session.delete(matched_backup)
+                verified = True
+                flask.current_app.logger.info(f'2FA backup code used for: {pending_email} from: {client_ip}/{client_port}')
+
+        if verified:
+            destination = flask.session.pop('pending_2fa_destination', app.config['WEB_ADMIN'])
+            pwned_data = flask.session.pop('pending_2fa_pwned', -1)
+            flask.session.pop('pending_2fa_user', None)
+            flask.session.pop('pending_2fa_time', None)
+            flask.session.regenerate()
+            flask_login.login_user(user)
+            if user.change_pw_next_login:
+                flask.session['redirect_to'] = destination
+                destination = flask.url_for('sso.pw_change')
+            response = flask.redirect(destination)
+            response.set_cookie('rate_limit', utils.limiter.device_cookie(pending_email), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
+            flask.current_app.logger.info(f'Login attempt for: {pending_email}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: success: 2FA verified: password: {pwned_data}')
+            models.db.session.commit()
+            return response
+        else:
+            utils.limiter.rate_limit_ip(client_ip, pending_email)
+            flask.current_app.logger.info(f'2FA attempt for: {pending_email}/sso from: {client_ip}/{client_port}: failed: bad code')
+            flask.flash(_('Invalid authentication code'), 'error')
+
+    return flask.render_template('2fa_verify.html', form=form)
 
 @sso.route('/pw_change', methods=['GET', 'POST'])
 @access.authenticated

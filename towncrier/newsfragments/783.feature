@@ -1,0 +1,1 @@
+Add native TOTP two-factor authentication for web login (SSO/Admin), with QR code setup, backup recovery codes, and admin reset capability. Mail protocol access (IMAP/SMTP/POP3) continues to use App Tokens.

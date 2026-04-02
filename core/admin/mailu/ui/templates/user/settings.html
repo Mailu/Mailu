@@ -32,6 +32,16 @@
   {%- endcall %}
   {%- endcall %}
 
+  {%- call macros.card(title=_("Two-factor authentication")) %}
+  {%- if user.totp_enabled %}
+  <p>{% trans %}Two-factor authentication is <strong>enabled</strong>.{% endtrans %}</p>
+  <a href="{{ url_for('.user_2fa_setup') }}" class="btn btn-outline-danger btn-sm">{% trans %}Manage two-factor authentication{% endtrans %}</a>
+  {%- else %}
+  <p>{% trans %}Two-factor authentication is <strong>not enabled</strong>. We strongly recommend enabling it to protect your account.{% endtrans %}</p>
+  <a href="{{ url_for('.user_2fa_setup') }}" class="btn btn-primary btn-sm">{% trans %}Set up two-factor authentication{% endtrans %}</a>
+  {%- endif %}
+  {%- endcall %}
+
   {{ macros.form_field(form.submit) }}
 </form>
 {%- endblock %}

@@ -44,6 +44,7 @@
       {% if user.enable_imap %}<span class="badge bg-primary">imap</span>{% endif %}
       {% if user.enable_pop %}<span class="badge bg-secondary">pop3</span>{% endif %}
       {% if user.allow_spoofing %}<span class="badge bg-danger">allow-spoofing</span>{% endif %}
+      {% if user.totp_enabled %}<span class="badge bg-success">2fa</span>{% endif %}
     </td>
     <td data-sort="{{ user.quota_bytes_used }}">{{ user.quota_bytes_used | filesizeformat }} / {{ (user.quota_bytes | filesizeformat) if user.quota_bytes else '∞' }}</td>
     <td>{{ user.comment or '-' }}</td>

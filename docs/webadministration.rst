@@ -19,6 +19,8 @@ It offers the following configuration options:
 
 * configure application passwords.
 
+* configure two-factor authentication (TOTP).
+
 * send broadcast messages to all users.
 
 * configure global administration users.
@@ -186,6 +188,49 @@ The comment field can be used to enter a description for the authentication toke
 
 In the Authorized IP field a comma separated list of white listed IP addresses or networks can be entered. When the field is set, the application token can only be used when the IP address of the client matches what is in the field.
 When no IP address is entered, there is no restriction on IP address.
+
+
+.. _webadministration_2fa:
+
+Two-factor authentication (2FA)
+-------------------------------
+
+On the `settings` page, users can set up two-factor authentication to add an extra layer of security to their account.
+When 2FA is enabled, after entering the correct email and password, the user is prompted for a 6-digit code from their authenticator app.
+
+Setting up 2FA
+``````````````
+
+1. Go to the Settings page and click ``Set up two-factor authentication``.
+
+2. Scan the displayed QR code with an authenticator app (Google Authenticator, Authy, Microsoft Authenticator, FreeOTP, etc.).
+   Alternatively, manually enter the displayed secret key into the authenticator app.
+
+3. Enter the 6-digit code from the authenticator app to confirm the setup.
+
+4. Save the displayed backup recovery codes in a safe place. Each backup code can only be used once and will not be shown again.
+   These codes can be used to log in if you lose access to your authenticator app.
+
+Disabling 2FA
+`````````````
+
+To disable two-factor authentication, go to Settings and click ``Manage two-factor authentication``.
+Enter your current password and a valid 6-digit code from your authenticator app to confirm.
+
+Admin 2FA reset
+```````````````
+
+Domain administrators and global administrators can reset two-factor authentication for users they manage.
+On the user edit page, the 2FA status is displayed. If 2FA is enabled, administrators can click ``Reset two-factor authentication`` to disable it for the user.
+This is intended for account recovery when the user has lost access to their authenticator app and backup codes.
+
+Mail client access with 2FA
+```````````````````````````
+
+Two-factor authentication only applies to the web login (Admin GUI and Webmail). IMAP, POP3 and SMTP mail clients cannot prompt for a TOTP code.
+For mail client access, use :ref:`Authentication tokens <AUTH tokens>` (application passwords).
+It is recommended to enable ``AUTH_REQUIRE_TOKENS`` in ``mailu.env`` to prevent the use of the main password for mail protocols.
+For more information see :ref:`the configuration reference <admin_account>`.
 
 
 Announcement

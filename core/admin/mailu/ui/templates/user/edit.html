@@ -7,3 +7,21 @@
 {%- block subtitle %}
 {{ user }}
 {%- endblock %}
+
+{%- block content %}
+{{ super() }}
+
+{%- call macros.card(_("Two-factor authentication"), theme="info") %}
+{%- if user.totp_enabled %}
+<p>{% trans %}Two-factor authentication is <strong>enabled</strong> for this user.{% endtrans %}</p>
+<form method="post" action="{{ url_for('.user_2fa_reset', user_email=user.email) }}" class="d-inline">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('{% trans %}Are you sure you want to reset two-factor authentication for this user?{% endtrans %}')">
+    {% trans %}Reset two-factor authentication{% endtrans %}
+  </button>
+</form>
+{%- else %}
+<p>{% trans %}Two-factor authentication is <strong>not enabled</strong> for this user.{% endtrans %}</p>
+{%- endif %}
+{%- endcall %}
+{%- endblock %}

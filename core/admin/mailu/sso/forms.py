@@ -11,6 +11,13 @@ class LoginForm(flask_wtf.FlaskForm):
     submitWebmail = fields.SubmitField(_('Sign in'))
     submitAdmin = fields.SubmitField(_('Sign in'))
 
+class TOTPVerifyForm(flask_wtf.FlaskForm):
+    class Meta:
+        csrf = False
+    code = fields.StringField(_('Authentication code'), [validators.DataRequired(), validators.Length(min=6, max=12)], render_kw={'autofocus': True, 'autocomplete': 'one-time-code', 'inputmode': 'numeric', 'pattern': '[0-9]*', 'maxlength': '9'})
+    submitCode = fields.SubmitField(_('Verify'))
+    submitBackup = fields.SubmitField(_('Use backup code'))
+
 class PWChangeForm(flask_wtf.FlaskForm):
     oldpw = fields.PasswordField(_('Current password'), [validators.DataRequired()])
     pw = fields.PasswordField(_('New password'), [validators.DataRequired()])

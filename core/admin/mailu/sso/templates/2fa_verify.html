@@ -1,0 +1,25 @@
+{%- extends "base_sso.html" %}
+
+{%- block title %}
+{% trans %}Two-factor authentication{% endtrans %}
+{%- endblock %}
+
+{%- block content %}
+{%- call macros.card() %}
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  <p>{% trans %}Enter the 6-digit code from your authenticator app.{% endtrans %}</p>
+  {{ macros.form_field(form.code) }}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-6">
+        {{ form.submitCode(class_="btn btn-primary btn-block") }}
+      </div>
+      <div class="col-6">
+        {{ form.submitBackup(class_="btn btn-outline-secondary btn-block") }}
+      </div>
+    </div>
+  </div>
+</form>
+{%- endcall %}
+{%- endblock %}

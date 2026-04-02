@@ -1,0 +1,41 @@
+{%- extends "base.html" %}
+
+{%- block title %}
+{% trans %}Two-factor authentication{% endtrans %}
+{%- endblock %}
+
+{%- block subtitle %}
+{{ user }}
+{%- endblock %}
+
+{%- block content %}
+{%- if enabled %}
+{# 2FA is currently enabled — show disable form #}
+{%- call macros.card(title=_("Two-factor authentication is enabled")) %}
+<p>{% trans %}Two-factor authentication is currently active on your account.{% endtrans %}</p>
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {{ macros.form_field(form.password) }}
+  {{ macros.form_field(form.code) }}
+  {{ macros.form_field(form.submit) }}
+</form>
+{%- endcall %}
+{%- else %}
+{# Setup flow — show QR code and verification #}
+{%- call macros.card(title=_("Set up two-factor authentication")) %}
+<p>{% trans %}Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.):{% endtrans %}</p>
+<div class="text-center my-3">
+  {{ qr_data|safe }}
+</div>
+<p>{% trans %}Or enter this key manually:{% endtrans %}</p>
+<pre class="text-center user-select-all p-2 bg-light rounded">{{ secret }}</pre>
+<hr>
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  <p>{% trans %}Enter the 6-digit code from your authenticator app to confirm setup:{% endtrans %}</p>
+  {{ macros.form_field(form.code) }}
+  {{ macros.form_field(form.submit) }}
+</form>
+{%- endcall %}
+{%- endif %}
+{%- endblock %}

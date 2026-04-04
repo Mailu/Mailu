@@ -39,31 +39,32 @@ STATUSES = {
 WEBMAIL_PORTS = ['14190', '10143', '10025']
 
 def check_credentials(user, password, ip, protocol=None, auth_port=None, source_port=None, raw_user=None):
+    asn = utils.get_ASN(ip) or ''
     if not user or not user.enabled or (protocol == "imap" and not user.enable_imap and not auth_port in WEBMAIL_PORTS) or (protocol == "pop3" and not user.enable_pop):
-        app.logger.info(f'Login attempt for: {user or raw_user!r}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: account disabled')
+        app.logger.info(f'Login attempt for: {user or raw_user!r}/{protocol}/{auth_port} from: {asn}/{ip}/{source_port}: failed: account disabled')
         return False
     # webmails
     if auth_port in WEBMAIL_PORTS and password.startswith('token-'):
         if utils.verify_temp_token(user.get_id(), password):
-            app.logger.debug(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: success: webmail-token')
+            app.logger.debug(f'Login attempt for: {user}/{protocol}/{auth_port} from: {asn}{ip}/{source_port}: success: webmail-token')
             return True
     if utils.is_app_token(password):
         for token in user.tokens:
             if token.check_password(password):
                 if not token.ip or utils.is_ip_in_subnet(ip, token.ip):
-                    app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: success: token-{token.id}: {token.comment or ""!r}')
+                    app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {asn}/{ip}/{source_port}: success: token-{token.id}: {token.comment or ""!r}')
                     return True
                 else:
-                    app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: badip: token-{token.id}: {token.comment or ""!r}')
+                    app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {asn}/{ip}/{source_port}: failed: badip: token-{token.id}: {token.comment or ""!r}')
                     return False # we can return directly here since the token is valid
     if user.check_password(password):
         if app.config['AUTH_REQUIRE_TOKENS'] and not protocol in ['web', 'sso']:
-            app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: password ok, but a token is required')
+            app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {asn}/{ip}/{source_port}: failed: password ok, but a token is required')
             return False
         else:
-            app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: success: password')
+            app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {asn}/{ip}/{source_port}: success: password')
             return True
-    app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: badauth: {utils.truncated_pw_hash(password)}')
+    app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {asn}/{ip}/{source_port}: failed: badauth: {utils.truncated_pw_hash(password)}')
     return False
 
 def handle_authentication(headers):

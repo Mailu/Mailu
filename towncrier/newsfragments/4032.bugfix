@@ -1,0 +1,1 @@
+CVE-2026-49217: Missing authentication on PATCH /api/v1/token/<id>. Thanks to Geo (https://github.com/geo-chen) for reporting it!

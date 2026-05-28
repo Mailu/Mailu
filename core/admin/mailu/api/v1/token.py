@@ -1,5 +1,6 @@
 from flask_restx import Resource, fields, marshal
 import validators, datetime
+import ipaddress
 import flask
 from passlib import pwd
 
@@ -78,8 +79,9 @@ class Tokens(Resource):
         if 'AuthorizedIP' in data:
             token_new.ip = data['AuthorizedIP']
             for ip in token_new.ip:
-                if (not validators.ip_address.ipv4(ip,cidr=True, strict=False, host_bit=False) and
-                    not validators.ip_address.ipv6(ip,cidr=True, strict=False, host_bit=False)):
+                try:
+                    ipaddress.ip_network(ip, False)
+                except ValueError:
                     return { 'code': 400, 'message': f'Provided AuthorizedIP {ip} in {token_new.ip} is invalid'}, 400
         raw_password = pwd.genword(entropy=128, length=32, charset="hex")
         token_new.set_password(raw_password)
@@ -198,6 +200,7 @@ class Token(Resource):
     @token.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @token.response(404, 'User not found', response_fields)
     @token.doc(security='Bearer')
+    @common.api_token_authorization
     def patch(self, token_id):
         """ Update the specified token """
         data = api.payload
@@ -211,8 +214,9 @@ class Token(Resource):
         if 'AuthorizedIP' in data:
             token.ip = token.ip = data['AuthorizedIP']
             for ip in token.ip:
-                if (not validators.ip_address.ipv4(ip,cidr=True, strict=False, host_bit=False) and
-                    not validators.ip_address.ipv6(ip,cidr=True, strict=False, host_bit=False)):
+                try:
+                    ipaddress.ip_network(ip, False)
+                except ValueError:
                     return { 'code': 400, 'message': f'Provided AuthorizedIP {ip} in {token.ip} is invalid'}, 400
         models.db.session.add(token)
         #apply the changes

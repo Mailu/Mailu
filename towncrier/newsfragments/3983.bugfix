@@ -1,1 +1,1 @@
-Fix automatic replies (vacation) failing to compile when the account display name contains special characters such as `@`; the sieve `:from` now uses a quoted RFC 5322 display name.
+Fix automatic replies (vacation) failing to compile when the account display name contains special characters such as `@`; the sieve `:from` now uses a quoted RFC 5322 display name, and all user-controlled fields rendered into the script are escaped (`\`, `"`, `$`) to prevent sieve injection.

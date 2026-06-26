@@ -97,6 +97,15 @@ def create_app_from_config(config):
     def format_datetime(value):
         return utils.flask_babel.format_datetime(value) if value else ''
 
+    @app.template_filter()
+    def sieve_string(value):
+        # Escape a value for safe inclusion inside a Sieve quoted-string.
+        # RFC 5228 requires escaping '\' and '"'; we also escape '$' so a
+        # user-controlled value cannot inject Sieve variable expansion
+        # ('${...}', RFC 5229) once the "variables" extension is required.
+        # Backslash must be escaped first so the escapes we add aren't re-escaped.
+        return str(value).replace('\\', '\\\\').replace('"', '\\"').replace('$', '\\$')
+
     def ping():
         return ''
     app.route('/ping')(ping)

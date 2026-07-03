@@ -74,6 +74,7 @@ class DomainForm(flask_wtf.FlaskForm):
     max_quota_bytes = fields_.IntegerSliderField(_('Maximum user quota'), default=0)
     signup_enabled = fields.BooleanField(_('Enable sign-up'), default=False)
     anonmail_enabled = fields.BooleanField(_('Enable Global Anonymous Email Service'), default=False)
+    outgoing_only = fields.BooleanField(_('Outgoing only (do not deliver mail to this domain locally)'), default=False)
     comment = fields.StringField(_('Comment'), render_kw=AUTOFOCUS)
     submit = fields.SubmitField(_('Save'))
 

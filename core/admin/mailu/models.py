@@ -197,6 +197,7 @@ class Domain(Base):
     signup_enabled = db.Column(db.Boolean, nullable=False, default=False)
     # Anonymous Email Service integration: enable domain to accept API-generated aliases
     anonmail_enabled = db.Column(db.Boolean, nullable=False, default=False)
+    outgoing_only = db.Column(db.Boolean, default=False)
 
     _dkim_key = None
     _dkim_key_on_disk = None

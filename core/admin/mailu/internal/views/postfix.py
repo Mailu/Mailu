@@ -26,7 +26,7 @@ def postfix_dane_map(domain_name):
 def postfix_mailbox_domain(domain_name):
     if re.match(r'^\[.*\]$', domain_name):
         return flask.abort(404)
-    domain = models.Domain.query.get(domain_name) or \
+    domain = models.Domain.query.filter_by(outgoing_only=False, name=domain_name).first() or \
              models.Alternative.query.get(domain_name) or \
              flask.abort(404)
     return flask.jsonify(domain.name)

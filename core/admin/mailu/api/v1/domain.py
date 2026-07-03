@@ -16,6 +16,7 @@ domain_fields = api.model('Domain', {
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
+    'outgoing_only': fields.Boolean(description='domain is used only for outgoing mail; skip local delivery'),
     'alternatives': fields.List(fields.String(attribute='name', description='FQDN'), example='["example.com"]'),
 })
 
@@ -25,6 +26,7 @@ domain_fields_update = api.model('DomainUpdate', {
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
+    'outgoing_only': fields.Boolean(description='domain is used only for outgoing mail; skip local delivery'),
     'alternatives': fields.List(fields.String(attribute='name', description='FQDN'), example='["example.com"]'),
 })
 
@@ -36,6 +38,7 @@ domain_fields_get = api.model('DomainGet', {
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
+    'outgoing_only': fields.Boolean(description='domain is used only for outgoing mail; skip local delivery'),
     'alternatives': fields.List(fields.String(attribute='name', description='FQDN'), example='["example.com"]'),
     'dns_autoconfig': fields.List(fields.String(description='DNS client auto-configuration entry')),
     'dns_mx': fields.String(Description='MX record for domain'),
@@ -124,6 +127,8 @@ class Domains(Resource):
             domain_new.max_quota_bytes = data['max_quota_bytes']
         if 'signup_enabled' in data:
             domain_new.signup_enabled = data['signup_enabled']
+        if 'outgoing_only' in data:
+            domain_new.outgoing_only = data['outgoing_only']
         models.db.session.add(domain_new)
         #apply the changes
         db.session.commit()
@@ -189,6 +194,8 @@ class Domain(Resource):
             domain_found.max_quota_bytes = data['max_quota_bytes']
         if 'signup_enabled' in data:
             domain_found.signup_enabled = data['signup_enabled']
+        if 'outgoing_only' in data:
+            domain_found.outgoing_only = data['outgoing_only']
         models.db.session.add(domain_found)
 
         #apply the changes

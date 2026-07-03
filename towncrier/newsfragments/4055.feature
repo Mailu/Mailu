@@ -1,0 +1,1 @@
+Add an "Outgoing only" flag to Domain. When enabled, Postfix does not resolve the domain as a local mailbox domain, so Mailu can be used as an outbound relay (with DKIM signing) for domains whose incoming mail is handled by another provider (e.g. Google Workspace, Microsoft 365) without other Mailu-hosted domains bouncing mail addressed to it locally.

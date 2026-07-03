@@ -66,6 +66,7 @@ the version of Mailu that you are running.
     webadministration
     antispam
     anonmail
+    outgoing-only
     cli
     api
 

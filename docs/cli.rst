@@ -263,6 +263,7 @@ This is a complete YAML template with all additional parameters that can be defi
       max_quota_bytes: 0
       max_users: -1
       signup_enabled: false
+      outgoing_only: false
 
   user:
     - email: postmaster@example.com

@@ -1115,6 +1115,7 @@ class DomainSchema(BaseSchema):
 
         # Anonymous Email Service domain flags
         anonmail_enabled = fields.Boolean(load_default=False, dump_default=False)
+        outgoing_only = fields.Boolean(load_default=False, dump_default=False)
 
         include_by_context = {
             ('dns',): {'dkim_publickey', 'dns_mx', 'dns_spf', 'dns_dkim', 'dns_dmarc'},

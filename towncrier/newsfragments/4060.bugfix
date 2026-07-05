@@ -1,0 +1,1 @@
+Fix two admin-UI form-flow bugs: the forced password change now redirects to the chosen destination instead of always the admin UI, and the Create User form keeps the entered values and validation errors on a failed submit.

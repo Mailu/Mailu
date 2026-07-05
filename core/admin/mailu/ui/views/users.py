@@ -47,7 +47,10 @@ def user_create(domain_name):
             flask.flash('User %s created' % user)
             return flask.redirect(
                 flask.url_for('.user_list', domain_name=domain.name))
-    form.process()
+    elif not form.is_submitted():
+        # only (re)apply the dynamic field defaults on the initial GET; on a
+        # failed submit keep the entered values and validation errors
+        form.process()
     return flask.render_template('user/create.html',
         domain=domain, form=form)
 

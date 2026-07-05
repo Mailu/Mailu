@@ -95,7 +95,7 @@ def pw_change():
             user.change_pw_next_login = False
             models.db.session.commit()
             flask.current_app.logger.info(f'Forced password change by {user} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
-            destination = flask.session.pop('redir_to', None) or app.config['WEB_ADMIN']
+            destination = flask.session.pop('redirect_to', None) or app.config['WEB_ADMIN']
             return flask.redirect(destination)
         flask.flash(_("The current password is incorrect!"), "error")
 

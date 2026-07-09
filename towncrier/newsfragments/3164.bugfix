@@ -1,0 +1,1 @@
+Fix the link back to the Mailu admin UI in roundcube being broken when WEB_WEBMAIL is set to a path with more than two segments

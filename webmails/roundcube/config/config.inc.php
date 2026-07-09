@@ -57,7 +57,9 @@ $config['managesieve_mbox_encoding'] = 'UTF8';
 // roundcube customization
 $config['product_name'] = 'Mailu Webmail';
 {%- if ADMIN and WEB_ADMIN %}
-$config['support_url'] = '../..{{ WEB_ADMIN }}';
+{# This link must stay relative: roundcube's fix_paths() rewrites absolute paths to be skin-relative. -#}
+{# One "../" per WEB_WEBMAIL path segment climbs back to the web root regardless of its depth (see #3164). -#}
+$config['support_url'] = '{{ "../" * (WEB_WEBMAIL.strip("/").split("/")|length) }}{{ WEB_ADMIN.strip("/") }}';
 {%- endif %}
 $config['plugins'] = array({{ PLUGINS }});
 

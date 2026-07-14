@@ -277,3 +277,38 @@ def test_scim_patch_rejects_unknown_path(app, client):
 
     assert rv.status_code == 400
     assert rv.get_json()['scimType'] == 'invalidPath'
+
+
+def test_scim_list_caps_count_to_advertised_max_results(app, client):
+    with app.app_context():
+        domain = create_domain()
+        for localpart in ('kate', 'louis'):
+            user = models.User(localpart=localpart, domain=domain)
+            user.set_password('secret')
+            models.db.session.add(user)
+        models.db.session.commit()
+
+    rv = client.get('/api/scim/v2/Users?count=999999', headers=auth_headers(app))
+
+    assert rv.status_code == 200
+    data = rv.get_json()
+    assert data['itemsPerPage'] == 2
+    assert data['totalResults'] == 2
+
+
+def test_scim_patch_rejects_empty_operations(app, client):
+    with app.app_context():
+        domain = create_domain()
+        user = models.User(localpart='mallory', domain=domain)
+        user.set_password('secret')
+        models.db.session.add(user)
+        models.db.session.commit()
+
+    rv = client.patch(
+        '/api/scim/v2/Users/mallory@example.com',
+        json={'Operations': []},
+        headers=auth_headers(app),
+    )
+
+    assert rv.status_code == 400
+    assert rv.get_json()['scimType'] == 'invalidValue'

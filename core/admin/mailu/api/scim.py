@@ -52,12 +52,15 @@ def _payload():
     return data, None
 
 
-def _parse_positive_int(value, default, *, minimum=0):
+def _parse_positive_int(value, default, *, minimum=0, maximum=None):
     try:
         parsed = int(value)
     except (TypeError, ValueError):
         return None
-    return max(parsed, minimum)
+    parsed = max(parsed, minimum)
+    if maximum is not None:
+        parsed = min(parsed, maximum)
+    return parsed
 
 
 def _string_value(value):
@@ -173,9 +176,11 @@ def _apply_user_data(user, data, *, replacing=False):
 
 
 def _patch_user(user, data):
-    operations = data.get('Operations') or data.get('operations') or []
+    operations = data.get('Operations') or data.get('operations')
     if not isinstance(operations, list):
         return _scim_error(400, 'Operations must be a list', 'invalidSyntax')
+    if not operations:
+        return _scim_error(400, 'Operations must not be empty', 'invalidValue')
     for operation in operations:
         if not isinstance(operation, dict):
             return _scim_error(400, 'Patch operations must be objects', 'invalidSyntax')
@@ -313,7 +318,7 @@ def unsupported_groups(group_id=None):
 @blueprint.route('/Users', methods=['GET'])
 def list_users():
     start_index = _parse_positive_int(flask.request.args.get('startIndex', 1), 1, minimum=1)
-    count = _parse_positive_int(flask.request.args.get('count', 100), 100, minimum=0)
+    count = _parse_positive_int(flask.request.args.get('count', 100), 100, minimum=0, maximum=200)
     if start_index is None or count is None:
         return _scim_error(400, 'startIndex and count must be integers', 'invalidValue')
     query = models.User.query.order_by(models.User._email)

@@ -280,7 +280,7 @@ def _user_from_email(email):
         return None
 
     localpart, domain_name = email.rsplit('@', 1)
-    domain = models.Domain.query.get(domain_name)
+    domain = models.db.session.get(models.Domain, domain_name)
     if not domain:
         return None
     if domain.max_users != -1 and len(domain.users) >= domain.max_users:

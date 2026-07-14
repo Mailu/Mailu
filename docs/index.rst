@@ -80,3 +80,8 @@ the version of Mailu that you are running.
     contributors/memo
     contributors/localization
     contributors/firewalling
+
+.. toctree::
+   :maxdepth: 2
+
+   integrations/oidc-authentik

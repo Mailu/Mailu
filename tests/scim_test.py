@@ -206,3 +206,37 @@ def test_scim_patch_rejects_non_object_operations(app, client):
 
     assert rv.status_code == 400
     assert rv.get_json()['scimType'] == 'invalidSyntax'
+
+
+def test_scim_create_handles_non_string_username_and_name(app, client):
+    with app.app_context():
+        create_domain('123.example')
+
+    rv = client.post(
+        '/api/scim/v2/Users',
+        json={'userName': 123, 'name': 'not-an-object'},
+        headers=auth_headers(app),
+    )
+
+    assert rv.status_code == 400
+    assert rv.get_json()['scimType'] == 'invalidValue'
+
+
+def test_scim_patch_handles_non_string_op_and_path(app, client):
+    with app.app_context():
+        domain = create_domain()
+        user = models.User(localpart='heidi', domain=domain)
+        user.set_password('secret')
+        models.db.session.add(user)
+        models.db.session.commit()
+
+    rv = client.patch(
+        '/api/scim/v2/Users/heidi@example.com',
+        json={'Operations': [{'op': 7, 'path': 9, 'value': 'ignored'}]},
+        headers=auth_headers(app),
+    )
+
+    assert rv.status_code == 200
+    with app.app_context():
+        user = models.db.session.get(models.User, 'heidi@example.com')
+        assert user.enabled is True

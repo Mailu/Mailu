@@ -60,6 +60,14 @@ def _parse_positive_int(value, default, *, minimum=0):
     return max(parsed, minimum)
 
 
+def _string_value(value):
+    if value is None:
+        return ''
+    if isinstance(value, str):
+        return value
+    return str(value)
+
+
 def _active_value(value):
     if isinstance(value, bool):
         return value, None
@@ -73,25 +81,30 @@ def _active_value(value):
 
 
 def _user_email(data):
-    user_name = (data.get('userName') or '').strip().lower()
+    user_name = _string_value(data.get('userName')).strip().lower()
     if user_name:
         return user_name
     for email in data.get('emails') or []:
         if not isinstance(email, dict):
             continue
-        value = (email.get('value') or '').strip().lower()
+        value = _string_value(email.get('value')).strip().lower()
         if value:
             return value
     return ''
 
 
 def _display_name(data):
-    if data.get('displayName'):
-        return data['displayName']
+    if data.get('displayName') is not None:
+        display_name = _string_value(data.get('displayName')).strip()
+        if display_name:
+            return display_name
     name = data.get('name') or {}
-    if name.get('formatted'):
-        return name['formatted']
-    parts = [name.get('givenName'), name.get('familyName')]
+    if not isinstance(name, dict):
+        return ''
+    formatted = _string_value(name.get('formatted')).strip()
+    if formatted:
+        return formatted
+    parts = [_string_value(name.get('givenName')).strip(), _string_value(name.get('familyName')).strip()]
     return ' '.join(part for part in parts if part)
 
 
@@ -166,8 +179,8 @@ def _patch_user(user, data):
     for operation in operations:
         if not isinstance(operation, dict):
             return _scim_error(400, 'Patch operations must be objects', 'invalidSyntax')
-        op = (operation.get('op') or 'replace').lower()
-        path = (operation.get('path') or '').lower()
+        op = _string_value(operation.get('op') or 'replace').lower()
+        path = _string_value(operation.get('path')).lower()
         value = operation.get('value')
         if op not in ('add', 'replace'):
             continue
@@ -184,19 +197,19 @@ def _patch_user(user, data):
                 user.enabled = active
         if path in ('displayname', '') and (path or isinstance(value, dict)):
             if path == 'displayname' and value is not None:
-                user.displayed_name = str(value)
+                user.displayed_name = _string_value(value)
             elif isinstance(value, dict):
                 display_name = _display_name(value)
                 if display_name:
                     user.displayed_name = display_name
         if path in ('name.formatted', 'name', '') and value:
             if path == 'name.formatted':
-                user.displayed_name = str(value)
+                user.displayed_name = _string_value(value)
             elif path == 'name' and isinstance(value, dict) and value.get('formatted'):
                 user.displayed_name = value['formatted']
         if path in ('password', ''):
             if path == 'password' and value:
-                user.set_password(str(value))
+                user.set_password(_string_value(value))
             elif isinstance(value, dict) and value.get('password'):
                 user.set_password(value['password'])
     return None

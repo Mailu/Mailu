@@ -46,6 +46,8 @@ def _scim_error(status, detail, scim_type=None):
 def _payload():
     data = flask.request.get_json(silent=True)
     if data is None:
+        if flask.request.get_data(cache=True).strip():
+            return None, _scim_error(400, 'Request body must be valid JSON', 'invalidSyntax')
         return {}, None
     if not isinstance(data, dict):
         return None, _scim_error(400, 'Request body must be a JSON object', 'invalidSyntax')

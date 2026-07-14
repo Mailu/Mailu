@@ -346,3 +346,15 @@ def test_scim_patch_rejects_non_string_password(app, client):
 
     assert rv.status_code == 400
     assert rv.get_json()['scimType'] == 'invalidValue'
+
+
+def test_scim_create_rejects_malformed_json(app, client):
+    rv = client.post(
+        '/api/scim/v2/Users',
+        data='{',
+        content_type='application/scim+json',
+        headers={'Authorization': f'Bearer {app.config["API_TOKEN"]}'},
+    )
+
+    assert rv.status_code == 400
+    assert rv.get_json()['scimType'] == 'invalidSyntax'

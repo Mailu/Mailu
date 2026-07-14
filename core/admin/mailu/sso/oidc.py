@@ -294,6 +294,14 @@ def _user_from_email(email):
     return user
 
 
+def merge_userinfo_claims(id_token_claims, userinfo_claims):
+    if userinfo_claims.get('sub') and id_token_claims.get('sub') != userinfo_claims.get('sub'):
+        raise ValueError('UserInfo subject does not match ID token subject')
+    claims = dict(id_token_claims)
+    claims.update(userinfo_claims)
+    return claims
+
+
 def login_user_from_claims(claims):
     email_claim = app.config.get('OIDC_EMAIL_CLAIM') or 'email'
     email = (claims.get(email_claim) or '').strip().lower()
@@ -355,8 +363,7 @@ def handle_callback():
             return login_failed(_('OpenID Connect login failed'))
         claims = validate_id_token(id_token)
         userinfo = fetch_userinfo(access_token)
-        claims.update(userinfo)
-        user = login_user_from_claims(claims)
+        user = login_user_from_claims(merge_userinfo_claims(claims, userinfo))
     except Exception:
         flask.current_app.logger.exception('OIDC login failed')
         return login_failed(_('OpenID Connect login failed'))

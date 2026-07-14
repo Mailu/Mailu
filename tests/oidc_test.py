@@ -139,7 +139,7 @@ def test_oidc_callback_validates_jwt_and_logs_in_existing_user(app, client, monk
         if url == app.config['OIDC_JWKS_URI']:
             return FakeResponse(jwks)
         assert headers['Authorization'] == 'Bearer access-token'
-        return FakeResponse({'email': user.email, 'email_verified': True})
+        return FakeResponse({'sub': user.email, 'email': user.email, 'email_verified': True})
 
     monkeypatch.setattr(oidc.requests, 'post', fake_post)
     monkeypatch.setattr(oidc.requests, 'get', fake_get)
@@ -149,7 +149,7 @@ def test_oidc_callback_validates_jwt_and_logs_in_existing_user(app, client, monk
     rv = client.get(f'/sso/oidc/callback?code=abc&state={state}')
 
     assert rv.status_code == 302
-    assert rv.headers['Location'] == '/admin'
+    assert urlparse(rv.headers['Location']).path == '/admin'
     assert captured['token_request']['code'] == 'abc'
     assert captured['token_request']['code_verifier']
     assert captured['auth'] == ('mailu', 'secret')
@@ -219,6 +219,34 @@ def test_oidc_callback_rejects_bad_nonce(app, client, monkeypatch):
         assert '_user_id' not in session
 
 
+def test_oidc_callback_rejects_userinfo_subject_mismatch(app, client, monkeypatch):
+    configure_oidc(app)
+    user = create_domain_and_user()
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    jwks = {'keys': [jwk_from_private_key(private_key)]}
+
+    monkeypatch.setattr(oidc.requests, 'post', lambda *args, **kwargs: FakeResponse({
+        'access_token': 'access-token',
+        'id_token': signed_id_token(private_key, id_token_claims(app, client, user.email)),
+    }))
+
+    def fake_get(url, headers=None, timeout=None):
+        if url == app.config['OIDC_JWKS_URI']:
+            return FakeResponse(jwks)
+        return FakeResponse({'sub': 'other@example.com', 'email': user.email, 'email_verified': True})
+
+    monkeypatch.setattr(oidc.requests, 'get', fake_get)
+
+    login = client.get('/sso/oidc/login')
+    state = parse_qs(urlparse(login.headers['Location']).query)['state'][0]
+    rv = client.get(f'/sso/oidc/callback?code=abc&state={state}')
+
+    assert rv.status_code == 302
+    assert rv.headers['Location'] == '/sso/login'
+    with client.session_transaction() as session:
+        assert '_user_id' not in session
+
+
 def test_oidc_callback_can_create_domain_user_when_enabled(app, client, monkeypatch):
     configure_oidc(app)
     app.config['OIDC_CREATE_USER'] = True
@@ -237,7 +265,7 @@ def test_oidc_callback_can_create_domain_user_when_enabled(app, client, monkeypa
     def fake_get(url, headers=None, timeout=None):
         if url == app.config['OIDC_JWKS_URI']:
             return FakeResponse(jwks)
-        return FakeResponse({'email': 'new@example.com', 'email_verified': True})
+        return FakeResponse({'sub': 'new@example.com', 'email': 'new@example.com', 'email_verified': True})
 
     monkeypatch.setattr(oidc.requests, 'get', fake_get)
 

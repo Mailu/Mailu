@@ -94,16 +94,29 @@ def _active_value(value):
 
 
 def _user_email(data):
-    user_name = _string_value(data.get('userName')).strip().lower()
-    if user_name:
-        return user_name
-    for email in data.get('emails') or []:
+    user_name = data.get('userName')
+    if user_name not in (None, ''):
+        if not isinstance(user_name, str):
+            return None, _scim_error(400, 'userName must be a string', 'invalidValue')
+        user_name = user_name.strip().lower()
+        if user_name:
+            return user_name, None
+
+    emails = data.get('emails') or []
+    if not isinstance(emails, list):
+        return None, _scim_error(400, 'emails must be a list', 'invalidValue')
+    for email in emails:
         if not isinstance(email, dict):
             continue
-        value = _string_value(email.get('value')).strip().lower()
+        value = email.get('value')
+        if value in (None, ''):
+            continue
+        if not isinstance(value, str):
+            return None, _scim_error(400, 'email values must be strings', 'invalidValue')
+        value = value.strip().lower()
         if value:
-            return value
-    return ''
+            return value, None
+    return '', None
 
 
 def _display_name(data):
@@ -369,7 +382,9 @@ def create_user():
     data, error = _payload()
     if error:
         return error
-    email = _user_email(data)
+    email, error = _user_email(data)
+    if error:
+        return error
     if not email:
         return _scim_error(400, 'userName or emails[0].value is required', 'invalidValue')
     if _get_user(email):
@@ -407,7 +422,9 @@ def replace_user(user_id):
     data, error = _payload()
     if error:
         return error
-    new_email = _user_email(data)
+    new_email, error = _user_email(data)
+    if error:
+        return error
     if new_email and new_email != user.email:
         return _scim_error(400, 'Changing userName/email is not supported', 'mutability')
     error = _apply_user_data(user, data, replacing=True)

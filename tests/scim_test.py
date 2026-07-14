@@ -312,3 +312,37 @@ def test_scim_patch_rejects_empty_operations(app, client):
 
     assert rv.status_code == 400
     assert rv.get_json()['scimType'] == 'invalidValue'
+
+
+def test_scim_create_rejects_non_string_password(app, client):
+    with app.app_context():
+        create_domain()
+
+    rv = client.post(
+        '/api/scim/v2/Users',
+        json={'userName': 'nick@example.com', 'password': {'cleartext': 'nope'}},
+        headers=auth_headers(app),
+    )
+
+    assert rv.status_code == 400
+    assert rv.get_json()['scimType'] == 'invalidValue'
+    with app.app_context():
+        assert models.db.session.get(models.User, 'nick@example.com') is None
+
+
+def test_scim_patch_rejects_non_string_password(app, client):
+    with app.app_context():
+        domain = create_domain()
+        user = models.User(localpart='olivia', domain=domain)
+        user.set_password('secret')
+        models.db.session.add(user)
+        models.db.session.commit()
+
+    rv = client.patch(
+        '/api/scim/v2/Users/olivia@example.com',
+        json={'Operations': [{'op': 'replace', 'path': 'password', 'value': ['bad']}]},
+        headers=auth_headers(app),
+    )
+
+    assert rv.status_code == 400
+    assert rv.get_json()['scimType'] == 'invalidValue'

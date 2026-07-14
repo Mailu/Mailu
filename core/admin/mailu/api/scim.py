@@ -71,6 +71,14 @@ def _string_value(value):
     return str(value)
 
 
+def _password_value(value):
+    if value in (None, ''):
+        return None, None
+    if not isinstance(value, str):
+        return None, _scim_error(400, 'password must be a string', 'invalidValue')
+    return value, None
+
+
 def _active_value(value):
     if isinstance(value, bool):
         return value, None
@@ -170,8 +178,11 @@ def _apply_user_data(user, data, *, replacing=False):
     display_name = _display_name(data)
     if display_name:
         user.displayed_name = display_name
-    if data.get('password'):
-        user.set_password(data['password'])
+    password, error = _password_value(data.get('password'))
+    if error:
+        return error
+    if password:
+        user.set_password(password)
     return None
 
 
@@ -222,10 +233,16 @@ def _patch_user(user, data):
                 handled = True
         if path in ('password', ''):
             if path == 'password' and value:
-                user.set_password(_string_value(value))
+                password, error = _password_value(value)
+                if error:
+                    return error
+                user.set_password(password)
                 handled = True
             elif isinstance(value, dict) and value.get('password'):
-                user.set_password(_string_value(value['password']))
+                password, error = _password_value(value['password'])
+                if error:
+                    return error
+                user.set_password(password)
                 handled = True
         if not handled:
             return _scim_error(400, f'Patch path {path!r} is not supported', 'invalidPath')
@@ -356,8 +373,11 @@ def create_user():
     if error:
         return error
     localpart, domain = domain_data
+    password, error = _password_value(data.get('password'))
+    if error:
+        return error
     user = models.User(localpart=localpart, domain=domain)
-    user.set_password(data.get('password') or secrets.token_urlsafe())
+    user.set_password(password or secrets.token_urlsafe())
     error = _apply_user_data(user, data, replacing=True)
     if error:
         return error

@@ -222,7 +222,7 @@ def test_scim_create_handles_non_string_username_and_name(app, client):
     assert rv.get_json()['scimType'] == 'invalidValue'
 
 
-def test_scim_patch_handles_non_string_op_and_path(app, client):
+def test_scim_patch_rejects_non_string_op_and_path(app, client):
     with app.app_context():
         domain = create_domain()
         user = models.User(localpart='heidi', domain=domain)
@@ -236,7 +236,44 @@ def test_scim_patch_handles_non_string_op_and_path(app, client):
         headers=auth_headers(app),
     )
 
-    assert rv.status_code == 200
+    assert rv.status_code == 400
+    assert rv.get_json()['scimType'] == 'mutability'
     with app.app_context():
         user = models.db.session.get(models.User, 'heidi@example.com')
         assert user.enabled is True
+
+
+def test_scim_patch_rejects_remove_operation(app, client):
+    with app.app_context():
+        domain = create_domain()
+        user = models.User(localpart='ivan', domain=domain)
+        user.set_password('secret')
+        models.db.session.add(user)
+        models.db.session.commit()
+
+    rv = client.patch(
+        '/api/scim/v2/Users/ivan@example.com',
+        json={'Operations': [{'op': 'remove', 'path': 'displayName'}]},
+        headers=auth_headers(app),
+    )
+
+    assert rv.status_code == 400
+    assert rv.get_json()['scimType'] == 'mutability'
+
+
+def test_scim_patch_rejects_unknown_path(app, client):
+    with app.app_context():
+        domain = create_domain()
+        user = models.User(localpart='judy', domain=domain)
+        user.set_password('secret')
+        models.db.session.add(user)
+        models.db.session.commit()
+
+    rv = client.patch(
+        '/api/scim/v2/Users/judy@example.com',
+        json={'Operations': [{'op': 'replace', 'path': 'title', 'value': 'Boss'}]},
+        headers=auth_headers(app),
+    )
+
+    assert rv.status_code == 400
+    assert rv.get_json()['scimType'] == 'invalidPath'

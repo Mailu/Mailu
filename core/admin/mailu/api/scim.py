@@ -183,37 +183,48 @@ def _patch_user(user, data):
         path = _string_value(operation.get('path')).lower()
         value = operation.get('value')
         if op not in ('add', 'replace'):
-            continue
+            return _scim_error(400, f'Patch operation {op!r} is not supported', 'mutability')
+
+        handled = False
         if path in ('active', '') and (path or isinstance(value, dict)):
             if path == 'active':
                 active, error = _active_value(value)
                 if error:
                     return error
                 user.enabled = active
+                handled = True
             elif isinstance(value, dict) and 'active' in value:
                 active, error = _active_value(value['active'])
                 if error:
                     return error
                 user.enabled = active
+                handled = True
         if path in ('displayname', '') and (path or isinstance(value, dict)):
             if path == 'displayname' and value is not None:
                 user.displayed_name = _string_value(value)
+                handled = True
             elif isinstance(value, dict):
                 display_name = _display_name(value)
                 if display_name:
                     user.displayed_name = display_name
+                    handled = True
         if path in ('name.formatted', 'name', '') and value:
             if path == 'name.formatted':
                 user.displayed_name = _string_value(value)
+                handled = True
             elif path == 'name' and isinstance(value, dict) and value.get('formatted'):
-                user.displayed_name = value['formatted']
+                user.displayed_name = _string_value(value['formatted'])
+                handled = True
         if path in ('password', ''):
             if path == 'password' and value:
                 user.set_password(_string_value(value))
+                handled = True
             elif isinstance(value, dict) and value.get('password'):
-                user.set_password(value['password'])
+                user.set_password(_string_value(value['password']))
+                handled = True
+        if not handled:
+            return _scim_error(400, f'Patch path {path!r} is not supported', 'invalidPath')
     return None
-
 
 @blueprint.before_request
 def authorize():

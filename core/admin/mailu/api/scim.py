@@ -187,7 +187,10 @@ def _apply_user_data(user, data, *, replacing=False):
 
 
 def _patch_user(user, data):
-    operations = data.get('Operations') or data.get('operations')
+    if 'Operations' in data:
+        operations = data['Operations']
+    else:
+        operations = data.get('operations')
     if not isinstance(operations, list):
         return _scim_error(400, 'Operations must be a list', 'invalidSyntax')
     if not operations:

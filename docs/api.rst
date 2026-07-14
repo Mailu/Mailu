@@ -33,3 +33,39 @@ anyone to visualize and interact with the Mailu API.
 
 Assuming ``/api`` is configured as value for ``WEB_API``, it
 is accessible via the URL: https://myserver/api/
+
+
+SCIM provisioning
+-----------------
+
+Mailu exposes a SCIM 2.0 user provisioning endpoint at
+``<WEB_API>/scim/v2``. With the default ``WEB_API=/api``, the SCIM base URL is::
+
+  https://myserver/api/scim/v2
+
+The SCIM endpoint uses the same bearer token as the REST API::
+
+  Authorization: Bearer <API_TOKEN>
+
+Supported SCIM resources:
+
+* ``/ServiceProviderConfig``
+* ``/ResourceTypes``
+* ``/Schemas``
+* ``/Users`` for listing, creating, reading, replacing, patching, and deprovisioning users
+* ``/Groups`` returns an empty list; group provisioning is not supported
+
+Mailu maps SCIM users to mailbox users:
+
+* ``userName`` is the mailbox email address.
+* ``displayName`` or ``name.formatted`` maps to the Mailu displayed name.
+* ``active`` maps to the Mailu enabled flag.
+* ``password`` sets the mailbox password when supplied. If no password is supplied during creation, Mailu generates a random mailbox password.
+
+SCIM user creation requires the mailbox domain to already exist in Mailu. Mailu does not create domains from SCIM requests. SCIM ``DELETE`` deprovisions users by disabling the mailbox instead of deleting mailbox data.
+
+For authentik, create a SCIM provider for the Mailu application and configure:
+
+* SCIM base URL: ``https://myserver/api/scim/v2``
+* Authentication mode: static token
+* Token: the Mailu ``API_TOKEN`` value

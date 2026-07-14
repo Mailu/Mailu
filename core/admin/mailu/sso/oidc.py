@@ -1,15 +1,27 @@
 import base64
 import hashlib
+import json
 import secrets
+import time
 from urllib.parse import urlencode, urljoin, urlparse, unquote
 
 import flask
 import flask_login
 import requests
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.primitives.hashes import SHA256, SHA384, SHA512
 from flask import current_app as app
 from flask_babel import lazy_gettext as _
 
 from mailu import models
+
+
+JWT_ALGORITHMS = {
+    'RS256': (padding.PKCS1v15(), SHA256()),
+    'RS384': (padding.PKCS1v15(), SHA384()),
+    'RS512': (padding.PKCS1v15(), SHA512()),
+}
 
 
 def enabled():
@@ -35,17 +47,32 @@ def provider_config():
     authorization_endpoint = app.config.get('OIDC_AUTHORIZATION_ENDPOINT') or data.get('authorization_endpoint')
     token_endpoint = app.config.get('OIDC_TOKEN_ENDPOINT') or data.get('token_endpoint')
     userinfo_endpoint = app.config.get('OIDC_USERINFO_ENDPOINT') or data.get('userinfo_endpoint')
+    jwks_uri = app.config.get('OIDC_JWKS_URI') or data.get('jwks_uri')
     issuer = app.config.get('OIDC_ISSUER') or data.get('issuer')
 
-    if not authorization_endpoint or not token_endpoint or not userinfo_endpoint:
+    if not authorization_endpoint or not token_endpoint or not userinfo_endpoint or not jwks_uri:
         raise RuntimeError('OIDC is enabled but provider endpoints are incomplete')
 
     return {
         'authorization_endpoint': authorization_endpoint,
         'token_endpoint': token_endpoint,
         'userinfo_endpoint': userinfo_endpoint,
+        'jwks_uri': jwks_uri,
         'issuer': issuer,
     }
+
+
+def _base64url_decode(value):
+    padding_len = (-len(value)) % 4
+    return base64.urlsafe_b64decode(value + ('=' * padding_len))
+
+
+def _base64url_uint(value):
+    return int.from_bytes(_base64url_decode(value), 'big')
+
+
+def _load_jwt_part(value):
+    return json.loads(_base64url_decode(value))
 
 
 def _code_challenge(verifier):
@@ -114,6 +141,115 @@ def exchange_code(code):
     response = requests.post(config['token_endpoint'], data=data, headers=headers, auth=auth, timeout=10)
     response.raise_for_status()
     return response.json()
+
+
+def fetch_jwks(jwks_uri):
+    cached = app.config.get('_OIDC_JWKS_CACHE')
+    now = time.time()
+    if cached and cached['uri'] == jwks_uri and cached['expires_at'] > now:
+        return cached['jwks']
+
+    response = requests.get(jwks_uri, headers={'Accept': 'application/json'}, timeout=10)
+    response.raise_for_status()
+    jwks = response.json()
+    app.config['_OIDC_JWKS_CACHE'] = {
+        'uri': jwks_uri,
+        'jwks': jwks,
+        'expires_at': now + int(app.config.get('OIDC_JWKS_CACHE_SECONDS') or 3600),
+    }
+    return jwks
+
+
+def _jwk_matches(header, jwk):
+    if jwk.get('kty') != 'RSA':
+        return False
+    if jwk.get('use') not in (None, 'sig'):
+        return False
+    if header.get('kid') and jwk.get('kid') != header.get('kid'):
+        return False
+    if jwk.get('alg') and jwk.get('alg') != header.get('alg'):
+        return False
+    return True
+
+
+def _public_key_from_jwk(jwk):
+    if jwk.get('kty') != 'RSA':
+        raise ValueError('unsupported JWK key type')
+    numbers = rsa.RSAPublicNumbers(
+        e=_base64url_uint(jwk['e']),
+        n=_base64url_uint(jwk['n']),
+    )
+    return numbers.public_key()
+
+
+def _verify_signature(header, signing_input, signature, jwks):
+    alg = header.get('alg')
+    allowed = app.config.get('OIDC_JWT_ALGORITHMS') or {'RS256'}
+    if alg not in allowed or alg not in JWT_ALGORITHMS:
+        raise ValueError('unsupported or disallowed JWT algorithm')
+
+    candidates = [jwk for jwk in jwks.get('keys', []) if _jwk_matches(header, jwk)]
+    if not candidates:
+        raise ValueError('no matching JWK')
+
+    verifier, hash_algorithm = JWT_ALGORITHMS[alg]
+    for jwk in candidates:
+        public_key = _public_key_from_jwk(jwk)
+        try:
+            public_key.verify(signature, signing_input, verifier, hash_algorithm)
+            return
+        except InvalidSignature:
+            continue
+    raise ValueError('invalid JWT signature')
+
+
+def _validate_jwt_claims(claims):
+    config = provider_config()
+    now = int(time.time())
+    leeway = int(app.config.get('OIDC_CLOCK_SKEW_SECONDS') or 60)
+    client_id = app.config['OIDC_CLIENT_ID']
+
+    if config.get('issuer') and claims.get('iss') != config['issuer']:
+        raise ValueError('invalid JWT issuer')
+
+    aud = claims.get('aud')
+    if isinstance(aud, str):
+        audiences = [aud]
+    elif isinstance(aud, list):
+        audiences = aud
+    else:
+        raise ValueError('missing JWT audience')
+    if client_id not in audiences:
+        raise ValueError('invalid JWT audience')
+    if len(audiences) > 1 and claims.get('azp') not in (None, client_id):
+        raise ValueError('invalid JWT authorized party')
+
+    if not isinstance(claims.get('exp'), int) or now > claims['exp'] + leeway:
+        raise ValueError('expired JWT')
+    if 'nbf' in claims and isinstance(claims['nbf'], int) and now + leeway < claims['nbf']:
+        raise ValueError('JWT not yet valid')
+    if not isinstance(claims.get('iat'), int) or now + leeway < claims['iat']:
+        raise ValueError('invalid JWT issued-at')
+
+    expected_nonce = flask.session.pop('oidc_nonce', None)
+    if not expected_nonce or not claims.get('nonce') or not secrets.compare_digest(expected_nonce, claims['nonce']):
+        raise ValueError('invalid JWT nonce')
+
+
+def validate_id_token(id_token):
+    parts = id_token.split('.')
+    if len(parts) != 3:
+        raise ValueError('invalid JWT structure')
+    header = _load_jwt_part(parts[0])
+    claims = _load_jwt_part(parts[1])
+    signing_input = f'{parts[0]}.{parts[1]}'.encode('ascii')
+    signature = _base64url_decode(parts[2])
+
+    config = provider_config()
+    jwks = fetch_jwks(config['jwks_uri'])
+    _verify_signature(header, signing_input, signature, jwks)
+    _validate_jwt_claims(claims)
+    return claims
 
 
 def fetch_userinfo(access_token):
@@ -213,10 +349,13 @@ def handle_callback():
     try:
         token = exchange_code(code)
         access_token = token.get('access_token')
-        if not access_token:
-            flask.current_app.logger.warning('OIDC login failed: token response omitted access_token')
+        id_token = token.get('id_token')
+        if not access_token or not id_token:
+            flask.current_app.logger.warning('OIDC login failed: token response omitted access_token or id_token')
             return login_failed(_('OpenID Connect login failed'))
-        claims = fetch_userinfo(access_token)
+        claims = validate_id_token(id_token)
+        userinfo = fetch_userinfo(access_token)
+        claims.update(userinfo)
         user = login_user_from_claims(claims)
     except Exception:
         flask.current_app.logger.exception('OIDC login failed')

@@ -28,14 +28,15 @@ Enable OIDC and point Mailu at the provider discovery document:
    OIDC_CLIENT_SECRET=<client-secret>
    OIDC_REDIRECT_URI=https://<mail-host>/sso/oidc/callback
 
-The discovery document should provide the authorization, token, and UserInfo
-endpoints. If discovery is not available, configure the endpoints explicitly:
+The discovery document should provide the authorization, token, UserInfo, and
+JWKS endpoints. If discovery is not available, configure the endpoints explicitly:
 
 .. code-block:: text
 
    OIDC_AUTHORIZATION_ENDPOINT=https://<auth-host>/application/o/authorize/
    OIDC_TOKEN_ENDPOINT=https://<auth-host>/application/o/token/
    OIDC_USERINFO_ENDPOINT=https://<auth-host>/application/o/userinfo/
+   OIDC_JWKS_URI=https://<auth-host>/application/o/<application-slug>/jwks/
 
 Optional settings:
 
@@ -47,6 +48,9 @@ Optional settings:
    OIDC_CREATE_USER=false
    OIDC_ALLOWED_DOMAINS=example.com,example.org
    OIDC_CLIENT_AUTH_METHOD=client_secret_basic
+   OIDC_JWT_ALGORITHMS=RS256
+   OIDC_JWKS_CACHE_SECONDS=3600
+   OIDC_CLOCK_SKEW_SECONDS=60
 
 By default, OIDC login only succeeds for existing enabled Mailu users. Set
 ``OIDC_CREATE_USER=true`` to create a Mailu mailbox automatically when the
@@ -58,8 +62,11 @@ Security notes
 --------------
 
 The login flow uses authorization-code login with state checking and PKCE. Mailu
-exchanges the code server-side, calls the provider UserInfo endpoint with the
-returned access token, and maps the configured email claim to a Mailu user.
+exchanges the code server-side, requires an ID token, validates that token
+against the provider JWKS, and checks signature, allowed algorithm, issuer,
+audience, expiry, issued-at time, optional not-before time, authorized party,
+and nonce. Mailu then calls the provider UserInfo endpoint with the returned
+access token and maps the configured email claim to a Mailu user.
 
 Use HTTPS for Mailu and the identity provider, keep client secrets out of source
 control, and keep ``OIDC_REQUIRE_EMAIL_VERIFIED=true`` unless your provider has a

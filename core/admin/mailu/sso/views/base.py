@@ -1,6 +1,6 @@
 from werkzeug.utils import redirect
 from mailu import models, utils
-from mailu.sso import sso, forms
+from mailu.sso import sso, forms, oidc
 from mailu.ui import access
 
 from flask import current_app as app
@@ -67,7 +67,19 @@ def login():
             utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username, form.pw.data) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip, username)
             flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: failed: badauth: {utils.truncated_pw_hash(form.pw.data)}')
             flask.flash(_('Wrong e-mail or password'), 'error')
-    return flask.render_template('login.html', form=form, fields=fields)
+    return flask.render_template('login.html', form=form, fields=fields, oidc_enabled=oidc.enabled())
+
+@sso.route('/oidc/login', methods=['GET'])
+def oidc_login():
+    if not oidc.enabled():
+        flask.abort(404)
+    return flask.redirect(oidc.authorize_url())
+
+@sso.route('/oidc/callback', methods=['GET'])
+def oidc_callback():
+    if not oidc.enabled():
+        flask.abort(404)
+    return oidc.handle_callback()
 
 @sso.route('/pw_change', methods=['GET', 'POST'])
 @access.authenticated

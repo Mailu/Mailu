@@ -96,6 +96,21 @@ DEFAULT_CONFIG = {
     'PROXY_AUTH_HEADER': 'X-Auth-Email',
     'PROXY_AUTH_CREATE': False,
     'PROXY_AUTH_LOGOUT_URL': None,
+    'OIDC_ENABLED': False,
+    'OIDC_DISCOVERY_URL': '',
+    'OIDC_ISSUER': '',
+    'OIDC_AUTHORIZATION_ENDPOINT': '',
+    'OIDC_TOKEN_ENDPOINT': '',
+    'OIDC_USERINFO_ENDPOINT': '',
+    'OIDC_CLIENT_ID': '',
+    'OIDC_CLIENT_SECRET': '',
+    'OIDC_CLIENT_AUTH_METHOD': 'client_secret_basic',
+    'OIDC_REDIRECT_URI': '',
+    'OIDC_SCOPES': 'openid email profile',
+    'OIDC_EMAIL_CLAIM': 'email',
+    'OIDC_REQUIRE_EMAIL_VERIFIED': True,
+    'OIDC_CREATE_USER': False,
+    'OIDC_ALLOWED_DOMAINS': '',
     'SUBNET': '192.168.203.0/24',
     'SUBNET6': None,
 }
@@ -163,6 +178,7 @@ class ConfigManager:
         self.config['AUTH_RATELIMIT_IP_V6_MASK'] = int(self.config['AUTH_RATELIMIT_IP_V6_MASK'])
         self.config['AUTH_RATELIMIT_EXEMPTION'] = set(ipaddress.ip_network(cidr, False) for cidr in (cidr.strip() for cidr in self.config['AUTH_RATELIMIT_EXEMPTION'].split(',')) if cidr)
         self.config['MESSAGE_RATELIMIT_EXEMPTION'] = set([s for s in self.config['MESSAGE_RATELIMIT_EXEMPTION'].lower().replace(' ', '').split(',') if s])
+        self.config['OIDC_ALLOWED_DOMAINS'] = set([s for s in self.config['OIDC_ALLOWED_DOMAINS'].lower().replace(' ', '').split(',') if s])
         hostnames = [host.strip() for host in self.config['HOSTNAMES'].split(',')]
         self.config['HOSTNAMES'] = ','.join(hostnames)
         self.config['HOSTNAME'] = hostnames[0]

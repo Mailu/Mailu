@@ -46,8 +46,30 @@ def _scim_error(status, detail, scim_type=None):
 def _payload():
     data = flask.request.get_json(silent=True)
     if data is None:
-        return {}
-    return data
+        return {}, None
+    if not isinstance(data, dict):
+        return None, _scim_error(400, 'Request body must be a JSON object', 'invalidSyntax')
+    return data, None
+
+
+def _parse_positive_int(value, default, *, minimum=0):
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return None
+    return max(parsed, minimum)
+
+
+def _active_value(value):
+    if isinstance(value, bool):
+        return value, None
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered == 'true':
+            return True, None
+        if lowered == 'false':
+            return False, None
+    return None, _scim_error(400, 'active must be a boolean', 'invalidValue')
 
 
 def _user_email(data):
@@ -55,6 +77,8 @@ def _user_email(data):
     if user_name:
         return user_name
     for email in data.get('emails') or []:
+        if not isinstance(email, dict):
+            continue
         value = (email.get('value') or '').strip().lower()
         if value:
             return value
@@ -114,20 +138,34 @@ def _validate_user_domain(email):
 
 def _apply_user_data(user, data, *, replacing=False):
     if replacing:
-        user.enabled = bool(data.get('active', True))
+        if 'active' in data:
+            active, error = _active_value(data['active'])
+            if error:
+                return error
+            user.enabled = active
+        else:
+            user.enabled = True
     elif 'active' in data:
-        user.enabled = bool(data['active'])
+        active, error = _active_value(data['active'])
+        if error:
+            return error
+        user.enabled = active
 
     display_name = _display_name(data)
     if display_name:
         user.displayed_name = display_name
     if data.get('password'):
         user.set_password(data['password'])
+    return None
 
 
 def _patch_user(user, data):
     operations = data.get('Operations') or data.get('operations') or []
+    if not isinstance(operations, list):
+        return _scim_error(400, 'Operations must be a list', 'invalidSyntax')
     for operation in operations:
+        if not isinstance(operation, dict):
+            return _scim_error(400, 'Patch operations must be objects', 'invalidSyntax')
         op = (operation.get('op') or 'replace').lower()
         path = (operation.get('path') or '').lower()
         value = operation.get('value')
@@ -135,9 +173,15 @@ def _patch_user(user, data):
             continue
         if path in ('active', '') and (path or isinstance(value, dict)):
             if path == 'active':
-                user.enabled = bool(value)
+                active, error = _active_value(value)
+                if error:
+                    return error
+                user.enabled = active
             elif isinstance(value, dict) and 'active' in value:
-                user.enabled = bool(value['active'])
+                active, error = _active_value(value['active'])
+                if error:
+                    return error
+                user.enabled = active
         if path in ('displayname', '') and (path or isinstance(value, dict)):
             if path == 'displayname' and value is not None:
                 user.displayed_name = str(value)
@@ -155,6 +199,7 @@ def _patch_user(user, data):
                 user.set_password(str(value))
             elif isinstance(value, dict) and value.get('password'):
                 user.set_password(value['password'])
+    return None
 
 
 @blueprint.before_request
@@ -243,8 +288,10 @@ def unsupported_groups(group_id=None):
 
 @blueprint.route('/Users', methods=['GET'])
 def list_users():
-    start_index = max(int(flask.request.args.get('startIndex', 1)), 1)
-    count = max(int(flask.request.args.get('count', 100)), 0)
+    start_index = _parse_positive_int(flask.request.args.get('startIndex', 1), 1, minimum=1)
+    count = _parse_positive_int(flask.request.args.get('count', 100), 100, minimum=0)
+    if start_index is None or count is None:
+        return _scim_error(400, 'startIndex and count must be integers', 'invalidValue')
     query = models.User.query.order_by(models.User._email)
 
     filter_value = flask.request.args.get('filter')
@@ -268,7 +315,9 @@ def list_users():
 
 @blueprint.route('/Users', methods=['POST'])
 def create_user():
-    data = _payload()
+    data, error = _payload()
+    if error:
+        return error
     email = _user_email(data)
     if not email:
         return _scim_error(400, 'userName or emails[0].value is required', 'invalidValue')
@@ -280,7 +329,9 @@ def create_user():
     localpart, domain = domain_data
     user = models.User(localpart=localpart, domain=domain)
     user.set_password(data.get('password') or secrets.token_urlsafe())
-    _apply_user_data(user, data, replacing=True)
+    error = _apply_user_data(user, data, replacing=True)
+    if error:
+        return error
     models.db.session.add(user)
     models.db.session.commit()
     return _scim_response(_make_user_resource(user), 201)
@@ -299,11 +350,15 @@ def replace_user(user_id):
     user = _get_user(user_id)
     if not user:
         return _scim_error(404, f'User {user_id} cannot be found')
-    data = _payload()
+    data, error = _payload()
+    if error:
+        return error
     new_email = _user_email(data)
     if new_email and new_email != user.email:
         return _scim_error(400, 'Changing userName/email is not supported', 'mutability')
-    _apply_user_data(user, data, replacing=True)
+    error = _apply_user_data(user, data, replacing=True)
+    if error:
+        return error
     models.db.session.add(user)
     models.db.session.commit()
     return _scim_response(_make_user_resource(user))
@@ -314,7 +369,12 @@ def patch_user(user_id):
     user = _get_user(user_id)
     if not user:
         return _scim_error(404, f'User {user_id} cannot be found')
-    _patch_user(user, _payload())
+    data, error = _payload()
+    if error:
+        return error
+    error = _patch_user(user, data)
+    if error:
+        return error
     models.db.session.add(user)
     models.db.session.commit()
     return _scim_response(_make_user_resource(user))

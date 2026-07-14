@@ -133,3 +133,76 @@ def test_scim_delete_disables_user_without_removing_mailbox(app, client):
         user = models.db.session.get(models.User, 'dave@example.com')
         assert user is not None
         assert user.enabled is False
+
+
+def test_scim_list_rejects_invalid_pagination(app, client):
+    rv = client.get('/api/scim/v2/Users?startIndex=nope', headers=auth_headers(app))
+
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data['schemas'] == ['urn:ietf:params:scim:api:messages:2.0:Error']
+    assert data['scimType'] == 'invalidValue'
+
+
+def test_scim_create_rejects_non_object_payload(app, client):
+    rv = client.post('/api/scim/v2/Users', json=[], headers=auth_headers(app))
+
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data['scimType'] == 'invalidSyntax'
+
+
+def test_scim_create_parses_string_false_active(app, client):
+    with app.app_context():
+        create_domain()
+
+    payload = {
+        'userName': 'erin@example.com',
+        'active': 'false',
+    }
+    rv = client.post('/api/scim/v2/Users', json=payload, headers=auth_headers(app))
+
+    assert rv.status_code == 201
+    assert rv.get_json()['active'] is False
+    with app.app_context():
+        user = models.db.session.get(models.User, 'erin@example.com')
+        assert user.enabled is False
+
+
+def test_scim_patch_rejects_invalid_active_value(app, client):
+    with app.app_context():
+        domain = create_domain()
+        user = models.User(localpart='frank', domain=domain)
+        user.set_password('secret')
+        models.db.session.add(user)
+        models.db.session.commit()
+
+    payload = {
+        'schemas': ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+        'Operations': [{'op': 'replace', 'path': 'active', 'value': 'maybe'}],
+    }
+    rv = client.patch('/api/scim/v2/Users/frank@example.com', json=payload, headers=auth_headers(app))
+
+    assert rv.status_code == 400
+    assert rv.get_json()['scimType'] == 'invalidValue'
+    with app.app_context():
+        user = models.db.session.get(models.User, 'frank@example.com')
+        assert user.enabled is True
+
+
+def test_scim_patch_rejects_non_object_operations(app, client):
+    with app.app_context():
+        domain = create_domain()
+        user = models.User(localpart='grace', domain=domain)
+        user.set_password('secret')
+        models.db.session.add(user)
+        models.db.session.commit()
+
+    rv = client.patch(
+        '/api/scim/v2/Users/grace@example.com',
+        json={'Operations': ['not-an-object']},
+        headers=auth_headers(app),
+    )
+
+    assert rv.status_code == 400
+    assert rv.get_json()['scimType'] == 'invalidSyntax'

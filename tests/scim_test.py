@@ -21,18 +21,84 @@ def test_scim_service_provider_config(app, client):
     assert rv.status_code == 200
     data = rv.get_json()
     assert data['patch']['supported'] is True
-    assert data['bulk']['supported'] is False
+    assert data['bulk']['supported'] is True
+    assert data['etag']['supported'] is True
     assert data['authenticationSchemes'][0]['type'] == 'oauthbearertoken'
 
 
-def test_scim_groups_are_explicitly_unsupported(app, client):
-    rv = client.get('/api/scim/v2/Groups', headers=auth_headers(app))
+def test_scim_groups_are_backed_by_aliases(app, client):
+    with app.app_context():
+        create_domain()
+        domain = models.db.session.get(models.Domain, 'example.com')
+        user = models.User(localpart='alice', domain=domain)
+        user.set_password('secret')
+        models.db.session.add(user)
+        models.db.session.commit()
+
+    payload = {
+        'schemas': ['urn:ietf:params:scim:schemas:core:2.0:Group'],
+        'displayName': 'admins@example.com',
+        'members': [{'value': 'alice@example.com'}],
+    }
+    rv = client.post('/api/scim/v2/Groups', json=payload, headers=auth_headers(app))
+
+    assert rv.status_code == 201
+    data = rv.get_json()
+    assert data['id'] == 'admins@example.com'
+    assert data['displayName'] == 'admins@example.com'
+    assert data['members'][0]['value'] == 'alice@example.com'
+    assert data['meta']['resourceType'] == 'Group'
+    assert data['meta']['version'].startswith('W/"')
+
+    with app.app_context():
+        alias = models.db.session.get(models.Alias, 'admins@example.com')
+        assert alias is not None
+        assert alias.destination == ['alice@example.com']
+
+    rv = client.get('/api/scim/v2/Groups/admins@example.com', headers=auth_headers(app))
+    assert rv.status_code == 200
+    assert rv.get_json()['members'][0]['value'] == 'alice@example.com'
+
+
+def test_scim_group_patch_updates_alias_members(app, client):
+    with app.app_context():
+        domain = create_domain()
+        alias = models.Alias(localpart='team', domain=domain, destination=['alice@example.com'])
+        models.db.session.add(alias)
+        models.db.session.commit()
+
+    payload = {
+        'schemas': ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+        'Operations': [
+            {'op': 'add', 'path': 'members', 'value': [{'value': 'bob@example.com'}]},
+            {'op': 'remove', 'path': 'members', 'value': [{'value': 'alice@example.com'}]},
+        ],
+    }
+    rv = client.patch('/api/scim/v2/Groups/team@example.com', json=payload, headers=auth_headers(app))
 
     assert rv.status_code == 200
-    assert rv.get_json()['Resources'] == []
+    assert [member['value'] for member in rv.get_json()['members']] == ['bob@example.com']
+    with app.app_context():
+        alias = models.db.session.get(models.Alias, 'team@example.com')
+        assert alias.destination == ['bob@example.com']
 
-    rv = client.post('/api/scim/v2/Groups', json={'displayName': 'admins'}, headers=auth_headers(app))
-    assert rv.status_code == 501
+
+
+def test_scim_user_resources_include_etag_metadata(app, client):
+    with app.app_context():
+        domain = create_domain()
+        user = models.User(localpart='etag', domain=domain)
+        user.set_password('secret')
+        models.db.session.add(user)
+        models.db.session.commit()
+
+    rv = client.get('/api/scim/v2/Users/etag@example.com', headers=auth_headers(app))
+
+    assert rv.status_code == 200
+    meta = rv.get_json()['meta']
+    assert meta['resourceType'] == 'User'
+    assert meta['version'].startswith('W/"')
+    assert meta['created']
 
 
 def test_scim_create_and_get_user(app, client):
@@ -358,3 +424,56 @@ def test_scim_create_rejects_malformed_json(app, client):
 
     assert rv.status_code == 400
     assert rv.get_json()['scimType'] == 'invalidSyntax'
+
+
+def test_scim_bulk_creates_user_and_group(app, client):
+    with app.app_context():
+        create_domain()
+
+    payload = {
+        'schemas': ['urn:ietf:params:scim:api:messages:2.0:BulkRequest'],
+        'Operations': [
+            {
+                'method': 'POST',
+                'path': '/Users',
+                'bulkId': 'user1',
+                'data': {'userName': 'bulkuser@example.com', 'active': True},
+            },
+            {
+                'method': 'POST',
+                'path': '/Groups',
+                'bulkId': 'group1',
+                'data': {
+                    'displayName': 'bulkgroup@example.com',
+                    'members': [{'value': 'bulkuser@example.com'}],
+                },
+            },
+        ],
+    }
+    rv = client.post('/api/scim/v2/Bulk', json=payload, headers=auth_headers(app))
+
+    assert rv.status_code == 200
+    data = rv.get_json()
+    assert data['schemas'] == ['urn:ietf:params:scim:api:messages:2.0:BulkResponse']
+    assert [operation['status'] for operation in data['Operations']] == ['201', '201']
+    with app.app_context():
+        assert models.db.session.get(models.User, 'bulkuser@example.com') is not None
+        alias = models.db.session.get(models.Alias, 'bulkgroup@example.com')
+        assert alias is not None
+        assert alias.destination == ['bulkuser@example.com']
+
+
+def test_scim_bulk_stops_after_fail_on_errors(app, client):
+    payload = {
+        'failOnErrors': 1,
+        'Operations': [
+            {'method': 'POST', 'path': '/Users', 'data': {'userName': 'missing@example.com'}},
+            {'method': 'POST', 'path': '/Users', 'data': {'userName': 'never@example.com'}},
+        ],
+    }
+    rv = client.post('/api/scim/v2/Bulk', json=payload, headers=auth_headers(app))
+
+    assert rv.status_code == 200
+    operations = rv.get_json()['Operations']
+    assert len(operations) == 1
+    assert operations[0]['status'] == '404'

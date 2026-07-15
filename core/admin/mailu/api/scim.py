@@ -12,6 +12,8 @@ SCIM_GROUP_SCHEMA = 'urn:ietf:params:scim:schemas:core:2.0:Group'
 SCIM_LIST_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:ListResponse'
 SCIM_PATCH_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:PatchOp'
 SCIM_ERROR_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:Error'
+SCIM_BULK_REQUEST_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:BulkRequest'
+SCIM_BULK_RESPONSE_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:BulkResponse'
 
 blueprint = flask.Blueprint('scim', __name__)
 
@@ -30,6 +32,34 @@ def _scim_response(payload, status=200):
     response.status_code = status
     response.headers['Content-Type'] = 'application/scim+json'
     return response
+
+
+def _response_payload(response):
+    if isinstance(response, tuple):
+        response = response[0]
+    if response.status_code == 204:
+        return None
+    return response.get_json(silent=True)
+
+
+def _resource_version(resource):
+    value = getattr(resource, 'updated_at', None) or getattr(resource, 'created_at', None)
+    if not value:
+        return None
+    return f'W/"{value.isoformat()}"'
+
+
+def _resource_meta(resource_type, collection, resource_id, model):
+    meta = {
+        'resourceType': resource_type,
+        'location': _resource_location(collection, resource_id),
+    }
+    if getattr(model, 'created_at', None):
+        meta['created'] = model.created_at.isoformat()
+    version = _resource_version(model)
+    if version:
+        meta['version'] = version
+    return meta
 
 
 def _scim_error(status, detail, scim_type=None):
@@ -155,12 +185,127 @@ def _make_user_resource(user):
             'primary': True,
             'type': 'work',
         }],
-        'meta': {
-            'resourceType': 'User',
-            'location': _resource_location('Users', email),
-        },
+        'meta': _resource_meta('User', 'Users', email, user),
     }
     return payload
+
+
+def _get_group(group_id):
+    return models.db.session.get(models.Alias, group_id.lower())
+
+
+def _member_values(data):
+    members = data.get('members', [])
+    if members in (None, ''):
+        return [], None
+    if not isinstance(members, list):
+        return None, _scim_error(400, 'members must be a list', 'invalidValue')
+    values = []
+    for member in members:
+        if isinstance(member, str):
+            value = member
+        elif isinstance(member, dict):
+            value = member.get('value')
+        else:
+            return None, _scim_error(400, 'members must contain strings or objects', 'invalidValue')
+        if not isinstance(value, str) or not value.strip():
+            return None, _scim_error(400, 'member values must be non-empty strings', 'invalidValue')
+        value = value.strip().lower()
+        if not validators.email(value):
+            return None, _scim_error(400, f'{value!r} is not a valid member email address', 'invalidValue')
+        if value not in values:
+            values.append(value)
+    return values, None
+
+
+def _group_email(data):
+    for key in ('id', 'displayName'):
+        value = data.get(key)
+        if value not in (None, ''):
+            if not isinstance(value, str):
+                return None, _scim_error(400, f'{key} must be a string', 'invalidValue')
+            return value.strip().lower(), None
+    return '', None
+
+
+def _make_group_resource(group):
+    email = group.email
+    return {
+        'schemas': [SCIM_GROUP_SCHEMA],
+        'id': email,
+        'displayName': group.comment or email,
+        'members': [{
+            'value': destination,
+            'display': destination,
+            '$ref': _resource_location('Users', destination),
+        } for destination in group.destination],
+        'meta': _resource_meta('Group', 'Groups', email, group),
+    }
+
+
+def _validate_alias_domain(email):
+    if not validators.email(email):
+        return None, _scim_error(400, f'{email!r} is not a valid email address', 'invalidValue')
+    localpart, domain_name = email.rsplit('@', 1)
+    domain = models.db.session.get(models.Domain, domain_name)
+    if not domain:
+        return None, _scim_error(404, f'Domain {domain_name} does not exist')
+    if domain.max_aliases != -1 and len(domain.aliases) >= domain.max_aliases:
+        return None, _scim_error(409, f'Too many aliases for domain {domain_name}', 'uniqueness')
+    return (localpart, domain), None
+
+
+def _apply_group_data(group, data, *, replacing=False):
+    if 'displayName' in data and data.get('displayName') != group.email:
+        group.comment = _string_value(data.get('displayName')).strip()
+    if replacing or 'members' in data:
+        members, error = _member_values(data)
+        if error:
+            return error
+        group.destination = members
+    return None
+
+
+def _patch_group(group, data):
+    operations = data['Operations'] if 'Operations' in data else data.get('operations')
+    if not isinstance(operations, list):
+        return _scim_error(400, 'Operations must be a list', 'invalidSyntax')
+    if not operations:
+        return _scim_error(400, 'Operations must not be empty', 'invalidValue')
+    for operation in operations:
+        if not isinstance(operation, dict):
+            return _scim_error(400, 'Patch operations must be objects', 'invalidSyntax')
+        op = _string_value(operation.get('op') or 'replace').lower()
+        path = _string_value(operation.get('path')).lower()
+        value = operation.get('value')
+        if op not in ('add', 'replace', 'remove'):
+            return _scim_error(400, f'Patch operation {op!r} is not supported', 'mutability')
+        if path in ('displayname', '') and op in ('add', 'replace'):
+            if path == 'displayname':
+                group.comment = _string_value(value).strip()
+                continue
+            if isinstance(value, dict) and 'displayName' in value:
+                group.comment = _string_value(value.get('displayName')).strip()
+                continue
+        if path in ('members', ''):
+            if path == 'members':
+                member_data = {'members': value if isinstance(value, list) else [value]}
+            elif isinstance(value, dict) and 'members' in value:
+                member_data = {'members': value.get('members')}
+            else:
+                return _scim_error(400, f'Patch path {path!r} is not supported', 'invalidPath')
+            members, error = _member_values(member_data)
+            if error:
+                return error
+            if op == 'remove':
+                group.destination = [member for member in group.destination if member not in members]
+            elif op == 'add':
+                group.destination = group.destination + [member for member in members if member not in group.destination]
+            else:
+                group.destination = members
+            continue
+        return _scim_error(400, f'Patch path {path!r} is not supported', 'invalidPath')
+    return None
 
 
 def _validate_user_domain(email):
@@ -283,11 +428,11 @@ def service_provider_config():
     return _scim_response({
         'schemas': ['urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig'],
         'patch': {'supported': True},
-        'bulk': {'supported': False, 'maxOperations': 0, 'maxPayloadSize': 0},
+        'bulk': {'supported': True, 'maxOperations': 100, 'maxPayloadSize': 1048576},
         'filter': {'supported': True, 'maxResults': 200},
         'changePassword': {'supported': True},
         'sort': {'supported': False},
-        'etag': {'supported': False},
+        'etag': {'supported': True},
         'authenticationSchemes': [{
             'type': 'oauthbearertoken',
             'name': 'Bearer',
@@ -300,54 +445,189 @@ def service_provider_config():
 
 @blueprint.route('/ResourceTypes', methods=['GET'])
 def resource_types():
-    return _scim_response({
-        'schemas': [SCIM_LIST_SCHEMA],
-        'totalResults': 1,
-        'startIndex': 1,
-        'itemsPerPage': 1,
-        'Resources': [{
+    resources = [
+        {
             'schemas': ['urn:ietf:params:scim:schemas:core:2.0:ResourceType'],
             'id': 'User',
             'name': 'User',
             'endpoint': '/Users',
             'schema': SCIM_USER_SCHEMA,
             'meta': {'resourceType': 'ResourceType', 'location': _resource_location('ResourceTypes', 'User')},
-        }],
+        },
+        {
+            'schemas': ['urn:ietf:params:scim:schemas:core:2.0:ResourceType'],
+            'id': 'Group',
+            'name': 'Group',
+            'endpoint': '/Groups',
+            'schema': SCIM_GROUP_SCHEMA,
+            'meta': {'resourceType': 'ResourceType', 'location': _resource_location('ResourceTypes', 'Group')},
+        },
+    ]
+    return _scim_response({
+        'schemas': [SCIM_LIST_SCHEMA],
+        'totalResults': len(resources),
+        'startIndex': 1,
+        'itemsPerPage': len(resources),
+        'Resources': resources,
     })
 
 
 @blueprint.route('/Schemas', methods=['GET'])
 def schemas():
-    return _scim_response({
-        'schemas': [SCIM_LIST_SCHEMA],
-        'totalResults': 1,
-        'startIndex': 1,
-        'itemsPerPage': 1,
-        'Resources': [{
+    resources = [
+        {
             'id': SCIM_USER_SCHEMA,
             'name': 'User',
             'description': 'Mailu SCIM user schema subset',
             'attributes': [],
             'meta': {'resourceType': 'Schema', 'location': _resource_location('Schemas', SCIM_USER_SCHEMA)},
-        }],
+        },
+        {
+            'id': SCIM_GROUP_SCHEMA,
+            'name': 'Group',
+            'description': 'Mailu SCIM group schema subset backed by aliases',
+            'attributes': [],
+            'meta': {'resourceType': 'Schema', 'location': _resource_location('Schemas', SCIM_GROUP_SCHEMA)},
+        },
+    ]
+    return _scim_response({
+        'schemas': [SCIM_LIST_SCHEMA],
+        'totalResults': len(resources),
+        'startIndex': 1,
+        'itemsPerPage': len(resources),
+        'Resources': resources,
     })
+
+
+def _list_groups_response():
+    start_index = _parse_positive_int(flask.request.args.get('startIndex', 1), 1, minimum=1)
+    count = _parse_positive_int(flask.request.args.get('count', 100), 100, minimum=0, maximum=200)
+    if start_index is None or count is None:
+        return _scim_error(400, 'startIndex and count must be integers', 'invalidValue')
+    query = models.Alias.query.order_by(models.Alias._email)
+
+    filter_value = flask.request.args.get('filter')
+    if filter_value:
+        prefix = 'displayName eq '
+        if not filter_value.startswith(prefix):
+            return _scim_error(400, 'Only displayName eq filters are supported', 'invalidFilter')
+        email = filter_value[len(prefix):].strip().strip('"').lower()
+        query = query.filter_by(email=email)
+
+    total = query.count()
+    groups = query.offset(start_index - 1).limit(count).all() if count else []
+    return _scim_response({
+        'schemas': [SCIM_LIST_SCHEMA],
+        'totalResults': total,
+        'startIndex': start_index,
+        'itemsPerPage': len(groups),
+        'Resources': [_make_group_resource(group) for group in groups],
+    })
+
+
+def _create_group_response(data):
+    email, error = _group_email(data)
+    if error:
+        return error
+    if not email:
+        return _scim_error(400, 'displayName is required', 'invalidValue')
+    if _get_group(email):
+        return _scim_error(409, f'Group {email} already exists', 'uniqueness')
+    domain_data, error = _validate_alias_domain(email)
+    if error:
+        return error
+    localpart, domain = domain_data
+    group = models.Alias(localpart=localpart, domain=domain, destination=[])
+    error = _apply_group_data(group, data, replacing=True)
+    if error:
+        return error
+    models.db.session.add(group)
+    models.db.session.commit()
+    return _scim_response(_make_group_resource(group), 201)
+
+
+def _get_group_response(group_id):
+    group = _get_group(group_id)
+    if not group:
+        return _scim_error(404, f'Group {group_id} cannot be found')
+    return _scim_response(_make_group_resource(group))
+
+
+def _replace_group_response(group_id, data):
+    group = _get_group(group_id)
+    if not group:
+        return _scim_error(404, f'Group {group_id} cannot be found')
+    new_email, error = _group_email(data)
+    if error:
+        return error
+    if new_email and new_email != group.email:
+        return _scim_error(400, 'Changing group id/displayName is not supported', 'mutability')
+    error = _apply_group_data(group, data, replacing=True)
+    if error:
+        return error
+    models.db.session.add(group)
+    models.db.session.commit()
+    return _scim_response(_make_group_resource(group))
+
+
+def _patch_group_response(group_id, data):
+    group = _get_group(group_id)
+    if not group:
+        return _scim_error(404, f'Group {group_id} cannot be found')
+    error = _patch_group(group, data)
+    if error:
+        return error
+    models.db.session.add(group)
+    models.db.session.commit()
+    return _scim_response(_make_group_resource(group))
+
+
+def _delete_group_response(group_id):
+    group = _get_group(group_id)
+    if not group:
+        return '', 204
+    models.db.session.delete(group)
+    models.db.session.commit()
+    return '', 204
 
 
 @blueprint.route('/Groups', methods=['GET'])
 def list_groups():
-    return _scim_response({
-        'schemas': [SCIM_LIST_SCHEMA],
-        'totalResults': 0,
-        'startIndex': 1,
-        'itemsPerPage': 0,
-        'Resources': [],
-    })
+    return _list_groups_response()
 
 
 @blueprint.route('/Groups', methods=['POST'])
-@blueprint.route('/Groups/<path:group_id>', methods=['GET', 'PUT', 'PATCH', 'DELETE'])
-def unsupported_groups(group_id=None):
-    return _scim_error(501, 'Mailu SCIM currently provisions users only; groups are not supported')
+def create_group():
+    data, error = _payload()
+    if error:
+        return error
+    return _create_group_response(data)
+
+
+@blueprint.route('/Groups/<path:group_id>', methods=['GET'])
+def get_group(group_id):
+    return _get_group_response(group_id)
+
+
+@blueprint.route('/Groups/<path:group_id>', methods=['PUT'])
+def replace_group(group_id):
+    data, error = _payload()
+    if error:
+        return error
+    return _replace_group_response(group_id, data)
+
+
+@blueprint.route('/Groups/<path:group_id>', methods=['PATCH'])
+def patch_group(group_id):
+    data, error = _payload()
+    if error:
+        return error
+    return _patch_group_response(group_id, data)
+
+
+@blueprint.route('/Groups/<path:group_id>', methods=['DELETE'])
+def delete_group(group_id):
+    return _delete_group_response(group_id)
 
 
 @blueprint.route('/Users', methods=['GET'])
@@ -377,11 +657,7 @@ def list_users():
     })
 
 
-@blueprint.route('/Users', methods=['POST'])
-def create_user():
-    data, error = _payload()
-    if error:
-        return error
+def _create_user_response(data):
     email, error = _user_email(data)
     if error:
         return error
@@ -414,14 +690,10 @@ def get_user(user_id):
     return _scim_response(_make_user_resource(user))
 
 
-@blueprint.route('/Users/<path:user_id>', methods=['PUT'])
-def replace_user(user_id):
+def _replace_user_response(user_id, data):
     user = _get_user(user_id)
     if not user:
         return _scim_error(404, f'User {user_id} cannot be found')
-    data, error = _payload()
-    if error:
-        return error
     new_email, error = _user_email(data)
     if error:
         return error
@@ -435,14 +707,10 @@ def replace_user(user_id):
     return _scim_response(_make_user_resource(user))
 
 
-@blueprint.route('/Users/<path:user_id>', methods=['PATCH'])
-def patch_user(user_id):
+def _patch_user_response(user_id, data):
     user = _get_user(user_id)
     if not user:
         return _scim_error(404, f'User {user_id} cannot be found')
-    data, error = _payload()
-    if error:
-        return error
     error = _patch_user(user, data)
     if error:
         return error
@@ -451,8 +719,7 @@ def patch_user(user_id):
     return _scim_response(_make_user_resource(user))
 
 
-@blueprint.route('/Users/<path:user_id>', methods=['DELETE'])
-def delete_user(user_id):
+def _delete_user_response(user_id):
     user = _get_user(user_id)
     if not user:
         return '', 204
@@ -460,3 +727,128 @@ def delete_user(user_id):
     models.db.session.add(user)
     models.db.session.commit()
     return '', 204
+
+@blueprint.route('/Users', methods=['POST'])
+def create_user():
+    data, error = _payload()
+    if error:
+        return error
+    return _create_user_response(data)
+
+
+@blueprint.route('/Users/<path:user_id>', methods=['PUT'])
+def replace_user(user_id):
+    data, error = _payload()
+    if error:
+        return error
+    return _replace_user_response(user_id, data)
+
+
+@blueprint.route('/Users/<path:user_id>', methods=['PATCH'])
+def patch_user(user_id):
+    data, error = _payload()
+    if error:
+        return error
+    return _patch_user_response(user_id, data)
+
+
+@blueprint.route('/Users/<path:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    return _delete_user_response(user_id)
+
+
+def _bulk_response(operation, bulk_ids):
+    method = _string_value(operation.get('method')).upper()
+    path = _string_value(operation.get('path')).lstrip('/')
+    data = operation.get('data') or {}
+    if not method or not path:
+        return {'status': '400', 'response': _response_payload(_scim_error(400, 'Bulk operations require method and path', 'invalidValue'))}, None
+    if not isinstance(data, dict):
+        return {'status': '400', 'response': _response_payload(_scim_error(400, 'Bulk operation data must be an object', 'invalidSyntax'))}, None
+
+    for key, value in list(data.items()):
+        if isinstance(value, str) and value.startswith('bulkId:'):
+            data[key] = bulk_ids.get(value[7:], value)
+
+    parts = path.split('/', 1)
+    collection = parts[0]
+    resource_id = parts[1] if len(parts) > 1 else None
+    if collection == 'Users':
+        if method == 'POST' and resource_id is None:
+            response = _create_user_response(data)
+        elif method == 'GET' and resource_id:
+            response = get_user(resource_id)
+        elif method == 'PUT' and resource_id:
+            response = _replace_user_response(resource_id, data)
+        elif method == 'PATCH' and resource_id:
+            response = _patch_user_response(resource_id, data)
+        elif method == 'DELETE' and resource_id:
+            response = _delete_user_response(resource_id)
+        else:
+            response = _scim_error(400, f'Unsupported bulk path {path!r}', 'invalidPath')
+    elif collection == 'Groups':
+        if method == 'POST' and resource_id is None:
+            response = _create_group_response(data)
+        elif method == 'GET' and resource_id:
+            response = _get_group_response(resource_id)
+        elif method == 'PUT' and resource_id:
+            response = _replace_group_response(resource_id, data)
+        elif method == 'PATCH' and resource_id:
+            response = _patch_group_response(resource_id, data)
+        elif method == 'DELETE' and resource_id:
+            response = _delete_group_response(resource_id)
+        else:
+            response = _scim_error(400, f'Unsupported bulk path {path!r}', 'invalidPath')
+    else:
+        response = _scim_error(400, f'Unsupported bulk path {path!r}', 'invalidPath')
+
+    if isinstance(response, tuple):
+        status = response[1]
+        payload = None
+        location = None
+    else:
+        status = response.status_code
+        payload = _response_payload(response)
+        location = payload.get('meta', {}).get('location') if isinstance(payload, dict) else None
+    item = {'status': str(status)}
+    if operation.get('bulkId'):
+        item['bulkId'] = operation['bulkId']
+    if location:
+        item['location'] = location
+    if payload is not None:
+        item['response'] = payload
+    resource_id = payload.get('id') if isinstance(payload, dict) else None
+    return item, resource_id
+
+
+@blueprint.route('/Bulk', methods=['POST'])
+def bulk():
+    data, error = _payload()
+    if error:
+        return error
+    operations = data.get('Operations') or data.get('operations')
+    if not isinstance(operations, list):
+        return _scim_error(400, 'Operations must be a list', 'invalidSyntax')
+    if len(operations) > 100:
+        return _scim_error(413, 'Too many bulk operations', 'tooMany')
+    fail_on_errors = _parse_positive_int(data.get('failOnErrors', len(operations)), len(operations), minimum=0)
+    responses = []
+    errors = 0
+    bulk_ids = {}
+    for operation in operations:
+        if not isinstance(operation, dict):
+            responses.append({'status': '400', 'response': _response_payload(_scim_error(400, 'Bulk operations must be objects', 'invalidSyntax'))})
+            errors += 1
+        else:
+            response, resource_id = _bulk_response(operation, bulk_ids)
+            responses.append(response)
+            if operation.get('bulkId') and resource_id:
+                bulk_ids[operation['bulkId']] = resource_id
+            if int(response['status']) >= 400:
+                errors += 1
+        if fail_on_errors and errors >= fail_on_errors:
+            break
+    return _scim_response({
+        'schemas': [SCIM_BULK_RESPONSE_SCHEMA],
+        'Operations': responses,
+    })

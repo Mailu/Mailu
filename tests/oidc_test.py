@@ -4,7 +4,7 @@ import time
 from urllib.parse import parse_qs, urlparse
 
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519, padding, rsa, utils
 
 from mailu import models
 from mailu.sso import oidc
@@ -41,6 +41,53 @@ def jwk_from_private_key(private_key, kid='test-key'):
     }
 
 
+def jwk_from_ec_private_key(private_key, kid='test-ec-key'):
+    numbers = private_key.public_key().public_numbers()
+    return {
+        'kty': 'EC',
+        'use': 'sig',
+        'alg': 'ES256',
+        'kid': kid,
+        'crv': 'P-256',
+        'x': b64url_uint(numbers.x),
+        'y': b64url_uint(numbers.y),
+    }
+
+
+def jwk_from_ed25519_private_key(private_key, kid='test-ed-key'):
+    public_bytes = private_key.public_key().public_bytes_raw()
+    return {
+        'kty': 'OKP',
+        'use': 'sig',
+        'alg': 'EdDSA',
+        'kid': kid,
+        'crv': 'Ed25519',
+        'x': b64url(public_bytes),
+    }
+
+
+def signed_es256_id_token(private_key, claims, kid='test-ec-key'):
+    header = {'typ': 'JWT', 'alg': 'ES256', 'kid': kid}
+    signing_input = '.'.join([
+        b64url(json.dumps(header, separators=(',', ':')).encode('utf-8')),
+        b64url(json.dumps(claims, separators=(',', ':')).encode('utf-8')),
+    ])
+    der_signature = private_key.sign(signing_input.encode('ascii'), ec.ECDSA(hashes.SHA256()))
+    r, s = utils.decode_dss_signature(der_signature)
+    signature = r.to_bytes(32, 'big') + s.to_bytes(32, 'big')
+    return f'{signing_input}.{b64url(signature)}'
+
+
+def signed_eddsa_id_token(private_key, claims, kid='test-ed-key'):
+    header = {'typ': 'JWT', 'alg': 'EdDSA', 'kid': kid}
+    signing_input = '.'.join([
+        b64url(json.dumps(header, separators=(',', ':')).encode('utf-8')),
+        b64url(json.dumps(claims, separators=(',', ':')).encode('utf-8')),
+    ])
+    signature = private_key.sign(signing_input.encode('ascii'))
+    return f'{signing_input}.{b64url(signature)}'
+
+
 def signed_id_token(private_key, claims, kid='test-key'):
     header = {'typ': 'JWT', 'alg': 'RS256', 'kid': kid}
     signing_input = '.'.join([
@@ -67,7 +114,7 @@ def configure_oidc(app):
         'OIDC_REQUIRE_EMAIL_VERIFIED': True,
         'OIDC_CREATE_USER': False,
         'OIDC_ALLOWED_DOMAINS': set(),
-        'OIDC_JWT_ALGORITHMS': {'RS256'},
+        'OIDC_JWT_ALGORITHMS': {'EdDSA', 'ES256', 'RS256'},
         'OIDC_JWKS_CACHE_SECONDS': 3600,
         'OIDC_CLOCK_SKEW_SECONDS': 60,
     })
@@ -155,6 +202,78 @@ def test_oidc_callback_validates_jwt_and_logs_in_existing_user(app, client, monk
     assert captured['auth'] == ('mailu', 'secret')
     with client.session_transaction() as session:
         assert session['_user_id'] == user.email
+
+
+def test_oidc_callback_accepts_es256_id_token(app, client, monkeypatch):
+    configure_oidc(app)
+    user = create_domain_and_user()
+    private_key = ec.generate_private_key(ec.SECP256R1())
+    jwks = {'keys': [jwk_from_ec_private_key(private_key)]}
+
+    monkeypatch.setattr(oidc.requests, 'post', lambda *args, **kwargs: FakeResponse({
+        'access_token': 'access-token',
+        'id_token': signed_es256_id_token(private_key, id_token_claims(app, client, user.email)),
+    }))
+    monkeypatch.setattr(oidc.requests, 'get', lambda *args, **kwargs: FakeResponse(jwks))
+
+    login = client.get('/sso/oidc/login')
+    state = parse_qs(urlparse(login.headers['Location']).query)['state'][0]
+    rv = client.get(f'/sso/oidc/callback?code=abc&state={state}')
+
+    assert rv.status_code == 302
+    assert rv.headers['Location'] == '/admin'
+    with client.session_transaction() as session:
+        assert session['_user_id'] == user.email
+
+
+def test_oidc_callback_accepts_eddsa_id_token(app, client, monkeypatch):
+    configure_oidc(app)
+    user = create_domain_and_user()
+    private_key = ed25519.Ed25519PrivateKey.generate()
+    jwks = {'keys': [jwk_from_ed25519_private_key(private_key)]}
+
+    monkeypatch.setattr(oidc.requests, 'post', lambda *args, **kwargs: FakeResponse({
+        'access_token': 'access-token',
+        'id_token': signed_eddsa_id_token(private_key, id_token_claims(app, client, user.email)),
+    }))
+    monkeypatch.setattr(oidc.requests, 'get', lambda *args, **kwargs: FakeResponse(jwks))
+
+    login = client.get('/sso/oidc/login')
+    state = parse_qs(urlparse(login.headers['Location']).query)['state'][0]
+    rv = client.get(f'/sso/oidc/callback?code=abc&state={state}')
+
+    assert rv.status_code == 302
+    assert rv.headers['Location'] == '/admin'
+    with client.session_transaction() as session:
+        assert session['_user_id'] == user.email
+
+
+def test_oidc_callback_rejects_hs256_id_token(app, client, monkeypatch):
+    configure_oidc(app)
+    app.config['OIDC_JWT_ALGORITHMS'] = {'HS256', 'RS256'}
+    user = create_domain_and_user()
+    header = {'typ': 'JWT', 'alg': 'HS256', 'kid': 'symmetric'}
+    claims = id_token_claims(app, client, user.email)
+    signing_input = '.'.join([
+        b64url(json.dumps(header, separators=(',', ':')).encode('utf-8')),
+        b64url(json.dumps(claims, separators=(',', ':')).encode('utf-8')),
+    ])
+    token = f'{signing_input}.{b64url(b"not-a-valid-hmac")}'
+
+    monkeypatch.setattr(oidc.requests, 'post', lambda *args, **kwargs: FakeResponse({
+        'access_token': 'access-token',
+        'id_token': token,
+    }))
+    monkeypatch.setattr(oidc.requests, 'get', lambda *args, **kwargs: FakeResponse({'keys': []}))
+
+    login = client.get('/sso/oidc/login')
+    state = parse_qs(urlparse(login.headers['Location']).query)['state'][0]
+    rv = client.get(f'/sso/oidc/callback?code=abc&state={state}')
+
+    assert rv.status_code == 302
+    assert rv.headers['Location'] == '/sso/login'
+    with client.session_transaction() as session:
+        assert '_user_id' not in session
 
 
 def test_oidc_callback_rejects_invalid_state(app, client, monkeypatch):

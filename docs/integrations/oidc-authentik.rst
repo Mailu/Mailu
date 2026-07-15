@@ -14,14 +14,14 @@ Create an Authentik OAuth2/OpenID provider with:
 * Grant type: authorization code
 * Scopes: ``openid email profile``
 * Redirect URI: ``https://<mail-host>/sso/oidc/callback``
-* Signing key: select an RSA certificate/key pair so Authentik advertises and
-  signs ID tokens with ``RS256``
+* Signing key: select an asymmetric signing key. Prefer ``EdDSA`` or
+  ``ES256`` where supported; ``RS256`` remains accepted for providers that only
+  expose RSA signing keys.
 
 Mailu validates ID-token signatures against the provider JWKS and allows
-``RS256`` by default. If the Authentik provider has no signing key configured,
-Authentik may advertise a symmetric algorithm such as ``HS256``; Mailu rejects
-that default unless ``OIDC_JWT_ALGORITHMS`` is explicitly changed. Prefer an RSA
-signing key instead of allowing shared-secret token signatures.
+``EdDSA``, ``ES256``, and ``RS256`` by default. If the Authentik provider has no
+signing key configured, Authentik may advertise a symmetric algorithm such as
+``HS256``; Mailu rejects symmetric ``HS*`` ID tokens.
 
 Mailu configuration
 -------------------
@@ -56,7 +56,7 @@ Optional settings:
    OIDC_CREATE_USER=false
    OIDC_ALLOWED_DOMAINS=example.com,example.org
    OIDC_CLIENT_AUTH_METHOD=client_secret_basic
-   OIDC_JWT_ALGORITHMS=RS256
+   OIDC_JWT_ALGORITHMS=EdDSA,ES256,RS256
    OIDC_JWKS_CACHE_SECONDS=3600
    OIDC_CLOCK_SKEW_SECONDS=60
 

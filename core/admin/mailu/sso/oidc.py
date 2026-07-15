@@ -9,7 +9,7 @@ import flask
 import flask_login
 import requests
 from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519, padding, rsa, utils
 from cryptography.hazmat.primitives.hashes import SHA256, SHA384, SHA512
 from flask import current_app as app
 from flask_babel import lazy_gettext as _
@@ -18,9 +18,29 @@ from mailu import models
 
 
 JWT_ALGORITHMS = {
-    'RS256': (padding.PKCS1v15(), SHA256()),
-    'RS384': (padding.PKCS1v15(), SHA384()),
-    'RS512': (padding.PKCS1v15(), SHA512()),
+    'EdDSA': ('eddsa', None),
+    'ES256': ('ecdsa', SHA256()),
+    'ES384': ('ecdsa', SHA384()),
+    'ES512': ('ecdsa', SHA512()),
+    'RS256': ('rsa', SHA256()),
+    'RS384': ('rsa', SHA384()),
+    'RS512': ('rsa', SHA512()),
+}
+
+JWK_KEY_TYPES = {
+    'EdDSA': 'OKP',
+    'ES256': 'EC',
+    'ES384': 'EC',
+    'ES512': 'EC',
+    'RS256': 'RSA',
+    'RS384': 'RSA',
+    'RS512': 'RSA',
+}
+
+EC_CURVES = {
+    'P-256': ec.SECP256R1(),
+    'P-384': ec.SECP384R1(),
+    'P-521': ec.SECP521R1(),
 }
 
 
@@ -161,7 +181,8 @@ def fetch_jwks(jwks_uri):
 
 
 def _jwk_matches(header, jwk):
-    if jwk.get('kty') != 'RSA':
+    alg = header.get('alg')
+    if jwk.get('kty') != JWK_KEY_TYPES.get(alg):
         return False
     if jwk.get('use') not in (None, 'sig'):
         return False
@@ -173,18 +194,39 @@ def _jwk_matches(header, jwk):
 
 
 def _public_key_from_jwk(jwk):
-    if jwk.get('kty') != 'RSA':
-        raise ValueError('unsupported JWK key type')
-    numbers = rsa.RSAPublicNumbers(
-        e=_base64url_uint(jwk['e']),
-        n=_base64url_uint(jwk['n']),
-    )
-    return numbers.public_key()
+    if jwk.get('kty') == 'RSA':
+        numbers = rsa.RSAPublicNumbers(
+            e=_base64url_uint(jwk['e']),
+            n=_base64url_uint(jwk['n']),
+        )
+        return numbers.public_key()
+    if jwk.get('kty') == 'EC':
+        curve = EC_CURVES.get(jwk.get('crv'))
+        if not curve:
+            raise ValueError('unsupported EC JWK curve')
+        numbers = ec.EllipticCurvePublicNumbers(
+            x=_base64url_uint(jwk['x']),
+            y=_base64url_uint(jwk['y']),
+            curve=curve,
+        )
+        return numbers.public_key()
+    if jwk.get('kty') == 'OKP' and jwk.get('crv') == 'Ed25519':
+        return ed25519.Ed25519PublicKey.from_public_bytes(_base64url_decode(jwk['x']))
+    raise ValueError('unsupported JWK key type')
+
+
+def _ecdsa_signature_from_jose(signature):
+    size = len(signature) // 2
+    if not size or len(signature) % 2:
+        raise ValueError('invalid ECDSA signature')
+    r = int.from_bytes(signature[:size], 'big')
+    s = int.from_bytes(signature[size:], 'big')
+    return utils.encode_dss_signature(r, s)
 
 
 def _verify_signature(header, signing_input, signature, jwks):
     alg = header.get('alg')
-    allowed = app.config.get('OIDC_JWT_ALGORITHMS') or {'RS256'}
+    allowed = app.config.get('OIDC_JWT_ALGORITHMS') or {'EdDSA', 'ES256', 'RS256'}
     if alg not in allowed or alg not in JWT_ALGORITHMS:
         raise ValueError('unsupported or disallowed JWT algorithm')
 
@@ -192,11 +234,18 @@ def _verify_signature(header, signing_input, signature, jwks):
     if not candidates:
         raise ValueError('no matching JWK')
 
-    verifier, hash_algorithm = JWT_ALGORITHMS[alg]
+    family, hash_algorithm = JWT_ALGORITHMS[alg]
     for jwk in candidates:
         public_key = _public_key_from_jwk(jwk)
         try:
-            public_key.verify(signature, signing_input, verifier, hash_algorithm)
+            if family == 'rsa':
+                public_key.verify(signature, signing_input, padding.PKCS1v15(), hash_algorithm)
+            elif family == 'ecdsa':
+                public_key.verify(_ecdsa_signature_from_jose(signature), signing_input, ec.ECDSA(hash_algorithm))
+            elif family == 'eddsa':
+                public_key.verify(signature, signing_input)
+            else:
+                raise ValueError('unsupported JWT algorithm family')
             return
         except InvalidSignature:
             continue

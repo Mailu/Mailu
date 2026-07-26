@@ -10,7 +10,7 @@ def autoconfig_mozilla():
     hostname = app.config['HOSTNAME']
     xml = f'''<?xml version="1.0"?>
 <clientConfig version="1.1">
-<emailProvider id="%EMAILDOMAIN%">
+<emailProvider id="{hostname}">
 <domain>%EMAILDOMAIN%</domain>
 
 <displayName>Email</displayName>

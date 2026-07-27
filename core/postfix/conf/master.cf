@@ -2,7 +2,7 @@
 #               (yes)   (yes)   (yes)   (never) (100)
 
 # Exposed SMTP service
-smtp      inet  n       -       n       -       -       smtpd
+smtp      inet  n       -       -       -       1       postscreen
 
 # Internal SMTP service
 10025     inet  n       -       n       -       -       smtpd

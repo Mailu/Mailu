@@ -76,6 +76,16 @@ def has_dane_record(domain, timeout=10):
         app.logger.info(f'Error while looking up the TLSA record for {domain} {e}')
         pass
 
+def resolve(domain, v6=False, timeout=10):
+    try:
+        t = dns.rdatatype.AAAA if v6 else dns.rdatatype.A
+        result = resolver.resolve(domain, t, dns.rdataclass.IN, lifetime=timeout)
+        for record in result:
+            return record.address
+    except Exception as e:
+        app.logger.warn(f'Error while looking up the record for {domain} {v6} {e}')
+        return domain
+
 # Rate limiter
 limiter = limiter.LimitWraperFactory()
 

@@ -18,6 +18,7 @@ from .. import models, utils
 
 SCIM_USER_SCHEMA = 'urn:ietf:params:scim:schemas:core:2.0:User'
 SCIM_GROUP_SCHEMA = 'urn:ietf:params:scim:schemas:core:2.0:Group'
+SCIM_GROUP_EXTENSION = 'https://mailu.io/schemas/scim/2.0/Group'
 SCIM_LIST_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:ListResponse'
 SCIM_PATCH_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:PatchOp'
 SCIM_ERROR_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:Error'
@@ -27,6 +28,7 @@ SCIM_SCHEMA_SCHEMA = 'urn:ietf:params:scim:schemas:core:2.0:Schema'
 
 blueprint = flask.Blueprint('scim', __name__)
 _IF_MATCH_FROM_REQUEST = object()
+_UNCHANGED = object()
 SCIM_MAX_BULK_OPERATIONS = 100
 SCIM_MAX_BULK_PAYLOAD_SIZE = 1048576
 _FILTER_PATTERN = re.compile(r'^\s*([A-Za-z][A-Za-z0-9.]*)\s+eq\s+"([^"]*)"\s*$', re.IGNORECASE)
@@ -34,18 +36,23 @@ _MEMBER_FILTER_PATTERN = re.compile(
     r'^\s*members\s*\[\s*value\s+eq\s+"([^"]+)"\s*\]\s*$',
     re.IGNORECASE,
 )
-_PROJECTION_SEGMENT_PATTERN = re.compile(r'^[A-Za-z][A-Za-z0-9_-]*$')
+_PROJECTION_SEGMENT_PATTERN = re.compile(
+    r'^(?:[A-Za-z][A-Za-z0-9_-]*|\$ref)$'
+)
 _INVALID_PERCENT_ESCAPE = re.compile(r'%(?![0-9A-Fa-f]{2})')
 _SCIM_KEY_CASES = {
     key.lower(): key
     for key in (
         'Operations',
+        '$ref',
         'active',
+        'aliasAddress',
         'bulkId',
         'data',
         'displayName',
         'emails',
         'externalId',
+        'externalDestinations',
         'failOnErrors',
         'familyName',
         'formatted',
@@ -63,6 +70,7 @@ _SCIM_KEY_CASES = {
         'userName',
         'value',
         'version',
+        SCIM_GROUP_EXTENSION,
     )
 }
 _USER_PROJECTION_PATHS = {
@@ -73,6 +81,7 @@ _USER_PROJECTION_PATHS = {
     ('emails', 'type'),
     ('emails', 'value'),
     ('id',),
+    ('externalid',),
     ('meta',),
     ('meta', 'location'),
     ('meta', 'resourcetype'),
@@ -86,14 +95,20 @@ _USER_PROJECTION_PATHS = {
 _GROUP_PROJECTION_PATHS = {
     ('displayname',),
     ('id',),
+    ('externalid',),
     ('members',),
     ('members', 'display'),
+    ('members', '$ref'),
+    ('members', 'type'),
     ('members', 'value'),
     ('meta',),
     ('meta', 'location'),
     ('meta', 'resourcetype'),
     ('meta', 'version'),
     ('schemas',),
+    (SCIM_GROUP_EXTENSION.casefold(),),
+    (SCIM_GROUP_EXTENSION.casefold(), 'aliasaddress'),
+    (SCIM_GROUP_EXTENSION.casefold(), 'externaldestinations'),
 }
 _USER_PROJECTION_ENDPOINTS = {
     'create_user',
@@ -138,6 +153,29 @@ def _projection_context():
 def _projection_path(value, schema, allowed_paths):
     path = value.strip()
     prefix = f'{schema}:'
+    extension_prefix = f'{SCIM_GROUP_EXTENSION}:'
+    if path.casefold().startswith(extension_prefix.casefold()):
+        path = path[len(extension_prefix):]
+        parts = path.split('.')
+        if (
+            not path
+            or any(
+                not _PROJECTION_SEGMENT_PATTERN.fullmatch(part)
+                for part in parts
+            )
+        ):
+            return None
+        normalized = (
+            SCIM_GROUP_EXTENSION.casefold(),
+            *(
+                _SCIM_KEY_CASES.get(part.casefold(), part).casefold()
+                for part in parts
+            ),
+        )
+        return normalized if normalized in allowed_paths else None
+    if path.casefold() == SCIM_GROUP_EXTENSION.casefold():
+        normalized = (SCIM_GROUP_EXTENSION.casefold(),)
+        return normalized if normalized in allowed_paths else None
     if path.casefold().startswith('urn:'):
         if not path.casefold().startswith(prefix.casefold()):
             return None
@@ -227,7 +265,13 @@ def _project_value(value, tree, *, include):
 
 
 def _always_returned(resource):
-    return {'schemas', 'id'}
+    always = {'schemas', 'id'}
+    schemas = resource.get('schemas', [])
+    if SCIM_USER_SCHEMA in schemas:
+        always.add('username')
+    if SCIM_GROUP_SCHEMA in schemas:
+        always.add('displayname')
+    return always
 
 
 def _project_resource(resource, mode, paths):
@@ -295,12 +339,37 @@ def _not_modified(version):
 
 
 def _resource_version(resource):
-    if isinstance(resource, models.User):
+    if isinstance(resource, models.ScimResource):
+        state = {
+            'externalId': resource.external_id,
+            'id': resource.id,
+            'resourceType': resource.resource_type,
+            'subjectAddress': resource.subject_address,
+        }
+        if resource.resource_type == 'User' and resource.user is not None:
+            state.update({
+                'active': resource.user.enabled,
+                'displayName': resource.user.displayed_name,
+                'userName': resource.user.email,
+            })
+        elif resource.resource_type == 'Group' and resource.alias is not None:
+            state.update({
+                'aliasAddress': resource.alias.email,
+                'displayName': resource.alias.comment or resource.alias.email,
+                'externalDestinations': sorted(
+                    destination.destination
+                    for destination in resource.destinations
+                ),
+                'members': sorted(
+                    edge.member_id
+                    for edge in resource.member_edges
+                ),
+            })
+    elif isinstance(resource, models.User):
         state = {
             'active': resource.enabled,
             'displayName': resource.displayed_name,
             'id': resource.email,
-            'password': resource.password,
         }
     elif isinstance(resource, models.Alias):
         state = {
@@ -494,14 +563,17 @@ def _commit_error():
 
 
 def _commit_user_change(user, *, prune_sessions):
+    error = _commit_error()
+    if error:
+        return error
     if prune_sessions:
         try:
             utils.MailuSessionExtension.prune_sessions(uid=user.email)
         except Exception:
-            models.db.session.rollback()
-            flask.current_app.logger.exception('SCIM session revocation failed')
-            return _scim_error(500, 'Existing sessions could not be revoked')
-    return _commit_error()
+            flask.current_app.logger.exception(
+                'SCIM post-commit session cleanup failed'
+            )
+    return None
 
 
 @blueprint.errorhandler(HTTPException)
@@ -602,19 +674,55 @@ def _equality_filter(value, supported_attribute):
 
 
 def _schema_error(data, expected):
+    return _schema_set_error(data, [expected])
+
+
+def _schema_set_error(data, expected):
     schemas = data.get('schemas')
     if (
         not isinstance(schemas, list)
-        or len(schemas) != 1
-        or not isinstance(schemas[0], str)
-        or schemas[0].casefold() != expected.casefold()
+        or len(schemas) != len(expected)
+        or any(not isinstance(schema, str) for schema in schemas)
+        or len({schema.casefold() for schema in schemas}) != len(schemas)
+        or {schema.casefold() for schema in schemas}
+        != {schema.casefold() for schema in expected}
     ):
+        description = ', '.join(expected)
         return _scim_error(
             400,
-            f'schemas must contain exactly {expected}',
+            f'schemas must contain exactly {description}',
             'invalidValue',
         )
     return None
+
+
+def _external_id_value(data, *, replacing=False):
+    if 'externalId' not in data:
+        return (None if replacing else _UNCHANGED), None
+    value = data['externalId']
+    if value is None:
+        return None, None
+    if not isinstance(value, str):
+        return None, _scim_error(
+            400,
+            'externalId must be a string',
+            'invalidValue',
+        )
+    try:
+        encoded = value.encode('utf-8')
+    except UnicodeEncodeError:
+        return None, _scim_error(
+            400,
+            'externalId must contain valid Unicode',
+            'invalidValue',
+        )
+    if len(encoded) > 1024:
+        return None, _scim_error(
+            400,
+            'externalId must not exceed 1024 UTF-8 bytes',
+            'invalidValue',
+        )
+    return value, None
 
 
 def _string_value(value):
@@ -667,7 +775,9 @@ def _user_email(data, *, require_user_name=False, conflict_scim_type='invalidVal
         if user_name:
             values.append(user_name)
 
-    emails = data.get('emails') or []
+    emails = data.get('emails', [])
+    if emails is None:
+        emails = []
     if not isinstance(emails, list):
         return None, _scim_error(400, 'emails must be a list', 'invalidValue')
     for email in emails:
@@ -688,6 +798,17 @@ def _user_email(data, *, require_user_name=False, conflict_scim_type='invalidVal
             'userName and emails must identify the same mailbox',
             conflict_scim_type,
         )
+    for value in unique_values:
+        if not validators.email(value):
+            return None, _scim_error(
+                400,
+                f'{value!r} is not a valid email address',
+                'invalidValue',
+            )
+    if require_user_name:
+        # RFC 7643 makes userName independently required. An emails entry is
+        # representation data, not an alternate identity input.
+        return user_name, None
     return (unique_values[0] if unique_values else ''), None
 
 
@@ -698,7 +819,9 @@ def _display_name(data):
         display_name = data['displayName'].strip()
         if display_name:
             return display_name, None
-    name = data.get('name') or {}
+    name = data.get('name', {})
+    if name is None:
+        name = {}
     if not isinstance(name, dict):
         return None, _scim_error(400, 'name must be an object', 'invalidValue')
     for attribute in ('formatted', 'givenName', 'familyName'):
@@ -712,27 +835,73 @@ def _display_name(data):
 
 
 def _resource_id(value, resource_type):
-    if not isinstance(value, str) or not validators.email(value):
+    if (
+        not isinstance(value, str)
+        or not value
+        or len(value) > 255
+        or '/' in value
+    ):
         return None, _scim_error(
             400,
-            f'{resource_type} id must be a valid email address',
+            f'{resource_type} id must be a non-empty opaque identifier',
             'invalidValue',
         )
-    return value.lower(), None
+    return value, None
 
 
 def _get_user(user_id):
-    if not isinstance(user_id, str) or not validators.email(user_id):
+    return models.ScimResource.get_exact(
+        user_id,
+        resource_type='User',
+        active_only=True,
+    )
+
+
+def _get_scim_for_update(resource_id, resource_type):
+    """Lock an exact active mapping and its live Mailu resource."""
+    statement = (
+        sqlalchemy.select(models.ScimResource)
+        .where(models.ScimResource.id == resource_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+    resource = models.db.session.execute(statement).scalar_one_or_none()
+    if (
+        resource is None
+        or resource.id != resource_id
+        or resource.resource_type != resource_type
+        or resource.deleted_at is not None
+    ):
         return None
-    user_id = user_id.lower()
-    return models.db.session.get(models.User, user_id)
+    target_model = (
+        models.User
+        if resource_type == 'User'
+        else models.Alias
+    )
+    target_id = (
+        resource.user_email
+        if resource_type == 'User'
+        else resource.alias_email
+    )
+    target = models.db.session.execute(
+        sqlalchemy.select(target_model)
+        .where(target_model._email == target_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).scalar_one_or_none()
+    if target is None or target.email != target_id:
+        raise models.ScimIdentityError(
+            f'Active SCIM {resource_type} {resource_id!r} has no live target'
+        )
+    return resource
 
 
-def _make_user_resource(user):
+def _make_user_resource(resource):
+    user = resource.user
     email = user.email
     payload = {
         'schemas': [SCIM_USER_SCHEMA],
-        'id': email,
+        'id': resource.id,
         'userName': email,
         'active': user.enabled,
         'displayName': user.displayed_name or email,
@@ -744,21 +913,29 @@ def _make_user_resource(user):
             'primary': True,
             'type': 'work',
         }],
-        'meta': _resource_meta('User', 'Users', email, user),
+        'meta': _resource_meta(
+            'User',
+            'Users',
+            resource.id,
+            resource,
+        ),
     }
+    if resource.external_id is not None:
+        payload['externalId'] = resource.external_id
     return payload
 
 
 def _get_group(group_id):
-    if not isinstance(group_id, str) or not validators.email(group_id):
-        return None
-    group_id = group_id.lower()
-    return models.db.session.get(models.Alias, group_id)
+    return models.ScimResource.get_exact(
+        group_id,
+        resource_type='Group',
+        active_only=True,
+    )
 
 
 def _member_values(data):
     members = data.get('members', [])
-    if members in (None, ''):
+    if members is None:
         return [], None
     if not isinstance(members, list):
         return None, _scim_error(400, 'members must be a list', 'invalidValue')
@@ -772,36 +949,89 @@ def _member_values(data):
             return None, _scim_error(400, 'members must contain strings or objects', 'invalidValue')
         if not isinstance(value, str) or not value.strip():
             return None, _scim_error(400, 'member values must be non-empty strings', 'invalidValue')
-        value = value.strip().lower()
-        if not validators.email(value):
-            return None, _scim_error(400, f'{value!r} is not a valid member email address', 'invalidValue')
+        value = value.strip()
+        if value.startswith('bulkId:'):
+            return None, _scim_error(
+                400,
+                f'Member {value!r} references an unresolved bulkId',
+                'invalidValue',
+            )
         if value not in values:
             values.append(value)
     return values, None
 
 
-def _group_email(data):
-    for key in ('id', 'displayName'):
-        value = data.get(key)
-        if value not in (None, ''):
-            if not isinstance(value, str):
-                return None, _scim_error(400, f'{key} must be a string', 'invalidValue')
-            return value.strip().lower(), None
-    return '', None
+def _external_destinations(value):
+    if value is None:
+        return [], None
+    if not isinstance(value, list):
+        return None, _scim_error(
+            400,
+            'externalDestinations must be a list',
+            'invalidValue',
+        )
+    destinations = []
+    for destination in value:
+        if not isinstance(destination, str) or not destination.strip():
+            return None, _scim_error(
+                400,
+                'externalDestinations must contain non-empty strings',
+                'invalidValue',
+            )
+        try:
+            canonical = models.canonicalize_scim_destination(destination)
+        except (
+            models.ScimExternalDestinationError,
+            models.ScimIdentityError,
+        ) as error:
+            return None, _scim_error(400, str(error), 'invalidValue')
+        if canonical not in destinations:
+            destinations.append(canonical)
+    return destinations, None
 
 
-def _make_group_resource(group):
-    email = group.email
-    return {
-        'schemas': [SCIM_GROUP_SCHEMA],
-        'id': email,
-        'displayName': group.comment or email,
-        'members': [{
-            'value': destination,
-            'display': destination,
-        } for destination in group.destination],
-        'meta': _resource_meta('Group', 'Groups', email, group),
+def _make_group_resource(resource):
+    group = resource.alias
+    members = []
+    for edge in sorted(resource.member_edges, key=lambda item: item.member_id):
+        member = models.ScimResource.get_exact(
+            edge.member_id,
+            active_only=True,
+        )
+        if member is None:
+            # The live foreign key and graph lock should make this impossible.
+            raise models.ScimGraphError(
+                f'Group member {edge.member_id!r} is not active'
+            )
+        collection = 'Users' if member.resource_type == 'User' else 'Groups'
+        members.append({
+            'value': member.id,
+            '$ref': _resource_location(collection, member.id),
+            'display': member.subject_address,
+            'type': member.resource_type,
+        })
+    payload = {
+        'schemas': [SCIM_GROUP_SCHEMA, SCIM_GROUP_EXTENSION],
+        'id': resource.id,
+        'displayName': group.comment or group.email,
+        'members': members,
+        SCIM_GROUP_EXTENSION: {
+            'aliasAddress': group.email,
+            'externalDestinations': sorted(
+                destination.destination
+                for destination in resource.destinations
+            ),
+        },
+        'meta': _resource_meta(
+            'Group',
+            'Groups',
+            resource.id,
+            resource,
+        ),
     }
+    if resource.external_id is not None:
+        payload['externalId'] = resource.external_id
+    return payload
 
 
 def _validate_alias_domain(email, *, for_update=False):
@@ -821,29 +1051,83 @@ def _validate_alias_domain(email, *, for_update=False):
     return (localpart, domain), None
 
 
-def _apply_group_data(group, data, *, replacing=False):
-    if 'displayName' in data:
-        if not isinstance(data['displayName'], str):
-            return _scim_error(400, 'displayName must be a string', 'invalidValue')
-        group.comment = '' if data['displayName'].strip().lower() == group.email else data['displayName'].strip()
-    elif replacing:
-        group.comment = ''
-    if replacing or 'members' in data:
-        members, error = _member_values(data)
-        if error:
-            return error
-        group.destination = members
-    return None
+def _group_replacement(data, *, current=None):
+    error = _schema_set_error(
+        data,
+        [SCIM_GROUP_SCHEMA, SCIM_GROUP_EXTENSION],
+    )
+    if error:
+        return None, error
+    display_name = data.get('displayName')
+    if not isinstance(display_name, str) or not display_name.strip():
+        return None, _scim_error(
+            400,
+            'displayName is required',
+            'invalidValue',
+        )
+    extension = data.get(SCIM_GROUP_EXTENSION)
+    if not isinstance(extension, dict):
+        return None, _scim_error(
+            400,
+            f'{SCIM_GROUP_EXTENSION} is required',
+            'invalidValue',
+        )
+    alias_address = extension.get('aliasAddress')
+    if not isinstance(alias_address, str) or not alias_address.strip():
+        return None, _scim_error(
+            400,
+            'aliasAddress is required',
+            'invalidValue',
+        )
+    alias_address = alias_address.strip().lower()
+    if not validators.email(alias_address):
+        return None, _scim_error(
+            400,
+            f'{alias_address!r} is not a valid aliasAddress',
+            'invalidValue',
+        )
+    if current is not None and alias_address != current.alias.email:
+        return None, _scim_error(
+            400,
+            'aliasAddress is immutable',
+            'mutability',
+        )
+    members, error = _member_values(data)
+    if error:
+        return None, error
+    destinations, error = _external_destinations(
+        extension.get('externalDestinations', [])
+    )
+    if error:
+        return None, error
+    external_id, error = _external_id_value(data, replacing=True)
+    if error:
+        return None, error
+    return {
+        'aliasAddress': alias_address,
+        'displayName': display_name.strip(),
+        'externalId': external_id,
+        'members': members,
+        'externalDestinations': destinations,
+    }, None
 
 
-def _patch_group(group, data):
+def _patch_group(resource, data):
     operations = data['Operations'] if 'Operations' in data else data.get('operations')
     if not isinstance(operations, list):
         return _scim_error(400, 'Operations must be a list', 'invalidSyntax')
     if not operations:
         return _scim_error(400, 'Operations must not be empty', 'invalidValue')
-    comment = group.comment or ''
-    members = list(group.destination)
+    display_name = resource.alias.comment or resource.alias.email
+    external_id = resource.external_id
+    members = [
+        edge.member_id
+        for edge in resource.member_edges
+    ]
+    external_destinations = [
+        destination.destination
+        for destination in resource.destinations
+    ]
     for operation in operations:
         if not isinstance(operation, dict):
             return _scim_error(400, 'Patch operations must be objects', 'invalidSyntax')
@@ -851,14 +1135,22 @@ def _patch_group(group, data):
         if not isinstance(op_value, str) or not op_value:
             return _scim_error(400, 'Patch op must be a non-empty string', 'invalidSyntax')
         op = op_value.lower()
+        path_present = 'path' in operation
         path_value = operation.get('path')
-        if path_value is not None and not isinstance(path_value, str):
+        if path_present and (
+            not isinstance(path_value, str)
+            or not path_value.strip()
+        ):
             return _scim_error(400, 'Patch path must be a string', 'invalidPath')
         path = _schema_path((path_value or '').strip(), SCIM_GROUP_SCHEMA)
         path_lower = path.lower()
         value = operation.get('value')
         if op not in ('add', 'replace', 'remove'):
             return _scim_error(400, f'Patch operation {op!r} is not supported', 'mutability')
+        if op in ('add', 'replace') and 'value' not in operation:
+            return _scim_error(400, 'Patch value is required', 'invalidValue')
+        if op == 'remove' and not path_present:
+            return _scim_error(400, 'Pathless remove has no target', 'noTarget')
 
         member_filter = _MEMBER_FILTER_PATTERN.fullmatch(path)
         if member_filter:
@@ -880,7 +1172,18 @@ def _patch_group(group, data):
             elif not isinstance(value, str):
                 return _scim_error(400, 'displayName must be a string', 'invalidValue')
             else:
-                comment = '' if value.strip().lower() == group.email else value.strip()
+                display_name = value.strip()
+            continue
+
+        if path_lower == 'externalid':
+            if op == 'remove':
+                external_id = None
+            else:
+                external_id, error = _external_id_value(
+                    {'externalId': value},
+                )
+                if error:
+                    return error
             continue
 
         if path_lower == 'members':
@@ -899,7 +1202,42 @@ def _patch_group(group, data):
                 members = patch_members
             continue
 
-        if not path:
+        extension_path = _schema_path(
+            (path_value or '').strip(),
+            SCIM_GROUP_EXTENSION,
+        )
+        if extension_path.casefold() == 'aliasaddress':
+            return _scim_error(
+                400,
+                'aliasAddress is immutable',
+                'mutability',
+            )
+        if extension_path.casefold() == 'externaldestinations':
+            if op == 'remove' and value is None:
+                external_destinations = []
+                continue
+            patch_destinations, error = _external_destinations(
+                value if isinstance(value, list) else [value]
+            )
+            if error:
+                return error
+            if op == 'remove':
+                external_destinations = [
+                    item
+                    for item in external_destinations
+                    if item not in patch_destinations
+                ]
+            elif op == 'add':
+                external_destinations += [
+                    item
+                    for item in patch_destinations
+                    if item not in external_destinations
+                ]
+            else:
+                external_destinations = patch_destinations
+            continue
+
+        if not path_present:
             if op not in ('add', 'replace') or not isinstance(value, dict):
                 return _scim_error(400, 'Pathless Group PATCH values must be objects', 'invalidPath')
             handled = False
@@ -907,7 +1245,11 @@ def _patch_group(group, data):
                 if not isinstance(value['displayName'], str):
                     return _scim_error(400, 'displayName must be a string', 'invalidValue')
                 display_name = value['displayName'].strip()
-                comment = '' if display_name.lower() == group.email else display_name
+                handled = True
+            if 'externalId' in value:
+                external_id, error = _external_id_value(value)
+                if error:
+                    return error
                 handled = True
             if 'members' in value:
                 patch_members, error = _member_values({'members': value['members']})
@@ -918,14 +1260,53 @@ def _patch_group(group, data):
                 else:
                     members = patch_members
                 handled = True
+            if SCIM_GROUP_EXTENSION in value:
+                extension = value[SCIM_GROUP_EXTENSION]
+                if not isinstance(extension, dict):
+                    return _scim_error(
+                        400,
+                        f'{SCIM_GROUP_EXTENSION} must be an object',
+                        'invalidValue',
+                    )
+                if 'aliasAddress' in extension:
+                    alias_address = extension['aliasAddress']
+                    if (
+                        not isinstance(alias_address, str)
+                        or alias_address.strip().lower()
+                        != resource.alias.email
+                    ):
+                        return _scim_error(
+                            400,
+                            'aliasAddress is immutable',
+                            'mutability',
+                        )
+                    handled = True
+                if 'externalDestinations' in extension:
+                    patch_destinations, error = _external_destinations(
+                        extension['externalDestinations']
+                    )
+                    if error:
+                        return error
+                    if op == 'add':
+                        external_destinations += [
+                            item
+                            for item in patch_destinations
+                            if item not in external_destinations
+                        ]
+                    else:
+                        external_destinations = patch_destinations
+                    handled = True
             if not handled:
                 return _scim_error(400, 'Pathless Group PATCH has no supported attributes', 'invalidPath')
             continue
 
         return _scim_error(400, f'Patch path {path!r} is not supported', 'invalidPath')
-    group.comment = comment
-    group.destination = members
-    return None
+    return {
+        'displayName': display_name,
+        'externalId': external_id,
+        'members': members,
+        'externalDestinations': external_destinations,
+    }
 
 
 def _validate_user_domain(email, *, for_update=False):
@@ -977,12 +1358,15 @@ def _user_data_changes(data, *, replacing=False):
 
 
 def _apply_user_changes(user, changes):
+    final_changes = {}
+    for attribute, value in changes:
+        final_changes[attribute] = value
     password_changed = False
     deactivated = False
-    for attribute, value in changes:
+    for attribute, value in final_changes.items():
         if attribute == 'active':
+            deactivated = user.enabled and not value
             user.enabled = value
-            deactivated = deactivated or not value
         elif attribute == 'displayName':
             user.displayed_name = value
         elif attribute == 'password':
@@ -999,7 +1383,8 @@ def _apply_user_data(user, data, *, replacing=False):
     return None, password_changed, deactivated
 
 
-def _patch_user(user, data):
+def _patch_user(resource, data):
+    user = resource.user
     if 'Operations' in data:
         operations = data['Operations']
     else:
@@ -1009,20 +1394,29 @@ def _patch_user(user, data):
     if not operations:
         return _scim_error(400, 'Operations must not be empty', 'invalidValue'), False
     changes = []
+    external_id = resource.external_id
     for operation in operations:
         if not isinstance(operation, dict):
             return _scim_error(400, 'Patch operations must be objects', 'invalidSyntax'), False
         op_value = operation.get('op')
+        path_present = 'path' in operation
         path_value = operation.get('path')
         if not isinstance(op_value, str) or not op_value:
             return _scim_error(400, 'Patch op must be a non-empty string', 'invalidSyntax'), False
-        if path_value is not None and not isinstance(path_value, str):
+        if path_present and (
+            not isinstance(path_value, str)
+            or not path_value.strip()
+        ):
             return _scim_error(400, 'Patch path must be a string', 'invalidPath'), False
         op = op_value.lower()
         path = _schema_path(path_value or '', SCIM_USER_SCHEMA).lower()
         value = operation.get('value')
         if op not in ('add', 'replace', 'remove'):
             return _scim_error(400, f'Patch operation {op!r} is not supported', 'mutability'), False
+        if op in ('add', 'replace') and 'value' not in operation:
+            return _scim_error(400, 'Patch value is required', 'invalidValue'), False
+        if op == 'remove' and not path_present:
+            return _scim_error(400, 'Pathless remove has no target', 'noTarget'), False
         if path == 'password' or (
             not path
             and isinstance(value, dict)
@@ -1034,6 +1428,9 @@ def _patch_user(user, data):
                 'mutability',
             ), False
         if op == 'remove':
+            if path == 'externalid':
+                external_id = None
+                continue
             if path in ('displayname', 'name', 'name.formatted'):
                 changes.append(('displayName', ''))
                 continue
@@ -1043,6 +1440,18 @@ def _patch_user(user, data):
             return _scim_error(400, f'Patch path {path!r} is not supported', 'invalidPath'), False
 
         handled = False
+        if path == 'externalid':
+            external_id, error = _external_id_value(
+                {'externalId': value},
+            )
+            if error:
+                return error, False
+            handled = True
+        elif not path_present and isinstance(value, dict) and 'externalId' in value:
+            external_id, error = _external_id_value(value)
+            if error:
+                return error, False
+            handled = True
         if path in ('active', '') and (path or isinstance(value, dict)):
             if path == 'active':
                 active, error = _active_value(value)
@@ -1050,7 +1459,7 @@ def _patch_user(user, data):
                     return error, False
                 changes.append(('active', active))
                 handled = True
-            elif isinstance(value, dict) and 'active' in value:
+            elif not path_present and isinstance(value, dict) and 'active' in value:
                 active, error = _active_value(value['active'])
                 if error:
                     return error, False
@@ -1062,13 +1471,14 @@ def _patch_user(user, data):
                     return _scim_error(400, 'displayName must be a string', 'invalidValue'), False
                 changes.append(('displayName', value))
                 handled = True
-            elif isinstance(value, dict):
+            elif not path_present and isinstance(value, dict) and (
+                'displayName' in value or 'name' in value
+            ):
                 display_name, error = _display_name(value)
                 if error:
                     return error, False
-                if display_name:
-                    changes.append(('displayName', display_name))
-                    handled = True
+                changes.append(('displayName', display_name))
+                handled = True
         if path in ('name.formatted', 'name', '') and value:
             if path == 'name.formatted':
                 if not isinstance(value, str):
@@ -1084,8 +1494,22 @@ def _patch_user(user, data):
                 if display_name:
                     changes.append(('displayName', display_name))
                     handled = True
+        if not path_present and isinstance(value, dict) and (
+            'userName' in value or 'emails' in value
+        ):
+            email, error = _user_email(value)
+            if error:
+                return error, False
+            if email and email != user.email:
+                return _scim_error(
+                    400,
+                    'userName and emails are immutable',
+                    'mutability',
+                ), False
+            handled = True
         if not handled:
             return _scim_error(400, f'Patch path {path!r} is not supported', 'invalidPath'), False
+    resource.external_id = external_id
     password_changed, deactivated = _apply_user_changes(user, changes)
     return None, password_changed or deactivated
 
@@ -1119,6 +1543,9 @@ def service_provider_config():
             'maxOperations': SCIM_MAX_BULK_OPERATIONS,
             'maxPayloadSize': SCIM_MAX_BULK_PAYLOAD_SIZE,
         },
+        # Mailu implements only two exact-equality convenience filters per
+        # resource. That is not RFC 7644 filter support and must not be
+        # advertised as such.
         'filter': {'supported': False, 'maxResults': 200},
         'changePassword': {'supported': False},
         'sort': {'supported': False},
@@ -1149,6 +1576,10 @@ def _resource_type_resources():
             'name': 'Group',
             'endpoint': '/Groups',
             'schema': SCIM_GROUP_SCHEMA,
+            'schemaExtensions': [{
+                'schema': SCIM_GROUP_EXTENSION,
+                'required': True,
+            }],
             'meta': {'resourceType': 'ResourceType', 'location': _resource_location('ResourceTypes', 'Group')},
         },
     ]
@@ -1183,13 +1614,23 @@ def _schema_resources():
             'description': 'Mailu SCIM user schema subset',
             'attributes': [
                 {
+                    'name': 'externalId',
+                    'type': 'string',
+                    'multiValued': False,
+                    'required': False,
+                    'caseExact': True,
+                    'mutability': 'readWrite',
+                    'returned': 'default',
+                    'uniqueness': 'none',
+                },
+                {
                     'name': 'userName',
                     'type': 'string',
                     'multiValued': False,
                     'required': True,
                     'caseExact': False,
                     'mutability': 'immutable',
-                    'returned': 'default',
+                    'returned': 'always',
                     'uniqueness': 'server',
                 },
                 {
@@ -1289,13 +1730,23 @@ def _schema_resources():
             'description': 'Mailu SCIM group schema subset backed by aliases',
             'attributes': [
                 {
+                    'name': 'externalId',
+                    'type': 'string',
+                    'multiValued': False,
+                    'required': False,
+                    'caseExact': True,
+                    'mutability': 'readWrite',
+                    'returned': 'default',
+                    'uniqueness': 'none',
+                },
+                {
                     'name': 'displayName',
                     'type': 'string',
                     'multiValued': False,
                     'required': True,
                     'caseExact': False,
                     'mutability': 'readWrite',
-                    'returned': 'default',
+                    'returned': 'always',
                     'uniqueness': 'none',
                 },
                 {
@@ -1326,10 +1777,67 @@ def _schema_resources():
                             'returned': 'default',
                             'uniqueness': 'none',
                         },
+                        {
+                            'name': '$ref',
+                            'type': 'reference',
+                            'multiValued': False,
+                            'required': False,
+                            'caseExact': True,
+                            'mutability': 'readOnly',
+                            'returned': 'default',
+                            'referenceTypes': ['User', 'Group'],
+                        },
+                        {
+                            'name': 'type',
+                            'type': 'string',
+                            'multiValued': False,
+                            'required': False,
+                            'caseExact': True,
+                            'mutability': 'readOnly',
+                            'returned': 'default',
+                            'uniqueness': 'none',
+                        },
                     ],
                 },
             ],
             'meta': {'resourceType': 'Schema', 'location': _resource_location('Schemas', SCIM_GROUP_SCHEMA)},
+        },
+        {
+            'schemas': [SCIM_SCHEMA_SCHEMA],
+            'id': SCIM_GROUP_EXTENSION,
+            'name': 'MailuGroup',
+            'description': (
+                'Mailu alias routing attributes for SCIM Groups'
+            ),
+            'attributes': [
+                {
+                    'name': 'aliasAddress',
+                    'type': 'string',
+                    'multiValued': False,
+                    'required': True,
+                    'caseExact': False,
+                    'mutability': 'immutable',
+                    'returned': 'default',
+                    'uniqueness': 'server',
+                },
+                {
+                    'name': 'externalDestinations',
+                    'type': 'string',
+                    'multiValued': True,
+                    'required': False,
+                    'caseExact': False,
+                    'mutability': 'readWrite',
+                    'returned': 'default',
+                    'uniqueness': 'none',
+                },
+            ],
+            'meta': {
+                'resourceType': 'Schema',
+                'location': _resource_location(
+                    'Schemas',
+                    SCIM_GROUP_EXTENSION,
+                ),
+            },
         },
     ]
 
@@ -1359,21 +1867,56 @@ def _list_groups_response():
     count = _parse_positive_int(flask.request.args.get('count', 100), 100, minimum=0, maximum=200)
     if start_index is None or count is None:
         return _scim_error(400, 'startIndex and count must be integers', 'invalidValue')
-    query = models.Alias.query.order_by(models.Alias._email)
+    query = (
+        models.ScimResource.query
+        .filter(
+            models.ScimResource.resource_type == 'Group',
+            models.ScimResource.deleted_at.is_(None),
+            models.ScimResource.alias_email.is_not(None),
+        )
+        .join(
+            models.Alias,
+            models.ScimResource.alias_email == models.Alias._email,
+        )
+        .order_by(models.ScimResource.id)
+    )
 
     filter_value = flask.request.args.get('filter')
     if filter_value:
-        display_name, error = _equality_filter(filter_value, 'displayName')
-        if error:
-            return error
-        normalized = display_name.lower()
-        predicates = [sqlalchemy.func.lower(models.Alias.comment) == normalized]
-        if validators.email(display_name):
-            predicates.append(sqlalchemy.and_(
-                sqlalchemy.or_(models.Alias.comment.is_(None), models.Alias.comment == ''),
-                models.Alias._email == normalized,
+        match = _FILTER_PATTERN.fullmatch(filter_value)
+        if not match:
+            return _scim_error(
+                400,
+                'Only displayName or externalId eq filters are supported',
+                'invalidFilter',
+            )
+        attribute, value = match.groups()
+        if attribute.casefold() == 'displayname':
+            normalized = value.lower()
+            query = query.filter(sqlalchemy.or_(
+                sqlalchemy.func.lower(models.Alias.comment) == normalized,
+                sqlalchemy.and_(
+                    sqlalchemy.or_(
+                        models.Alias.comment.is_(None),
+                        models.Alias.comment == '',
+                    ),
+                    sqlalchemy.func.lower(models.Alias._email) == normalized,
+                ),
             ))
-        query = query.filter(sqlalchemy.or_(*predicates))
+        elif attribute.casefold() == 'externalid':
+            try:
+                encoded = value.encode('utf-8')
+            except UnicodeEncodeError:
+                encoded = None
+            query = query.filter(
+                models.ScimResource.external_id_bytes == encoded
+            )
+        else:
+            return _scim_error(
+                400,
+                'Only displayName or externalId eq filters are supported',
+                'invalidFilter',
+            )
 
     total = query.count()
     groups = query.offset(start_index - 1).limit(count).all() if count else []
@@ -1387,51 +1930,79 @@ def _list_groups_response():
 
 
 def _create_group_response(data):
-    error = _schema_error(data, SCIM_GROUP_SCHEMA)
+    replacement, error = _group_replacement(data)
     if error:
         return error
-    email, error = _group_email(data)
-    if error:
-        return error
-    if not email:
-        return _scim_error(400, 'displayName is required', 'invalidValue')
-    domain_data, error = _validate_alias_domain(email, for_update=True)
-    if error:
-        models.db.session.rollback()
-        return error
-    if _get_group(email) or _get_user(email):
-        models.db.session.rollback()
-        return _scim_error(409, f'Address {email} already exists', 'uniqueness')
-    localpart, domain = domain_data
-    group = models.Alias(localpart=localpart, domain=domain, destination=[])
-    error = _apply_group_data(group, data, replacing=True)
-    if error:
-        models.db.session.rollback()
-        return error
-    models.db.session.add(group)
+    email = replacement['aliasAddress']
     try:
+        models.lock_scim_graph()
+        domain_data, error = _validate_alias_domain(email)
+        if error:
+            models.db.session.rollback()
+            return error
+        if models.db.session.get(models.MailAddress, email):
+            models.db.session.rollback()
+            return _scim_error(
+                409,
+                f'Address {email} already exists',
+                'uniqueness',
+            )
+        localpart, domain = domain_data
+        group = models.Alias(
+            localpart=localpart,
+            domain=domain,
+            destination=[],
+            comment=replacement['displayName'],
+            disabled=False,
+            wildcard=False,
+            owner=None,
+        )
+        models.db.session.add(group)
+        models.db.session.flush()
+        resource = models.create_scim_group_mapping(
+            group,
+            resource_id=models.new_scim_id(),
+            external_id=replacement['externalId'],
+        )
+        models.replace_scim_group_graph(
+            resource,
+            member_ids=replacement['members'],
+            external_destinations=replacement['externalDestinations'],
+        )
         models.db.session.commit()
-    except IntegrityError:
+    except (IntegrityError, models.AddressConflict):
         models.db.session.rollback()
         return _scim_error(409, f'Address {email} already exists', 'uniqueness')
+    except (
+        models.ScimExternalDestinationError,
+        models.ScimGraphError,
+    ) as identity_error:
+        models.db.session.rollback()
+        return _scim_error(400, str(identity_error), 'invalidValue')
+    except models.ScimIdentityError:
+        models.db.session.rollback()
+        flask.current_app.logger.exception(
+            'SCIM Group identity invariant failed during creation'
+        )
+        return _scim_error(500, 'The SCIM Group identity is inconsistent')
     except SQLAlchemyError:
         models.db.session.rollback()
         flask.current_app.logger.exception('SCIM Group creation failed')
         return _scim_error(500, 'The SCIM Group could not be created')
-    return _scim_response(_make_group_resource(group), 201)
+    return _scim_response(_make_group_resource(resource), 201)
 
 
 def _get_group_response(group_id):
     group_id, error = _resource_id(group_id, 'Group')
     if error:
         return error
-    group = _get_group(group_id)
-    if not group:
+    resource = _get_group(group_id)
+    if not resource:
         return _scim_error(404, f'Group {group_id} cannot be found')
-    conditional = _conditional_read_response(group)
+    conditional = _conditional_read_response(resource)
     if conditional:
         return conditional
-    return _scim_response(_make_group_resource(group))
+    return _scim_response(_make_group_resource(resource))
 
 
 def _replace_group_response(
@@ -1440,49 +2011,53 @@ def _replace_group_response(
     if_match=_IF_MATCH_FROM_REQUEST,
     if_none_match=_IF_MATCH_FROM_REQUEST,
 ):
-    error = _schema_error(data, SCIM_GROUP_SCHEMA)
-    if error:
-        return error
     group_id, error = _resource_id(group_id, 'Group')
     if error:
         return error
-    group, error = _locked_resource(models.Alias, group_id)
-    if error:
-        return error
-    error = _if_match_error(group, if_match)
-    if error:
-        models.db.session.rollback()
-        return error
-    error = _if_none_match_error(group, if_none_match)
-    if error:
-        models.db.session.rollback()
-        return error
-    if not group:
-        models.db.session.rollback()
-        return _scim_error(404, f'Group {group_id} cannot be found')
-    if not isinstance(data.get('displayName'), str) or not data['displayName'].strip():
-        models.db.session.rollback()
-        return _scim_error(400, 'displayName is required', 'invalidValue')
-    supplied_id = data.get('id')
-    if supplied_id is not None:
-        new_email, error = _resource_id(supplied_id, 'Group')
+    try:
+        models.lock_scim_graph()
+        resource = _get_scim_for_update(group_id, 'Group')
+        error = _if_match_error(resource, if_match)
         if error:
             models.db.session.rollback()
             return error
-    else:
-        new_email = None
-    if new_email and new_email != group.email:
+        error = _if_none_match_error(resource, if_none_match)
+        if error:
+            models.db.session.rollback()
+            return error
+        if not resource:
+            models.db.session.rollback()
+            return _scim_error(404, f'Group {group_id} cannot be found')
+        replacement, error = _group_replacement(data, current=resource)
+        if error:
+            models.db.session.rollback()
+            return error
+        models.permit_scim_managed_alias_edit(resource.alias)
+        resource.alias.comment = replacement['displayName']
+        resource.external_id = replacement['externalId']
+        models.replace_scim_group_graph(
+            resource,
+            member_ids=replacement['members'],
+            external_destinations=replacement['externalDestinations'],
+        )
+        models.db.session.commit()
+    except (
+        models.ScimExternalDestinationError,
+        models.ScimGraphError,
+    ) as identity_error:
         models.db.session.rollback()
-        return _scim_error(400, 'Changing group id is not supported', 'mutability')
-    error = _apply_group_data(group, data, replacing=True)
-    if error:
+        return _scim_error(400, str(identity_error), 'invalidValue')
+    except models.ScimIdentityError:
         models.db.session.rollback()
-        return error
-    models.db.session.add(group)
-    error = _commit_error()
-    if error:
-        return error
-    return _scim_response(_make_group_resource(group))
+        flask.current_app.logger.exception(
+            'SCIM Group identity invariant failed during replacement'
+        )
+        return _scim_error(500, 'The SCIM Group identity is inconsistent')
+    except SQLAlchemyError:
+        models.db.session.rollback()
+        flask.current_app.logger.exception('SCIM Group replacement failed')
+        return _scim_error(500, 'The SCIM Group could not be replaced')
+    return _scim_response(_make_group_resource(resource))
 
 
 def _patch_group_response(
@@ -1497,29 +2072,57 @@ def _patch_group_response(
     group_id, error = _resource_id(group_id, 'Group')
     if error:
         return error
-    group, error = _locked_resource(models.Alias, group_id)
-    if error:
-        return error
-    error = _if_match_error(group, if_match)
-    if error:
+    try:
+        models.lock_scim_graph()
+        resource = _get_scim_for_update(group_id, 'Group')
+        error = _if_match_error(resource, if_match)
+        if error:
+            models.db.session.rollback()
+            return error
+        error = _if_none_match_error(resource, if_none_match)
+        if error:
+            models.db.session.rollback()
+            return error
+        if not resource:
+            models.db.session.rollback()
+            return _scim_error(404, f'Group {group_id} cannot be found')
+        replacement = _patch_group(resource, data)
+        if not isinstance(replacement, dict):
+            models.db.session.rollback()
+            return replacement
+        if not replacement['displayName']:
+            models.db.session.rollback()
+            return _scim_error(
+                400,
+                'Group displayName is required',
+                'mutability',
+            )
+        models.permit_scim_managed_alias_edit(resource.alias)
+        resource.alias.comment = replacement['displayName']
+        resource.external_id = replacement['externalId']
+        models.replace_scim_group_graph(
+            resource,
+            member_ids=replacement['members'],
+            external_destinations=replacement['externalDestinations'],
+        )
+        models.db.session.commit()
+    except (
+        models.ScimExternalDestinationError,
+        models.ScimGraphError,
+    ) as identity_error:
         models.db.session.rollback()
-        return error
-    error = _if_none_match_error(group, if_none_match)
-    if error:
+        return _scim_error(400, str(identity_error), 'invalidValue')
+    except models.ScimIdentityError:
         models.db.session.rollback()
-        return error
-    if not group:
+        flask.current_app.logger.exception(
+            'SCIM Group identity invariant failed during patch'
+        )
+        return _scim_error(500, 'The SCIM Group identity is inconsistent')
+    except SQLAlchemyError:
         models.db.session.rollback()
-        return _scim_error(404, f'Group {group_id} cannot be found')
-    error = _patch_group(group, data)
-    if error:
-        models.db.session.rollback()
-        return error
-    models.db.session.add(group)
-    error = _commit_error()
-    if error:
-        return error
-    return _scim_response(_make_group_resource(group))
+        flask.current_app.logger.exception('SCIM Group patch failed')
+        return _scim_error(500, 'The SCIM Group could not be patched')
+    return _scim_response(_make_group_resource(resource))
 
 
 def _delete_group_response(
@@ -1530,24 +2133,41 @@ def _delete_group_response(
     group_id, error = _resource_id(group_id, 'Group')
     if error:
         return error
-    group, error = _locked_resource(models.Alias, group_id)
-    if error:
-        return error
-    error = _if_match_error(group, if_match)
-    if error:
+    try:
+        models.lock_scim_graph()
+        resource = _get_scim_for_update(group_id, 'Group')
+        error = _if_match_error(resource, if_match)
+        if error:
+            models.db.session.rollback()
+            return error
+        error = _if_none_match_error(resource, if_none_match)
+        if error:
+            models.db.session.rollback()
+            return error
+        if not resource:
+            models.db.session.rollback()
+            return _scim_error(404, f'Group {group_id} cannot be found')
+        alias = resource.alias
+        models.tombstone_scim_resource(resource)
+        # Persist the detached tombstone before deleting the Alias. Otherwise
+        # the generic before_flush lifecycle hook still sees the database's
+        # pre-tombstone live FK and attempts to tombstone it a second time.
+        models.db.session.flush()
+        models.db.session.delete(alias)
+        models.db.session.commit()
+    except models.ScimGraphError as identity_error:
         models.db.session.rollback()
-        return error
-    error = _if_none_match_error(group, if_none_match)
-    if error:
+        return _scim_error(400, str(identity_error), 'invalidValue')
+    except models.ScimIdentityError:
         models.db.session.rollback()
-        return error
-    if not group:
+        flask.current_app.logger.exception(
+            'SCIM Group identity invariant failed during deletion'
+        )
+        return _scim_error(500, 'The SCIM Group identity is inconsistent')
+    except SQLAlchemyError:
         models.db.session.rollback()
-        return _scim_error(404, f'Group {group_id} cannot be found')
-    models.db.session.delete(group)
-    error = _commit_error()
-    if error:
-        return error
+        flask.current_app.logger.exception('SCIM Group deletion failed')
+        return _scim_error(500, 'The SCIM Group could not be deleted')
     return '', 204
 
 
@@ -1596,17 +2216,52 @@ def list_users():
     count = _parse_positive_int(flask.request.args.get('count', 100), 100, minimum=0, maximum=200)
     if start_index is None or count is None:
         return _scim_error(400, 'startIndex and count must be integers', 'invalidValue')
-    query = models.User.query.order_by(models.User._email)
+    query = (
+        models.ScimResource.query
+        .filter(
+            models.ScimResource.resource_type == 'User',
+            models.ScimResource.deleted_at.is_(None),
+            models.ScimResource.user_email.is_not(None),
+        )
+        .join(
+            models.User,
+            models.ScimResource.user_email == models.User._email,
+        )
+        .order_by(models.ScimResource.id)
+    )
 
     filter_value = flask.request.args.get('filter')
     if filter_value:
-        email, error = _equality_filter(filter_value, 'userName')
-        if error:
-            return error
-        if not validators.email(email):
-            return _scim_error(400, 'userName filter value must be a valid email address', 'invalidFilter')
-        email = email.lower()
-        query = query.filter_by(email=email)
+        match = _FILTER_PATTERN.fullmatch(filter_value)
+        if not match:
+            return _scim_error(
+                400,
+                'Only userName or externalId eq filters are supported',
+                'invalidFilter',
+            )
+        attribute, value = match.groups()
+        if attribute.casefold() == 'username':
+            if not validators.email(value):
+                return _scim_error(
+                    400,
+                    'userName filter value must be a valid email address',
+                    'invalidFilter',
+                )
+            query = query.filter(models.User._email == value.lower())
+        elif attribute.casefold() == 'externalid':
+            try:
+                encoded = value.encode('utf-8')
+            except UnicodeEncodeError:
+                encoded = None
+            query = query.filter(
+                models.ScimResource.external_id_bytes == encoded
+            )
+        else:
+            return _scim_error(
+                400,
+                'Only userName or externalId eq filters are supported',
+                'invalidFilter',
+            )
 
     total = query.count()
     users = query.offset(start_index - 1).limit(count).all() if count else []
@@ -1627,33 +2282,67 @@ def _create_user_response(data):
     if error:
         return error
     if not email:
-        return _scim_error(400, 'userName or emails[0].value is required', 'invalidValue')
-    domain_data, error = _validate_user_domain(email, for_update=True)
+        return _scim_error(400, 'userName is required', 'invalidValue')
+    external_id, error = _external_id_value(data, replacing=True)
     if error:
-        models.db.session.rollback()
         return error
-    if _get_user(email) or _get_group(email):
-        models.db.session.rollback()
-        return _scim_error(409, f'Address {email} already exists', 'uniqueness')
-    localpart, domain = domain_data
-    user = models.User(localpart=localpart, domain=domain)
-    error, password_changed, _ = _apply_user_data(user, data, replacing=True)
-    if error:
-        models.db.session.rollback()
-        return error
-    if not password_changed:
-        user.set_password(secrets.token_urlsafe(), keep_sessions=True)
-    models.db.session.add(user)
     try:
+        models.lock_scim_graph()
+        domain_name = email.rsplit('@', 1)[1]
+        domain = models.db.session.get(models.Domain, domain_name)
+        if not domain:
+            models.db.session.rollback()
+            return _scim_error(404, f'Domain {domain_name} does not exist')
+        address = models.db.session.get(models.MailAddress, email)
+        user = models.db.session.get(models.User, email)
+        if address is not None or user is not None:
+            models.db.session.rollback()
+            return _scim_error(
+                409,
+                f'Address {email} already exists',
+                'uniqueness',
+            )
+        if (
+            domain.max_users != -1
+            and len(domain.users) >= domain.max_users
+        ):
+            models.db.session.rollback()
+            return _scim_error(
+                409,
+                f'Too many users for domain {domain_name}',
+                'uniqueness',
+            )
+        localpart = email.rsplit('@', 1)[0]
+        user = models.User(localpart=localpart, domain=domain)
+        models.db.session.add(user)
+        error, password_changed, _ = _apply_user_data(
+            user,
+            data,
+            replacing=True,
+        )
+        if error:
+            models.db.session.rollback()
+            return error
+        if not password_changed:
+            user.set_password(secrets.token_urlsafe(), keep_sessions=True)
+        models.db.session.add(user)
+        models.db.session.flush()
+        resource = models.create_scim_user_mapping(
+            user,
+            external_id=external_id,
+        )
         models.db.session.commit()
-    except IntegrityError:
+    except (IntegrityError, models.AddressConflict):
         models.db.session.rollback()
         return _scim_error(409, f'Address {email} already exists', 'uniqueness')
+    except models.ScimIdentityError as identity_error:
+        models.db.session.rollback()
+        return _scim_error(409, str(identity_error), 'uniqueness')
     except SQLAlchemyError:
         models.db.session.rollback()
         flask.current_app.logger.exception('SCIM User creation failed')
         return _scim_error(500, 'The SCIM User could not be created')
-    return _scim_response(_make_user_resource(user), 201)
+    return _scim_response(_make_user_resource(resource), 201)
 
 
 @blueprint.route('/Users/<path:user_id>', methods=['GET'])
@@ -1661,13 +2350,13 @@ def get_user(user_id):
     user_id, error = _resource_id(user_id, 'User')
     if error:
         return error
-    user = _get_user(user_id)
-    if not user:
+    resource = _get_user(user_id)
+    if not resource:
         return _scim_error(404, f'User {user_id} cannot be found')
-    conditional = _conditional_read_response(user)
+    conditional = _conditional_read_response(resource)
     if conditional:
         return conditional
-    return _scim_response(_make_user_resource(user))
+    return _scim_response(_make_user_resource(resource))
 
 
 def _replace_user_response(
@@ -1682,49 +2371,82 @@ def _replace_user_response(
     user_id, error = _resource_id(user_id, 'User')
     if error:
         return error
-    user, error = _locked_resource(models.User, user_id)
-    if error:
-        return error
-    error = _if_match_error(user, if_match)
-    if error:
+    try:
+        models.lock_scim_graph()
+        resource = _get_scim_for_update(user_id, 'User')
+        error = _if_match_error(resource, if_match)
+        if error:
+            models.db.session.rollback()
+            return error
+        error = _if_none_match_error(resource, if_none_match)
+        if error:
+            models.db.session.rollback()
+            return error
+        if not resource:
+            models.db.session.rollback()
+            return _scim_error(404, f'User {user_id} cannot be found')
+        user = resource.user
+        new_email, error = _user_email(
+            data,
+            require_user_name=True,
+            conflict_scim_type='mutability',
+        )
+        if error:
+            models.db.session.rollback()
+            return error
+        if not new_email:
+            models.db.session.rollback()
+            return _scim_error(
+                400,
+                'userName is required',
+                'invalidValue',
+            )
+        if new_email != user.email:
+            models.db.session.rollback()
+            return _scim_error(
+                400,
+                'Changing userName/email is not supported',
+                'mutability',
+            )
+        if 'password' in data:
+            models.db.session.rollback()
+            return _scim_error(
+                400,
+                'Changing an existing password through SCIM is not supported',
+                'mutability',
+            )
+        external_id, error = _external_id_value(data, replacing=True)
+        if error:
+            models.db.session.rollback()
+            return error
+        resource.external_id = external_id
+        error, password_changed, deactivated = _apply_user_data(
+            user,
+            data,
+            replacing=True,
+        )
+        if error:
+            models.db.session.rollback()
+            return error
+        models.db.session.add(resource)
+        models.db.session.add(user)
+        error = _commit_user_change(
+            user,
+            prune_sessions=password_changed or deactivated,
+        )
+        if error:
+            return error
+    except models.ScimIdentityError:
         models.db.session.rollback()
-        return error
-    error = _if_none_match_error(user, if_none_match)
-    if error:
+        flask.current_app.logger.exception(
+            'SCIM User identity invariant failed during replacement'
+        )
+        return _scim_error(500, 'The SCIM User identity is inconsistent')
+    except SQLAlchemyError:
         models.db.session.rollback()
-        return error
-    if not user:
-        models.db.session.rollback()
-        return _scim_error(404, f'User {user_id} cannot be found')
-    new_email, error = _user_email(
-        data,
-        require_user_name=True,
-        conflict_scim_type='mutability',
-    )
-    if error:
-        models.db.session.rollback()
-        return error
-    if not new_email:
-        models.db.session.rollback()
-        return _scim_error(400, 'userName or emails[0].value is required', 'invalidValue')
-    if new_email != user.email:
-        models.db.session.rollback()
-        return _scim_error(400, 'Changing userName/email is not supported', 'mutability')
-    if 'password' in data:
-        models.db.session.rollback()
-        return _scim_error(400, 'Changing an existing password through SCIM is not supported', 'mutability')
-    error, password_changed, deactivated = _apply_user_data(user, data, replacing=True)
-    if error:
-        models.db.session.rollback()
-        return error
-    models.db.session.add(user)
-    error = _commit_user_change(
-        user,
-        prune_sessions=password_changed or deactivated,
-    )
-    if error:
-        return error
-    return _scim_response(_make_user_resource(user))
+        flask.current_app.logger.exception('SCIM User replacement failed')
+        return _scim_error(500, 'The SCIM User could not be replaced')
+    return _scim_response(_make_user_resource(resource))
 
 
 def _patch_user_response(
@@ -1739,29 +2461,43 @@ def _patch_user_response(
     user_id, error = _resource_id(user_id, 'User')
     if error:
         return error
-    user, error = _locked_resource(models.User, user_id)
-    if error:
-        return error
-    error = _if_match_error(user, if_match)
-    if error:
+    try:
+        models.lock_scim_graph()
+        resource = _get_scim_for_update(user_id, 'User')
+        error = _if_match_error(resource, if_match)
+        if error:
+            models.db.session.rollback()
+            return error
+        error = _if_none_match_error(resource, if_none_match)
+        if error:
+            models.db.session.rollback()
+            return error
+        if not resource:
+            models.db.session.rollback()
+            return _scim_error(404, f'User {user_id} cannot be found')
+        error, prune_sessions = _patch_user(resource, data)
+        if error:
+            models.db.session.rollback()
+            return error
+        models.db.session.add(resource)
+        models.db.session.add(resource.user)
+        error = _commit_user_change(
+            resource.user,
+            prune_sessions=prune_sessions,
+        )
+        if error:
+            return error
+    except models.ScimIdentityError:
         models.db.session.rollback()
-        return error
-    error = _if_none_match_error(user, if_none_match)
-    if error:
+        flask.current_app.logger.exception(
+            'SCIM User identity invariant failed during patch'
+        )
+        return _scim_error(500, 'The SCIM User identity is inconsistent')
+    except SQLAlchemyError:
         models.db.session.rollback()
-        return error
-    if not user:
-        models.db.session.rollback()
-        return _scim_error(404, f'User {user_id} cannot be found')
-    error, prune_sessions = _patch_user(user, data)
-    if error:
-        models.db.session.rollback()
-        return error
-    models.db.session.add(user)
-    error = _commit_user_change(user, prune_sessions=prune_sessions)
-    if error:
-        return error
-    return _scim_response(_make_user_resource(user))
+        flask.current_app.logger.exception('SCIM User patch failed')
+        return _scim_error(500, 'The SCIM User could not be patched')
+    return _scim_response(_make_user_resource(resource))
 
 
 def _delete_user_response(
@@ -1772,25 +2508,45 @@ def _delete_user_response(
     user_id, error = _resource_id(user_id, 'User')
     if error:
         return error
-    user, error = _locked_resource(models.User, user_id)
-    if error:
-        return error
-    error = _if_match_error(user, if_match)
-    if error:
+    try:
+        models.lock_scim_graph()
+        resource = _get_scim_for_update(user_id, 'User')
+        error = _if_match_error(resource, if_match)
+        if error:
+            models.db.session.rollback()
+            return error
+        error = _if_none_match_error(resource, if_none_match)
+        if error:
+            models.db.session.rollback()
+            return error
+        if not resource:
+            models.db.session.rollback()
+            return _scim_error(404, f'User {user_id} cannot be found')
+        email = resource.user.email
+        models.tombstone_scim_resource(
+            resource,
+            scrub_user_authority=True,
+        )
+        models.db.session.commit()
+    except models.ScimGraphError as identity_error:
         models.db.session.rollback()
-        return error
-    error = _if_none_match_error(user, if_none_match)
-    if error:
+        return _scim_error(400, str(identity_error), 'invalidValue')
+    except models.ScimIdentityError:
         models.db.session.rollback()
-        return error
-    if not user:
+        flask.current_app.logger.exception(
+            'SCIM User identity invariant failed during deletion'
+        )
+        return _scim_error(500, 'The SCIM User identity is inconsistent')
+    except SQLAlchemyError:
         models.db.session.rollback()
-        return _scim_error(404, f'User {user_id} cannot be found')
-    user.enabled = False
-    models.db.session.add(user)
-    error = _commit_user_change(user, prune_sessions=True)
-    if error:
-        return error
+        flask.current_app.logger.exception('SCIM User deletion failed')
+        return _scim_error(500, 'The SCIM User could not be deleted')
+    try:
+        utils.MailuSessionExtension.prune_sessions(uid=email)
+    except Exception:
+        flask.current_app.logger.exception(
+            'SCIM post-commit session cleanup failed'
+        )
     return '', 204
 
 @blueprint.route('/Users', methods=['POST'])
@@ -1823,38 +2579,117 @@ def delete_user(user_id):
 
 
 def _resolve_bulk_ids(value, bulk_ids):
-    if isinstance(value, str) and value.startswith('bulkId:'):
-        return bulk_ids.get(value[7:], value)
-    if isinstance(value, list):
-        return [_resolve_bulk_ids(item, bulk_ids) for item in value]
-    if isinstance(value, dict):
-        return {key: _resolve_bulk_ids(item, bulk_ids) for key, item in value.items()}
-    return value
+    """Resolve Bulk references only in Group member reference slots."""
+    if not isinstance(value, dict):
+        return value
+    resolved = dict(value)
+    if 'members' in resolved:
+        members = resolved['members']
+        if isinstance(members, list):
+            resolved_members = []
+            for member in members:
+                if (
+                    isinstance(member, str)
+                    and member.startswith('bulkId:')
+                ):
+                    member = bulk_ids.get(member[7:], member)
+                elif isinstance(member, dict):
+                    member = dict(member)
+                    reference = member.get('value')
+                    if (
+                        isinstance(reference, str)
+                        and reference.startswith('bulkId:')
+                    ):
+                        member['value'] = bulk_ids.get(
+                            reference[7:],
+                            reference,
+                        )
+                resolved_members.append(member)
+            resolved['members'] = resolved_members
+    operations = resolved.get('Operations')
+    if isinstance(operations, list):
+        resolved_operations = []
+        for operation in operations:
+            if not isinstance(operation, dict):
+                resolved_operations.append(operation)
+                continue
+            operation = dict(operation)
+            path = operation.get('path')
+            if not path and isinstance(operation.get('value'), dict):
+                operation['value'] = _resolve_bulk_ids(
+                    operation['value'],
+                    bulk_ids,
+                )
+            elif isinstance(path, str):
+                core_path = _schema_path(path.strip(), SCIM_GROUP_SCHEMA)
+                if core_path.casefold() == 'members':
+                    wrapped = {
+                        'members': (
+                            operation.get('value')
+                            if isinstance(operation.get('value'), list)
+                            else [operation.get('value')]
+                        )
+                    }
+                    operation['value'] = _resolve_bulk_ids(
+                        wrapped,
+                        bulk_ids,
+                    )['members']
+            resolved_operations.append(operation)
+        resolved['Operations'] = resolved_operations
+    return resolved
+
+
+def _member_bulk_references(value):
+    references = set()
+    if not isinstance(value, dict):
+        return references
+    members = value.get('members')
+    if isinstance(members, list):
+        for member in members:
+            reference = (
+                member.get('value')
+                if isinstance(member, dict)
+                else member
+            )
+            if isinstance(reference, str) and reference.startswith('bulkId:'):
+                references.add(reference[7:])
+    operations = value.get('Operations')
+    if isinstance(operations, list):
+        for operation in operations:
+            if not isinstance(operation, dict):
+                continue
+            path = operation.get('path')
+            if not path and isinstance(operation.get('value'), dict):
+                references.update(
+                    _member_bulk_references(operation['value'])
+                )
+            elif isinstance(path, str):
+                core_path = _schema_path(path.strip(), SCIM_GROUP_SCHEMA)
+                if core_path.casefold() == 'members':
+                    item = operation.get('value')
+                    references.update(_member_bulk_references({
+                        'members': item if isinstance(item, list) else [item],
+                    }))
+    return references
 
 
 def _bulk_id_references(value):
-    if isinstance(value, str):
-        return {value[7:]} if value.startswith('bulkId:') else set()
-    if isinstance(value, list):
-        references = set()
-        for item in value:
-            references.update(_bulk_id_references(item))
-        return references
-    if isinstance(value, dict):
-        references = set()
-        for item in value.values():
-            references.update(_bulk_id_references(item))
-        return references
+    return _member_bulk_references(value)
+
+
+def _path_bulk_reference(operation):
+    path = operation.get('path')
+    if not isinstance(path, str):
+        return set()
+    parts = path.lstrip('/').split('/', 1)
+    if len(parts) == 2 and parts[1].startswith('bulkId:'):
+        return {parts[1][7:]}
     return set()
 
 
 def _operation_bulk_references(operation):
-    references = _bulk_id_references(operation.get('data'))
-    path = operation.get('path')
-    if isinstance(path, str):
-        parts = path.lstrip('/').split('/', 1)
-        if len(parts) == 2 and parts[1].startswith('bulkId:'):
-            references.add(parts[1][7:])
+    references = _member_bulk_references(operation.get('data'))
+    references.update(_path_bulk_reference(operation))
     return references
 
 
@@ -2076,21 +2911,28 @@ def bulk():
         return _scim_error(400, 'Operations must not be empty', 'invalidValue')
     if len(operations) > SCIM_MAX_BULK_OPERATIONS:
         return _scim_error(413, 'Too many bulk operations', 'tooMany')
-    raw_fail_on_errors = data.get('failOnErrors', len(operations))
-    try:
-        fail_on_errors = int(raw_fail_on_errors)
-    except (TypeError, ValueError):
-        fail_on_errors = None
-    if isinstance(raw_fail_on_errors, bool) or fail_on_errors is None or fail_on_errors < 0:
+    fail_on_errors = data.get('failOnErrors', len(operations))
+    if (
+        isinstance(fail_on_errors, bool)
+        or not isinstance(fail_on_errors, int)
+        or fail_on_errors < 0
+    ):
         return _scim_error(400, 'failOnErrors must be a non-negative integer', 'invalidValue')
     bulk_id_values = []
     for operation in operations:
         if not isinstance(operation, dict):
             continue
         bulk_id = operation.get('bulkId')
-        method = _string_value(operation.get('method')).upper()
+        method_value = operation.get('method')
+        if not isinstance(method_value, str):
+            return _scim_error(400, 'Bulk operation method must be a string', 'invalidValue')
+        method = method_value.upper()
+        if method not in ('POST', 'PUT', 'PATCH', 'DELETE'):
+            return _scim_error(400, f'Unsupported bulk method {method!r}', 'invalidValue')
         if method == 'POST' and (not isinstance(bulk_id, str) or not bulk_id):
             return _scim_error(400, 'POST bulk operations require a non-empty bulkId', 'invalidValue')
+        if method != 'POST' and bulk_id is not None:
+            return _scim_error(400, 'bulkId is permitted only for POST operations', 'invalidValue')
         if bulk_id is not None and (not isinstance(bulk_id, str) or not bulk_id):
             return _scim_error(400, 'bulkId must be a non-empty string', 'invalidValue')
         if bulk_id in bulk_id_values:

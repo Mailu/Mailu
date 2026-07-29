@@ -452,6 +452,60 @@ def alias(localpart, domain_name, destination, wildcard=False):
     db.session.commit()
 
 
+@mailu.command('scim-group-adopt')
+@click.argument('email')
+@click.option(
+    '--external-id',
+    default=None,
+    help='Optional provider externalId to bind to the adopted SCIM Group.',
+)
+@with_appcontext
+def scim_group_adopt(email, external_id=None):
+    """Adopt one eligible existing alias as a provider-managed SCIM Group."""
+    alias = db.session.get(models.Alias, email)
+    if alias is None or alias.email != email:
+        raise click.ClickException(f'alias {email!r} not found')
+
+    original_destinations = list(alias.destination)
+    try:
+        group = models.create_scim_group_mapping(
+            alias,
+            external_id=external_id,
+        )
+        member_ids = []
+        external_destinations = []
+        for value in original_destinations:
+            destination = models.canonicalize_scim_destination(value)
+            local_address = db.session.get(models.MailAddress, destination)
+            if local_address is None:
+                external_destinations.append(destination)
+                continue
+
+            if local_address.address_type == models.User.ADDRESS_TYPE:
+                subject = db.session.get(models.User, local_address.email)
+            else:
+                subject = db.session.get(models.Alias, local_address.email)
+            member = subject.scim_resource if subject is not None else None
+            if member is None or member.deleted_at is not None:
+                raise models.ScimGroupAdoptionError(
+                    f'local destination {destination!r} is not an active '
+                    'SCIM resource'
+                )
+            member_ids.append(member.id)
+
+        models.replace_scim_group_graph(
+            group,
+            member_ids=member_ids,
+            external_destinations=external_destinations,
+        )
+        db.session.commit()
+    except (models.ScimIdentityError, ValueError) as exc:
+        db.session.rollback()
+        raise click.ClickException(str(exc)) from exc
+
+    click.echo(f'adopted {email!r} as SCIM Group {group.id}')
+
+
 @mailu.command()
 @click.argument('domain_name')
 @click.argument('max_users')

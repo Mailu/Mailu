@@ -465,8 +465,8 @@ jobs:
 # This job runs the headless admin unit tests (anonmail and SCIM) inside the freshly
 # built admin image, so they exercise the exact python interpreter and pinned
 # dependencies that ship in the image instead of a separately installed set. They
-# cover the Flask-Admin models/views/API layer against an in-memory SQLite
-# database, which the docker-compose tests above do not.
+# cover the Flask-Admin models/views/API layer against SQLite, plus the
+# load-bearing SCIM graph races against MariaDB REPEATABLE READ.
   unit-tests:
     name: admin unit tests
     if: contains(inputs.architecture, 'linux/amd64')
@@ -476,6 +476,21 @@ jobs:
       packages: read
     needs:
       - build
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_DATABASE: mailu_scim_test
+          MARIADB_USER: mailu
+          MARIADB_PASSWORD: mailu-test-password
+          MARIADB_ROOT_PASSWORD: mailu-test-root-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
     steps:
       - uses: actions/checkout@v4
       - name: Login to GitHub Container Registry
@@ -496,7 +511,21 @@ jobs:
             -w /app \
             -e PYTHONDONTWRITEBYTECODE=1 \
             ghcr.io/${{ steps.string.outputs.lowercase }}/admin:${{ inputs.mailu_version }}-build \
-            sh -c "pip install --no-cache-dir pytest && python -m pytest -v -p no:cacheprovider tests/anonmail tests/scim_test.py"
+            sh -c "pip install --no-cache-dir pytest && python -m pytest -v -p no:cacheprovider tests/anonmail tests/address_registry_test.py tests/auth_generation_model_test.py tests/session_authority_test.py tests/scim_group_adopt_test.py tests/scim_identity_model_test.py tests/scim_identity_test.py tests/scim_test.py"
+      - name: Run MariaDB SCIM graph race tests
+        run: |
+          docker run --rm --network host \
+            -v ${{ github.workspace }}/tests:/app/tests:ro \
+            -w /app \
+            -e PYTHONDONTWRITEBYTECODE=1 \
+            -e SQLALCHEMY_DATABASE_URI=mysql+mysqlconnector://mailu:mailu-test-password@127.0.0.1:3306/mailu_scim_test \
+            -e REDIS_ADDRESS=localhost \
+            -e MEMORY_SESSIONS=true \
+            -e RATELIMIT_STORAGE_URL=memory:// \
+            -e API_TOKEN=not-empty \
+            -e SECRET_KEY=test-secret \
+            ghcr.io/${{ steps.string.outputs.lowercase }}/admin:${{ inputs.mailu_version }}-build \
+            sh -c "pip install --no-cache-dir pytest && python -m pytest -v -p no:cacheprovider tests/scim_identity_model_test.py -k mysql_"
 
   deploy:
     name: Deploy images

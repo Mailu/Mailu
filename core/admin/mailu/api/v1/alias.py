@@ -69,6 +69,9 @@ class Aliases(Resource):
         alias_found = models.Alias.query.filter_by(email = data['email']).first()
         if alias_found:
           return { 'code': 409, 'message': f'Duplicate alias {data["email"]}'}, 409
+        user_found = models.User.query.filter_by(email=data['email']).first()
+        if user_found:
+          return { 'code': 409, 'message': f'Email address {data["email"]} is already used'}, 409
 
         alias_model = models.Alias(email=data["email"],destination=data['destination'])
         if 'comment' in data:
@@ -76,7 +79,11 @@ class Aliases(Resource):
         if 'wildcard' in data:
           alias_model.wildcard = data['wildcard']
         db.session.add(alias_model)
-        db.session.commit()
+        try:
+          db.session.commit()
+        except models.AddressConflict:
+          db.session.rollback()
+          return { 'code': 409, 'message': f'Email address {data["email"]} is already used'}, 409
 
         return {'code': 200, 'message': f'Alias {data["email"]} to destination(s) {data["destination"]} has been created'}, 200
 

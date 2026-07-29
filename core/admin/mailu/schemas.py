@@ -1069,7 +1069,26 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
                     # reset password hash
                     inst = type(item)(password=attr.history.deleted[-1])
                     if inst.check_password(original):
-                        item.password = inst.password
+                        if isinstance(item, models.User):
+                            state = sqlalchemy.inspect(item)
+                            generation = state.attrs.auth_generation
+                            original_generation = (
+                                generation.history.deleted[-1]
+                                if generation.history.deleted
+                                else None
+                            )
+                            item._preserve_auth_generation = True
+                            try:
+                                item.password = inst.password
+                            finally:
+                                del item._preserve_auth_generation
+                            if (
+                                original_generation is not None
+                                and not state.attrs.enabled.history.has_changes()
+                            ):
+                                item.auth_generation = original_generation
+                        else:
+                            item.password = inst.password
                 except ValueError:
                     # hash in db is invalid
                     pass
@@ -1179,7 +1198,15 @@ class UserSchema(BaseSchema):
         model = models.User
         load_instance = True
         include_relationships = True
-        exclude = ['_email', 'domain', 'localpart', 'domain_name', 'quota_bytes_used']
+        exclude = [
+            '_email',
+            'address_type',
+            'domain',
+            'localpart',
+            'domain_name',
+            'quota_bytes_used',
+            'auth_generation',
+        ]
 
         primary_keys = ['email']
         exclude_by_value = {
@@ -1206,7 +1233,13 @@ class AliasSchema(BaseSchema):
         """ Schema config """
         model = models.Alias
         load_instance = True
-        exclude = ['_email', 'domain', 'localpart', 'domain_name']
+        exclude = [
+            '_email',
+            'address_type',
+            'domain',
+            'localpart',
+            'domain_name',
+        ]
 
         primary_keys = ['email']
         exclude_by_value = {

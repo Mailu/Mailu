@@ -13,6 +13,7 @@ Managing domains, users and aliases can be done from CLI using the commands:
 * config-update
 * config-export
 * config-import
+* scim-group-adopt
 
 alias
 -----
@@ -28,6 +29,31 @@ alias-delete
 .. code-block:: bash
 
   docker compose exec admin flask mailu alias-delete foo@example.net
+
+
+scim-group-adopt
+----------------
+
+SCIM exposes only aliases explicitly owned by a provisioning provider. Existing
+aliases are not silently exposed as SCIM Groups. To adopt one existing alias,
+run the one-shot maintenance command:
+
+.. code-block:: bash
+
+  docker compose exec admin flask mailu scim-group-adopt list@example.net
+
+The alias must be enabled, non-wildcard, unowned, and not already managed.
+Every local destination must already be an active SCIM User or Group; remote
+destinations are recorded in the Mailu Group extension. Adoption validates the
+whole member graph, rejects cycles, and commits the identity and normalized
+routing snapshot atomically. Ordinary alias editing is blocked after adoption.
+
+The optional provider correlation value is case-sensitive:
+
+.. code-block:: bash
+
+  docker compose exec admin flask mailu scim-group-adopt \
+    --external-id directory-group-7 list@example.net
 
 
 domain

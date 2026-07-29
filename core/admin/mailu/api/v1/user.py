@@ -131,6 +131,9 @@ class Users(Resource):
         email_found = models.User.query.filter_by(email=data['email']).first()
         if email_found:
             return { 'code': 409, 'message': f'User {data["email"]} already exists'}, 409
+        alias_found = models.Alias.query.filter_by(email=data['email']).first()
+        if alias_found:
+            return { 'code': 409, 'message': f'Email address {data["email"]} is already used'}, 409
         if 'forward_enabled' in data and data['forward_enabled'] is True:
             if ('forward_destination' in data and len(data['forward_destination']) == 0) or 'forward_destination' not in data:
                 return { 'code': 400, 'message': f'forward_destination is mandatory when forward_enabled is true'}, 400
@@ -185,7 +188,11 @@ class Users(Resource):
         if 'spam_threshold' in data:
             user_new.spam_threshold = data['spam_threshold']
         db.session.add(user_new)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except models.AddressConflict:
+            db.session.rollback()
+            return { 'code': 409, 'message': f'Email address {data["email"]} is already used'}, 409
 
         return {'code': 200,'message': f'User {data["email"]} has been created'}, 200
 

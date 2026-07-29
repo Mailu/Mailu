@@ -10,6 +10,7 @@ from mailu.api import scim
 
 USER_SCHEMA = 'urn:ietf:params:scim:schemas:core:2.0:User'
 GROUP_SCHEMA = 'urn:ietf:params:scim:schemas:core:2.0:Group'
+GROUP_EXTENSION = 'https://mailu.io/schemas/scim/2.0/Group'
 PATCH_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:PatchOp'
 BULK_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:BulkRequest'
 
@@ -43,11 +44,70 @@ def create_group(localpart='conditional-group', *, comment='Original group'):
         localpart=localpart,
         domain=domain,
         comment=comment,
-        destination=['original@example.net'],
+        destination=[],
     )
     models.db.session.add(group)
+    models.db.session.flush()
+    resource = models.create_scim_group_mapping(
+        group,
+        resource_id=models.new_scim_id(),
+    )
+    models.replace_scim_group_graph(
+        resource,
+        member_ids=[],
+        external_destinations=['original@example.net'],
+    )
     models.db.session.commit()
     return group
+
+
+def scim_id(subject):
+    if isinstance(subject, models.ScimResource):
+        return subject.id
+    return subject.scim_resource.id
+
+
+def scim_resource(resource_id):
+    return models.db.session.get(models.ScimResource, resource_id)
+
+
+def scim_user(resource_id):
+    resource = scim_resource(resource_id)
+    if resource is not None:
+        return (
+            resource.user
+            or models.db.session.get(models.User, resource.subject_address)
+        )
+    return models.db.session.get(models.User, resource_id)
+
+
+def scim_group(resource_id):
+    resource = scim_resource(resource_id)
+    if resource is not None:
+        return resource.alias
+    return models.db.session.get(models.Alias, resource_id)
+
+
+def group_payload(
+    alias_address,
+    *,
+    display_name='Group',
+    members=None,
+    external_destinations=None,
+    schemas=None,
+):
+    return {
+        'schemas': schemas or [GROUP_SCHEMA, GROUP_EXTENSION],
+        'displayName': display_name,
+        'members': [
+            {'value': member}
+            for member in (members or [])
+        ],
+        GROUP_EXTENSION: {
+            'aliasAddress': alias_address,
+            'externalDestinations': external_destinations or [],
+        },
+    }
 
 
 def assert_precondition_failed(response):
@@ -81,19 +141,25 @@ def test_scim_groups_are_backed_by_aliases(app, client):
         user.set_password('secret')
         models.db.session.add(user)
         models.db.session.commit()
+        user_id = scim_id(user)
 
-    payload = {
-        'schemas': ['urn:ietf:params:scim:schemas:core:2.0:Group'],
-        'displayName': 'admins@example.com',
-        'members': [{'value': 'alice@example.com'}],
-    }
+    payload = group_payload(
+        'admins@example.com',
+        display_name='Administrators',
+        members=[user_id],
+    )
     rv = client.post('/api/scim/v2/Groups', json=payload, headers=auth_headers(app))
 
     assert rv.status_code == 201
     data = rv.get_json()
-    assert data['id'] == 'admins@example.com'
-    assert data['displayName'] == 'admins@example.com'
-    assert data['members'][0]['value'] == 'alice@example.com'
+    assert data['id'] != 'admins@example.com'
+    assert data['displayName'] == 'Administrators'
+    assert data['members'][0]['value'] == user_id
+    assert data['members'][0]['type'] == 'User'
+    assert data[GROUP_EXTENSION] == {
+        'aliasAddress': 'admins@example.com',
+        'externalDestinations': [],
+    }
     assert data['meta']['resourceType'] == 'Group'
     assert data['meta']['version'].startswith('"')
     assert data['meta']['version'].endswith('"')
@@ -106,29 +172,45 @@ def test_scim_groups_are_backed_by_aliases(app, client):
         assert alias is not None
         assert alias.destination == ['alice@example.com']
 
-    rv = client.get('/api/scim/v2/Groups/admins@example.com', headers=auth_headers(app))
+    rv = client.get(
+        f'/api/scim/v2/Groups/{data["id"]}',
+        headers=auth_headers(app),
+    )
     assert rv.status_code == 200
-    assert rv.get_json()['members'][0]['value'] == 'alice@example.com'
+    assert rv.get_json()['members'][0]['value'] == user_id
 
 
 def test_scim_group_patch_updates_alias_members(app, client):
     with app.app_context():
-        domain = create_domain()
-        alias = models.Alias(localpart='team', domain=domain, destination=['alice@example.com'])
-        models.db.session.add(alias)
+        create_domain()
+        alice = create_user(localpart='alice')
+        bob = create_user(localpart='bob')
+        alias = create_group(localpart='team')
+        models.replace_scim_group_graph(
+            alias.scim_resource,
+            member_ids=[scim_id(alice)],
+            external_destinations=[],
+        )
         models.db.session.commit()
+        group_id = scim_id(alias)
+        alice_id = scim_id(alice)
+        bob_id = scim_id(bob)
 
     payload = {
         'schemas': ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
         'Operations': [
-            {'op': 'add', 'path': 'members', 'value': [{'value': 'bob@example.com'}]},
-            {'op': 'remove', 'path': 'members', 'value': [{'value': 'alice@example.com'}]},
+            {'op': 'add', 'path': 'members', 'value': [{'value': bob_id}]},
+            {'op': 'remove', 'path': 'members', 'value': [{'value': alice_id}]},
         ],
     }
-    rv = client.patch('/api/scim/v2/Groups/team@example.com', json=payload, headers=auth_headers(app))
+    rv = client.patch(
+        f'/api/scim/v2/Groups/{group_id}',
+        json=payload,
+        headers=auth_headers(app),
+    )
 
     assert rv.status_code == 200
-    assert [member['value'] for member in rv.get_json()['members']] == ['bob@example.com']
+    assert [member['value'] for member in rv.get_json()['members']] == [bob_id]
     with app.app_context():
         alias = models.db.session.get(models.Alias, 'team@example.com')
         assert alias.destination == ['bob@example.com']
@@ -136,45 +218,50 @@ def test_scim_group_patch_updates_alias_members(app, client):
 
 def test_scim_group_patch_supports_filtered_and_remove_all_members(app, client):
     with app.app_context():
-        domain = create_domain()
-        group = models.Alias(
-            localpart='filtered',
-            domain=domain,
-            destination=['alice@example.com', 'bob@example.com'],
+        create_domain()
+        alice = create_user(localpart='alice')
+        bob = create_user(localpart='bob')
+        group = create_group(localpart='filtered')
+        models.replace_scim_group_graph(
+            group.scim_resource,
+            member_ids=[scim_id(alice), scim_id(bob)],
+            external_destinations=[],
         )
-        models.db.session.add(group)
         models.db.session.commit()
+        group_id = scim_id(group)
+        alice_id = scim_id(alice)
+        bob_id = scim_id(bob)
 
     filtered = client.patch(
-        '/api/scim/v2/Groups/filtered@example.com',
+        f'/api/scim/v2/Groups/{group_id}',
         json={
             'schemas': [PATCH_SCHEMA],
             'Operations': [{
                 'op': 'remove',
-                'path': 'members[value eq "alice@example.com"]',
+                'path': f'members[value eq "{alice_id}"]',
             }],
         },
         headers=auth_headers(app),
     )
     assert filtered.status_code == 200
-    assert [member['value'] for member in filtered.get_json()['members']] == ['bob@example.com']
+    assert [member['value'] for member in filtered.get_json()['members']] == [bob_id]
 
     no_target = client.patch(
-        '/api/scim/v2/Groups/filtered@example.com',
+        f'/api/scim/v2/Groups/{group_id}',
         json={
             'schemas': [PATCH_SCHEMA],
             'Operations': [{
                 'op': 'remove',
-                'path': 'members[value eq "missing@example.com"]',
+                'path': 'members[value eq "00000000-0000-4000-8000-000000000000"]',
             }],
         },
         headers=auth_headers(app),
     )
     assert no_target.status_code == 200
-    assert [member['value'] for member in no_target.get_json()['members']] == ['bob@example.com']
+    assert [member['value'] for member in no_target.get_json()['members']] == [bob_id]
 
     remove_all = client.patch(
-        '/api/scim/v2/Groups/filtered@example.com',
+        f'/api/scim/v2/Groups/{group_id}',
         json={
             'schemas': [PATCH_SCHEMA],
             'Operations': [{'op': 'remove', 'path': 'members'}],
@@ -185,7 +272,7 @@ def test_scim_group_patch_supports_filtered_and_remove_all_members(app, client):
     assert remove_all.get_json()['members'] == []
 
     required = client.patch(
-        '/api/scim/v2/Groups/filtered@example.com',
+        f'/api/scim/v2/Groups/{group_id}',
         json={
             'schemas': [PATCH_SCHEMA],
             'Operations': [{'op': 'remove', 'path': 'displayName'}],
@@ -198,7 +285,9 @@ def test_scim_group_patch_supports_filtered_and_remove_all_members(app, client):
 
 def test_scim_group_pathless_patch_applies_all_attributes_atomically(app, client):
     with app.app_context():
-        group_id = create_group(localpart='pathless').email
+        create_domain()
+        member_id = scim_id(create_user(localpart='pathless-member'))
+        group_id = scim_id(create_group(localpart='pathless'))
 
     response = client.patch(
         f'/api/scim/v2/Groups/{group_id}',
@@ -208,7 +297,10 @@ def test_scim_group_pathless_patch_applies_all_attributes_atomically(app, client
                 'op': 'replace',
                 'value': {
                     'displayName': 'Pathless group',
-                    'members': [{'value': 'member@example.net'}],
+                    'members': [{'value': member_id}],
+                    GROUP_EXTENSION: {
+                        'externalDestinations': ['pager@example.net'],
+                    },
                 },
             }],
         },
@@ -216,7 +308,10 @@ def test_scim_group_pathless_patch_applies_all_attributes_atomically(app, client
     )
     assert response.status_code == 200
     assert response.get_json()['displayName'] == 'Pathless group'
-    assert [member['value'] for member in response.get_json()['members']] == ['member@example.net']
+    assert [member['value'] for member in response.get_json()['members']] == [member_id]
+    assert response.get_json()[GROUP_EXTENSION]['externalDestinations'] == [
+        'pager@example.net',
+    ]
 
     rejected = client.patch(
         f'/api/scim/v2/Groups/{group_id}',
@@ -231,9 +326,12 @@ def test_scim_group_pathless_patch_applies_all_attributes_atomically(app, client
     )
     assert rejected.status_code == 400
     with app.app_context():
-        group = models.db.session.get(models.Alias, group_id)
+        group = scim_group(group_id)
         assert group.comment == 'Pathless group'
-        assert group.destination == ['member@example.net']
+        assert group.destination == [
+            'pager@example.net',
+            'pathless-member@example.com',
+        ]
 
 
 
@@ -244,8 +342,12 @@ def test_scim_user_resources_include_etag_metadata(app, client):
         user.set_password('secret')
         models.db.session.add(user)
         models.db.session.commit()
+        user_id = scim_id(user)
 
-    rv = client.get('/api/scim/v2/Users/etag@example.com', headers=auth_headers(app))
+    rv = client.get(
+        f'/api/scim/v2/Users/{user_id}',
+        headers=auth_headers(app),
+    )
 
     assert rv.status_code == 200
     meta = rv.get_json()['meta']
@@ -259,31 +361,20 @@ def test_scim_user_resources_include_etag_metadata(app, client):
 
 
 def test_scim_resource_locations_percent_encode_reserved_id_characters(app, client):
-    with app.app_context():
-        user_id = create_user(localpart='hash#tag').email
-
-    response = client.get(
-        f'/api/scim/v2/Users/{urllib.parse.quote(user_id, safe="@")}',
-        headers=auth_headers(app),
-    )
-    location = response.get_json()['meta']['location']
-
-    assert response.status_code == 200
+    with app.test_request_context('/'):
+        location = scim._resource_location(
+            'Users',
+            'hash#tag@example.com',
+        )
     assert '#tag' not in location
     assert '%23tag' in location
-    followed = client.get(
-        urllib.parse.urlsplit(location).path,
-        headers=auth_headers(app),
-    )
-    assert followed.status_code == 200
-    assert followed.get_json()['id'] == user_id
 
 
 @pytest.mark.parametrize('resource_type', ['Users', 'Groups'])
 def test_scim_conditional_get_uses_http_entity_tag_rules(app, client, resource_type):
     with app.app_context():
         resource = create_user() if resource_type == 'Users' else create_group()
-        resource_id = resource.email
+        resource_id = scim_id(resource)
 
     url = f'/api/scim/v2/{resource_type}/{resource_id}'
     current = client.get(url, headers=auth_headers(app))
@@ -314,7 +405,7 @@ def test_scim_conditional_get_uses_http_entity_tag_rules(app, client, resource_t
 def test_scim_if_none_match_rejects_unsafe_change(app, client, resource_type):
     with app.app_context():
         resource = create_user() if resource_type == 'Users' else create_group()
-        resource_id = resource.email
+        resource_id = scim_id(resource)
 
     url = f'/api/scim/v2/{resource_type}/{resource_id}'
     version = client.get(url, headers=auth_headers(app)).headers['ETag']
@@ -351,16 +442,16 @@ def test_scim_if_none_match_rejects_unsafe_change(app, client, resource_type):
     assert response.get_json()['detail'] == 'If-None-Match matches the current resource version'
     with app.app_context():
         if resource_type == 'Users':
-            user = models.db.session.get(models.User, resource_id)
+            user = scim_user(resource_id)
             assert user.displayed_name == 'Original user'
         else:
-            group = models.db.session.get(models.Alias, resource_id)
+            group = scim_group(resource_id)
             assert group.destination == ['original@example.net']
 
 
 def test_scim_if_match_supports_lists_and_wildcard_but_rejects_weak_tags(app, client):
     with app.app_context():
-        user_id = create_user(localpart='entity-tags').email
+        user_id = scim_id(create_user(localpart='entity-tags'))
     url = f'/api/scim/v2/Users/{user_id}'
     version = client.get(url, headers=auth_headers(app)).headers['ETag']
     payload = {
@@ -403,13 +494,14 @@ def test_scim_if_match_supports_lists_and_wildcard_but_rejects_weak_tags(app, cl
 def test_scim_user_if_match_rejects_stale_without_changes(app, client, method):
     with app.app_context():
         user = create_user()
-        user_id = user.email
+        user_id = scim_id(user)
+        user_name = user.email
 
     initial = client.get(f'/api/scim/v2/Users/{user_id}', headers=auth_headers(app))
     stale_version = initial.get_json()['meta']['version']
 
     with app.app_context():
-        user = models.db.session.get(models.User, user_id)
+        user = scim_user(user_id)
         user.displayed_name = 'Concurrent user update'
         models.db.session.commit()
         expected_password = user.password
@@ -425,7 +517,7 @@ def test_scim_user_if_match_rejects_stale_without_changes(app, client, method):
             json={
                 'schemas': ['urn:ietf:params:scim:schemas:core:2.0:User'],
                 'id': user_id,
-                'userName': user_id,
+                'userName': user_name,
                 'active': False,
                 'displayName': 'Rejected stale replacement',
             },
@@ -448,7 +540,7 @@ def test_scim_user_if_match_rejects_stale_without_changes(app, client, method):
 
     assert_precondition_failed(response)
     with app.app_context():
-        user = models.db.session.get(models.User, user_id)
+        user = scim_user(user_id)
         assert user.enabled is True
         assert user.displayed_name == 'Concurrent user update'
         assert user.password == expected_password
@@ -460,7 +552,7 @@ def test_scim_user_if_match_rejects_stale_without_changes(app, client, method):
             json={
                 'schemas': ['urn:ietf:params:scim:schemas:core:2.0:User'],
                 'id': user_id,
-                'userName': user_id,
+                'userName': user_name,
                 'active': False,
                 'displayName': 'Accepted replacement',
             },
@@ -488,15 +580,16 @@ def test_scim_user_if_match_rejects_stale_without_changes(app, client, method):
 def test_scim_group_if_match_rejects_stale_without_changes(app, client, method):
     with app.app_context():
         group = create_group()
-        group_id = group.email
+        group_id = scim_id(group)
+        alias_address = group.email
 
     initial = client.get(f'/api/scim/v2/Groups/{group_id}', headers=auth_headers(app))
     stale_version = initial.get_json()['meta']['version']
 
     with app.app_context():
-        group = models.db.session.get(models.Alias, group_id)
+        group = scim_group(group_id)
+        models.permit_scim_managed_alias_edit(group)
         group.comment = 'Concurrent group update'
-        group.destination = ['current@example.net']
         models.db.session.commit()
 
     current = client.get(f'/api/scim/v2/Groups/{group_id}', headers=auth_headers(app))
@@ -507,12 +600,11 @@ def test_scim_group_if_match_rejects_stale_without_changes(app, client, method):
     if method == 'PUT':
         response = client.put(
             f'/api/scim/v2/Groups/{group_id}',
-            json={
-                'schemas': ['urn:ietf:params:scim:schemas:core:2.0:Group'],
-                'id': group_id,
-                'displayName': 'Rejected stale replacement',
-                'members': [{'value': 'rejected@example.net'}],
-            },
+            json=group_payload(
+                alias_address,
+                display_name='Rejected stale replacement',
+                external_destinations=['rejected@example.net'],
+            ),
             headers=headers,
         )
     elif method == 'PATCH':
@@ -523,8 +615,10 @@ def test_scim_group_if_match_rejects_stale_without_changes(app, client, method):
                 'Operations': [
                     {
                         'op': 'replace',
-                        'path': 'members',
-                        'value': [{'value': 'rejected@example.net'}],
+                        'path': (
+                            f'{GROUP_EXTENSION}:externalDestinations'
+                        ),
+                        'value': ['rejected@example.net'],
                     }
                 ],
             },
@@ -535,20 +629,19 @@ def test_scim_group_if_match_rejects_stale_without_changes(app, client, method):
 
     assert_precondition_failed(response)
     with app.app_context():
-        group = models.db.session.get(models.Alias, group_id)
+        group = scim_group(group_id)
         assert group.comment == 'Concurrent group update'
-        assert group.destination == ['current@example.net']
+        assert group.destination == ['original@example.net']
 
     current_headers = {**auth_headers(app), 'If-Match': current_version}
     if method == 'PUT':
         response = client.put(
             f'/api/scim/v2/Groups/{group_id}',
-            json={
-                'schemas': ['urn:ietf:params:scim:schemas:core:2.0:Group'],
-                'id': group_id,
-                'displayName': 'Accepted replacement',
-                'members': [{'value': 'accepted@example.net'}],
-            },
+            json=group_payload(
+                alias_address,
+                display_name='Accepted replacement',
+                external_destinations=['accepted@example.net'],
+            ),
             headers=current_headers,
         )
         assert response.status_code == 200
@@ -561,15 +654,19 @@ def test_scim_group_if_match_rejects_stale_without_changes(app, client, method):
                 'Operations': [
                     {
                         'op': 'replace',
-                        'path': 'members',
-                        'value': [{'value': 'accepted@example.net'}],
+                        'path': (
+                            f'{GROUP_EXTENSION}:externalDestinations'
+                        ),
+                        'value': ['accepted@example.net'],
                     }
                 ],
             },
             headers=current_headers,
         )
         assert response.status_code == 200
-        assert [member['value'] for member in response.get_json()['members']] == ['accepted@example.net']
+        assert response.get_json()[GROUP_EXTENSION][
+            'externalDestinations'
+        ] == ['accepted@example.net']
     else:
         response = client.delete(f'/api/scim/v2/Groups/{group_id}', headers=current_headers)
         assert response.status_code == 204
@@ -578,7 +675,7 @@ def test_scim_group_if_match_rejects_stale_without_changes(app, client, method):
 def test_scim_user_patch_rejects_password_change_without_side_effects(app, client, monkeypatch):
     with app.app_context():
         user = create_user(localpart='patch-password')
-        user_id = user.email
+        user_id = scim_id(user)
         original_password = user.password
 
     pruned_users = []
@@ -603,7 +700,7 @@ def test_scim_user_patch_rejects_password_change_without_side_effects(app, clien
     assert response.get_json()['scimType'] == 'mutability'
     assert pruned_users == []
     with app.app_context():
-        user = models.db.session.get(models.User, user_id)
+        user = scim_user(user_id)
         assert user.password == original_password
 
 
@@ -615,7 +712,9 @@ def test_scim_deprovisioning_prunes_existing_sessions_after_commit(
     method,
 ):
     with app.app_context():
-        user_id = create_user(localpart=f'deprovision-{method.lower()}').email
+        user = create_user(localpart=f'deprovision-{method.lower()}')
+        user_id = scim_id(user)
+        user_email = user.email
 
     pruned_users = []
     monkeypatch.setattr(
@@ -629,7 +728,7 @@ def test_scim_deprovisioning_prunes_existing_sessions_after_commit(
             url,
             json={
                 'schemas': [USER_SCHEMA],
-                'userName': user_id,
+                'userName': user_email,
                 'active': False,
             },
             headers=auth_headers(app),
@@ -651,9 +750,9 @@ def test_scim_deprovisioning_prunes_existing_sessions_after_commit(
         response = client.delete(url, headers=auth_headers(app))
 
     assert response.status_code == (204 if method == 'DELETE' else 200)
-    assert pruned_users == [user_id]
+    assert pruned_users == [user_email]
     with app.app_context():
-        assert models.db.session.get(models.User, user_id).enabled is False
+        assert scim_user(user_id).enabled is False
 
 
 def test_scim_stale_deprovision_precondition_does_not_prune_sessions(
@@ -662,11 +761,11 @@ def test_scim_stale_deprovision_precondition_does_not_prune_sessions(
     monkeypatch,
 ):
     with app.app_context():
-        user_id = create_user(localpart='stale-deprovision').email
+        user_id = scim_id(create_user(localpart='stale-deprovision'))
     url = f'/api/scim/v2/Users/{user_id}'
     stale_version = client.get(url, headers=auth_headers(app)).headers['ETag']
     with app.app_context():
-        user = models.db.session.get(models.User, user_id)
+        user = scim_user(user_id)
         user.displayed_name = 'Concurrent change'
         models.db.session.commit()
 
@@ -692,16 +791,16 @@ def test_scim_stale_deprovision_precondition_does_not_prune_sessions(
     assert_precondition_failed(response)
     assert pruned_users == []
     with app.app_context():
-        assert models.db.session.get(models.User, user_id).enabled is True
+        assert scim_user(user_id).enabled is True
 
 
-def test_scim_session_revocation_failure_rolls_back_user_change(
+def test_scim_session_revocation_failure_does_not_roll_back_committed_user_change(
     app,
     client,
     monkeypatch,
 ):
     with app.app_context():
-        user_id = create_user(localpart='revoke-failure').email
+        user_id = scim_id(create_user(localpart='revoke-failure'))
 
     def fail_revocation(**_kwargs):
         raise RuntimeError('session store unavailable')
@@ -724,11 +823,11 @@ def test_scim_session_revocation_failure_rolls_back_user_change(
         headers=auth_headers(app),
     )
 
-    assert response.status_code == 500
+    assert response.status_code == 200
     assert response.content_type == 'application/scim+json'
-    assert response.get_json()['detail'] == 'Existing sessions could not be revoked'
+    assert response.get_json()['active'] is False
     with app.app_context():
-        assert models.db.session.get(models.User, user_id).enabled is True
+        assert scim_user(user_id).enabled is False
 
 
 def test_scim_lock_failure_returns_scim_error_without_mutation(
@@ -737,15 +836,15 @@ def test_scim_lock_failure_returns_scim_error_without_mutation(
     monkeypatch,
 ):
     with app.app_context():
-        user_id = create_user(localpart='lock-failure').email
-    original_get_for_update = scim._get_for_update
+        user_id = scim_id(create_user(localpart='lock-failure'))
+    original_get_scim_for_update = scim._get_scim_for_update
 
-    def fail_user_lock(model, resource_id):
-        if model is models.User and resource_id == user_id:
+    def fail_user_lock(resource_id, resource_type):
+        if resource_type == 'User' and resource_id == user_id:
             raise scim.SQLAlchemyError('lock unavailable')
-        return original_get_for_update(model, resource_id)
+        return original_get_scim_for_update(resource_id, resource_type)
 
-    monkeypatch.setattr(scim, '_get_for_update', fail_user_lock)
+    monkeypatch.setattr(scim, '_get_scim_for_update', fail_user_lock)
     response = client.patch(
         f'/api/scim/v2/Users/{user_id}',
         json={
@@ -761,30 +860,33 @@ def test_scim_lock_failure_returns_scim_error_without_mutation(
 
     assert response.status_code == 500
     assert response.content_type == 'application/scim+json'
-    assert response.get_json()['detail'] == 'The SCIM resource could not be locked'
+    assert response.get_json()['detail'] == 'The SCIM User could not be patched'
     with app.app_context():
-        assert models.db.session.get(models.User, user_id).enabled is True
+        assert scim_user(user_id).enabled is True
 
 
 def test_scim_sqlite_lock_refreshes_an_unexpired_identity(app):
     with app.app_context():
-        user_id = create_user(localpart='stale-identity').email
+        user = create_user(localpart='stale-identity')
+        user_id = scim_id(user)
+        user_email = user.email
         session = models.db.session()
-        cached = session.get(models.User, user_id)
+        cached = session.get(models.User, user_email)
         session.commit()
         assert cached.displayed_name == 'Original user'
 
         concurrent_session = Session(models.db.engine)
         try:
-            concurrent = concurrent_session.get(models.User, user_id)
+            concurrent = concurrent_session.get(models.User, user_email)
             concurrent.displayed_name = 'Concurrent user'
             concurrent_session.commit()
         finally:
             concurrent_session.close()
 
-        locked = scim._get_for_update(models.User, user_id)
-        assert locked is cached
-        assert locked.displayed_name == 'Concurrent user'
+        models.lock_scim_graph()
+        locked = scim._get_scim_for_update(user_id, 'User')
+        assert locked.user is cached
+        assert locked.user.displayed_name == 'Concurrent user'
         models.db.session.rollback()
 
 
@@ -794,7 +896,7 @@ def test_scim_bulk_continues_after_session_revocation_failure(
     monkeypatch,
 ):
     with app.app_context():
-        user_id = create_user(localpart='bulk-revoke-failure').email
+        user_id = scim_id(create_user(localpart='bulk-revoke-failure'))
 
     def fail_revocation(**_kwargs):
         raise RuntimeError('session store unavailable')
@@ -835,9 +937,9 @@ def test_scim_bulk_continues_after_session_revocation_failure(
         headers=auth_headers(app),
     )
 
-    assert [item['status'] for item in response.get_json()['Operations']] == ['500', '201']
+    assert [item['status'] for item in response.get_json()['Operations']] == ['200', '201']
     with app.app_context():
-        assert models.db.session.get(models.User, user_id).enabled is True
+        assert scim_user(user_id).enabled is False
         assert models.db.session.get(models.User, 'after-revocation-error@example.com') is not None
 
 
@@ -855,7 +957,8 @@ def test_scim_create_and_get_user(app, client):
 
     assert rv.status_code == 201
     data = rv.get_json()
-    assert data['id'] == 'alice@example.com'
+    assert data['id'] != 'alice@example.com'
+    assert data['id']
     assert data['userName'] == 'alice@example.com'
     assert data['active'] is True
     assert data['displayName'] == 'Alice Example'
@@ -867,7 +970,10 @@ def test_scim_create_and_get_user(app, client):
         assert user.enabled is True
         assert user.displayed_name == 'Alice Example'
 
-    rv = client.get('/api/scim/v2/Users/alice@example.com', headers=auth_headers(app))
+    rv = client.get(
+        f'/api/scim/v2/Users/{data["id"]}',
+        headers=auth_headers(app),
+    )
     assert rv.status_code == 200
     assert rv.get_json()['userName'] == 'alice@example.com'
 
@@ -890,6 +996,7 @@ def test_scim_filter_user_by_username(app, client):
         user.set_password('secret')
         models.db.session.add(user)
         models.db.session.commit()
+        user_id = scim_id(user)
 
     rv = client.get('/api/scim/v2/Users?filter=userName eq "bob@example.com"', headers=auth_headers(app))
 
@@ -906,6 +1013,7 @@ def test_scim_patch_active_and_display_name(app, client):
         user.set_password('secret')
         models.db.session.add(user)
         models.db.session.commit()
+        user_id = scim_id(user)
 
     payload = {
         'schemas': ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
@@ -914,7 +1022,11 @@ def test_scim_patch_active_and_display_name(app, client):
             {'op': 'replace', 'path': 'displayName', 'value': 'Carol Disabled'},
         ],
     }
-    rv = client.patch('/api/scim/v2/Users/carol@example.com', json=payload, headers=auth_headers(app))
+    rv = client.patch(
+        f'/api/scim/v2/Users/{user_id}',
+        json=payload,
+        headers=auth_headers(app),
+    )
 
     assert rv.status_code == 200
     data = rv.get_json()
@@ -929,7 +1041,7 @@ def test_scim_patch_active_and_display_name(app, client):
 
 def test_scim_patch_accepts_schema_qualified_core_path(app, client):
     with app.app_context():
-        user_id = create_user(localpart='qualified-path').email
+        user_id = scim_id(create_user(localpart='qualified-path'))
 
     response = client.patch(
         f'/api/scim/v2/Users/{user_id}',
@@ -952,7 +1064,7 @@ def test_scim_patch_accepts_schema_qualified_core_path(app, client):
 
 def test_scim_resource_attribute_names_are_case_insensitive(app, client):
     with app.app_context():
-        user_id = create_user(localpart='attribute-case').email
+        user_id = scim_id(create_user(localpart='attribute-case'))
 
     response = client.patch(
         f'/api/scim/v2/Users/{user_id}',
@@ -978,10 +1090,18 @@ def test_scim_delete_disables_user_without_removing_mailbox(app, client):
         user.set_password('secret')
         models.db.session.add(user)
         models.db.session.commit()
+        user_id = scim_id(user)
 
-    rv = client.delete('/api/scim/v2/Users/dave@example.com', headers=auth_headers(app))
+    rv = client.delete(
+        f'/api/scim/v2/Users/{user_id}',
+        headers=auth_headers(app),
+    )
 
     assert rv.status_code == 204
+    assert client.get(
+        f'/api/scim/v2/Users/{user_id}',
+        headers=auth_headers(app),
+    ).status_code == 404
     with app.app_context():
         user = models.db.session.get(models.User, 'dave@example.com')
         assert user is not None
@@ -1002,7 +1122,7 @@ def test_scim_delete_missing_resource_returns_scim_404(app, client, resource_typ
 
 def test_scim_repeated_group_delete_returns_scim_404(app, client):
     with app.app_context():
-        group_id = create_group(localpart='delete-twice').email
+        group_id = scim_id(create_group(localpart='delete-twice'))
     url = f'/api/scim/v2/Groups/{group_id}'
 
     assert client.delete(url, headers=auth_headers(app)).status_code == 204
@@ -1054,12 +1174,17 @@ def test_scim_patch_rejects_invalid_active_value(app, client):
         user.set_password('secret')
         models.db.session.add(user)
         models.db.session.commit()
+        user_id = scim_id(user)
 
     payload = {
         'schemas': ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
         'Operations': [{'op': 'replace', 'path': 'active', 'value': 'maybe'}],
     }
-    rv = client.patch('/api/scim/v2/Users/frank@example.com', json=payload, headers=auth_headers(app))
+    rv = client.patch(
+        f'/api/scim/v2/Users/{user_id}',
+        json=payload,
+        headers=auth_headers(app),
+    )
 
     assert rv.status_code == 400
     assert rv.get_json()['scimType'] == 'invalidValue'
@@ -1075,9 +1200,10 @@ def test_scim_patch_rejects_non_object_operations(app, client):
         user.set_password('secret')
         models.db.session.add(user)
         models.db.session.commit()
+        user_id = scim_id(user)
 
     rv = client.patch(
-        '/api/scim/v2/Users/grace@example.com',
+        f'/api/scim/v2/Users/{user_id}',
         json={
             'schemas': [PATCH_SCHEMA],
             'Operations': ['not-an-object'],
@@ -1114,9 +1240,10 @@ def test_scim_patch_rejects_non_string_op_and_path(app, client):
         user.set_password('secret')
         models.db.session.add(user)
         models.db.session.commit()
+        user_id = scim_id(user)
 
     rv = client.patch(
-        '/api/scim/v2/Users/heidi@example.com',
+        f'/api/scim/v2/Users/{user_id}',
         json={
             'schemas': [PATCH_SCHEMA],
             'Operations': [{'op': 7, 'path': 9, 'value': 'ignored'}],
@@ -1138,9 +1265,10 @@ def test_scim_patch_remove_clears_optional_display_name(app, client):
         user.set_password('secret')
         models.db.session.add(user)
         models.db.session.commit()
+        user_id = scim_id(user)
 
     rv = client.patch(
-        '/api/scim/v2/Users/ivan@example.com',
+        f'/api/scim/v2/Users/{user_id}',
         json={
             'schemas': [PATCH_SCHEMA],
             'Operations': [{'op': 'remove', 'path': 'displayName'}],
@@ -1161,9 +1289,10 @@ def test_scim_patch_rejects_unknown_path(app, client):
         user.set_password('secret')
         models.db.session.add(user)
         models.db.session.commit()
+        user_id = scim_id(user)
 
     rv = client.patch(
-        '/api/scim/v2/Users/judy@example.com',
+        f'/api/scim/v2/Users/{user_id}',
         json={
             'schemas': [PATCH_SCHEMA],
             'Operations': [{
@@ -1203,9 +1332,10 @@ def test_scim_patch_rejects_empty_operations(app, client):
         user.set_password('secret')
         models.db.session.add(user)
         models.db.session.commit()
+        user_id = scim_id(user)
 
     rv = client.patch(
-        '/api/scim/v2/Users/mallory@example.com',
+        f'/api/scim/v2/Users/{user_id}',
         json={'schemas': [PATCH_SCHEMA], 'Operations': []},
         headers=auth_headers(app),
     )
@@ -1241,9 +1371,10 @@ def test_scim_patch_rejects_existing_password_changes(app, client):
         user.set_password('secret')
         models.db.session.add(user)
         models.db.session.commit()
+        user_id = scim_id(user)
 
     rv = client.patch(
-        '/api/scim/v2/Users/olivia@example.com',
+        f'/api/scim/v2/Users/{user_id}',
         json={
             'schemas': [PATCH_SCHEMA],
             'Operations': [{
@@ -1292,11 +1423,11 @@ def test_scim_bulk_creates_user_and_group(app, client):
                 'method': 'POST',
                 'path': '/Groups',
                 'bulkId': 'group1',
-                'data': {
-                    'schemas': [GROUP_SCHEMA],
-                    'displayName': 'bulkgroup@example.com',
-                    'members': [{'value': 'bulkId:user1'}],
-                },
+                'data': group_payload(
+                    'bulkgroup@example.com',
+                    display_name='Bulk group',
+                    members=['bulkId:user1'],
+                ),
             },
         ],
     }
@@ -1328,11 +1459,11 @@ def test_scim_bulk_resolves_forward_bulk_id_dependencies(app, client):
                     'method': 'POST',
                     'path': '/Groups',
                     'bulkId': 'group-first',
-                    'data': {
-                        'schemas': [GROUP_SCHEMA],
-                        'displayName': 'forward-group@example.com',
-                        'members': [{'value': 'bulkId:user-later'}],
-                    },
+                    'data': group_payload(
+                        'forward-group@example.com',
+                        display_name='Forward group',
+                        members=['bulkId:user-later'],
+                    ),
                 },
                 {
                     'method': 'POST',
@@ -1371,24 +1502,24 @@ def test_scim_bulk_rejects_circular_bulk_id_dependencies_without_partial_commit(
                     'method': 'POST',
                     'path': '/Groups',
                     'bulkId': 'group-a',
-                    'data': {
-                        'schemas': [GROUP_SCHEMA],
-                        'displayName': 'group-a@example.com',
-                        'members': [{'value': 'bulkId:group-b'}],
-                    },
+                    'data': group_payload(
+                        'group-a@example.com',
+                        display_name='Group A',
+                        members=['bulkId:group-b'],
+                    ),
                 },
                 {
                     'method': 'POST',
                     'path': '/Groups',
                     'bulkId': 'group-b',
-                    'data': {
-                        'schemas': [GROUP_SCHEMA],
-                        'displayName': 'group-b@example.com',
-                        'members': [
-                            {'value': 'bulkId:group-a'},
-                            {'value': 'not-an-email'},
+                    'data': group_payload(
+                        'group-b@example.com',
+                        display_name='Group B',
+                        members=[
+                            'bulkId:group-a',
+                            'not-an-id',
                         ],
-                    },
+                    ),
                 },
             ],
         },
@@ -1440,16 +1571,17 @@ def test_scim_bulk_stops_after_fail_on_errors(app, client):
 def test_scim_bulk_version_rejects_stale_resource_without_changes(app, client, resource_type):
     with app.app_context():
         resource = create_user() if resource_type == 'Users' else create_group()
-        resource_id = resource.email
+        resource_id = scim_id(resource)
     url = f'/api/scim/v2/{resource_type}/{resource_id}'
     stale_version = client.get(url, headers=auth_headers(app)).headers['ETag']
 
     with app.app_context():
         if resource_type == 'Users':
-            resource = models.db.session.get(models.User, resource_id)
+            resource = scim_user(resource_id)
             resource.displayed_name = 'Concurrent user'
         else:
-            resource = models.db.session.get(models.Alias, resource_id)
+            resource = scim_group(resource_id)
+            models.permit_scim_managed_alias_edit(resource)
             resource.comment = 'Concurrent group'
         models.db.session.commit()
 
@@ -1467,8 +1599,8 @@ def test_scim_bulk_version_rejects_stale_resource_without_changes(app, client, r
             'schemas': [PATCH_SCHEMA],
             'Operations': [{
                 'op': 'replace',
-                'path': 'members',
-                'value': [{'value': 'rejected@example.net'}],
+                'path': f'{GROUP_EXTENSION}:externalDestinations',
+                'value': ['rejected@example.net'],
             }],
         }
     response = client.post(
@@ -1493,16 +1625,16 @@ def test_scim_bulk_version_rejects_stale_resource_without_changes(app, client, r
     assert operation['location'].endswith(f'/{resource_type}/{resource_id}')
     with app.app_context():
         if resource_type == 'Users':
-            assert models.db.session.get(models.User, resource_id).displayed_name == 'Concurrent user'
+            assert scim_user(resource_id).displayed_name == 'Concurrent user'
         else:
-            group = models.db.session.get(models.Alias, resource_id)
+            group = scim_group(resource_id)
             assert group.comment == 'Concurrent group'
             assert group.destination == ['original@example.net']
 
 
 def test_scim_bulk_delete_response_includes_resource_location(app, client):
     with app.app_context():
-        group_id = create_group(localpart='bulk-delete-location').email
+        group_id = scim_id(create_group(localpart='bulk-delete-location'))
 
     response = client.post(
         '/api/scim/v2/Bulk',
@@ -1520,12 +1652,20 @@ def test_scim_bulk_delete_response_includes_resource_location(app, client):
     assert operation['status'] == '204'
     assert operation['location'].endswith(f'/Groups/{group_id}')
     with app.app_context():
-        assert models.db.session.get(models.Alias, group_id) is None
+        assert scim_group(group_id) is None
 
 
 def test_scim_bulk_does_not_leak_failed_operation_state_into_later_commit(app, client):
     with app.app_context():
-        group_id = create_group(localpart='bulk-rollback').email
+        group = create_group(localpart='bulk-rollback')
+        group_id = scim_id(group)
+        group_email = group.email
+    invalid_group = group_payload(
+        group_email,
+        display_name='Must roll back',
+    )
+    invalid_group['id'] = group_id
+    invalid_group['members'] = [{}]
 
     response = client.post(
         '/api/scim/v2/Bulk',
@@ -1535,12 +1675,7 @@ def test_scim_bulk_does_not_leak_failed_operation_state_into_later_commit(app, c
                 {
                     'method': 'PUT',
                     'path': f'/Groups/{group_id}',
-                    'data': {
-                        'schemas': [GROUP_SCHEMA],
-                        'id': group_id,
-                        'displayName': 'Must roll back',
-                        'members': [{}],
-                    },
+                    'data': invalid_group,
                 },
                 {
                     'method': 'POST',
@@ -1558,7 +1693,7 @@ def test_scim_bulk_does_not_leak_failed_operation_state_into_later_commit(app, c
 
     assert [item['status'] for item in response.get_json()['Operations']] == ['400', '201']
     with app.app_context():
-        group = models.db.session.get(models.Alias, group_id)
+        group = scim_group(group_id)
         assert group.comment == 'Original group'
         assert group.destination == ['original@example.net']
         assert models.db.session.get(models.User, 'committed@example.com') is not None
@@ -1566,7 +1701,7 @@ def test_scim_bulk_does_not_leak_failed_operation_state_into_later_commit(app, c
 
 def test_scim_bulk_ignores_outer_if_match_and_preserves_absent_version_behavior(app, client):
     with app.app_context():
-        user_id = create_user(localpart='bulk-outer-header').email
+        user_id = scim_id(create_user(localpart='bulk-outer-header'))
 
     response = client.post(
         '/api/scim/v2/Bulk',
@@ -1687,7 +1822,9 @@ def test_scim_bulk_accepts_canonical_percent_encoded_resource_paths(
     method,
 ):
     with app.app_context():
-        user_id = create_user(localpart=f'bulk-{method.lower()}#question?percent%').email
+        user = create_user(localpart=f'bulk-{method.lower()}#question?percent%')
+        user_id = scim_id(user)
+        user_email = user.email
     direct_path = f'/api/scim/v2/Users/{urllib.parse.quote(user_id, safe="@")}'
     direct = client.get(direct_path, headers=auth_headers(app))
     location = direct.get_json()['meta']['location']
@@ -1695,7 +1832,7 @@ def test_scim_bulk_accepts_canonical_percent_encoded_resource_paths(
     if method == 'PUT':
         data = {
             'schemas': [USER_SCHEMA],
-            'userName': user_id,
+            'userName': user_email,
             'displayName': 'Bulk encoded PUT',
         }
     elif method == 'PATCH':
@@ -1729,7 +1866,7 @@ def test_scim_bulk_accepts_canonical_percent_encoded_resource_paths(
     assert result['status'] == ('204' if method == 'DELETE' else '200')
     assert result['location'] == location
     with app.app_context():
-        user = models.db.session.get(models.User, user_id)
+        user = scim_user(user_id)
         if method == 'DELETE':
             assert user.enabled is False
         else:
@@ -1761,35 +1898,39 @@ def test_scim_bulk_rejects_non_relative_resource_paths(app, client, path):
 
 
 @pytest.mark.parametrize('resource_type', ['Users', 'Groups'])
-def test_scim_malformed_resource_id_returns_scim_error(app, client, resource_type):
+def test_scim_unknown_opaque_resource_id_returns_scim_404(app, client, resource_type):
     response = client.get(
         f'/api/scim/v2/{resource_type}/not-an-email',
         headers=auth_headers(app),
     )
 
-    assert response.status_code == 400
+    assert response.status_code == 404
     assert response.content_type == 'application/scim+json'
-    assert response.get_json()['scimType'] == 'invalidValue'
+    assert response.get_json()['status'] == '404'
 
 
 def test_scim_filters_validate_syntax_and_group_display_name_semantics(app, client):
     with app.app_context():
-        create_group(localpart='filter-label', comment='Operations Team')
-        create_group(localpart='filter-address', comment='')
+        label_id = scim_id(
+            create_group(localpart='filter-label', comment='Operations Team')
+        )
+        address_id = scim_id(
+            create_group(localpart='filter-address', comment='')
+        )
 
     label = client.get(
         '/api/scim/v2/Groups?filter=displayName%20eq%20%22operations%20team%22',
         headers=auth_headers(app),
     )
     assert label.status_code == 200
-    assert [group['id'] for group in label.get_json()['Resources']] == ['filter-label@example.com']
+    assert [group['id'] for group in label.get_json()['Resources']] == [label_id]
 
     address = client.get(
         '/api/scim/v2/Groups?filter=displayName%20eq%20%22filter-address@example.com%22',
         headers=auth_headers(app),
     )
     assert address.status_code == 200
-    assert [group['id'] for group in address.get_json()['Resources']] == ['filter-address@example.com']
+    assert [group['id'] for group in address.get_json()['Resources']] == [address_id]
 
     malformed = client.get(
         '/api/scim/v2/Users?filter=userName%20eq%20not-an-email',
@@ -1805,10 +1946,10 @@ def test_scim_rejects_user_alias_address_collisions(app, client):
 
     group_collision = client.post(
         '/api/scim/v2/Groups',
-        json={
-            'schemas': [GROUP_SCHEMA],
-            'displayName': 'user-first@example.com',
-        },
+        json=group_payload(
+            'user-first@example.com',
+            display_name='User collision',
+        ),
         headers=auth_headers(app),
     )
     assert group_collision.status_code == 409
@@ -1834,31 +1975,33 @@ def test_scim_rejects_user_alias_address_collisions(app, client):
 
 def test_scim_external_group_destination_has_no_dangling_user_reference(app, client):
     with app.app_context():
-        group_id = create_group(localpart='external-member').email
+        group_id = scim_id(create_group(localpart='external-member'))
 
     response = client.get(
         f'/api/scim/v2/Groups/{group_id}',
         headers=auth_headers(app),
     )
-    member = response.get_json()['members'][0]
-    assert member == {
-        'value': 'original@example.net',
-        'display': 'original@example.net',
-    }
+    payload = response.get_json()
+    assert payload['members'] == []
+    assert payload[GROUP_EXTENSION]['externalDestinations'] == [
+        'original@example.net',
+    ]
 
 
 @pytest.mark.parametrize('resource_type', ['Users', 'Groups'])
 def test_scim_put_requires_complete_identity_fields_without_mutation(app, client, resource_type):
     with app.app_context():
         resource = create_user() if resource_type == 'Users' else create_group()
-        resource_id = resource.email
+        resource_id = scim_id(resource)
 
     response = client.put(
         f'/api/scim/v2/{resource_type}/{resource_id}',
         json={
-            'schemas': [
-                USER_SCHEMA if resource_type == 'Users' else GROUP_SCHEMA
-            ],
+            'schemas': (
+                [USER_SCHEMA]
+                if resource_type == 'Users'
+                else [GROUP_SCHEMA, GROUP_EXTENSION]
+            ),
         },
         headers=auth_headers(app),
     )
@@ -1866,24 +2009,26 @@ def test_scim_put_requires_complete_identity_fields_without_mutation(app, client
     assert response.get_json()['scimType'] == 'invalidValue'
     with app.app_context():
         if resource_type == 'Users':
-            user = models.db.session.get(models.User, resource_id)
+            user = scim_user(resource_id)
             assert user.displayed_name == 'Original user'
             assert user.enabled is True
         else:
-            group = models.db.session.get(models.Alias, resource_id)
+            group = scim_group(resource_id)
             assert group.comment == 'Original group'
             assert group.destination == ['original@example.net']
 
 
 def test_scim_user_put_rejects_conflicting_immutable_email_identity(app, client):
     with app.app_context():
-        user_id = create_user(localpart='identity-conflict').email
+        user = create_user(localpart='identity-conflict')
+        user_id = scim_id(user)
+        user_email = user.email
 
     response = client.put(
         f'/api/scim/v2/Users/{user_id}',
         json={
             'schemas': [USER_SCHEMA],
-            'userName': user_id,
+            'userName': user_email,
             'emails': [{'value': 'different@example.com'}],
             'active': False,
         },
@@ -1893,7 +2038,7 @@ def test_scim_user_put_rejects_conflicting_immutable_email_identity(app, client)
     assert response.status_code == 400
     assert response.get_json()['scimType'] == 'mutability'
     with app.app_context():
-        user = models.db.session.get(models.User, user_id)
+        user = scim_user(user_id)
         assert user.enabled is True
         assert user.displayed_name == 'Original user'
 
@@ -1902,7 +2047,7 @@ def test_scim_user_put_rejects_conflicting_immutable_email_identity(app, client)
 def test_scim_patch_requires_explicit_operation(app, client, resource_type):
     with app.app_context():
         resource = create_user() if resource_type == 'Users' else create_group()
-        resource_id = resource.email
+        resource_id = scim_id(resource)
 
     response = client.patch(
         f'/api/scim/v2/{resource_type}/{resource_id}',
@@ -1921,7 +2066,7 @@ def test_scim_patch_requires_explicit_operation(app, client, resource_type):
 
 def test_scim_rejects_incorrect_schema_envelope_without_mutation(app, client):
     with app.app_context():
-        user_id = create_user(localpart='wrong-schema').email
+        user_id = scim_id(create_user(localpart='wrong-schema'))
 
     response = client.patch(
         f'/api/scim/v2/Users/{user_id}',
@@ -1939,7 +2084,7 @@ def test_scim_rejects_incorrect_schema_envelope_without_mutation(app, client):
     assert response.status_code == 400
     assert response.get_json()['scimType'] == 'invalidValue'
     with app.app_context():
-        assert models.db.session.get(models.User, user_id).enabled is True
+        assert scim_user(user_id).enabled is True
 
 
 def test_scim_discovery_self_links_are_retrievable_and_schemas_are_not_empty(app, client):
@@ -1958,6 +2103,7 @@ def test_scim_discovery_self_links_are_retrievable_and_schemas_are_not_empty(app
     assert schema.status_code == 200
     assert schema.get_json()['schemas'] == ['urn:ietf:params:scim:schemas:core:2.0:Schema']
     assert {attribute['name'] for attribute in schema.get_json()['attributes']} == {
+        'externalId',
         'displayName',
         'members',
     }
@@ -1990,8 +2136,8 @@ def test_scim_authentication_failure_uses_scim_error_envelope(app, client):
 
 def test_scim_attributes_projection_applies_to_single_and_list_resources(app, client):
     with app.app_context():
-        user_id = create_user(localpart='project-user').email
-        group_id = create_group(localpart='project-group').email
+        user_id = scim_id(create_user(localpart='project-user'))
+        group_id = scim_id(create_group(localpart='project-group'))
 
     user = client.get(
         f'/api/scim/v2/Users/{user_id}?attributes=userName',
@@ -2017,8 +2163,13 @@ def test_scim_attributes_projection_applies_to_single_and_list_resources(app, cl
     )
     group_payload = group.get_json()
     assert group.status_code == 200
-    assert set(group_payload) == {'schemas', 'id', 'members'}, group_payload
-    assert group_payload['members'] == [{'value': 'original@example.net'}]
+    assert set(group_payload) == {
+        'schemas',
+        'id',
+        'displayName',
+        'members',
+    }, group_payload
+    assert group_payload['members'] == []
     assert group.headers['ETag']
 
     groups = client.get(
@@ -2029,13 +2180,21 @@ def test_scim_attributes_projection_applies_to_single_and_list_resources(app, cl
         resource for resource in groups.get_json()['Resources']
         if resource['id'] == group_id
     )
-    assert set(projected_group) == {'schemas', 'id'}
+    assert set(projected_group) == {
+        'schemas',
+        'id',
+        'displayName',
+        GROUP_EXTENSION,
+    }
+    assert projected_group[GROUP_EXTENSION]['externalDestinations'] == [
+        'original@example.net',
+    ]
 
     id_only = client.get(
         f'/api/scim/v2/Users/{user_id}?attributes=id',
         headers=auth_headers(app),
     )
-    assert set(id_only.get_json()) == {'schemas', 'id'}
+    assert set(id_only.get_json()) == {'schemas', 'id', 'userName'}
 
 
 @pytest.mark.parametrize('query', [
@@ -2062,7 +2221,9 @@ def test_scim_projection_parent_dominates_children_and_never_returns_password(
     client,
 ):
     with app.app_context():
-        user_id = create_user(localpart='projection-tree').email
+        user = create_user(localpart='projection-tree')
+        user_id = scim_id(user)
+        user_email = user.email
 
     parent = client.get(
         f'/api/scim/v2/Users/{user_id}?attributes=emails.value,emails',
@@ -2070,7 +2231,7 @@ def test_scim_projection_parent_dominates_children_and_never_returns_password(
     )
     assert parent.status_code == 200
     assert parent.get_json()['emails'] == [{
-        'value': user_id,
+        'value': user_email,
         'primary': True,
         'type': 'work',
     }]
@@ -2079,28 +2240,30 @@ def test_scim_projection_parent_dominates_children_and_never_returns_password(
         f'/api/scim/v2/Users/{user_id}?attributes=password',
         headers=auth_headers(app),
     )
-    assert set(password.get_json()) == {'schemas', 'id'}
+    assert set(password.get_json()) == {'schemas', 'id', 'userName'}
 
 
 def test_scim_projection_applies_to_mutation_responses_but_not_discovery(app, client):
     with app.app_context():
-        user_id = create_user(localpart='project-mutation').email
+        user = create_user(localpart='project-mutation')
+        user_id = scim_id(user)
+        user_email = user.email
 
     replaced = client.put(
         f'/api/scim/v2/Users/{user_id}?attributes=id',
         json={
             'schemas': [USER_SCHEMA],
-            'userName': user_id,
+            'userName': user_email,
             'displayName': 'Projected mutation',
         },
         headers=auth_headers(app),
     )
     assert replaced.status_code == 200
-    assert set(replaced.get_json()) == {'schemas', 'id'}
+    assert set(replaced.get_json()) == {'schemas', 'id', 'userName'}
     assert replaced.headers['ETag']
     assert replaced.headers['Content-Location']
     with app.app_context():
-        assert models.db.session.get(models.User, user_id).displayed_name == 'Projected mutation'
+        assert scim_user(user_id).displayed_name == 'Projected mutation'
 
     discovery = client.get(
         '/api/scim/v2/Schemas?attributes=&excludedAttributes=id',
@@ -2119,7 +2282,7 @@ def test_scim_projection_applies_to_mutation_responses_but_not_discovery(app, cl
         for attribute in user_schema['attributes']
         if attribute['name'] == 'userName'
     )
-    assert user_name['returned'] == 'default'
+    assert user_name['returned'] == 'always'
 
 
 @pytest.mark.parametrize('schemas', [
@@ -2170,11 +2333,13 @@ def test_scim_schema_uri_matching_is_case_insensitive(app, client):
 
 def test_scim_put_patch_and_bulk_require_their_schema_envelopes(app, client):
     with app.app_context():
-        user_id = create_user(localpart='schema-envelope').email
+        user = create_user(localpart='schema-envelope')
+        user_id = scim_id(user)
+        user_email = user.email
 
     put_response = client.put(
         f'/api/scim/v2/Users/{user_id}',
-        json={'userName': user_id, 'displayName': 'Must not change'},
+        json={'userName': user_email, 'displayName': 'Must not change'},
         headers=auth_headers(app),
     )
     patch_response = client.patch(
@@ -2211,22 +2376,22 @@ def test_scim_put_patch_and_bulk_require_their_schema_envelopes(app, client):
     assert patch_response.status_code == 400
     assert bulk_response.status_code == 400
     with app.app_context():
-        assert models.db.session.get(models.User, user_id).displayed_name == 'Original user'
+        assert scim_user(user_id).displayed_name == 'Original user'
 
 
 @pytest.mark.parametrize('method', ['post', 'put'])
 def test_scim_user_create_and_replace_require_explicit_username(app, client, method):
     with app.app_context():
         create_domain()
+        user_id = 'required-username@example.com'
         if method == 'put':
-            create_user(localpart='required-username')
+            user_id = scim_id(create_user(localpart='required-username'))
 
-    user_id = 'required-username@example.com'
     response = getattr(client, method)(
         '/api/scim/v2/Users' if method == 'post' else f'/api/scim/v2/Users/{user_id}',
         json={
             'schemas': [USER_SCHEMA],
-            'emails': [{'value': user_id}],
+            'emails': [{'value': 'required-username@example.com'}],
             'active': False,
         },
         headers=auth_headers(app),
@@ -2236,9 +2401,9 @@ def test_scim_user_create_and_replace_require_explicit_username(app, client, met
     assert response.get_json()['scimType'] == 'invalidValue'
     with app.app_context():
         if method == 'post':
-            assert models.db.session.get(models.User, user_id) is None
+            assert scim_user(user_id) is None
         else:
-            user = models.db.session.get(models.User, user_id)
+            user = scim_user(user_id)
             assert user.enabled is True
             assert user.displayed_name == 'Original user'
 
@@ -2277,7 +2442,7 @@ def test_scim_rejects_case_equivalent_attribute_collisions_without_mutation(
 
 def test_scim_rejects_case_equivalent_patch_and_bulk_keys_without_mutation(app, client):
     with app.app_context():
-        user_id = create_user(localpart='ambiguous-operation').email
+        user_id = scim_id(create_user(localpart='ambiguous-operation'))
 
     patch_response = client.patch(
         f'/api/scim/v2/Users/{user_id}',
@@ -2318,7 +2483,7 @@ def test_scim_rejects_case_equivalent_patch_and_bulk_keys_without_mutation(app, 
     assert bulk_response.status_code == 400
     assert bulk_response.get_json()['scimType'] == 'invalidSyntax'
     with app.app_context():
-        assert models.db.session.get(models.User, user_id).enabled is True
+        assert scim_user(user_id).enabled is True
 
 
 @pytest.mark.parametrize('duplicate_name', ['userName', r'user\u004eame'])
@@ -2350,7 +2515,7 @@ def test_scim_rejects_exact_duplicate_json_names_without_mutation(
 
 def test_scim_rejects_nested_exact_duplicate_json_names_without_mutation(app, client):
     with app.app_context():
-        user_id = create_user(localpart='nested-duplicate').email
+        user_id = scim_id(create_user(localpart='nested-duplicate'))
 
     response = client.post(
         '/api/scim/v2/Bulk',
@@ -2368,7 +2533,7 @@ def test_scim_rejects_nested_exact_duplicate_json_names_without_mutation(app, cl
     assert response.content_type == 'application/scim+json'
     assert response.get_json()['scimType'] == 'invalidSyntax'
     with app.app_context():
-        assert models.db.session.get(models.User, user_id).enabled is True
+        assert scim_user(user_id).enabled is True
 
 
 @pytest.mark.parametrize(
@@ -2387,7 +2552,7 @@ def test_scim_rejects_malformed_if_match_without_mutation(
     malformed,
 ):
     with app.app_context():
-        user_id = create_user(localpart=f'malformed-{malformed}').email
+        user_id = scim_id(create_user(localpart=f'malformed-{malformed}'))
 
     url = f'/api/scim/v2/Users/{user_id}'
     version = client.get(url, headers=auth_headers(app)).headers['ETag']
@@ -2415,12 +2580,12 @@ def test_scim_rejects_malformed_if_match_without_mutation(
     assert response.content_type == 'application/scim+json'
     assert response.get_json()['scimType'] == 'invalidValue'
     with app.app_context():
-        assert models.db.session.get(models.User, user_id).displayed_name == 'Original user'
+        assert scim_user(user_id).displayed_name == 'Original user'
 
 
 def test_scim_rejects_malformed_if_none_match(app, client):
     with app.app_context():
-        user_id = create_user(localpart='malformed-if-none-match').email
+        user_id = scim_id(create_user(localpart='malformed-if-none-match'))
 
     url = f'/api/scim/v2/Users/{user_id}'
     version = client.get(url, headers=auth_headers(app)).headers['ETag']
@@ -2436,7 +2601,7 @@ def test_scim_rejects_malformed_if_none_match(app, client):
 
 def test_scim_accepts_empty_entity_tag_list_elements(app, client):
     with app.app_context():
-        user_id = create_user(localpart='empty-etag-elements').email
+        user_id = scim_id(create_user(localpart='empty-etag-elements'))
 
     url = f'/api/scim/v2/Users/{user_id}'
     version = client.get(url, headers=auth_headers(app)).headers['ETag']
@@ -2487,7 +2652,7 @@ def test_scim_accepts_empty_entity_tag_list_elements(app, client):
 
 def test_scim_accepts_ows_around_entity_tag_field_values(app, client):
     with app.app_context():
-        user_id = create_user(localpart='etag-ows').email
+        user_id = scim_id(create_user(localpart='etag-ows'))
 
     url = f'/api/scim/v2/Users/{user_id}'
     version = client.get(url, headers=auth_headers(app)).headers['ETag']
@@ -2518,7 +2683,7 @@ def test_scim_accepts_ows_around_entity_tag_field_values(app, client):
 
 def test_scim_rejects_large_malformed_bulk_version_in_linear_time(app, client):
     with app.app_context():
-        user_id = create_user(localpart='large-malformed-version').email
+        user_id = scim_id(create_user(localpart='large-malformed-version'))
 
     started = time.monotonic()
     response = client.post(
@@ -2541,7 +2706,7 @@ def test_scim_rejects_large_malformed_bulk_version_in_linear_time(app, client):
     assert operation['status'] == '400'
     assert operation['response']['scimType'] == 'invalidValue'
     with app.app_context():
-        assert models.db.session.get(models.User, user_id).enabled is True
+        assert scim_user(user_id).enabled is True
 
 
 def test_scim_validates_if_none_match_before_missing_resource(app, client):
@@ -2561,7 +2726,7 @@ def test_scim_validates_if_none_match_before_missing_resource(app, client):
 
 def test_scim_bulk_rejects_malformed_version_without_mutation(app, client):
     with app.app_context():
-        user_id = create_user(localpart='malformed-bulk-version').email
+        user_id = scim_id(create_user(localpart='malformed-bulk-version'))
 
     url = f'/api/scim/v2/Users/{user_id}'
     version = client.get(url, headers=auth_headers(app)).headers['ETag']
@@ -2591,7 +2756,7 @@ def test_scim_bulk_rejects_malformed_version_without_mutation(app, client):
     assert operation['status'] == '400'
     assert operation['response']['scimType'] == 'invalidValue'
     with app.app_context():
-        assert models.db.session.get(models.User, user_id).displayed_name == 'Original user'
+        assert scim_user(user_id).displayed_name == 'Original user'
 
 
 def test_scim_bulk_rejects_empty_operations_with_invalid_value(app, client):

@@ -49,7 +49,7 @@ def create_app_from_config(config):
     utils.limiter.init_app(app)
     utils.babel.init_app(app, locale_selector=utils.get_locale)
     utils.login.init_app(app)
-    utils.login.user_loader(models.User.get)
+    utils.login.user_loader(utils.load_session_user)
     utils.proxy.init_app(app)
     utils.migrate.init_app(app, models.db)
 

@@ -22,6 +22,7 @@ class TestDomainAdminPrivesc:
     def _login(client, user):
         with client.session_transaction() as sess:
             sess['_user_id'] = user.get_id()
+            sess['_auth_generation'] = user.auth_generation
             sess['_fresh'] = True
 
     @staticmethod

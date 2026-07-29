@@ -8,8 +8,9 @@ import flask
 import sqlalchemy
 import validators
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from werkzeug.datastructures import ETags
 from werkzeug.exceptions import HTTPException
-from werkzeug.http import parse_etags, unquote_etag
+from werkzeug.http import unquote_etag
 
 from . import common
 from .. import models, utils
@@ -349,16 +350,87 @@ def _locked_resource(model, resource_id):
         return None, _scim_error(500, 'The SCIM resource could not be locked')
 
 
+def _parse_entity_tags(value, field_name):
+    if not isinstance(value, str):
+        return None, _scim_error(
+            400,
+            f'{field_name} must be an entity-tag string',
+            'invalidValue',
+        )
+
+    def invalid():
+        return None, _scim_error(
+            400,
+            f'{field_name} must contain valid HTTP entity-tags',
+            'invalidValue',
+        )
+
+    length = len(value)
+    start = 0
+    while start < length and value[start] in ' \t':
+        start += 1
+    end = length
+    while end > start and value[end - 1] in ' \t':
+        end -= 1
+    if end - start == 1 and value[start] == '*':
+        return ETags(star_tag=True), None
+
+    strong = []
+    weak = []
+    position = 0
+    while True:
+        while position < length and value[position] in ' \t':
+            position += 1
+        if position == length:
+            return ETags(strong, weak), None
+        if value[position] == ',':
+            position += 1
+            continue
+
+        is_weak = value.startswith('W/', position)
+        if is_weak:
+            position += 2
+        if position == length or value[position] != '"':
+            return invalid()
+        position += 1
+        tag_start = position
+        while position < length and value[position] != '"':
+            codepoint = ord(value[position])
+            if not (
+                codepoint == 0x21
+                or 0x23 <= codepoint <= 0x7e
+                or 0x80 <= codepoint <= 0xff
+            ):
+                return invalid()
+            position += 1
+        if position == length:
+            return invalid()
+        tag = value[tag_start:position]
+        position += 1
+        (weak if is_weak else strong).append(tag)
+
+        while position < length and value[position] in ' \t':
+            position += 1
+        if position == length:
+            return ETags(strong, weak), None
+        if value[position] != ',':
+            return invalid()
+        position += 1
+
+
 def _if_match_error(resource, value=_IF_MATCH_FROM_REQUEST):
     if value is _IF_MATCH_FROM_REQUEST:
         value = flask.request.headers.get('If-Match')
+        field_name = 'If-Match'
+    else:
+        field_name = 'version'
     if value is None:
         return None
-    if not isinstance(value, str):
-        return _scim_error(400, 'version must be an entity-tag string', 'invalidValue')
+    candidates, error = _parse_entity_tags(value, field_name)
+    if error:
+        return error
     if resource is None:
         return _scim_error(412, 'If-Match does not match the current resource version')
-    candidates = parse_etags(value)
     current = _resource_version(resource)
     current_opaque, current_is_weak = unquote_etag(current)
     if candidates.star_tag or (not current_is_weak and candidates.contains(current_opaque)):
@@ -373,7 +445,9 @@ def _conditional_read_response(resource):
     value = flask.request.headers.get('If-None-Match')
     if value is None:
         return None
-    candidates = parse_etags(value)
+    candidates, error = _parse_entity_tags(value, 'If-None-Match')
+    if error:
+        return error
     current = _resource_version(resource)
     current_opaque, _ = unquote_etag(current)
     if candidates.star_tag or candidates.contains_weak(current_opaque):
@@ -384,9 +458,13 @@ def _conditional_read_response(resource):
 def _if_none_match_error(resource, value=_IF_MATCH_FROM_REQUEST):
     if value is _IF_MATCH_FROM_REQUEST:
         value = flask.request.headers.get('If-None-Match')
-    if value is None or resource is None:
+    if value is None:
         return None
-    candidates = parse_etags(value)
+    candidates, error = _parse_entity_tags(value, 'If-None-Match')
+    if error:
+        return error
+    if resource is None:
+        return None
     current = _resource_version(resource)
     current_opaque, _ = unquote_etag(current)
     if candidates.star_tag or candidates.contains_weak(current_opaque):
@@ -439,12 +517,32 @@ def _database_error(_error):
     return _scim_error(500, 'The SCIM database operation failed')
 
 
+def _reject_duplicate_json_names(pairs):
+    value = {}
+    for key, item in pairs:
+        if key in value:
+            raise _AmbiguousScimKeys(f'Duplicate JSON member name {key!r}')
+        value[key] = item
+    return value
+
+
 def _payload():
-    data = flask.request.get_json(silent=True)
-    if data is None:
-        if flask.request.get_data(cache=True).strip():
-            return None, _scim_error(400, 'Request body must be valid JSON', 'invalidSyntax')
+    raw_data = flask.request.get_data(cache=True)
+    if not raw_data.strip():
         return {}, None
+    if not flask.request.is_json:
+        return None, _scim_error(400, 'Request body must be valid JSON', 'invalidSyntax')
+    try:
+        data = flask.current_app.json.loads(
+            raw_data,
+            object_pairs_hook=_reject_duplicate_json_names,
+        )
+    except _AmbiguousScimKeys as error:
+        return None, _scim_error(400, str(error), 'invalidSyntax')
+    except (TypeError, ValueError):
+        return None, _scim_error(400, 'Request body must be valid JSON', 'invalidSyntax')
+    if data is None:
+        return None, _scim_error(400, 'Request body must be valid JSON', 'invalidSyntax')
     if not isinstance(data, dict):
         return None, _scim_error(400, 'Request body must be a JSON object', 'invalidSyntax')
     try:
@@ -1971,7 +2069,7 @@ def bulk():
     error = _schema_error(data, SCIM_BULK_REQUEST_SCHEMA)
     if error:
         return error
-    operations = data.get('Operations') or data.get('operations')
+    operations = data['Operations'] if 'Operations' in data else data.get('operations')
     if not isinstance(operations, list):
         return _scim_error(400, 'Operations must be a list', 'invalidSyntax')
     if not operations:

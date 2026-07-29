@@ -1,3 +1,4 @@
+import time
 import urllib.parse
 
 import pytest
@@ -2318,3 +2319,292 @@ def test_scim_rejects_case_equivalent_patch_and_bulk_keys_without_mutation(app, 
     assert bulk_response.get_json()['scimType'] == 'invalidSyntax'
     with app.app_context():
         assert models.db.session.get(models.User, user_id).enabled is True
+
+
+@pytest.mark.parametrize('duplicate_name', ['userName', r'user\u004eame'])
+def test_scim_rejects_exact_duplicate_json_names_without_mutation(
+    app,
+    client,
+    duplicate_name,
+):
+    with app.app_context():
+        create_domain()
+
+    response = client.post(
+        '/api/scim/v2/Users',
+        data=(
+            '{"schemas":["' + USER_SCHEMA + '"],'
+            '"userName":"first-duplicate@example.com",'
+            '"' + duplicate_name + '":"second-duplicate@example.com"}'
+        ),
+        headers=auth_headers(app),
+    )
+
+    assert response.status_code == 400
+    assert response.content_type == 'application/scim+json'
+    assert response.get_json()['scimType'] == 'invalidSyntax'
+    with app.app_context():
+        assert models.db.session.get(models.User, 'first-duplicate@example.com') is None
+        assert models.db.session.get(models.User, 'second-duplicate@example.com') is None
+
+
+def test_scim_rejects_nested_exact_duplicate_json_names_without_mutation(app, client):
+    with app.app_context():
+        user_id = create_user(localpart='nested-duplicate').email
+
+    response = client.post(
+        '/api/scim/v2/Bulk',
+        data=(
+            '{"schemas":["' + BULK_SCHEMA + '"],"Operations":[{'
+            '"method":"PATCH","method":"DELETE",'
+            '"path":"/Users/' + user_id + '",'
+            '"data":{"schemas":["' + PATCH_SCHEMA + '"],"Operations":[{'
+            '"op":"replace","path":"active","value":false}]}}]}'
+        ),
+        headers=auth_headers(app),
+    )
+
+    assert response.status_code == 400
+    assert response.content_type == 'application/scim+json'
+    assert response.get_json()['scimType'] == 'invalidSyntax'
+    with app.app_context():
+        assert models.db.session.get(models.User, user_id).enabled is True
+
+
+@pytest.mark.parametrize(
+    'malformed',
+    [
+        'unquoted',
+        'lowercase-weak',
+        'wildcard-list',
+        'unterminated',
+        'space-in-opaque-tag',
+    ],
+)
+def test_scim_rejects_malformed_if_match_without_mutation(
+    app,
+    client,
+    malformed,
+):
+    with app.app_context():
+        user_id = create_user(localpart=f'malformed-{malformed}').email
+
+    url = f'/api/scim/v2/Users/{user_id}'
+    version = client.get(url, headers=auth_headers(app)).headers['ETag']
+    values = {
+        'unquoted': version[1:-1],
+        'lowercase-weak': f'w/{version}',
+        'wildcard-list': f'*, {version}',
+        'unterminated': version[:-1],
+        'space-in-opaque-tag': '"invalid entity tag"',
+    }
+    response = client.patch(
+        url,
+        json={
+            'schemas': [PATCH_SCHEMA],
+            'Operations': [{
+                'op': 'replace',
+                'path': 'displayName',
+                'value': 'Must not change',
+            }],
+        },
+        headers={**auth_headers(app), 'If-Match': values[malformed]},
+    )
+
+    assert response.status_code == 400
+    assert response.content_type == 'application/scim+json'
+    assert response.get_json()['scimType'] == 'invalidValue'
+    with app.app_context():
+        assert models.db.session.get(models.User, user_id).displayed_name == 'Original user'
+
+
+def test_scim_rejects_malformed_if_none_match(app, client):
+    with app.app_context():
+        user_id = create_user(localpart='malformed-if-none-match').email
+
+    url = f'/api/scim/v2/Users/{user_id}'
+    version = client.get(url, headers=auth_headers(app)).headers['ETag']
+    response = client.get(
+        url,
+        headers={**auth_headers(app), 'If-None-Match': version[1:-1]},
+    )
+
+    assert response.status_code == 400
+    assert response.content_type == 'application/scim+json'
+    assert response.get_json()['scimType'] == 'invalidValue'
+
+
+def test_scim_accepts_empty_entity_tag_list_elements(app, client):
+    with app.app_context():
+        user_id = create_user(localpart='empty-etag-elements').email
+
+    url = f'/api/scim/v2/Users/{user_id}'
+    version = client.get(url, headers=auth_headers(app)).headers['ETag']
+    empty_only = client.patch(
+        url,
+        json={
+            'schemas': [PATCH_SCHEMA],
+            'Operations': [{
+                'op': 'replace',
+                'path': 'displayName',
+                'value': 'Must not change',
+            }],
+        },
+        headers={**auth_headers(app), 'If-Match': ','},
+    )
+    assert_precondition_failed(empty_only)
+
+    comma_in_opaque_tag = client.patch(
+        url,
+        json={
+            'schemas': [PATCH_SCHEMA],
+            'Operations': [{
+                'op': 'replace',
+                'path': 'displayName',
+                'value': 'Must not change',
+            }],
+        },
+        headers={**auth_headers(app), 'If-Match': '"valid,opaque-tag"'},
+    )
+    assert_precondition_failed(comma_in_opaque_tag)
+
+    response = client.patch(
+        url,
+        json={
+            'schemas': [PATCH_SCHEMA],
+            'Operations': [{
+                'op': 'replace',
+                'path': 'displayName',
+                'value': 'Empty elements ignored',
+            }],
+        },
+        headers={**auth_headers(app), 'If-Match': f', {version},,'},
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()['displayName'] == 'Empty elements ignored'
+
+
+def test_scim_accepts_ows_around_entity_tag_field_values(app, client):
+    with app.app_context():
+        user_id = create_user(localpart='etag-ows').email
+
+    url = f'/api/scim/v2/Users/{user_id}'
+    version = client.get(url, headers=auth_headers(app)).headers['ETag']
+    changed = client.patch(
+        url,
+        json={
+            'schemas': [PATCH_SCHEMA],
+            'Operations': [{
+                'op': 'replace',
+                'path': 'displayName',
+                'value': 'OWS accepted',
+            }],
+        },
+        headers={**auth_headers(app), 'If-Match': f' \t{version}\t '},
+    )
+
+    assert changed.status_code == 200
+    current_version = changed.headers['ETag']
+    not_modified = client.get(
+        url,
+        headers={
+            **auth_headers(app),
+            'If-None-Match': f' \tW/{current_version}\t ',
+        },
+    )
+    assert not_modified.status_code == 304
+
+
+def test_scim_rejects_large_malformed_bulk_version_in_linear_time(app, client):
+    with app.app_context():
+        user_id = create_user(localpart='large-malformed-version').email
+
+    started = time.monotonic()
+    response = client.post(
+        '/api/scim/v2/Bulk',
+        json={
+            'schemas': [BULK_SCHEMA],
+            'Operations': [{
+                'method': 'DELETE',
+                'path': f'/Users/{user_id}',
+                'version': (' ' * 24000) + 'x',
+            }],
+        },
+        headers=auth_headers(app),
+    )
+    elapsed = time.monotonic() - started
+
+    assert elapsed < 1.0
+    assert response.status_code == 200
+    operation = response.get_json()['Operations'][0]
+    assert operation['status'] == '400'
+    assert operation['response']['scimType'] == 'invalidValue'
+    with app.app_context():
+        assert models.db.session.get(models.User, user_id).enabled is True
+
+
+def test_scim_validates_if_none_match_before_missing_resource(app, client):
+    response = client.put(
+        '/api/scim/v2/Users/missing@example.com',
+        json={
+            'schemas': [USER_SCHEMA],
+            'userName': 'missing@example.com',
+        },
+        headers={**auth_headers(app), 'If-None-Match': 'unquoted'},
+    )
+
+    assert response.status_code == 400
+    assert response.content_type == 'application/scim+json'
+    assert response.get_json()['scimType'] == 'invalidValue'
+
+
+def test_scim_bulk_rejects_malformed_version_without_mutation(app, client):
+    with app.app_context():
+        user_id = create_user(localpart='malformed-bulk-version').email
+
+    url = f'/api/scim/v2/Users/{user_id}'
+    version = client.get(url, headers=auth_headers(app)).headers['ETag']
+    response = client.post(
+        '/api/scim/v2/Bulk',
+        json={
+            'schemas': [BULK_SCHEMA],
+            'Operations': [{
+                'method': 'PATCH',
+                'path': f'/Users/{user_id}',
+                'version': version[1:-1],
+                'data': {
+                    'schemas': [PATCH_SCHEMA],
+                    'Operations': [{
+                        'op': 'replace',
+                        'path': 'displayName',
+                        'value': 'Must not change',
+                    }],
+                },
+            }],
+        },
+        headers=auth_headers(app),
+    )
+
+    assert response.status_code == 200
+    operation = response.get_json()['Operations'][0]
+    assert operation['status'] == '400'
+    assert operation['response']['scimType'] == 'invalidValue'
+    with app.app_context():
+        assert models.db.session.get(models.User, user_id).displayed_name == 'Original user'
+
+
+def test_scim_bulk_rejects_empty_operations_with_invalid_value(app, client):
+    response = client.post(
+        '/api/scim/v2/Bulk',
+        json={
+            'schemas': [BULK_SCHEMA],
+            'Operations': [],
+        },
+        headers=auth_headers(app),
+    )
+
+    assert response.status_code == 400
+    assert response.content_type == 'application/scim+json'
+    assert response.get_json()['scimType'] == 'invalidValue'
+    assert response.get_json()['detail'] == 'Operations must not be empty'

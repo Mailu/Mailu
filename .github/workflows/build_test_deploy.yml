@@ -462,7 +462,7 @@ jobs:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}-build
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-build
 
-# This job runs the headless admin unit tests (tests/anonmail) inside the freshly
+# This job runs the headless admin unit tests (anonmail and SCIM) inside the freshly
 # built admin image, so they exercise the exact python interpreter and pinned
 # dependencies that ship in the image instead of a separately installed set. They
 # cover the Flask-Admin models/views/API layer against an in-memory SQLite
@@ -489,14 +489,14 @@ jobs:
         uses: ASzc/change-string-case-action@v6
         with:
           string: ${{ github.repository_owner }}
-      - name: Run tests/anonmail inside the admin image
+      - name: Run admin unit tests inside the admin image
         run: |
           docker run --rm \
             -v ${{ github.workspace }}/tests:/app/tests:ro \
             -w /app \
             -e PYTHONDONTWRITEBYTECODE=1 \
             ghcr.io/${{ steps.string.outputs.lowercase }}/admin:${{ inputs.mailu_version }}-build \
-            sh -c "pip install --no-cache-dir pytest && python -m pytest -v -p no:cacheprovider tests/anonmail"
+            sh -c "pip install --no-cache-dir pytest && python -m pytest -v -p no:cacheprovider tests/anonmail tests/scim_test.py"
 
   deploy:
     name: Deploy images

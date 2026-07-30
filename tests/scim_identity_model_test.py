@@ -429,9 +429,24 @@ def test_external_destination_reservation_blocks_later_local_address(app):
     models.db.session.rollback()
 
 
-def test_mysql_external_reservation_sees_local_commit_after_old_snapshot(app):
-    if models.db.engine.dialect.name != 'mysql':
-        pytest.skip('requires MySQL/MariaDB REPEATABLE READ')
+def test_mysql_engine_uses_read_committed(app):
+    if models.db.engine.dialect.name not in {'mysql', 'mariadb'}:
+        pytest.skip('requires MySQL/MariaDB')
+
+    assert sa.event.contains(
+        models.db.engine,
+        'connect',
+        models._reject_mysql_statement_binlog,
+    )
+    assert (
+        models.db.session.connection().get_isolation_level()
+        == 'READ COMMITTED'
+    )
+
+
+def test_mysql_external_reservation_sees_local_commit_after_prior_read(app):
+    if models.db.engine.dialect.name not in {'mysql', 'mariadb'}:
+        pytest.skip('requires MySQL/MariaDB')
 
     group = _managed_group('snapshot-external')
     group_id = group.id
@@ -489,9 +504,9 @@ def test_mysql_external_reservation_sees_local_commit_after_old_snapshot(app):
     ).count() == 0
 
 
-def test_mysql_local_claim_sees_external_commit_after_old_snapshot(app):
-    if models.db.engine.dialect.name != 'mysql':
-        pytest.skip('requires MySQL/MariaDB REPEATABLE READ')
+def test_mysql_local_claim_sees_external_commit_after_prior_read(app):
+    if models.db.engine.dialect.name not in {'mysql', 'mariadb'}:
+        pytest.skip('requires MySQL/MariaDB')
 
     group = _managed_group('snapshot-local')
     group_id = group.id
@@ -531,6 +546,128 @@ def test_mysql_local_claim_sees_external_commit_after_old_snapshot(app):
     assert models.ScimGroupDestination.query.filter_by(
         destination='future@future.example',
     ).count() == 1
+
+
+def test_mysql_external_reservation_sees_local_delete_after_prior_read(app):
+    if models.db.engine.dialect.name not in {'mysql', 'mariadb'}:
+        pytest.skip('requires MySQL/MariaDB')
+
+    group = _managed_group('delete-external')
+    group_id = group.id
+    domain = _domain('future.example')
+    candidate = models.User(localpart='future', domain=domain)
+    candidate.set_password('not-a-real-password')
+    models.db.session.add(candidate)
+    models.db.session.commit()
+    models.db.session.remove()
+
+    snapshot_ready = threading.Event()
+    local_deleted = threading.Event()
+    outcome = []
+
+    def reserve_external():
+        with app.app_context():
+            try:
+                stale_group = models.db.session.get(
+                    models.ScimResource,
+                    group_id,
+                )
+                models.db.session.execute(sa.select(models.Domain)).all()
+                snapshot_ready.set()
+                assert local_deleted.wait(timeout=10)
+                models.replace_scim_group_graph(
+                    stale_group,
+                    member_ids=[],
+                    external_destinations=['future@future.example'],
+                )
+                models.db.session.commit()
+            except Exception as error:
+                models.db.session.rollback()
+                outcome.append(error)
+            else:
+                outcome.append('reserved')
+            finally:
+                models.db.session.remove()
+
+    worker = threading.Thread(target=reserve_external)
+    worker.start()
+    assert snapshot_ready.wait(timeout=10)
+
+    current = models.db.session.get(
+        models.User,
+        'future@future.example',
+    )
+    models.db.session.delete(current)
+    models.db.session.commit()
+    local_deleted.set()
+    worker.join(timeout=15)
+
+    assert not worker.is_alive()
+    assert outcome == ['reserved']
+    assert models.db.session.get(
+        models.User,
+        'future@future.example',
+    ) is None
+    assert models.ScimGroupDestination.query.filter_by(
+        destination='future@future.example',
+    ).count() == 1
+
+
+def test_mysql_local_claim_sees_external_delete_after_prior_read(app):
+    if models.db.engine.dialect.name not in {'mysql', 'mariadb'}:
+        pytest.skip('requires MySQL/MariaDB')
+
+    group = _managed_group('delete-local')
+    group_id = group.id
+    domain = _domain('future.example')
+    models.replace_scim_group_graph(
+        group,
+        member_ids=[],
+        external_destinations=['future@future.example'],
+    )
+    models.db.session.commit()
+    models.db.session.execute(sa.select(models.Domain)).all()
+    outcome = []
+
+    def remove_external():
+        with app.app_context():
+            try:
+                current_group = models.db.session.get(
+                    models.ScimResource,
+                    group_id,
+                )
+                models.replace_scim_group_graph(
+                    current_group,
+                    member_ids=[],
+                    external_destinations=[],
+                )
+                models.db.session.commit()
+            except Exception as error:
+                models.db.session.rollback()
+                outcome.append(error)
+            else:
+                outcome.append('removed')
+            finally:
+                models.db.session.remove()
+
+    worker = threading.Thread(target=remove_external)
+    worker.start()
+    worker.join(timeout=15)
+    assert not worker.is_alive()
+    assert outcome == ['removed']
+
+    candidate = models.User(localpart='future', domain=domain)
+    candidate.set_password('not-a-real-password')
+    models.db.session.add(candidate)
+    models.db.session.commit()
+
+    assert models.db.session.get(
+        models.User,
+        'future@future.example',
+    ) is not None
+    assert models.ScimGroupDestination.query.filter_by(
+        destination='future@future.example',
+    ).count() == 0
 
 
 def test_group_cycle_is_rejected_before_materialization(app):

@@ -466,7 +466,8 @@ jobs:
 # built admin image, so they exercise the exact python interpreter and pinned
 # dependencies that ship in the image instead of a separately installed set. They
 # cover the Flask-Admin models/views/API layer against SQLite, plus the
-# load-bearing SCIM graph races against MariaDB REPEATABLE READ.
+# load-bearing SCIM graph races against MariaDB using Mailu's configured
+# transaction isolation.
   unit-tests:
     name: admin unit tests
     if: contains(inputs.architecture, 'linux/amd64')
@@ -511,14 +512,28 @@ jobs:
             -w /app \
             -e PYTHONDONTWRITEBYTECODE=1 \
             ghcr.io/${{ steps.string.outputs.lowercase }}/admin:${{ inputs.mailu_version }}-build \
-            sh -c "pip install --no-cache-dir pytest && python -m pytest -v -p no:cacheprovider tests/anonmail tests/address_registry_test.py tests/auth_generation_model_test.py tests/config_import_reconcile_test.py tests/session_authority_test.py tests/scim_group_adopt_test.py tests/scim_identity_model_test.py tests/scim_identity_test.py tests/scim_test.py"
-      - name: Run MariaDB SCIM graph race tests
+            sh -c "pip install --no-cache-dir pytest && python -m pytest -v -p no:cacheprovider tests/anonmail tests/address_registry_test.py tests/auth_generation_model_test.py tests/configuration_test.py tests/config_import_reconcile_test.py tests/session_authority_test.py tests/scim_group_adopt_test.py tests/scim_identity_model_test.py tests/scim_identity_test.py tests/scim_test.py"
+      - name: Run MariaDB SCIM graph race tests with mysqlconnector
         run: |
           docker run --rm --network host \
             -v ${{ github.workspace }}/tests:/app/tests:ro \
             -w /app \
             -e PYTHONDONTWRITEBYTECODE=1 \
             -e SQLALCHEMY_DATABASE_URI=mysql+mysqlconnector://mailu:mailu-test-password@127.0.0.1:3306/mailu_scim_test \
+            -e REDIS_ADDRESS=localhost \
+            -e MEMORY_SESSIONS=true \
+            -e RATELIMIT_STORAGE_URL=memory:// \
+            -e API_TOKEN=not-empty \
+            -e SECRET_KEY=test-secret \
+            ghcr.io/${{ steps.string.outputs.lowercase }}/admin:${{ inputs.mailu_version }}-build \
+            sh -c "pip install --no-cache-dir pytest && python -m pytest -v -p no:cacheprovider tests/scim_identity_model_test.py -k mysql_"
+      - name: Run MariaDB SCIM graph race tests with mariadbconnector
+        run: |
+          docker run --rm --network host \
+            -v ${{ github.workspace }}/tests:/app/tests:ro \
+            -w /app \
+            -e PYTHONDONTWRITEBYTECODE=1 \
+            -e SQLALCHEMY_DATABASE_URI=mariadb+mariadbconnector://mailu:mailu-test-password@127.0.0.1:3306/mailu_scim_test \
             -e REDIS_ADDRESS=localhost \
             -e MEMORY_SESSIONS=true \
             -e RATELIMIT_STORAGE_URL=memory:// \

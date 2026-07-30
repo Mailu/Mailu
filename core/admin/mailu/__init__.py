@@ -45,6 +45,8 @@ def create_app_from_config(config):
     # Initialize application extensions
     config.init_app(app)
     models.db.init_app(app)
+    with app.app_context():
+        models.configure_database_engine(models.db.engine)
     utils.session.init_app(app)
     utils.limiter.init_app(app)
     utils.babel.init_app(app, locale_selector=utils.get_locale)
@@ -124,4 +126,3 @@ def create_app():
     """
     config = configuration.ConfigManager()
     return create_app_from_config(config)
-

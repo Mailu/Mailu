@@ -43,6 +43,53 @@ logging.getLogger('passlib').setLevel(logging.ERROR)
 db = flask_sqlalchemy.SQLAlchemy()
 
 
+def _sql_variable_enabled(value):
+    if isinstance(value, bytes):
+        value = value.decode('ascii')
+    return str(value).strip().upper() in {'1', 'ON', 'TRUE'}
+
+
+def _reject_mysql_statement_binlog(dbapi_connection, _connection_record):
+    cursor = dbapi_connection.cursor()
+    try:
+        cursor.execute(
+            'SELECT @@GLOBAL.log_bin, @@SESSION.sql_log_bin, '
+            '@@SESSION.binlog_format'
+        )
+        log_bin, sql_log_bin, binlog_format = cursor.fetchone()
+    finally:
+        cursor.close()
+
+    if isinstance(binlog_format, bytes):
+        binlog_format = binlog_format.decode('ascii')
+    if (
+        _sql_variable_enabled(log_bin)
+        and _sql_variable_enabled(sql_log_bin)
+        and str(binlog_format).strip().upper() == 'STATEMENT'
+    ):
+        raise RuntimeError(
+            'Mailu requires MySQL/MariaDB binlog_format=ROW or MIXED '
+            'while binary logging is active because the admin database '
+            'uses READ COMMITTED; binlog_format=STATEMENT is unsupported'
+        )
+
+
+def configure_database_engine(engine):
+    if (
+        engine.dialect.name in {'mysql', 'mariadb'}
+        and not event.contains(
+            engine,
+            'connect',
+            _reject_mysql_statement_binlog,
+        )
+    ):
+        event.listen(
+            engine,
+            'connect',
+            _reject_mysql_statement_binlog,
+        )
+
+
 @sqlalchemy.event.listens_for(sqlalchemy.engine.Engine, 'connect')
 def _enable_sqlite_foreign_keys(dbapi_connection, _connection_record):
     """Make SQLite enforce the same foreign-key contract as production SQL."""

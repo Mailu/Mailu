@@ -12,7 +12,7 @@ import yaml
 
 import sqlalchemy
 
-from marshmallow import pre_load, post_load, post_dump, fields, Schema
+from marshmallow import missing, pre_load, post_load, post_dump, fields, Schema
 from marshmallow.utils import ensure_text_type
 from marshmallow.exceptions import ValidationError
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchemaOpts
@@ -814,6 +814,59 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
         res = super().get_instance(data)
         return res
 
+    def _replacement_default(self, name):
+        """Return the value a freshly-created model gets for one load field."""
+        if name == self._primary:
+            raise KeyError(name)
+
+        mapper_property = self.opts.model.__mapper__.attrs.get(name)
+        if isinstance(mapper_property, sqlalchemy.orm.RelationshipProperty):
+            return [] if mapper_property.uselist else None
+        if isinstance(mapper_property, sqlalchemy.orm.ColumnProperty):
+            column = mapper_property.columns[0]
+            if column.primary_key:
+                raise KeyError(name)
+            default = column.default
+            if default is None:
+                return None
+            if default.is_scalar:
+                return deepcopy(default.arg)
+            if default.is_callable:
+                return default.arg(None)
+            raise KeyError(name)
+
+        descriptor = getattr(self.opts.model, name, None)
+        if isinstance(descriptor, property) and descriptor.fset is not None:
+            return None
+        raise KeyError(name)
+
+    def _prepare_replacement_item(self, data):
+        """Reset omitted public fields while retaining the persistent row."""
+        if type(data) is not dict:
+            return data
+        instance = self.get_instance(data)
+        if instance is None:
+            return data
+        for name, field in self.load_fields.items():
+            if name in data:
+                continue
+            if field.required:
+                # Required fields without input must still fail normal schema
+                # validation. Do not manufacture ``None`` and crash a field
+                # serializer before Marshmallow can report the contract error.
+                continue
+            try:
+                value = self._replacement_default(name)
+            except KeyError:
+                pass
+            else:
+                data[name] = field._serialize( # pylint: disable=protected-access
+                    value,
+                    name,
+                    instance,
+                )
+        return data
+
     @pre_load(pass_many=True)
     def _patch_many(self, items, many, **kwargs): # pylint: disable=unused-argument
         """ - flush sqla session before serializing a section when requested
@@ -826,6 +879,20 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
         # flush sqla session
         if not self.Meta.sibling:
             self.opts.sqla_session.flush()
+
+        # A default full import preserves rows by primary key but otherwise
+        # retains replacement semantics. Populate omitted public fields with
+        # the values a newly-created row would receive; do not borrow the
+        # merge/list-union semantics used by --update.
+        if self.context.get('reconcile'):
+            originals = items if many else [items]
+            self.store('original', deepcopy(originals))
+            if many:
+                return [
+                    self._prepare_replacement_item(item)
+                    for item in items
+                ]
+            return self._prepare_replacement_item(items)
 
         # stop early when not updating
         if not self.context.get('update'):
@@ -1047,8 +1114,15 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
             self.opts.sqla_session.add(item)
             return item
 
-        # stop early when not updating or item has no password attribute
-        if not self.context.get('update') or not hasattr(item, 'password'):
+        # stop early when neither updating nor reconciling, or when the item
+        # has no password attribute
+        if (
+            not (
+                self.context.get('update')
+                or self.context.get('reconcile')
+            )
+            or not hasattr(item, 'password')
+        ):
             return item
 
         # did we hash a new plaintext password?
@@ -1069,7 +1143,26 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
                     # reset password hash
                     inst = type(item)(password=attr.history.deleted[-1])
                     if inst.check_password(original):
-                        item.password = inst.password
+                        if isinstance(item, models.User):
+                            state = sqlalchemy.inspect(item)
+                            generation = state.attrs.auth_generation
+                            original_generation = (
+                                generation.history.deleted[-1]
+                                if generation.history.deleted
+                                else None
+                            )
+                            item._preserve_auth_generation = True
+                            try:
+                                item.password = inst.password
+                            finally:
+                                del item._preserve_auth_generation
+                            if (
+                                original_generation is not None
+                                and not state.attrs.enabled.history.has_changes()
+                            ):
+                                item.auth_generation = original_generation
+                        else:
+                            item.password = inst.password
                 except ValueError:
                     # hash in db is invalid
                     pass
@@ -1179,7 +1272,16 @@ class UserSchema(BaseSchema):
         model = models.User
         load_instance = True
         include_relationships = True
-        exclude = ['_email', 'domain', 'localpart', 'domain_name', 'quota_bytes_used']
+        exclude = [
+            '_email',
+            'address_type',
+            'domain',
+            'localpart',
+            'domain_name',
+            'quota_bytes_used',
+            'auth_generation',
+            'scim_resource',
+        ]
 
         primary_keys = ['email']
         exclude_by_value = {
@@ -1206,7 +1308,13 @@ class AliasSchema(BaseSchema):
         """ Schema config """
         model = models.Alias
         load_instance = True
-        exclude = ['_email', 'domain', 'localpart', 'domain_name']
+        exclude = [
+            '_email',
+            'address_type',
+            'domain',
+            'localpart',
+            'domain_name',
+        ]
 
         primary_keys = ['email']
         exclude_by_value = {
@@ -1219,10 +1327,31 @@ class AliasSchema(BaseSchema):
     # Anonymous Email Service metadata
     note = fields.String(allow_none=True)
     hostname = fields.String(allow_none=True)
-    owner_email = fields.String(allow_none=True, dump_only=True)
+    # Full config export/import must round-trip owned/anonmail aliases. Keep
+    # this relationship read-only for standalone and --update loads; default
+    # replacement enables it only after the reconciliation preflight.
+    owner_email = fields.String(allow_none=True)
     # No load_default: in merge mode (config-import --update) an omitted field must
     # keep the stored value. On create the model column default (False) applies.
     disabled = fields.Boolean(dump_default=False)
+
+    @pre_load
+    def _owner_email_replacement_only(
+        self,
+        data,
+        many,
+        **kwargs,
+    ): # pylint: disable=unused-argument
+        if (
+            type(data) is dict
+            and 'owner_email' in data
+            and not self.context.get('reconcile')
+        ):
+            raise ValidationError(
+                'Unknown field.',
+                field_name='owner_email',
+            )
+        return data
 
 
 @mapped
@@ -1264,15 +1393,368 @@ class MailuSchema(Schema, Storage):
     @pre_load
     def _clear_config(self, data, many, **kwargs): # pylint: disable=unused-argument
         """ create config object in context if missing
-            and clear it if requested
+            and reconcile it if replacement was requested
         """
         if 'config' not in self.context:
             self.context['config'] = models.MailuConfig()
         if self.context.get('clear'):
-            self.context['config'].clear(
-                models = {field.nested.opts.model for field in self.fields.values()}
-            )
+            self.context['reconcile'] = True
+            self._reconcile_config(data)
         return data
+
+    def _reconcile_config(self, data):
+        """Prune absent rows while retaining rows present by public key."""
+        if type(data) is not dict:
+            return
+
+        self._preflight_nested_identities(data)
+        self._preflight_related_owners(data)
+        retained = {}
+        routing_addresses = {}
+        for section, field in self.fields.items():
+            items = data.get(section, [])
+            if type(items) is not list:
+                raise ValidationError(
+                    'Not a valid list.',
+                    field_name=section,
+                )
+            nested = field.schema
+            model = nested.opts.model
+            identities = set()
+            primary_keys = set()
+            managed_alias_items = []
+            primary_column = (
+                model.__table__.primary_key.columns.values()[0]
+            )
+            bind_processor = primary_column.type.bind_processor(
+                models.db.session.get_bind().dialect
+            )
+            for position, item in enumerate(items):
+                if type(item) is not dict:
+                    raise ValidationError(
+                        'Not a valid mapping.',
+                        field_name=f'{section}.{position}',
+                    )
+                # This relationship was accidentally exposed by the first
+                # persistent-identity implementation. It is internal state,
+                # not configuration data, and must never be rebound.
+                if model is models.User:
+                    item.pop('scim_resource', None)
+                if nested._primary not in item:
+                    raise ValidationError(
+                        'Missing data for required field.',
+                        field_name=(
+                            f'{section}.{position}.{nested._primary}'
+                        ),
+                    )
+                try:
+                    primary_key = item[nested._primary]
+                    if bind_processor is not None:
+                        primary_key = bind_processor(primary_key)
+                except (AttributeError, TypeError, ValueError) as exc:
+                    raise ValidationError(
+                        f'Invalid {nested._primary}: '
+                        f'{item[nested._primary]!r}.',
+                        field_name=(
+                            f'{section}.{position}.{nested._primary}'
+                        ),
+                    ) from exc
+                if primary_key in primary_keys:
+                    raise ValidationError(
+                        f'Duplicate {nested._primary}: {primary_key!r}.',
+                        field_name=(
+                            f'{section}.{position}.{nested._primary}'
+                        ),
+                    )
+                primary_keys.add(primary_key)
+                if model in (models.User, models.Alias):
+                    owner = routing_addresses.get(primary_key)
+                    if owner is not None:
+                        raise ValidationError(
+                            f'Address {primary_key!r} is present in both '
+                            f'{owner} and {section}.',
+                            field_name=(
+                                f'{section}.{position}.{nested._primary}'
+                            ),
+                        )
+                    routing_addresses[primary_key] = section
+                instance = nested.get_instance(item)
+                if instance is not None:
+                    # SQL bind canonicalization can make two spellings the
+                    # same public key (notably IDNA U-labels/A-labels). Retain
+                    # the existing row without assigning the alternate
+                    # spelling back through a persisted primary-key setter.
+                    item[nested._primary] = getattr(
+                        instance,
+                        nested._primary,
+                    )
+                    identities.add(sqlalchemy.inspect(instance).identity)
+                    if (
+                        model is models.Alias
+                        and instance.scim_resource is not None
+                        and instance.scim_resource.deleted_at is None
+                    ):
+                        self._validate_managed_alias_input(
+                            nested,
+                            instance,
+                            item,
+                            position,
+                        )
+                        managed_alias_items.append(item)
+            retained[model] = identities
+            if managed_alias_items:
+                # The materialized Alias is a projection of normalized SCIM
+                # graph state, not an import authority. An unchanged projection
+                # establishes retention, then stays out of the generic loader
+                # so concurrent pruning cannot reload stale destinations.
+                items[:] = [
+                    item for item in items
+                    if item not in managed_alias_items
+                ]
+
+        obsolete = {
+            model: [
+                item for item in model.query.all()
+                if sqlalchemy.inspect(item).identity not in identities
+            ]
+            for model, identities in retained.items()
+        }
+
+        scim_deleted_aliases = set()
+        for alias in obsolete.get(models.Alias, []):
+            if (
+                alias.scim_resource is not None
+                and alias.scim_resource.deleted_at is None
+            ):
+                models.tombstone_scim_resource(alias.scim_resource)
+                # Match SCIM Group DELETE: persist the detached tombstone
+                # before deleting its formerly managed Alias.
+                models.db.session.flush()
+                models.db.session.delete(alias)
+                scim_deleted_aliases.add(alias)
+
+        retained_users = retained.get(models.User, set())
+        retained_aliases = retained.get(models.Alias, set())
+        for domain in obsolete.get(models.Domain, []):
+            has_retained_user = any(
+                sqlalchemy.inspect(user).identity in retained_users
+                for user in domain.users
+            )
+            has_retained_alias = any(
+                sqlalchemy.inspect(alias).identity in retained_aliases
+                for alias in domain.aliases
+            )
+            if has_retained_user or has_retained_alias:
+                raise ValidationError(
+                    f'Domain {domain.name} cannot be removed while retained '
+                    'users or aliases reference it.',
+                    field_name='domain',
+                )
+
+        for items in obsolete.values():
+            for item in items:
+                if item not in scim_deleted_aliases:
+                    models.db.session.delete(item)
+        models.db.session.flush()
+
+        # Deleting a User can rematerialize retained Group projections from
+        # inside the identity lifecycle hook. Settle those lifecycle-owned
+        # writes before the ordinary section loaders issue their own flushes.
+        dirty_managed_aliases = [
+            alias for alias in models.db.session.dirty
+            if (
+                isinstance(alias, models.Alias)
+                and alias.scim_resource is not None
+                and alias.scim_resource.deleted_at is None
+            )
+        ]
+        for alias in dirty_managed_aliases:
+            models.permit_scim_managed_alias_edit(alias)
+        if dirty_managed_aliases:
+            models.db.session.flush()
+
+    def _preflight_nested_identities(self, data):
+        """Reject duplicate nested database identities before any mutation."""
+        seen = {}
+        dialect = models.db.session.get_bind().dialect
+        for section, outer_field in self.fields.items():
+            outer_items = data.get(section, [])
+            if type(outer_items) is not list:
+                continue
+            outer_schema = outer_field.schema
+            for outer_position, outer_item in enumerate(outer_items):
+                if type(outer_item) is not dict:
+                    continue
+                for name, nested_field in outer_schema.load_fields.items():
+                    if (
+                        not isinstance(nested_field, fields.Nested)
+                        or not nested_field.many
+                        or name not in outer_item
+                    ):
+                        continue
+                    nested_items = outer_item[name]
+                    if type(nested_items) is not list:
+                        raise ValidationError(
+                            'Not a valid list.',
+                            field_name=(
+                                f'{section}.{outer_position}.{name}'
+                            ),
+                        )
+                    nested_schema = nested_field.schema
+                    primary = nested_schema._primary
+                    model = nested_schema.opts.model
+                    primary_column = (
+                        model.__table__.primary_key.columns.values()[0]
+                    )
+                    bind_processor = primary_column.type.bind_processor(
+                        dialect
+                    )
+                    model_seen = seen.setdefault(model, set())
+                    for nested_position, nested_item in enumerate(
+                        nested_items
+                    ):
+                        if type(nested_item) is not dict:
+                            raise ValidationError(
+                                'Not a valid mapping.',
+                                field_name=(
+                                    f'{section}.{outer_position}.{name}.'
+                                    f'{nested_position}'
+                                ),
+                            )
+                        if primary not in nested_item:
+                            continue
+                        value = nested_schema.load_fields[
+                            primary
+                        ].deserialize(nested_item[primary])
+                        if bind_processor is not None:
+                            value = bind_processor(value)
+                        if value in model_seen:
+                            raise ValidationError(
+                                f'Duplicate {primary}: {value!r}.',
+                                field_name=(
+                                    f'{section}.{outer_position}.{name}.'
+                                    f'{nested_position}.{primary}'
+                                ),
+                            )
+                        model_seen.add(value)
+
+    def _preflight_related_owners(self, data):
+        """Reject duplicate ownership of one-to-many related identities."""
+        dialect = models.db.session.get_bind().dialect
+        for section, outer_field in self.fields.items():
+            outer_items = data.get(section, [])
+            if type(outer_items) is not list:
+                continue
+            outer_schema = outer_field.schema
+            outer_model = outer_schema.opts.model
+            for name, related_field in outer_schema.load_fields.items():
+                if not isinstance(related_field, RelatedList):
+                    continue
+                relationship = outer_model.__mapper__.relationships.get(name)
+                if (
+                    relationship is None
+                    or relationship.direction
+                    is not sqlalchemy.orm.ONETOMANY
+                ):
+                    continue
+                primary_columns = relationship.mapper.primary_key
+                if len(primary_columns) != 1:
+                    continue
+                primary_column = primary_columns[0]
+                bind_processor = primary_column.type.bind_processor(dialect)
+                python_type = primary_column.type.python_type
+                seen = set()
+                for outer_position, outer_item in enumerate(outer_items):
+                    if type(outer_item) is not dict or name not in outer_item:
+                        continue
+                    related_items = outer_item[name]
+                    if type(related_items) is not list:
+                        raise ValidationError(
+                            'Not a valid list.',
+                            field_name=(
+                                f'{section}.{outer_position}.{name}'
+                            ),
+                        )
+                    for related_position, raw_value in enumerate(
+                        related_items
+                    ):
+                        path = (
+                            f'{section}.{outer_position}.{name}.'
+                            f'{related_position}'
+                        )
+                        try:
+                            related = related_field.inner.deserialize(
+                                raw_value
+                            )
+                            value = getattr(
+                                related,
+                                primary_column.key,
+                            )
+                            value = python_type(value)
+                            if bind_processor is not None:
+                                value = bind_processor(value)
+                        except (
+                            AttributeError,
+                            TypeError,
+                            ValueError,
+                            ValidationError,
+                        ) as exc:
+                            raise ValidationError(
+                                f'Invalid related identity: {raw_value!r}.',
+                                field_name=path,
+                            ) from exc
+                        if value in seen:
+                            raise ValidationError(
+                                f'Duplicate related identity: {value!r}.',
+                                field_name=path,
+                            )
+                        seen.add(value)
+
+    @staticmethod
+    def _validate_managed_alias_input(schema, alias, item, position):
+        """Reject attempts to mutate a retained SCIM-owned Alias."""
+        unknown = set(item) - set(schema.fields)
+        if unknown:
+            name = sorted(unknown)[0]
+            raise ValidationError(
+                'Unknown field.',
+                field_name=f'alias.{position}.{name}',
+            )
+
+        prepared = schema._prepare_replacement_item( # pylint: disable=protected-access
+            deepcopy(item)
+        )
+        for name, raw_value in prepared.items():
+            field = schema.load_fields.get(name)
+            if field is None:
+                continue
+            if name == schema._primary:
+                continue
+            value = field.deserialize(
+                raw_value,
+                attr=name,
+                data=prepared,
+            )
+            current_raw = field.serialize(name, alias)
+            current = (
+                None
+                if current_raw is missing
+                else field.deserialize(
+                    current_raw,
+                    attr=name,
+                    data={name: current_raw},
+                )
+            )
+            if name == 'destination':
+                value = sorted(set(value))
+                current = sorted(set(current))
+            if value != current:
+                raise ValidationError(
+                    f'SCIM-managed Group alias {alias.email} cannot be '
+                    f'modified by config import; field {name!r} is '
+                    'provider-owned.',
+                    field_name=f'alias.{position}.{name}',
+                )
 
     @post_load
     def _make_config(self, data, many, **kwargs): # pylint: disable=unused-argument

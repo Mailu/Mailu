@@ -147,6 +147,19 @@ class ConfigManager:
             template = self.DB_TEMPLATES[self.config['DB_FLAVOR']]
             self.config['SQLALCHEMY_DATABASE_URI'] = template.format(**self.config)
 
+        database_scheme = (
+            self.config['SQLALCHEMY_DATABASE_URI']
+            .partition(':')[0]
+            .partition('+')[0]
+            .lower()
+        )
+        if database_scheme in {'mysql', 'mariadb'}:
+            engine_options = dict(
+                self.config.get('SQLALCHEMY_ENGINE_OPTIONS') or {}
+            )
+            engine_options['isolation_level'] = 'READ COMMITTED'
+            self.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
+
         if not self.config.get('RATELIMIT_STORAGE_URL'):
             self.config['RATELIMIT_STORAGE_URL'] = f'redis://{self.config["REDIS_ADDRESS"]}/2'
 

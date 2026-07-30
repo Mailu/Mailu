@@ -53,7 +53,8 @@ def login():
         user = models.User.login(username, form.pw.data)
         if user:
             flask.session.regenerate()
-            flask_login.login_user(user)
+            if not utils.login_user(user):
+                flask.abort(403)
             if user.change_pw_next_login:
                 flask.session['redirect_to'] = destination
                 destination = flask.url_for('sso.pw_change')
@@ -89,11 +90,17 @@ def pw_change():
             return flask.redirect(flask.url_for('sso.pw_change'))
         user = models.User.login(flask_login.current_user.email, form.oldpw.data)
         if user:
-            flask.session.regenerate()
-            flask_login.login_user(user)
-            user.set_password(form.pw.data, keep_sessions=set(flask.session))
+            user.set_password(form.pw.data, keep_sessions=True)
             user.change_pw_next_login = False
+            expected_generation = user.auth_generation
+            uid = user.email
             models.db.session.commit()
+            utils.finish_session_authority_change(
+                user,
+                preserve_current=True,
+                expected_generation=expected_generation,
+                uid=uid,
+            )
             flask.current_app.logger.info(f'Forced password change by {user} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
             destination = flask.session.pop('redirect_to', None) or app.config['WEB_ADMIN']
             return flask.redirect(destination)
@@ -144,8 +151,15 @@ def _proxy():
 
     user = models.User.get(email)
     if user:
+        if not user.enabled:
+            flask.current_app.logger.warning(
+                f'Login failed by proxy - disabled user: {user} from '
+                f'{client_ip} through {flask.request.remote_addr}.'
+            )
+            return flask.abort(403)
         flask.session.regenerate()
-        flask_login.login_user(user)
+        if not utils.login_user(user):
+            return flask.abort(403)
         flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
         return flask.redirect(url)
 
@@ -164,11 +178,12 @@ def _proxy():
         flask.current_app.logger.warning('Too many users for domain %s' % domain)
         return flask.abort(500, 'Too many users in (domain=%s)' % domain)
     user = models.User(localpart=localpart, domain=domain)
-    user.set_password(secrets.token_urlsafe(), keep_sessions=set(flask.session))
+    user.set_password(secrets.token_urlsafe(), keep_sessions=True)
     models.db.session.add(user)
     models.db.session.commit()
     flask.session.regenerate()
-    flask_login.login_user(user)
+    if not utils.login_user(user):
+        return flask.abort(403)
     user.send_welcome()
     flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
     return flask.redirect(url)

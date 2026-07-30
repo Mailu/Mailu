@@ -347,6 +347,10 @@ to be stored and SQLite is deemed both sufficient, simpler and more reliable ove
 For PostgreSQL use driver postgresql (``SQLALCHEMY_DATABASE_URI=postgresql://mailu:mailu_secret_password@database/mailu``).
 
 For MariaDB/MySQL use driver mysql+mysqlconnector (``SQLALCHEMY_DATABASE_URI= mysql+mysqlconnector://mailu:mailu_secret_password@database/mailu``).
+Mailu automatically uses ``READ COMMITTED`` transaction isolation for the admin service's MariaDB/MySQL connection.
+When binary logging is active, its ``binlog_format`` must be ``ROW`` or ``MIXED``;
+Mailu rejects admin connections using ``STATEMENT`` because ``READ COMMITTED`` InnoDB writes cannot be logged safely in that format.
+The Roundcube database connection is not changed.
 
 For Roundcube, refer to the `roundcube documentation`_ for the URL specification.
 

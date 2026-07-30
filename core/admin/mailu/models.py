@@ -3,8 +3,11 @@
 
 import os
 import json
+import secrets
+import sqlite3
+import uuid
 
-from datetime import date
+from datetime import date, datetime, timezone
 from email.mime import text
 from itertools import chain
 
@@ -17,10 +20,12 @@ import logging
 import os
 import smtplib
 import idna
+import validators
 import dns.resolver
 import dns.exception
 
 from flask import current_app as app
+from sqlalchemy.dialects import mysql
 from sqlalchemy.ext import declarative
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
@@ -36,6 +41,89 @@ logging.getLogger('passlib').setLevel(logging.ERROR)
 
 
 db = flask_sqlalchemy.SQLAlchemy()
+
+
+def _sql_variable_enabled(value):
+    if isinstance(value, bytes):
+        value = value.decode('ascii')
+    return str(value).strip().upper() in {'1', 'ON', 'TRUE'}
+
+
+def _reject_mysql_statement_binlog(dbapi_connection, _connection_record):
+    cursor = dbapi_connection.cursor()
+    try:
+        cursor.execute(
+            'SELECT @@GLOBAL.log_bin, @@SESSION.sql_log_bin, '
+            '@@SESSION.binlog_format'
+        )
+        log_bin, sql_log_bin, binlog_format = cursor.fetchone()
+    finally:
+        cursor.close()
+
+    if isinstance(binlog_format, bytes):
+        binlog_format = binlog_format.decode('ascii')
+    if (
+        _sql_variable_enabled(log_bin)
+        and _sql_variable_enabled(sql_log_bin)
+        and str(binlog_format).strip().upper() == 'STATEMENT'
+    ):
+        raise RuntimeError(
+            'Mailu requires MySQL/MariaDB binlog_format=ROW or MIXED '
+            'while binary logging is active because the admin database '
+            'uses READ COMMITTED; binlog_format=STATEMENT is unsupported'
+        )
+
+
+def configure_database_engine(engine):
+    if (
+        engine.dialect.name in {'mysql', 'mariadb'}
+        and not event.contains(
+            engine,
+            'connect',
+            _reject_mysql_statement_binlog,
+        )
+    ):
+        event.listen(
+            engine,
+            'connect',
+            _reject_mysql_statement_binlog,
+        )
+
+
+@sqlalchemy.event.listens_for(sqlalchemy.engine.Engine, 'connect')
+def _enable_sqlite_foreign_keys(dbapi_connection, _connection_record):
+    """Make SQLite enforce the same foreign-key contract as production SQL."""
+    if isinstance(dbapi_connection, sqlite3.Connection):
+        cursor = dbapi_connection.cursor()
+        cursor.execute('PRAGMA foreign_keys=ON')
+        cursor.close()
+
+
+class AddressConflict(sqlalchemy.exc.IntegrityError):
+    """Raised when two concrete resources claim one routing address."""
+
+    def __init__(self, email, original):
+        self.email = email
+        if isinstance(original, sqlalchemy.exc.IntegrityError):
+            statement = original.statement
+            params = original.params
+            cause = original.orig
+            invalidated = original.connection_invalidated
+        else:
+            statement = None
+            params = {'email': email}
+            cause = original
+            invalidated = False
+        super().__init__(
+            statement,
+            params,
+            cause,
+            connection_invalidated=invalidated,
+        )
+
+
+class AddressRenameError(ValueError):
+    """Raised when code attempts to mutate a persisted address primary key."""
 
 
 class IdnaDomain(db.TypeDecorator):
@@ -64,6 +152,8 @@ class IdnaEmail(db.TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         """ encode unicode domain part of email address to punycode """
+        if value is None:
+            return None
         if not '@' in value:
             raise ValueError('invalid email address (no "@")')
         localpart, domain_name = value.lower().rsplit('@', 1)
@@ -73,8 +163,19 @@ class IdnaEmail(db.TypeDecorator):
 
     def process_result_value(self, value, dialect):
         """ decode punycode domain part of email to unicode """
+        if value is None:
+            return None
         localpart, domain_name = value.rsplit('@', 1)
         return f'{localpart}@{idna.decode(domain_name)}'
+
+
+def ExactScimId():
+    """Store provider IDs with byte-exact MySQL/MariaDB comparisons."""
+    return db.String(255).with_variant(
+        mysql.VARCHAR(255, collation='utf8mb4_bin'),
+        'mysql',
+    )
+
 
 class CommaSeparatedList(db.TypeDecorator):
     """ Stores a list as a comma-separated string, compatible with Postfix.
@@ -427,6 +528,32 @@ class Relay(Base):
     smtp = db.Column(db.String(80), nullable=True)
 
 
+class MailAddress(db.Model):
+    """Single active owner of a canonical routing address.
+
+    This table enforces address uniqueness across the otherwise independent
+    User and Alias primary-key namespaces. It is deliberately not a SCIM
+    identity or tombstone table.
+    """
+
+    __tablename__ = 'mail_address'
+
+    email = db.Column(IdnaEmail, primary_key=True, nullable=False)
+    address_type = db.Column(db.String(5), nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint(
+            'email',
+            'address_type',
+            name='mail_address_email_type_key',
+        ),
+        db.CheckConstraint(
+            "address_type IN ('user', 'alias')",
+            name='mail_address_type_check',
+        ),
+    )
+
+
 class Email(object):
     """ Abstraction for an email address (localpart and domain).
     """
@@ -574,12 +701,37 @@ class User(Base, Email):
     """
 
     __tablename__ = 'user'
+    ADDRESS_TYPE = 'user'
     _ctx = None
     _credential_cache = {}
+
+    address_type = db.Column(
+        db.String(5),
+        nullable=False,
+        default=ADDRESS_TYPE,
+        server_default=ADDRESS_TYPE,
+    )
+
+    __table_args__ = (
+        db.CheckConstraint(
+            "address_type = 'user'",
+            name='user_address_type_check',
+        ),
+        db.ForeignKeyConstraint(
+            ['email', 'address_type'],
+            ['mail_address.email', 'mail_address.address_type'],
+            name='user_mail_address_fkey',
+        ),
+    )
 
     domain = db.relationship(Domain,
         backref=db.backref('users', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
+    auth_generation = db.Column(
+        db.String(32),
+        nullable=False,
+        default=lambda: secrets.token_hex(16),
+    )
     quota_bytes = db.Column(db.BigInteger, nullable=False, default=10**9)
     quota_bytes_used = db.Column(db.BigInteger, nullable=False, default=0)
     global_admin = db.Column(db.Boolean, nullable=False, default=False)
@@ -611,8 +763,12 @@ class User(Base, Email):
 
     # Flask-login attributes
     is_authenticated = True
-    is_active = True
     is_anonymous = False
+
+    @property
+    def is_active(self):
+        """Disabled users are not valid Flask-Login principals."""
+        return bool(self.enabled)
 
     def get_id(self):
         """ return users email address """
@@ -692,7 +848,11 @@ class User(Base, Email):
 
         result, new_hash = User.get_password_context().verify_and_update(password, reference)
         if new_hash:
-            self.password = new_hash
+            self._preserve_auth_generation = True
+            try:
+                self.password = new_hash
+            finally:
+                del self._preserve_auth_generation
             db.session.add(self)
             db.session.commit()
 
@@ -709,14 +869,22 @@ in clear-text regardless of the presence of the cache.
         return result
 
     def set_password(self, password, raw=False, keep_sessions=None):
-        """ Set password for user and destroy all web sessions except those in keep_sessions
+        """Set a credential and rotate SQL-backed session authority.
+
             @password: plain text password to encrypt (or, if raw is True: the hash itself)
-            @keep_sessions: True if all the sessions should be preserved, otherwise a
-set() containing the sessions to keep
+            @keep_sessions: retained for caller compatibility; physical session
+              cleanup must run only after the surrounding SQL transaction commits.
         """
-        self.password = password if raw else User.get_password_context().hash(password)
-        if keep_sessions is not True and self.email is not None:
-            utils.MailuSessionExtension.prune_sessions(uid=self.email, keep=keep_sessions)
+        replacement = (
+            password
+            if raw
+            else User.get_password_context().hash(password)
+        )
+        self.password = replacement
+
+    def rotate_auth_generation(self):
+        """Invalidate every previously issued browser/webmail session."""
+        self.auth_generation = secrets.token_hex(16)
 
     def get_managed_domains(self):
         """ return list of domains this user can manage """
@@ -751,11 +919,71 @@ set() containing the sessions to keep
         return user if (user and user.enabled and user.check_password(password)) else None
 
 
+@sqlalchemy.event.listens_for(
+    User.enabled,
+    'set',
+    active_history=True,
+)
+def _rotate_auth_generation_on_enabled_change(
+    target,
+    value,
+    oldvalue,
+    _initiator,
+):
+    """Make enablement changes invalidate sessions at the model boundary."""
+    if (
+        oldvalue is not sqlalchemy.orm.attributes.NO_VALUE
+        and bool(value) != bool(oldvalue)
+    ):
+        target.rotate_auth_generation()
+
+
+@sqlalchemy.event.listens_for(
+    User.password,
+    'set',
+    active_history=True,
+)
+def _rotate_auth_generation_on_password_change(
+    target,
+    value,
+    oldvalue,
+    _initiator,
+):
+    """Catch every ORM credential writer, including Marshmallow imports."""
+    if (
+        oldvalue is not sqlalchemy.orm.attributes.NO_VALUE
+        and oldvalue is not None
+        and value != oldvalue
+        and not getattr(target, '_preserve_auth_generation', False)
+    ):
+        target.rotate_auth_generation()
+
+
 class Alias(Base, Email):
     """ An alias is an email address that redirects to some destination.
     """
 
     __tablename__ = 'alias'
+    ADDRESS_TYPE = 'alias'
+
+    address_type = db.Column(
+        db.String(5),
+        nullable=False,
+        default=ADDRESS_TYPE,
+        server_default=ADDRESS_TYPE,
+    )
+
+    __table_args__ = (
+        db.CheckConstraint(
+            "address_type = 'alias'",
+            name='alias_address_type_check',
+        ),
+        db.ForeignKeyConstraint(
+            ['email', 'address_type'],
+            ['mail_address.email', 'mail_address.address_type'],
+            name='alias_mail_address_fkey',
+        ),
+    )
 
     domain = db.relationship(Domain,
         backref=db.backref('aliases', cascade='all, delete-orphan'))
@@ -830,6 +1058,87 @@ class Alias(Base, Email):
 
 
 # end of Alias class helpers
+
+
+def _address_value(target):
+    """Return and materialize the canonical email before mapper INSERT."""
+    if target.email:
+        return target.email
+    domain_name = target.domain_name
+    if not domain_name and target.domain is not None:
+        domain_name = target.domain.name
+    if not target.localpart or not domain_name:
+        raise ValueError('User and Alias require a complete email address')
+    target.email = f'{target.localpart}@{domain_name}'
+    return target.email
+
+
+def _claim_mail_address(_mapper, connection, target):
+    email = _address_value(target)
+    target.address_type = target.ADDRESS_TYPE
+    graph_lock = globals().get('_lock_scim_graph_connection')
+    destination_model = globals().get('ScimGroupDestination')
+    if graph_lock is not None:
+        graph_lock(connection)
+    if (
+        destination_model is not None
+        and connection.execute(
+            sqlalchemy.select(destination_model.group_id).where(
+                destination_model.destination == email
+            ).limit(1).with_for_update()
+        ).first()
+        is not None
+    ):
+        original = RuntimeError(
+            f'Routing address {email!r} is reserved as an external '
+            'destination'
+        )
+        raise AddressConflict(email, original) from original
+    try:
+        connection.execute(
+            MailAddress.__table__.insert().values(
+                email=email,
+                address_type=target.ADDRESS_TYPE,
+            )
+        )
+    except sqlalchemy.exc.IntegrityError as exc:
+        raise AddressConflict(email, exc) from exc
+
+
+def _reject_mail_address_rename(_mapper, _connection, target):
+    if sqlalchemy.inspect(target).attrs._email.history.has_changes():
+        raise AddressRenameError(
+            f'Persisted email address {target.email} cannot be renamed'
+        )
+
+
+def _release_mail_address(_mapper, connection, target):
+    connection.execute(
+        MailAddress.__table__.delete().where(
+            sqlalchemy.and_(
+                MailAddress.email == target.email,
+                MailAddress.address_type == target.ADDRESS_TYPE,
+            )
+        )
+    )
+
+
+for _address_model in (User, Alias):
+    sqlalchemy.event.listen(
+        _address_model,
+        'before_insert',
+        _claim_mail_address,
+    )
+    sqlalchemy.event.listen(
+        _address_model,
+        'before_update',
+        _reject_mail_address_rename,
+    )
+    sqlalchemy.event.listen(
+        _address_model,
+        'after_delete',
+        _release_mail_address,
+    )
 
 
 class Token(Base):
@@ -945,6 +1254,819 @@ def has_domain_access(domain_name, user=None):
         DomainAccess.user_email == user.email
     )
     return db.session.query(query.exists()).scalar()
+
+
+class ScimIdentityError(RuntimeError):
+    """Base error for persistent SCIM identity invariants."""
+
+
+class ScimGraphError(ScimIdentityError):
+    """Raised when a normalized Group graph would be invalid."""
+
+
+class ScimManagedAliasError(ScimIdentityError):
+    """Raised when an ordinary writer mutates a SCIM-owned Alias."""
+
+
+class ScimGroupAdoptionError(ScimIdentityError):
+    """Raised when an Alias cannot safely enter exclusive SCIM ownership."""
+
+
+class ScimExternalDestinationError(ScimIdentityError):
+    """Raised when a raw destination conflicts with local routing ownership."""
+
+
+class ScimState(db.Model):
+    """Singleton row used to serialize every normalized graph mutation."""
+
+    __tablename__ = 'scim_state'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=False)
+    revision = db.Column(db.BigInteger, nullable=False, default=0)
+
+    __table_args__ = (
+        db.CheckConstraint('id = 1', name='scim_state_singleton_check'),
+    )
+
+
+class ScimResource(Base):
+    """Stable provider identity and ownership marker for a SCIM resource."""
+
+    __tablename__ = 'scim_resource'
+
+    id = db.Column(ExactScimId(), primary_key=True, nullable=False)
+    resource_type = db.Column(db.String(5), nullable=False)
+    external_id_bytes = db.Column(db.LargeBinary(1024), nullable=True)
+    user_email = db.Column(
+        IdnaEmail,
+        db.ForeignKey(User.email),
+        nullable=True,
+        unique=True,
+    )
+    alias_email = db.Column(
+        IdnaEmail,
+        db.ForeignKey(Alias.email),
+        nullable=True,
+        unique=True,
+    )
+    subject_address = db.Column(IdnaEmail, nullable=False)
+    deleted_at = db.Column(db.DateTime, nullable=True)
+
+    user = db.relationship(
+        User,
+        foreign_keys=[user_email],
+        backref=db.backref(
+            'scim_resource',
+            uselist=False,
+            passive_deletes=True,
+        ),
+    )
+    alias = db.relationship(
+        Alias,
+        foreign_keys=[alias_email],
+        backref=db.backref(
+            'scim_resource',
+            uselist=False,
+            passive_deletes=True,
+        ),
+    )
+
+    __table_args__ = (
+        db.CheckConstraint(
+            "resource_type IN ('User', 'Group')",
+            name='scim_resource_type_check',
+        ),
+        db.CheckConstraint(
+            '('
+            "deleted_at IS NULL AND resource_type = 'User' "
+            'AND user_email IS NOT NULL AND alias_email IS NULL '
+            'AND subject_address = user_email'
+            ') OR ('
+            "deleted_at IS NULL AND resource_type = 'Group' "
+            'AND user_email IS NULL AND alias_email IS NOT NULL '
+            'AND subject_address = alias_email'
+            ') OR ('
+            'deleted_at IS NOT NULL '
+            'AND user_email IS NULL AND alias_email IS NULL'
+            ')',
+            name='scim_resource_lifecycle_check',
+        ),
+    )
+
+    @property
+    def external_id(self):
+        if self.external_id_bytes is None:
+            return None
+        return self.external_id_bytes.decode('utf-8')
+
+    @external_id.setter
+    def external_id(self, value):
+        if value is None:
+            self.external_id_bytes = None
+            return
+        if not isinstance(value, str):
+            raise TypeError('externalId must be a string or null')
+        encoded = value.encode('utf-8')
+        if len(encoded) > 1024:
+            raise ValueError('externalId must not exceed 1024 UTF-8 bytes')
+        self.external_id_bytes = encoded
+
+    @property
+    def active(self):
+        return self.deleted_at is None
+
+    @classmethod
+    def get_exact(cls, resource_id, *, resource_type=None, active_only=True):
+        """Fetch an opaque ID without trusting a case-insensitive collation."""
+        if not isinstance(resource_id, str):
+            return None
+        resource = db.session.get(cls, resource_id)
+        if resource is None or resource.id != resource_id:
+            return None
+        if resource_type is not None and resource.resource_type != resource_type:
+            return None
+        if active_only and resource.deleted_at is not None:
+            return None
+        return resource
+
+
+class ScimGroupMember(db.Model):
+    """Stable normalized edge from one managed Group to a SCIM resource."""
+
+    __tablename__ = 'scim_group_member'
+
+    group_id = db.Column(
+        ExactScimId(),
+        db.ForeignKey(ScimResource.id),
+        primary_key=True,
+    )
+    member_id = db.Column(
+        ExactScimId(),
+        db.ForeignKey(ScimResource.id),
+        primary_key=True,
+    )
+
+    group = db.relationship(
+        ScimResource,
+        foreign_keys=[group_id],
+        backref=db.backref(
+            'member_edges',
+            cascade='all, delete-orphan',
+        ),
+    )
+    member = db.relationship(
+        ScimResource,
+        foreign_keys=[member_id],
+        backref=db.backref(
+            'membership_edges',
+            cascade='all, delete-orphan',
+        ),
+    )
+
+
+class ScimGroupDestination(db.Model):
+    """Raw, non-local forwarding destination owned by a managed Group."""
+
+    __tablename__ = 'scim_group_destination'
+
+    group_id = db.Column(
+        ExactScimId(),
+        db.ForeignKey(ScimResource.id),
+        primary_key=True,
+    )
+    destination = db.Column(IdnaEmail, primary_key=True)
+
+    __table_args__ = (
+        db.Index(
+            'scim_group_destination_destination_idx',
+            'destination',
+        ),
+    )
+
+    group = db.relationship(
+        ScimResource,
+        foreign_keys=[group_id],
+        backref=db.backref(
+            'destinations',
+            cascade='all, delete-orphan',
+        ),
+    )
+
+
+@sqlalchemy.event.listens_for(ScimState.__table__, 'after_create')
+def _seed_scim_state(_target, connection, **_kwargs):
+    connection.execute(
+        ScimState.__table__.insert().values(id=1, revision=0)
+    )
+
+
+def new_scim_id():
+    """Return the one canonical representation used for new provider IDs."""
+    return str(uuid.uuid4()).lower()
+
+
+def _lock_scim_graph_connection(connection):
+    result = connection.execute(
+        ScimState.__table__.update().where(
+            ScimState.id == 1
+        ).values(
+            revision=ScimState.revision,
+        )
+    )
+    if result.rowcount != 1:
+        raise ScimGraphError('SCIM graph state row is missing')
+
+
+def lock_scim_graph(session=None):
+    """Acquire the portable singleton graph write lock for this transaction."""
+    session = session or db.session
+    result = session.execute(
+        ScimState.__table__.update().where(
+            ScimState.id == 1
+        ).values(
+            revision=ScimState.revision,
+        )
+    )
+    if result.rowcount != 1:
+        raise ScimGraphError('SCIM graph state row is missing')
+
+
+def create_scim_user_mapping(
+    user,
+    *,
+    resource_id=None,
+    external_id=None,
+):
+    """Return or create the active mapping for a persistent User."""
+    if inspect(user).persistent is False:
+        raise ScimIdentityError(
+            'User must be persistent before its SCIM mapping is created'
+        )
+    lock_scim_graph()
+    existing = db.session.execute(
+        sqlalchemy.select(ScimResource)
+        .where(
+            ScimResource.resource_type == 'User',
+            ScimResource.user_email == user.email,
+            ScimResource.deleted_at.is_(None),
+        )
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).scalar_one_or_none()
+    if existing is not None:
+        if existing.deleted_at is not None:
+            raise ScimIdentityError(
+                f'User {user.email} has a deleted SCIM mapping'
+            )
+        if resource_id is not None and resource_id != existing.id:
+            raise ScimIdentityError(
+                f'User {user.email} already has a different SCIM mapping'
+            )
+        if external_id is not None:
+            existing.external_id = external_id
+        return existing
+    reserved = db.session.execute(
+        sqlalchemy.select(ScimResource)
+        .where(
+            ScimResource.resource_type == 'User',
+            ScimResource.subject_address == user.email,
+            ScimResource.deleted_at.is_not(None),
+        )
+        .limit(1)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).scalar_one_or_none()
+    if reserved is not None:
+        raise ScimIdentityError(
+            f'User address {user.email} is permanently reserved by a '
+            'deleted SCIM identity'
+        )
+    resource = ScimResource(
+        id=resource_id or new_scim_id(),
+        resource_type='User',
+        user=user,
+        subject_address=user.email,
+    )
+    resource.external_id = external_id
+    db.session.add(resource)
+    return resource
+
+
+def validate_scim_group_adoption(alias):
+    """Require a live, exact, unowned Alias before exclusive adoption."""
+    if inspect(alias).persistent is False:
+        raise ScimGroupAdoptionError('Alias must be persistent before adoption')
+    if alias.disabled:
+        raise ScimGroupAdoptionError('Disabled Alias cannot be adopted')
+    if alias.wildcard:
+        raise ScimGroupAdoptionError('Wildcard Alias cannot be adopted')
+    if alias.owner_email is not None:
+        raise ScimGroupAdoptionError('Owned Alias cannot be adopted')
+    if alias.scim_resource is not None:
+        raise ScimGroupAdoptionError('Alias is already SCIM managed')
+    return alias
+
+
+def create_scim_group_mapping(
+    alias,
+    *,
+    resource_id=None,
+    external_id=None,
+):
+    """Adopt an existing Alias; graph initialization remains explicit."""
+    lock_scim_graph()
+    alias = db.session.execute(
+        sqlalchemy.select(Alias)
+        .where(Alias._email == alias.email)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).scalar_one_or_none()
+    if alias is None:
+        raise ScimGroupAdoptionError('Alias disappeared during adoption')
+    existing_mapping = db.session.execute(
+        sqlalchemy.select(ScimResource.id)
+        .where(
+            ScimResource.alias_email == alias.email,
+            ScimResource.deleted_at.is_(None),
+        )
+        .limit(1)
+        .with_for_update()
+    ).first()
+    if existing_mapping is not None:
+        raise ScimGroupAdoptionError('Alias is already SCIM managed')
+    validate_scim_group_adoption(alias)
+    resource = ScimResource(
+        id=resource_id or alias.email,
+        resource_type='Group',
+        alias=alias,
+        subject_address=alias.email,
+    )
+    resource.external_id = external_id
+    db.session.add(resource)
+    return resource
+
+
+def scrub_scim_user_authority(user):
+    """Remove identity-bound authority before retaining a deleted mailbox."""
+    user.global_admin = False
+    user.allow_spoofing = False
+    user.forward_enabled = False
+    user.forward_destination = []
+    user.forward_keep = True
+    user.reply_enabled = False
+    user.reply_subject = None
+    user.reply_body = None
+    user.reply_startdate = date(1900, 1, 1)
+    user.reply_enddate = date(2999, 12, 31)
+    user.set_password(secrets.token_urlsafe(48))
+    for token in list(user.tokens):
+        db.session.delete(token)
+    for fetch in list(user.fetches):
+        db.session.delete(fetch)
+    for alias in list(user.owned_aliases):
+        db.session.delete(alias)
+    for access in list(user.domain_accesses):
+        db.session.delete(access)
+    db.session.execute(
+        managers.delete().where(managers.c.user_email == user.email)
+    )
+
+
+def canonicalize_scim_destination(value):
+    if not isinstance(value, str):
+        raise ScimExternalDestinationError(
+            'External destinations must be strings'
+        )
+    value = value.strip().lower()
+    if not value or ',' in value or value.count('@') != 1:
+        raise ScimExternalDestinationError(
+            f'Invalid external destination {value!r}'
+        )
+    localpart, domain_name = value.rsplit('@', 1)
+    if not localpart or not domain_name:
+        raise ScimExternalDestinationError(
+            f'Invalid external destination {value!r}'
+        )
+    try:
+        domain_name = idna.decode(idna.encode(domain_name))
+    except idna.IDNAError as exc:
+        raise ScimExternalDestinationError(
+            f'Invalid external destination {value!r}'
+        ) from exc
+    destination = f'{localpart}@{domain_name}'
+    if not validators.email(destination):
+        raise ScimExternalDestinationError(
+            f'Invalid external destination {value!r}'
+        )
+    return destination
+
+
+def _active_scim_resource(resource_id):
+    resource = db.session.execute(
+        sqlalchemy.select(ScimResource)
+        .where(ScimResource.id == resource_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).scalar_one_or_none()
+    if (
+        resource is None
+        or resource.id != resource_id
+        or resource.deleted_at is not None
+    ):
+        raise ScimGraphError(
+            f'SCIM member {resource_id!r} is not an active resource'
+        )
+    return resource
+
+
+def _validate_scim_cycle(group, member_ids):
+    adjacency = {}
+    edges = db.session.execute(
+        sqlalchemy.select(
+            ScimGroupMember.group_id,
+            ScimGroupMember.member_id,
+        ).with_for_update()
+    ).all()
+    for group_id, member_id in edges:
+        if group_id == group.id:
+            continue
+        adjacency.setdefault(group_id, set()).add(member_id)
+    adjacency[group.id] = set(member_ids)
+
+    def reaches_group(resource_id, seen):
+        if resource_id == group.id:
+            return True
+        if resource_id in seen:
+            return False
+        seen.add(resource_id)
+        return any(
+            reaches_group(child_id, seen)
+            for child_id in adjacency.get(resource_id, ())
+        )
+
+    if any(reaches_group(member_id, set()) for member_id in member_ids):
+        raise ScimGraphError('SCIM Group membership would create a cycle')
+
+
+def permit_scim_managed_alias_edit(alias):
+    """Permit exactly one pending flush of a managed Alias mutation."""
+    session = inspect(alias).session
+    if session is None:
+        raise ScimManagedAliasError('Managed Alias is detached')
+    session.info.setdefault('_scim_alias_edit_permits', set()).add(id(alias))
+
+
+def materialize_scim_group(group):
+    """Project normalized members and raw destinations into Alias.destination."""
+    if (
+        group.resource_type != 'Group'
+        or group.deleted_at is not None
+        or group.alias is None
+    ):
+        raise ScimGraphError('Only an active Group can be materialized')
+
+    destinations = set(db.session.execute(
+        sqlalchemy.select(ScimResource.subject_address)
+        .join(
+            ScimGroupMember,
+            ScimGroupMember.member_id == ScimResource.id,
+        )
+        .where(
+            ScimGroupMember.group_id == group.id,
+            ScimResource.deleted_at.is_(None),
+        )
+        .with_for_update()
+    ).scalars())
+    destinations.update(db.session.execute(
+        sqlalchemy.select(ScimGroupDestination.destination)
+        .where(ScimGroupDestination.group_id == group.id)
+        .with_for_update()
+    ).scalars()
+    )
+    projection = sorted(destinations)
+    if any(',' in destination for destination in projection):
+        raise ScimGraphError('Group destinations cannot contain commas')
+    if len(','.join(projection)) > 1023:
+        raise ScimGraphError(
+            'Materialized Group destinations exceed 1023 characters'
+        )
+    permit_scim_managed_alias_edit(group.alias)
+    group.alias.destination = projection
+    return projection
+
+
+def replace_scim_group_graph(
+    group,
+    *,
+    member_ids,
+    external_destinations,
+):
+    """Atomically stage and materialize one complete managed Group graph."""
+    if not isinstance(group, ScimResource):
+        raise TypeError('group must be a ScimResource')
+    if (
+        group.resource_type != 'Group'
+        or group.deleted_at is not None
+        or group.alias is None
+    ):
+        raise ScimGraphError('Only an active Group can own graph state')
+    lock_scim_graph()
+
+    member_ids = list(dict.fromkeys(member_ids or ()))
+    members = [_active_scim_resource(member_id) for member_id in member_ids]
+    _validate_scim_cycle(group, member_ids)
+
+    normalized_destinations = sorted({
+        canonicalize_scim_destination(value)
+        for value in (external_destinations or ())
+    })
+    for destination in normalized_destinations:
+        local = db.session.execute(
+            sqlalchemy.select(MailAddress.email)
+            .where(MailAddress.email == destination)
+            .with_for_update()
+        ).scalar_one_or_none()
+        if local is not None:
+            raise ScimExternalDestinationError(
+                f'External destination {destination!r} is locally owned'
+            )
+
+    db.session.execute(
+        sqlalchemy.delete(ScimGroupMember).where(
+            ScimGroupMember.group_id == group.id
+        )
+    )
+    db.session.execute(
+        sqlalchemy.delete(ScimGroupDestination).where(
+            ScimGroupDestination.group_id == group.id
+        )
+    )
+    db.session.add_all(
+        ScimGroupMember(group=group, member=member)
+        for member in members
+    )
+    db.session.add_all(
+        ScimGroupDestination(group=group, destination=destination)
+        for destination in normalized_destinations
+    )
+    materialize_scim_group(group)
+    return group
+
+
+def _remove_scim_resource_edges(resource):
+    membership_edges = db.session.execute(
+        sqlalchemy.select(ScimGroupMember)
+        .where(ScimGroupMember.member_id == resource.id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).scalars().all()
+    member_edges = db.session.execute(
+        sqlalchemy.select(ScimGroupMember)
+        .where(ScimGroupMember.group_id == resource.id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).scalars().all()
+    destinations = db.session.execute(
+        sqlalchemy.select(ScimGroupDestination)
+        .where(ScimGroupDestination.group_id == resource.id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).scalars().all()
+    affected_ids = {
+        edge.group_id
+        for edge in membership_edges
+    }
+    affected_groups = db.session.execute(
+        sqlalchemy.select(ScimResource)
+        .where(
+            ScimResource.id.in_(affected_ids),
+            ScimResource.deleted_at.is_(None),
+        )
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).scalars().all() if affected_ids else []
+    db.session.execute(
+        sqlalchemy.delete(ScimGroupMember).where(
+            ScimGroupMember.member_id == resource.id
+        )
+    )
+    db.session.execute(
+        sqlalchemy.delete(ScimGroupMember).where(
+            ScimGroupMember.group_id == resource.id
+        )
+    )
+    db.session.execute(
+        sqlalchemy.delete(ScimGroupDestination).where(
+            ScimGroupDestination.group_id == resource.id
+        )
+    )
+    return affected_groups
+
+
+def tombstone_scim_resource(
+    resource,
+    *,
+    retain_subject=True,
+    scrub_user_authority=False,
+):
+    """Detach one active mapping while retaining its provider ID forever."""
+    if resource.deleted_at is not None:
+        raise ScimIdentityError(f'SCIM resource {resource.id} is already deleted')
+    lock_scim_graph()
+    user = resource.user
+    affected_groups = _remove_scim_resource_edges(resource)
+
+    if user is not None and retain_subject:
+        user.enabled = False
+        if scrub_user_authority:
+            scrub_scim_user_authority(user)
+
+    resource.user = None
+    resource.alias = None
+    resource.user_email = None
+    resource.alias_email = None
+    resource.deleted_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    for group in affected_groups:
+        if group not in db.session.deleted and group.deleted_at is None:
+            materialize_scim_group(group)
+    return resource
+
+
+def _create_scim_mapping_after_user_insert(_mapper, connection, target):
+    _lock_scim_graph_connection(connection)
+    connection.execute(
+        ScimResource.__table__.insert().values(
+            id=new_scim_id(),
+            resource_type='User',
+            user_email=target.email,
+            alias_email=None,
+            subject_address=target.email,
+            deleted_at=None,
+            created_at=date.today(),
+            updated_at=None,
+            comment='',
+        )
+    )
+
+
+@sqlalchemy.event.listens_for(ScimResource, 'before_update')
+def _reject_scim_identity_change(_mapper, _connection, target):
+    state = inspect(target)
+    for attribute in ('id', 'resource_type', 'subject_address'):
+        if state.attrs[attribute].history.has_changes():
+            raise ScimIdentityError(
+                f'SCIM resource {attribute} is immutable'
+            )
+    deleted_history = state.attrs.deleted_at.history
+    was_deleted = (
+        deleted_history.deleted[-1]
+        if deleted_history.deleted
+        else target.deleted_at
+    )
+    lifecycle_attributes = (
+        'external_id_bytes',
+        'user_email',
+        'alias_email',
+        'deleted_at',
+    )
+    if was_deleted is not None:
+        if any(
+            state.attrs[attribute].history.has_changes()
+            for attribute in lifecycle_attributes
+        ):
+            raise ScimIdentityError(
+                f'SCIM resource {target.id} tombstone is immutable'
+            )
+        return
+    transitioning_to_tombstone = (
+        target.deleted_at is not None
+        and target.user_email is None
+        and target.alias_email is None
+    )
+    if (
+        any(
+            state.attrs[attribute].history.has_changes()
+            for attribute in ('user_email', 'alias_email', 'deleted_at')
+        )
+        and not transitioning_to_tombstone
+    ):
+        raise ScimIdentityError(
+            f'SCIM resource {target.id} principal binding is immutable'
+        )
+
+
+@sqlalchemy.event.listens_for(ScimResource, 'before_delete')
+def _reject_scim_resource_hard_delete(_mapper, _connection, target):
+    raise ScimIdentityError(
+        f'SCIM resource {target.id} must be retained as a tombstone'
+    )
+
+
+@sqlalchemy.event.listens_for(sqlalchemy.orm.Session, 'before_flush')
+def _maintain_scim_identity_lifecycle(session, _flush_context, _instances):
+    permits = session.info.setdefault('_scim_alias_edit_permits', set())
+    deleted = set(session.deleted)
+
+    dirty_aliases = [
+        value for value in session.dirty
+        if isinstance(value, Alias) and value not in deleted
+    ]
+    address_deletes = [
+        value for value in deleted
+        if isinstance(value, (User, Alias))
+    ]
+    if dirty_aliases or address_deletes:
+        lock_scim_graph(session)
+
+    for alias in dirty_aliases:
+        state = inspect(alias)
+        changed = any(
+            state.attrs[property_.key].history.has_changes()
+            for property_ in state.mapper.column_attrs
+            if property_.key not in ('created_at', 'updated_at')
+        )
+        if not changed:
+            continue
+        managed = session.execute(
+            sqlalchemy.select(ScimResource)
+            .where(
+                ScimResource.alias_email == alias.email,
+                ScimResource.deleted_at.is_(None),
+            )
+            .limit(1)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        ).scalar_one_or_none()
+        if managed is not None and managed.deleted_at is None:
+            if id(alias) not in permits:
+                raise ScimManagedAliasError(
+                    f'Alias {alias.email} is exclusively SCIM managed'
+                )
+            permits.discard(id(alias))
+
+    mapped_deletes = []
+    with session.no_autoflush:
+        for target in deleted:
+            if isinstance(target, User):
+                resource = session.execute(
+                    sqlalchemy.select(ScimResource).where(
+                        ScimResource.user_email == target.email,
+                        ScimResource.deleted_at.is_(None),
+                    ).with_for_update().execution_options(
+                        populate_existing=True
+                    )
+                ).scalar_one_or_none()
+            elif isinstance(target, Alias):
+                resource = session.execute(
+                    sqlalchemy.select(ScimResource).where(
+                        ScimResource.alias_email == target.email,
+                        ScimResource.deleted_at.is_(None),
+                    ).with_for_update().execution_options(
+                        populate_existing=True
+                    )
+                ).scalar_one_or_none()
+                if resource is not None and resource.deleted_at is None:
+                    raise ScimManagedAliasError(
+                        f'Alias {target.email} is exclusively SCIM managed'
+                    )
+                continue
+            else:
+                continue
+            if resource is not None:
+                mapped_deletes.append(resource)
+
+    for resource in mapped_deletes:
+        tombstone_scim_resource(
+            resource,
+            retain_subject=False,
+            scrub_user_authority=False,
+        )
+
+
+@sqlalchemy.event.listens_for(sqlalchemy.orm.Session, 'after_flush')
+def _clear_scim_alias_edit_permits(session, _flush_context):
+    session.info.pop('_scim_alias_edit_permits', None)
+
+
+@sqlalchemy.event.listens_for(sqlalchemy.orm.Session, 'after_rollback')
+def _clear_scim_alias_edit_permits_after_rollback(session):
+    session.info.pop('_scim_alias_edit_permits', None)
+
+
+@sqlalchemy.event.listens_for(sqlalchemy.orm.Session, 'after_soft_rollback')
+def _clear_scim_alias_edit_permits_after_soft_rollback(
+    session,
+    _previous_transaction,
+):
+    session.info.pop('_scim_alias_edit_permits', None)
+
+
+sqlalchemy.event.listen(
+    User,
+    'after_insert',
+    _create_scim_mapping_after_user_insert,
+)
 
 
 class MailuConfig:
@@ -1064,13 +2186,16 @@ class MailuConfig:
             return item
 
     def __init__(self):
-
-        # section-name -> attr
-        self._sections = {
-            name: getattr(self, name)
-            for name in dir(self)
-            if isinstance(getattr(self, name), self.MailuCollection)
-        }
+        # The class attributes below are collection templates. Each config
+        # object needs fresh collections: sharing the cached query results
+        # leaks detached ORM instances across app/session lifetimes.
+        self._sections = {}
+        for name in dir(type(self)):
+            template = getattr(type(self), name)
+            if isinstance(template, self.MailuCollection):
+                section = self.MailuCollection(template.model)
+                setattr(self, name, section)
+                self._sections[name] = section
 
         # known models
         self._models = tuple(section.model for section in self._sections.values())

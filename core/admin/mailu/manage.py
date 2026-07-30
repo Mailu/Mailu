@@ -339,6 +339,28 @@ def config_import(verbose=0, secrets=False, debug=False, quiet=False, color=Fals
     }
 
     schema = MailuSchema(only=MailuSchema.Meta.order, context=context)
+    absent = object()
+    dkim_state = [
+        (
+            domain,
+            domain.__dict__.get('_dkim_key', absent),
+            domain.__dict__.get('_dkim_key_on_disk', absent),
+        )
+        for domain in models.Domain.query.all()
+    ]
+
+    def rollback():
+        """Roll back SQL and unmapped Domain key cache state."""
+        db.session.rollback()
+        for domain, key, on_disk in dkim_state:
+            for name, value in (
+                ('_dkim_key', key),
+                ('_dkim_key_on_disk', on_disk),
+            ):
+                if value is absent:
+                    domain.__dict__.pop(name, None)
+                else:
+                    domain.__dict__[name] = value
 
     try:
         # import source
@@ -350,6 +372,7 @@ def config_import(verbose=0, secrets=False, debug=False, quiet=False, color=Fals
         # check for duplicate domain names
         config.check()
     except Exception as exc:
+        rollback()
         if msg := log.format_exception(exc):
             raise click.ClickException(msg) from exc
         raise
@@ -357,7 +380,7 @@ def config_import(verbose=0, secrets=False, debug=False, quiet=False, color=Fals
     # do not commit when running dry
     if dry_run:
         log.changes('Dry run. Not committing changes.')
-        db.session.rollback()
+        rollback()
     else:
         log.changes('Committing changes.')
         db.session.commit()

@@ -2139,13 +2139,16 @@ class MailuConfig:
             return item
 
     def __init__(self):
-
-        # section-name -> attr
-        self._sections = {
-            name: getattr(self, name)
-            for name in dir(self)
-            if isinstance(getattr(self, name), self.MailuCollection)
-        }
+        # The class attributes below are collection templates. Each config
+        # object needs fresh collections: sharing the cached query results
+        # leaks detached ORM instances across app/session lifetimes.
+        self._sections = {}
+        for name in dir(type(self)):
+            template = getattr(type(self), name)
+            if isinstance(template, self.MailuCollection):
+                section = self.MailuCollection(template.model)
+                setattr(self, name, section)
+                self._sections[name] = section
 
         # known models
         self._models = tuple(section.model for section in self._sections.values())

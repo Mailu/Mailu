@@ -511,7 +511,7 @@ jobs:
             -w /app \
             -e PYTHONDONTWRITEBYTECODE=1 \
             ghcr.io/${{ steps.string.outputs.lowercase }}/admin:${{ inputs.mailu_version }}-build \
-            sh -c "pip install --no-cache-dir pytest && python -m pytest -v -p no:cacheprovider tests/anonmail tests/address_registry_test.py tests/auth_generation_model_test.py tests/session_authority_test.py tests/scim_group_adopt_test.py tests/scim_identity_model_test.py tests/scim_identity_test.py tests/scim_test.py"
+            sh -c "pip install --no-cache-dir pytest && python -m pytest -v -p no:cacheprovider tests/anonmail tests/address_registry_test.py tests/auth_generation_model_test.py tests/config_import_reconcile_test.py tests/session_authority_test.py tests/scim_group_adopt_test.py tests/scim_identity_model_test.py tests/scim_identity_test.py tests/scim_test.py"
       - name: Run MariaDB SCIM graph race tests
         run: |
           docker run --rm --network host \

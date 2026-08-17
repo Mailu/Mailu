@@ -417,5 +417,18 @@ Requests to:
 
 Use ``PROXY_AUTH_LOGOUT_URL`` (default: unset) to redirect users to a specific URL after they have been logged out.
 
+.. _openid_connect_authentication:
+
+OpenID Connect authentication
+-----------------------------
+
+Set ``OIDC_ENABLED=true`` to enable web/admin login through an OpenID Connect provider. SMTP, IMAP, POP3, submission, and sieve authentication continue to use Mailu-managed credentials or tokens.
+
+Use ``OIDC_DISCOVERY_URL`` to point Mailu at the provider discovery document, or configure ``OIDC_AUTHORIZATION_ENDPOINT``, ``OIDC_TOKEN_ENDPOINT``, ``OIDC_USERINFO_ENDPOINT``, and ``OIDC_JWKS_URI`` explicitly. Configure ``OIDC_CLIENT_ID`` and ``OIDC_CLIENT_SECRET`` with the provider credentials. ``OIDC_REDIRECT_URI`` defaults to ``/sso/oidc/callback`` on the Mailu host, but may be set explicitly when Mailu is behind a reverse proxy.
+
+``OIDC_SCOPES`` defaults to ``openid email profile``. ``OIDC_EMAIL_CLAIM`` defaults to ``email``. ``OIDC_REQUIRE_EMAIL_VERIFIED`` defaults to ``true`` and requires the provider's UserInfo response to contain ``email_verified: true``. ``OIDC_JWT_ALGORITHMS`` defaults to ``EdDSA,ES256,RS256`` and controls the accepted asymmetric ID-token signing algorithms. Symmetric ``HS*`` algorithms are not supported because Mailu validates ID tokens from the provider JWKS. ``OIDC_JWKS_CACHE_SECONDS`` controls JWKS cache lifetime, and ``OIDC_CLOCK_SKEW_SECONDS`` controls JWT time-claim leeway.
+
+By default, OIDC login only maps to existing enabled Mailu users. Set ``OIDC_CREATE_USER=true`` to automatically create users in existing Mailu domains. ``OIDC_ALLOWED_DOMAINS`` can restrict which email domains are accepted for OIDC login and automatic creation.
+
 .. _`1972`: https://github.com/Mailu/Mailu/issues/1972
 .. _`2692`: https://github.com/Mailu/Mailu/issues/2692

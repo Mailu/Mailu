@@ -71,9 +71,8 @@ class TestAnonmailPostfixIntegration:
             # 4. Disable the alias and verify Postfix no longer sees it
             # We can use the PATCH /api/v1/alias/me/<alias> endpoint to disable it
             patch_payload = {'disabled': True}
-            # disable using the global API token (the /me endpoints require API token auth)
-            headers_api = {'Authorization': f'Bearer {app.config["API_TOKEN"]}'}
-            rv_patch = client.patch(f'/api/v1/alias/me/{alias_email}', json=patch_payload, headers=headers_api)
+            # disable as the owning user: /me acts on the caller's own aliases
+            rv_patch = client.patch(f'/api/v1/alias/me/{alias_email}', json=patch_payload, headers=headers)
             assert rv_patch.status_code == 200
 
             # Now Postfix should get a 404 for this alias

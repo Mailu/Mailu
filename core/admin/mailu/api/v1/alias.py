@@ -1,5 +1,4 @@
 import flask
-import flask_login
 from flask_restx import Resource, fields, marshal
 from . import api, response_fields
 from .. import common
@@ -175,11 +174,11 @@ class AliasWithDest(Resource):
 class AnonAliases(Resource):
     @alias.doc('list_anonaliases')
     @alias.marshal_with(alias_fields, as_list=True, skip_none=True)
-    @alias.doc(security='Bearer')
-    @common.api_token_authorization
+    @alias.doc(security='Authentication')
+    @common.user_token_authorization
     def get(self):
         """List anonymous aliases created by the current user"""
-        user_email = flask.g.user.email if hasattr(flask.g, 'user') else flask_login.current_user.email
+        user_email = flask.g.user.email
         return models.Alias.query.filter_by(owner_email=user_email).all()
 
 
@@ -188,13 +187,13 @@ class AnonAlias(Resource):
     @alias.doc('delete_anonalias')
     @alias.response(200, 'Success', response_fields)
     @alias.response(400, 'Input validation exception', response_fields)
-    @alias.doc(security='Bearer')
-    @common.api_token_authorization
+    @alias.doc(security='Authentication')
+    @common.user_token_authorization
     def delete(self, alias):
         """Permanently delete the specified alias"""
         if not validators.email(alias):
             return {'code': 400, 'message': f'Provided alias (email address) {alias} is not a valid email address'}, 400
-        user_email = flask.g.user.email if hasattr(flask.g, 'user') else flask_login.current_user.email
+        user_email = flask.g.user.email
         alias_found = models.Alias.query.filter_by(email=alias, owner_email=user_email).first()
         if not alias_found:
             return {'code': 404, 'message': f'Alias {alias} cannot be found'}, 404
@@ -205,13 +204,14 @@ class AnonAlias(Resource):
     @alias.expect(alias_fields_update)
     @alias.doc('update_anonalias')
     @alias.response(200, 'Success', response_fields)
-    @common.api_token_authorization
+    @alias.doc(security='Authentication')
+    @common.user_token_authorization
     def patch(self, alias):
         """Modify an alias (toggle disabled, update note/hostname/destination)"""
         data = api.payload or {}
         if not validators.email(alias):
             return {'code': 400, 'message': f'Provided alias (email address) {alias} is not a valid email address'}, 400
-        user_email = flask.g.user.email if hasattr(flask.g, 'user') else flask_login.current_user.email
+        user_email = flask.g.user.email
         alias_found = models.Alias.query.filter_by(email=alias, owner_email=user_email).first()
         if not alias_found:
             return {'code': 404, 'message': f'Alias {alias} cannot be found'}, 404

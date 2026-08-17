@@ -151,7 +151,7 @@ def get_server(protocol, authenticated=False):
         if authenticated:
             hostname, port = app.config['SMTP_ADDRESS'], 10025
         else:
-            hostname, port = app.config['SMTP_ADDRESS'], 25
+            hostname, port = utils.resolve(app.config['SMTP_ADDRESS'], True) if app.config["SUBNET6"] else app.config['SMTP_ADDRESS'], 25
     elif protocol == 'submission':
         hostname, port = app.config['SMTP_ADDRESS'], 10025
     elif protocol == 'lmtp':

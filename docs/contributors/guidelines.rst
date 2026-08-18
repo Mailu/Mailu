@@ -187,11 +187,19 @@ Coding
 Coding standards
 ````````````````
 
-All Python code should comply with PEP-8. We should review our code using
-pylint.
+All Python code should comply with PEP-8. To make sure all new code is
+compliant, the CI pipeline checks linting and formatting on all PRs.
+If the checks fail, the PR will not be merged until the issues are fixed.
+In order to make this easier as a developer, you can (optionally) run the
+linting and formatting checks locally before pushing your code by using
+pre-commit hooks. This can be done using `pre-commit`_ or the modern
+alternative `prek`_.
 
 We should comply with architectural recommendations from the Flask
 documentation.
+
+.. _`pre-commit`: https://pre-commit.com/
+.. _`prek`: https://prek.j178.dev/
 
 Models and database
 ```````````````````

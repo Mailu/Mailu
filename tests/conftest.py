@@ -31,8 +31,8 @@ def app(env_setup):
         models.Base.metadata.create_all(bind=models.db.engine)
         yield app
         models.db.session.remove()
-        models.db.drop_all()
         models.Base.metadata.drop_all(bind=models.db.engine)
+        models.db.drop_all()
 
 
 @pytest.fixture

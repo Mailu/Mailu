@@ -42,12 +42,19 @@ def alias_create(domain_name):
 @access.domain_admin(models.Alias, 'alias')
 def alias_edit(alias):
     alias = models.Alias.query.get(alias) or flask.abort(404)
+    domain_name = alias.domain_name
     form = forms.AliasForm(obj=alias)
     wtforms_components.read_only(form.localpart)
     form.localpart.validators = []
     if form.validate_on_submit():
         form.populate_obj(alias)
-        models.db.session.commit()
+        try:
+            models.db.session.commit()
+        except models.ScimManagedAliasError as exc:
+            models.db.session.rollback()
+            flask.flash(str(exc), 'error')
+            return flask.redirect(
+                flask.url_for('.alias_list', domain_name=domain_name))
         flask.flash('Alias %s updated' % alias)
         return flask.redirect(
             flask.url_for('.alias_list', domain_name=alias.domain.name))
@@ -60,12 +67,18 @@ def alias_edit(alias):
 @access.confirmation_required("delete {alias}")
 def alias_delete(alias):
     alias = models.Alias.query.get(alias) or flask.abort(404)
-    domain = alias.domain
-    models.db.session.delete(alias)
-    models.db.session.commit()
+    domain_name = alias.domain_name
+    try:
+        models.db.session.delete(alias)
+        models.db.session.commit()
+    except models.ScimManagedAliasError as exc:
+        models.db.session.rollback()
+        flask.flash(str(exc), 'error')
+        return flask.redirect(
+            flask.url_for('.alias_list', domain_name=domain_name))
     flask.flash('Alias %s deleted' % alias)
     return flask.redirect(
-        flask.url_for('.alias_list', domain_name=domain.name))
+        flask.url_for('.alias_list', domain_name=domain_name))
 
 
 @ui.route('/anonalias/list', methods=['GET'])

@@ -44,7 +44,7 @@ def check_credentials(user, password, ip, protocol=None, auth_port=None, source_
         return False
     # webmails
     if auth_port in WEBMAIL_PORTS and password.startswith('token-'):
-        if utils.verify_temp_token(user.get_id(), password):
+        if utils.verify_temp_token(user, password):
             app.logger.debug(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: success: webmail-token')
             return True
     if utils.is_app_token(password):

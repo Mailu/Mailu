@@ -42,6 +42,91 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 login = flask_login.LoginManager()
 login.login_view = "sso.login"
 
+INITIAL_AUTH_GENERATION = '0' * 32
+SESSION_AUTH_GENERATION_KEY = '_auth_generation'
+_MISSING_AUTH_GENERATION = object()
+
+
+def _auth_generation(user):
+    """Return a User generation, failing closed on corrupt database state."""
+    generation = user.auth_generation
+    if (
+        not isinstance(generation, str)
+        or len(generation) != 32
+        or any(character not in string.hexdigits for character in generation)
+    ):
+        raise RuntimeError(f'Invalid auth generation for User {user.email!r}')
+    return generation.lower()
+
+
+def _session_generation_matches(session_data, user, *, backfill_legacy=False):
+    """Whether a server-side session belongs to the User's current generation."""
+    current = _auth_generation(user)
+    stored = session_data.get(
+        SESSION_AUTH_GENERATION_KEY,
+        _MISSING_AUTH_GENERATION,
+    )
+    if stored is _MISSING_AUTH_GENERATION:
+        if current != INITIAL_AUTH_GENERATION:
+            return False
+        if backfill_legacy:
+            session_data[SESSION_AUTH_GENERATION_KEY] = current
+        return True
+    return isinstance(stored, str) and stored == current
+
+
+def _invalidate_current_session(reason, user_id=None):
+    """Fail closed even when physical session-store deletion fails."""
+    try:
+        flask.session.destroy()
+    except Exception:
+        flask.current_app.logger.exception(
+            'Session cleanup failed after authority rejection: '
+            'reason=%s user=%r',
+            reason,
+            user_id,
+        )
+        # Do not let a Redis failure preserve authenticated state in the
+        # in-memory request session or write it back during response handling.
+        flask.session.pop('_user_id', None)
+        flask.session.pop(SESSION_AUTH_GENERATION_KEY, None)
+        flask.session.pop('_fresh', None)
+        flask.session.pop('_id', None)
+        flask.session.pop('_remember', None)
+        flask.session.pop('_remember_seconds', None)
+    return None
+
+
+def load_session_user(user_id):
+    """Flask-Login loader with SQL-backed session authority."""
+    # Import locally: models imports this module for password/session helpers.
+    from mailu import models
+
+    user = models.User.get(user_id)
+    if user is None:
+        return _invalidate_current_session('missing_user', user_id)
+    if not user.enabled:
+        return _invalidate_current_session('disabled', user_id)
+    if not _session_generation_matches(
+        flask.session,
+        user,
+        backfill_legacy=True,
+    ):
+        return _invalidate_current_session('generation_mismatch', user_id)
+    return user
+
+
+def login_user(user, **kwargs):
+    """Issue a Flask-Login session bound to the authenticated User generation."""
+    if not user.enabled:
+        return False
+    generation = _auth_generation(user)
+    if not flask_login.login_user(user, **kwargs):
+        return False
+    flask.session[SESSION_AUTH_GENERATION_KEY] = generation
+    return True
+
+
 @login.unauthorized_handler
 def handle_needs_login():
     """ redirect unauthorized requests to login page """
@@ -172,16 +257,16 @@ class DictStore:
 
     def get(self, key):
         """ load item from store. """
-        return self.dict[key]
+        return self.dict[want_bytes(key)]
 
     def put(self, key, value, ttl=None):
         """ save item to store. """
-        self.dict[key] = value
+        self.dict[want_bytes(key)] = value
 
     def delete(self, key):
         """ delete item from store. """
         try:
-            del self.dict[key]
+            del self.dict[want_bytes(key)]
         except KeyError:
             pass
 
@@ -189,6 +274,7 @@ class DictStore:
         """ return list of keys starting with prefix """
         if prefix is None:
             return list(self.dict.keys())
+        prefix = want_bytes(prefix)
         return [key for key in self.dict if key.startswith(prefix)]
 
 class MailuSession(CallbackDict, SessionMixin):
@@ -459,7 +545,7 @@ class MailuSessionExtension:
             keep: keep listed sessions
         """
 
-        keep = keep or set()
+        keep = {want_bytes(key) for key in (keep or set())}
         app = app or flask.current_app
 
         prefix = None if uid is None else app.session_config.gen_uid(uid)
@@ -467,7 +553,11 @@ class MailuSessionExtension:
         count = 0
         for key in app.session_store.list(prefix):
             if key not in keep and not key.startswith(b'token-'):
-                app.session_store.delete(key)
+                stored_session = MailuSession(key, app)
+                if stored_session.saved:
+                    stored_session.delete()
+                else:
+                    app.session_store.delete(key)
                 count += 1
 
         return count
@@ -502,16 +592,117 @@ class MailuSessionExtension:
 cleaned = Value('i', False)
 session = MailuSessionExtension()
 
-# this is used by the webmail to authenticate IMAP/SMTP
-def verify_temp_token(email, token):
+
+def prune_sessions_best_effort(uid):
+    """Physically remove stale sessions after SQL authority has committed."""
     try:
-        if token.startswith('token-'):
+        count = MailuSessionExtension.prune_sessions(uid=uid)
+    except Exception:
+        flask.current_app.logger.exception(
+            'Physical session cleanup failed after authority was revoked: '
+            'user=%r authority_revoked=true',
+            uid,
+        )
+        return False
+    flask.current_app.logger.info(
+        'Physical session cleanup completed: user=%r deleted=%d',
+        uid,
+        count,
+    )
+    return True
+
+
+def finish_session_authority_change(
+    user,
+    *,
+    preserve_current=False,
+    expected_generation=None,
+    uid=None,
+):
+    """Run non-authoritative session cleanup after a successful SQL commit.
+
+    Callers must commit the password/enablement change and auth generation
+    before entering this helper.
+    """
+    uid = uid or user.email
+    if (
+        preserve_current
+        and flask.has_request_context()
+        and flask.session.get('_user_id') == uid
+    ):
+        try:
+            current_generation = _auth_generation(user)
+            expected_generation = (
+                current_generation
+                if expected_generation is None
+                else expected_generation
+            )
+            if (
+                not user.enabled
+                or current_generation != expected_generation
+            ):
+                _invalidate_current_session(
+                    'post_commit_generation_changed',
+                    uid,
+                )
+                return prune_sessions_best_effort(uid)
+            # The replacement session is not in the store yet, so the
+            # subsequent prefix prune cannot delete it.
+            flask.session.regenerate()
+            if not login_user(user):
+                _invalidate_current_session('post_commit_rebind_failed', uid)
+        except Exception:
+            flask.current_app.logger.exception(
+                'Current session could not be rebound after authority change: '
+                'user=%r',
+                uid,
+            )
+            _invalidate_current_session('post_commit_rebind_failed', uid)
+    return prune_sessions_best_effort(uid)
+
+
+# this is used by the webmail to authenticate IMAP/SMTP
+def verify_temp_token(user, token):
+    """Validate a webmail token against its User and session generation."""
+    backing_session = None
+    try:
+        if user and user.enabled and token.startswith('token-'):
             if sessid := app.session_store.get(token):
-                session = MailuSession(sessid, app)
-                if session.get('_user_id', '') == email:
+                backing_session = MailuSession(sessid, app)
+                had_generation = (
+                    SESSION_AUTH_GENERATION_KEY in backing_session
+                )
+                if (
+                    backing_session.get('_user_id', '') == user.email
+                    and _session_generation_matches(
+                        backing_session,
+                        user,
+                        backfill_legacy=True,
+                    )
+                ):
+                    if not had_generation:
+                        backing_session.save()
                     return True
-    except:
-        pass
+    except KeyError:
+        return False
+    except Exception:
+        app.logger.exception(
+            'Temporary webmail token validation failed closed: user=%r',
+            getattr(user, 'email', None),
+        )
+        return False
+
+    # A mismatch is authoritative. Physical deletion remains best effort.
+    try:
+        if backing_session is not None:
+            backing_session.delete()
+        app.session_store.delete(token)
+    except Exception:
+        app.logger.exception(
+            'Stale temporary webmail token cleanup failed: user=%r',
+            getattr(user, 'email', None),
+        )
+    return False
 
 def gen_temp_token(email, session):
     token = session.get('webmail_token', 'token-'+secrets.token_urlsafe())

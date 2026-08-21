@@ -69,6 +69,9 @@ class Aliases(Resource):
         alias_found = models.Alias.query.filter_by(email = data['email']).first()
         if alias_found:
           return { 'code': 409, 'message': f'Duplicate alias {data["email"]}'}, 409
+        user_found = models.User.query.filter_by(email=data['email']).first()
+        if user_found:
+          return { 'code': 409, 'message': f'Email address {data["email"]} is already used'}, 409
 
         alias_model = models.Alias(email=data["email"],destination=data['destination'])
         if 'comment' in data:
@@ -76,7 +79,11 @@ class Aliases(Resource):
         if 'wildcard' in data:
           alias_model.wildcard = data['wildcard']
         db.session.add(alias_model)
-        db.session.commit()
+        try:
+          db.session.commit()
+        except models.AddressConflict:
+          db.session.rollback()
+          return { 'code': 409, 'message': f'Email address {data["email"]} is already used'}, 409
 
         return {'code': 200, 'message': f'Alias {data["email"]} to destination(s) {data["destination"]} has been created'}, 200
 
@@ -105,6 +112,7 @@ class Alias(Resource):
     @alias.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @alias.response(404, 'Alias not found', response_fields)
     @alias.response(400, 'Input validation exception', response_fields)
+    @alias.response(409, 'Alias is managed by SCIM', response_fields)
     @alias.doc(security='Bearer')
     @common.api_token_authorization
     def patch(self, alias):
@@ -116,19 +124,24 @@ class Alias(Resource):
       alias_found = models.Alias.query.filter_by(email = alias).first()
       if alias_found is None:
         return { 'code': 404, 'message': f'Alias {alias} cannot be found'}, 404
-      if 'comment' in data:
-        alias_found.comment = data['comment']
       if 'destination' in data:
-        alias_found.destination = data['destination']
         for dest in data['destination']:
             if not validators.email(dest):
                 return { 'code': 400, 'message': f'Provided destination email address {dest} is not a valid email address'}, 400
             elif models.User.query.filter_by(email=dest).first() is None:
                 return { 'code': 404, 'message': f'Provided destination email address {dest} does not exist'}, 404
+      if 'comment' in data:
+        alias_found.comment = data['comment']
+      if 'destination' in data:
+        alias_found.destination = data['destination']
       if 'wildcard' in data:
         alias_found.wildcard = data['wildcard']
       db.session.add(alias_found)
-      db.session.commit()
+      try:
+        db.session.commit()
+      except models.ScimManagedAliasError as exc:
+        db.session.rollback()
+        return {'code': 409, 'message': str(exc)}, 409
       return {'code': 200, 'message': f'Alias {alias} has been updated'}
 
     @alias.doc('delete_alias')
@@ -136,6 +149,7 @@ class Alias(Resource):
     @alias.response(400, 'Input validation exception', response_fields)
     @alias.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @alias.response(404, 'Alias not found', response_fields)
+    @alias.response(409, 'Alias is managed by SCIM', response_fields)
     @alias.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, alias):
@@ -145,8 +159,12 @@ class Alias(Resource):
       alias_found = models.Alias.query.filter_by(email = alias).first()
       if alias_found is None:
         return { 'code': 404, 'message': f'Alias {alias} cannot be found'}, 404
-      db.session.delete(alias_found)
-      db.session.commit()
+      try:
+        db.session.delete(alias_found)
+        db.session.commit()
+      except models.ScimManagedAliasError as exc:
+        db.session.rollback()
+        return {'code': 409, 'message': str(exc)}, 409
       return {'code': 200, 'message': f'Alias {alias} has been deleted'}, 200
 
 @alias.route('/destination/<string:domain>')

@@ -200,6 +200,7 @@ class Domain(Resource):
     @dom.response(400, 'Input validation exception', response_fields)
     @dom.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
     @dom.response(404, 'Domain not found', response_fields)
+    @dom.response(409, 'Domain contains a SCIM-managed Alias', response_fields)
     @dom.doc(security='Bearer')
     @common.api_token_authorization
     def delete(self, domain):
@@ -209,8 +210,12 @@ class Domain(Resource):
         domain_found = models.Domain.query.get(domain)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
-        db.session.delete(domain_found)
-        db.session.commit()
+        try:
+            db.session.delete(domain_found)
+            db.session.commit()
+        except models.ScimManagedAliasError as exc:
+            db.session.rollback()
+            return {'code': 409, 'message': str(exc)}, 409
         return {'code': 200, 'message': f'Domain {domain} has been deleted'}, 200
 
 @dom.route('/<domain>/dkim')

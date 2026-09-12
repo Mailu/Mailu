@@ -1,0 +1,1 @@
+Don't configure Tika when ``FULL_TEXT_SEARCH_ATTACHMENTS`` is set to ``False``. The dovecot template treated any non-empty string as true, so the literal string ``False`` enabled ``fts_tika`` and pointed dovecot at a container that isn't running, which broke server-side search entirely.

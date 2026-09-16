@@ -23,6 +23,7 @@ def start_podop():
 # Actual startup script
 for dovecot_file in glob.glob("/conf/*.conf"):
     conf.jinja(dovecot_file, os.environ, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))
+conf.jinja("/conf/login.lua", os.environ, "/etc/dovecot/login.lua")
 
 os.makedirs("/conf/bin", exist_ok=True)
 for script_file in glob.glob("/conf/*.script"):

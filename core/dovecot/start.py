@@ -8,10 +8,6 @@ from podop import run_server
 from socrate import system, conf
 
 system.set_env(log_filters=[
-    # dovecot 2.3 wording
-    rb'Error\: SSL context initialization failed, disabling SSL\: Can\'t load SSL certificate \(ssl_cert setting\)\: The certificate is empty$',
-    # dovecot 2.4 renamed ssl_cert to ssl_server_cert_file and wraps the
-    # reason in "Couldn't initialize SSL server context"
     rb'Error\: SSL context initialization failed, disabling SSL\: Couldn\'t initialize SSL server context\: Can\'t load SSL certificate \(ssl_server_cert_file setting\)\: The certificate is empty$',
 ])
 

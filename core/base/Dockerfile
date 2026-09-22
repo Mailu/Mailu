@@ -3,10 +3,7 @@
 # base system image (intermediate)
 # Note when updating the alpine tag, first manually run the workflow .github/workflows/mirror.yml.
 # Just run the workflow with the tag that must be synchronised.
-# This points at docker.io because ghcr.io/mailu/alpine:3.22.5 does not exist
-# yet - run the mirror workflow for this tag and change the line back before
-# merging.
-ARG DISTRO=docker.io/alpine:3.22.5
+ARG DISTRO=ghcr.io/mailu/alpine:3.22.6
 FROM $DISTRO as system
 
 ENV TZ=Etc/UTC LANG=C.UTF-8

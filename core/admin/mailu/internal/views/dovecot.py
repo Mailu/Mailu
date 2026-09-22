@@ -41,13 +41,7 @@ def dovecot_userdb_dict(user_email):
         quota = models.User.query.filter(models.User.email==user_email).with_entities(models.User.quota_bytes).one_or_none() or flask.abort(404)
     except sqlalchemy.exc.StatementError as exc:
         flask.abort(404)
-    # Both names are sent so that this endpoint serves either dovecot: 2.3
-    # reads quota_rule and has no quota_storage_size, 2.4 dropped quota_rule
-    # (the settings are quota_storage_size and quota_message_count, see
-    # src/plugins/quota/quota-settings.c) and ignores it. Each version takes
-    # the field it knows and passes over the other.
     return flask.jsonify({
-        "quota_rule": f"*:bytes={quota[0]}",
         "quota_storage_size": str(quota[0]),
     })
 

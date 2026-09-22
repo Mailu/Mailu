@@ -1,0 +1,1 @@
+Honour ``DEFER_ON_TLS_ERROR=false`` (and ``no``) in the postfix container: the setting was rendered as a truthiness test on a raw string, so any non-empty value - including ``false`` - enabled deferral on incomplete TLS policies instead of disabling it.

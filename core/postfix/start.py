@@ -46,7 +46,14 @@ def is_valid_postconf_line(line):
             and not line == ''
 
 # Actual startup script
-os.environ['DEFER_ON_TLS_ERROR'] = os.environ['DEFER_ON_TLS_ERROR'] if 'DEFER_ON_TLS_ERROR' in os.environ else 'True'
+# Normalize DEFER_ON_TLS_ERROR to a value the postfix templates can test for truthiness.
+# They are rendered from the raw environment strings (see the jinja calls below), so a
+# value like "false" - a non-empty string, and therefore truthy - would *enable*
+# deferral instead of disabling it. Empty string means disabled, anything else enabled.
+if os.environ.get('DEFER_ON_TLS_ERROR', 'True').lower() in ('false', 'no', ''):
+    os.environ['DEFER_ON_TLS_ERROR'] = ''
+else:
+    os.environ['DEFER_ON_TLS_ERROR'] = 'True'
 
 # Postfix requires IPv6 addresses to be wrapped in square brackets
 if 'RELAYNETS' in os.environ:

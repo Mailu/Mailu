@@ -96,8 +96,8 @@ highly recommended if you are using a relayhost that supports TLS but discourage
 otherwise. ``DEFER_ON_TLS_ERROR`` (default: True) controls whether incomplete
 policies (DANE without DNSSEC or "testing" MTA-STS policies) will be taken into
 account and whether emails will be deferred if the additional checks enforced by
-those policies fail. Set it to ``False`` (or ``no``) to fall back to opportunistic
-TLS and deliver such mail anyway.
+those policies fail. Set it to ``False`` or ``no`` (case-insensitive) to fall back
+to opportunistic TLS and deliver such mail anyway.
 
 Similarly by default nginx uses "opportunistic TLS" for inbound mail. This can be changed
 by setting ``INBOUND_TLS_ENFORCE`` to ``True``. Please note that this is forbidden for

@@ -1,8 +1,9 @@
 from mailu.internal import internal
 
+from xml.etree import ElementTree as ET
+from xml.sax.saxutils import escape, quoteattr
 from flask import current_app as app
 import flask
-import xmltodict
 
 @internal.route("/autoconfig/mozilla")
 def autoconfig_mozilla():
@@ -51,46 +52,71 @@ def autoconfig_microsoft_json():
     else:
         return flask.abort(404)
 
-@internal.route("/autoconfig/microsoft", methods=['POST'])
+@internal.route("/autoconfig/microsoft", methods=["POST"])
 def autoconfig_microsoft():
-    # https://docs.microsoft.com/en-us/previous-versions/office/office-2010/cc511507(v=office.14)?redirectedfrom=MSDN#Anchor_3
-    hostname = app.config['HOSTNAME']
+    hostname = escape(app.config["HOSTNAME"])
+
     try:
-        xmlRequest = (flask.request.data).decode("utf-8")
-        xml = xmltodict.parse(xmlRequest[xmlRequest.find('<'):xmlRequest.rfind('>')+1])
-        schema = xml['Autodiscover']['Request']['AcceptableResponseSchema']
-        if not schema.startswith('http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006'):
+        root = ET.fromstring(flask.request.data)
+
+        # Autodiscover requests normally use this namespace, so strip
+        # namespaces when looking for the two Request children we need.
+        request = next(
+            element
+            for element in root
+            if element.tag.rsplit("}", 1)[-1] == "Request"
+        )
+
+        schema_element = next(
+            element
+            for element in request
+            if element.tag.rsplit("}", 1)[-1] == "AcceptableResponseSchema"
+        )
+        email_element = next(
+            element
+            for element in request
+            if element.tag.rsplit("}", 1)[-1] == "EMailAddress"
+        )
+
+        schema = schema_element.text or ""
+        email = email_element.text or ""
+        if not schema.startswith(
+            "http://schemas.microsoft.com/exchange/autodiscover/"
+            "outlook/responseschema/2006"
+        ):
             return flask.abort(404)
-        email = xml['Autodiscover']['Request']['EMailAddress']
-        xml = f'''<?xml version="1.0" encoding="utf-8" ?>
-    <Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006">
-        <Response xmlns="{schema}">
-            <Account>
-            <AccountType>email</AccountType>
-            <Action>settings</Action>
-            <Protocol>
-                <Type>IMAP</Type>
-                <Server>{hostname}</Server>
-                <Port>993</Port>
-                <LoginName>{email}</LoginName>
-                <DomainRequired>on</DomainRequired>
-                <SPA>off</SPA>
-                <SSL>on</SSL>
-            </Protocol>
-            <Protocol>
-                <Type>SMTP</Type>
-                <Server>{hostname}</Server>
-                <Port>465</Port>
-                <LoginName>{email}</LoginName>
-                <DomainRequired>on</DomainRequired>
-                <SPA>off</SPA>
-                <SSL>on</SSL>
-                </Protocol>
-            </Account>
-        </Response>
-    </Autodiscover>'''
-        return flask.Response(xml, mimetype='text/xml', status=200)
-    except:
+
+        schema = quoteattr(schema)
+        email = escape(email)
+        xml = f"""<?xml version="1.0" encoding="utf-8" ?>
+<Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006">
+    <Response xmlns={schema}>
+        <Account>
+        <AccountType>email</AccountType>
+        <Action>settings</Action>
+        <Protocol>
+            <Type>IMAP</Type>
+            <Server>{hostname}</Server>
+            <Port>993</Port>
+            <LoginName>{email}</LoginName>
+            <DomainRequired>on</DomainRequired>
+            <SPA>off</SPA>
+            <SSL>on</SSL>
+        </Protocol>
+        <Protocol>
+            <Type>SMTP</Type>
+            <Server>{hostname}</Server>
+            <Port>465</Port>
+            <LoginName>{email}</LoginName>
+            <DomainRequired>on</DomainRequired>
+            <SPA>off</SPA>
+            <SSL>on</SSL>
+        </Protocol>
+        </Account>
+    </Response>
+</Autodiscover>"""
+        return flask.Response(xml, mimetype="text/xml", status=200)
+    except (ET.ParseError, KeyError, StopIteration):
         return flask.abort(400)
 
 @internal.route("/autoconfig/apple")

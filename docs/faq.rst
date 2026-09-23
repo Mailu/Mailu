@@ -254,16 +254,46 @@ correct syntax. The following file names will be taken as override configuration
    - For both ``postfix.cf`` and ``postfix.master``, you need to put one configuration per line, as they are fed line-by-line
      to postfix.
    - ``logrotate.conf`` as ``$ROOT/overrides/postfix/logrotate.conf`` - Replaces the logrotate.conf file used for rotating ``POSTFIX_LOG_FILE``.
-- `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory.
+- `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory. This file must be written in the
+  Dovecot 2.4 syntax, see :ref:`dovecot24-override-label`.
 - `Nginx`_ :
    - All ``*.conf`` files in the ``nginx`` sub-directory.
-   - ``proxy.conf`` in the ``nginx/dovecot`` sub-directory.
+   - ``proxy.conf`` in the ``nginx/dovecot`` sub-directory. This one configures the dovecot mail
+     proxy running inside front and must be written in the Dovecot 2.4 syntax as well, see
+     :ref:`dovecot24-override-label`.
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
 - `Roundcube`_ - All ``*.inc.php`` files in the ``roundcube`` sub directory.
 
 To override the root location (``/``) in Nginx ``WEBROOT_REDIRECT`` needs to be set to ``none`` in the env file (see :ref:`web settings <web_settings>`).
 
 *Issue reference:* `206`_, `1368`_.
+
+.. _dovecot24-override-label:
+
+My Dovecot override stopped working after upgrading
+```````````````````````````````````````````````````
+
+Mailu moved from Dovecot 2.3 to Dovecot 2.4. The two do not share a configuration syntax:
+``plugin { }`` is gone, most plugin settings moved into named sections, and a number of settings
+were renamed or had their meaning inverted. Mailu's own configuration was rewritten for 2.4, but
+an override file is included unchanged, so one written for 2.3 makes the container fail to start.
+This affects both dovecot overrides - ``$ROOT/overrides/dovecot/dovecot.conf`` for the imap
+container and ``$ROOT/overrides/nginx/dovecot/proxy.conf`` for the mail proxy inside front.
+Dovecot names the offending line when it refuses to start:
+
+.. code-block:: bash
+
+    doveconf: Fatal: Error in configuration file /overrides/dovecot.conf line 3: Unknown setting: fts_enforced
+
+To convert an existing override:
+
+1. Feed it through the `Dovecot config upgrader`_, which turns a 2.3 configuration into its 2.4
+   equivalent.
+2. Check the result against the `Dovecot 2.3 to 2.4 upgrade guide`_. The upgrader is explicitly
+   not perfect - it drops settings it has no rule for and warns about others that do have an
+   equivalent - so do not apply its output unread.
+3. Drop the ``dovecot_config_version`` line if the upgrader added one. Mailu's own configuration
+   already declares it and it may only be set once.
 
 I want to integrate Nextcloud 15 (and newer) with Mailu
 ```````````````````````````````````````````````````````
@@ -347,7 +377,9 @@ How do I use webdav (radicale)?
 
 
 .. _`Postfix`:   http://www.postfix.org/postconf.5.html
-.. _`Dovecot`:   https://doc.dovecot.org/configuration_manual/config_file/config_file_syntax/
+.. _`Dovecot`:   https://doc.dovecot.org/latest/core/settings/syntax.html
+.. _`Dovecot config upgrader`: https://dovecot.org/upgrader/
+.. _`Dovecot 2.3 to 2.4 upgrade guide`: https://doc.dovecot.org/latest/installation/upgrade/2.3-to-2.4.html
 .. _`NGINX`:     https://nginx.org/en/docs/
 .. _`Rspamd`:    https://www.rspamd.com/doc/configuration/index.html
 .. _`Roundcube`: https://github.com/roundcube/roundcubemail/wiki/Configuration#customize-the-look

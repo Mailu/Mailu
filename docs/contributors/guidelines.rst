@@ -97,8 +97,10 @@ life-cycle management.
 
 Anything that is not static, i.e. able to change at runtime, either due to
 configuration in the admin UI or user behavior, should take advantage of the
-admin API. The `podop` package binds mail specific software (Postfix and Dovecot
-at the moment) to the admin API, other containers should use specific API calls.
+admin API. The `podop` package binds mail specific software to the admin API
+(Postfix, and Dovecot's quota and sieve dictionaries); Dovecot's authentication
+queries the admin API directly from a lua script. Other containers should use
+specific API calls.
 
 What traffic should go through the nginx container
 ``````````````````````````````````````````````````

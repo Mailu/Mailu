@@ -8,8 +8,8 @@ function script_deinit()
 end
 
 local http_client = dovecot.http.client {
-    timeout = 2000;
-    max_attempts = 3;
+    request_timeout = "2s";
+    request_max_attempts = 3;
 }
 
 function urlEncode(str)
@@ -27,9 +27,9 @@ function setRequestHeadersFromDovecotRequest(auth_request, req)
         local password = urlEncode(req.password)
         auth_request:add_header('Auth-Pass', password)
     end
-    if req.service ~= nil
+    if req.protocol ~= nil
     then
-        auth_request:add_header('Auth-Protocol', req.service)
+        auth_request:add_header('Auth-Protocol', req.protocol)
     end
 
     if req.remote_ip ~= nil
@@ -52,23 +52,6 @@ function setRequestHeadersFromDovecotRequest(auth_request, req)
     end
 end
 
-function formatJsonToKeyValueString(json_str)
-    local data = json.decode(json_str)
-    local result = {}
-
-    for key, value in pairs(data) do
-        local formatted_value
-        if value == nil then
-            formatted_value = ""
-        else
-            formatted_value = tostring(value)
-        end
-        table.insert(result, key .. "=" .. formatted_value)
-    end
-
-    return table.concat(result, " ")
-end
-
 function auth_passdb_lookup(req)
     local auth_request = http_client:request {
         url = "http://{{ ADMIN_ADDRESS }}:8080/internal/dovecot/passdb/" .. urlEncode(req.user);
@@ -79,7 +62,7 @@ function auth_passdb_lookup(req)
 
     if resp_status == 200
     then
-        return dovecot.auth.PASSDB_RESULT_OK, formatJsonToKeyValueString(auth_response:payload())
+        return dovecot.auth.PASSDB_RESULT_OK, json.decode(auth_response:payload())
     else
         return dovecot.auth.PASSDB_RESULT_USER_UNKNOWN, ""
     end
@@ -95,10 +78,7 @@ function auth_userdb_lookup(req)
 
     if resp_status == 200
     then
-        local json_body = auth_response:payload()
-        local result_str = formatJsonToKeyValueString(json_body)
-
-        return dovecot.auth.USERDB_RESULT_OK, result_str
+        return dovecot.auth.USERDB_RESULT_OK, json.decode(auth_response:payload())
     else
         return dovecot.auth.USERDB_RESULT_USER_UNKNOWN, ""
     end
@@ -109,6 +89,12 @@ function auth_userdb_iterate()
         url = "http://{{ ADMIN_ADDRESS }}:8080/internal/dovecot/userdb/";
     }
     local auth_response = auth_request:submit()
+    local resp_status = auth_response:status()
 
-    return json.decode(auth_response:payload())
+    if resp_status == 200
+    then
+        return json.decode(auth_response:payload())
+    else
+        return {}
+    end
 end

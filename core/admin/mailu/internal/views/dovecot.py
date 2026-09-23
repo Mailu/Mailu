@@ -42,7 +42,7 @@ def dovecot_userdb_dict(user_email):
     except sqlalchemy.exc.StatementError as exc:
         flask.abort(404)
     return flask.jsonify({
-        "quota_rule": f"*:bytes={quota[0]}"
+        "quota_storage_size": str(quota[0]),
     })
 
 

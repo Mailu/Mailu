@@ -139,13 +139,13 @@ their DMARC policy records. Reports are sent at 2 AM daily for the previous day'
 email traffic from ``POSTMASTER@DOMAIN``.
 
 The ``FULL_TEXT_SEARCH`` variable (default: 'en') is a comma separated list of
-language codes as defined on `fts_languages`_. This feature can be disabled
-(e.g. for performance reasons) by setting the variable to ``off``.
+ISO 639-1 language codes, as listed under `Dovecot languages`_. This feature can
+be disabled (e.g. for performance reasons) by setting the variable to ``off``.
 
 You can set a global ``DEFAULT_QUOTA`` to be used for mailboxes when the domain has
 no specific quota configured.
 
-.. _`fts_languages`: https://doc.dovecot.org/settings/plugin/fts-plugin/#fts-languages
+.. _`Dovecot languages`: https://doc.dovecot.org/latest/core/plugins/fts.html
 
 .. _web_settings:
 
@@ -266,12 +266,14 @@ c) silently drop emails; moreover, modern servers will benefit from various down
 (DOWNGRD, RFC7507) making the security argument mostly a moot point.
 
 The ``COMPRESSION`` (default: unset) setting controls whether emails are stored compressed at rest on disk.
-Valid values are ``gz``, ``bz2`` or ``zstd`` and additional settings can be configured via
-``COMPRESSION_LEVEL``, see `zlib_save_level`_ for accepted values. If the underlying filesystem
+Valid values are ``gz``, ``bz2`` or ``zstd``. The compression strength is set with
+``COMPRESSION_LEVEL``, whose meaning depends on the method: for ``gz`` it is the zlib level (0 to 9),
+for ``zstd`` the zstd level, and for ``bz2`` it is the block size in units of 100k (1 to 9). See
+`mail_compress`_ for details. If the underlying filesystem
 supports compression natively you should use it instead of this setting as it will be more efficient
 and will improve compatibility with 3rd party tools.
 
-.. _`zlib_save_level`: https://doc.dovecot.org/settings/plugin/zlib-plugin/#plugin_setting-zlib-zlib_save_level
+.. _`mail_compress`: https://doc.dovecot.org/latest/core/plugins/mail_compress.html
 
 .. _reverse_proxy_headers:
 

@@ -181,11 +181,21 @@ def run_process_and_forward_output(cmd):
     stderr_thread.daemon = True
     stderr_thread.start()
 
+    forwarding_warned = False
     while True:
         rc = process.poll()
-        if rc is not None or threading.active_count() < 3:
+        if rc is not None:
             sys.stdout.flush()
             sys.stderr.flush()
             os._exit(rc if rc > 0 else 143)
+
+        if not forwarding_warned and threading.active_count() < 3:
+            # A forwarding thread returned, which happens when its pipe hits
+            # EOF. Dovecot 2.4 closes the inherited stdout during startup, so
+            # this is normal and must not tear down a process that is still
+            # running. It also used to reach os._exit() with rc still None,
+            # which raised TypeError while trying to report the failure.
+            log.warning("stopped forwarding output of one stream")
+            forwarding_warned = True
 
         time.sleep(1)

@@ -70,8 +70,13 @@ def domain_edit(domain_name):
 @access.confirmation_required("delete {domain_name}")
 def domain_delete(domain_name):
     domain = models.Domain.query.get(domain_name) or flask.abort(404)
-    models.db.session.delete(domain)
-    models.db.session.commit()
+    try:
+        models.db.session.delete(domain)
+        models.db.session.commit()
+    except models.ScimManagedAliasError as exc:
+        models.db.session.rollback()
+        flask.flash(str(exc), 'error')
+        return flask.redirect(flask.url_for('.domain_list'))
     flask.flash('Domain %s deleted' % domain)
     return flask.redirect(flask.url_for('.domain_list'))
 

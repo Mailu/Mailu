@@ -8,6 +8,8 @@
 #    Second Username of docker login for logging in docker for pulling images (higher pull rate limit)
 # ${{ secrets.Docker_Password2 }}
 #    Second Password of docker login for logging in docker for pulling images (higher pull rate limit)
+# ${{ secrets.Release_Token }}
+#    Token with contents and workflows write access, used to create release tags.
 ################################################
 
 name: build-test-deploy
@@ -53,6 +55,8 @@ on:
       Docker_Login2:
         required: false
       Docker_Password2:
+        required: false
+      Release_Token:
         required: false
 
   workflow_dispatch:
@@ -615,7 +619,7 @@ jobs:
       - name: Create tag for branch x.y.
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.Release_Token || secrets.GITHUB_TOKEN }}
         run: |
           commit=$(/usr/bin/git rev-parse HEAD)
           printf 'git tag %s %s\n' "$PINNED_MAILU_VERSION" "$commit"

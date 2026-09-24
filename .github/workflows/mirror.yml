@@ -18,7 +18,10 @@ permissions:
 jobs:
 # mirror alpine image
   mirror-image-alpine:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Helper to convert docker org to lowercase
         id: string

@@ -26,15 +26,15 @@ def postfix_dane_map(domain_name):
 def postfix_mailbox_domain(domain_name):
     if re.match(r'^\[.*\]$', domain_name):
         return flask.abort(404)
-    domain = models.Domain.query.get(domain_name) or \
-             models.Alternative.query.get(domain_name) or \
+    domain = models.db.session.get(models.Domain, domain_name) or \
+             models.db.session.get(models.Alternative, domain_name) or \
              flask.abort(404)
     return flask.jsonify(domain.name)
 
 
 @internal.route("/postfix/mailbox/<path:email>")
 def postfix_mailbox_map(email):
-    user = models.User.query.get(email) or flask.abort(404)
+    user = models.db.session.get(models.User, email) or flask.abort(404)
     return flask.jsonify(user.email)
 
 
@@ -54,7 +54,7 @@ def postfix_transport(email):
     if email == '*' or re.match(r'(^|.*@)\[.*\]$', email):
         return flask.abort(404)
     _, domain_name = models.Email.resolve_domain(email)
-    relay = models.Relay.query.get(domain_name) or flask.abort(404)
+    relay = models.db.session.get(models.Relay, domain_name) or flask.abort(404)
     target = relay.smtp.lower()
     port = None
     use_lmtp = False
@@ -143,7 +143,7 @@ def postfix_sender_map(sender):
         localpart, domain_name = models.Email.resolve_domain(sender)
     except Exception as error:
         return flask.abort(404)
-    if models.Domain.query.get(domain_name):
+    if models.db.session.get(models.Domain, domain_name):
         return flask.abort(404)
     return flask.jsonify(srs.forward(sender, domain))
 

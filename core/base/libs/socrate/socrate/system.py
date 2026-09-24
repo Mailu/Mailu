@@ -193,8 +193,7 @@ def run_process_and_forward_output(cmd):
             # A forwarding thread returned, which happens when its pipe hits
             # EOF. Dovecot 2.4 closes the inherited stdout during startup, so
             # this is normal and must not tear down a process that is still
-            # running. It also used to reach os._exit() with rc still None,
-            # which raised TypeError while trying to report the failure.
+            # running.
             log.warning("stopped forwarding output of one stream")
             forwarding_warned = True
 

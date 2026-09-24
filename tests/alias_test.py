@@ -1,9 +1,8 @@
 import smtplib
-import imaplib
-import time
 import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from mail_utils import clear_inbox, connect_imap, wait_for_message
 
 msg = MIMEMultipart()
 msg['From'] = "admin@mailu.io"
@@ -25,33 +24,17 @@ try:
 except:
     sys.exit(25)
 
-time.sleep(30)
-
 for user in ['user@mailu.io', 'admin@mailu.io', 'user/with/slash@mailu.io']:
     try:
-        imap_server = imaplib.IMAP4_SSL('localhost')
-        imap_server.login(user, 'password')
+        imap_server = connect_imap(user, 'password')
     except Exception as exc:
         print("Failed with:", exc)
         sys.exit(110)
 
-    stat, count = imap_server.select('inbox')
-    try:
-        stat, data = imap_server.fetch(count[0], '(UID BODY[TEXT])')
-    except :
-        sys.exit(99)
-
-    if "Alias Text" in str(data[0][1]):
+    if wait_for_message(imap_server, "Alias Text"):
         print("Success: Mail is in aliassed inbox", user)
     else:
         print("Failed receiving email in aliassed inbox", user)
         sys.exit(99)
 
-    typ, data = imap_server.search(None, 'ALL')
-    for num in data[0].split():
-        imap_server.store(num, '+FLAGS', '\\Deleted')
-    imap_server.expunge()
-
-    imap_server.close()
-    imap_server.logout()
-
+    clear_inbox(imap_server)

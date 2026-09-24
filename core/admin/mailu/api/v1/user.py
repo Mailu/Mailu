@@ -123,7 +123,7 @@ class Users(Resource):
                 if not validators.email(dest):
                     return { 'code': 400, 'message': f'Provided forward destination email address {dest} is not a valid email address'}, 400
         localpart, domain_name = data['email'].lower().rsplit('@', 1)
-        domain_found = models.Domain.query.get(domain_name)
+        domain_found = models.db.session.get(models.Domain, domain_name)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain_name} does not exist'}, 404
         if not domain_found.max_users == -1 and len(domain_found.users) >= domain_found.max_users:
@@ -225,7 +225,7 @@ class User(Resource):
             for dest in data['forward_destination']:
                 if not validators.email(dest):
                     return { 'code': 400, 'message': f'Provided forward destination email address {dest} is not a valid email address'}, 400
-        user_found = models.User.query.get(email)
+        user_found = models.db.session.get(models.User, email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
         if ('forward_enabled' in data and data['forward_enabled'] is True) or ('forward_enabled' not in data and user_found.forward_enabled):

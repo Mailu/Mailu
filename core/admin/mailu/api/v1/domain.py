@@ -143,7 +143,7 @@ class Domain(Resource):
         """ Look up the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 200
-        domain_found = models.Domain.query.get(domain)
+        domain_found = models.db.session.get(models.Domain, domain)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
         return marshal(domain_found, domain_fields_get), 200
@@ -161,7 +161,7 @@ class Domain(Resource):
         """ Update the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain_found = models.Domain.query.get(domain)
+        domain_found = models.db.session.get(models.Domain, domain)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
         data = api.payload
@@ -206,7 +206,7 @@ class Domain(Resource):
         """ Delete the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain_found = models.Domain.query.get(domain)
+        domain_found = models.db.session.get(models.Domain, domain)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
         db.session.delete(domain_found)
@@ -226,7 +226,7 @@ class Domain(Resource):
         """ Generate new DKIM/DMARC keys for the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain_found = models.Domain.query.get(domain)
+        domain_found = models.db.session.get(models.Domain, domain)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
         domain_found.generate_dkim_key()
@@ -246,7 +246,7 @@ class Manager(Resource):
         """ List all managers of the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain_found = models.Domain.query.get(domain)
+        domain_found = models.db.session.get(models.Domain, domain)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
         return marshal(domain_found, manager_fields), 200
@@ -267,10 +267,10 @@ class Manager(Resource):
             return {'code': 400, 'message': f'Invalid email address {data["user_email"]}'}, 400
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain = models.Domain.query.get(domain)
+        domain = models.db.session.get(models.Domain, domain)
         if not domain:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
-        user = models.User.query.get(data['user_email'])
+        user = models.db.session.get(models.User, data['user_email'])
         if not user:
             return { 'code': 404, 'message': f'User {data["user_email"]} does not exist'}, 404
         if user in domain.managers:
@@ -294,10 +294,10 @@ class Domain(Resource):
             return {'code': 400, 'message': f'Invalid email address {email}'}, 400
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain = models.Domain.query.get(domain)
+        domain = models.db.session.get(models.Domain, domain)
         if not domain:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
-        user = models.User.query.get(email)
+        user = models.db.session.get(models.User, email)
         if not user:
             return { 'code': 404, 'message': f'User {email} does not exist'}, 404
         if user in domain.managers:
@@ -321,10 +321,10 @@ class Domain(Resource):
             return {'code': 400, 'message': f'Invalid email address {email}'}, 400
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain = models.Domain.query.get(domain)
+        domain = models.db.session.get(models.Domain, domain)
         if not domain:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
-        user = models.User.query.get(email)
+        user = models.db.session.get(models.User, email)
         if not user:
             return { 'code': 404, 'message': f'User {email} does not exist'}, 404
         if user in domain.managers:
@@ -347,7 +347,7 @@ class User(Resource):
         """ List all the users from the specified domain """
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
-        domain_found = models.Domain.query.get(domain)
+        domain_found = models.db.session.get(models.Domain, domain)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
         return  marshal(models.User.query.filter_by(domain=domain_found).all(), user.user_fields_get),200
@@ -381,7 +381,7 @@ class Alternatives(Resource):
             return { 'code': 400, 'message': f'Alternative domain {data["name"]} is not a valid domain'}, 400
         if not validators.domain(data['domain']):
             return { 'code': 400, 'message': f'Domain {data["domain"]} is not a valid domain'}, 400
-        domain = models.Domain.query.get(data['domain'])
+        domain = models.db.session.get(models.Domain, data['domain'])
         if not domain:
             return { 'code': 404, 'message': f'Domain {data["domain"]} does not exist'}, 404
         if common.fqdn_in_use(data['name']):

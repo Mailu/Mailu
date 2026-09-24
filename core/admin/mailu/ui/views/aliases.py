@@ -10,14 +10,14 @@ import wtforms_components
 @ui.route('/alias/list/<domain_name>', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
 def alias_list(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     return flask.render_template('alias/list.html', domain=domain)
 
 
 @ui.route('/alias/create/<domain_name>', methods=['GET', 'POST'])
 @access.domain_admin(models.Domain, 'domain_name')
 def alias_create(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     if not domain.max_aliases == -1 and len(domain.aliases) >= domain.max_aliases:
         flask.flash('Too many aliases for domain %s' % domain, 'error')
         return flask.redirect(
@@ -41,7 +41,7 @@ def alias_create(domain_name):
 @ui.route('/alias/edit/<path:alias>', methods=['GET', 'POST'])
 @access.domain_admin(models.Alias, 'alias')
 def alias_edit(alias):
-    alias = models.Alias.query.get(alias) or flask.abort(404)
+    alias = models.db.session.get(models.Alias, alias) or flask.abort(404)
     form = forms.AliasForm(obj=alias)
     wtforms_components.read_only(form.localpart)
     form.localpart.validators = []
@@ -59,7 +59,7 @@ def alias_edit(alias):
 @access.domain_admin(models.Alias, 'alias')
 @access.confirmation_required("delete {alias}")
 def alias_delete(alias):
-    alias = models.Alias.query.get(alias) or flask.abort(404)
+    alias = models.db.session.get(models.Alias, alias) or flask.abort(404)
     domain = alias.domain
     models.db.session.delete(alias)
     models.db.session.commit()

@@ -1,10 +1,9 @@
 # syntax=docker/dockerfile-upstream:1.4.3
 
 # base system image (intermediate)
-# Note when updating the alpine tag, first manually run the workflow .github/workflows/mirror.yml.
-# Just run the workflow with the tag that must be synchronised.
-ARG DISTRO=ghcr.io/mailu/alpine:3.22.6
-FROM $DISTRO as system
+# When updating this tag, first mirror it with .github/workflows/mirror.yml.
+ARG DISTRO=ghcr.io/mailu/alpine:3.24.2
+FROM $DISTRO AS system
 
 ENV TZ=Etc/UTC LANG=C.UTF-8
 
@@ -20,14 +19,14 @@ RUN set -euxo pipefail \
 
 WORKDIR /app
 
-CMD /bin/bash
+CMD ["/bin/bash"]
 
 
 # build virtual env (intermediate)
-FROM system as build
+FROM system AS build
 
 ARG MAILU_DEPS=prod
-ARG SNUFFLEUPAGUS_VERSION=0.12.0
+ARG SNUFFLEUPAGUS_VERSION=0.14.0
 
 ENV VIRTUAL_ENV=/app/venv
 
@@ -51,21 +50,27 @@ ENV \
   LDFLAGS="-Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now" \
   SNUFFLEUPAGUS_URL="https://github.com/jvoisin/snuffleupagus/archive/refs/tags/v${SNUFFLEUPAGUS_VERSION}.tar.gz"
 
+# snuffleupagus' Makefile calls the unversioned "phpize", which alpine ships
+# only for its current default php -- and that moves every release. Pin both
+# wrappers to the php it builds for.
 RUN set -euxo pipefail \
   ;  machine="$(apk --print-arch)" \
   ; deps="build-base gcc libffi-dev python3-dev mariadb-dev" \
   ; [[ "${machine}" != x86_64 ]] && \
-      deps="${deps} rust cargo git libretls-dev mariadb-connector-c-dev postgresql-dev" \
+      deps="${deps} rust cargo cmake git libretls-dev mariadb-connector-c-dev postgresql-dev" \
   ; apk add --virtual .build-deps ${deps} \
   ; [[ "${machine}" == armv7* ]] && \
       mkdir -p /root/.cargo/registry/index && \
       git clone --bare https://github.com/rust-lang/crates.io-index.git /root/.cargo/registry/index/github.com-1285ae84e5963aae \
-  ; pip install -r requirements-${MAILU_DEPS}.txt \
+  # bcrypt 4.3 builds from source on arm/v7 and uses Python's stable ABI.
+  ; PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 pip install -r requirements-${MAILU_DEPS}.txt \
   ; curl -sL ${SNUFFLEUPAGUS_URL} | tar xz \
   ; cd snuffleupagus-${SNUFFLEUPAGUS_VERSION} \
   ; rm -rf src/tests/*php7*/ src/tests/*session*/ src/tests/broken_configuration/ src/tests/*cookie* src/tests/upload_validation/ \
-  ; apk add --virtual .build-deps php83-dev php83-cgi php83-simplexml php83-xml pcre-dev build-base php83-pear php83-openssl re2c \
-  ; pecl83 install vld-beta \
+  ; apk add --virtual .build-deps php84-dev php84-cgi php84-simplexml php84-xml pcre-dev build-base php84-pear php84-openssl re2c \
+  ; ln -sf /usr/bin/phpize84 /usr/bin/phpize \
+  ; ln -sf /usr/bin/php-config84 /usr/bin/php-config \
+  ; pecl84 install vld-beta \
   ; make -j $(grep -c processor /proc/cpuinfo) release \
   ; cp src/.libs/snuffleupagus.so /app \
   ; rm -rf /root/.cargo /tmp/*.pem /root/.cache
@@ -74,7 +79,7 @@ RUN set -euxo pipefail \
 FROM system
 
 COPY --from=build /app/venv/ /app/venv/
-COPY --chown=root:root --from=build /app/snuffleupagus.so /usr/lib/php83/modules/
+COPY --chown=root:root --from=build /app/snuffleupagus.so /usr/lib/php84/modules/
 
 ENV \
   VIRTUAL_ENV=/app/venv \

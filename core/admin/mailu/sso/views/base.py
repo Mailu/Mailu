@@ -43,12 +43,13 @@ def login():
                 destination = app.config['WEB_WEBMAIL']
         device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
         username = form.email.data
-        if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
-            flask.flash(_('Too many attempts from your IP (rate-limit)'), 'error')
-            return flask.render_template('login.html', form=form, fields=fields)
-        if utils.limiter.should_rate_limit_user(username, client_ip, device_cookie, device_cookie_username):
-            flask.flash(_('Too many attempts for this user (rate-limit)'), 'error')
-            return flask.render_template('login.html', form=form, fields=fields)
+        if not utils.is_app_token(form.pw.data):
+            if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
+                flask.flash(_('Too many attempts from your IP (rate-limit)'), 'error')
+                return flask.render_template('login.html', form=form, fields=fields)
+            if utils.limiter.should_rate_limit_user(username, client_ip, device_cookie, device_cookie_username):
+                flask.flash(_('Too many attempts for this user (rate-limit)'), 'error')
+                return flask.render_template('login.html', form=form, fields=fields)
         user = models.User.login(username, form.pw.data)
         if user:
             flask.session.regenerate()
@@ -158,7 +159,7 @@ def _proxy():
     except Exception as e:
         flask.current_app.logger.error('Error creating a new user via proxy for %s from %s: %s' % (email, client_ip, str(e)), e)
         return flask.abort(500, 'You don\'t exist. Go away! (%s)' % email)
-    domain = models.Domain.query.get(desireddomain) or flask.abort(500, 'You don\'t exist. Go away! (domain=%s)' % desireddomain)
+    domain = models.db.session.get(models.Domain, desireddomain) or flask.abort(500, 'You don\'t exist. Go away! (domain=%s)' % desireddomain)
     if not domain.max_users == -1 and len(domain.users) >= domain.max_users:
         flask.current_app.logger.warning('Too many users for domain %s' % domain)
         return flask.abort(500, 'Too many users in (domain=%s)' % domain)

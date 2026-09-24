@@ -49,7 +49,7 @@ class TestFetchEmptyFolders:
                       'submit': 'Submit'},
             )
             assert rv.status_code == 302, f'expected redirect, got {rv.status_code}'
-            assert models.Fetch.query.get(fetch_id).folders == []
+            assert models.db.session.get(models.Fetch, fetch_id).folders == []
 
     def test_fetch_create_with_empty_folders_does_not_500(self, app, client):
         app.config['FETCHMAIL_ENABLED'] = True

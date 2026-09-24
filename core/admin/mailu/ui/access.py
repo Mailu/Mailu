@@ -78,7 +78,7 @@ def domain_admin(args, kwargs, model, key):
     target (see ``_can_manage_user``) so a domain manager cannot take over a
     higher-privileged account that owns a mailbox in the managed domain (#2685).
     """
-    obj = model.query.get(kwargs[key])
+    obj = models.db.session.get(model, kwargs[key])
     if obj:
         domain = obj if type(obj) is models.Domain else obj.domain
         if domain not in flask_login.current_user.get_managed_domains():
@@ -107,7 +107,7 @@ def owner(args, kwargs, model, key):
     """
     if kwargs[key] is None and model == models.User:
         return True
-    obj = model.query.get(kwargs[key])
+    obj = models.db.session.get(model, kwargs[key])
     if obj:
         user = obj if type(obj) is models.User else obj.user
         if user.email == flask_login.current_user.email:

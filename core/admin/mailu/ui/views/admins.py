@@ -22,7 +22,7 @@ def admin_create():
         flask_login.current_user.get_managed_emails(include_aliases=False)
     ]
     if form.validate_on_submit():
-        user = models.User.query.get(form.admin.data)
+        user = models.db.session.get(models.User, form.admin.data)
         if user:
             user.global_admin = True
             models.db.session.commit()
@@ -37,7 +37,7 @@ def admin_create():
 @access.global_admin
 @access.confirmation_required("delete admin {admin}")
 def admin_delete(admin):
-    user = models.User.query.get(admin)
+    user = models.db.session.get(models.User, admin)
     if user:
         user.global_admin  = False
         models.db.session.commit()

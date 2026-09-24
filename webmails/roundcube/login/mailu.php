@@ -44,10 +44,10 @@ class mailu extends rcube_plugin
   {
     if (!array_key_exists('HTTP_X_REMOTE_USER', $_SERVER) or !array_key_exists('HTTP_X_REMOTE_USER_TOKEN', $_SERVER)) {
       if ($_SERVER['PHP_SELF'] == '/sso.php') {
-        header('HTTP/1.0 403 Forbidden');
+        http_response_code(403);
         print('mailu sso failure');
       } else {
-        header('Location: sso.php', 302);
+        header('Location: sso.php', true, 302);
       }
       exit();
     }
@@ -72,13 +72,13 @@ class mailu extends rcube_plugin
 
   function login($args)
   {
-    header('Location: index.php', 302);
+    header('Location: index.php', true, 302);
     exit();
   }
 
   function login_failed($args)
   {
-    header('Location: sso.php', 302);
+    header('Location: sso.php', true, 302);
     exit();
   }
 

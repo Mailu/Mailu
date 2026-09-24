@@ -5,7 +5,7 @@
       malformed header (bad base64, or no ':' separator) -> binascii.Error/ValueError
       -> 500. It should fall through to 401.
     - /internal/dovecot/passdb|quota|sieve looked the user up with an unguarded
-      User.query.get(); a username that is not a storable e-mail (no '@', or a
+      db.session.get(); a username that is not a storable e-mail (no '@', or a
       non-IDNA domain) raised a StatementError -> 500. The sibling userdb endpoint
       already caught this and returned 404.
 """

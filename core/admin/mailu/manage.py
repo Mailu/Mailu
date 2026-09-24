@@ -60,13 +60,13 @@ def admin(localpart, domain_name, password, mode):
     if not mode in ('create', 'update', 'ifmissing'):
         raise click.ClickException(f'invalid mode: {mode!r}')
 
-    domain = models.Domain.query.get(domain_name)
+    domain = models.db.session.get(models.Domain, domain_name)
     if not domain:
         domain = models.Domain(name=domain_name)
         db.session.add(domain)
 
     email = f'{localpart}@{domain_name}'
-    if user := models.User.query.get(email):
+    if user := models.db.session.get(models.User, email):
         if mode == 'ifmissing':
             print(f'user {email!r} exists, not updating')
             return
@@ -96,7 +96,7 @@ def admin(localpart, domain_name, password, mode):
 def user(localpart, domain_name, password):
     """ Create a user
     """
-    domain = models.Domain.query.get(domain_name)
+    domain = models.db.session.get(models.Domain, domain_name)
     if not domain:
         domain = models.Domain(name=domain_name)
         db.session.add(domain)
@@ -120,7 +120,7 @@ def password(localpart, domain_name, password):
     """ Change the password of an user
     """
     email = f'{localpart}@{domain_name}'
-    user  = models.User.query.get(email)
+    user  = models.db.session.get(models.User, email)
     if user:
         user.set_password(password)
         user.change_pw_next_login=True
@@ -138,7 +138,7 @@ def password(localpart, domain_name, password):
 def domain(domain_name, max_users=-1, max_aliases=-1, max_quota_bytes=0):
     """ Create a domain
     """
-    domain = models.Domain.query.get(domain_name)
+    domain = models.db.session.get(models.Domain, domain_name)
     if not domain:
         domain = models.Domain(name=domain_name, max_users=max_users,
                                max_aliases=max_aliases, max_quota_bytes=max_quota_bytes)
@@ -154,7 +154,7 @@ def domain(domain_name, max_users=-1, max_aliases=-1, max_quota_bytes=0):
 def user_import(localpart, domain_name, password_hash):
     """ Import a user along with password hash
     """
-    domain = models.Domain.query.get(domain_name)
+    domain = models.db.session.get(models.Domain, domain_name)
     if not domain:
         domain = models.Domain(name=domain_name)
         db.session.add(domain)
@@ -188,7 +188,7 @@ def config_update(verbose=False, delete_objects=False):
         max_aliases = domain_config.get('max_aliases', -1)
         max_quota_bytes = domain_config.get('max_quota_bytes', 0)
         tracked_domains.add(domain_name)
-        domain = models.Domain.query.get(domain_name)
+        domain = models.db.session.get(models.Domain, domain_name)
         if not domain:
             domain = models.Domain(name=domain_name,
                                    max_users=max_users,
@@ -216,7 +216,7 @@ def config_update(verbose=False, delete_objects=False):
         localpart = user_config['localpart']
         domain_name = user_config['domain']
         password_hash = user_config.get('password_hash', None)
-        domain = models.Domain.query.get(domain_name)
+        domain = models.db.session.get(models.Domain, domain_name)
         email = f'{localpart}@{domain_name}'
         optional_params = {}
         for k in user_optional_params:
@@ -225,7 +225,7 @@ def config_update(verbose=False, delete_objects=False):
         if not domain:
             domain = models.Domain(name=domain_name)
             db.session.add(domain)
-        user = models.User.query.get(email)
+        user = models.db.session.get(models.User, email)
         tracked_users.add(email)
         tracked_domains.add(domain_name)
         if not user:
@@ -252,12 +252,12 @@ def config_update(verbose=False, delete_objects=False):
         else:
             destination = alias_config['destination']
         wildcard = alias_config.get('wildcard', False)
-        domain = models.Domain.query.get(domain_name)
+        domain = models.db.session.get(models.Domain, domain_name)
         email = f'{localpart}@{domain_name}'
         if not domain:
             domain = models.Domain(name=domain_name)
             db.session.add(domain)
-        alias = models.Alias.query.get(email)
+        alias = models.db.session.get(models.Alias, email)
         tracked_aliases.add(email)
         tracked_domains.add(domain_name)
         if not alias:
@@ -282,8 +282,8 @@ def config_update(verbose=False, delete_objects=False):
             print(str(manager_config))
         domain_name = manager_config['domain']
         user_name = manager_config['user']
-        domain = models.Domain.query.get(domain_name)
-        manageruser = models.User.query.get(f'{user_name}@{domain_name}')
+        domain = models.db.session.get(models.Domain, domain_name)
+        manageruser = models.db.session.get(models.User, f'{user_name}@{domain_name}')
         if manageruser not in domain.managers:
             domain.managers.append(manageruser)
         db.session.add(domain)
@@ -410,7 +410,7 @@ def config_export(full=False, secrets=False, color=False, dns=False, output=None
 @with_appcontext
 def user_delete(email, really=False):
     """disable or delete user"""
-    if user := models.User.query.get(email):
+    if user := models.db.session.get(models.User, email):
         if really:
             db.session.delete(user)
         else:
@@ -423,7 +423,7 @@ def user_delete(email, really=False):
 @with_appcontext
 def alias_delete(email):
     """delete alias"""
-    if alias := models.Alias.query.get(email):
+    if alias := models.db.session.get(models.Alias, email):
         db.session.delete(alias)
         db.session.commit()
 
@@ -437,7 +437,7 @@ def alias_delete(email):
 def alias(localpart, domain_name, destination, wildcard=False):
     """ Create an alias
     """
-    domain = models.Domain.query.get(domain_name)
+    domain = models.db.session.get(models.Domain, domain_name)
     if not domain:
         domain = models.Domain(name=domain_name)
         db.session.add(domain)
@@ -461,7 +461,7 @@ def alias(localpart, domain_name, destination, wildcard=False):
 def setlimits(domain_name, max_users, max_aliases, max_quota_bytes):
     """ Set domain limits
     """
-    domain = models.Domain.query.get(domain_name)
+    domain = models.db.session.get(models.Domain, domain_name)
     domain.max_users = max_users
     domain.max_aliases = max_aliases
     domain.max_quota_bytes = max_quota_bytes
@@ -476,8 +476,8 @@ def setlimits(domain_name, max_users, max_aliases, max_quota_bytes):
 def setmanager(domain_name, user_name='manager'):
     """ Make a user manager of a domain
     """
-    domain = models.Domain.query.get(domain_name)
-    manageruser = models.User.query.get(f'{user_name}@{domain_name}')
+    domain = models.db.session.get(models.Domain, domain_name)
+    manageruser = models.db.session.get(models.User, f'{user_name}@{domain_name}')
     domain.managers.append(manageruser)
     db.session.add(domain)
     db.session.commit()

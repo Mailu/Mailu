@@ -13,7 +13,7 @@ sp.xxe_protection.enable();
 # Global configuration variables
 sp.global.secret_key("{{ SNUFFLEUPAGUS_KEY }}");
 
-# Globally activate strict mode
+# Reject implicit scalar type coercions, including for PHP's internal functions.
 # https://www.php.net/manual/en/language.types.declarations.php#language.types.declarations.strict
 sp.global_strict.enable();
 
@@ -46,6 +46,7 @@ sp.disable_function.function("chmod").param("permissions").value("511").drop();
 sp.disable_function.function("mail").param("additional_parameters").value_r("\\-").drop();
 @condition PHP_VERSION_ID >= 80300;
 sp.disable_function.function("mail").param("additional_params").value_r("\\-").drop();
+sp.disable_function.function("mb_send_mail").param("additional_params").value_r("\\-").drop();
 @end_condition;
 
 # Since it's now burned, me might as well mitigate it publicly
@@ -54,6 +55,10 @@ sp.disable_function.function("putenv").param("assignment").value("PATH").drop();
 
 # This one was burned in Nov 2019 - https://gist.github.com/LoadLow/90b60bd5535d6c3927bb24d5f9955b80
 sp.disable_function.function("putenv").param("assignment").value_r("GCONV_").drop();
+
+# Prevent CURLOPT_SSLENGINE from loading an attacker-controlled crypto engine.
+# https://github.com/php/php-src/issues/22035
+sp.disable_function.function("curl_setopt").param("option").value("10089").drop();
 
 # Since people are stupid enough to use `extract` on things like $_GET or $_POST, we might as well mitigate this vector
 sp.disable_function.function("extract").param("array").value_r("^_").drop();

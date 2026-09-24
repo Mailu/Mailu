@@ -46,13 +46,17 @@ function auth_passdb_lookup(req)
     then
       local server = auth_response:header('Auth-Server')
       local port = auth_response:header('Auth-Port')
-      return dovecot.auth.PASSDB_RESULT_OK, {
+      local reply = {
         proxy = "y",
         host = server,
         port = port,
         nopassword = "Y",
         proxy_noauth = "Y",
       }
+      if req.protocol == "imap" then
+        reply.proxy_mech = "PLAIN"
+      end
+      return dovecot.auth.PASSDB_RESULT_OK, reply
     else
       return dovecot.auth.PASSDB_RESULT_PASSWORD_MISMATCH, ""
     end

@@ -32,9 +32,9 @@ def domain_create():
     form = forms.DomainForm()
     if form.validate_on_submit():
         if validators.domain(form.name.data):
-            conflicting_domain = models.Domain.query.get(form.name.data)
-            conflicting_alternative = models.Alternative.query.get(form.name.data)
-            conflicting_relay = models.Relay.query.get(form.name.data)
+            conflicting_domain = models.db.session.get(models.Domain, form.name.data)
+            conflicting_alternative = models.db.session.get(models.Alternative, form.name.data)
+            conflicting_relay = models.db.session.get(models.Relay, form.name.data)
             if conflicting_domain or conflicting_alternative or conflicting_relay:
                 flask.flash('Domain %s is already used' % form.name.data, 'error')
             else:
@@ -52,7 +52,7 @@ def domain_create():
 @ui.route('/domain/edit/<domain_name>', methods=['GET', 'POST'])
 @access.global_admin
 def domain_edit(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     form = forms.DomainForm(obj=domain)
     wtforms_components.read_only(form.name)
     form.name.validators = []
@@ -69,7 +69,7 @@ def domain_edit(domain_name):
 @access.global_admin
 @access.confirmation_required("delete {domain_name}")
 def domain_delete(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     models.db.session.delete(domain)
     models.db.session.commit()
     flask.flash('Domain %s deleted' % domain)
@@ -79,13 +79,13 @@ def domain_delete(domain_name):
 @ui.route('/domain/details/<domain_name>', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
 def domain_details(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     return flask.render_template('domain/details.html', domain=domain)
 
 @ui.route('/domain/details/<domain_name>/zonefile', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
 def domain_download_zonefile(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     res = [domain.dns_mx, domain.dns_spf]
     if domain.dkim_publickey:
         record = domain.dns_dkim.split('"', 1)[0].strip()
@@ -119,7 +119,7 @@ def domain_download_zonefile(domain_name):
 @access.domain_admin(models.Domain, 'domain_name')
 @access.confirmation_required("regenerate keys for {domain_name}")
 def domain_genkeys(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     domain.generate_dkim_key()
     models.db.session.add(domain)
     models.db.session.commit()
@@ -140,9 +140,9 @@ def domain_signup(domain_name=None):
         if msg := utils.isBadOrPwned(form):
             flask.flash(msg, "error")
             return flask.render_template('domain/signup.html', form=form)
-        conflicting_domain = models.Domain.query.get(form.name.data)
-        conflicting_alternative = models.Alternative.query.get(form.name.data)
-        conflicting_relay = models.Relay.query.get(form.name.data)
+        conflicting_domain = models.db.session.get(models.Domain, form.name.data)
+        conflicting_alternative = models.db.session.get(models.Alternative, form.name.data)
+        conflicting_relay = models.db.session.get(models.Relay, form.name.data)
         if conflicting_domain or conflicting_alternative or conflicting_relay:
             flask.flash('Domain %s is already used' % form.name.data, 'error')
         else:
@@ -154,7 +154,7 @@ def domain_signup(domain_name=None):
             if domain.check_mx():
                 models.db.session.add(domain)
                 if flask_login.current_user.is_authenticated:
-                    user = models.User.query.get(flask_login.current_user.email)
+                    user = models.db.session.get(models.User, flask_login.current_user.email)
                 else:
                     user = models.User()
                     user.domain = domain

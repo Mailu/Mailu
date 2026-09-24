@@ -10,6 +10,8 @@ on:
 
 concurrency: ci-multiarch-${{ github.ref }}
 
+permissions: {}
+
 # REQUIRED global variables
 # DOCKER_ORG, docker org used for pushing images.
 env:
@@ -20,7 +22,9 @@ jobs:
 # All subsequent jobs will retrieve and use these variables. This way the variables only have to be derived once.
   derive-variables:
     name: derive variables
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
     outputs:
         MAILU_VERSION: ${{ env.MAILU_VERSION }}
         PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
@@ -29,14 +33,15 @@ jobs:
         DEPLOY: ${{ env.DEPLOY }}
         RELEASE: ${{ env.RELEASE }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # fetch-depth 0 is required to also retrieve all tags.
           fetch-depth: 0
+          persist-credentials: false
       - name: Extract branch name
         shell: bash
         run: |
-          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+          printf 'BRANCH=%s\n' "${GITHUB_REF#refs/heads/}" >> "$GITHUB_ENV"
         #For branch TESTING, we set the image tag to pr-xxxx
       - name: Derive MAILU_VERSION and PINNED_MAILU_VERSION and DEPLOY/RELEASE for branch testing
         if: env.BRANCH == 'testing'
@@ -44,55 +49,76 @@ jobs:
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
-          echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "PINNED_MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "DOCKER_ORG_DERIVED=${{ env.DOCKER_ORG }}" >> $GITHUB_ENV
-          echo "DEPLOY=true" >> $GITHUB_ENV
-          echo "RELEASE=false" >> $GITHUB_ENV
+          {
+            printf 'MAILU_VERSION=pr-%s\n' "${COMMIT_MESSAGE//[!0-9]/}"
+            printf 'PINNED_MAILU_VERSION=pr-%s\n' "${COMMIT_MESSAGE//[!0-9]/}"
+            printf 'DOCKER_ORG_DERIVED=%s\n' "$DOCKER_ORG"
+            printf 'DEPLOY=true\n'
+            printf 'RELEASE=false\n'
+          } >> "$GITHUB_ENV"
       - name: Derive MAILU_VERSION and DEPLOY/RELEASE for other branches than testing
         if: env.BRANCH != 'testing'
         shell: bash
         run: |
-          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
-          echo "DOCKER_ORG_DERIVED=${{ env.DOCKER_ORG }}" >> $GITHUB_ENV
-          echo "DEPLOY=true" >> $GITHUB_ENV
-          echo "RELEASE=false" >> $GITHUB_ENV
+          {
+            printf 'MAILU_VERSION=%s\n' "$BRANCH"
+            printf 'DOCKER_ORG_DERIVED=%s\n' "$DOCKER_ORG"
+            printf 'DEPLOY=true\n'
+            printf 'RELEASE=false\n'
+          } >> "$GITHUB_ENV"
       - name: Derive PINNED_MAILU_VERSION and DEPLOY/RELEASE for normal release x.y
         if: env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' && !(contains(env.BRANCH, 'test-'))
         shell: bash
         run: |
-          version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
-          echo "DEPLOY=true" >> $GITHUB_ENV
-          echo "RELEASE=true" >> $GITHUB_ENV
+          version=$(git tag --sort=version:refname --list "$MAILU_VERSION.*" | tail -1)
+          root_version=${version%.*}
+          patch_version=${version##*.}
+          if [[ -z "$patch_version" ]]; then
+            pinned_version="$MAILU_VERSION.0"
+          else
+            pinned_version="$root_version.$((patch_version + 1))"
+          fi
+          {
+            printf 'PINNED_MAILU_VERSION=%s\n' "$pinned_version"
+            printf 'DEPLOY=true\n'
+            printf 'RELEASE=true\n'
+          } >> "$GITHUB_ENV"
       - name: Derive PINNED_MAILU_VERSION and DEPLOY/RELEASE for staging
         id: deploy
         if: env.BRANCH == 'staging'
         shell: bash
         run: |
-          echo "PINNED_MAILU_VERSION=staging" >> $GITHUB_ENV
-          echo "DEPLOY=false" >> $GITHUB_ENV
-          echo "RELEASE=false" >> $GITHUB_ENV
+          {
+            printf 'PINNED_MAILU_VERSION=staging\n'
+            printf 'DEPLOY=false\n'
+            printf 'RELEASE=false\n'
+          } >> "$GITHUB_ENV"
       - name: Derive PINNED_MAILU_VERSION for master
         if: env.BRANCH == 'master'
         shell: bash
-        env:
-          GITHUB_SHA: ${{ env.GITHUB_SHA }}
         run: |
-          echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
-          echo "DEPLOY=true" >> $GITHUB_ENV
-          echo "RELEASE=false" >> $GITHUB_ENV
+          {
+            printf 'PINNED_MAILU_VERSION=%s\n' "$GITHUB_SHA"
+            printf 'DEPLOY=true\n'
+            printf 'RELEASE=false\n'
+          } >> "$GITHUB_ENV"
       - name: Derive for branch test-*
         if: contains(env.BRANCH, 'test-')
         run: |
-          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
-          echo "PINNED_MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
-          echo "DOCKER_ORG_DERIVED=${{ env.DOCKER_ORG }}" >> $GITHUB_ENV
-          echo "DEPLOY=true" >> $GITHUB_ENV
-          echo "RELEASE=false" >> $GITHUB_ENV
+          {
+            printf 'MAILU_VERSION=%s\n' "$BRANCH"
+            printf 'PINNED_MAILU_VERSION=%s\n' "$BRANCH"
+            printf 'DOCKER_ORG_DERIVED=%s\n' "$DOCKER_ORG"
+            printf 'DEPLOY=true\n'
+            printf 'RELEASE=false\n'
+          } >> "$GITHUB_ENV"
 
   build-test-deploy:
     needs:
       - derive-variables
+    permissions:
+      contents: write
+      packages: write
     uses: ./.github/workflows/build_test_deploy.yml
     with:
       architecture: 'linux/amd64,linux/arm64/v8,linux/arm/v7'
@@ -102,7 +128,12 @@ jobs:
       branch: ${{needs.derive-variables.outputs.BRANCH}}
       deploy: ${{needs.derive-variables.outputs.DEPLOY}}
       release: ${{needs.derive-variables.outputs.RELEASE}}
-    secrets: inherit
+    secrets:
+      Docker_Login: ${{ secrets.Docker_Login }}
+      Docker_Password: ${{ secrets.Docker_Password }}
+      Docker_Login2: ${{ secrets.Docker_Login2 }}
+      Docker_Password2: ${{ secrets.Docker_Password2 }}
+      Release_Token: ${{ secrets.Release_Token }}
 
  # This job is watched by bors. It only complets if building,testing and deploy worked.
   ci-success:
@@ -111,7 +142,8 @@ jobs:
     if: success()
     needs:
       - build-test-deploy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
+    permissions: {}
     steps:
       - name: CI/CD succeeded.
         run: exit 0

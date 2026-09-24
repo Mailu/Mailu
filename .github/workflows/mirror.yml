@@ -12,25 +12,33 @@ on:
         required: true
         type: string
 
+permissions:
+  packages: write
+
 jobs:
 # mirror alpine image
   mirror-image-alpine:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Helper to convert docker org to lowercase
         id: string
-        uses: ASzc/change-string-case-action@v5
+        uses: ASzc/change-string-case-action@ecd1412d078f2e06e9eedcbaa6fcd988151c3f82 # v8
         with:
           string: ${{ github.repository_owner }}
       - name: Mirror images
         shell: bash
         env:
           DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
+          REGCTL_SHA256: 8e0e62a497fcdb8048d18aa927a139613176ba0531f412bc541044e28f9856bd
+          REGCTL_VERSION: v0.11.6
           TAG: ${{ inputs.tag }}
         run: |
           set -euxo pipefail \
           ; echo "${{ github.token }}" | docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
-          ; curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 >regctl \
+          ; curl --fail --location --show-error --silent \
+            "https://github.com/regclient/regclient/releases/download/${REGCTL_VERSION}/regctl-linux-amd64" \
+            --output regctl \
+          ; echo "${REGCTL_SHA256}  regctl" | sha256sum --check --strict \
           ; chmod 755 regctl \
           ; ./regctl image copy docker.io/alpine:"$TAG" "$DOCKER_ORG"/alpine:"$TAG" \
           ; rm regctl \

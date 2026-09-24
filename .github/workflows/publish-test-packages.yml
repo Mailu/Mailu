@@ -1,0 +1,26 @@
+name: publish-test-packages
+
+on:
+  push:
+    branches:
+      - upgrade-github-workflows
+
+permissions:
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Make test packages public
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          packages=(
+            setup docs fetchmail webmail admin traefik-certdumper radicale
+            rspamd oletools postfix dovecot unbound nginx
+          )
+          for package in "${packages[@]}"; do
+            gh api --method PATCH "/user/packages/container/$package" \
+              --field visibility=public
+          done

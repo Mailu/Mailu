@@ -537,7 +537,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ["setup", "docs", "fetchmail", "webmail", "admin", "traefik-certdumper", "radicale", "rspamd", "oletools", "postfix", "dovecot", "unbound", "nginx"]
+        target: ["setup", "docs", "fetchmail", "webmail", "admin", "radicale", "rspamd", "oletools", "postfix", "dovecot", "unbound", "nginx"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -675,4 +675,8 @@ jobs:
       - name: Create release for tag x.y.z.
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "$PINNED_MAILU_VERSION" --notes-file release_note.md --verify-tag
+        run: |
+          gh release create "$PINNED_MAILU_VERSION" \
+            --title "$PINNED_MAILU_VERSION" \
+            --notes-file release_note.md \
+            --verify-tag

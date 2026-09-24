@@ -51,7 +51,6 @@ group "default" {
 
     "fetchmail",
     "resolver",
-    "traefik-certdumper",
     "webdav"
   ]
 }
@@ -222,12 +221,6 @@ target "resolver" {
     base = "docker-image://${DOCKER_ORG}/base:${MAILU_VERSION}"
   }
   tags = tag("unbound")
-}
-
-target "traefik-certdumper" {
-  inherits = ["defaults"]
-  context = "optional/traefik-certdumper/"
-  tags = tag("traefik-certdumper")
 }
 
 target "webdav" {

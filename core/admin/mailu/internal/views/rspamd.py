@@ -16,7 +16,7 @@ def vault_error(*messages, status=404):
 @internal.route("/rspamd/vault/v1/dkim/<domain_name>", methods=['GET'])
 def rspamd_dkim_key(domain_name):
     selectors = []
-    if domain := models.Domain.query.get(domain_name):
+    if domain := models.db.session.get(models.Domain, domain_name):
         if key := domain.dkim_key:
             selectors.append(
                 {
@@ -25,7 +25,7 @@ def rspamd_dkim_key(domain_name):
                     'selector': flask.current_app.config.get('DKIM_SELECTOR', 'dkim'),
                 }
             )
-    elif domain := models.Alternative.query.get(domain_name):
+    elif domain := models.db.session.get(models.Alternative, domain_name):
         if key := domain.domain.dkim_key:
             selectors.append(
                 {

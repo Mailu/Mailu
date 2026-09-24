@@ -94,6 +94,9 @@ if os.environ.get('POSTFIX_LOG_FILE'):
         shutil.copyfile("/overrides/logrotate.conf", "/etc/logrotate.d/postfix.conf")
 
 # Run Podop and Postfix
+# forkserver, the default on linux, re-imports this module in the child and
+# re-runs everything above. Both targets need fork semantics.
+multiprocessing.set_start_method('fork')
 multiprocessing.Process(target=start_podop).start()
 multiprocessing.Process(target=start_mta_sts_daemon).start()
 os.system("/usr/libexec/postfix/post-install meta_directory=/etc/postfix create-missing")

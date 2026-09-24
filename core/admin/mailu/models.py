@@ -506,7 +506,7 @@ class Email(object):
     def resolve_domain(cls, email):
         """ resolves domain alternative to real domain """
         localpart, domain_name = email.rsplit('@', 1) if '@' in email else (None, email)
-        if alternative := Alternative.query.get(domain_name):
+        if alternative := db.session.get(Alternative, domain_name):
             domain_name = alternative.domain_name
         return (localpart, domain_name)
 
@@ -534,9 +534,9 @@ class Email(object):
                 localpart_stripped = localpart[:pos]
 
         # is localpart@domain_name or localpart_stripped@domain_name an user?
-        user = User.query.get(f'{localpart}@{domain_name}')
+        user = db.session.get(User, f'{localpart}@{domain_name}')
         if not user and localpart_stripped:
-            user = User.query.get(f'{localpart_stripped}@{domain_name}')
+            user = db.session.get(User, f'{localpart_stripped}@{domain_name}')
 
         if user:
             email = f'{localpart}@{domain_name}'
@@ -659,6 +659,9 @@ class User(Base, Email):
             scheme for scheme in passlib.registry.list_crypt_handlers()
             if not (scheme == 'scrypt' or scheme.endswith('plaintext'))
         ]
+        # Lazy bcrypt initialization can invalidate the first bcrypt_sha256
+        # operation on Python 3.14.
+        passlib.hash.bcrypt_sha256.get_backend()
         cls._ctx = passlib.context.CryptContext(
             schemes=schemes,
             default='bcrypt_sha256',
@@ -742,12 +745,12 @@ set() containing the sessions to keep
     @classmethod
     def get(cls, email):
         """ find user object for email address """
-        return cls.query.get(email)
+        return db.session.get(cls, email)
 
     @classmethod
     def login(cls, email, password):
         """ login user when enabled and password is valid """
-        user = cls.query.get(email)
+        user = db.session.get(cls, email)
         return user if (user and user.enabled and user.check_password(password)) else None
 
 
@@ -933,7 +936,7 @@ def has_domain_access(domain_name, user=None):
         return True
     
     if user is not None:
-        domain = Domain.query.get(domain_name)
+        domain = db.session.get(Domain, domain_name)
         if domain and domain.managers.filter_by(email=user.email).first():
             return True
 

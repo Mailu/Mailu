@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile-upstream:1.4.3
 
 # build static assets (intermediate)
-FROM base as static
+FROM base AS static
 
 COPY static/ /static/
 

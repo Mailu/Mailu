@@ -66,10 +66,10 @@ def has_dane_record(domain, timeout=10):
         # If the DNSSEC data is invalid and the DNS resolver is DNSSEC enabled
         # we will receive this non-specific exception. The safe behaviour is to
         # accept to defer the email.
-        app.logger.warn(f'Unable to lookup the TLSA record for {domain}. Is the DNSSEC zone okay on https://dnsviz.net/d/{domain}/dnssec/?')
+        app.logger.warning(f'Unable to lookup the TLSA record for {domain}. Is the DNSSEC zone okay on https://dnsviz.net/d/{domain}/dnssec/?')
         return app.config['DEFER_ON_TLS_ERROR']
     except dns.exception.Timeout:
-        app.logger.warn(f'Timeout while resolving the TLSA record for {domain} ({timeout}s).')
+        app.logger.warning(f'Timeout while resolving the TLSA record for {domain} ({timeout}s).')
     except (dns.resolver.NXDOMAIN, dns.name.EmptyLabel):
         pass # this is expected, not TLSA record is fine
     except Exception as e:

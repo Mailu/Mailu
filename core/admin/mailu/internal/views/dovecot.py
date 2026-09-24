@@ -11,7 +11,7 @@ def _get_user_or_404(user_email):
     """ Look up a user by their (possibly malformed) address, returning a clean
         404 rather than a 500 when the address is not a valid stored e-mail. """
     try:
-        user = models.User.query.get(user_email)
+        user = models.db.session.get(models.User, user_email)
     except sqlalchemy.exc.StatementError:
         user = None
     return user or flask.abort(404)

@@ -10,14 +10,14 @@ import wtforms_components
 @ui.route('/user/list/<domain_name>', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
 def user_list(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     return flask.render_template('user/list.html', domain=domain)
 
 
 @ui.route('/user/create/<domain_name>', methods=['GET', 'POST'])
 @access.domain_admin(models.Domain, 'domain_name')
 def user_create(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     if not domain.max_users == -1 and len(domain.users) >= domain.max_users:
         flask.flash('Too many users for domain %s' % domain, 'error')
         return flask.redirect(
@@ -58,7 +58,7 @@ def user_create(domain_name):
 @ui.route('/user/edit/<path:user_email>', methods=['GET', 'POST'])
 @access.domain_admin(models.User, 'user_email')
 def user_edit(user_email):
-    user = models.User.query.get(user_email) or flask.abort(404)
+    user = models.db.session.get(models.User, user_email) or flask.abort(404)
     # Handle the case where user quota is more than allowed
     max_quota_bytes = user.domain.max_quota_bytes
     if max_quota_bytes and user.quota_bytes > max_quota_bytes:
@@ -92,7 +92,7 @@ def user_edit(user_email):
 @access.owner(models.User, 'user_email')
 def user_settings(user_email):
     user_email_or_current = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email_or_current) or flask.abort(404)
+    user = models.db.session.get(models.User, user_email_or_current) or flask.abort(404)
     form = forms.UserSettingsForm(obj=user)
     utils.formatCSVField(form.forward_destination)
     if form.validate_on_submit():
@@ -117,7 +117,7 @@ def user_settings(user_email):
 
 def _process_password_change(form, user_email):
     user_email_or_current = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email_or_current) or flask.abort(404)
+    user = models.db.session.get(models.User, user_email_or_current) or flask.abort(404)
     if form.validate_on_submit():
         if form.pw.data != form.pw2.data:
             flask.flash('Passwords do not match', 'error')
@@ -151,7 +151,7 @@ def user_password(user_email):
 @access.owner(models.User, 'user_email')
 def user_reply(user_email):
     user_email_or_current = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email_or_current) or flask.abort(404)
+    user = models.db.session.get(models.User, user_email_or_current) or flask.abort(404)
     form = forms.UserReplyForm(obj=user)
     if form.validate_on_submit():
         form.populate_obj(user)

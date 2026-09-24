@@ -33,7 +33,9 @@ def run_server(verbosity, server_type, socket, tables):
     # Run the main loop
     logging.basicConfig(stream=sys.stderr, level=max(3 - verbosity, 0) * 10,
                         format='%(name)s (%(levelname)s): %(message)s')
-    loop = asyncio.get_event_loop()
+    # get_event_loop() does not create a loop when none is running.
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     server = loop.run_until_complete(loop.create_unix_server(
         SERVER_TYPES[server_type].factory(table_map), socket
     ))

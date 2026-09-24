@@ -8,19 +8,19 @@ import wtforms_components
 @ui.route('/alternative/list/<domain_name>', methods=['GET'])
 @access.global_admin
 def alternative_list(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     return flask.render_template('alternative/list.html', domain=domain)
 
 
 @ui.route('/alternative/create/<domain_name>', methods=['GET', 'POST'])
 @access.global_admin
 def alternative_create(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     form = forms.AlternativeForm()
     if form.validate_on_submit():
-        conflicting_domain = models.Domain.query.get(form.name.data)
-        conflicting_alternative = models.Alternative.query.get(form.name.data)
-        conflicting_relay = models.Relay.query.get(form.name.data)
+        conflicting_domain = models.db.session.get(models.Domain, form.name.data)
+        conflicting_alternative = models.db.session.get(models.Alternative, form.name.data)
+        conflicting_relay = models.db.session.get(models.Relay, form.name.data)
         if conflicting_domain or conflicting_alternative or conflicting_relay:
             flask.flash('Domain %s is already used' % form.name.data, 'error')
         else:
@@ -39,7 +39,7 @@ def alternative_create(domain_name):
 @access.global_admin
 @access.confirmation_required("delete {alternative}")
 def alternative_delete(alternative):
-    alternative = models.Alternative.query.get(alternative) or flask.abort(404)
+    alternative = models.db.session.get(models.Alternative, alternative) or flask.abort(404)
     domain = alternative.domain
     models.db.session.delete(alternative)
     models.db.session.commit()

@@ -13,7 +13,7 @@ import wtforms_components
 @access.owner(models.User, 'user_email')
 def token_list(user_email):
     user_email = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email) or flask.abort(404)
+    user = models.db.session.get(models.User, user_email) or flask.abort(404)
     return flask.render_template('token/list.html', user=user)
 
 
@@ -22,7 +22,7 @@ def token_list(user_email):
 @access.owner(models.User, 'user_email')
 def token_create(user_email):
     user_email = user_email or flask_login.current_user.email
-    user = models.User.query.get(user_email) or flask.abort(404)
+    user = models.db.session.get(models.User, user_email) or flask.abort(404)
     form = forms.TokenForm()
     wtforms_components.read_only(form.displayed_password)
     if not form.raw_password.data:
@@ -49,7 +49,7 @@ def token_create(user_email):
 @access.confirmation_required("delete an authentication token")
 @access.owner(models.Token, 'token_id')
 def token_delete(token_id):
-    token = models.Token.query.get(token_id) or flask.abort(404)
+    token = models.db.session.get(models.Token, token_id) or flask.abort(404)
     user = token.user
     models.db.session.delete(token)
     models.db.session.commit()

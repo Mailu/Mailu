@@ -16,6 +16,9 @@ jobs:
 # mirror alpine image
   mirror-image-alpine:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Helper to convert docker org to lowercase
         id: string
@@ -30,8 +33,12 @@ jobs:
         run: |
           set -euxo pipefail \
           ; echo "${{ github.token }}" | docker login --username "${{ github.repository_owner }}" --password-stdin ghcr.io \
-          ; curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 >regctl \
-          ; chmod 755 regctl \
-          ; ./regctl image copy docker.io/alpine:"$TAG" "$DOCKER_ORG"/alpine:"$TAG" \
+           ; curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 >regctl \
+           ; chmod 755 regctl \
+           ; if ./regctl manifest head "$DOCKER_ORG"/alpine:"$TAG"; then
+               echo "Refusing to overwrite existing mirror tag: $DOCKER_ORG/alpine:$TAG" >&2
+               exit 1
+             fi \
+           ; ./regctl image copy docker.io/alpine:"$TAG" "$DOCKER_ORG"/alpine:"$TAG" \
           ; rm regctl \
           ; docker logout ghcr.io

@@ -1004,13 +1004,24 @@ If you are comfortable using an online spellchecker, the easiest is to configure
    $config['spellcheck_ignore_nums'] = true;
    $config['spellcheck_dictionary'] = true;
 
-If not, you can download the `aspell dictionary`_ you require and place it in ``/usr/share/aspell/`` and then enable it by tweaking the following in the configuration file:
+If not, the webmail image spellchecks through `enchant`_, which reads the
+dictionaries installed for one of its backends. Which backend is in use is
+printed while the image is built; you can also ask the running container:
+
+.. code-block:: bash
+
+   docker compose exec webmail php -r 'print_r(enchant_broker_describe(enchant_broker_init()));'
+
+Install the dictionary where that backend expects it -- ``/usr/share/aspell/``
+for the `aspell dictionaries`_, ``/usr/share/hunspell/`` for hunspell -- and
+then enable it by tweaking the following in the configuration file:
 
 .. code-block:: php
 
    $config['spellcheck_languages'] = array('en'=>'English', ...);
 
-.. _`aspell dictionary`: http://ftp.gnu.org/gnu/aspell/dict/0index.html
+.. _`enchant`: https://rrthomas.github.io/enchant/
+.. _`aspell dictionaries`: http://ftp.gnu.org/gnu/aspell/dict/0index.html
 
 
 I see a lot of "mount: Deactivated successfully." messages in the logs

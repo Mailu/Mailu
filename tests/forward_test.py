@@ -1,9 +1,8 @@
 import smtplib
-import imaplib
-import time
 import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from mail_utils import clear_inbox, connect_imap, wait_for_message
 
 msg = MIMEMultipart()
 msg['From'] = "admin@mailu.io"
@@ -25,60 +24,32 @@ try:
 except:
     sys.exit(25)
 
-time.sleep(30)
-
 # check forward target
 try:
-    imap_server = imaplib.IMAP4_SSL('localhost')
-    imap_server.login('user@mailu.io', 'password')
+    imap_server = connect_imap('user@mailu.io', 'password')
 except Exception as exc:
     print("Failed with:", exc)
     sys.exit(110)
 
-stat, count = imap_server.select('inbox')
-try:
-    stat, data = imap_server.fetch(count[0], '(UID BODY[TEXT])')
-except :
-    sys.exit(99)
-
-if "Forward Text" in str(data[0][1]):
+if wait_for_message(imap_server, "Forward Text"):
     print("Success: Mail is in forwarded inbox")
 else:
     print("Failed receiving email in forwarded inbox")
     sys.exit(99)
 
-typ, data = imap_server.search(None, 'ALL')
-for num in data[0].split():
-    imap_server.store(num, '+FLAGS', '\\Deleted')
-imap_server.expunge()
-
-imap_server.close()
-imap_server.logout()
+clear_inbox(imap_server)
 
 # check original user
 try:
-    imap_server = imaplib.IMAP4_SSL('localhost')
-    imap_server.login('forwardinguser@mailu.io', 'password')
+    imap_server = connect_imap('forwardinguser@mailu.io', 'password')
 except Exception as exc:
     print("Failed with:", exc)
     sys.exit(110)
 
-stat, count = imap_server.select('inbox')
-try:
-    stat, data = imap_server.fetch(count[0], '(UID BODY[TEXT])')
-except :
-    sys.exit(99)
-
-if "Forward Text" in str(data[0][1]):
+if wait_for_message(imap_server, "Forward Text"):
     print("Success: Mail is in forwarding inbox")
 else:
     print("Failed receiving email in forwarding inbox")
     sys.exit(99)
 
-typ, data = imap_server.search(None, 'ALL')
-for num in data[0].split():
-    imap_server.store(num, '+FLAGS', '\\Deleted')
-imap_server.expunge()
-
-imap_server.close()
-imap_server.logout()
+clear_inbox(imap_server)

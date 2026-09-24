@@ -68,7 +68,7 @@ class Tokens(Resource):
         email = data['email']
         if not validators.email(email):
             return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
-        user_found = models.User.query.get(email)
+        user_found = models.db.session.get(models.User, email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
         tokens = user_found.tokens
@@ -112,7 +112,7 @@ class Token(Resource):
         """ Look up all the tokens of the specified user """
         if not validators.email(email):
             return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
-        user_found = models.User.query.get(email)
+        user_found = models.db.session.get(models.User, email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
         tokens = user_found.tokens
@@ -142,7 +142,7 @@ class Token(Resource):
         data = api.payload
         if not validators.email(email):
             return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
-        user_found = models.User.query.get(email)
+        user_found = models.db.session.get(models.User, email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
 
@@ -180,7 +180,7 @@ class Token(Resource):
     @common.api_token_authorization
     def get(self, token_id):
         "Find the specified token"
-        token = models.Token.query.get(token_id)
+        token = models.db.session.get(models.Token, token_id)
         if not token:
             return { 'code' : 404, 'message' : f'Record cannot be found for id {token_id} or invalid id provided'}, 404
         response_dict  = {
@@ -205,7 +205,7 @@ class Token(Resource):
         """ Update the specified token """
         data = api.payload
 
-        token = models.Token.query.get(token_id)
+        token = models.db.session.get(models.Token, token_id)
         if not token:
             return { 'code' : 404, 'message' : f'Record cannot be found for id {token_id} or invalid id provided'}, 404
 
@@ -232,7 +232,7 @@ class Token(Resource):
     @common.api_token_authorization
     def delete(self, token_id):
         """ Delete the specified token """
-        token = models.Token.query.get(token_id)
+        token = models.db.session.get(models.Token, token_id)
         if not token:
             return { 'code' : 404, 'message' : f'Record cannot be found for id {token_id} or invalid id provided'}, 404
         db.session.delete(token)

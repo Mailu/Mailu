@@ -55,7 +55,7 @@ class Aliases(Resource):
         if not validators.email(data['email']):
             return { 'code': 400, 'message': f'Provided alias {data["email"]} is not a valid email address'}, 400
         localpart, domain_name = data['email'].lower().rsplit('@', 1)
-        domain_found = models.Domain.query.get(domain_name)
+        domain_found = models.db.session.get(models.Domain, domain_name)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain_name} does not exist ({data["email"]})'}, 404
         if not domain_found.max_aliases == -1 and len(domain_found.aliases) >= domain_found.max_aliases:
@@ -222,7 +222,7 @@ class AnonAlias(Resource):
             for dest in data['destination']:
                 if not validators.email(dest):
                     return {'code': 400, 'message': f'Provided destination email address {dest} is not a valid email address'}, 400
-                if not models.User.query.get(dest):
+                if not models.db.session.get(models.User, dest):
                     return {'code': 404, 'message': f'Provided destination email address {dest} does not exist'}, 404
             alias_found.destination = data['destination']
         if 'wildcard' in data:

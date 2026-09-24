@@ -34,6 +34,14 @@ from mailu import models, dkim
 ma = Marshmallow()
 
 
+class ContextNested(fields.Nested):
+    def _bind_to_schema(self, field_name, parent):
+        super()._bind_to_schema(field_name, parent)
+        nested = self.nested
+        if isinstance(nested, type) and issubclass(nested, Schema):
+            self.nested = lambda: nested(context=parent.context)
+
+
 ### import logging and schema colorization ###
 
 _model2schema = {}
@@ -683,12 +691,12 @@ class Storage:
 class BaseOpts(SQLAlchemyAutoSchemaOpts):
     """ Option class with sqla session
     """
-    def __init__(self, meta, ordered=False):
+    def __init__(self, meta):
         if not hasattr(meta, 'sqla_session'):
             meta.sqla_session = models.db.session
         if not hasattr(meta, 'sibling'):
             meta.sibling = False
-        super(BaseOpts, self).__init__(meta, ordered=ordered)
+        super(BaseOpts, self).__init__(meta)
 
 class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
     """ Marshmallow base schema with custom exclude logic
@@ -711,7 +719,8 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
         only = set(kwargs.get('only') or [])
 
         # get context
-        context = kwargs.get('context', {})
+        context = kwargs.pop('context', {})
+        self.context = context
         flags = {key for key, value in context.items() if value is True}
 
         # compile excludes
@@ -774,9 +783,10 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
                     fieldlist[field] = fieldlist.pop(field)
 
         # move post_load hook "_add_instance" to the end (after load_instance mixin)
-        hooks = self._hooks[('post_load', False)]
-        hooks.remove('_add_instance')
-        hooks.append('_add_instance')
+        hooks = self._hooks['post_load']
+        add_instance_hook = next(hook for hook in hooks if hook[0] == '_add_instance')
+        hooks.remove(add_instance_hook)
+        hooks.append(add_instance_hook)
 
     def hide(self, data):
         """ helper method to hide input data for logging """
@@ -814,7 +824,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
         res = super().get_instance(data)
         return res
 
-    @pre_load(pass_many=True)
+    @pre_load(pass_collection=True)
     def _patch_many(self, items, many, **kwargs): # pylint: disable=unused-argument
         """ - flush sqla session before serializing a section when requested
               (make sure all objects that could be referred to later are created)
@@ -997,7 +1007,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
 
         return data
 
-    @post_load(pass_many=True)
+    @post_load(pass_collection=True)
     def _prune_items(self, items, many, **kwargs): # pylint: disable=unused-argument
         """ handle list pruning """
 
@@ -1192,8 +1202,8 @@ class UserSchema(BaseSchema):
         }
 
     email = fields.String(required=True)
-    tokens = fields.Nested(TokenSchema, many=True)
-    fetches = fields.Nested(FetchSchema, many=True)
+    tokens = ContextNested(TokenSchema, many=True)
+    fetches = ContextNested(FetchSchema, many=True)
 
     password = PasswordField(required=True, metadata={'model': models.User})
     hash_password = fields.Boolean(load_only=True, load_default=False)
@@ -1254,6 +1264,7 @@ class MailuSchema(Schema, Storage):
         order = ['domain', 'user', 'alias', 'relay'] # 'config'
 
     def __init__(self, *args, **kwargs):
+        self.context = kwargs.pop('context', {})
         super().__init__(*args, **kwargs)
         # order fieldlists
         for fieldlist in (self.fields, self.load_fields, self.dump_fields):
@@ -1284,8 +1295,8 @@ class MailuSchema(Schema, Storage):
 
         return config
 
-    domain = fields.Nested(DomainSchema, many=True)
-    user = fields.Nested(UserSchema, many=True)
-    alias = fields.Nested(AliasSchema, many=True)
-    relay = fields.Nested(RelaySchema, many=True)
+    domain = ContextNested(DomainSchema, many=True)
+    user = ContextNested(UserSchema, many=True)
+    alias = ContextNested(AliasSchema, many=True)
+    relay = ContextNested(RelaySchema, many=True)
 #    config = fields.Nested(ConfigSchema, many=True)

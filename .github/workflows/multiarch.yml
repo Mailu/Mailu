@@ -22,7 +22,7 @@ jobs:
 # All subsequent jobs will retrieve and use these variables. This way the variables only have to be derived once.
   derive-variables:
     name: derive variables
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     outputs:
@@ -141,7 +141,7 @@ jobs:
     if: success()
     needs:
       - build-test-deploy
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions: {}
     steps:
       - name: CI/CD succeeded.

@@ -766,3 +766,22 @@ msgstr "域名"
 msgid "Available slots"
 msgstr "可用"
 
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "搜索:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "显示 _MENU_ 条记录"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "没有找到匹配的记录"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "上页"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "下页"

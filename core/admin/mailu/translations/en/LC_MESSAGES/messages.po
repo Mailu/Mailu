@@ -812,3 +812,22 @@ msgstr "Domain"
 msgid "Available slots"
 msgstr ""
 
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "Search:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "Show _MENU_ entries"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "No matching records found"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "Previous"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "Next"

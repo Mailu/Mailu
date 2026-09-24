@@ -764,3 +764,22 @@ msgstr "空きメールボックス数"
 #~ msgid "General settings"
 #~ msgstr "一般設定"
 
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "検索:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "_MENU_ 件表示"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "一致するレコードがありません"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "前"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "次"

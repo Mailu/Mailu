@@ -739,3 +739,23 @@ msgstr "Домен"
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
 msgstr "Наявні слоти"
+
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "Пошук:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "Показати _MENU_ записів"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "Не знайдено жодних записів"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "Попередня"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "Наступна"

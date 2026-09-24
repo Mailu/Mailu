@@ -1,25 +1,25 @@
-<div class="sidebar text-sm">
-  <nav class="mt-2">
-    <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
+<div class="sidebar-wrapper">
+  <nav id="navigation" class="mt-2">
+    <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
     <li class="nav-header text-uppercase text-primary" role="none">{% trans %}Go to{% endtrans %}</li>
     {%- if config['ADMIN'] %}
-      <li class="nav-item">
-        <a href="{{ url_for('ui.client') }}" class="nav-link">
-          <i class="nav-icon fa fa-laptop"></i>
+      <li class="nav-item" role="none">
+        <a href="{{ url_for('ui.client') }}" class="nav-link" role="menuitem">
+          <i class="nav-icon fa-solid fa-laptop"></i>
           <p class="text">{% trans %}Client setup{% endtrans %}</p>
         </a>
       </li>
     {%- endif %}
       <li class="nav-item" role="none">
         <a href="{{ config["WEBSITE"] }}" target="_blank" class="nav-link" role="menuitem" rel="noreferrer">
-          <i class="nav-icon fa fa-globe"></i>
-          <p>{% trans %}Website{% endtrans %} <i class="fas fa-external-link-alt text-xs"></i></p>
+          <i class="nav-icon fa-solid fa-globe"></i>
+          <p>{% trans %}Website{% endtrans %} <i class="fa-solid fa-up-right-from-square small"></i></p>
         </a>
       </li>
       <li class="nav-item" role="none">
         <a href="https://mailu.io" target="_blank" class="nav-link" role="menuitem">
-          <i class="nav-icon fa fa-life-ring"></i>
-          <p class="text">{% trans %}Help{% endtrans %} <i class="fas fa-external-link-alt text-xs"></i></p>
+          <i class="nav-icon fa-solid fa-life-ring"></i>
+          <p class="text">{% trans %}Help{% endtrans %} <i class="fa-solid fa-up-right-from-square small"></i></p>
         </a>
       </li>
     {#-
@@ -31,14 +31,14 @@
     {%- if config['DOMAIN_REGISTRATION'] and not current_user.is_authenticated and config['ADMIN'] %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('ui.domain_signup') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fa fa-plus-square"></i>
+          <i class="nav-icon fa-solid fa-square-plus"></i>
           <p class="text">{% trans %}Register a domain{% endtrans %}</p>
         </a>
       </li>
     {%- endif %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('sso.login') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fas fa-sign-in-alt"></i>
+          <i class="nav-icon fa-solid fa-right-to-bracket"></i>
           <p>{% trans %}Sign in{% endtrans %}</p>
         </a>
       </li>
@@ -51,7 +51,7 @@
     {%- if not current_user.is_authenticated and signup_domains and config['ADMIN'] %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('ui.user_signup') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fa fa-user-plus"></i>
+          <i class="nav-icon fa-solid fa-user-plus"></i>
           <p class="text">{% trans %}Sign up{% endtrans %}</p>
         </a>
       </li>

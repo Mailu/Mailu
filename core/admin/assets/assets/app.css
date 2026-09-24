@@ -3,7 +3,13 @@
   opacity: .8;
 }
 .bg-mailu-logo {
-  background-color: #2980b9!important;
+  background-color: #2471a3!important;
+}
+.sidebar-brand .brand-text {
+  color: white;
+}
+.sidebar-menu .nav-header {
+  color: #6cb6e8!important;
 }
 
 /* user image */
@@ -15,7 +21,7 @@
   background-color: white;
   border-radius: 50%;
 }
-.div-circle > i {
+.div-circle > svg {
   display: block;
   position: absolute;
   top: 50%;
@@ -32,9 +38,20 @@
   border-radius: 4px;
 }
 
+.antispam-frame {
+  border: 0;
+  display: block;
+  height: calc(100dvh - 13rem);
+  min-height: 20rem;
+  width: 100%;
+}
+
 /* fieldset */
 legend {
   font-size: inherit;
+}
+fieldset > legend .form-check {
+  margin-left: -.5rem;
 }
 fieldset:disabled :not(legend) label {
   opacity: .5;
@@ -44,18 +61,50 @@ fieldset:disabled .form-control:disabled {
 }
 
 /* fix animation for icons in menu text */
-.sidebar .nav-link p i {
+.sidebar-wrapper .nav-link p svg {
   transition: margin-left .3s linear,opacity .3s ease,visibility .3s ease;
 }
 
-/* fix select2 text color */
-.select2-container--default .select2-selection--multiple .select2-selection__choice {
-  color: black;
+.user-panel {
+  align-items: center;
+  border-bottom: 1px solid var(--bs-border-color-translucent);
+  padding: 1rem .5rem;
+}
+.user-panel .info {
+  overflow: hidden;
+  padding-left: .75rem;
+  text-overflow: ellipsis;
+}
+.user-panel .info a {
+  color: rgba(255, 255, 255, .8);
+  text-decoration: none;
+  white-space: nowrap;
 }
 
-/* range input spacing */
-.input-group-text {
-  margin-right: 1em;
+/* keep Tom Select aligned with regular Bootstrap controls */
+.ts-wrapper {
+  width: 100%;
+}
+.mailu-table-sort {
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-align: inherit;
+}
+.mailu-table-sort::after {
+  content: "\00a0\2195";
+  opacity: .35;
+}
+th[aria-sort="ascending"] .mailu-table-sort::after {
+  content: "\00a0\2191";
+  opacity: 1;
+}
+th[aria-sort="descending"] .mailu-table-sort::after {
+  content: "\00a0\2193";
+  opacity: 1;
 }
 
 /* version string */

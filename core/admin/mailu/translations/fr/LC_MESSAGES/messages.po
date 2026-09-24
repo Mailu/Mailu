@@ -792,3 +792,22 @@ msgstr "Places disponibles"
 #~ msgid "General settings"
 #~ msgstr "Général"
 
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "Rechercher :"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "Afficher _MENU_ entrées"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "Aucune entrée correspondante trouvée"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "Précédente"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "Suivante"

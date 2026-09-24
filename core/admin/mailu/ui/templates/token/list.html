@@ -9,7 +9,7 @@
 {%- endblock %}
 
 {%- block main_action %}
-<a class="btn btn-primary float-right" href="{{ url_for('.token_create', user_email=user.email) }}">{% trans %}New token{% endtrans %}</a>
+<a class="btn btn-primary float-end" href="{{ url_for('.token_create', user_email=user.email) }}">{% trans %}New token{% endtrans %}</a>
 {%- endblock %}
 
 {%- block content %}
@@ -28,7 +28,7 @@
   {%- for token in user.tokens %}
   <tr>
     <td>
-      <a href="{{ url_for('.token_delete', token_id=token.id) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+      <a href="{{ url_for('.token_delete', token_id=token.id) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa-solid fa-trash"></i></a>
     </td>
     <td>{{ token.id }}</td>
     <td>{{ token.comment }}</td>

@@ -39,10 +39,10 @@ class DestinationField(fields.SelectMultipleField):
         
         for email in managed:
             selected = self.data is not None and self.coerce(email) in self.data
-            yield (email, email, selected)
+            yield (email, email, selected, {})
         for email in self.data or ():
             if email not in managed:
-                yield (email, email, True)
+                yield (email, email, True, {})
 
     def pre_validate(self, form):
         for item in self.data:

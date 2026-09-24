@@ -742,3 +742,22 @@ msgstr "Tilgjengelige plasser"
 #~ msgid "Forward emails"
 #~ msgstr "Videresend e-poster"
 
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "Søk:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "Vis _MENU_ oppføringer"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "Ingen rader samsvarer med søket"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "Forrige"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "Neste"

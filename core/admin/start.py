@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import ipaddress
 import os
 import os.path
 import time
@@ -62,8 +63,21 @@ def test_DNS():
 test_DNS()
 test_unsupported()
 
+subnet = os.environ.get("SUBNET")
+forwarded_allow_networks = list(filter(None, [subnet, os.environ.get("SUBNET6")]))
+if subnet:
+    ipv4_network = ipaddress.ip_network(subnet)
+    if ipv4_network.version == 4:
+        forwarded_allow_networks.append(
+            str(ipaddress.ip_network(
+                f"::ffff:{ipv4_network.network_address}/{96 + ipv4_network.prefixlen}"
+            ))
+        )
+forwarded_allow_ips = ",".join(forwarded_allow_networks)
+
 cmdline = [
     "gunicorn",
+    "--worker-class", "gthread",
     "--threads", os.environ.get('CPU_COUNT', '1'),
     # If SUBNET6 is defined, gunicorn must listen on IPv6 as well as IPv4
     "-b", f"{'[::]' if os.environ.get('SUBNET6') else '0.0.0.0'}:8080",
@@ -71,7 +85,10 @@ cmdline = [
     f"--log-level {os.environ.get('LOG_LEVEL', 'INFO')}",
     "--worker-tmp-dir /dev/shm",
     "--error-logfile", "-",
-    "--preload"
+    "--preload",
+    "--http-protocols", "h2,h1",
+    "--http2-cleartext", "both",
+    "--forwarded-allow-ips", forwarded_allow_ips
 ]
 
 # logging

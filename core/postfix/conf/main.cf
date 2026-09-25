@@ -1,6 +1,7 @@
 ###############
 # General
 ###############
+compatibility_level=3.11
 
 # Main domain and hostname
 mydomain = {{ DOMAIN }}
@@ -24,7 +25,6 @@ alias_maps =
 podop = socketmap:unix:/tmp/podop.socket:
 
 postscreen_upstream_proxy_protocol = haproxy
-compatibility_level=3.6
 smtpd_forbid_bare_newline=yes
 smtpd_forbid_unauth_pipelining=no
 

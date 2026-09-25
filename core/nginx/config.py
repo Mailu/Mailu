@@ -7,7 +7,7 @@ import sys
 from socrate import system, conf
 
 from cryptography import x509
-from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, load_pem_private_key
 from cryptography.x509.verification import PolicyBuilder, Store, DNSName
 from cryptography.x509.oid import NameOID
 import hashlib
@@ -106,8 +106,9 @@ sI1ANRYvqSFC2X1VRZfDg+wD6E21BccmifG4yWc=
 -----END CERTIFICATE-----
 ''')
 
-args = system.set_env()
+args = system.set_env(cleanup_pids=False)
 log.basicConfig(stream=sys.stderr, level=args.get("LOG_LEVEL", "WARNING"))
+bootstrap = "--bootstrap" in sys.argv
 
 args['TLS_PERMISSIVE'] = str(args.get('TLS_PERMISSIVE')).lower() not in ('false', 'no')
 
@@ -129,6 +130,23 @@ args["TLS"] = {
         "/certs/letsencrypt/live/mailu/privkey.pem", "/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem", "/certs/letsencrypt/live/mailu-ecdsa/privkey.pem"),
     "notls": None
 }[args["TLS_FLAVOR"]]
+
+def validate_keypair(fullchain, private_key):
+    if not os.path.exists(fullchain) or not os.path.exists(private_key):
+        return
+    with open(fullchain, 'rb') as chain_file:
+        certificate = x509.load_pem_x509_certificates(chain_file.read())[0]
+    with open(private_key, 'rb') as key_file:
+        key = load_pem_private_key(key_file.read(), password=None)
+    certificate_key = certificate.public_key().public_bytes(
+        Encoding.DER, PublicFormat.SubjectPublicKeyInfo
+    )
+    private_public_key = key.public_key().public_bytes(
+        Encoding.DER, PublicFormat.SubjectPublicKeyInfo
+    )
+    if certificate_key != private_public_key:
+        raise ValueError(f'Private key does not match {fullchain}')
+
 
 def format_for_dane(fullchain, output):
     """Build a validated chain containing a DNS-published trust anchor."""
@@ -170,12 +188,31 @@ def format_for_dane(fullchain, output):
             f.write(f'{cert.public_bytes(encoding=Encoding.PEM).decode("ascii").strip()}\n')
 
 if args['TLS_FLAVOR'] in ['letsencrypt', 'mail-letsencrypt']:
-    format_for_dane('/certs/letsencrypt/live/mailu/fullchain.pem', '/certs/letsencrypt/live/mailu/DANE-chain.pem')
-    format_for_dane('/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem', '/certs/letsencrypt/live/mailu-ecdsa/DANE-chain.pem')
+    try:
+        validate_keypair(
+            '/certs/letsencrypt/live/mailu/fullchain.pem',
+            '/certs/letsencrypt/live/mailu/privkey.pem',
+        )
+        validate_keypair(
+            '/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem',
+            '/certs/letsencrypt/live/mailu-ecdsa/privkey.pem',
+        )
+        format_for_dane('/certs/letsencrypt/live/mailu/fullchain.pem', '/certs/letsencrypt/live/mailu/DANE-chain.pem')
+        format_for_dane('/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem', '/certs/letsencrypt/live/mailu-ecdsa/DANE-chain.pem')
+    except Exception:
+        if not bootstrap:
+            raise
+        log.exception('Disabling TLS until valid certificate chains are available')
+        args["TLS_ERROR"] = "yes"
 
 if args["TLS"] and not all(os.path.exists(file_path) for file_path in args["TLS"]):
     print("Missing cert or key file, disabling TLS")
     args["TLS_ERROR"] = "yes"
+if bootstrap and args.get("TLS_ERROR") and args['TLS_FLAVOR'] in ['letsencrypt', 'mail-letsencrypt']:
+    with open("/tmp/mailu-renewal-required", "a"):
+        pass
+if args.get("TLS_ERROR"):
+    args["TLS"] = None
 
 args['TLS_PERMISSIVE'] = str(args.get('TLS_PERMISSIVE')).lower() not in ('false', 'no')
 
@@ -191,9 +228,13 @@ subprocess.run(
     check=True,
     stdout=subprocess.DEVNULL,
 )
-for daemon, pid_file in (
-    ("nginx", "/var/run/nginx.pid"),
-    ("dovecot", "/run/dovecot/master.pid"),
-):
-    if os.path.exists(pid_file):
-        subprocess.run(["killall", "-q", "-HUP", daemon], check=True)
+if not bootstrap:
+    reload_commands = (
+        (["nginx", "-s", "reload"], "/var/run/nginx.pid"),
+        (["doveadm", "reload"], "/run/dovecot/master.pid"),
+    )
+    for _, pid_file in reload_commands:
+        if not os.path.exists(pid_file):
+            raise RuntimeError(f"Cannot reload service without {pid_file}")
+    for command, _ in reload_commands:
+        subprocess.run(command, check=True)

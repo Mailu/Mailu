@@ -200,7 +200,7 @@ def test_eai_localpart_round_trips_through_internal_lookups(
         )
         assert response.status_code == 200
         assert response.headers["Auth-Status"] == "OK"
-        assert response.headers["Auth-User"] == user.email
+        assert "Auth-User" not in response.headers
 
         for endpoint, address, expected in (
             ("mailbox", user.email, user.email),

@@ -32,10 +32,15 @@ def nginx_authentication():
         return response
     headers = nginx.handle_authentication(flask.request.headers)
     response = flask.Response()
+    username = headers.get('Auth-User', None)
     for key, value in headers.items():
+        # Auth-User is optional in an auth_http response. Omitting it preserves
+        # the client-supplied username and avoids putting SMTPUTF8 data in an
+        # HTTP header, which WSGI requires to be Latin-1 encodable.
+        if key == 'Auth-User':
+            continue
         response.headers[key] = str(value)
     is_valid_user = False
-    username = response.headers.get('Auth-User', None)
     if response.headers.get("Auth-User-Exists") == "True":
         if not is_from_webmail and not is_app_token and utils.limiter.should_rate_limit_user(username, client_ip):
             # FIXME could be done before handle_authentication()

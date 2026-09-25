@@ -5,6 +5,7 @@ import os
 import requests
 import secrets
 import socket
+import stat
 import sys
 import subprocess
 import threading
@@ -59,6 +60,28 @@ required_files = (
     "/certs/letsencrypt/live/mailu-ecdsa/privkey.pem",
 )
 keypairs = (required_files[0], required_files[1]), (required_files[2], required_files[3])
+renewal_configs = (
+    "/certs/letsencrypt/renewal/mailu.conf",
+    "/certs/letsencrypt/renewal/mailu-ecdsa.conf",
+)
+
+
+def remove_legacy_post_hooks():
+    for renewal_config in renewal_configs:
+        if not os.path.exists(renewal_config):
+            continue
+        with open(renewal_config) as config_file:
+            lines = config_file.readlines()
+        filtered_lines = [
+            line for line in lines if line.partition("=")[0].strip() != "post_hook"
+        ]
+        if filtered_lines == lines:
+            continue
+        temporary_config = f"{renewal_config}.mailu"
+        with open(temporary_config, "w") as config_file:
+            config_file.writelines(filtered_lines)
+        os.chmod(temporary_config, stat.S_IMODE(os.stat(renewal_config).st_mode))
+        os.replace(temporary_config, renewal_config)
 
 
 def certificate_state():
@@ -130,7 +153,8 @@ def reachable_hostnames():
                 except socket.gaierror as error:
                     log.warning("Cannot resolve %s for HTTP-01: %s", hostname, error)
                     continue
-                address_results = []
+                successful_address = False
+                invalid_response = False
                 for family, address in addresses:
                     url_address = f"[{address}]" if family == socket.AF_INET6 else address
                     target = f"http://{url_address}{challenge_path}"
@@ -148,18 +172,19 @@ def reachable_hostnames():
                             address,
                             error,
                         )
-                        address_results.append(False)
                         continue
                     valid_response = response.status_code == 200 and response.content == response_body
                     if not valid_response:
+                        invalid_response = True
                         log.warning(
                             "The HTTP-01 challenge for %s via %s returned status %s or an unexpected body",
                             hostname,
                             address,
                             response.status_code,
                         )
-                    address_results.append(valid_response)
-                if address_results and all(address_results):
+                    else:
+                        successful_address = True
+                if successful_address and not invalid_response:
                     reachable.add(hostname)
             if len(reachable) == len(hostname_list):
                 break
@@ -175,6 +200,7 @@ def reachable_hostnames():
         server.server_close()
 
 # Wait for nginx to start
+remove_legacy_post_hooks()
 time.sleep(5)
 
 # Run certbot every day

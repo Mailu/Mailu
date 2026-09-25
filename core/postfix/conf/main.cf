@@ -1,6 +1,7 @@
 ###############
 # General
 ###############
+compatibility_level=3.11
 
 # Main domain and hostname
 mydomain = {{ DOMAIN }}

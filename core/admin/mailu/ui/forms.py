@@ -2,7 +2,7 @@ from wtforms import validators, fields, widgets
 from wtforms.validators import ValidationError
 from wtforms_components import fields as fields_
 from flask_babel import lazy_gettext as _
-from .. import models
+from .. import models, utils
 
 import flask_login
 import flask_wtf
@@ -19,6 +19,11 @@ EMAIL_ADDRESS_REGEX = rf'[{LOCALPART_CHARS}]+(?:\.[{LOCALPART_CHARS}]+)*@(?:[a-z
 def checkStrippable(form, field):
     if field.data != field.data.strip(string.whitespace):
         raise ValidationError(_('Passwords should not start or end with whitespaces'))
+
+
+def validLocalpart(form, field):
+    if not utils.is_valid_localpart(field.data):
+        raise ValidationError(_('Invalid email address.'))
 
 AUTOFOCUS = {'autofocus': True}
 NO_AUTOCOMPLETE = {'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'}
@@ -46,7 +51,7 @@ class DestinationField(fields.SelectMultipleField):
 
     def pre_validate(self, form):
         for item in self.data:
-            if not self.validator.match(item):
+            if not utils.is_valid_email(item):
                 raise validators.ValidationError(_('Invalid email address.'))
 
 class MultipleEmailAddressesVerify(object):
@@ -54,8 +59,8 @@ class MultipleEmailAddressesVerify(object):
         self.message = message
 
     def __call__(self, form, field):
-        pattern = re.compile(rf'^{EMAIL_ADDRESS_REGEX}(,{EMAIL_ADDRESS_REGEX})*$', re.IGNORECASE)
-        if not pattern.match(field.data.replace(" ", "")):
+        addresses = field.data.replace(" ", "").split(',')
+        if not all(utils.is_valid_email(address) for address in addresses):
             raise validators.ValidationError(self.message)
 
 class MultipleFoldersVerify(object):
@@ -84,7 +89,7 @@ class DomainForm(flask_wtf.FlaskForm):
 
 class DomainSignupForm(flask_wtf.FlaskForm):
     name = fields.StringField(_('Domain name'), [validators.DataRequired()], render_kw=AUTOFOCUS|NO_AUTOCOMPLETE)
-    localpart = fields.StringField(_('Initial admin'), [validators.DataRequired()], render_kw=NO_AUTOCOMPLETE)
+    localpart = fields.StringField(_('Initial admin'), [validators.DataRequired(), validLocalpart], render_kw=NO_AUTOCOMPLETE)
     pw = fields.PasswordField(_('Admin password'), [validators.DataRequired(), checkStrippable])
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
     pwned = fields.HiddenField(label='', default=-1)
@@ -105,7 +110,7 @@ class RelayForm(flask_wtf.FlaskForm):
 
 
 class UserForm(flask_wtf.FlaskForm):
-    localpart = fields.StringField(_('E-mail'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)], render_kw=NO_AUTOCOMPLETE)
+    localpart = fields.StringField(_('E-mail'), [validators.DataRequired(), validLocalpart], render_kw=NO_AUTOCOMPLETE)
     pw = fields.PasswordField(_('Password'))
     pw2 = fields.PasswordField(_('Confirm password'), [checkStrippable, validators.EqualTo('pw')])
     pwned = fields.HiddenField(label='', default=-1)
@@ -121,7 +126,7 @@ class UserForm(flask_wtf.FlaskForm):
 
 
 class UserSignupForm(flask_wtf.FlaskForm):
-    localpart = fields.StringField(_('Email address'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)], render_kw=AUTOFOCUS|NO_AUTOCOMPLETE)
+    localpart = fields.StringField(_('Email address'), [validators.DataRequired(), validLocalpart], render_kw=AUTOFOCUS|NO_AUTOCOMPLETE)
     pw = fields.PasswordField(_('Password'), [validators.DataRequired(), checkStrippable])
     pw2 = fields.PasswordField(_('Confirm password'), [validators.EqualTo('pw')])
     pwned = fields.HiddenField(label='', default=-1)
@@ -185,7 +190,7 @@ class TokenForm(flask_wtf.FlaskForm):
             raise validators.ValidationError('Not a valid list of CIDRs')
 
 class AliasForm(flask_wtf.FlaskForm):
-    localpart = fields.StringField(_('Alias'), [validators.DataRequired(), validators.Regexp(LOCALPART_REGEX)], render_kw=NO_AUTOCOMPLETE)
+    localpart = fields.StringField(_('Alias'), [validators.DataRequired(), validLocalpart], render_kw=NO_AUTOCOMPLETE)
     wildcard = fields.BooleanField(
         _('Use SQL LIKE Syntax (e.g. for catch-all aliases)'))
     destination = DestinationField(_('Destination'))

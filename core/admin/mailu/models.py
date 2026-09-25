@@ -472,6 +472,8 @@ class Email(object):
         # email local parts are case-insensitive: keep them lowercased so the
         # localpart stays in sync with the (lowercased) email primary key (#2695)
         value = value.lower() if value else value
+        if not utils.is_valid_localpart(value):
+            raise ValueError('invalid email local part')
         if target.domain_name:
             target._email = f'{value}@{target.domain_name}'
         return value

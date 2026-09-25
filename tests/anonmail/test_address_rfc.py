@@ -65,6 +65,27 @@ def test_postfix_alias_map_accepts_unicode_and_alabel_domains(app, client):
             assert response.get_json() == f"recipient@{IDN_ALABEL}"
 
 
+@pytest.mark.parametrize("endpoint", ["mailbox", "sender/rate"])
+def test_postfix_mailbox_maps_reject_keys_without_at(app, client, endpoint):
+    with app.app_context():
+        response = client.get(f"/internal/postfix/{endpoint}/localpart")
+
+        assert response.status_code == 404
+
+
+@pytest.mark.parametrize("resource", ["user", "alias"])
+@pytest.mark.parametrize("domain", ["\U0001f600.example", "xn--e28h.example"])
+def test_api_rejects_non_idna_domains_cleanly(app, client, resource, domain):
+    address = quote(f"recipient@{domain}", safe="")
+    with app.app_context():
+        response = client.get(
+            f"/api/v1/{resource}/{address}",
+            headers=bearer(app),
+        )
+
+        assert response.status_code == 400
+
+
 @pytest.mark.parametrize(
     "model",
     [
@@ -82,6 +103,27 @@ def test_postfix_alias_map_accepts_unicode_and_alabel_domains(app, client):
 def test_localpart_over_64_octets_is_rejected(app, model, localpart):
     """#2696: RFC 5321 and RFC 6531 limit a local-part to 64 octets."""
     assert len(localpart.encode("utf-8")) == 65
+
+    with app.app_context():
+        models.db.session.add(models.Domain(name="example.com"))
+
+        with pytest.raises((ValueError, sqlalchemy.exc.StatementError)):
+            email = make_email(model, localpart)
+            models.db.session.add(email)
+            models.db.session.commit()
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        pytest.param(models.User, id="user"),
+        pytest.param(models.Alias, id="alias"),
+    ],
+)
+def test_localpart_lowercase_form_must_fit_in_64_octets(app, model):
+    localpart = "A" * 62 + "\u0130"
+    assert len(localpart.encode("utf-8")) == 64
+    assert len(localpart.lower().encode("utf-8")) == 65
 
     with app.app_context():
         models.db.session.add(models.Domain(name="example.com"))

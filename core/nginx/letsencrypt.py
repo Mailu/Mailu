@@ -4,6 +4,7 @@ import logging as log
 import os
 import requests
 import secrets
+import socket
 import sys
 import subprocess
 import threading
@@ -110,26 +111,56 @@ def reachable_hostnames():
     server = HTTPServer(("127.0.0.1", 8008), ChallengeHandler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
+    session = requests.Session()
+    session.trust_env = False
     try:
         reachable = set()
         for attempt in range(3):
             for hostname in hostname_list:
                 if hostname in reachable:
                     continue
-                target = f"http://{hostname}{challenge_path}"
                 try:
-                    response = requests.get(target, allow_redirects=False, timeout=10)
-                except requests.RequestException as error:
-                    log.warning("Cannot reach the HTTP-01 challenge at %s: %s", target, error)
+                    addresses = tuple(dict.fromkeys(
+                        (family, sockaddr[0])
+                        for family, _, _, _, sockaddr in socket.getaddrinfo(
+                            hostname, 80, type=socket.SOCK_STREAM
+                        )
+                        if family in (socket.AF_INET, socket.AF_INET6)
+                    ))
+                except socket.gaierror as error:
+                    log.warning("Cannot resolve %s for HTTP-01: %s", hostname, error)
                     continue
-                if response.status_code == 200 and response.content == response_body:
+                address_results = []
+                for family, address in addresses:
+                    url_address = f"[{address}]" if family == socket.AF_INET6 else address
+                    target = f"http://{url_address}{challenge_path}"
+                    try:
+                        response = session.get(
+                            target,
+                            headers={"Host": hostname},
+                            allow_redirects=False,
+                            timeout=10,
+                        )
+                    except requests.RequestException as error:
+                        log.warning(
+                            "Cannot reach the HTTP-01 challenge for %s via %s: %s",
+                            hostname,
+                            address,
+                            error,
+                        )
+                        address_results.append(False)
+                        continue
+                    valid_response = response.status_code == 200 and response.content == response_body
+                    if not valid_response:
+                        log.warning(
+                            "The HTTP-01 challenge for %s via %s returned status %s or an unexpected body",
+                            hostname,
+                            address,
+                            response.status_code,
+                        )
+                    address_results.append(valid_response)
+                if address_results and all(address_results):
                     reachable.add(hostname)
-                else:
-                    log.warning(
-                        "The HTTP-01 challenge at %s returned status %s or an unexpected body",
-                        target,
-                        response.status_code,
-                    )
             if len(reachable) == len(hostname_list):
                 break
             if attempt < 2:
@@ -138,6 +169,7 @@ def reachable_hostnames():
             log.error("Excluding %s because its HTTP-01 challenge is not reachable", hostname)
         return tuple(hostname for hostname in hostname_list if hostname in reachable)
     finally:
+        session.close()
         server.shutdown()
         thread.join()
         server.server_close()

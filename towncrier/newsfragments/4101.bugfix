@@ -1,0 +1,5 @@
+Support SMTPUTF8 mailbox addresses consistently across the admin UI, API, models, and Postfix lookups while enforcing IDNA and UTF-8 octet limits.
+Advertise SMTPUTF8 on port 25 and enable end-to-end delivery through Dovecot LMTP.
+Fix authentication for mailbox names containing non-ASCII characters.
+Return a not-found response for malformed Postfix lookup keys instead of causing temporary mail failures.
+Stop Dovecot submission ports from advertising the unsupported BURL capability.

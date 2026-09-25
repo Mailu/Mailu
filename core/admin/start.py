@@ -62,8 +62,14 @@ def test_DNS():
 test_DNS()
 test_unsupported()
 
+forwarded_allow_ips = ",".join(filter(None,[
+    os.environ.get("SUBNET"),
+    os.environ.get("SUBNET6"),
+]))
+
 cmdline = [
     "gunicorn",
+    "--worker-class", "gthread",
     "--threads", os.environ.get('CPU_COUNT', '1'),
     # If SUBNET6 is defined, gunicorn must listen on IPv6 as well as IPv4
     "-b", f"{'[::]' if os.environ.get('SUBNET6') else '0.0.0.0'}:8080",
@@ -71,7 +77,10 @@ cmdline = [
     f"--log-level {os.environ.get('LOG_LEVEL', 'INFO')}",
     "--worker-tmp-dir /dev/shm",
     "--error-logfile", "-",
-    "--preload"
+    "--preload",
+    "--http-protocols", "h2,h1",
+    "--http2-cleartext", "both",
+    "--forwarded-allow-ips", forwarded_allow_ips
 ]
 
 # logging

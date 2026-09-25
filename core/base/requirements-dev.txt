@@ -18,7 +18,10 @@ Flask-Migrate
 Flask-RESTX
 Flask-SQLAlchemy
 Flask-WTF
-gunicorn
+gunicorn[http2]
+h2
+hpack
+hyperframe
 idna
 itsdangerous
 limits

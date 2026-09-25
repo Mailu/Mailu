@@ -40,6 +40,7 @@ digraph mailu {
             <TR>
                 <TD>80/tcp</TD>
                 <TD>443/tcp</TD>
+                <TD>443/udp</TD>
             </TR>
             <TR>
                 <TD>25/tcp</TD>
@@ -70,6 +71,7 @@ digraph mailu {
             <TR>
                 <TD>80/tcp</TD>
                 <TD>443/tcp</TD>
+                <TD>443/udp</TD>
             </TR>
             <TR>
                 <TD>25/tcp</TD>

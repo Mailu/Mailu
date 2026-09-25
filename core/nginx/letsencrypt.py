@@ -9,6 +9,7 @@ import time
 
 log.basicConfig(stream=sys.stderr, level="WARNING")
 hostnames = ','.join(set(host.strip() for host in os.environ['HOSTNAMES'].split(',')))
+deploy_marker = "/tmp/mailu-certificates-renewed"
 
 command = [
     "certbot",
@@ -23,7 +24,7 @@ command = [
     "--key-type", "rsa",
     "--renew-with-new-domains",
     "--config-dir", "/certs/letsencrypt",
-    "--post-hook", "/config.py"
+    "--deploy-hook", f"touch {deploy_marker}"
 ]
 command2 = [
     "certbot",
@@ -38,8 +39,15 @@ command2 = [
     "--key-type", "ecdsa",
     "--renew-with-new-domains",
     "--config-dir", "/certs/letsencrypt",
-    "--post-hook", "/config.py"
+    "--deploy-hook", f"touch {deploy_marker}"
 ]
+
+required_files = (
+    "/certs/letsencrypt/live/mailu/fullchain.pem",
+    "/certs/letsencrypt/live/mailu/privkey.pem",
+    "/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem",
+    "/certs/letsencrypt/live/mailu-ecdsa/privkey.pem",
+)
 
 # Wait for nginx to start
 time.sleep(5)
@@ -60,6 +68,14 @@ while True:
             log.error(f"Exception while fetching {target}!", exc_info = e)
             time.sleep(15)
 
-    subprocess.call(command)
-    subprocess.call(command2)
+    rsa_status = subprocess.call(command)
+    ecdsa_status = subprocess.call(command2)
+    if (
+        rsa_status == 0
+        and ecdsa_status == 0
+        and os.path.exists(deploy_marker)
+        and all(os.path.exists(path) for path in required_files)
+    ):
+        if subprocess.call(["/config.py"]) == 0:
+            os.remove(deploy_marker)
     time.sleep(86400)

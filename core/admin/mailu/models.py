@@ -295,6 +295,10 @@ class Domain(Base):
                 f'_25._tcp.{idna.encode(hostname.lower()).decode('ascii')}. 86400 IN TLSA 2 1 1 0b9fa5a59eed715c26c1020c711b4f6ec42d58b0015e14337a39dad301c5afc3',
                 # current ISRG Root X2 (ECDSA P-384, O = Internet Security Research Group, CN = ISRG Root X2) @20240311
                 f'_25._tcp.{idna.encode(hostname.lower()).decode('ascii')}. 86400 IN TLSA 2 1 1 762195c225586ee6c0237456e2107dc54f1efc21f61a792ebd515913cce68332',
+                # future ISRG Root YE (ECDSA P-384, O = Internet Security Research Group, CN = ISRG Root YE) @20260925
+                f'_25._tcp.{idna.encode(hostname.lower()).decode('ascii')}. 86400 IN TLSA 2 1 1 b0292ae545978e0fbb98abbd94c861605e5b18bb32ed523f50d5b7b5c71d47bc',
+                # future ISRG Root YR (RSA 4096, O = Internet Security Research Group, CN = ISRG Root XY) @20260925
+                f'_25._tcp.{idna.encode(hostname.lower()).decode('ascii')}. 86400 IN TLSA 2 1 1 7e4e8838a8add6295de7ae3b047d3aba3488ab95db0a0aa56d897a00d8618bcf',
             ]
         return []
 

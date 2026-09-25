@@ -2,6 +2,7 @@
 
 import os
 import logging as log
+import subprocess
 import sys
 from socrate import system, conf
 
@@ -59,6 +60,52 @@ tL4ndQavEi51mI38AjEAi/V3bNTIZargCyzuFJ0nN6T5U6VR5CmD1/iQMVtCnwr1
 -----END CERTIFICATE-----
 ''')
 
+ISRG_ROOT_YE = x509.load_pem_x509_certificate(b'''-----BEGIN CERTIFICATE-----
+MIIB2TCCAWCgAwIBAgIRAKQCa6LvbHwg1AR+XmWmk4AwCgYIKoZIzj0EAwMwLjEL
+MAkGA1UEBhMCVVMxDTALBgNVBAoTBElTUkcxEDAOBgNVBAMTB1Jvb3QgWUUwHhcN
+MjUwOTAzMDAwMDAwWhcNNDUwOTAyMjM1OTU5WjAuMQswCQYDVQQGEwJVUzENMAsG
+A1UEChMESVNSRzEQMA4GA1UEAxMHUm9vdCBZRTB2MBAGByqGSM49AgEGBSuBBAAi
+A2IABDwS/6vhrcVqcbBo+wgdI3fwn9x7DNJJOY/lTOti0vkwuRN87RhEhTH17E7X
+yFjWsPYhIPt/wzOqxTd2b+4ZJNy9ID04YywF9U5zasDVyGSNErVNtz8uSGh5izW8
+7j77GaNCMEAwDgYDVR0PAQH/BAQDAgEGMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0O
+BBYEFKPIJlqOoUzQNWP8myPIOq5W809WMAoGCCqGSM49BAMDA2cAMGQCMHhMr8N9
+LdL1VQKs9BdV81r76eXRB6mtjuNjzk6/lBsPNToWLTDzGYgtQKO1jl63uAIwGV7m
+onyF377c+MM1oqVNs17sgu7F9YKZwgLmVbeOMDbKAXHtKMDLbiGllCcs8f47
+-----END CERTIFICATE-----
+''')
+
+ISRG_ROOT_YR = x509.load_pem_x509_certificate(b'''-----BEGIN CERTIFICATE-----
+MIIFKTCCAxGgAwIBAgIRAOxGNJNgz0sP+KmC2Tqpyj0wDQYJKoZIhvcNAQELBQAw
+LjELMAkGA1UEBhMCVVMxDTALBgNVBAoTBElTUkcxEDAOBgNVBAMTB1Jvb3QgWVIw
+HhcNMjUwOTAzMDAwMDAwWhcNNDUwOTAyMjM1OTU5WjAuMQswCQYDVQQGEwJVUzEN
+MAsGA1UEChMESVNSRzEQMA4GA1UEAxMHUm9vdCBZUjCCAiIwDQYJKoZIhvcNAQEB
+BQADggIPADCCAgoCggIBANvGJnN78CTJdWL3+eGfsLN5TrNBJs+VH9hRXqRbwxu9
+sGNiB0BD1fcOxbSUQCJIM1xE13Db+5Cw1w0s0EBYsvuIP/6joF0w8cuImbgR1OGg
+YbSQ4OpzI+DG8SGuTlcE873OCS+kh3srlo6vl43M5OJg4Aeo1sfHp6kTJDoIiFBN
+JAY+OKfX/FUvYKuhjT+no49lmqmupSBI5PkBQiqrEGtWU5uxU/cQWHGu8jSjFBzn
+ZqvbNPLMXMLFxCb3WTfrJBXXjqvWG+v4bjzxjjeAtOlU7qarRDvNOyAuQYLln904
+M+faKx8hnLCpJ15ZqaEgcNlY+9MMWcC5yvL2A2j3l9+2buggZX+dOE91zYmIdawT
+vSZuVvlbRrAlLxIB6pwMBjneXCjYQ8+3BCCjssbSNpZU3hTcBDdhfAlEDlYr6pEa
+tnMdmDT5BqnKC92bd0EhM1fbLHioLccLCuievT8ZkPhZrq7Mii7gNXAcUEAR8+lz
+Yal+9zTg7C5DALyVOeG/CqfRAMn1KSHCR0NSA6P8tn/mGRlnCct5rtVCLnVySVpU
+6H1qGg3DgTOuskf8eahTMiYbI5ezPJmO5ertalskQ1utp74+eDy92PI4ftHKTbq9
+IWhH4YZKh3WnJEIt+oQvlYZbY8tpEroKrFB6PFGzrJIDRyts4HqvuH52RFj2zv/B
+AgMBAAGjQjBAMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8EBTADAQH/MB0GA1Ud
+DgQWBBTe51tg0CJtQCh9Pw0B/qS1UrRRlDANBgkqhkiG9w0BAQsFAAOCAgEAWHnf
+713Bdkq7t5yN2dNIgQakUb94X9WuyhMEHHkgx4oDpSUlnG0w4g94MoqaEUE31ZjR
+LU7L5LD1g9ujFHTQu8AD215AHMVQFbm6j8hQxdXHAzDajFNQnOlDJrLjzIx176oy
+AjvUtejZx2NNmdb5fd0WGVGsCdoAJ3N8ozo7ajE8t6vfxStZb4BQ9WYJGHUDrv2N
+i5tJF6CNiPnlzs3BUfECRbE4JSk+jvy8+VoGiFE8qsH/j78x2fjgQhAQFV7P7Zxy
+dBTZ1wEkNpZNW2qnaK1SKBLa+xf6E06YRIq5uaI+HWH8SY1y5VbRgzq40EKg3yxP
+06fz+uYAUIFJoLNfhwRCc3Q6pQVuMX3yAjHAes4gk4moGcLQ5p7HAh39yeylZc1J
+41sx/jKwLIkPE6Rr1Nf4pxdsxf9SA4yOEiAkDgq04DVxn8hgYFdUtBCuiuVC2heA
+EiqVEa+8QZjuw8Gj0EbHXcRd1nInvGqRS1o9Is7YBdQN57X1AYveGBNNqjICSb7c
+awuw1EawTDrs13VUlJVEsbQ0/O/1aaV73mCdOQ8azqL2KTv1Ewu1xbquE2S+kdQU
+To9TUwat3wUA6cwXh1EfpS/3fJ0aGah5hdpRyoCLDlsSn8tkrjMfFFX0viC+GxHc
+sI1ANRYvqSFC2X1VRZfDg+wD6E21BccmifG4yWc=
+-----END CERTIFICATE-----
+''')
+
 args = system.set_env()
 log.basicConfig(stream=sys.stderr, level=args.get("LOG_LEVEL", "WARNING"))
 
@@ -75,29 +122,25 @@ cert_name = args.get("TLS_CERT_FILENAME", "cert.pem")
 keypair_name = args.get("TLS_KEYPAIR_FILENAME", "key.pem")
 args["TLS"] = {
     "cert": ("/certs/%s" % cert_name, "/certs/%s" % keypair_name),
-    "letsencrypt": ("/certs/letsencrypt/live/mailu/nginx-chain.pem",
-        "/certs/letsencrypt/live/mailu/privkey.pem", "/certs/letsencrypt/live/mailu-ecdsa/nginx-chain.pem", "/certs/letsencrypt/live/mailu-ecdsa/privkey.pem"),
+    "letsencrypt": ("/certs/letsencrypt/live/mailu/fullchain.pem",
+        "/certs/letsencrypt/live/mailu/privkey.pem", "/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem", "/certs/letsencrypt/live/mailu-ecdsa/privkey.pem"),
     "mail": ("/certs/%s" % cert_name, "/certs/%s" % keypair_name),
-    "mail-letsencrypt": ("/certs/letsencrypt/live/mailu/nginx-chain.pem",
-        "/certs/letsencrypt/live/mailu/privkey.pem", "/certs/letsencrypt/live/mailu-ecdsa/nginx-chain.pem", "/certs/letsencrypt/live/mailu-ecdsa/privkey.pem"),
+    "mail-letsencrypt": ("/certs/letsencrypt/live/mailu/fullchain.pem",
+        "/certs/letsencrypt/live/mailu/privkey.pem", "/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem", "/certs/letsencrypt/live/mailu-ecdsa/privkey.pem"),
     "notls": None
 }[args["TLS_FLAVOR"]]
 
-def format_for_nginx(fullchain, output, strip_CA=args.get('LETSENCRYPT_SHORTCHAIN')):
-    """ We may want to strip ISRG Root X1 out """
+def format_for_dane(fullchain, output):
+    """Build a validated chain containing a DNS-published trust anchor."""
     if not os.path.exists(fullchain):
         return
     chain=[]
     with open(fullchain, 'rb') as f:
         chain = x509.load_pem_x509_certificates(f.read())
-    builder = PolicyBuilder().store(Store([ISRG_ROOT_X1, ISRG_ROOT_X2])).time(chain[0].not_valid_before_utc)
+    builder = PolicyBuilder().store(Store([ISRG_ROOT_X1, ISRG_ROOT_X2, ISRG_ROOT_YE, ISRG_ROOT_YR]))
 
     verifier = builder.build_server_verifier(DNSName(chain[0].subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value))
-    try:
-        valid_chain = verifier.verify(chain[0], chain[1:])
-    except Exception as e:
-        log.error(e)
-        valid_chain = chain
+    valid_chain = verifier.verify(chain[0], chain[1:])
     log.info(f'The certificate chain looks as follows for {fullchain}:')
     indent = '  '
     has_found_PIN = False
@@ -112,19 +155,23 @@ def format_for_nginx(fullchain, output, strip_CA=args.get('LETSENCRYPT_SHORTCHAI
         elif digest == '762195c225586ee6c0237456e2107dc54f1efc21f61a792ebd515913cce68332': # ISRG Root X2
             log.info('ISRG X2 PIN FOUND!')
             has_found_PIN = True
+        elif digest == 'b0292ae545978e0fbb98abbd94c861605e5b18bb32ed523f50d5b7b5c71d47bc': # ISRG Root YE
+            log.info('ISRG YE PIN FOUND!')
+            has_found_PIN = True
+        elif digest == '7e4e8838a8add6295de7ae3b047d3aba3488ab95db0a0aa56d897a00d8618bcf': # ISRG Root YR
+            log.info('ISRG YR PIN FOUND!')
+            has_found_PIN = True
     if not has_found_PIN:
-        log.error('Neither ISRG X1 nor ISRG X2 have been found in the certificate chain. Please check your DANE records.')
+        message = 'No ISRG pin has been found in the certificate chain. Please check your DANE records.'
+        log.error(message)
+        raise ValueError(message)
     with open(output, 'wt') as f:
         for cert in valid_chain:
-            if strip_CA and (cert.subject.rfc4514_string() in ['CN=ISRG Root X1,O=Internet Security Research Group,C=US', 'CN=ISRG Root X2,O=Internet Security Research Group,C=US']):
-                continue
             f.write(f'{cert.public_bytes(encoding=Encoding.PEM).decode("ascii").strip()}\n')
 
 if args['TLS_FLAVOR'] in ['letsencrypt', 'mail-letsencrypt']:
-    format_for_nginx('/certs/letsencrypt/live/mailu/fullchain.pem', '/certs/letsencrypt/live/mailu/nginx-chain.pem')
-    format_for_nginx('/certs/letsencrypt/live/mailu/fullchain.pem', '/certs/letsencrypt/live/mailu/DANE-chain.pem', False)
-    format_for_nginx('/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem', '/certs/letsencrypt/live/mailu-ecdsa/nginx-chain.pem')
-    format_for_nginx('/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem', '/certs/letsencrypt/live/mailu-ecdsa/DANE-chain.pem', False)
+    format_for_dane('/certs/letsencrypt/live/mailu/fullchain.pem', '/certs/letsencrypt/live/mailu/DANE-chain.pem')
+    format_for_dane('/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem', '/certs/letsencrypt/live/mailu-ecdsa/DANE-chain.pem')
 
 if args["TLS"] and not all(os.path.exists(file_path) for file_path in args["TLS"]):
     print("Missing cert or key file, disabling TLS")
@@ -138,4 +185,15 @@ conf.jinja("/conf/proxy.conf", args, "/etc/nginx/proxy.conf")
 conf.jinja("/conf/nginx.conf", args, "/etc/nginx/nginx.conf")
 conf.jinja("/dovecot_conf/login.lua", args, "/etc/dovecot/login.lua")
 conf.jinja("/dovecot_conf/proxy.conf", args, "/etc/dovecot/proxy.conf")
-os.system("killall -q -HUP nginx dovecot")
+subprocess.run(["nginx", "-t"], check=True)
+subprocess.run(
+    ["doveconf", "-c", "/etc/dovecot/proxy.conf"],
+    check=True,
+    stdout=subprocess.DEVNULL,
+)
+for daemon, pid_file in (
+    ("nginx", "/var/run/nginx.pid"),
+    ("dovecot", "/run/dovecot/master.pid"),
+):
+    if os.path.exists(pid_file):
+        subprocess.run(["killall", "-q", "-HUP", daemon], check=True)

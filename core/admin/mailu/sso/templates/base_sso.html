@@ -47,7 +47,7 @@
       <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
         <div class="sidebar-brand bg-mailu-logo"{% if config["LOGO_BACKGROUND"] %} style="background-color:{{ config["LOGO_BACKGROUND"] }}!important;"{% endif %}>
         <a class="brand-link">
-          <img src="{{ config["LOGO_URL"] if config["LOGO_URL"] else '/static/mailu.png' }}" width="33" height="33" alt="Mailu" class="brand-image mailu-logo rounded-circle elevation-3">
+          <img src="{{ config["LOGO_URL"] if config["LOGO_URL"] else '/static/mailu.png' }}" width="33" height="33" alt="Mailu" class="brand-image mailu-logo rounded-circle shadow">
           <span class="brand-text fw-light">{{ config["SITENAME"] }}</span>
         </a>
         </div>

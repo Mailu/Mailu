@@ -5,9 +5,13 @@ import imaplib
 import smtplib
 import ssl
 import subprocess
+import sys
 import uuid
 from email import policy
 from email.message import EmailMessage
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import mail_utils
 

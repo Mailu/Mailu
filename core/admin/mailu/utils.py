@@ -12,6 +12,11 @@ import dns.flags
 import dns.rdtypes
 import dns.rdatatype
 import dns.rdataclass
+import idna
+import validators
+
+from email_validator import EmailNotValidError
+from email_validator import validate_email
 
 import hmac
 import secrets
@@ -53,6 +58,40 @@ def handle_needs_login():
 resolver = dns.resolver.Resolver()
 resolver.use_edns(0, dns.flags.DO, 1232)
 resolver.flags = dns.flags.AD | dns.flags.RD
+
+
+def is_valid_localpart(localpart):
+    """Validate an RFC 5321/6531 dot-atom local-part."""
+    if not isinstance(localpart, str) or not localpart:
+        return False
+    try:
+        if any(len(candidate.encode('utf-8')) > 64
+               for candidate in (localpart, localpart.lower())):
+            return False
+    except UnicodeEncodeError:
+        return False
+    try:
+        validate_email(
+            f'{localpart}@example.com',
+            allow_smtputf8=True,
+            check_deliverability=False,
+            strict=True,
+        )
+    except EmailNotValidError:
+        return False
+    return True
+
+
+def is_valid_email(email):
+    """Validate a mailbox while preserving Mailu's existing domain policy."""
+    if not isinstance(email, str) or email.count('@') != 1:
+        return False
+    localpart, domain = email.rsplit('@', 1)
+    try:
+        idna.encode(domain.lower())
+    except idna.IDNAError:
+        return False
+    return is_valid_localpart(localpart) and bool(validators.domain(domain))
 
 def has_dane_record(domain, timeout=10):
     try:

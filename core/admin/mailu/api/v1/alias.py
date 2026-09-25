@@ -52,7 +52,7 @@ class Aliases(Resource):
         """ Create a new alias """
         data = api.payload
 
-        if not validators.email(data['email']):
+        if not utils.is_valid_email(data['email']):
             return { 'code': 400, 'message': f'Provided alias {data["email"]} is not a valid email address'}, 400
         localpart, domain_name = data['email'].lower().rsplit('@', 1)
         domain_found = models.db.session.get(models.Domain, domain_name)
@@ -61,7 +61,7 @@ class Aliases(Resource):
         if not domain_found.max_aliases == -1 and len(domain_found.aliases) >= domain_found.max_aliases:
             return { 'code': 409, 'message': f'Too many aliases for domain {domain_name}'}, 409
         for dest in data['destination']:
-            if not validators.email(dest):
+            if not utils.is_valid_email(dest):
                 return { 'code': 400, 'message': f'Provided destination email address {dest} is not a valid email address'}, 400
             elif models.User.query.filter_by(email=dest).first() is None:
                 return { 'code': 404, 'message': f'Provided destination email address {dest} does not exist'}, 404
@@ -91,7 +91,7 @@ class Alias(Resource):
     @common.api_token_authorization
     def get(self, alias):
         """ Look up the specified alias """
-        if not validators.email(alias):
+        if not utils.is_valid_email(alias):
             return { 'code': 400, 'message': f'Provided alias (email address) {alias} is not a valid email address'}, 400
         alias_found = models.Alias.query.filter_by(email = alias).first()
         if alias_found is None:
@@ -111,7 +111,7 @@ class Alias(Resource):
       """ Update the specfied alias """
       data = api.payload
 
-      if not validators.email(alias):
+      if not utils.is_valid_email(alias):
           return { 'code': 400, 'message': f'Provided alias (email address) {alias} is not a valid email address'}, 400
       alias_found = models.Alias.query.filter_by(email = alias).first()
       if alias_found is None:
@@ -121,7 +121,7 @@ class Alias(Resource):
       if 'destination' in data:
         alias_found.destination = data['destination']
         for dest in data['destination']:
-            if not validators.email(dest):
+            if not utils.is_valid_email(dest):
                 return { 'code': 400, 'message': f'Provided destination email address {dest} is not a valid email address'}, 400
             elif models.User.query.filter_by(email=dest).first() is None:
                 return { 'code': 404, 'message': f'Provided destination email address {dest} does not exist'}, 404
@@ -140,7 +140,7 @@ class Alias(Resource):
     @common.api_token_authorization
     def delete(self, alias):
       """ Delete the specified alias """
-      if not validators.email(alias):
+      if not utils.is_valid_email(alias):
           return { 'code': 400, 'message': f'Provided alias (email address) {alias} is not a valid email address'}, 400
       alias_found = models.Alias.query.filter_by(email = alias).first()
       if alias_found is None:
@@ -192,7 +192,7 @@ class AnonAlias(Resource):
     @common.api_token_authorization
     def delete(self, alias):
         """Permanently delete the specified alias"""
-        if not validators.email(alias):
+        if not utils.is_valid_email(alias):
             return {'code': 400, 'message': f'Provided alias (email address) {alias} is not a valid email address'}, 400
         user_email = flask.g.user.email if hasattr(flask.g, 'user') else flask_login.current_user.email
         alias_found = models.Alias.query.filter_by(email=alias, owner_email=user_email).first()
@@ -209,7 +209,7 @@ class AnonAlias(Resource):
     def patch(self, alias):
         """Modify an alias (toggle disabled, update note/hostname/destination)"""
         data = api.payload or {}
-        if not validators.email(alias):
+        if not utils.is_valid_email(alias):
             return {'code': 400, 'message': f'Provided alias (email address) {alias} is not a valid email address'}, 400
         user_email = flask.g.user.email if hasattr(flask.g, 'user') else flask_login.current_user.email
         alias_found = models.Alias.query.filter_by(email=alias, owner_email=user_email).first()
@@ -220,7 +220,7 @@ class AnonAlias(Resource):
             alias_found.comment = data['comment']
         if 'destination' in data:
             for dest in data['destination']:
-                if not validators.email(dest):
+                if not utils.is_valid_email(dest):
                     return {'code': 400, 'message': f'Provided destination email address {dest} is not a valid email address'}, 400
                 if not models.db.session.get(models.User, dest):
                     return {'code': 404, 'message': f'Provided destination email address {dest} does not exist'}, 404

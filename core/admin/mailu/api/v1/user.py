@@ -1,9 +1,9 @@
 from flask_restx import Resource, fields, marshal
-import validators, datetime
+import datetime
 
 from . import api, response_fields
 from .. import common
-from ... import models
+from ... import models, utils
 
 db = models.db
 
@@ -116,11 +116,11 @@ class Users(Resource):
     def post(self):
         """ Create a new user """
         data = api.payload
-        if not validators.email(data['email']):
+        if not utils.is_valid_email(data['email']):
             return { 'code': 400, 'message': f'Provided email address {data["email"]} is not a valid email address'}, 400
         if 'forward_destination' in data and len(data['forward_destination']) > 0:
             for dest in data['forward_destination']:
-                if not validators.email(dest):
+                if not utils.is_valid_email(dest):
                     return { 'code': 400, 'message': f'Provided forward destination email address {dest} is not a valid email address'}, 400
         localpart, domain_name = data['email'].lower().rsplit('@', 1)
         domain_found = models.db.session.get(models.Domain, domain_name)
@@ -200,7 +200,7 @@ class User(Resource):
     @common.api_token_authorization
     def get(self, email):
         """ Look up the specified user """
-        if not validators.email(email):
+        if not utils.is_valid_email(email):
             return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
 
         email_found = models.User.query.filter_by(email=email).first()
@@ -219,11 +219,11 @@ class User(Resource):
     def patch(self, email):
         """ Update the specified user """
         data = api.payload
-        if not validators.email(email):
+        if not utils.is_valid_email(email):
             return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
         if 'forward_destination' in data and len(data['forward_destination']) > 0:
             for dest in data['forward_destination']:
-                if not validators.email(dest):
+                if not utils.is_valid_email(dest):
                     return { 'code': 400, 'message': f'Provided forward destination email address {dest} is not a valid email address'}, 400
         user_found = models.db.session.get(models.User, email)
         if not user_found:
@@ -295,7 +295,7 @@ class User(Resource):
     @common.api_token_authorization
     def delete(self, email):
         """ Delete the specified user """
-        if not validators.email(email):
+        if not utils.is_valid_email(email):
             return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
 
         email_found = models.User.query.filter_by(email=email).first()

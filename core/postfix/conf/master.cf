@@ -44,7 +44,6 @@ verify    unix  -       -       n       -       1       verify
 flush     unix  n       -       n       1000?   0       flush
 proxymap  unix  -       -       n       -       -       proxymap
 smtp      unix  -       -       n       -       -       smtp
-smtpd     pass  -       -       n       -       -       smtpd
 relay     unix  -       -       n       -       -       smtp
 error     unix  -       -       n       -       -       error
 retry     unix  -       -       n       -       -       error

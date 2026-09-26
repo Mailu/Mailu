@@ -765,3 +765,22 @@ msgstr "Slots disponíveis"
 #~ msgid "General settings"
 #~ msgstr "Configurações"
 
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "Procurar:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "Mostrar _MENU_ registos"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "Não foram encontrados resultados"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "Anterior"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "Seguinte"

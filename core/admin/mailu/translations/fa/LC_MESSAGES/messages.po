@@ -733,3 +733,23 @@ msgstr "دامنه"
 #: mailu/ui/templates/user/signup_domain.html:15
 msgid "Available slots"
 msgstr "جایگاه‌های موجود"
+
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "جستجو:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "نمایش _MENU_ ردیف"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "رکوردی با این مشخصات پیدا نشد"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "قبلی"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "بعدی"

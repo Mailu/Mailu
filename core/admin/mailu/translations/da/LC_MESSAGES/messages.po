@@ -734,3 +734,22 @@ msgstr "Tilgængelige pladser"
 #~ msgid "Forward emails"
 #~ msgstr ""
 
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "Søg:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "Vis _MENU_ linjer"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "Ingen linjer matcher søgningen"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "Forrige"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "Næste"

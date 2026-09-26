@@ -20,10 +20,10 @@
 
 {%- macro form_fields(fields, prepend='', append='', label=True) %}
   {%- set width = (12 / fields|length)|int %}
-  <div class="form-group">
+  <div class="mb-3">
     <div class="row">
       {%- for field in fields %}
-      <div class="col-lg-{{ width }} col-xs-12">
+      <div class="col-lg-{{ width }} col-12">
         {%- if field.__class__.__name__ == 'list' %}
           {%- for subfield in field %}
             {{ form_individual_field(subfield, prepend=prepend, append=append, label=label, **kwargs) }}
@@ -40,10 +40,13 @@
 {%- macro form_individual_field(field, prepend='', append='', label=True, class_="") %}
   {%- set fieldclass=" ".join(["form-control"] + ([class_] if class_ else []) + (["is-invalid"] if field.errors else [])) %}
   {%- if field.type == "BooleanField" %}
-    {{ field(**kwargs) }}<span>&nbsp;&nbsp;</span>{{ field.label if label else '' }}
+    <div class="form-check">
+      {{ field(class_="form-check-input" + (" is-invalid" if field.errors else ""), **kwargs) }}
+      {{ field.label(class_="form-check-label") if label else '' }}
+    </div>
   {%- else %}
     {{ field.label if label else '' }}{{ form_field_errors(field) }}
-    {%- if prepend %}<div class="input-group-prepend">{%- elif append %}<div class="input-group-append">{%- endif %}
+    {%- if prepend or append %}<div class="input-group">{%- endif %}
       {{ prepend|safe }}{{ field(class_=fieldclass, **kwargs) }}{{ append|safe }}
     {%- if prepend or append %}</div>{%- endif %}
   {%- endif %}
@@ -51,7 +54,7 @@
 
 {%- macro form_field(field) %}
   {%- if field.type == 'SubmitField' %}
-  {{- form_fields((field,), label=False, class="btn btn-default", **kwargs) }}
+  {{- form_fields((field,), label=False, class="btn btn-secondary", **kwargs) }}
   {%- else %}
   {{- form_fields((field,), **kwargs) }}
   {%- endif %}
@@ -97,7 +100,13 @@
       </div>
       {%- endif %}
       <div class="card-body">
-        <table class="table table-bordered{% if datatable %} dataTable{% endif %}" data-order="{{ order or '[]' | e }}">
+        <table class="table table-bordered{% if datatable %} mailu-table{% endif %}"
+          data-order="{{ order or '[]' | e }}"
+          data-search="{{ _('Search') }}"
+          data-length-menu="{{ _('Show _MENU_ entries') }}"
+          data-empty="{{ _('No matching records found') }}"
+          data-previous="{{ _('Previous') }}"
+          data-next="{{ _('Next') }}">
           {{- caller() }}
         </table>
       </div>
@@ -125,8 +134,8 @@
 </fieldset>
 {%- endmacro %}
 
-{%- macro clip(target, title=_("copy to clipboard"), icon="copy", color="primary", action="copy") %}
-<button class="btn btn-{{ color }} btn-xs btn-clip float-right ml-2 mt-1" data-clipboard-action="{{ action }}" data-clipboard-target="#{{ target }}">
-<i class="fas fa-{{ icon }}" title="{{ title }}" aria-expanded="false"></i><span class="sr-only">{{ title }}</span>
+{%- macro clip(target, title=_("copy to clipboard"), icon="copy", color="primary") %}
+<button type="button" class="btn btn-{{ color }} btn-sm btn-clip float-end ms-2 mt-1" data-clipboard-target="#{{ target }}">
+<i class="fa-solid fa-{{ icon }}" title="{{ title }}"></i><span class="visually-hidden">{{ title }}</span>
 </button>
 {%- endmacro %}

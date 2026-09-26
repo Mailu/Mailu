@@ -1,60 +1,58 @@
-<div class="sidebar text-sm">
+<div class="sidebar-wrapper">
   {%- if current_user.is_authenticated %}
   <div class="user-panel mt-3 pb-3 mb-3 d-flex" title="{{ current_user }}">
-    <div class="image">
-      <div class="div-circle elevation-2"><i class="fa fa-user text-lg text-dark"></i></div>
-    </div>
+    <div class="div-circle shadow-sm flex-shrink-0"><i class="fa-solid fa-user fa-lg text-dark"></i></div>
     <div class="info">
       <a href="{{ url_for('.user_settings') }}" class="d-block">{{ current_user.displayed_name or current_user }}</a>
     </div>
   </div>
   {%- endif %}
-  <nav class="mt-2">
-    <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
+  <nav id="navigation" class="mt-2">
+    <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
       {%- if current_user.is_authenticated %}
       <li class="nav-header text-uppercase text-primary" role="none">{% trans %}My account{% endtrans %}</li>
       <li class="nav-item" role="none">
         <a href="{{ url_for('.user_settings') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fa fa-wrench"></i>
+          <i class="nav-icon fa-solid fa-wrench"></i>
           <p>{% trans %}Settings{% endtrans %}</p>
         </a>
       </li>
       <li class="nav-item" role="none">
         <a href="{{ url_for('.user_password_change') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fa fa-lock"></i>
+          <i class="nav-icon fa-solid fa-lock"></i>
           <p>{% trans %}Update password{% endtrans %}</p>
         </a>
       </li>
       <li class="nav-item" role="none">
         <a href="{{ url_for('.user_reply') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fa fa-plane"></i>
+          <i class="nav-icon fa-solid fa-plane"></i>
           <p>{% trans %}Auto-reply{% endtrans %}</p>
         </a>
       </li>
       {%- if config["FETCHMAIL_ENABLED"] %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.fetch_list') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fas fa-download"></i>
+          <i class="nav-icon fa-solid fa-download"></i>
           <p>{% trans %}Fetched accounts{% endtrans %}</p>
         </a>
       </li>
       {%- endif %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.token_list') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fas fa-ticket-alt"></i>
+          <i class="nav-icon fa-solid fa-ticket"></i>
           <p>{% trans %}Authentication tokens{% endtrans %}</p>
         </a>
       </li>
       <li class="nav-item" role="none">
         <a href="{{ url_for('.anonalias_list') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fas fa-user-secret"></i>
+          <i class="nav-icon fa-solid fa-user-secret"></i>
           <p>{% trans %}Anonymous Aliases{% endtrans %}</p>
         </a>
       </li>
       {%- if current_user.is_authenticated %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.client') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fa fa-laptop"></i>
+          <i class="nav-icon fa-solid fa-laptop"></i>
           <p>{% trans %}Client setup{% endtrans %}</p>
         </a>
       </li>
@@ -66,25 +64,25 @@
       {%- if current_user.global_admin %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.announcement') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fa fa-bullhorn"></i>
+          <i class="nav-icon fa-solid fa-bullhorn"></i>
           <p>{% trans %}Announcement{% endtrans %}</p>
         </a>
       </li>
       <li class="nav-item" role="none">
         <a href="{{ url_for('.admin_list') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fa fa-user"></i>
+          <i class="nav-icon fa-solid fa-user"></i>
           <p>{% trans %}Administrators{% endtrans %}</p>
         </a>
       </li>
       <li class="nav-item" role="none">
         <a href="{{ url_for('.relay_list') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fa fa-reply-all"></i>
+          <i class="nav-icon fa-solid fa-reply-all"></i>
           <p>{% trans %}Relayed domains{% endtrans %}</p>
         </a>
       </li>
       <li class="nav-item" role="none">
         <a href="{{ config["WEB_ADMIN"] }}/antispam/" data-clicked="{{ url_for('.antispam') }}" target="_blank" class="nav-link" role="menuitem">
-        <i class="nav-icon fas fa-trash-alt"></i>
+        <i class="nav-icon fa-solid fa-trash-can"></i>
         <p>{% trans %}Antispam{% endtrans %}</p>
         </a>
       </li>
@@ -92,7 +90,7 @@
       {%- if current_user.manager_of or current_user.global_admin %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.domain_list') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fa fa-envelope"></i>
+          <i class="nav-icon fa-solid fa-envelope"></i>
           <p>{% trans %}Mail domains{% endtrans %}</p>
         </a>
       </li>
@@ -103,7 +101,7 @@
       {%- if config["WEBMAIL"] != "none" and current_user.is_authenticated %}
       <li class="nav-item" role="none">
         <a href="{{ config["WEB_WEBMAIL"] }}" class="nav-link" role="menuitem">
-        <i class="nav-icon far fa-envelope"></i>
+        <i class="nav-icon fa-regular fa-envelope"></i>
         <p>{% trans %}Webmail{% endtrans %}</p>
         </a>
       </li>
@@ -111,27 +109,27 @@
       {%- if not current_user.is_authenticated %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.client') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fa fa-laptop"></i>
+          <i class="nav-icon fa-solid fa-laptop"></i>
           <p>{% trans %}Client setup{% endtrans %}</p>
         </a>
       </li>
       {%- endif %}
       <li class="nav-item" role="none">
         <a href="{{ config["WEBSITE"] }}" target="_blank" class="nav-link" role="menuitem" rel="noreferrer">
-        <i class="nav-icon fa fa-globe"></i>
-        <p>{% trans %}Website{% endtrans %} <i class="fas fa-external-link-alt text-xs"></i></p>
+        <i class="nav-icon fa-solid fa-globe"></i>
+        <p>{% trans %}Website{% endtrans %} <i class="fa-solid fa-up-right-from-square small"></i></p>
         </a>
       </li>
       <li class="nav-item" role="none">
         <a href="https://mailu.io" target="_blank" class="nav-link" role="menuitem" rel="noreferrer">
-          <i class="nav-icon fa fa-life-ring"></i>
-          <p>{% trans %}Help{% endtrans %} <i class="fas fa-external-link-alt text-xs"></i></p>
+          <i class="nav-icon fa-solid fa-life-ring"></i>
+          <p>{% trans %}Help{% endtrans %} <i class="fa-solid fa-up-right-from-square small"></i></p>
         </a>
       </li>
       {%- if config['DOMAIN_REGISTRATION'] %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.domain_signup') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fa fa-plus-square"></i>
+          <i class="nav-icon fa-solid fa-square-plus"></i>
           <p>{% trans %}Register a domain{% endtrans %}</p>
         </a>
       </li>
@@ -139,21 +137,21 @@
       {%- if current_user.is_authenticated %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('sso.logout') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fas fa-sign-out-alt"></i>
+          <i class="nav-icon fa-solid fa-right-from-bracket"></i>
           <p>{% trans %}Sign out{% endtrans %}</p>
         </a>
       </li>
       {% else %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('sso.login') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fas fa-sign-in-alt"></i>
+          <i class="nav-icon fa-solid fa-right-to-bracket"></i>
           <p>{% trans %}Sign in{% endtrans %}</p>
         </a>
       </li>
       {%- if signup_domains %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.user_signup') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fa fa-user-plus"></i>
+          <i class="nav-icon fa-solid fa-user-plus"></i>
           <p>{% trans %}Sign up{% endtrans %}</p>
         </a>
       </li>

@@ -137,7 +137,7 @@ def clean_env():
         elif item == '':
             pass
         else:
-            log.error(f'Not sure what to do with {item} in PROXY_PROTOCOL ({args.get("PROXY_PROTOCOL")})')
+            log.error(f'Not sure what to do with {item} in PROXY_PROTOCOL ({os.environ.get("PROXY_PROTOCOL")})')
 
     PORTS_REQUIRING_TLS=['443', '465', '993', '995']
     ALL_PORTS='25,80,443,465,993,995,4190'

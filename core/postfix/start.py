@@ -10,7 +10,7 @@ import re
 from podop import run_server
 from socrate import system, conf
 
-system.set_env(log_filters=[
+env = system.set_env(log_filters=[
     rb'(dis)?connect from localhost\[(\:\:1|127\.0\.0\.1)\]( quit=1 commands=1)?$',
     rb'haproxy read\: short protocol header\: QUIT$',
     rb'discarding EHLO keywords\: PIPELINING$'
@@ -46,14 +46,15 @@ def is_valid_postconf_line(line):
             and not line == ''
 
 # Actual startup script
-os.environ['DEFER_ON_TLS_ERROR'] = os.environ['DEFER_ON_TLS_ERROR'] if 'DEFER_ON_TLS_ERROR' in os.environ else 'True'
 
 # Postfix requires IPv6 addresses to be wrapped in square brackets
 if 'RELAYNETS' in os.environ:
     os.environ["RELAYNETS"] = re.sub(r'([0-9a-fA-F]+:[0-9a-fA-F:]+)/', '[\\1]/', os.environ["RELAYNETS"])
 
+context = dict(os.environ, DEFER_ON_TLS_ERROR=env.get('DEFER_ON_TLS_ERROR', True))
+
 for postfix_file in glob.glob("/conf/*.cf"):
-    conf.jinja(postfix_file, os.environ, os.path.join("/etc/postfix", os.path.basename(postfix_file)))
+    conf.jinja(postfix_file, context, os.path.join("/etc/postfix", os.path.basename(postfix_file)))
 
 if os.path.exists("/overrides/postfix.cf"):
     for line in open("/overrides/postfix.cf").read().strip().split("\n"):
@@ -74,7 +75,7 @@ for map_file in glob.glob("/overrides/*.map"):
 if os.path.exists("/overrides/mta-sts-daemon.yml"):
     shutil.copyfile("/overrides/mta-sts-daemon.yml", "/etc/mta-sts-daemon.yml")
 else:
-    conf.jinja("/conf/mta-sts-daemon.yml", os.environ, "/etc/mta-sts-daemon.yml")
+    conf.jinja("/conf/mta-sts-daemon.yml", context, "/etc/mta-sts-daemon.yml")
 
 for policy in ['tls_policy', 'transport']:
     if not os.path.exists(f'/etc/postfix/{policy}.map.lmdb'):
@@ -83,12 +84,12 @@ for policy in ['tls_policy', 'transport']:
 
 if "RELAYUSER" in os.environ:
     path = "/etc/postfix/sasl_passwd"
-    conf.jinja("/conf/sasl_passwd", os.environ, path)
+    conf.jinja("/conf/sasl_passwd", context, path)
     os.system("postmap {}".format(path))
 
 # Configure logrotate and start crond
 if os.environ.get('POSTFIX_LOG_FILE'):
-    conf.jinja("/conf/logrotate.conf", os.environ, "/etc/logrotate.d/postfix.conf")
+    conf.jinja("/conf/logrotate.conf", context, "/etc/logrotate.d/postfix.conf")
     os.system("/usr/sbin/crond")
     if os.path.exists("/overrides/logrotate.conf"):
         shutil.copyfile("/overrides/logrotate.conf", "/etc/logrotate.d/postfix.conf")

@@ -1,7 +1,7 @@
 <div class="sidebar-wrapper">
   {%- if current_user.is_authenticated %}
   <div class="user-panel mt-3 pb-3 mb-3 d-flex" title="{{ current_user }}">
-    <div class="div-circle shadow-sm"><i class="fa-solid fa-user fa-lg text-dark"></i></div>
+    <div class="div-circle shadow-sm flex-shrink-0"><i class="fa-solid fa-user fa-lg text-dark"></i></div>
     <div class="info">
       <a href="{{ url_for('.user_settings') }}" class="d-block">{{ current_user.displayed_name or current_user }}</a>
     </div>

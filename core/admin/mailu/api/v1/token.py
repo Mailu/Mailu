@@ -6,7 +6,7 @@ from passlib import pwd
 
 from . import api, response_fields
 from .. import common
-from ... import models
+from ... import models, utils
 
 db = models.db
 
@@ -66,7 +66,7 @@ class Tokens(Resource):
         """ Create a new token"""
         data = api.payload
         email = data['email']
-        if not validators.email(email):
+        if not utils.is_valid_email(email):
             return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
         user_found = models.db.session.get(models.User, email)
         if not user_found:
@@ -110,7 +110,7 @@ class Token(Resource):
     @common.api_token_authorization
     def get(self, email):
         """ Look up all the tokens of the specified user """
-        if not validators.email(email):
+        if not utils.is_valid_email(email):
             return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
         user_found = models.db.session.get(models.User, email)
         if not user_found:
@@ -140,7 +140,7 @@ class Token(Resource):
     def post(self, email):
         """ Create a new token for the specified user"""
         data = api.payload
-        if not validators.email(email):
+        if not utils.is_valid_email(email):
             return { 'code': 400, 'message': f'Provided email address {email} is not a valid email address'}, 400
         user_found = models.db.session.get(models.User, email)
         if not user_found:

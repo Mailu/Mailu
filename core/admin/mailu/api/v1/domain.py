@@ -2,7 +2,7 @@ import validators
 from flask_restx import Resource, fields, marshal
 from . import api, response_fields, user
 from .. import common
-from ... import models
+from ... import models, utils
 
 db = models.db
 
@@ -263,7 +263,7 @@ class Manager(Resource):
     def post(self, domain):
         """ Create a new domain manager for the specified domain """
         data = api.payload
-        if not validators.email(data['user_email']):
+        if not utils.is_valid_email(data['user_email']):
             return {'code': 400, 'message': f'Invalid email address {data["user_email"]}'}, 400
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
@@ -290,7 +290,7 @@ class Domain(Resource):
     @common.api_token_authorization
     def get(self, domain, email):
         """ Check if the specified user is a manager of the specified domain """
-        if not validators.email(email):
+        if not utils.is_valid_email(email):
             return {'code': 400, 'message': f'Invalid email address {email}'}, 400
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
@@ -317,7 +317,7 @@ class Domain(Resource):
     @common.api_token_authorization
     def delete(self, domain, email):
         """ Delete the specified manager of the specified domain """
-        if not validators.email(email):
+        if not utils.is_valid_email(email):
             return {'code': 400, 'message': f'Invalid email address {email}'}, 400
         if not validators.domain(domain):
             return { 'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400

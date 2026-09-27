@@ -10,7 +10,7 @@ services:
     image: redis:alpine
     restart: always
     volumes:
-      - "/mailu/redis:/data"
+      - "${MAILU_ROOT:-/mailu}/redis:/data"
 
   # Core services
   front:
@@ -31,15 +31,15 @@ services:
       - "127.0.0.1:993:993"
       - "127.0.0.1:4190:4190"
     volumes:
-      - "/mailu/certs:/certs"
+      - "${MAILU_ROOT:-/mailu}/certs:/certs"
 
   admin:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-local}
     restart: always
     env_file: mailu.env
     volumes:
-      - "/mailu/data:/data"
-      - "/mailu/dkim:/dkim"
+      - "${MAILU_ROOT:-/mailu}/data:/data"
+      - "${MAILU_ROOT:-/mailu}/dkim:/dkim"
     dns:
       - 192.168.203.254
     depends_on:
@@ -51,8 +51,8 @@ services:
     restart: always
     env_file: mailu.env
     volumes:
-      - "/mailu/mail:/mail"
-      - "/mailu/overrides:/overrides"
+      - "${MAILU_ROOT:-/mailu}/mail:/mail"
+      - "${MAILU_ROOT:-/mailu}/overrides:/overrides"
     depends_on:
       - front
 
@@ -61,7 +61,7 @@ services:
     restart: always
     env_file: mailu.env
     volumes:
-      - "/mailu/overrides:/overrides"
+      - "${MAILU_ROOT:-/mailu}/overrides:/overrides"
     depends_on:
       - front
 
@@ -80,9 +80,9 @@ services:
       - default
       - noinet
     volumes:
-      - "/mailu/filter:/var/lib/rspamd"
-      - "/mailu/dkim:/dkim"
-      - "/mailu/overrides/rspamd:/etc/rspamd/override.d"
+      - "${MAILU_ROOT:-/mailu}/filter:/var/lib/rspamd"
+      - "${MAILU_ROOT:-/mailu}/dkim:/dkim"
+      - "${MAILU_ROOT:-/mailu}/overrides/rspamd:/etc/rspamd/override.d"
     depends_on:
       - front
 

@@ -38,5 +38,5 @@ COPY --from=build /build/$VERSION /build/$VERSION
 
 EXPOSE 80/tcp
 
-CMD nginx -g "daemon off;"
+CMD ["nginx", "-g", "daemon off;"]
 RUN echo $pinned_version >> /version

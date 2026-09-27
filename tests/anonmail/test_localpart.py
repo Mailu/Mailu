@@ -22,6 +22,17 @@ class TestAnonymousAliasLocalpart:
         # Should be a random token (not a word)
         assert len(result) > 0
 
+    def test_generate_anonymous_alias_localpart_falls_back_when_word_is_none(self, monkeypatch):
+        monkeypatch.setattr(utils.RandomWord, 'word', lambda *args, **kwargs: None)
+
+        result = utils.generate_anonymous_alias_localpart(hostname='www.example.com')
+        prefix, word = result.split('.', 1)
+
+        assert prefix == 'example'
+        assert word.isalpha()
+        assert word.islower()
+        assert len(word) == 10
+
     def test_generate_anonymous_alias_localpart_consistency(self):
         """Test that generate_anonymous_alias_localpart returns different words (most of the time)"""
         words = [utils.generate_anonymous_alias_localpart(hostname='www.example.com') for _ in range(10)]

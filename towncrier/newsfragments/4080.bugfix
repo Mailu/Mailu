@@ -1,0 +1,1 @@
+Preserve the front container's nginx and Dovecot PID files during certificate reloads so that health checks and subsequent reloads continue to work.

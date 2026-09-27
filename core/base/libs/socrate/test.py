@@ -1,6 +1,7 @@
 import unittest
 import io
 import os
+from unittest import mock
 
 from socrate import conf, system
 
@@ -62,6 +63,45 @@ class TestConf(unittest.TestCase):
             conf.resolve_function("unittest.inexistant")
         with self.assertRaises(ModuleNotFoundError):
             conf.resolve_function("inexistant.function")
+
+
+class TestEnvironment(unittest.TestCase):
+    """Environment setup must distinguish startup from a live reload."""
+
+    def setUp(self):
+        for patcher in (
+            mock.patch.dict(os.environ, {
+                "SECRET_KEY": "test-secret",
+                "TLS_FLAVOR": "cert",
+                "ADMIN": "true",
+            }, clear=True),
+            mock.patch.object(system, "_is_compatible_with_hardened_malloc", return_value=False),
+            mock.patch.object(system.signal, "signal"),
+        ):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        patcher = mock.patch.object(system.os, "system")
+        self.run_command = patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_startup_cleans_stale_pid_files(self):
+        system.set_env()
+        self.run_command.assert_called_once_with(
+            r'find /run -xdev -type f -name \*.pid -print -delete'
+        )
+
+    def test_reload_preserves_pid_files_and_initializes_environment(self):
+        env = system.set_env(["SECRET"], cleanup_pids=False)
+        self.run_command.assert_not_called()
+        self.assertIs(env["ADMIN"], True)
+        self.assertIs(env["PORT_993"], True)
+        self.assertNotEqual(env["SECRET_KEY"], "test-secret")
+        self.assertEqual(len(env["SECRET_KEY"]), 64)
+
+    def test_reload_does_not_disable_later_startup_cleanup(self):
+        system.set_env(cleanup_pids=False)
+        system.set_env()
+        self.run_command.assert_called_once()
 
 
 class TestSystem(unittest.TestCase):

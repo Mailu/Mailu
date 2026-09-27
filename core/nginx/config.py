@@ -59,7 +59,7 @@ tL4ndQavEi51mI38AjEAi/V3bNTIZargCyzuFJ0nN6T5U6VR5CmD1/iQMVtCnwr1
 -----END CERTIFICATE-----
 ''')
 
-args = system.set_env()
+args = system.set_env(cleanup_pids=False)
 log.basicConfig(stream=sys.stderr, level=args.get("LOG_LEVEL", "WARNING"))
 
 args['TLS_PERMISSIVE'] = str(args.get('TLS_PERMISSIVE')).lower() not in ('false', 'no')

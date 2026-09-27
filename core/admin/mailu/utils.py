@@ -585,14 +585,20 @@ def generate_anonymous_alias_localpart(hostname=None):
         random_part = None
         try:
             rw = RandomWord()
-            candidate = rw.word(word_min_length=5, word_max_length=10)
+            candidate = rw.word(
+                word_min_length=5,
+                word_max_length=10,
+                regex=r"[A-Za-z]+",
+            )
             if candidate and isinstance(candidate, str):
                 w = candidate.strip().lower()
                 if w.isalpha():
                     random_part = w
         except Exception:
-            # Fallback to random token if word generation fails
-            random_part = secrets.token_urlsafe(10)
+            pass
+
+        if random_part is None:
+            random_part = ''.join(secrets.choice(string.ascii_lowercase) for _ in range(10))
 
         return f"{hostname_prefix}.{random_part}"
 

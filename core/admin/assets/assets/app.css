@@ -64,6 +64,9 @@ fieldset:disabled .form-control:disabled {
 .sidebar-wrapper .nav-link p svg {
   transition: margin-left .3s linear,opacity .3s ease,visibility .3s ease;
 }
+.sidebar-wrapper .nav-link {
+  align-items: center;
+}
 
 .user-panel {
   align-items: center;

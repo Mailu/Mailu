@@ -743,3 +743,22 @@ msgstr "מקומות פנויים"
 #~ msgid "Forward emails"
 #~ msgstr "העברת הודעות"
 
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "חפש:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "הצג _MENU_ פריטים"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "לא נמצאו רשומות מתאימות"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "קודם"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "הבא"

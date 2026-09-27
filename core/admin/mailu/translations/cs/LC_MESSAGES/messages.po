@@ -821,3 +821,23 @@ msgstr "Dostupné sloty"
 
 #~ msgid "DKIM public key"
 #~ msgstr "Veřejný klíč DKIM"
+
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "Vyhledávání:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "Zobrazit _MENU_ výsledků"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "Nebyly nalezeny žádné záznamy"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "Předchozí"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "Další"

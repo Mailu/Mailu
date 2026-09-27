@@ -745,3 +745,22 @@ msgstr "Ranures lliures"
 #~ msgid "Forward emails"
 #~ msgstr "Reenvia correus"
 
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "Cerca:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "Mostra _MENU_ registres"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "No s'han trobat registres"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "Anterior"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "Següent"

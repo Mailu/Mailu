@@ -771,3 +771,22 @@ msgstr "Доступные слоты"
 #~ msgid "General settings"
 #~ msgstr "Общие настройки"
 
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "Поиск:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "Показать _MENU_ записей"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "Записи отсутствуют."
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "Предыдущая"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "Следующая"

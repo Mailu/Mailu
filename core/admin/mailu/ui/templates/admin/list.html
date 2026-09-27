@@ -5,7 +5,7 @@
 {%- endblock %}
 
 {%- block main_action %}
-<a class="btn btn-primary float-right" href="{{ url_for('.admin_create') }}">
+<a class="btn btn-primary float-end" href="{{ url_for('.admin_create') }}">
   {% trans %}Add administrator{% endtrans %}
 </a>
 {%- endblock %}
@@ -22,8 +22,8 @@
   {%- for admin in admins %}
   <tr>
     <td>
-      <a href="{{ url_for('.user_edit', user_email=admin.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fas fa-pencil-alt"></i></a>&nbsp;
-      <a href="{{ url_for('.admin_delete', admin=admin.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+      <a href="{{ url_for('.user_edit', user_email=admin.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa-solid fa-pencil"></i></a>&nbsp;
+      <a href="{{ url_for('.admin_delete', admin=admin.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa-solid fa-trash"></i></a>
     </td>
     <td>{{ admin }}</td>
   </tr>

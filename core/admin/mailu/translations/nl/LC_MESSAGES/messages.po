@@ -789,3 +789,22 @@ msgstr "Vrije sloten"
 #~ msgid "General settings"
 #~ msgstr "Algemene instellingen"
 
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "Zoeken:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "_MENU_ resultaten weergeven"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "Geen resultaten gevonden"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "Vorige"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "Volgende"

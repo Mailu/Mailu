@@ -743,3 +743,23 @@ msgstr "Прымусова зьмяніць пароль пры наступны
 #: mailu/ui/forms.py:98
 msgid "Allow the user to spoof the sender (send email as anyone)"
 msgstr "Дазволіць карыстальніку падрабляць адпраўшчыка (адсылаць пошту як хто заўгодна)"
+
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "Пошук:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "Паказваць _MENU_ запісаў"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "Патрэбныя запісы не знойдзены."
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "Папярэдняя"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "Наступная"

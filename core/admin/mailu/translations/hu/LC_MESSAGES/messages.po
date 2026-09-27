@@ -767,3 +767,22 @@ msgstr "Elérhető rekeszek"
 #~ msgid "General settings"
 #~ msgstr "Általános beállítások"
 
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "Keresés:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "_MENU_ találat oldalanként"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "Nincs a keresésnek megfelelő találat"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "Előző"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "Következő"

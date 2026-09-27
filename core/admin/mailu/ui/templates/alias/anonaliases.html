@@ -10,7 +10,7 @@
 
 {%- block main_action %}
 {% if has_access %}
-<a class="btn btn-primary float-right" href="{{ url_for('.anonalias_create') }}">{% trans %}Generate alias{% endtrans %}</a>
+<a class="btn btn-primary float-end" href="{{ url_for('.anonalias_create') }}">{% trans %}Generate alias{% endtrans %}</a>
 {% endif %}
 {%- endblock %}
 
@@ -38,12 +38,12 @@
   <tr{% if alias.disabled %} class="text-muted"{% endif %}>
     <td>
       {% if alias.disabled %}
-      <a href="{{ url_for('.anonalias_enable', alias_email=alias.email) }}" title="{% trans %}Enable{% endtrans %}"><i class="fa fa-check"></i></a>&nbsp;
+      <a href="{{ url_for('.anonalias_enable', alias_email=alias.email) }}" title="{% trans %}Enable{% endtrans %}"><i class="fa-solid fa-check"></i></a>&nbsp;
       {% else %}
-      <a href="{{ url_for('.anonalias_disable', alias_email=alias.email) }}" title="{% trans %}Disable{% endtrans %}"><i class="fa fa-ban"></i></a>&nbsp;
+      <a href="{{ url_for('.anonalias_disable', alias_email=alias.email) }}" title="{% trans %}Disable{% endtrans %}"><i class="fa-solid fa-ban"></i></a>&nbsp;
       {% endif %}
-      <a href="#" onclick="navigator.clipboard.writeText('{{ alias.email }}'); return false;" title="{% trans %}Copy{% endtrans %}"><i class="fa fa-copy"></i></a>&nbsp;
-      <a href="{{ url_for('.anonalias_delete', alias_email=alias.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+      <a href="#" data-clipboard-text="{{ alias.email }}" title="{% trans %}Copy{% endtrans %}"><i class="fa-solid fa-copy"></i></a>&nbsp;
+      <a href="{{ url_for('.anonalias_delete', alias_email=alias.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa-solid fa-trash"></i></a>
     </td>
     <td>{{ alias.email }}</td>
     <td>{{ alias.email.split('@')[1] }}</td>

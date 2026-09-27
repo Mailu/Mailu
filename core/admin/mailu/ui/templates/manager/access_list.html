@@ -9,7 +9,7 @@
 {%- endblock %}
 
 {%- block main_action %}
-<a class="btn btn-primary float-right" href="{{ url_for('.domain_access_create', domain_name=domain.name) }}">{% trans %}Grant access{% endtrans %}</a>
+<a class="btn btn-primary float-end" href="{{ url_for('.domain_access_create', domain_name=domain.name) }}">{% trans %}Grant access{% endtrans %}</a>
 {%- endblock %}
 
 {%- block content %}
@@ -24,7 +24,7 @@
 {%- for access in domain.domain_accesses %}
 <tr data-access-id="{{ access.id }}">
   <td>
-    <a href="{{ url_for('.domain_access_delete', domain_name=domain.name, access_id=access.id) }}" title="{% trans %}Revoke{% endtrans %}"><i class="fa fa-trash"></i></a>
+    <a href="{{ url_for('.domain_access_delete', domain_name=domain.name, access_id=access.id) }}" title="{% trans %}Revoke{% endtrans %}"><i class="fa-solid fa-trash"></i></a>
   </td>
   <td>{{ access.user_email or '-' }}</td>
 </tr>

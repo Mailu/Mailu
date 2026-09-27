@@ -10,13 +10,13 @@
 
 {%- block main_action %}
 {%- if current_user.global_admin %}
-<a class="btn btn-primary btn-group float-right" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}">
+<a class="btn btn-primary btn-group float-end" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}">
   {%- if domain.dkim_publickey %}
   {% trans %}Regenerate keys{% endtrans %}
   {%- else %}
   {% trans %}Generate keys{% endtrans %}
   {%- endif %}
-</a><a style="margin-right: 5px;" class="btn btn-primary btn-group float-right" href="{{ url_for(".domain_download_zonefile", domain_name=domain.name) }}">  {% trans %}Download zonefile{% endtrans %}</a>
+</a><a class="btn btn-primary btn-group float-end me-1" href="{{ url_for(".domain_download_zonefile", domain_name=domain.name) }}">  {% trans %}Download zonefile{% endtrans %}</a>
 {%- endif %}
 {%- endblock %}
 
@@ -27,7 +27,7 @@
   <td>{{ domain.name }}</td>
 </tr>
 <tr>
-  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa {{ 'fa-check-circle text-success' if domain.check_mx() else 'fa-exclamation-circle text-danger' }}"></i></th>
+  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa-solid {{ 'fa-circle-check text-success' if domain.check_mx() else 'fa-circle-exclamation text-danger' }}"></i></th>
   <td>{{ macros.clip("dns_mx") }}<pre id="dns_mx" class="pre-config border bg-light">{{ domain.dns_mx }}</pre></td>
 </tr>
 <tr>
@@ -52,7 +52,7 @@
 {%- endif %}
 {%- if domain.dns_tlsa|length > 0 %}
 <tr>
-  <th>{% trans %}DNS TLSA entry{% endtrans %}</br><span class="text-secondary text-xs font-weight-normal">Let's Encrypt ISRG Roots</span></th>
+  <th>{% trans %}DNS TLSA entry{% endtrans %}<br><span class="text-secondary small fw-normal">Let's Encrypt ISRG Roots</span></th>
   <td>{{ macros.clip("dns_tlsa") }}<pre id="dns_tlsa" class="pre-config border bg-light">{{ domain.dns_tlsa | join("\n") }}</pre></td>
 </tr>
 {%- endif %}
@@ -78,7 +78,7 @@
   <td>{{ alternative.name }}</td>
 </tr>
 <tr>
-  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa {{ 'fa-check-circle text-success' if alternative.check_mx() else 'fa-exclamation-circle text-danger' }}"></i></th>
+  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa-solid {{ 'fa-circle-check text-success' if alternative.check_mx() else 'fa-circle-exclamation text-danger' }}"></i></th>
   <td>{{ macros.clip("dns_mx") }}<pre id="dns_mx" class="pre-config border bg-light">{{ alternative.dns_mx }}</pre></td>
 </tr>
 <tr>

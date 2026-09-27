@@ -23,7 +23,6 @@ alias_maps =
 # Podop configuration
 podop = socketmap:unix:/tmp/podop.socket:
 
-postscreen_upstream_proxy_protocol = haproxy
 compatibility_level=3.6
 smtpd_forbid_bare_newline=yes
 smtpd_forbid_unauth_pipelining=no
@@ -48,8 +47,6 @@ recipient_delimiter = {{ RECIPIENT_DELIMITER }}
 ###############
 
 # General TLS configuration
-tls_high_cipherlist = EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA256:EECDH:+CAMELLIA128:+AES128:+SSLv3:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!IDEA:!ECDSA:kEDH:CAMELLIA128-SHA:AES128-SHA
-tls_preempt_cipherlist = yes
 tls_ssl_options = NO_COMPRESSION, NO_TICKET
 
 # By default, outgoing TLS is more flexible because
@@ -62,7 +59,6 @@ smtp_tls_dane_insecure_mx_policy = {{ 'dane' if DEFER_ON_TLS_ERROR else 'may' }}
 smtp_tls_policy_maps=lmdb:/etc/postfix/tls_policy.map, ${podop}dane, socketmap:unix:/tmp/mta-sts.socket:postfix
 smtp_tls_CApath = /etc/ssl/certs
 smtp_tls_session_cache_database = lmdb:/dev/shm/postfix/smtp_scache
-smtpd_tls_session_cache_database = lmdb:/dev/shm/postfix/smtpd_scache
 smtp_host_lookup = dns
 smtp_dns_support_level = dnssec
 delay_warning_time = 5m

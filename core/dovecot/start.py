@@ -25,7 +25,6 @@ context = dict(os.environ, FULL_TEXT_SEARCH_ATTACHMENTS=env.get('FULL_TEXT_SEARC
 
 for dovecot_file in glob.glob("/conf/*.conf"):
     conf.jinja(dovecot_file, context, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))
-conf.jinja("/conf/login.lua", context, "/etc/dovecot/login.lua")
 
 os.makedirs("/conf/bin", exist_ok=True)
 for script_file in glob.glob("/conf/*.script"):

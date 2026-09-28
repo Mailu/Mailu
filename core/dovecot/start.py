@@ -7,13 +7,8 @@ import multiprocessing
 from podop import run_server
 from socrate import system, conf
 
-<<<<<<< HEAD
-system.set_env(log_filters=[
-    rb'Error\: SSL context initialization failed, disabling SSL\: Can\'t load SSL certificate \(ssl_cert setting\)\: The certificate is empty$'
-=======
 env = system.set_env(log_filters=[
-    rb'Error\: SSL context initialization failed, disabling SSL\: Couldn\'t initialize SSL server context\: Can\'t load SSL certificate \(ssl_server_cert_file setting\)\: The certificate is empty$',
->>>>>>> 354abcb (Honour FULL_TEXT_SEARCH_ATTACHMENTS=False in the dovecot container)
+    rb'Error\: SSL context initialization failed, disabling SSL\: Couldn\'t initialize SSL server context\: Can\'t load SSL certificate \(ssl_server_cert_file setting\)\: The certificate is empty$'
 ])
 
 def start_podop():
@@ -29,12 +24,8 @@ def start_podop():
 context = dict(os.environ, FULL_TEXT_SEARCH_ATTACHMENTS=env.get('FULL_TEXT_SEARCH_ATTACHMENTS', False))
 
 for dovecot_file in glob.glob("/conf/*.conf"):
-<<<<<<< HEAD
-    conf.jinja(dovecot_file, os.environ, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))
-=======
     conf.jinja(dovecot_file, context, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))
 conf.jinja("/conf/login.lua", context, "/etc/dovecot/login.lua")
->>>>>>> 354abcb (Honour FULL_TEXT_SEARCH_ATTACHMENTS=False in the dovecot container)
 
 os.makedirs("/conf/bin", exist_ok=True)
 for script_file in glob.glob("/conf/*.script"):

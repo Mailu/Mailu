@@ -8,7 +8,7 @@ from podop import run_server
 from socrate import system, conf
 
 env = system.set_env(log_filters=[
-    rb'Error\: SSL context initialization failed, disabling SSL\: Couldn\'t initialize SSL server context\: Can\'t load SSL certificate \(ssl_server_cert_file setting\)\: The certificate is empty$'
+    rb'Error\: SSL context initialization failed, disabling SSL\: Can\'t load SSL certificate \(ssl_cert setting\)\: The certificate is empty$'
 ])
 
 def start_podop():

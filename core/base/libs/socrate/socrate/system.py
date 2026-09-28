@@ -75,7 +75,7 @@ def sigterm_handler(_signo, _stack_frame):
     log.critical("Received SIGTERM, terminating.")
     sys.exit(143)
 
-def set_env(required_secrets=[], log_filters=[]):
+def set_env(required_secrets=[], log_filters=[], cleanup_pids=True):
     if log_filters:
         sys.stdout = LogFilter(sys.stdout, log_filters)
         sys.stderr = LogFilter(sys.stderr, log_filters)
@@ -100,7 +100,8 @@ def set_env(required_secrets=[], log_filters=[]):
     for secret in required_secrets:
         os.environ[f'{secret}_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray(secret, 'utf-8'), 'sha256').hexdigest()
 
-    os.system(r'find /run -xdev -type f -name \*.pid -print -delete')
+    if cleanup_pids:
+        os.system(r'find /run -xdev -type f -name \*.pid -print -delete')
 
     return {
             key: _coerce_value(os.environ.get(key, value))
@@ -128,7 +129,7 @@ def clean_env():
         elif item == '':
             pass
         else:
-            log.error(f'Not sure what to do with {item} in PROXY_PROTOCOL ({args.get("PROXY_PROTOCOL")})')
+            log.error(f'Not sure what to do with {item} in PROXY_PROTOCOL ({os.environ.get("PROXY_PROTOCOL")})')
 
     PORTS_REQUIRING_TLS=['443', '465', '993', '995']
     ALL_PORTS='25,80,443,465,993,995,4190'

@@ -7,7 +7,7 @@ import multiprocessing
 from podop import run_server
 from socrate import system, conf
 
-system.set_env(log_filters=[
+env = system.set_env(log_filters=[
     rb'Error\: SSL context initialization failed, disabling SSL\: Can\'t load SSL certificate \(ssl_cert setting\)\: The certificate is empty$'
 ])
 
@@ -21,13 +21,15 @@ def start_podop():
     ])
 
 # Actual startup script
+context = dict(os.environ, FULL_TEXT_SEARCH_ATTACHMENTS=env.get('FULL_TEXT_SEARCH_ATTACHMENTS', False))
+
 for dovecot_file in glob.glob("/conf/*.conf"):
-    conf.jinja(dovecot_file, os.environ, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))
+    conf.jinja(dovecot_file, context, os.path.join("/etc/dovecot", os.path.basename(dovecot_file)))
 
 os.makedirs("/conf/bin", exist_ok=True)
 for script_file in glob.glob("/conf/*.script"):
     out_file = os.path.join("/conf/bin/", os.path.basename(script_file).replace('.script',''))
-    conf.jinja(script_file, os.environ, out_file)
+    conf.jinja(script_file, context, out_file)
     os.chmod(out_file, 0o555)
 
 # Run Podop, then postfix

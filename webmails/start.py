@@ -11,11 +11,12 @@ from socrate import conf, system
 
 env = os.environ
 
-system.set_env(['ROUNDCUBE','SNUFFLEUPAGUS'])
+coerced = system.set_env(['ROUNDCUBE','SNUFFLEUPAGUS'])
 
 # jinja context
 context = {}
 context.update(env)
+context['ADMIN'] = coerced.get('ADMIN', False)
 
 context["MAX_FILESIZE"] = str(int(int(env.get("MESSAGE_SIZE_LIMIT", "50000000")) * 0.66 / 1048576))
 

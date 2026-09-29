@@ -298,7 +298,7 @@ This page is only accessible for global administrators. On the edit page, the gl
 
 * Maximum alias count. The maximum amount of aliases that can be created for an email account.
 
-* Maximum user quota. The maximum amount of quota that can be assigned to a user. When creating or editing a user, this sets the limit on the maximum amount of quota that can be assigned to the user.
+* Maximum user quota. The maximum amount of quota that can be assigned to a user. Enter an integer in MB or GB, up to 1000 of the selected unit (1000 GB is 1 TB). A value of 0 means there is no domain-specific quota limit. When creating or editing a user, this sets the limit on the maximum amount of quota that can be assigned to the user.
 
 * Enable sign-up. When this option is ticked, self-registration is enabled. When the Admin GUI is accessed, in the menu list the option Signup becomes available.
   Obviously this menu item is only visible when signed out. On the Signup page a user can create an email account.
@@ -362,7 +362,7 @@ For adding a new user the following options can be configured.
 * Enabled. Tick this checkbox to enable the user account. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail.
   The email inbox of the user is still retained. This option can be used to temporarily suspend an user account.
 
-* Storage Quota. The maximum quota for the user's email box.
+* Storage Quota. The maximum quota for the user's email box. Enter an integer in MB or GB, up to 1000 of the selected unit (1000 GB is 1 TB), subject to the domain's maximum user quota. A value of 0 means unlimited.
 
 * Allow IMAP access. When ticked, allows email retrieval via the IMAP protocol.
 
@@ -432,7 +432,7 @@ This page is only accessible for global administrators. Via this page a new doma
 
 * Maximum alias count. The maximum amount of aliases that can be made for an email account.
 
-* Maximum user quota. The maximum amount of quota that can be assigned to a user. When creating or editing a user, this sets the limit on the maximum amount of quota that can be assigned to the user.
+* Maximum user quota. The maximum amount of quota that can be assigned to a user. Enter an integer in MB or GB, up to 1000 of the selected unit (1000 GB is 1 TB). A value of 0 means there is no domain-specific quota limit. When creating or editing a user, this sets the limit on the maximum amount of quota that can be assigned to the user.
 
 * Enable sign-up. When this option is ticked, self-registration is enabled. When the Admin GUI is accessed, in the menu list the option Signup becomes available.
   Obviously this menu item is only visible when signed out. On the Signup page a user can create an email account.

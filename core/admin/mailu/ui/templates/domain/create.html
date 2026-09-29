@@ -8,10 +8,14 @@
 {%- call macros.card() %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
+  {% set quota_bytes = form.max_quota_bytes.data or 0 %}
+  {% set quota_unit = 1000000000 if quota_bytes % 1000000000 == 0 else 1000000 %}
   {{ macros.form_field(form.name, autofocus=True, autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false") }}
   {{ macros.form_fields((form.max_users, form.max_aliases)) }}
-  {{ macros.form_field(form.max_quota_bytes, step=50*10**6, max=50*10**9, data_infinity="true", data_unit=10**9,
-      prepend='<span class="input-group-text"><span id="max_quota_bytes_value"></span>&nbsp;GB</span>') }}
+  {{ macros.form_field(form.max_quota_bytes, step=1, max=max_quota_bytes, data_infinity="true",
+      prepend=macros.quota_amount_input(form.max_quota_bytes.id, ((quota_bytes / quota_unit) | round | int)),
+      append=macros.quota_unit_selector(quota_unit)) }}
+  {{ macros.quota_unlimited_note() }}
   {{ macros.form_field(form.signup_enabled) }}
   {{ macros.form_field(form.anonmail_enabled) }}
   {{ macros.form_field(form.comment) }}

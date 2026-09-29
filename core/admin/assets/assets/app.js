@@ -253,6 +253,67 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[type=range]').forEach(input => {
         const output = document.querySelector(`#${CSS.escape(input.id)}_value`);
         if (!output) return;
+        const unitSelect = input.closest('.input-group')?.querySelector('[data-quota-unit]');
+        if (unitSelect) {
+            const amountInput = output.matches('input[data-quota-value]') ? output : null;
+            const minInBytes = Number(input.min);
+            const maxInBytes = Number(input.max);
+            let unit = Number(unitSelect.value);
+            const update = (syncAmount = true) => {
+                let value = input.dataset.infinity && input.value === '0' ? '∞' : Number(input.value).toFixed(2);
+                if (value.endsWith('.00')) value = value.slice(0, -3);
+                if (amountInput) {
+                    if (syncAmount) amountInput.value = value === '∞' ? '0' : value;
+                } else {
+                    output.textContent = value;
+                }
+            };
+            const setScale = valueInBytes => {
+                unit = Number(unitSelect.value);
+                const amountInUnit = valueInBytes / unit;
+                input.min = minInBytes / unit;
+                input.max = Math.min(maxInBytes / unit, Math.max(1000, amountInUnit));
+                input.step = 1;
+                if (amountInput) {
+                    amountInput.min = input.min;
+                    amountInput.max = input.max;
+                    amountInput.step = 1;
+                }
+                input.value = amountInUnit;
+                update();
+            };
+
+            setScale(Number(input.value));
+            input.addEventListener('input', update);
+            if (amountInput) {
+                amountInput.addEventListener('input', () => {
+                    if (amountInput.value === '') return;
+                    input.value = amountInput.value;
+                    update(false);
+                });
+                amountInput.addEventListener('change', () => {
+                    if (amountInput.value === '') {
+                        amountInput.value = input.value;
+                        return;
+                    }
+                    input.value = amountInput.value;
+                    update();
+                });
+            }
+            unitSelect.addEventListener('change', () => {
+                const amount = Number(input.value);
+                setScale(amount * Number(unitSelect.value));
+            });
+            input.form?.addEventListener('submit', () => {
+                if (amountInput && amountInput.value !== '') input.value = amountInput.value;
+                const valueInBytes = Math.round(Number(input.value) * unit);
+                input.min = minInBytes;
+                input.max = maxInBytes;
+                input.step = 1;
+                input.value = valueInBytes;
+            });
+            return;
+        }
         const update = () => {
             const unit = input.dataset.unit === undefined || input.dataset.unit === 'false' ? 1 : Number(input.dataset.unit);
             let value = input.dataset.infinity && input.value === '0' ? '∞' : (input.value / unit).toFixed(2);

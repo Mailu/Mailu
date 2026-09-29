@@ -60,6 +60,22 @@
   {%- endif %}
 {%- endmacro %}
 
+{%- macro quota_unit_selector(selected_unit=1000000000) %}
+  <select class="form-select" data-quota-unit aria-label="{{ _('Quota unit') }}">
+    <option value="1000000"{% if selected_unit == 1000000 %} selected{% endif %}>MB</option>
+    <option value="1000000000"{% if selected_unit == 1000000000 %} selected{% endif %}>GB</option>
+  </select>
+{%- endmacro %}
+
+{%- macro quota_amount_input(field_id, value) %}
+  <input type="number" id="{{ field_id }}_value" class="form-control quota-amount" data-quota-value
+      min="0" step="1" value="{{ value }}" aria-label="{{ _('Quota amount; enter 0 for unlimited') }}">
+{%- endmacro %}
+
+{%- macro quota_unlimited_note() %}
+  <small class="form-text text-body-secondary">{{ _('0 means unlimited.') }}</small>
+{%- endmacro %}
+
 {%- macro form(form) %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}

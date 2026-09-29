@@ -1,0 +1,1 @@
+Clear stale webmail session cookies on SSO login, so switching accounts without logging out no longer leaves the webmail on the previous user (``AUTHENTICATIONFAILED`` folders error)

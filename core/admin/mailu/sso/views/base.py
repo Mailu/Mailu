@@ -56,7 +56,7 @@ def login():
             if user.change_pw_next_login:
                 flask.session['redirect_to'] = destination
                 destination = flask.url_for('sso.pw_change')
-            response = flask.redirect(destination)
+            response = _clear_webmail_cookies(flask.redirect(destination))
             response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
             flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
             if msg := utils.isBadOrPwned(form):
@@ -106,6 +106,13 @@ def logout():
     flask_login.logout_user()
     flask.session.destroy()
     response = flask.redirect(app.config['PROXY_AUTH_LOGOUT_URL'] or flask.url_for('.login'))
+    return _clear_webmail_cookies(response)
+
+"""
+Drop any webmail session left over from a previous login: its credentials
+are bound to the Mailu session that was just replaced and no longer work.
+"""
+def _clear_webmail_cookies(response):
     for cookie in ['roundcube_sessauth', 'roundcube_sessid', 'smsession']:
         response.set_cookie(cookie, 'empty', expires=0)
     return response
@@ -146,7 +153,7 @@ def _proxy():
         flask.session.regenerate()
         flask_login.login_user(user)
         flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
-        return flask.redirect(url)
+        return _clear_webmail_cookies(flask.redirect(url))
 
     if not app.config['PROXY_AUTH_CREATE']:
         flask.current_app.logger.warning(f'Login failed by proxy - does not exist: {user} from {client_ip} through {flask.request.remote_addr}.')
@@ -170,4 +177,4 @@ def _proxy():
     flask_login.login_user(user)
     user.send_welcome()
     flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
-    return flask.redirect(url)
+    return _clear_webmail_cookies(flask.redirect(url))

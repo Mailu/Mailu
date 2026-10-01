@@ -24,17 +24,15 @@ def user_create(domain_name):
             flask.url_for('.user_list', domain_name=domain.name))
     form = forms.UserForm()
     form.pw.validators = [wtforms.validators.DataRequired()]
-    form.quota_bytes.default = int(app.config['DEFAULT_QUOTA'])
-    if domain.max_quota_bytes:
-        form.quota_bytes.validators = [
-            wtforms.validators.NumberRange(max=domain.max_quota_bytes)]
-        if form.quota_bytes.default > domain.max_quota_bytes:
-            form.quota_bytes.default = domain.max_quota_bytes
+    max_quota_bytes = min(domain.max_quota_bytes or forms.MAX_QUOTA_BYTES, forms.MAX_QUOTA_BYTES)
+    form.quota_bytes.validators = [
+        wtforms.validators.NumberRange(min=0, max=max_quota_bytes)]
+    form.quota_bytes.default = min(int(app.config['DEFAULT_QUOTA']), max_quota_bytes)
     if form.validate_on_submit():
         if msg := utils.isBadOrPwned(form):
             flask.flash(msg, "error")
             return flask.render_template('user/create.html',
-                domain=domain, form=form)
+                domain=domain, form=form, max_quota_bytes=max_quota_bytes)
         if domain.has_email(form.localpart.data):
             flask.flash('Email is already used', 'error')
         else:
@@ -52,7 +50,7 @@ def user_create(domain_name):
         # failed submit keep the entered values and validation errors
         form.process()
     return flask.render_template('user/create.html',
-        domain=domain, form=form)
+        domain=domain, form=form, max_quota_bytes=max_quota_bytes)
 
 
 @ui.route('/user/edit/<path:user_email>', methods=['GET', 'POST'])
@@ -60,16 +58,17 @@ def user_create(domain_name):
 def user_edit(user_email):
     user = models.db.session.get(models.User, user_email) or flask.abort(404)
     # Handle the case where user quota is more than allowed
-    max_quota_bytes = user.domain.max_quota_bytes
+    max_quota_bytes = min(
+        user.domain.max_quota_bytes or forms.MAX_QUOTA_BYTES,
+        forms.MAX_QUOTA_BYTES)
     if max_quota_bytes and user.quota_bytes > max_quota_bytes:
         max_quota_bytes = user.quota_bytes
     # Create the form
     form = forms.UserForm(obj=user)
     wtforms_components.read_only(form.localpart)
     form.localpart.validators = []
-    if max_quota_bytes:
-        form.quota_bytes.validators = [
-            wtforms.validators.NumberRange(max=max_quota_bytes)]
+    form.quota_bytes.validators = [
+        wtforms.validators.NumberRange(min=0, max=max_quota_bytes)]
     if form.validate_on_submit():
         if form.pw.data:
             if msg := utils.isBadOrPwned(form):

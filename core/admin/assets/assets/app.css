@@ -88,6 +88,14 @@ fieldset:disabled .form-control:disabled {
 .ts-wrapper {
   width: 100%;
 }
+.input-group > .quota-amount {
+  flex: 0 0 7rem;
+  width: 7rem;
+}
+.input-group > [data-quota-unit] {
+  flex: 0 0 5rem;
+  width: 5rem;
+}
 .mailu-table-sort {
   background: none;
   border: 0;

@@ -5,6 +5,7 @@ from flask import current_app as app
 import validators
 import flask
 import flask_login
+import wtforms
 import wtforms_components
 
 
@@ -46,7 +47,8 @@ def domain_create():
                 return flask.redirect(flask.url_for('.domain_list'))
         else:
             flask.flash('Domain %s is invalid' % form.name.data, 'error')
-    return flask.render_template('domain/create.html', form=form)
+    return flask.render_template('domain/create.html', form=form,
+        max_quota_bytes=forms.MAX_QUOTA_BYTES)
 
 
 @ui.route('/domain/edit/<domain_name>', methods=['GET', 'POST'])
@@ -54,6 +56,9 @@ def domain_create():
 def domain_edit(domain_name):
     domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     form = forms.DomainForm(obj=domain)
+    max_quota_bytes = max(forms.MAX_QUOTA_BYTES, domain.max_quota_bytes)
+    form.max_quota_bytes.validators = [
+        wtforms.validators.NumberRange(min=0, max=max_quota_bytes)]
     wtforms_components.read_only(form.name)
     form.name.validators = []
     if form.validate_on_submit():
@@ -62,7 +67,7 @@ def domain_edit(domain_name):
         flask.flash('Domain %s saved' % domain)
         return flask.redirect(flask.url_for('.domain_list'))
     return flask.render_template('domain/edit.html', form=form,
-        domain=domain)
+        domain=domain, max_quota_bytes=max_quota_bytes)
 
 
 @ui.route('/domain/delete/<domain_name>', methods=['GET', 'POST'])

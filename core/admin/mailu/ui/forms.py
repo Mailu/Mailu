@@ -27,6 +27,7 @@ def validLocalpart(form, field):
 
 AUTOFOCUS = {'autofocus': True}
 NO_AUTOCOMPLETE = {'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'}
+MAX_QUOTA_BYTES = 1000 * 10**9
 
 class DestinationField(fields.SelectMultipleField):
     """ Allow for multiple emails selection from current user choices and
@@ -80,7 +81,7 @@ class DomainForm(flask_wtf.FlaskForm):
     name = fields.StringField(_('Domain name'), [validators.DataRequired()], render_kw=NO_AUTOCOMPLETE)
     max_users = fields_.IntegerField(_('Maximum user count'), [validators.NumberRange(min=-1)], default=10)
     max_aliases = fields_.IntegerField(_('Maximum alias count'), [validators.NumberRange(min=-1)], default=10)
-    max_quota_bytes = fields_.IntegerSliderField(_('Maximum user quota'), default=0)
+    max_quota_bytes = fields_.IntegerSliderField(_('Maximum user quota'), [validators.NumberRange(min=0, max=MAX_QUOTA_BYTES)], default=0)
     signup_enabled = fields.BooleanField(_('Enable sign-up'), default=False)
     anonmail_enabled = fields.BooleanField(_('Enable Global Anonymous Email Service'), default=False)
     comment = fields.StringField(_('Comment'), render_kw=AUTOFOCUS)
@@ -114,7 +115,7 @@ class UserForm(flask_wtf.FlaskForm):
     pw = fields.PasswordField(_('Password'))
     pw2 = fields.PasswordField(_('Confirm password'), [checkStrippable, validators.EqualTo('pw')])
     pwned = fields.HiddenField(label='', default=-1)
-    quota_bytes = fields_.IntegerSliderField(_('Quota'), default=10**9)
+    quota_bytes = fields_.IntegerSliderField(_('Quota'), [validators.NumberRange(min=0, max=MAX_QUOTA_BYTES)], default=10**9)
     enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)
     enable_pop = fields.BooleanField(_('Allow POP3 access'), default=True)
     allow_spoofing = fields.BooleanField(_('Allow the user to spoof the sender (send email as anyone)'), default=False)

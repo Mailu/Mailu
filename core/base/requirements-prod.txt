@@ -66,6 +66,7 @@ Pygments==2.21.0
 pyparsing==3.3.3
 python-dateutil==2.9.0.post0
 python-magic==0.4.27
+python-gnupg==0.5.7
 pytz==2026.4
 PyYAML==6.0.3
 Radicale==3.8.0

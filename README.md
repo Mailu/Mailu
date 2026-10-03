@@ -20,7 +20,7 @@ Main features include:
 - **Standard email server**, IMAP and IMAP+, SMTP and Submission with auto-configuration profiles for clients
 - **Advanced email features**, aliases, domain aliases, custom routing, full-text search of email attachments
 - **Web access**, multiple Webmails and administration interface
-- **User features**, aliases, auto-reply, auto-forward, fetched accounts, managesieve
+- **User features**, aliases, auto-reply, auto-forward, fetched accounts, managesieve, OpenPGP key publication through WKD
 - **Admin features**, global admins, announcements, per-domain delegation, quotas
 - **Security**, enforced TLS, DANE, MTA-STS, Letsencrypt!, outgoing DKIM, anti-virus scanner, [Snuffleupagus](https://github.com/jvoisin/snuffleupagus/), block malicious attachments
 - **Antispam**, auto-learn, greylisting, DMARC and SPF, anti-spoofing

@@ -74,6 +74,7 @@ Settings
 After logging in the web administration interface, the settings page is loaded.
 On the settings page the settings of the currently logged in user can be changed.
 Changes are saved and effective immediately after clicking the Save Settings button at the bottom of the page.
+OpenPGP keys have a separate publish button in their settings section.
 
 
 Display name
@@ -81,6 +82,36 @@ Display name
 
 On the settings page the displayed name can be changed of the logged in user.
 This display name is only used within the web administration interface.
+
+
+OpenPGP keys and Web Key Directory
+``````````````````````````````````
+
+Users can publish an OpenPGP public key through Web Key Directory (WKD) from
+the ``OpenPGP`` section of their account settings. WKD lets compatible mail
+clients discover a recipient's public key using their email address. It is
+served by the admin application through the existing web server; no additional
+container or WKD-specific DNS record is required. The admin interface must be
+enabled and its domain must be reachable over HTTPS.
+
+Paste an ASCII-armored **public** key into the field and click
+``Publish OpenPGP key``. Mailu validates the key with GnuPG, rejects secret key
+material, and requires a valid key user ID matching the mailbox. Only the
+public key is stored and published. To remove the published key, clear the
+field and click ``Publish OpenPGP key``.
+
+Mailu also publishes a user's key for active, exact aliases currently routed
+to that mailbox, but only when the key contains a valid user ID matching the
+alias address. Configured alternative domains are included too, provided the
+key contains a matching user ID for the address at that alternative domain.
+Wildcard aliases are not included. If multiple users' keys contain the same
+group-alias user ID, WKD returns all of those keys in one response. After
+changing an alias, its destinations, or a domain alternative, republish the
+affected users' keys to refresh the publications.
+
+WKD publication is public. Its hashed lookup names are not a privacy measure:
+common email local-parts can be guessed. Publish only keys and email addresses
+you intend to make discoverable.
 
 
 Antispam

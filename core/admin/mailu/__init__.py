@@ -112,7 +112,10 @@ def create_app_from_config(config):
 
     # Import views
     from mailu import ui, internal, sso, api
+    from mailu.ui.views.users import wkd_lookup
     app.register_blueprint(ui.ui, url_prefix=app.config['WEB_ADMIN'])
+    app.add_url_rule('/.well-known/openpgpkey/hu/<key_hash>', 'wkd_lookup', wkd_lookup)
+    app.add_url_rule('/.well-known/openpgpkey/<domain_name>/hu/<key_hash>', 'wkd_advanced_lookup', wkd_lookup)
     app.register_blueprint(internal.internal, url_prefix='/internal')
     app.register_blueprint(sso.sso, url_prefix='/sso')
     api.register(app, web_api_root=app.config.get('WEB_API'))
@@ -124,4 +127,3 @@ def create_app():
     """
     config = configuration.ConfigManager()
     return create_app_from_config(config)
-

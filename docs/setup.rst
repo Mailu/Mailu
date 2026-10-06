@@ -63,6 +63,9 @@ Make sure that you test properly before going live!
 
 - Try to send an email to an external service
 - On the external service, verify that DKIM and SPF are listed as passing
+- Or send one message to `Email Spam Tester`_, which delivers it to real mailboxes at
+  Gmail, Outlook, Yahoo and other providers and reports inbox or spam for each of them,
+  along with the SPF, DKIM, DMARC and blocklist results for that same message.
 - Try to receive an email from an external service
 - Check the logs (``docker compose logs -f servicenamehere``) to look for
   warnings or errors
@@ -72,3 +75,4 @@ Make sure that you test properly before going live!
   email is getting through and forgeries are being properly blocked.
 
   .. _mxtoolbox: https://mxtoolbox.com/diagnostic.aspx
+  .. _Email Spam Tester: https://email-spam-tester.com/

@@ -1,0 +1,1 @@
+Add CalDAV and CardDAV autodiscovery for Radicale to email client autoconfiguration, and publish RFC 6764 DNS SRV/TXT records when WebDAV is enabled ([#3731](https://github.com/Mailu/Mailu/issues/3731)).

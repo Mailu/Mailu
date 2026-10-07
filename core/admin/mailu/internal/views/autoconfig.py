@@ -8,7 +8,20 @@ import flask
 @internal.route("/autoconfig/mozilla")
 def autoconfig_mozilla():
     # https://wiki.mozilla.org/Thunderbird:Autoconfiguration:ConfigFileFormat
-    hostname = app.config['HOSTNAME']
+    hostname = escape(app.config['HOSTNAME'])
+    webdav_xml = ''
+    if app.config['WEBDAV'] != 'none':
+        scheme = 'http' if app.config['TLS_FLAVOR'] == 'notls' else 'https'
+        webdav_xml = f'''<addressBook type="carddav">
+<username>%EMAILADDRESS%</username>
+<authentication>http-basic</authentication>
+<serverURL>{scheme}://{hostname}/webdav/</serverURL>
+</addressBook>
+<calendar type="caldav">
+<username>%EMAILADDRESS%</username>
+<authentication>http-basic</authentication>
+<serverURL>{scheme}://{hostname}/webdav/</serverURL>
+</calendar>'''
     xml = f'''<?xml version="1.0"?>
 <clientConfig version="1.1">
 <emailProvider id="{hostname}">
@@ -39,6 +52,7 @@ def autoconfig_mozilla():
 <descr lang="en">Configure your email client</descr>
 </documentation>
 </emailProvider>
+{webdav_xml}
 </clientConfig>\r\n'''
     return flask.Response(xml, mimetype='text/xml', status=200)
 
@@ -55,7 +69,6 @@ def autoconfig_microsoft_json():
 @internal.route("/autoconfig/microsoft", methods=["POST"])
 def autoconfig_microsoft():
     hostname = escape(app.config["HOSTNAME"])
-
     try:
         root = ET.fromstring(flask.request.data)
 
@@ -88,6 +101,17 @@ def autoconfig_microsoft():
 
         schema = quoteattr(schema)
         email = escape(email)
+        webdav_protocol = ''
+        if app.config['WEBDAV'] != 'none':
+            scheme = 'http' if app.config['TLS_FLAVOR'] == 'notls' else 'https'
+            webdav_protocol = f'''<Protocol>
+            <Type>DAV</Type>
+            <Server>{scheme}://{hostname}/webdav/</Server>
+            <LoginName>{email}</LoginName>
+            <DomainRequired>on</DomainRequired>
+            <SPA>off</SPA>
+            <SSL>{'off' if scheme == 'http' else 'on'}</SSL>
+        </Protocol>'''
         xml = f"""<?xml version="1.0" encoding="utf-8" ?>
 <Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006">
     <Response xmlns={schema}>
@@ -112,6 +136,7 @@ def autoconfig_microsoft():
             <SPA>off</SPA>
             <SSL>on</SSL>
         </Protocol>
+        {webdav_protocol}
         </Account>
     </Response>
 </Autodiscover>"""
@@ -124,6 +149,38 @@ def autoconfig_apple():
     # https://developer.apple.com/business/documentation/Configuration-Profile-Reference.pdf
     hostname = app.config['HOSTNAME']
     sitename = app.config['SITENAME']
+    webdav_payloads = ''
+    if app.config['WEBDAV'] != 'none':
+        scheme = 'http' if app.config['TLS_FLAVOR'] == 'notls' else 'https'
+        use_ssl = '<false/>' if scheme == 'http' else '<true/>'
+        webdav_payloads = f'''<dict>
+<key>CardDAVAccountDescription</key><string>{escape(sitename)}</string>
+<key>CardDAVHostName</key><string>{escape(hostname)}</string>
+<key>CardDAVUsername</key><string></string>
+<key>CardDAVUseSSL</key>{use_ssl}
+<key>CardDAVPrincipalURL</key><string>{scheme}://{escape(hostname)}/webdav/</string>
+<key>PayloadType</key><string>com.apple.carddav.account</string>
+<key>PayloadVersion</key><integer>1</integer>
+<key>PayloadUUID</key><string>c1add9d6-d83a-4bdc-9ed4-5a47e3f3203e</string>
+<key>PayloadIdentifier</key><string>{escape(hostname)}.carddav</string>
+<key>PayloadDisplayName</key><string>{escape(hostname)}</string>
+<key>PayloadDescription</key><string>{escape(sitename)}</string>
+<key>PayloadOrganization</key><string></string>
+</dict>
+<dict>
+<key>CalDAVAccountDescription</key><string>{escape(sitename)}</string>
+<key>CalDAVHostName</key><string>{escape(hostname)}</string>
+<key>CalDAVUsername</key><string></string>
+<key>CalDAVUseSSL</key>{use_ssl}
+<key>CalDAVPrincipalURL</key><string>{scheme}://{escape(hostname)}/webdav/</string>
+<key>PayloadType</key><string>com.apple.caldav.account</string>
+<key>PayloadVersion</key><integer>1</integer>
+<key>PayloadUUID</key><string>6a453a88-a3ae-45f1-a47c-8db8c146164b</string>
+<key>PayloadIdentifier</key><string>{escape(hostname)}.caldav</string>
+<key>PayloadDisplayName</key><string>{escape(hostname)}</string>
+<key>PayloadDescription</key><string>{escape(sitename)}</string>
+<key>PayloadOrganization</key><string></string>
+</dict>'''
     xml = f'''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -187,6 +244,7 @@ def autoconfig_apple():
 <key>disableMailRecentsSyncing</key>
 <false/>
 </dict>
+{webdav_payloads}
 </array>
 <key>PayloadDescription</key>
 <string>{hostname} - E-Mail Account Configuration</string>

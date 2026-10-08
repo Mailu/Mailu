@@ -280,11 +280,29 @@ class Domain(Base):
                 ('pop3s', 995, 10),
             ])
 
-        return [
-            f'_{proto}._tcp.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN SRV {prio} 1 {port} {hostname}.' if port in ports else f'_{proto}._tcp.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN SRV 0 0 0 .'
+        webdav_records = []
+        if app.config['WEBDAV'] != 'none':
+            if app.config['TLS_FLAVOR'] == 'notls':
+                protocols.extend([('carddav', 80, 10), ('caldav', 80, 10)])
+                webdav_protocols = ('carddav', 'caldav')
+            else:
+                protocols.extend([('carddavs', 443, 10), ('caldavs', 443, 10)])
+                webdav_protocols = ('carddavs', 'caldavs')
+            webdav_records = [
+                f'_{proto}._tcp.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN TXT "path=/webdav/"'
+                for proto in webdav_protocols
+            ]
+
+        srv_records = [
+            f'_{proto}._tcp.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN SRV {prio} 1 {port} {idna.encode(hostname.lower()).decode("ascii")}.' if port in ports else f'_{proto}._tcp.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN SRV 0 0 0 .'
             for proto, port, prio
             in protocols
-        ]+[f'autoconfig.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN CNAME {idna.encode(hostname.lower()).decode('ascii')}.', f'autodiscover.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN CNAME {idna.encode(hostname.lower()).decode('ascii')}.']
+        ]
+
+        return srv_records + webdav_records + [
+            f'autoconfig.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN CNAME {idna.encode(hostname.lower()).decode("ascii")}.',
+            f'autodiscover.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN CNAME {idna.encode(hostname.lower()).decode("ascii")}.'
+        ]
 
     @cached_property
     def dns_tlsa(self):

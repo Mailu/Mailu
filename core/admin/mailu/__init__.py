@@ -112,10 +112,25 @@ def create_app_from_config(config):
 
     # Import views
     from mailu import ui, internal, sso, api
+    from mailu.ui.views.users import wkd_lookup, wkd_policy
     app.register_blueprint(ui.ui, url_prefix=app.config['WEB_ADMIN'])
+    app.add_url_rule('/.well-known/openpgpkey/hu/<key_hash>', 'wkd_lookup', wkd_lookup)
+    app.add_url_rule('/.well-known/openpgpkey/<domain_name>/hu/<key_hash>', 'wkd_advanced_lookup', wkd_lookup)
+    app.add_url_rule('/.well-known/openpgpkey/policy', 'wkd_policy', wkd_policy)
+    app.add_url_rule('/.well-known/openpgpkey/<domain_name>/policy', 'wkd_advanced_policy', wkd_policy)
     app.register_blueprint(internal.internal, url_prefix='/internal')
     app.register_blueprint(sso.sso, url_prefix='/sso')
     api.register(app, web_api_root=app.config.get('WEB_API'))
+
+    @app.after_request
+    def add_wkd_cors_headers(response):
+        if flask.request.path.startswith('/.well-known/openpgpkey/'):
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, HEAD, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+            response.headers['Cache-Control'] = 'public, max-age=3600'
+        return response
+
     return app
 
 
@@ -124,4 +139,3 @@ def create_app():
     """
     config = configuration.ConfigManager()
     return create_app_from_config(config)
-

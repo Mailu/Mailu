@@ -16,6 +16,12 @@
   {{ macros.form_field(form.displayed_name, autofocus=True) }}
   {%- endcall %}
 
+  {%- call macros.card(title=_("OpenPGP")) %}
+  <p>{% trans %}Upload your ASCII-armored public key to publish it through Web Key Directory (WKD). The key must include a user ID matching this email address. Active aliases currently routed to your mailbox are also published when the key includes a matching user ID for the alias.{% endtrans %}</p>
+  {{ macros.form_field(form.gpg_key, rows=12) }}
+  {{ macros.form_field(form.submit_gpg_key) }}
+  {%- endcall %}
+
   {%- call macros.card(title=_("Antispam")) %}
   {%- call macros.fieldset(field=form.spam_enabled, enabled=user.spam_enabled) %}
   {{ macros.form_field(form.spam_mark_as_read) }}

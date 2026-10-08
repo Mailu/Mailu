@@ -3,6 +3,8 @@
 
 import os
 import json
+import base64
+import hashlib
 
 from datetime import date
 from email.mime import text
@@ -25,7 +27,6 @@ from sqlalchemy.ext import declarative
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.attributes import flag_modified
-from sqlalchemy import event
 from werkzeug.utils import cached_property
 
 from mailu import dkim, utils
@@ -614,6 +615,7 @@ class User(Base, Email):
     spam_mark_as_read = db.Column(db.Boolean, nullable=False, default=True)
     spam_threshold = db.Column(db.Integer, nullable=False, default=lambda:int(app.config.get("DEFAULT_SPAM_THRESHOLD", 80)))
     change_pw_next_login = db.Column(db.Boolean, nullable=False, default=False)
+    gpg_key = db.Column(db.Text, nullable=True)
 
     # Flask-login attributes
     is_authenticated = True
@@ -760,6 +762,25 @@ set() containing the sessions to keep
         return user if (user and user.enabled and user.check_password(password)) else None
 
 
+class WkdKey(Base):
+    """Pre-filtered OpenPGP key material published for a WKD hash."""
+
+    __tablename__ = 'wkd_key'
+    key_hash = db.Column(db.String(32), primary_key=True, nullable=False)
+    domain_name = db.Column(IdnaDomain, primary_key=True, nullable=False)
+    user_email = db.Column(IdnaEmail, db.ForeignKey(User.email, ondelete='CASCADE'), primary_key=True, nullable=False)
+    fingerprint = db.Column(db.String(64), primary_key=True, nullable=False)
+    key_data = db.Column(db.LargeBinary, nullable=False)
+    user = db.relationship(User)
+
+
+def wkd_hash(localpart):
+    digest = hashlib.sha1(localpart.lower().encode('utf-8')).digest()
+    standard = base64.b32encode(digest).decode('ascii').lower().rstrip('=')
+    return standard.translate(str.maketrans(
+        'abcdefghijklmnopqrstuvwxyz234567', 'ybndrfg8ejkmcpqxot1uwisza345h769'))
+
+
 class Alias(Base, Email):
     """ An alias is an email address that redirects to some destination.
     """
@@ -839,6 +860,55 @@ class Alias(Base, Email):
 
 
 # end of Alias class helpers
+
+
+def wkd_addresses_for_user(user, uid_emails):
+    """Authorize only addresses present in the uploaded key's UIDs."""
+    # Load domain alternatives once, including those used by alias destinations.
+    alternatives = dict(db.session.query(Alternative.name, Alternative.domain_name).all())
+
+    def canonical(address):
+        localpart, domain_name = address.lower().rsplit('@', 1)
+        domain_name = idna.decode(idna.encode(domain_name))
+        return f'{localpart}@{alternatives.get(domain_name, domain_name)}'
+
+    target = canonical(user.email)
+    candidates = {address: canonical(address) for address in uid_emails}
+    addresses = {address for address, destination in candidates.items() if destination == target}
+    alias_addresses = set(candidates.values()) - {target}
+    if not alias_addresses:
+        return addresses
+
+    # A mailbox takes precedence over an alias with the same address.
+    mailboxes = {email for email, in db.session.query(User._email).filter(
+        User._email.in_(alias_addresses)).all()}
+    aliases = Alias.query.filter(
+        Alias._email.in_(alias_addresses - mailboxes),
+        Alias.wildcard.is_(False), Alias.disabled.is_(False),
+        sqlalchemy.or_(Alias.owner_email.is_(None), sqlalchemy.exists().where(
+            sqlalchemy.and_(User.email == Alias.owner_email, User.enabled.is_(True)))),
+    ).all()
+    authorized_aliases = {
+        canonical(alias.email) for alias in aliases
+        if any(canonical(destination) == target for destination in alias.destination)
+    }
+    addresses.update(address for address, destination in candidates.items()
+        if destination in authorized_aliases)
+    return addresses
+
+
+def update_wkd_keys(user, uid_keys):
+    """Replace this user's publications with already-authorized binary exports."""
+    WkdKey.query.filter_by(user_email=user.email).delete(synchronize_session=False)
+    for uid_email, fingerprint, key_data in uid_keys:
+        localpart, domain_name = uid_email.rsplit('@', 1)
+        db.session.add(WkdKey(
+            key_hash=wkd_hash(localpart),
+            domain_name=domain_name,
+            user_email=user.email,
+            fingerprint=fingerprint,
+            key_data=key_data,
+        ))
 
 
 class Token(Base):

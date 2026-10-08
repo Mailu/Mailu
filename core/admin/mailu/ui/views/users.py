@@ -1,4 +1,4 @@
-from mailu import models, utils
+from mailu import models, utils, openpgp
 from mailu.ui import ui, access, forms
 from flask import current_app as app
 
@@ -95,6 +95,19 @@ def user_settings(user_email):
     form = forms.UserSettingsForm(obj=user)
     utils.formatCSVField(form.forward_destination)
     if form.validate_on_submit():
+        submitted_key = (form.gpg_key.data or '').strip()
+        key_changed = (
+            submitted_key != (user.gpg_key or '')
+            or 'submit_gpg_key' in flask.request.form
+        )
+        uid_keys = []
+        if key_changed and submitted_key:
+            public_key, uid_keys = openpgp.parse_public_key(submitted_key, user.email,
+                authorize_addresses=lambda addresses: models.wkd_addresses_for_user(user, addresses))
+            if public_key is None:
+                flask.flash('The OpenPGP key is invalid, contains secret material, or has no valid user ID for this email address', 'error')
+                return flask.render_template('user/settings.html', form=form, user=user)
+            form.gpg_key.data = public_key
         user.forward_enabled = bool(flask.request.form.get('forward_enabled', False))
         if user.forward_enabled and not form.forward_destination.data:
             flask.flash('Destination email address is missing', 'error')
@@ -102,6 +115,8 @@ def user_settings(user_email):
                 flask.url_for('.user_settings', user_email=user_email))
         form.forward_destination.data = form.forward_destination.data.replace(" ","").split(",")
         form.populate_obj(user)
+        if key_changed:
+            models.update_wkd_keys(user, uid_keys)
         models.db.session.commit()
         form.forward_destination.data = ", ".join(form.forward_destination.data)
         flask.flash('Settings updated for %s' % user)
@@ -113,6 +128,31 @@ def user_settings(user_email):
             return flask.redirect(
                 flask.url_for('.user_settings', user_email=user_email))
     return flask.render_template('user/settings.html', form=form, user=user)
+
+
+def wkd_lookup(key_hash, domain_name=None):
+    domain_name = _wkd_domain_from_request(domain_name)
+    if len(key_hash) != 32 or any(c not in 'ybndrfg8ejkmcpqxot1uwisza345h769' for c in key_hash):
+        flask.abort(404)
+    keys = [key_data for key_data, in models.db.session.query(models.WkdKey.key_data
+        ).filter_by(key_hash=key_hash, domain_name=domain_name).all()]
+    keys = list(dict.fromkeys(key for key in keys if key))
+    if not keys:
+        flask.abort(404)
+    return flask.Response(b''.join(keys), mimetype='application/octet-stream')
+
+
+def wkd_policy(domain_name=None):
+    _wkd_domain_from_request(domain_name)
+    return flask.Response('', mimetype='text/plain')
+
+
+def _wkd_domain_from_request(domain_name=None):
+    host = flask.request.host.split(':', 1)[0].lower()
+    domain_name = (domain_name or host).lower()
+    if host not in (domain_name, f'openpgpkey.{domain_name}'):
+        flask.abort(404)
+    return domain_name
 
 def _process_password_change(form, user_email):
     user_email_or_current = user_email or flask_login.current_user.email

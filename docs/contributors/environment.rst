@@ -354,10 +354,17 @@ the workspace members and ``uv.lock`` pins every dependency. Test tooling such a
 lives in the ``dev`` dependency group, which ``uv sync`` installs by default. Production images
 are built with ``uv sync --locked --no-dev``, so they do not include it.
 
+The MariaDB driver is an optional extra (``mariadb``) of ``mailu-admin``. It needs the MariaDB
+client headers (``mariadb_config``) to build, so ``uv sync`` skips it by default. Install it only
+if you need it locally:
+
 .. code-block:: bash
 
   uv sync
   uv run --group dev pytest tests/anonmail
+
+  # Only if you need the MariaDB driver (requires mariadb_config, e.g. from libmariadb-dev)
+  uv sync --extra mariadb
 
 To change a dependency, edit the relevant ``pyproject.toml`` and run ``uv lock``. Commit the
 updated ``uv.lock`` together with the change.

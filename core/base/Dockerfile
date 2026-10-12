@@ -62,7 +62,7 @@ RUN set -euxo pipefail \
       mkdir -p /root/.cargo/registry/index && \
       git clone --bare https://github.com/rust-lang/crates.io-index.git /root/.cargo/registry/index/github.com-1285ae84e5963aae \
   # bcrypt 4.3 builds from source on arm/v7 and uses Python's stable ABI.
-  ; PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 uv sync --locked --all-packages --no-dev --no-editable --no-cache \
+  ; PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 uv sync --locked --all-packages --no-dev --no-editable --no-cache --extra mariadb \
   ; curl -sL ${SNUFFLEUPAGUS_URL} | tar xz \
   ; cd snuffleupagus-${SNUFFLEUPAGUS_VERSION} \
   ; rm -rf src/tests/*php7*/ src/tests/*session*/ src/tests/broken_configuration/ src/tests/*cookie* src/tests/upload_validation/ \

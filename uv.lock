@@ -934,7 +934,6 @@ dependencies = [
     { name = "idna" },
     { name = "itsdangerous" },
     { name = "limits" },
-    { name = "mariadb" },
     { name = "marshmallow" },
     { name = "marshmallow-sqlalchemy" },
     { name = "mysql-connector-python" },
@@ -956,6 +955,11 @@ dependencies = [
     { name = "wonderwords" },
     { name = "wtforms" },
     { name = "wtforms-components" },
+]
+
+[package.optional-dependencies]
+mariadb = [
+    { name = "mariadb" },
 ]
 
 [package.metadata]
@@ -983,7 +987,7 @@ requires-dist = [
     { name = "idna", specifier = "==3.20" },
     { name = "itsdangerous", specifier = "==2.2.0" },
     { name = "limits", specifier = "==5.8.0" },
-    { name = "mariadb", specifier = "==1.1.14" },
+    { name = "mariadb", marker = "extra == 'mariadb'", specifier = "==1.1.14" },
     { name = "marshmallow", specifier = "==4.3.1" },
     { name = "marshmallow-sqlalchemy", specifier = "==1.5.0" },
     { name = "mysql-connector-python", specifier = "==26.7.0" },
@@ -1006,6 +1010,7 @@ requires-dist = [
     { name = "wtforms", specifier = "==3.2.2" },
     { name = "wtforms-components", specifier = "==0.11.0" },
 ]
+provides-extras = ["mariadb"]
 
 [[package]]
 name = "mako"

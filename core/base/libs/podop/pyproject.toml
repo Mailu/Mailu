@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "podop"
+version = "0.2.5"
+description = "Postfix and Dovecot proxy"
+readme = "README.md"
+authors = [{ name = "Pierre Jaury", email = "pierre@jaury.eu" }]
+urls = { Homepage = "https://github.com/mailu/podop.git" }
+requires-python = ">=3.14"
+dependencies = ["aiohttp"]
+
+[tool.setuptools]
+packages = ["podop"]
+script-files = ["scripts/podop"]
+include-package-data = true

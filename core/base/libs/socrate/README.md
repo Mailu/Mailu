@@ -11,7 +11,7 @@ Setup
 Socrate is available on Pypi, simpy run:
 
 ```
-pip install socrate
+uv pip install socrate
 ```
 
 

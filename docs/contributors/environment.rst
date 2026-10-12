@@ -379,7 +379,7 @@ files. It is possible to run a local documentation server for reviewing purposes
 .. code-block:: bash
 
   cd <Mailu repo>
-  docker build -t docs docs
+  docker build -f docs/Dockerfile -t docs .
   docker run -p 127.0.0.1:8080:80 docs
 
 In a local build Docker always assumes the version to be master.

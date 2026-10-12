@@ -468,12 +468,16 @@ jobs:
         uses: ASzc/change-string-case-action@ecd1412d078f2e06e9eedcbaa6fcd988151c3f82 # v8
         with:
           string: ${{ github.repository_owner }}
-      - name: Install python packages
-        run: python3 -m pip install -r tests/requirements.txt
+      - name: Install uv
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: 0.11.19
+      - name: Install test dependencies
+        run: uv sync --locked --only-group dev
       - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
       - name: Test ${{ matrix.target }}
-        run: python tests/compose/test.py "$TARGET" "$TIME"
+        run: uv run --no-sync python tests/compose/test.py "$TARGET" "$TIME"
         env:
           DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
           MAILU_VERSION: ${{ env.MAILU_VERSION }}-build
@@ -510,16 +514,19 @@ jobs:
         uses: ASzc/change-string-case-action@ecd1412d078f2e06e9eedcbaa6fcd988151c3f82 # v8
         with:
           string: ${{ github.repository_owner }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: 0.11.19
       - name: Install test dependencies on the runner
-        # The admin image ships its locked dependencies without pip, so the dev
-        # group is exported from uv.lock and installed here, then mounted in. The
+        # The admin image ships its locked dependencies without a package manager, so the
+        # dev group is exported from uv.lock and installed here, then mounted in. The
         # export is pinned to the same lock as the image. It is appended to sys.path
         # below so that the image's own packages take precedence.
         run: |
-          python3 -m pip install --no-cache-dir --target "$RUNNER_TEMP/uv" uv==0.11.19
-          "$RUNNER_TEMP/uv/bin/uv" export --frozen --project "$GITHUB_WORKSPACE" \
+          uv export --frozen --project "$GITHUB_WORKSPACE" \
             --only-group dev --no-emit-project --output-file "$RUNNER_TEMP/requirements-dev.txt"
-          python3 -m pip install --no-cache-dir --target "$RUNNER_TEMP/pytest" -r "$RUNNER_TEMP/requirements-dev.txt"
+          uv pip install --no-cache --require-hashes --target "$RUNNER_TEMP/pytest" -r "$RUNNER_TEMP/requirements-dev.txt"
       - name: Run tests/anonmail inside the admin image
         env:
           ADMIN_IMAGE: ghcr.io/${{ steps.string.outputs.lowercase }}/admin:${{ inputs.mailu_version }}-build

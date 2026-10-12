@@ -1,5 +1,0 @@
-recommonmark~=0.7.1
-Sphinx~=9.1.0
-sphinx-autobuild~=2025.8.25
-sphinx_rtd_theme~=3.1.0
-docutils~=0.22.4

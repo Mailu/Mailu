@@ -38,5 +38,15 @@ socrate = { workspace = true }
 
 [dependency-groups]
 dev = [
+    "colorama==0.4.6",
+    "docker==7.2.0",
+    "managesieve==0.8.1",
     "pytest>=9.1.1",
+]
+docs = [
+    "docutils~=0.22.4",
+    "recommonmark~=0.7.1",
+    "Sphinx~=9.1.0",
+    "sphinx-autobuild~=2025.8.25",
+    "sphinx_rtd_theme~=3.1.0",
 ]

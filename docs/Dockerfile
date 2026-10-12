@@ -2,10 +2,19 @@
 FROM python:3.14.7-alpine3.24 AS build
 
 ARG version=master
-ENV VERSION=$version
+ENV VERSION=$version \
+  VIRTUAL_ENV=/venv \
+  UV_PROJECT_ENVIRONMENT=/venv \
+  UV_PYTHON_DOWNLOADS=never \
+  PATH="/venv/bin:${PATH}"
 
-COPY requirements.txt /requirements.txt
-COPY . /docs
+# The docs dependencies come from the workspace lock file, so the build context is the
+# repository root. Only the manifests of the workspace members are copied for resolution.
+WORKDIR /lock
+COPY pyproject.toml uv.lock ./
+COPY core/admin/pyproject.toml core/admin/
+COPY core/base/libs/ core/base/libs/
+COPY docs /docs
 
 RUN set -euxo pipefail \
   ; machine="$(uname -m)" \
@@ -16,7 +25,8 @@ RUN set -euxo pipefail \
   ; [[ "${machine}" == armv7* ]] && \
       mkdir -p /root/.cargo/registry/index && \
       git clone --bare https://github.com/rust-lang/crates.io-index.git /root/.cargo/registry/index/github.com-1285ae84e5963aae \
-  ; pip3 install -r /requirements.txt \
+  ; apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.24/community uv=0.11.19-r0 \
+  ; uv sync --locked --only-group docs --no-cache \
   ; mkdir -p /build/$VERSION/ \
   ; dot -Tsvg /docs/mailu-network-diagram.dot -o /docs/contributors/mailu-network-diagram.svg \
   ; sphinx-build -W /docs /build/$VERSION \

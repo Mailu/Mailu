@@ -101,7 +101,8 @@ target "assets" {
 # -----------------------------------------------------------------------------------------
 target "docs" {
   inherits = ["defaults"]
-  context = "docs/"
+  context = "."
+  dockerfile = "docs/Dockerfile"
   tags = tag("docs")
   args = {
     version = "${LABEL_VERSION}"

@@ -320,7 +320,6 @@ to run it. It will create a local webserver listening at port 8080:
 
   cd core/admin
   ./run_dev.sh
-  pip install -r requirements.txt
   [...]
   =============================================================================
   The "mailu-dev" container was built using this configuration:
@@ -350,6 +349,19 @@ Any change to the files will automatically restart the Web server and reload the
 When using the development environment, a debugging toolbar is displayed on the right
 side of the screen, where you can access query details, internal variables, etc.
 
+Python dependencies are managed with `uv`_ as a workspace. The root ``pyproject.toml`` lists
+the workspace members and ``uv.lock`` pins every dependency. Test tooling such as ``pytest``
+lives in the ``dev`` dependency group, which ``uv sync`` installs by default. Production images
+are built with ``uv sync --locked --no-dev``, so they do not include it.
+
+.. code-block:: bash
+
+  uv sync
+  uv run --group dev pytest tests/anonmail
+
+To change a dependency, edit the relevant ``pyproject.toml`` and run ``uv lock``. Commit the
+updated ``uv.lock`` together with the change.
+
 
 Documentation
 -------------
@@ -370,3 +382,4 @@ You can read the local documentation by navigating to http://localhost:8080/mast
   restarted for the changes to become visible.
 
 .. _`reStructuredText`: http://docutils.sourceforge.net/rst.html
+.. _`uv`: https://docs.astral.sh/uv/

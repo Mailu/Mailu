@@ -1,3 +1,32 @@
+[project]
+name = "mailu"
+version = "0.0.0"
+description = "Mailu mail server services"
+requires-python = ">=3.14"
+dependencies = [
+    "mailu-admin",
+    "oletools",
+    "podop",
+    "postfix-mta-sts-resolver",
+    "python-magic",
+    "radicale",
+    "requests",
+    "socrate",
+    "uvloop",
+    "watchdog",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["core/base/libs/*", "core/admin"]
+
+[tool.uv.sources]
+mailu-admin = { workspace = true }
+podop = { workspace = true }
+socrate = { workspace = true }
+
 [tool.towncrier]
     package = "towncrier"
     filename = "CHANGELOG.md"

@@ -19,6 +19,10 @@ COPY start.py /
 RUN echo $VERSION >/version
 
 #EXPOSE 53/udp 53/tcp
-HEALTHCHECK CMD dig @127.0.0.1 || exit 1
+# dig exits 0 whatever the answer, SERVFAIL included, so `dig @127.0.0.1`
+# alone kept the container healthy while it failed every lookup (a stale
+# DNSSEC trust anchor after the 2026 root KSK rollover). The root NS set
+# goes through validation, so a broken anchor or no upstream fails this.
+HEALTHCHECK CMD dig @127.0.0.1 +time=3 +tries=1 . NS | grep -q 'status: NOERROR' || exit 1
 
 CMD /start.py

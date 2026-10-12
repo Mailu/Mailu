@@ -39,19 +39,22 @@ trap "rm -rf '${tmp}'" INT TERM EXIT
 admin="$(realpath "$(pwd)/${0%/*}")"
 base="${admin}/../base"
 assets="${admin}/assets"
+root="$(realpath "${admin}/../..")"
 
 cd "${tmp}"
 
 # base
-cp "${base}"/requirements-* .
-cp -r "${base}"/libs .
+cp "${root}/pyproject.toml" "${root}/uv.lock" .
+mkdir -p core/admin core/base
+cp "${admin}/pyproject.toml" core/admin/
+cp -r "${base}/libs" core/base/
 sed -E '/^#/d;s:^FROM system$:FROM system AS base:' "${base}/Dockerfile" >Dockerfile
 
 # assets
 cp "${assets}/package.json" .
 cp -r "${assets}/assets" ./assets
 sed '/new compress/,/}),/d' <"${assets}/webpack.config.js" >webpack.config.js
-sed -E '/^#/d;s:^(FROM [^ ]+$):\1 AS assets:' "${assets}/Dockerfile" >>Dockerfile
+sed -E '/^#/d;s:^(FROM .*)$:\1 AS assets:' "${assets}/Dockerfile" >>Dockerfile
 
 # admin
 sed -E '/^#/d;/^(COPY|EXPOSE|HEALTHCHECK|VOLUME|CMD) /d; s:^(.* )[^ ]*pybabel[^\\]*(.*):\1true \2:' "${admin}/Dockerfile" >>Dockerfile
@@ -105,7 +108,7 @@ for vol in audit.py start.py mailu/ migrations/; do
 done
 
 for file in "${assets}/assets"/*; do
-    [[ ! -f "${file}" || "${file}" == */vendor.js ]] && continue
+    [[ ! -f "${file}" || "${file}" == */vendor.js || "${file}" == */app.js || "${file}" == */app.css ]] && continue
     volumes+=( --volume "${file}:/app/static/${file/*\//}" )
 done
 
@@ -137,11 +140,9 @@ ${docker/*\/} exec -it "${DEV_NAME}" /bin/bash
 
 =============================================================================
 
-To update requirements-prod.txt you can build mailu using the dev requirements:
-"$0" --build-arg MAILU_DEPS=dev
-
-And then copy the new dependencies from a separate shell:
-${docker/*\/} exec "${DEV_NAME}" pip freeze >$(realpath "${base}")/requirements-new.txt
+To change the Python dependencies, edit the pyproject.toml files and run this
+from the repository root to update uv.lock:
+uv lock
 
 =============================================================================
 

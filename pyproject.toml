@@ -35,3 +35,8 @@ socrate = { workspace = true }
     title_format = "v{version} - {project_date}"
     issue_format = "[#{issue}](https://github.com/Mailu/Mailu/issues/{issue})"
     start_string = "<!-- TOWNCRIER -->"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

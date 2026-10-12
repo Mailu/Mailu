@@ -510,16 +510,27 @@ jobs:
         uses: ASzc/change-string-case-action@ecd1412d078f2e06e9eedcbaa6fcd988151c3f82 # v8
         with:
           string: ${{ github.repository_owner }}
+      - name: Install test dependencies on the runner
+        # The admin image ships its locked dependencies without pip, so the dev
+        # group is exported from uv.lock and installed here, then mounted in. The
+        # export is pinned to the same lock as the image. It is appended to sys.path
+        # below so that the image's own packages take precedence.
+        run: |
+          python3 -m pip install --no-cache-dir --target "$RUNNER_TEMP/uv" uv==0.11.19
+          "$RUNNER_TEMP/uv/bin/uv" export --frozen --project "$GITHUB_WORKSPACE" \
+            --only-group dev --no-emit-project --output-file "$RUNNER_TEMP/requirements-dev.txt"
+          python3 -m pip install --no-cache-dir --target "$RUNNER_TEMP/pytest" -r "$RUNNER_TEMP/requirements-dev.txt"
       - name: Run tests/anonmail inside the admin image
         env:
           ADMIN_IMAGE: ghcr.io/${{ steps.string.outputs.lowercase }}/admin:${{ inputs.mailu_version }}-build
         run: |
           docker run --rm \
             -v "$GITHUB_WORKSPACE/tests:/app/tests:ro" \
+            -v "$RUNNER_TEMP/pytest:/pytest:ro" \
             -w /app \
             -e PYTHONDONTWRITEBYTECODE=1 \
             "$ADMIN_IMAGE" \
-            sh -c "pip install --no-cache-dir pytest && python -m pytest -v -p no:cacheprovider tests/anonmail"
+            python -c "import sys; sys.path.append('/pytest'); import pytest; sys.exit(pytest.main(['-v', '-p', 'no:cacheprovider', 'tests/anonmail']))"
 
   deploy:
     name: Deploy images

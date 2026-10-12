@@ -87,7 +87,8 @@ function "tag" {
 # -----------------------------------------------------------------------------------------
 target "base" {
   inherits = ["defaults"]
-  context = "core/base/"
+  context = "."
+  dockerfile = "core/base/Dockerfile"
 }
 
 target "assets" {

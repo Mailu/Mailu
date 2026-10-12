@@ -25,25 +25,24 @@ CMD ["/bin/bash"]
 # build virtual env (intermediate)
 FROM system AS build
 
-ARG MAILU_DEPS=prod
 ARG SNUFFLEUPAGUS_VERSION=0.14.0
 
-ENV VIRTUAL_ENV=/app/venv
-
-COPY requirements-build.txt ./
-
+# uv is pinned to the version packaged by alpine, so builds do not drift with
+# the upstream image tag. It is only needed in this stage.
 RUN set -euxo pipefail \
-  ; apk add --no-cache py3-pip \
-  ; python3 -m venv ${VIRTUAL_ENV} \
-  ; ${VIRTUAL_ENV}/bin/pip install --no-cache-dir -r requirements-build.txt \
-  ; apk del -r py3-pip \
-  ; rm -f /tmp/*.pem
+  ; apk add --no-cache uv=0.11.19-r0
 
-COPY requirements-${MAILU_DEPS}.txt ./
-COPY libs/ libs/
+# The workspace lock file drives the install. Only the manifests of the
+# workspace members are copied, plus the libs sources that get built.
+COPY pyproject.toml uv.lock ./
+COPY core/admin/pyproject.toml core/admin/
+COPY core/base/libs/ core/base/libs/
 
 ENV \
-  PATH="${VIRTUAL_ENV}/bin:${PATH}" \
+  VIRTUAL_ENV=/app/venv \
+  UV_PROJECT_ENVIRONMENT=/app/venv \
+  UV_PYTHON_DOWNLOADS=never \
+  PATH="/app/venv/bin:${PATH}" \
   CXXFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security -fstack-clash-protection -fexceptions" \
   CFLAGS="-g -O2 -fdebug-prefix-map=/app=. -fstack-protector-strong -Wformat -Werror=format-security -fstack-clash-protection -fexceptions" \
   CPPFLAGS="-Wdate-time -D_FORTIFY_SOURCE=2" \
@@ -63,7 +62,7 @@ RUN set -euxo pipefail \
       mkdir -p /root/.cargo/registry/index && \
       git clone --bare https://github.com/rust-lang/crates.io-index.git /root/.cargo/registry/index/github.com-1285ae84e5963aae \
   # bcrypt 4.3 builds from source on arm/v7 and uses Python's stable ABI.
-  ; PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 pip install -r requirements-${MAILU_DEPS}.txt \
+  ; PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 uv sync --locked --all-packages --no-dev --no-editable --no-cache \
   ; curl -sL ${SNUFFLEUPAGUS_URL} | tar xz \
   ; cd snuffleupagus-${SNUFFLEUPAGUS_VERSION} \
   ; rm -rf src/tests/*php7*/ src/tests/*session*/ src/tests/broken_configuration/ src/tests/*cookie* src/tests/upload_validation/ \

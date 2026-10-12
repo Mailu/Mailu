@@ -43,7 +43,7 @@ ENV VERSION=$version
 ENV TZ=Etc/UTC
 LABEL version=$VERSION
 
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY docs/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /build/$VERSION /build/$VERSION
 
 EXPOSE 80/tcp

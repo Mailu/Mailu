@@ -1,0 +1,56 @@
+[project]
+name = "mailu-admin"
+version = "0.0.0"
+description = "Mailu admin web interface"
+requires-python = ">=3.14"
+dependencies = [
+    "alembic",
+    "Babel",
+    "bcrypt",
+    "click",
+    "dnspython",
+    "email-validator",
+    "Flask",
+    "Flask-Babel",
+    "Flask-Bootstrap",
+    "Flask-DebugToolbar",
+    "Flask-Login",
+    "flask-marshmallow",
+    "Flask-Migrate",
+    "Flask-RESTX",
+    "Flask-SQLAlchemy",
+    "Flask-WTF",
+    "gunicorn[http2]",
+    "h2",
+    "hpack",
+    "hyperframe",
+    "idna",
+    "itsdangerous",
+    "limits",
+    "mariadb",
+    "marshmallow",
+    "marshmallow-sqlalchemy",
+    "mysql-connector-python",
+    "passlib",
+    "psycopg2-binary",
+    "Pygments",
+    "python-gnupg",
+    "PyYAML",
+    "redis",
+    "SQLAlchemy",
+    "socrate",
+    # passlib imports pkg_resources, which setuptools removed in version 82
+    "setuptools<82",
+    "srslib",
+    "tabulate",
+    "tenacity",
+    "tld",
+    "validators",
+    "Werkzeug",
+    "wonderwords",
+    "WTForms",
+    "WTForms-Components",
+]
+
+[tool.uv]
+package = false

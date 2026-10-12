@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "socrate"
+version = "0.2.0"
+description = "Socrate daemon utilities"
+readme = "README.md"
+authors = [{ name = "Pierre Jaury", email = "pierre@jaury.eu" }]
+urls = { Homepage = "https://github.com/mailu/socrate.git" }
+requires-python = ">=3.14"
+dependencies = ["jinja2", "tenacity"]
+
+[tool.setuptools]
+packages = ["socrate"]
+include-package-data = true

@@ -77,6 +77,11 @@ class MultipleFoldersVerify(object):
 class ConfirmationForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Confirm'))
 
+
+class DkimToggleForm(flask_wtf.FlaskForm):
+    pass
+
+
 class DomainForm(flask_wtf.FlaskForm):
     name = fields.StringField(_('Domain name'), [validators.DataRequired()], render_kw=NO_AUTOCOMPLETE)
     max_users = fields_.IntegerField(_('Maximum user count'), [validators.NumberRange(min=-1)], default=10)

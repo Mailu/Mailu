@@ -118,11 +118,6 @@ class Logger:
             sqlalchemy.event.listen(model, 'after_update', self._listen_update)
             sqlalchemy.event.listen(model, 'after_delete', self._listen_delete)
 
-        # special listener for dkim_key changes
-        # TODO: _listen_dkim can be removed when dkim keys are stored in database
-        self._dedupe_dkim = set()
-        sqlalchemy.event.listen(models.db.session, 'after_flush', self._listen_dkim)
-
         # register debug logger for sqlalchemy
         if self.debug:
             logging.basicConfig()
@@ -195,29 +190,6 @@ class Logger:
         self._counter.update([('Deleted', target.__table__.name)])
         if self.verbose:
             self._log('Deleted', target)
-
-    # TODO: _listen_dkim can be removed when dkim keys are stored in database
-    def _listen_dkim(self, session, flush_context): # pylint: disable=unused-argument
-        """ callback method to track import """
-        for target in session.identity_map.values():
-            # look at Domains originally loaded from db
-            if not isinstance(target, models.Domain) or not target._sa_instance_state.load_path:
-                continue
-            before = target._dkim_key_on_disk
-            after = target._dkim_key
-            # "de-dupe" messages; this event is fired at every flush
-            if before == after or (target, before, after) in self._dedupe_dkim:
-                continue
-            self._dedupe_dkim.add((target, before, after))
-            self._counter.update([('Modified', target.__table__.name)])
-            if self.verbose:
-                if self.secrets:
-                    before = before.decode('ascii', 'ignore')
-                    after = after.decode('ascii', 'ignore')
-                else:
-                    before = HIDDEN if before else ''
-                    after = HIDDEN if after else ''
-                self._log('Modified', target, f'{str(target)!r} dkim_key: {before!r} -> {after!r}')
 
     def track_serialize(self, obj, item, backref=None):
         """ callback method to track import """

@@ -121,7 +121,6 @@ def create_app_from_config(config):
     app.register_blueprint(internal.internal, url_prefix='/internal')
     app.register_blueprint(sso.sso, url_prefix='/sso')
     api.register(app, web_api_root=app.config.get('WEB_API'))
-
     @app.after_request
     def add_wkd_cors_headers(response):
         if flask.request.path.startswith('/.well-known/openpgpkey/'):
@@ -131,6 +130,12 @@ def create_app_from_config(config):
             response.headers['Cache-Control'] = 'public, max-age=3600'
         return response
 
+    # Migrate existing filesystem DKIM keys once, after `flask db upgrade` has
+    # created the database table. Keep the original file as a .bak for recovery.
+    with app.app_context():
+        if models.inspect(models.db.engine).has_table('dkim_key'):
+            for domain in models.Domain.query.all():
+                domain._import_legacy_dkim_key()
     return app
 
 

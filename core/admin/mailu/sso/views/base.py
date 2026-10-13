@@ -1,5 +1,5 @@
 from werkzeug.utils import redirect
-from mailu import models, utils
+from mailu import models, utils, auth_flow
 from mailu.sso import sso, forms
 from mailu.ui import access
 
@@ -54,7 +54,7 @@ def login():
             flask.session.regenerate()
             flask_login.login_user(user)
             if user.change_pw_next_login:
-                flask.session['redirect_to'] = destination
+                auth_flow.require_actions(flask.session, 'password_change', destination)
                 destination = flask.url_for('sso.pw_change')
             response = _clear_webmail_cookies(flask.redirect(destination))
             response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
@@ -94,8 +94,7 @@ def pw_change():
             user.change_pw_next_login = False
             models.db.session.commit()
             flask.current_app.logger.info(f'Forced password change by {user} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
-            destination = flask.session.pop('redirect_to', None) or app.config['WEB_ADMIN']
-            return flask.redirect(destination)
+            return auth_flow.complete_action(flask.session, 'password_change')
         flask.flash(_("The current password is incorrect!"), "error")
 
     return flask.render_template('pw_change.html', form=form)

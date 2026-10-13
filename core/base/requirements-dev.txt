@@ -45,6 +45,7 @@ Werkzeug
 wonderwords
 WTForms
 WTForms-Components
+webauthn
 
 # core/nginx
 watchdog

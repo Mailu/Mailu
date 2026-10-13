@@ -40,7 +40,7 @@ def domain_create():
                 flask.flash('Domain %s is already used' % form.name.data, 'error')
             else:
                 domain = models.Domain()
-                form.populate_obj(domain)
+                form.populate_domain(domain)
                 models.db.session.add(domain)
                 models.db.session.commit()
                 flask.flash('Domain %s created' % domain)
@@ -62,7 +62,7 @@ def domain_edit(domain_name):
     wtforms_components.read_only(form.name)
     form.name.validators = []
     if form.validate_on_submit():
-        form.populate_obj(domain)
+        form.populate_domain(domain)
         models.db.session.commit()
         flask.flash('Domain %s saved' % domain)
         return flask.redirect(flask.url_for('.domain_list'))

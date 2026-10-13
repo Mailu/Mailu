@@ -36,12 +36,21 @@
         </a>
       </li>
     {%- endif %}
+      {%- if current_user.is_authenticated %}
+      <li class="nav-item" role="none">
+        <a href="{{ url_for('sso.logout') }}" class="nav-link" role="menuitem">
+          <i class="nav-icon fa-solid fa-right-from-bracket"></i>
+          <p>{% trans %}Sign out{% endtrans %}</p>
+        </a>
+      </li>
+      {%- else %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('sso.login') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fa-solid fa-right-to-bracket"></i>
           <p>{% trans %}Sign in{% endtrans %}</p>
         </a>
       </li>
+      {%- endif %}
     {#-
       User self-registration is only available when
        - Admin is available

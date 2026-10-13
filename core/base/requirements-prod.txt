@@ -94,3 +94,4 @@ WTForms==3.2.2
 WTForms-Components==0.11.0
 yarl==1.25.1
 tld==0.13.2
+webauthn==2.7.0

@@ -1,5 +1,5 @@
 from werkzeug.utils import redirect
-from mailu import models, utils, auth_flow
+from mailu import models, utils, auth_flow, passkeys as passkey_utils
 from mailu.sso import sso, forms
 from mailu.ui import access
 
@@ -10,6 +10,7 @@ import flask_login
 import secrets
 import ipaddress
 from urllib.parse import urlparse, urljoin, unquote
+from markupsafe import Markup
 
 @sso.route('/login', methods=['GET', 'POST'])
 def login():
@@ -19,7 +20,7 @@ def login():
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
     client_port = flask.request.headers.get('X-Real-Port', None)
     form = forms.LoginForm()
-
+    flask.session['passkey_login_redirect'] = _has_usable_redirect()
     fields = []
 
     if 'url' in flask.request.args and not 'homepage' in flask.request.url:
@@ -53,6 +54,12 @@ def login():
         if user:
             flask.session.regenerate()
             flask_login.login_user(user)
+            passkeys_url = flask.url_for('ui.passkey_list')
+            nudge_body = Markup(_('For phishing-resistant sign-in, use a passkey next time. <a href="{}">Manage passkeys</a>.')).format(passkeys_url)
+            nudge = Markup('<span {}>{}</span>').format(
+                Markup(passkey_utils.PASSWORD_NUDGE_MARKER), nudge_body,
+            )
+            flask.flash(nudge, 'info')
             if user.change_pw_next_login:
                 auth_flow.require_actions(flask.session, 'password_change', destination)
                 destination = flask.url_for('sso.pw_change')

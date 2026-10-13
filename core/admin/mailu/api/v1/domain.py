@@ -1,4 +1,5 @@
 import validators
+from flask import request
 from flask_restx import Resource, fields, marshal
 from . import api, response_fields, user
 from .. import common
@@ -248,7 +249,7 @@ class Domain(Resource):
             for key in domain_found.dkim_keys]
 
     @dom.doc('generate_dkim')
-    @dom.expect(dkim_key_create_fields)
+    @dom.expect(dkim_key_create_fields, validate=False)
     @dom.response(200, 'Success', response_fields)
     @dom.response(400, 'Input validation exception', response_fields)
     @dom.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
@@ -262,7 +263,10 @@ class Domain(Resource):
         domain_found = models.db.session.get(models.Domain, domain)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
-        data = api.payload or {}
+        payload = request.get_data(cache=True)
+        if payload and not request.is_json:
+            return {'code': 415, 'message': 'A JSON request body is required'}, 415
+        data = request.get_json() if payload else {}
         algorithm = data.get('algorithm', 'rsa')
         if algorithm not in ('rsa', 'ed25519'):
             return {'code': 400, 'message': 'algorithm must be rsa or ed25519'}, 400

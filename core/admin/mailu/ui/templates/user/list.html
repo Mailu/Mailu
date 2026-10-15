@@ -19,6 +19,7 @@
     <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
     <th data-orderable="false">{% trans %}User settings{% endtrans %}</th>
     <th>{% trans %}Email{% endtrans %}</th>
+    <th>{% trans %}Passkeys{% endtrans %}</th>
     <th>{% trans %}Features{% endtrans %}</th>
     <th>{% trans %}Quota{% endtrans %}</th>
     <th>{% trans %}Comment{% endtrans %}</th>
@@ -34,12 +35,19 @@
     </td>
     <td>
       <a href="{{ url_for('.user_settings', user_email=user.email) }}" title="{% trans %}Settings{% endtrans %}"><i class="fa-solid fa-wrench"></i></a>&nbsp;
+      <a href="{{ url_for('.passkey_list', user_email=user.email) }}" title="{% trans %}Manage passkeys{% endtrans %}"><i class="fa-solid fa-key"></i></a>&nbsp;
       <a href="{{ url_for('.user_reply', user_email=user.email) }}" title="{% trans %}Auto-reply{% endtrans %}"><i class="fa-solid fa-plane"></i></a>&nbsp;
       {%- if config["FETCHMAIL_ENABLED"] -%}
       <a href="{{ url_for('.fetch_list', user_email=user.email) }}" title="{% trans %}Fetched accounts{% endtrans %}"><i class="fa-solid fa-download"></i></a>&nbsp;
       {%- endif -%}
     </td>
     <td>{{ user }}</td>
+    {% set passkey_count = passkey_counts.get(user.email, 0) %}
+    <td data-sort="{{ passkey_count }}">
+      <a href="{{ url_for('.passkey_list', user_email=user.email) }}" title="{% trans %}Manage passkeys{% endtrans %}">
+        <span class="badge {{ 'text-bg-primary' if passkey_count else 'text-bg-secondary' }}">{{ passkey_count }}</span>
+      </a>
+    </td>
     <td data-sort="{{ user.allow_spoofing*4 + user.enable_imap*2 + user.enable_pop }}">
       {% if user.enable_imap %}<span class="badge bg-primary">imap</span>{% endif %}
       {% if user.enable_pop %}<span class="badge bg-secondary">pop3</span>{% endif %}

@@ -24,6 +24,12 @@
         </a>
       </li>
       <li class="nav-item" role="none">
+        <a href="{{ url_for('.passkey_list', user_email=current_user.email) }}" class="nav-link" role="menuitem">
+          <i class="nav-icon fa-solid fa-key"></i>
+          <p>{% trans %}Manage passkeys{% endtrans %}</p>
+        </a>
+      </li>
+      <li class="nav-item" role="none">
         <a href="{{ url_for('.user_reply') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fa-solid fa-plane"></i>
           <p>{% trans %}Auto-reply{% endtrans %}</p>

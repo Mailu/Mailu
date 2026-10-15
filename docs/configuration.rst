@@ -239,6 +239,11 @@ The ``SESSION_COOKIE_SECURE`` (default: True) setting controls the secure flag o
 the cookies of the administrative interface. It should only be turned off if you
 intend to access it over plain HTTP.
 
+The ``PASSKEY_RP_ID`` setting selects the WebAuthn relying-party ID for passkeys.
+It defaults to the first hostname in ``HOSTNAMES``. Set it to the domain users
+access the web interface through if that differs from the first hostname. Passkeys
+require a secure browser context, normally HTTPS.
+
 ``SESSION_TIMEOUT`` (default: 3600) is the maximum amount of time in seconds between
 requests before a session is invalidated. ``PERMANENT_SESSION_LIFETIME`` (default: 108000)
 is the maximum amount of time in seconds a session can be kept alive for if it hasn't timed-out.

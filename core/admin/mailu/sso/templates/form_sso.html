@@ -6,7 +6,14 @@
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.email) }}
   {{ macros.form_field(form.pw) }}
-  {{ macros.form_fields(fields, label=False, class="btn btn-secondary") }}
+  <div class="d-flex flex-wrap align-items-center gap-2">
+    {%- for field_group in fields %}
+      {%- for field in field_group %}
+        {{ field(class_="btn btn-secondary") }}
+      {%- endfor %}
+    {%- endfor %}
+    {%- block extra_login_options %}{%- endblock %}
+  </div>
 </form>
 {%- endcall %}
 {%- endblock %}

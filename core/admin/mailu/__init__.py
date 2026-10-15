@@ -136,6 +136,8 @@ def create_app_from_config(config):
         if models.inspect(models.db.engine).has_table('dkim_key'):
             for domain in models.Domain.query.all():
                 domain._import_legacy_dkim_key()
+    from mailu.auth_flow import enforce_pending_actions
+    app.before_request(enforce_pending_actions)
     return app
 
 

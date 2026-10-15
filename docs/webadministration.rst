@@ -19,6 +19,8 @@ It offers the following configuration options:
 
 * configure application passwords.
 
+* configure passkeys for signing in to the web interface.
+
 * send broadcast messages to all users.
 
 * configure global administration users.
@@ -324,6 +326,10 @@ Edit
 ````
 
 This page is only accessible for global administrators. On the edit page, the global settings for the domain can be changed.
+
+Mailu supports signing in to the Admin and Webmail interfaces with passkeys. Users can register, name, and remove their passkeys from their account settings; global administrators can also manage a user's passkeys.
+
+The passkey policy selects whether the listed authenticator AAGUIDs are allowed or blocked. Enter AAGUID UUIDs in the list, one per line. An empty list does not restrict authenticators. The policy is applied when passkeys are registered and when they are used to sign in. You can also require user verification (PIN or biometrics), require device-bound credentials, and set the resident-key preference. Defaults require user verification and prefer resident credentials without requiring device-bound credentials.
 
 * Maximum user count. The maximum amount of users that can be created under this domain. Once this limit is reached it is not possible anymore to add users to the domain; and it is also not possible for users to self-register.
 

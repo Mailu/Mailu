@@ -1,7 +1,7 @@
 """Store DKIM signing keys and retirement status.
 
 Revision ID: a8c190d4e72b
-Revises: 4e6b8a1c2d3f
+Revises: d73b4f1c8e20
 Create Date: 2026-10-03
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 revision = 'a8c190d4e72b'
-down_revision = '4e6b8a1c2d3f'
+down_revision = 'd73b4f1c8e20'
 branch_labels = None
 depends_on = None
 

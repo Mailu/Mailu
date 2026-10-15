@@ -841,3 +841,11 @@ msgstr ""
 #: mailu/ui/templates/client.html
 msgid "Authentication token"
 msgstr ""
+
+#: mailu/ui/templates/alias/create.html
+msgid "When enabled, % matches zero or more characters and _ matches exactly one character in the alias."
+msgstr ""
+
+#: mailu/ui/templates/alias/create.html
+msgid "For example, sales% matches sales and sales-team. Use % alone for a catch-all alias."
+msgstr ""

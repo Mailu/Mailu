@@ -84,8 +84,39 @@ class DomainForm(flask_wtf.FlaskForm):
     max_quota_bytes = fields_.IntegerSliderField(_('Maximum user quota'), [validators.NumberRange(min=0, max=MAX_QUOTA_BYTES)], default=0)
     signup_enabled = fields.BooleanField(_('Enable sign-up'), default=False)
     anonmail_enabled = fields.BooleanField(_('Enable Global Anonymous Email Service'), default=False)
+    passkey_aaguid_mode = fields.RadioField(_('AAGUID list behavior'), choices=[
+        ('allow', _('Allow only listed AAGUIDs')),
+        ('block', _('Block listed AAGUIDs')),
+    ], default='allow')
+    passkey_aaguids = fields.TextAreaField(_('AAGUIDs (one UUID per line)'), [validators.Optional()])
+    passkey_require_uv = fields.BooleanField(_('Require user verification (PIN or biometrics)'), default=True)
+    passkey_device_bound = fields.BooleanField(_('Only allow device-bound passkeys'), default=False)
+    passkey_resident_key = fields.SelectField(
+        _('Resident passkey preference'), choices=[
+            ('discouraged', _('Discouraged')),
+            ('preferred', _('Preferred')),
+            ('required', _('Required')),
+        ], default='preferred',
+    )
     comment = fields.StringField(_('Comment'), render_kw=AUTOFOCUS)
     submit = fields.SubmitField(_('Save'))
+
+    def validate_passkey_aaguids(form, field):
+        _validate_aaguids(field)
+
+    def populate_domain(self, domain):
+        """Save the domain form fields, excluding the CSRF token and submit control."""
+        for name, field in self._fields.items():
+            if name not in ('csrf_token', 'submit'):
+                setattr(domain, name, field.data)
+
+
+def _validate_aaguids(field):
+    try:
+        from .. import passkeys
+        passkeys.normalize_aaguids(field.data)
+    except ValueError:
+        raise ValidationError(_('Enter valid AAGUID UUIDs, one per line.'))
 
 
 class DomainSignupForm(flask_wtf.FlaskForm):

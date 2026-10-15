@@ -11,7 +11,21 @@ import wtforms_components
 @access.domain_admin(models.Domain, 'domain_name')
 def user_list(domain_name):
     domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
-    return flask.render_template('user/list.html', domain=domain)
+    passkey_counts = {}
+    rows = (
+        models.db.session.query(
+            models.Passkey.user_email,
+            models.db.func.count(),
+        )
+        .join(models.User, models.User.email == models.Passkey.user_email)
+        .filter(models.User.domain_name == domain.name)
+        .group_by(models.Passkey.user_email)
+    )
+    passkey_counts = dict(rows)
+    return flask.render_template(
+        'user/list.html', domain=domain,
+        passkey_counts=passkey_counts,
+    )
 
 
 @ui.route('/user/create/<domain_name>', methods=['GET', 'POST'])

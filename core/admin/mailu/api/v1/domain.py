@@ -2,7 +2,7 @@ import validators
 from flask_restx import Resource, fields, marshal
 from . import api, response_fields, user
 from .. import common
-from ... import models, utils
+from ... import models, utils, passkeys as passkey_utils
 
 db = models.db
 
@@ -16,6 +16,11 @@ domain_fields = api.model('Domain', {
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
+    'passkey_aaguid_mode': fields.String(description='Whether listed passkey AAGUIDs are allowed or blocked', enum=['allow', 'block']),
+    'passkey_aaguids': fields.String(description='Comma or newline separated passkey AAGUID UUIDs'),
+    'passkey_require_uv': fields.Boolean(description='require user verification for passkeys'),
+    'passkey_device_bound': fields.Boolean(description='require device-bound passkeys'),
+    'passkey_resident_key': fields.String(description='resident passkey preference', enum=['discouraged', 'preferred', 'required']),
     'alternatives': fields.List(fields.String(attribute='name', description='FQDN'), example='["example.com"]'),
 })
 
@@ -25,6 +30,11 @@ domain_fields_update = api.model('DomainUpdate', {
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
+    'passkey_aaguid_mode': fields.String(description='Whether listed passkey AAGUIDs are allowed or blocked', enum=['allow', 'block']),
+    'passkey_aaguids': fields.String(description='Comma or newline separated passkey AAGUID UUIDs'),
+    'passkey_require_uv': fields.Boolean(description='require user verification for passkeys'),
+    'passkey_device_bound': fields.Boolean(description='require device-bound passkeys'),
+    'passkey_resident_key': fields.String(description='resident passkey preference', enum=['discouraged', 'preferred', 'required']),
     'alternatives': fields.List(fields.String(attribute='name', description='FQDN'), example='["example.com"]'),
 })
 
@@ -36,6 +46,11 @@ domain_fields_get = api.model('DomainGet', {
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
+    'passkey_aaguid_mode': fields.String(description='Whether listed passkey AAGUIDs are allowed or blocked', enum=['allow', 'block']),
+    'passkey_aaguids': fields.String(description='Comma or newline separated passkey AAGUID UUIDs'),
+    'passkey_require_uv': fields.Boolean(description='require user verification for passkeys'),
+    'passkey_device_bound': fields.Boolean(description='require device-bound passkeys'),
+    'passkey_resident_key': fields.String(description='resident passkey preference', enum=['discouraged', 'preferred', 'required']),
     'alternatives': fields.List(fields.String(attribute='name', description='FQDN'), example='["example.com"]'),
     'dns_autoconfig': fields.List(fields.String(description='DNS client auto-configuration entry')),
     'dns_mx': fields.String(Description='MX record for domain'),
@@ -55,6 +70,31 @@ domain_fields_dns = api.model('DomainDNS', {
     'dns_dmarc_report': fields.String(Description='DMARC report record for domain'),
     'dns_tlsa': fields.List(fields.String(Description='TLSA records for domain')),
 })
+
+
+def _set_passkey_policy(domain, data):
+    updates = {}
+    if 'passkey_aaguid_mode' in data:
+        if data['passkey_aaguid_mode'] not in ('allow', 'block'):
+            return 'passkey_aaguid_mode must be "allow" or "block"'
+        updates['passkey_aaguid_mode'] = data['passkey_aaguid_mode']
+    if 'passkey_aaguids' in data:
+        try:
+            updates['passkey_aaguids'] = passkey_utils.normalize_aaguids(data['passkey_aaguids'])
+        except (TypeError, ValueError):
+            return 'passkey_aaguids must contain valid AAGUID UUIDs'
+    for name in ('passkey_require_uv', 'passkey_device_bound'):
+        if name in data:
+            if not isinstance(data[name], bool):
+                return f'{name} must be a boolean'
+            updates[name] = data[name]
+    if 'passkey_resident_key' in data:
+        if data['passkey_resident_key'] not in ('discouraged', 'preferred', 'required'):
+            return 'passkey_resident_key must be discouraged, preferred, or required'
+        updates['passkey_resident_key'] = data['passkey_resident_key']
+    for name, value in updates.items():
+        setattr(domain, name, value)
+    return None
 
 manager_fields = api.model('Manager', {
     'managers': fields.List(fields.String(attribute='email', description='manager of domain')),
@@ -114,6 +154,8 @@ class Domains(Resource):
                 alternative = models.Alternative(name=item, domain_name=data['name'])
                 models.db.session.add(alternative)
         domain_new = models.Domain(name=data['name'])
+        if error := _set_passkey_policy(domain_new, data):
+            return {'code': 400, 'message': error}, 400
         if 'comment' in data:
             domain_new.comment = data['comment']
         if 'max_users' in data:
@@ -189,6 +231,8 @@ class Domain(Resource):
             domain_found.max_quota_bytes = data['max_quota_bytes']
         if 'signup_enabled' in data:
             domain_found.signup_enabled = data['signup_enabled']
+        if error := _set_passkey_policy(domain_found, data):
+            return {'code': 400, 'message': error}, 400
         models.db.session.add(domain_found)
 
         #apply the changes

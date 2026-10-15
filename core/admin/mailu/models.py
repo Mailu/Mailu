@@ -199,6 +199,13 @@ class Domain(Base):
     # Anonymous Email Service integration: enable domain to accept API-generated aliases
     anonmail_enabled = db.Column(db.Boolean, nullable=False, default=False)
 
+    # WebAuthn passkey policy
+    passkey_aaguid_mode = db.Column(db.String(8), nullable=False, default='allow')
+    passkey_aaguids = db.Column(db.Text, nullable=False, default='')
+    passkey_require_uv = db.Column(db.Boolean, nullable=False, default=True)
+    passkey_device_bound = db.Column(db.Boolean, nullable=False, default=False)
+    passkey_resident_key = db.Column(db.String(16), nullable=False, default='preferred')
+
     _dkim_key = None
     _dkim_key_on_disk = None
 
@@ -635,6 +642,8 @@ class User(Base, Email):
     change_pw_next_login = db.Column(db.Boolean, nullable=False, default=False)
     gpg_key = db.Column(db.Text, nullable=True)
 
+    passkeys = db.relationship('Passkey', back_populates='user', cascade='all, delete-orphan')
+
     # Flask-login attributes
     is_authenticated = True
     is_active = True
@@ -797,6 +806,19 @@ def wkd_hash(localpart):
     standard = base64.b32encode(digest).decode('ascii').lower().rstrip('=')
     return standard.translate(str.maketrans(
         'abcdefghijklmnopqrstuvwxyz234567', 'ybndrfg8ejkmcpqxot1uwisza345h769'))
+
+
+class Passkey(Base):
+    __tablename__ = 'passkey'
+
+    credential_id = db.Column(db.LargeBinary(1023), primary_key=True)
+    user_email = db.Column(db.String(255), db.ForeignKey('user.email', ondelete='CASCADE'), nullable=False, index=True)
+    public_key = db.Column(db.LargeBinary, nullable=False)
+    sign_count = db.Column(db.BigInteger, nullable=False, default=0)
+    aaguid = db.Column(db.String(36), nullable=False)
+    device_bound = db.Column(db.Boolean, nullable=True, default=None)
+    name = db.Column(db.String(255), nullable=False, default='')
+    user = db.relationship('User', back_populates='passkeys')
 
 
 class Alias(Base, Email):

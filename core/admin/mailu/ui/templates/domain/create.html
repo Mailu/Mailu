@@ -5,11 +5,11 @@
 {%- endblock %}
 
 {%- block content %}
-{%- call macros.card() %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {% set quota_bytes = form.max_quota_bytes.data or 0 %}
   {% set quota_unit = 1000000000 if quota_bytes % 1000000000 == 0 else 1000000 %}
+  {%- call macros.card() %}
   {{ macros.form_field(form.name, autofocus=True, autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false") }}
   {{ macros.form_fields((form.max_users, form.max_aliases)) }}
   {{ macros.form_field(form.max_quota_bytes, step=1, max=max_quota_bytes, data_infinity="true",
@@ -18,8 +18,27 @@
   {{ macros.quota_unlimited_note() }}
   {{ macros.form_field(form.signup_enabled) }}
   {{ macros.form_field(form.anonmail_enabled) }}
+  {%- endcall %}
+  {%- call macros.card(title=_('Passkey policy')) %}
+  <p class="text-body-secondary">{% trans %}These settings apply to passkeys for users in this domain.{% endtrans %}</p>
+  <fieldset class="mb-3">
+    <legend class="form-label">{{ form.passkey_aaguid_mode.label.text }}</legend>
+    <div class="btn-group" role="group" aria-label="{{ form.passkey_aaguid_mode.label.text }}">
+      {% for choice in form.passkey_aaguid_mode %}
+      {{ choice(class_="btn-check", autocomplete="off") }}
+      {{ choice.label(class_="btn btn-outline-primary") }}
+      {% endfor %}
+    </div>
+    {{ macros.form_field_errors(form.passkey_aaguid_mode) }}
+  </fieldset>
+  {{ macros.form_field(form.passkey_aaguids, rows=5) }}
+  {{ macros.form_field(form.passkey_require_uv) }}
+  {{ macros.form_field(form.passkey_device_bound) }}
+  {{ macros.form_field(form.passkey_resident_key) }}
+  {%- endcall %}
+  {%- call macros.card() %}
   {{ macros.form_field(form.comment) }}
   {{ macros.form_field(form.submit) }}
+  {%- endcall %}
 </form>
-{%- endcall %}
 {%- endblock %}

@@ -38,6 +38,7 @@
   {%- endcall %}
   {%- endcall %}
 
+  <p><a class="btn btn-secondary" href="{{ url_for('.passkey_list', user_email=user.email) }}">{% trans %}Manage passkeys{% endtrans %}</a></p>
   {{ macros.form_field(form.submit) }}
 </form>
 {%- endblock %}

@@ -121,7 +121,6 @@ def create_app_from_config(config):
     app.register_blueprint(internal.internal, url_prefix='/internal')
     app.register_blueprint(sso.sso, url_prefix='/sso')
     api.register(app, web_api_root=app.config.get('WEB_API'))
-
     @app.after_request
     def add_wkd_cors_headers(response):
         if flask.request.path.startswith('/.well-known/openpgpkey/'):
@@ -131,6 +130,8 @@ def create_app_from_config(config):
             response.headers['Cache-Control'] = 'public, max-age=3600'
         return response
 
+    from mailu.auth_flow import enforce_pending_actions
+    app.before_request(enforce_pending_actions)
     return app
 
 

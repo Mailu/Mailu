@@ -85,18 +85,16 @@ def domain_delete(domain_name):
 @access.domain_admin(models.Domain, 'domain_name')
 def domain_details(domain_name):
     domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
-    return flask.render_template('domain/details.html', domain=domain)
+    return flask.render_template('domain/details.html', domain=domain,
+        dkim_toggle_form=forms.DkimToggleForm())
 
 @ui.route('/domain/details/<domain_name>/zonefile', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
 def domain_download_zonefile(domain_name):
     domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     res = [domain.dns_mx, domain.dns_spf]
-    if domain.dkim_publickey:
-        record = domain.dns_dkim.split('"', 1)[0].strip()
-        txt = f'v=DKIM1; k=rsa; p={domain.dkim_publickey}'
-        txt = ' '.join(f'"{txt[p:p+250]}"' for p in range(0, len(txt), 250))
-        res.append(f'{record} {txt}')
+    if domain.dkim_keys:
+        res.extend(key.dns_record(domain.name) for key in domain.dkim_keys)
         res.append(domain.dns_dmarc)
         if domain.dns_dmarc_report_needed:
             res.append(domain.dns_dmarc_report)
@@ -104,11 +102,8 @@ def domain_download_zonefile(domain_name):
     res.extend(domain.dns_autoconfig)
     for alternative in domain.alternatives:
         res.extend([alternative.dns_mx, alternative.dns_spf])
-        if alternative.domain.dkim_publickey:
-            record = alternative.dns_dkim.split('"', 1)[0].strip()
-            txt = f'v=DKIM1; k=rsa; p={alternative.domain.dkim_publickey}'
-            txt = ' '.join(f'"{txt[p:p+250]}"' for p in range(0, len(txt), 250))
-            res.append(f'{record} {txt}')
+        if alternative.domain.dkim_keys:
+            res.extend(key.dns_record(alternative.name) for key in alternative.domain.dkim_keys)
             res.append(alternative.dns_dmarc)
             if alternative.dns_dmarc_report_needed:
                 res.append(alternative.dns_dmarc_report)
@@ -122,14 +117,49 @@ def domain_download_zonefile(domain_name):
 
 @ui.route('/domain/genkeys/<domain_name>', methods=['GET', 'POST'])
 @access.domain_admin(models.Domain, 'domain_name')
-@access.confirmation_required("regenerate keys for {domain_name}")
+@access.confirmation_required("generate a DKIM key for {domain_name}")
 def domain_genkeys(domain_name):
     domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
-    domain.generate_dkim_key()
+    algorithm = flask.request.values.get('algorithm', 'rsa')
+    if algorithm not in ('rsa', 'ed25519'):
+        flask.abort(400)
+    domain.generate_dkim_key(algorithm=algorithm, active=False)
     models.db.session.add(domain)
     models.db.session.commit()
     return flask.redirect(
         flask.url_for(".domain_details", domain_name=domain_name))
+
+
+@ui.route('/domain/dkim/<int:key_id>/active', methods=['POST'])
+@access.domain_admin(models.DkimKey, 'key_id')
+@access.confirmation_required("change signing status for DKIM key {key_id}")
+def domain_dkim_toggle(key_id):
+    form = forms.DkimToggleForm()
+    if not form.validate_on_submit():
+        flask.abort(400)
+    key = models.db.session.get(models.DkimKey, key_id) or flask.abort(404)
+    if key.active:
+        key.active = False
+        key.retired = True
+    elif key.retired:
+        flask.abort(409)
+    else:
+        key.active = True
+    models.db.session.commit()
+    return flask.redirect(flask.url_for('.domain_details', domain_name=key.domain_name))
+
+
+@ui.route('/domain/dkim/<int:key_id>/delete', methods=['POST'])
+@access.domain_admin(models.DkimKey, 'key_id')
+@access.confirmation_required("delete DKIM key {key_id}")
+def domain_dkim_delete(key_id):
+    key = models.db.session.get(models.DkimKey, key_id) or flask.abort(404)
+    if key.active:
+        flask.abort(409)
+    domain_name = key.domain_name
+    models.db.session.delete(key)
+    models.db.session.commit()
+    return flask.redirect(flask.url_for('.domain_details', domain_name=domain_name))
 
 
 @ui.route('/domain/signup', methods=['GET', 'POST'])

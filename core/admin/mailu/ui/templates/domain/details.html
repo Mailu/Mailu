@@ -10,13 +10,7 @@
 
 {%- block main_action %}
 {%- if current_user.global_admin %}
-<a class="btn btn-primary btn-group float-end" href="{{ url_for(".domain_genkeys", domain_name=domain.name) }}">
-  {%- if domain.dkim_publickey %}
-  {% trans %}Regenerate keys{% endtrans %}
-  {%- else %}
-  {% trans %}Generate keys{% endtrans %}
-  {%- endif %}
-</a><a class="btn btn-primary btn-group float-end me-1" href="{{ url_for(".domain_download_zonefile", domain_name=domain.name) }}">  {% trans %}Download zonefile{% endtrans %}</a>
+<a class="btn btn-primary btn-group float-end" href="{{ url_for('.domain_download_zonefile', domain_name=domain.name) }}">{% trans %}Download zonefile{% endtrans %}</a>
 {%- endif %}
 {%- endblock %}
 
@@ -69,6 +63,36 @@
   <td>{% if domain.anonmail_enabled %}{% trans %}enabled{% endtrans %}{% else %}{% trans %}disabled{% endtrans %}{% endif %}</td>
 </tr>
 {%- endcall %}
+
+{% if domain.dkim_keys or domain in current_user.get_managed_domains() %}
+{% call macros.table(datatable=False) %}
+{% if domain.dkim_keys %}
+<tr><th>{% trans %}DKIM keys{% endtrans %}</th><td>
+{% for key in domain.dkim_keys %}
+<div class="mb-3"><strong>DKIM {{ key.algorithm|upper }} / {{ key.selector }}</strong> - {% if key.active %}{% trans %}Signing{% endtrans %}{% elif key.retired %}{% trans %}Retired{% endtrans %}{% else %}{% trans %}Staged{% endtrans %}{% endif %}<br><span class="text-secondary small">{% trans %}Created{% endtrans %}: {{ key.created_at | format_date }}</span>
+<pre class="pre-config border bg-light">{{ key.dns_record(domain.name) }}</pre>
+{% if domain in current_user.get_managed_domains() %}
+{% if key.retired %}
+<form method="post" action="{{ url_for('.domain_dkim_delete', key_id=key.id) }}"><button class="btn btn-secondary" type="submit">{% trans %}Delete{% endtrans %}</button></form>
+{% else %}
+<form method="post" action="{{ url_for('.domain_dkim_toggle', key_id=key.id) }}">{{ dkim_toggle_form.hidden_tag() }}<button class="btn btn-secondary" type="submit">{% if key.active %}{% trans %}Stop signing{% endtrans %}{% else %}{% trans %}Promote to signing{% endtrans %}{% endif %}</button></form>
+{% endif %}
+{% endif %}
+</div>
+{% endfor %}
+</td></tr>
+{% endif %}
+{% if domain in current_user.get_managed_domains() %}
+<tr>
+  <th>{% trans %}DKIM key management{% endtrans %}</th>
+  <td>
+    <a class="btn btn-primary btn-group" href="{{ url_for('.domain_genkeys', domain_name=domain.name, algorithm='rsa') }}">{% trans %}Stage DKIM RSA key{% endtrans %}</a>
+    <a class="btn btn-primary btn-group" href="{{ url_for('.domain_genkeys', domain_name=domain.name, algorithm='ed25519') }}">{% trans %}Stage DKIM Ed25519 key{% endtrans %}</a>
+  </td>
+</tr>
+{% endif %}
+{% endcall %}
+{% endif %}
 
 {%- for alternative in domain.alternatives %}
 

@@ -16,24 +16,20 @@ def vault_error(*messages, status=404):
 @internal.route("/rspamd/vault/v1/dkim/<domain_name>", methods=['GET'])
 def rspamd_dkim_key(domain_name):
     selectors = []
-    if domain := models.db.session.get(models.Domain, domain_name):
-        if key := domain.dkim_key:
-            selectors.append(
-                {
-                    'domain'  : idna.encode(domain.name.lower()).decode('ascii'),
-                    'key'     : key.decode('utf8'),
-                    'selector': flask.current_app.config.get('DKIM_SELECTOR', 'dkim'),
-                }
-            )
-    elif domain := models.db.session.get(models.Alternative, domain_name):
-        if key := domain.domain.dkim_key:
-            selectors.append(
-                {
-                    'domain'  : idna.encode(domain.name.lower()).decode('ascii'),
-                    'key'     : key.decode('utf8'),
-                    'selector': flask.current_app.config.get('DKIM_SELECTOR', 'dkim'),
-                }
-            )
+    domain = models.db.session.get(models.Domain, domain_name)
+    alternative = models.db.session.get(models.Alternative, domain_name)
+    signing_domains = [item for item in (domain, alternative.domain if alternative else None) if item]
+    seen = set()
+    for signing_domain in signing_domains:
+        for key in signing_domain.dkim_keys:
+            if key.active and key.selector not in seen:
+                seen.add(key.selector)
+                selectors.append({
+                    'domain': idna.encode(domain_name.lower()).decode('ascii'),
+                    'key': key.private_key.decode('utf8'),
+                    'selector': key.selector,
+                    'alg': key.algorithm,
+                })
     return flask.jsonify({'data': {'selectors': selectors}})
 
 @internal.route("/rspamd/local_domains", methods=['GET'])

@@ -173,12 +173,6 @@ class Config(Base):
     value = db.Column(JSONEncoded)
 
 
-def _save_dkim_keys(session):
-    """ store DKIM keys after commit """
-    for obj in session.identity_map.values():
-        if isinstance(obj, Domain):
-            obj.save_dkim_key()
-
 def _get_managers():
     return managers
 
@@ -199,6 +193,8 @@ class Domain(Base):
     # Anonymous Email Service integration: enable domain to accept API-generated aliases
     anonmail_enabled = db.Column(db.Boolean, nullable=False, default=False)
 
+    dkim_keys = db.relationship('DkimKey', back_populates='domain', cascade='all, delete-orphan', order_by='DkimKey.selector')
+
     # WebAuthn passkey policy
     passkey_aaguid_mode = db.Column(db.String(8), nullable=False, default='allow')
     passkey_aaguids = db.Column(db.Text, nullable=False, default='')
@@ -206,26 +202,24 @@ class Domain(Base):
     passkey_device_bound = db.Column(db.Boolean, nullable=False, default=False)
     passkey_resident_key = db.Column(db.String(16), nullable=False, default='preferred')
 
-    _dkim_key = None
-    _dkim_key_on_disk = None
+    def _import_legacy_dkim_key(self):
+        """Import the historical filesystem key once, preserving its old selector."""
+        path = app.config['DKIM_PATH'].format(domain=self.name, selector=app.config['DKIM_SELECTOR'])
+        backup_path = f'{path}.bak'
+        if os.path.exists(backup_path):
+            return
+        try:
+            with open(path, 'rb') as key_file:
+                key = key_file.read()
+        except OSError:
+            return
 
-    def _dkim_file(self):
-        """ return filename for active DKIM key """
-        return app.config['DKIM_PATH'].format(
-            domain=self.name,
-            selector=app.config['DKIM_SELECTOR']
-        )
-
-    def save_dkim_key(self):
-        """ save changed DKIM key to disk """
-        if self._dkim_key != self._dkim_key_on_disk:
-            file_path = self._dkim_file()
-            if self._dkim_key:
-                with open(file_path, 'wb') as handle:
-                    handle.write(self._dkim_key)
-            elif os.path.exists(file_path):
-                os.unlink(file_path)
-            self._dkim_key_on_disk = self._dkim_key
+        selector = app.config['DKIM_SELECTOR']
+        if not any(existing.selector == selector for existing in self.dkim_keys):
+            self.dkim_keys.append(DkimKey(private_key=key, algorithm='rsa', active=not any(k.active for k in self.dkim_keys),
+                selector=selector))
+        db.session.commit()
+        os.replace(path, backup_path)
 
     @cached_property
     def dns_mx(self):
@@ -242,9 +236,8 @@ class Domain(Base):
     @property
     def dns_dkim(self):
         """ return DKIM record for domain """
-        if self.dkim_key:
-            selector = app.config['DKIM_SELECTOR']
-            return f'{selector}._domainkey.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN TXT "v=DKIM1; k=rsa; p={self.dkim_publickey}"'
+        if self.dkim_keys:
+            return '\n'.join(key.dns_record(self.name) for key in self.dkim_keys)
 
     @cached_property
     def dns_dmarc(self):
@@ -331,34 +324,32 @@ class Domain(Base):
     @property
     def dkim_key(self):
         """ return private DKIM key """
-        if self._dkim_key is None:
-            file_path = self._dkim_file()
-            if os.path.exists(file_path):
-                with open(file_path, 'rb') as handle:
-                    self._dkim_key = self._dkim_key_on_disk = handle.read()
-            else:
-                self._dkim_key = self._dkim_key_on_disk = b''
-        return self._dkim_key if self._dkim_key else None
+        key = next((key for key in self.dkim_keys if key.active), None)
+        return key.private_key if key else None
 
     @dkim_key.setter
     def dkim_key(self, value):
         """ set private DKIM key """
-        old_key = self.dkim_key
-        self._dkim_key = value if value is not None else b''
-        if self._dkim_key != old_key:
-            if not sqlalchemy.event.contains(db.session, 'after_commit', _save_dkim_keys):
-                sqlalchemy.event.listen(db.session, 'after_commit', _save_dkim_keys)
+        if value is None:
+            return
+        key = next((key for key in self.dkim_keys if key.active), None)
+        if key:
+            key.private_key = value
+        else:
+            self.dkim_keys.append(DkimKey.create(self, value, 'rsa', active=True))
 
     @property
     def dkim_publickey(self):
         """ return public part of DKIM key """
-        dkim_key = self.dkim_key
-        if dkim_key:
-            return dkim.strip_key(dkim_key).decode('utf8')
+        key = next((key for key in self.dkim_keys if key.active), None)
+        if key:
+            return key.public
 
-    def generate_dkim_key(self):
-        """ generate new DKIM key """
-        self.dkim_key = dkim.gen_key()
+    def generate_dkim_key(self, algorithm='rsa', active=True):
+        """Generate a DKIM key, optionally leaving it staged for rotation."""
+        key = DkimKey.create(self, dkim.gen_ed25519_key() if algorithm == 'ed25519' else dkim.gen_key(), algorithm, active)
+        self.dkim_keys.append(key)
+        return key
 
     def has_email(self, localpart):
         """ checks if localpart is configured for domain """
@@ -395,9 +386,8 @@ class Alternative(Base):
     @property
     def dns_dkim(self):
         """ return DKIM record for domain """
-        if self.domain.dkim_key:
-            selector = app.config['DKIM_SELECTOR']
-            return f'{selector}._domainkey.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN TXT "v=DKIM1; k=rsa; p={self.domain.dkim_publickey}"'
+        if self.domain.dkim_keys:
+            return '\n'.join(key.dns_record(self.name) for key in self.domain.dkim_keys)
 
     @cached_property
     def dns_dmarc(self):
@@ -444,6 +434,38 @@ class Alternative(Base):
             )
         except dns.exception.DNSException:
             return False
+
+
+class DkimKey(Base):
+    """A database-backed signing key, retained while staged or retired."""
+
+    __tablename__ = 'dkim_key'
+
+    id = db.Column(db.Integer, primary_key=True)
+    domain_name = db.Column(IdnaDomain, db.ForeignKey('domain.name', ondelete='CASCADE'), nullable=False, index=True)
+    selector = db.Column(db.String(32), nullable=False)
+    algorithm = db.Column(db.String(16), nullable=False, default='rsa')
+    private_key = db.Column(db.LargeBinary, nullable=False)
+    active = db.Column(db.Boolean, nullable=False, default=False)
+    retired = db.Column(db.Boolean, nullable=False, default=False)
+    domain = db.relationship('Domain', back_populates='dkim_keys')
+    __table_args__ = (db.UniqueConstraint('domain_name', 'selector'),)
+
+    @classmethod
+    def create(cls, domain, private_key, algorithm, active=False):
+        return cls(domain_name=domain.name, private_key=private_key, algorithm=algorithm,
+            active=active, selector=dkim.selector(private_key, algorithm))
+
+    @property
+    def public(self):
+        return dkim.public_key(self.private_key, self.algorithm)
+
+    def dns_record(self, domain_name):
+        name = idna.encode(domain_name.lower()).decode('ascii')
+        record = f'{self.selector}._domainkey.{name}. 600 IN TXT'
+        txt = f'v=DKIM1; k={self.algorithm}; p={self.public}'
+        chunks = [f'"{txt[pos:pos + 250]}"' for pos in range(0, len(txt), 250)]
+        return f'{record} {" ".join(chunks)}'
 
 
 class Relay(Base):

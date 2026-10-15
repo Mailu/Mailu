@@ -1,4 +1,5 @@
 import validators
+from flask import request
 from flask_restx import Resource, fields, marshal
 from . import api, response_fields, user
 from .. import common
@@ -111,6 +112,23 @@ alternative_fields_update = api.model('AlternativeDomainUpdate', {
 alternative_fields = api.model('AlternativeDomain', {
     'name': fields.String(description='alternative FQDN', example='example2.com', required=True),
     'domain': fields.String(description='domain FQDN', example='example.com', required=True),
+})
+
+dkim_key_fields = api.model('DkimKey', {
+    'id': fields.Integer(readOnly=True),
+    'selector': fields.String(readOnly=True),
+    'algorithm': fields.String(readOnly=True),
+    'active': fields.Boolean(description='Whether Rspamd signs with this key'),
+    'retired': fields.Boolean(description='Whether this key has been stopped and cannot be promoted again'),
+    'dns_record': fields.String(readOnly=True),
+})
+
+dkim_key_create_fields = api.model('DkimKeyCreate', {
+    'algorithm': fields.String(enum=['rsa', 'ed25519'], default='rsa'),
+})
+
+dkim_key_update_fields = api.model('DkimKeyUpdate', {
+    'active': fields.Boolean(required=True, description='Enable or disable signing with this key'),
 })
 
 
@@ -259,7 +277,23 @@ class Domain(Resource):
 
 @dom.route('/<domain>/dkim')
 class Domain(Resource):
+    @dom.doc('list_dkim_keys')
+    @dom.marshal_with(dkim_key_fields, as_list=True)
+    @dom.doc(security='Bearer')
+    @common.api_token_authorization
+    def get(self, domain):
+        """List signing and staged DKIM keys."""
+        if not validators.domain(domain):
+            return {'code': 400, 'message': f'Domain {domain} is not a valid domain'}, 400
+        domain_found = models.db.session.get(models.Domain, domain)
+        if not domain_found:
+            return {'code': 404, 'message': f'Domain {domain} does not exist'}, 404
+        return [{'id': key.id, 'selector': key.selector, 'algorithm': key.algorithm,
+            'active': key.active, 'retired': key.retired, 'dns_record': key.dns_record(domain_found.name)}
+            for key in domain_found.dkim_keys]
+
     @dom.doc('generate_dkim')
+    @dom.expect(dkim_key_create_fields, validate=False)
     @dom.response(200, 'Success', response_fields)
     @dom.response(400, 'Input validation exception', response_fields)
     @dom.doc(responses={401: 'Authorization header missing', 403: 'Invalid authorization header'})
@@ -273,9 +307,60 @@ class Domain(Resource):
         domain_found = models.db.session.get(models.Domain, domain)
         if not domain_found:
             return { 'code': 404, 'message': f'Domain {domain} does not exist'}, 404
-        domain_found.generate_dkim_key()
-        domain_found.save_dkim_key()
-        return {'code': 200, 'message': f'DKIM/DMARC keys have been generated for domain {domain}'}, 200
+        payload = request.get_data(cache=True)
+        if payload and not request.is_json:
+            return {'code': 415, 'message': 'A JSON request body is required'}, 415
+        data = request.get_json() if payload else {}
+        algorithm = data.get('algorithm', 'rsa')
+        if algorithm not in ('rsa', 'ed25519'):
+            return {'code': 400, 'message': 'algorithm must be rsa or ed25519'}, 400
+        domain_found.generate_dkim_key(algorithm=algorithm, active=False)
+        models.db.session.commit()
+        return {'code': 200, 'message': f'Staged {algorithm} DKIM key for domain {domain}'}, 200
+
+
+@dom.route('/<domain>/dkim/<int:key_id>')
+class DomainDkimKey(Resource):
+    @dom.doc('update_dkim_key')
+    @dom.expect(dkim_key_update_fields)
+    @dom.response(200, 'Success', response_fields)
+    @dom.response(404, 'Domain or key not found', response_fields)
+    @dom.response(409, 'A retired key cannot be promoted again', response_fields)
+    @dom.doc(security='Bearer')
+    @common.api_token_authorization
+    def patch(self, domain, key_id):
+        """Promote a staged key or retire an active key."""
+        domain_found = models.db.session.get(models.Domain, domain)
+        key = models.db.session.get(models.DkimKey, key_id)
+        if not domain_found or not key or key.domain_name != domain_found.name:
+            return {'code': 404, 'message': 'Domain or DKIM key not found'}, 404
+        active = bool(api.payload['active'])
+        if active and key.retired:
+            return {'code': 409, 'message': 'A retired DKIM key cannot be promoted again'}, 409
+        key.active = active
+        if not active:
+            key.retired = True
+        models.db.session.commit()
+        action = 'enabled' if key.active else 'disabled'
+        return {'code': 200, 'message': f'DKIM signing {action} for selector {key.selector}'}, 200
+
+    @dom.doc('delete_dkim_key')
+    @dom.response(200, 'Success', response_fields)
+    @dom.response(404, 'Domain or key not found', response_fields)
+    @dom.response(409, 'An active key cannot be deleted', response_fields)
+    @dom.doc(security='Bearer')
+    @common.api_token_authorization
+    def delete(self, domain, key_id):
+        """Delete an inactive DKIM key and its DNS record."""
+        domain_found = models.db.session.get(models.Domain, domain)
+        key = models.db.session.get(models.DkimKey, key_id)
+        if not domain_found or not key or key.domain_name != domain_found.name:
+            return {'code': 404, 'message': 'Domain or DKIM key not found'}, 404
+        if key.active:
+            return {'code': 409, 'message': 'Stop signing with this key before deleting it'}, 409
+        models.db.session.delete(key)
+        models.db.session.commit()
+        return {'code': 200, 'message': f'DKIM key {key_id} has been deleted'}, 200
 
 @dom.route('/<domain>/manager')
 class Manager(Resource):
@@ -473,3 +558,76 @@ class Alternative(Resource):
         db.session.delete(alternative)
         db.session.commit()
         return {'code': 200, 'message': f'Alternative {alt} for domain {domain} has been deleted'}, 200
+
+
+@alt.route('/<string:alt>/dkim')
+class AlternativeDkimKeys(Resource):
+    @alt.marshal_with(dkim_key_fields, as_list=True)
+    @alt.doc(security='Bearer')
+    @common.api_token_authorization
+    def get(self, alt):
+        """List keys shared by an alternative and its parent domain."""
+        alternative = models.db.session.get(models.Alternative, alt)
+        if not alternative:
+            return {'code': 404, 'message': f'Alternative domain {alt} does not exist'}, 404
+        return [{'id': key.id, 'selector': key.selector, 'algorithm': key.algorithm,
+            'active': key.active, 'retired': key.retired, 'dns_record': key.dns_record(alternative.name)}
+            for key in alternative.domain.dkim_keys]
+
+    @alt.expect(dkim_key_create_fields)
+    @alt.response(200, 'Success', response_fields)
+    @alt.doc(security='Bearer')
+    @common.api_token_authorization
+    def post(self, alt):
+        """Generate a staged key shared by the alternative and its parent domain."""
+        alternative = models.db.session.get(models.Alternative, alt)
+        if not alternative:
+            return {'code': 404, 'message': f'Alternative domain {alt} does not exist'}, 404
+        algorithm = (api.payload or {}).get('algorithm', 'rsa')
+        if algorithm not in ('rsa', 'ed25519'):
+            return {'code': 400, 'message': 'algorithm must be rsa or ed25519'}, 400
+        alternative.domain.generate_dkim_key(algorithm=algorithm, active=False)
+        models.db.session.commit()
+        return {'code': 200, 'message': f'Staged {algorithm} DKIM key for alternative {alt}'}, 200
+
+
+@alt.route('/<string:alt>/dkim/<int:key_id>')
+class AlternativeDkimKey(Resource):
+    @alt.expect(dkim_key_update_fields)
+    @alt.response(200, 'Success', response_fields)
+    @alt.response(404, 'Alternative or key not found', response_fields)
+    @alt.response(409, 'A retired key cannot be promoted again', response_fields)
+    @alt.doc(security='Bearer')
+    @common.api_token_authorization
+    def patch(self, alt, key_id):
+        """Promote a staged key or retire an active key shared with the parent domain."""
+        alternative = models.db.session.get(models.Alternative, alt)
+        key = models.db.session.get(models.DkimKey, key_id)
+        if not alternative or not key or key.domain_name != alternative.domain_name:
+            return {'code': 404, 'message': 'Alternative or DKIM key not found'}, 404
+        active = bool(api.payload['active'])
+        if active and key.retired:
+            return {'code': 409, 'message': 'A retired DKIM key cannot be promoted again'}, 409
+        key.active = active
+        if not active:
+            key.retired = True
+        models.db.session.commit()
+        action = 'enabled' if key.active else 'disabled'
+        return {'code': 200, 'message': f'DKIM signing {action} for selector {key.selector}'}, 200
+
+    @alt.response(200, 'Success', response_fields)
+    @alt.response(404, 'Alternative or key not found', response_fields)
+    @alt.response(409, 'An active key cannot be deleted', response_fields)
+    @alt.doc(security='Bearer')
+    @common.api_token_authorization
+    def delete(self, alt, key_id):
+        """Delete an inactive key shared with the alternative's parent domain."""
+        alternative = models.db.session.get(models.Alternative, alt)
+        key = models.db.session.get(models.DkimKey, key_id)
+        if not alternative or not key or key.domain_name != alternative.domain_name:
+            return {'code': 404, 'message': 'Alternative or DKIM key not found'}, 404
+        if key.active:
+            return {'code': 409, 'message': 'Stop signing with this key before deleting it'}, 409
+        models.db.session.delete(key)
+        models.db.session.commit()
+        return {'code': 200, 'message': f'DKIM key {key_id} has been deleted'}, 200

@@ -829,3 +829,15 @@ msgstr ""
 #: mailu/ui/templates/user/signup_domain.html:16
 msgid "Available slots"
 msgstr ""
+
+#: mailu/ui/templates/client.html
+msgid "Your email client must use an authentication token instead of your account password. Enter the token in the client's password field for both incoming and outgoing mail."
+msgstr ""
+
+#: mailu/ui/templates/client.html
+msgid "Create an authentication token"
+msgstr ""
+
+#: mailu/ui/templates/client.html
+msgid "Authentication token"
+msgstr ""

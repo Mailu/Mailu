@@ -11,8 +11,8 @@
 }
 @media screen and (max-width: 480px) {
   #taskmenu a.button-mailu {
-    background-position: 0px;
-    background-size: 40px 40px;
+    background-position: .5em center;
+    background-size: 1.2em 1.2em;
   }
   #taskmenu a.button-mailu.selected, #taskmenu a.button-mailu.selected:hover, #taskmenu a.button-mailu:hover {
     color: #000;

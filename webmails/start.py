@@ -6,6 +6,7 @@ import sys
 import subprocess
 import shutil
 import hmac
+import tempfile
 
 from socrate import conf, system
 
@@ -88,30 +89,58 @@ def demote(username='mailu'):
         system.drop_privs_to(username)
     return result
 
-print("Initializing database")
-try:
-    result = subprocess.check_output(["/var/www/roundcube/bin/initdb.sh", "--dir", "/var/www/roundcube/SQL"],
-                                     stderr=subprocess.STDOUT, preexec_fn=demote())
-    print(result.decode())
-except subprocess.CalledProcessError as exc:
-    err = exc.stdout.decode()
-    if "already exists" in err:
-        print("Already initialized")
-    else:
-        print(err)
-        exit(3)
+def initialize_database(image_version_path="/version", marker_path="/data/.roundcube-version"):
+    with open(image_version_path) as handle:
+        version = handle.read().strip()
+    try:
+        with open(marker_path) as handle:
+            previous_version = handle.read().strip()
+    except FileNotFoundError:
+        previous_version = None
 
-print("Upgrading database")
-try:
-    subprocess.check_call(["/var/www/roundcube/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT, preexec_fn=demote())
-except subprocess.CalledProcessError as exc:
-    exit(4)
-else:
+    print("Initializing database")
+    newly_initialized = False
+    try:
+        result = subprocess.check_output(["/var/www/roundcube/bin/initdb.sh", "--dir", "/var/www/roundcube/SQL"],
+                                         stderr=subprocess.STDOUT, preexec_fn=demote())
+        print(result.decode())
+        newly_initialized = True
+    except subprocess.CalledProcessError as exc:
+        err = exc.stdout.decode()
+        if "already exists" in err:
+            print("Already initialized")
+        else:
+            print(err)
+            raise SystemExit(3)
+
+    if not newly_initialized and previous_version == version:
+        print("Roundcube database is up to date for this image")
+        return
+
+    print("Upgrading database")
+    try:
+        subprocess.check_call(["/var/www/roundcube/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT, preexec_fn=demote())
+    except subprocess.CalledProcessError:
+        raise SystemExit(4)
     print("Cleaning database")
     try:
         subprocess.check_call(["/var/www/roundcube/bin/cleandb.sh"], stderr=subprocess.STDOUT, preexec_fn=demote())
-    except subprocess.CalledProcessError as exc:
-        exit(5)
+    except subprocess.CalledProcessError:
+        raise SystemExit(5)
+
+    # Never record a failed or interrupted upgrade as complete.
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", dir=os.path.dirname(marker_path), delete=False) as handle:
+            temporary_path = handle.name
+            handle.write(version + "\n")
+        os.replace(temporary_path, marker_path)
+    finally:
+        if temporary_path and os.path.exists(temporary_path):
+            os.unlink(temporary_path)
+
+
+initialize_database()
 
 # Configure nginx
 conf.jinja("/conf/nginx-webmail.conf", context, "/etc/nginx/http.d/webmail.conf")

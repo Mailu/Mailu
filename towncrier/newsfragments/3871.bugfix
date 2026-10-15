@@ -1,0 +1,1 @@
+Persist successful Roundcube database upgrades in the webmail data volume so ordinary container restarts do not rerun update.sh and cleandb.sh.

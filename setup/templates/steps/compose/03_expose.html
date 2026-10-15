@@ -16,7 +16,7 @@ avoid generic all-interfaces addresses like <code>0.0.0.0</code> or <code>::</co
 <div class="form-group">
   <label>IPv4 listen address</label>
 <!--   Validates IPv4 address -->
-  <input class="form-control" type="text" name="bind4" value="127.0.0.1" >
+  <input class="form-control" type="text" name="bind4" value="127.0.0.1" aria-describedby="letsencrypt-loopback-warning">
   <label>Subnet of the docker network. This should not conflict with any networks to which your system is connected. (Internal and external!)
     Usually the format is '*.*.*.0/24'</label>
   <input class="form-control" type="text" name="subnet" value="192.168.203.0/24">
@@ -33,9 +33,22 @@ avoid generic all-interfaces addresses like <code>0.0.0.0</code> or <code>::</co
   <p><span class="label label-danger">Read this:</span> Docker currently does not expose the IPv6 ports properly, as it does not interface with <code>ip6tables</code>. Read <a href="https://mailu.io/{{ version }}/faq.html#how-to-make-ipv6-work">FAQ section</a> and be <b>very careful</b>. We do <b>NOT</b> recommend that you enable this!</p>
   <label>IPv6 listen address</label>
 <!--   Validates IPv6 address -->
-  <input class="form-control" type="text" name="bind6" value="::1" >
+  <input class="form-control" type="text" name="bind6" value="::1" aria-describedby="letsencrypt-loopback-warning">
   <label>Subnet of the docker network. This should not conflict with any networks to which your system is connected. (Internal and external!)</label>
   <input class="form-control" type="text" name="subnet6" required value="{{ subnet6 }}:beef::/64">
+</div>
+
+<div id="letsencrypt-loopback-warning" class="alert alert-warning" role="alert" style="display: none">
+  <strong>Let's Encrypt cannot reach a loopback listen address.</strong>
+  Addresses such as <code>127.0.0.1</code> and <code>::1</code> only accept
+  connections from this host. With <code>letsencrypt</code> selected, use a
+  specific network address that receives incoming connections on TCP port 80
+  (forward this port on your router if necessary).
+  If you intentionally use a local reverse proxy, it must forward
+  <code>/.well-known/acme-challenge/</code> to Mailu on port 80.
+  If the proxy manages certificates instead, select <code>cert</code> and
+  provide those certificates to Mailu.
+  <a href="https://mailu.io/{{ version }}/faq.html#letsencrypt-http-01-connectivity">Troubleshoot Let's Encrypt connectivity.</a>
 </div>
 
 <div class="form-check form-check-inline">

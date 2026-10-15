@@ -2,6 +2,28 @@
 var token = $("#api_token").val();
 
 $(document).ready(function() {
+	function updateLetsEncryptWarning() {
+		var bind4 = $.trim($('[name="bind4"]').val() || '');
+		var bind6 = $.trim($('[name="bind6"]').val() || '');
+		var loopback4 = /^127(?:\.\d{1,3}){3}$/.test(bind4);
+		var loopback6 = false;
+		if ($('#enable_ipv6').prop('checked')) {
+			try {
+				loopback6 = new URL('http://[' + bind6 + ']/').hostname === '[::1]';
+			} catch (error) {
+				// Invalid addresses are handled by the setup form validation.
+			}
+		}
+		$('#letsencrypt-loopback-warning').toggle(
+			$('[name="tls_flavor"]').val() === 'letsencrypt' && (loopback4 || loopback6)
+		);
+	}
+	$('[name="bind4"], [name="bind6"]').on('input change', updateLetsEncryptWarning);
+	$('[name="tls_flavor"], #enable_ipv6').on('change', updateLetsEncryptWarning);
+	updateLetsEncryptWarning();
+});
+
+$(document).ready(function() {
 	$("#no_java_script").hide();
 	$("#container").show();
 });

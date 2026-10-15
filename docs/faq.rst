@@ -641,6 +641,56 @@ Common problems:
 
 .. _`rate-limits`: https://letsencrypt.org/docs/rate-limits/
 
+.. _letsencrypt-http-01-connectivity:
+
+Why can't Mailu reach the Let's Encrypt HTTP challenge?
+............................................................
+
+With ``TLS_FLAVOR=letsencrypt`` or ``mail-letsencrypt``, Mailu checks that an
+HTTP challenge reaches its ``front`` container before requesting a certificate.
+Messages such as "Cannot reach ... on TCP port 80", "Skipping Let's Encrypt
+certificate issuance", or older ``Connection refused`` tracebacks from
+``/letsencrypt.py`` mean this check failed. Mailu retries automatically, but
+cannot obtain a certificate for an affected hostname until connectivity works.
+Secure services may be unavailable while no usable certificate exists.
+
+Check the following:
+
+- Every hostname in ``HOSTNAMES`` must resolve to your server's public address.
+  Publish an AAAA record only if IPv6 connectivity actually works.
+- Allow incoming **TCP port 80** through your firewall and forward it to the
+  ``front`` container. Opening port 443 alone does not allow HTTP-01 validation.
+- A Docker port bound to ``127.0.0.1`` (or ``::1``) only accepts connections
+  from the Docker host. Use a specific network address reachable from outside,
+  forwarding port 80 on your router if necessary. A loopback bind only works
+  with an additional proxy forwarding public requests to it.
+- A reverse proxy must forward ``/.well-known/acme-challenge/`` to Mailu's
+  HTTP listener, without authentication or redirects. If the proxy obtains
+  certificates itself, use ``TLS_FLAVOR=cert`` and supply those certificates
+  to Mailu instead.
+- The public hostname must also be reachable **from inside the front
+  container**. Behind a router, this may require hairpin NAT (also called
+  NAT loopback): connections from your internal network to the public address
+  must be forwarded back to Mailu.
+
+Run this command from the directory containing your Compose configuration,
+replacing ``mail.example.com`` with each hostname in ``HOSTNAMES``:
+
+.. code-block:: bash
+
+   docker compose exec front curl -v --connect-timeout 10 http://mail.example.com/.well-known/acme-challenge/testing
+
+A connection refusal or timeout indicates a connectivity problem. A ``404``
+shows that an HTTP server answered, but does **not** prove that the challenge
+reaches Mailu: this diagnostic path has no active challenge token. Mailu's own
+check uses a temporary token and verifies the response body. Also check
+reachability from a separate internet connection, since a successful internal
+check alone cannot prove public reachability.
+
+Do not add a hostname override pointing to ``127.0.0.1`` merely to bypass the
+check. It does not fix public reachability, and failed certificate requests
+can exhaust the certificate authority's rate limits.
+
 Copying certificates
 ....................
 

@@ -34,6 +34,11 @@ Or in plain English: if receivers start to classify your mail as spam, this post
     <option value="{{ tlsflavor }}" >{{ tlsflavor }}</option>
   {% endfor %}
   </select>
+  <p>Mailu's <code>letsencrypt</code> mode requires every public hostname to resolve
+  to this server, with TCP port 80 forwarded to Mailu's <em>front</em> container.
+  The HTTP challenge must be reachable from the internet and from the
+  <em>front</em> container itself (this may require hairpin NAT).
+  Opening port 443 alone is not enough.</p>
 </div>
 
 <div class="form-group">

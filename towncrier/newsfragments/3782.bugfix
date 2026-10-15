@@ -1,0 +1,1 @@
+Show authentication token requirements and a token creation link on the client setup page when AUTH_REQUIRE_TOKENS is enabled.

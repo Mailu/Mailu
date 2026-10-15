@@ -14,6 +14,10 @@
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.localpart, append='<span class="input-group-text">@'+domain.name+'</span>', autofocus=True, autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false") }}
   {{ macros.form_field(form.wildcard) }}
+  <p class="form-text">
+    {% trans %}When enabled, % matches zero or more characters and _ matches exactly one character in the alias.{% endtrans %}
+    {% trans %}For example, sales% matches sales and sales-team. Use % alone for a catch-all alias.{% endtrans %}
+  </p>
   {{ macros.form_field(form.destination, class_='mailselect') }}
   {{ macros.form_field(form.comment) }}
   {{ macros.form_field(form.submit) }}

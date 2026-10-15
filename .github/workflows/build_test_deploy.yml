@@ -516,6 +516,8 @@ jobs:
         run: |
           docker run --rm \
             -v "$GITHUB_WORKSPACE/tests:/app/tests:ro" \
+            -v "$GITHUB_WORKSPACE/core/nginx:/app/core/nginx:ro" \
+            -v "$GITHUB_WORKSPACE/webmails:/app/webmails:ro" \
             -w /app \
             -e PYTHONDONTWRITEBYTECODE=1 \
             "$ADMIN_IMAGE" \

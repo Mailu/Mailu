@@ -23,6 +23,7 @@ hostname_list = tuple(dict.fromkeys(
 renewed_marker = "/tmp/mailu-certificate-renewed"
 renewal_required_marker = "/tmp/mailu-renewal-required"
 deploy_marker = "/tmp/mailu-deploy-pending"
+http01_help = "https://mailu.io/master/faq.html#letsencrypt-http-01-connectivity"
 
 command = [
     "certbot",
@@ -151,7 +152,12 @@ def reachable_hostnames():
                         if family in (socket.AF_INET, socket.AF_INET6)
                     ))
                 except socket.gaierror as error:
-                    log.warning("Cannot resolve %s for HTTP-01: %s", hostname, error)
+                    log.debug("HTTP-01 DNS lookup failed for %s: %s", hostname, error, exc_info=True)
+                    log.warning(
+                        "Cannot obtain a Let's Encrypt certificate for %s: DNS lookup failed. "
+                        "Check this hostname's A/AAAA records. See %s",
+                        hostname, http01_help,
+                    )
                     continue
                 successful_address = False
                 invalid_response = False
@@ -166,21 +172,25 @@ def reachable_hostnames():
                             timeout=10,
                         )
                     except requests.RequestException as error:
+                        log.debug("HTTP-01 request to %s failed: %s", target, error, exc_info=True)
                         log.warning(
-                            "Cannot reach the HTTP-01 challenge for %s via %s: %s",
-                            hostname,
-                            address,
-                            error,
+                            "Cannot reach %s on TCP port 80 at %s to check the Let's Encrypt challenge. "
+                            "Check Mailu's listen address, firewall, port forwarding and hairpin NAT. "
+                            "Port 443 alone is not sufficient. See %s",
+                            hostname, address, http01_help,
                         )
                         continue
                     valid_response = response.status_code == 200 and response.content == response_body
                     if not valid_response:
                         invalid_response = True
                         log.warning(
-                            "The HTTP-01 challenge for %s via %s returned status %s or an unexpected body",
+                            "The Let's Encrypt challenge for %s via %s returned HTTP %s or an unexpected body. "
+                            "Ensure /.well-known/acme-challenge/ reaches Mailu directly, "
+                            "without authentication or redirects. See %s",
                             hostname,
                             address,
                             response.status_code,
+                            http01_help,
                         )
                     else:
                         successful_address = True
@@ -191,7 +201,11 @@ def reachable_hostnames():
             if attempt < 2:
                 time.sleep(5)
         for hostname in set(hostname_list) - reachable:
-            log.error("Excluding %s because its HTTP-01 challenge is not reachable", hostname)
+            log.error(
+                "Skipping Let's Encrypt certificate issuance for %s because its HTTP challenge "
+                "could not be verified from the front container. It must also be reachable "
+                "from the internet. See %s", hostname, http01_help,
+            )
         return tuple(hostname for hostname in hostname_list if hostname in reachable)
     finally:
         session.close()
@@ -227,7 +241,12 @@ while True:
             reachable = ()
         if reachable:
             break
-        log.critical("Port 80 must forward at least one hostname to Mailu before Let's Encrypt can be used")
+        log.critical(
+            "Let's Encrypt cannot obtain certificates: no hostname passed the HTTP challenge check. "
+            "Forward public TCP port 80 to Mailu's front container; a loopback listen address "
+            "such as 127.0.0.1 requires a reverse proxy forwarding the challenge. "
+            "Retrying in 60 seconds. See %s", http01_help,
+        )
         time.sleep(60)
 
     certificates_valid, renewal_due = certificate_state()

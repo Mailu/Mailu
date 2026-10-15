@@ -20,7 +20,7 @@ class RoundcubeUpgradeTest(unittest.TestCase):
         self.process.CalledProcessError = subprocess.CalledProcessError
         self.process.STDOUT = subprocess.STDOUT
         self.already_initialized()
-        source = Path(__file__).resolve().parents[1] / 'webmails/start.py'
+        source = Path(__file__).resolve().parents[2] / 'webmails/start.py'
         tree = ast.parse(source.read_text())
         function = next(node for node in tree.body if isinstance(node, ast.FunctionDef)
                         and node.name == 'initialize_database')

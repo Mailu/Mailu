@@ -1,6 +1,4 @@
-"""Standalone logging regressions; run with python -m unittest discover -s tests
--p test_gunicorn_logging.py (requires gunicorn[http2]).
-"""
+"""Gunicorn logging regressions, collected by the admin unit test suite."""
 
 import errno
 import importlib.util
@@ -11,10 +9,11 @@ import unittest
 from gunicorn.http2.errors import HTTP2ConnectionError, HTTP2ProtocolError
 
 
-spec = importlib.util.spec_from_file_location(
-    'gunicorn_logging',
-    Path(__file__).resolve().parents[1] / 'core/admin/mailu/gunicorn_logging.py',
-)
+source = Path(__file__).resolve().parents[2] / 'core/admin/mailu/gunicorn_logging.py'
+if not source.is_file():
+    # The admin image has a flattened /app/mailu layout.
+    source = Path(importlib.util.find_spec('mailu').origin).with_name('gunicorn_logging.py')
+spec = importlib.util.spec_from_file_location('gunicorn_logging', source)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 

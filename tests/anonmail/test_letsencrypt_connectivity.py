@@ -18,7 +18,7 @@ class ConnectivityTest(unittest.TestCase):
     def setUp(self):
         # The script starts its daemon at module scope. Load only the probe
         # function so these tests cannot invoke certbot or modify certificates.
-        source = Path(__file__).resolve().parents[1] / 'core/nginx/letsencrypt.py'
+        source = Path(__file__).resolve().parents[2] / 'core/nginx/letsencrypt.py'
         tree = ast.parse(source.read_text())
         probe = next(node for node in tree.body
                      if isinstance(node, ast.FunctionDef) and node.name == 'reachable_hostnames')

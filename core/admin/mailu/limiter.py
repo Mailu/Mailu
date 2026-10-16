@@ -39,13 +39,14 @@ class LimitWraperFactory(object):
         return LimitWrapper(self.limiter, limits.parse(limit), *args)
 
     def is_subject_to_rate_limits(self, ip):
-        return False if utils.is_exempt_from_ratelimits(ip) else not (self.storage.get(f'exempt-{ip}') > 0)
+        return False if utils.is_exempt_from_ratelimits(ip) else not (self.storage.get(f'exempt-{utils.normalize_ip(ip)}') > 0)
 
     def exempt_ip_from_ratelimits(self, ip):
         # Clearing the key first restarts its window: the exemption slides
         # forward on every successful authentication.
-        self.storage.clear(f'exempt-{ip}')
-        self.storage.incr(f'exempt-{ip}', app.config["AUTH_RATELIMIT_EXEMPTION_LENGTH"])
+        key = f'exempt-{utils.normalize_ip(ip)}'
+        self.storage.clear(key)
+        self.storage.incr(key, app.config["AUTH_RATELIMIT_EXEMPTION_LENGTH"])
 
     def should_rate_limit_ip(self, ip):
         limiter = self.get_limiter(app.config["AUTH_RATELIMIT_IP"], 'auth-ip')

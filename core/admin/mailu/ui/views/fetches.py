@@ -38,7 +38,7 @@ def fetch_create(user_email):
         flask.flash('Fetch configuration created')
         return flask.redirect(
             flask.url_for('.fetch_list', user_email=user.email))
-    return flask.render_template('fetch/create.html', form=form)
+    return flask.render_template('fetch/create.html', form=form, user=user)
 
 
 @ui.route('/fetch/edit/<fetch_id>', methods=['GET', 'POST'])

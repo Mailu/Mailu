@@ -50,9 +50,9 @@ login.login_view = "sso.login"
 @login.unauthorized_handler
 def handle_needs_login():
     """ redirect unauthorized requests to login page """
-    return flask.redirect(
-        flask.url_for('sso.login', url=flask.request.url)
-    )
+    from mailu import signin
+    signin.remember(flask.request.full_path.rstrip('?'))
+    return flask.redirect(flask.url_for('sso.login'))
 
 # DNS stub configured to do DNSSEC enabled queries
 resolver = dns.resolver.Resolver()
@@ -145,10 +145,12 @@ babel = flask_babel.Babel()
 def get_locale():
     """ selects locale for translation """
     if not app.config['SESSION_COOKIE_NAME'] in flask.request.cookies:
-        return flask.request.accept_languages.best_match(app.config.translations.keys())
+        return (flask.request.accept_languages.best_match(app.config.translations.keys())
+                or app.config['BABEL_DEFAULT_LOCALE'])
     language = flask.session.get('language')
     if not language in app.config.translations:
-        language = flask.request.accept_languages.best_match(app.config.translations.keys())
+        language = (flask.request.accept_languages.best_match(app.config.translations.keys())
+                or app.config['BABEL_DEFAULT_LOCALE'])
         flask.session['language'] = language
     return language
 

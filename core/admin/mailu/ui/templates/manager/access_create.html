@@ -16,9 +16,10 @@
 <div class="row">
   <div class="col-lg-6 col-12">
     {%- call macros.card(title=_('Grant access')) %}
-      <form class="form" method="POST" role="form">
-        {{ form.hidden_tag() }}
-        {{ macros.form_field(form.user) }}
+      <form class="form" method="POST" role="form" autocomplete="off">
+        {{ form.hidden_tag() }}{{ macros.form_errors(form) }}
+        <p class="text-body-secondary">{{ _('Search for accounts by email or display name. Select several accounts to grant access together.') }}</p>
+        {{ macros.form_field(form.user, class_='mailu-user-picker') }}
         {{ macros.form_field(form.submit) }}
       </form>
     {%- endcall %}

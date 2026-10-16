@@ -1,5 +1,8 @@
 import flask
 import flask_login
+from datetime import datetime, timezone
+from flask_wtf.csrf import validate_csrf
+from wtforms.validators import ValidationError
 from webauthn import (
     generate_authentication_options, options_to_json,
     verify_authentication_response,
@@ -7,8 +10,18 @@ from webauthn import (
 from webauthn.helpers import bytes_to_base64url, base64url_to_bytes
 from webauthn.helpers.structs import PublicKeyCredentialDescriptor, UserVerificationRequirement
 
-from mailu import models, utils, passkeys as webauthn_config, auth_flow
+from mailu import models, utils, signin, passkeys as webauthn_config, auth_flow
 from mailu.sso import sso
+
+
+def _csrf_error():
+    if not flask.current_app.config.get('WTF_CSRF_ENABLED', True):
+        return None
+    try:
+        validate_csrf(flask.request.headers.get('X-CSRFToken'))
+    except ValidationError:
+        return flask.jsonify(error='Your sign-in session expired. Reload the page and try again.'), 400
+    return None
 
 
 @sso.route('/passkey/options', methods=['POST'])
@@ -24,7 +37,7 @@ def passkey_authentication_options():
         destination = flask.current_app.config['WEB_WEBMAIL']
     else:
         return flask.jsonify(error='Invalid sign-in destination.'), 400
-    destination = flask.session.pop('passkey_login_redirect', None) or destination
+    destination = signin.pending() or destination
     flask.session['passkey_login_destination'] = destination
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
     if utils.limiter.should_rate_limit_ip(client_ip) or utils.limiter.should_rate_limit_user(email, client_ip):
@@ -52,10 +65,17 @@ def passkey_authentication_options():
         flask.session['passkey_login_email'] = email
     else:
         flask.session.pop('passkey_login_email', None)
-    return flask.jsonify(flask.json.loads(options_to_json(options)))
+    options_json = flask.json.loads(options_to_json(options))
+    if not email:
+        # Conditional mediation requests discoverable credentials. Omit the
+        # member entirely so browsers treat every discoverable credential as eligible.
+        options_json.pop('allowCredentials', None)
+    return flask.jsonify(options_json)
 
 @sso.route('/passkey/verify', methods=['POST'])
 def passkey_authenticate():
+    if error := _csrf_error():
+        return error
     challenge = flask.session.pop('passkey_login_challenge', None)
     email = flask.session.pop('passkey_login_email', None)
     payload = flask.request.get_json(silent=True)
@@ -80,6 +100,17 @@ def passkey_authenticate():
         )
         utils.limiter.rate_limit_user(email_for_rate_limit, flask.request.headers.get('X-Real-IP', flask.request.remote_addr))
         return flask.jsonify(error='Passkey sign-in failed.'), 401
+    domain = credential.user.domain
+    if not webauthn_config.aaguid_allowed(domain, credential.aaguid):
+        flask.current_app.logger.warning(
+            'Passkey authentication rejected user=%s credential=%s aaguid=%s '
+            'reason=aaguid_policy ip=%s',
+            credential.user_email, bytes_to_base64url(credential.credential_id)[:16],
+            credential.aaguid,
+            flask.request.headers.get('X-Real-IP', flask.request.remote_addr),
+        )
+        utils.limiter.rate_limit_user(email_for_rate_limit, flask.request.headers.get('X-Real-IP', flask.request.remote_addr))
+        return flask.jsonify(error='Passkey sign-in failed.'), 401
     current_sign_count = credential.sign_count
     current_device_bound = credential.device_bound
     try:
@@ -89,7 +120,9 @@ def passkey_authenticate():
             expected_rp_id=webauthn_config.rp_id(),
             expected_origin=webauthn_config.origin(),
             credential_public_key=credential.public_key,
-            credential_current_sign_count=credential.sign_count,
+            credential_current_sign_count=(
+                credential.sign_count if domain.passkey_require_sign_count_increase else 0
+            ),
             require_user_verification=credential.user.domain.passkey_require_uv,
         )
     except Exception as exc:
@@ -103,7 +136,27 @@ def passkey_authenticate():
         )
         utils.limiter.rate_limit_user(email_for_rate_limit, flask.request.headers.get('X-Real-IP', flask.request.remote_addr))
         return flask.jsonify(error='Passkey sign-in failed.'), 401
-    domain = credential.user.domain
+    flags = webauthn_config.authenticator_flags(payload)
+    if not webauthn_config.authenticator_flags_allowed(domain, flags):
+        flask.current_app.logger.warning(
+            'Passkey authentication rejected user=%s credential=%s up=%s uv=%s be=%s bs=%s '
+            'reason=backup_policy ip=%s',
+            credential.user_email, bytes_to_base64url(credential.credential_id)[:16],
+            flags.up, flags.uv, flags.be, flags.bs,
+            flask.request.headers.get('X-Real-IP', flask.request.remote_addr),
+        )
+        utils.limiter.rate_limit_user(email_for_rate_limit, flask.request.headers.get('X-Real-IP', flask.request.remote_addr))
+        return flask.jsonify(error='Passkey sign-in failed.'), 401
+    if not webauthn_config.sign_count_allowed(domain, current_sign_count, verification.new_sign_count):
+        flask.current_app.logger.warning(
+            'Passkey authentication rejected user=%s credential=%s sign_count=%s->%s '
+            'reason=sign_count_policy ip=%s',
+            credential.user_email, bytes_to_base64url(credential.credential_id)[:16],
+            current_sign_count, verification.new_sign_count,
+            flask.request.headers.get('X-Real-IP', flask.request.remote_addr),
+        )
+        utils.limiter.rate_limit_user(email_for_rate_limit, flask.request.headers.get('X-Real-IP', flask.request.remote_addr))
+        return flask.jsonify(error='Passkey sign-in failed.'), 401
     if domain.passkey_device_bound and (
         webauthn_config.enum_value(verification.credential_device_type) != 'single_device'
         or verification.credential_backed_up
@@ -124,6 +177,12 @@ def passkey_authenticate():
         webauthn_config.enum_value(verification.credential_device_type) == 'single_device'
         and not verification.credential_backed_up
     )
+    credential.user_verified = verification.user_verified
+    credential.user_present = flags.up
+    credential.credential_device_type = webauthn_config.enum_value(verification.credential_device_type)
+    credential.backup_eligible = flags.be
+    credential.backed_up = flags.bs
+    credential.last_used_at = datetime.now(timezone.utc)
     models.db.session.commit()
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
     client_port = flask.request.headers.get('X-Real-Port')
@@ -134,10 +193,10 @@ def passkey_authenticate():
     )
     flask.current_app.logger.info(
         'Passkey authentication success user=%s domain=%s credential=%s aaguid=%s '
-        'uv=%s device_type=%s backed_up=%s device_bound=%s->%s sign_count=%s->%s '
+        'up=%s uv=%s be=%s bs=%s device_type=%s backed_up=%s device_bound=%s->%s sign_count=%s->%s '
         'uv_required=%s device_bound_required=%s resident_key=%s rp_id=%s ip=%s',
         credential.user_email, domain.name, bytes_to_base64url(credential.credential_id)[:16],
-        credential.aaguid, verification.user_verified,
+        credential.aaguid, flags.up, verification.user_verified, flags.be, flags.bs,
         webauthn_config.enum_value(verification.credential_device_type),
         verification.credential_backed_up, current_device_bound, credential.device_bound,
         current_sign_count, verification.new_sign_count,
@@ -146,9 +205,10 @@ def passkey_authenticate():
     )
     webauthn_config.clear_password_passkey_nudge(flask.session)
     destination = flask.session.pop('passkey_login_destination', None)
+    signin.clear()
     flask.session.regenerate()
     flask_login.login_user(credential.user)
     if credential.user.change_pw_next_login:
         auth_flow.require_actions(flask.session, 'password_change', destination)
-        return flask.jsonify(redirect=flask.url_for('sso.pw_change'))
-    return flask.jsonify(redirect=destination or flask.current_app.config['WEB_ADMIN'])
+        return signin.remember_preference(flask.jsonify(redirect=flask.url_for('sso.pw_change')), destination or flask.current_app.config['WEB_ADMIN'])
+    return signin.remember_preference(flask.jsonify(redirect=destination or flask.current_app.config['WEB_ADMIN']), destination or flask.current_app.config['WEB_ADMIN'])

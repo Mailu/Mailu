@@ -475,6 +475,11 @@ Technical issues
 In this section we are trying to cover the most common problems our users are having.
 If your issue is not listed here, please consult issues with the `troubleshooting tag`_.
 
+Why does a passkey show unknown details?
+````````````````````````````````````````````````
+
+Older passkeys may have been enrolled before Mailu recorded all authenticator details. A successful sign-in records the flags returned by that authentication, the latest signature counter, and the last-use time. The attestation format is available only from enrollment, so it can remain unknown for a passkey enrolled before that information was stored. Removing and registering the passkey again records its enrollment details, but requires setting it up again in the authenticator.
+
 .. _delete_users:
 
 How to delete users?

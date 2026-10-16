@@ -17,9 +17,14 @@ domain_fields = api.model('Domain', {
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
+    'passkey_enforce_aaguid': fields.Boolean(description='enforce the domain AAGUID policy'),
     'passkey_aaguid_mode': fields.String(description='Whether listed passkey AAGUIDs are allowed or blocked', enum=['allow', 'block']),
     'passkey_aaguids': fields.String(description='Comma or newline separated passkey AAGUID UUIDs'),
     'passkey_require_uv': fields.Boolean(description='require user verification for passkeys'),
+    'passkey_backup_eligible_policy': fields.String(description='backup eligibility policy', enum=['optional', 'require', 'deny']),
+    'passkey_backup_state_policy': fields.String(description='backup state policy', enum=['optional', 'require', 'deny']),
+    'passkey_require_sign_count_increase': fields.Boolean(description='require a strictly increasing signature counter at every login'),
+    'passkey_attestation_policy': fields.String(description='authenticator attestation policy', enum=['optional', 'require', 'deny']),
     'passkey_device_bound': fields.Boolean(description='require device-bound passkeys'),
     'passkey_resident_key': fields.String(description='resident passkey preference', enum=['discouraged', 'preferred', 'required']),
     'alternatives': fields.List(fields.String(attribute='name', description='FQDN'), example='["example.com"]'),
@@ -31,9 +36,14 @@ domain_fields_update = api.model('DomainUpdate', {
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
+    'passkey_enforce_aaguid': fields.Boolean(description='enforce the domain AAGUID policy'),
     'passkey_aaguid_mode': fields.String(description='Whether listed passkey AAGUIDs are allowed or blocked', enum=['allow', 'block']),
     'passkey_aaguids': fields.String(description='Comma or newline separated passkey AAGUID UUIDs'),
     'passkey_require_uv': fields.Boolean(description='require user verification for passkeys'),
+    'passkey_backup_eligible_policy': fields.String(description='backup eligibility policy', enum=['optional', 'require', 'deny']),
+    'passkey_backup_state_policy': fields.String(description='backup state policy', enum=['optional', 'require', 'deny']),
+    'passkey_require_sign_count_increase': fields.Boolean(description='require a strictly increasing signature counter at every login'),
+    'passkey_attestation_policy': fields.String(description='authenticator attestation policy', enum=['optional', 'require', 'deny']),
     'passkey_device_bound': fields.Boolean(description='require device-bound passkeys'),
     'passkey_resident_key': fields.String(description='resident passkey preference', enum=['discouraged', 'preferred', 'required']),
     'alternatives': fields.List(fields.String(attribute='name', description='FQDN'), example='["example.com"]'),
@@ -47,9 +57,14 @@ domain_fields_get = api.model('DomainGet', {
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
+    'passkey_enforce_aaguid': fields.Boolean(description='enforce the domain AAGUID policy'),
     'passkey_aaguid_mode': fields.String(description='Whether listed passkey AAGUIDs are allowed or blocked', enum=['allow', 'block']),
     'passkey_aaguids': fields.String(description='Comma or newline separated passkey AAGUID UUIDs'),
     'passkey_require_uv': fields.Boolean(description='require user verification for passkeys'),
+    'passkey_backup_eligible_policy': fields.String(description='backup eligibility policy', enum=['optional', 'require', 'deny']),
+    'passkey_backup_state_policy': fields.String(description='backup state policy', enum=['optional', 'require', 'deny']),
+    'passkey_require_sign_count_increase': fields.Boolean(description='require a strictly increasing signature counter at every login'),
+    'passkey_attestation_policy': fields.String(description='authenticator attestation policy', enum=['optional', 'require', 'deny']),
     'passkey_device_bound': fields.Boolean(description='require device-bound passkeys'),
     'passkey_resident_key': fields.String(description='resident passkey preference', enum=['discouraged', 'preferred', 'required']),
     'alternatives': fields.List(fields.String(attribute='name', description='FQDN'), example='["example.com"]'),
@@ -75,6 +90,10 @@ domain_fields_dns = api.model('DomainDNS', {
 
 def _set_passkey_policy(domain, data):
     updates = {}
+    if 'passkey_enforce_aaguid' in data:
+        if not isinstance(data['passkey_enforce_aaguid'], bool):
+            return 'passkey_enforce_aaguid must be a boolean'
+        updates['passkey_enforce_aaguid'] = data['passkey_enforce_aaguid']
     if 'passkey_aaguid_mode' in data:
         if data['passkey_aaguid_mode'] not in ('allow', 'block'):
             return 'passkey_aaguid_mode must be "allow" or "block"'
@@ -84,10 +103,21 @@ def _set_passkey_policy(domain, data):
             updates['passkey_aaguids'] = passkey_utils.normalize_aaguids(data['passkey_aaguids'])
         except (TypeError, ValueError):
             return 'passkey_aaguids must contain valid AAGUID UUIDs'
-    for name in ('passkey_require_uv', 'passkey_device_bound'):
+    for name in (
+        'passkey_require_uv', 'passkey_device_bound',
+        'passkey_require_sign_count_increase',
+    ):
         if name in data:
             if not isinstance(data[name], bool):
                 return f'{name} must be a boolean'
+            updates[name] = data[name]
+    for name in (
+        'passkey_backup_eligible_policy', 'passkey_backup_state_policy',
+        'passkey_attestation_policy',
+    ):
+        if name in data:
+            if data[name] not in ('optional', 'require', 'deny'):
+                return f'{name} must be optional, require, or deny'
             updates[name] = data[name]
     if 'passkey_resident_key' in data:
         if data['passkey_resident_key'] not in ('discouraged', 'preferred', 'required'):

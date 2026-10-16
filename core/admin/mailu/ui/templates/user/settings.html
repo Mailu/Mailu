@@ -5,25 +5,32 @@
 {%- endblock %}
 
 {%- block subtitle %}
-{{ user }}
+{% if user.email != current_user.email %}{{ user }}{% endif %}
 {%- endblock %}
 
 {%- block content %}
-<form class="form" method="post" role="form">
+{% if not user.tokens %}
+<div class="alert alert-info" role="status">
+  {% trans %}No authentication tokens are configured for this account. Create a token to connect your email app, and save it in the app's password fields for incoming and outgoing mail.{% endtrans %}
+  <a class="alert-link" href="{{ url_for('.token_create', user_email=user.email) }}">{% trans %}Create an authentication token{% endtrans %}</a>
+</div>
+{% endif %}
+<form class="form mailu-settings" method="post" role="form">
   {{ form.hidden_tag() }}
 
   {%- call macros.card(title=_("Displayed name")) %}
   {{ macros.form_field(form.displayed_name, autofocus=True) }}
   {%- endcall %}
 
-  {%- call macros.card(title=_("OpenPGP")) %}
+  <details class="card" {% if form.gpg_key.errors %}open{% endif %}>
+  <summary class="card-header">{{ _('Advanced: OpenPGP') }}</summary><div class="card-body">
   <p>{% trans %}Upload your ASCII-armored public key to publish it through Web Key Directory (WKD). The key must include a user ID matching this email address. Active aliases currently routed to your mailbox are also published when the key includes a matching user ID for the alias.{% endtrans %}</p>
   {{ macros.form_field(form.gpg_key, rows=12) }}
   {{ macros.form_field(form.submit_gpg_key) }}
-  {%- endcall %}
+  </div></details>
 
   {%- call macros.card(title=_("Antispam")) %}
-  {%- call macros.fieldset(field=form.spam_enabled, enabled=user.spam_enabled) %}
+  {%- call macros.fieldset(field=form.spam_enabled, enabled=user.spam_enabled, class_="form-switch") %}
   {{ macros.form_field(form.spam_mark_as_read) }}
   {{ macros.form_field(form.spam_threshold, step=1, max=100,
      prepend='<span class="input-group-text"><span id="spam_threshold_value"></span>&nbsp;/&nbsp;100</span>') }}
@@ -34,11 +41,11 @@
   {%- call macros.fieldset(
       field=form.forward_enabled,
       enabled=user.forward_enabled,
+      class_="form-switch",
       fields=[form.forward_keep, form.forward_destination]) %}
   {%- endcall %}
   {%- endcall %}
 
-  <p><a class="btn btn-secondary" href="{{ url_for('.passkey_list', user_email=user.email) }}">{% trans %}Manage passkeys{% endtrans %}</a></p>
   {{ macros.form_field(form.submit) }}
 </form>
 {%- endblock %}

@@ -208,7 +208,7 @@ def config_update(verbose=False, delete_objects=False):
     user_optional_params = ('comment', 'quota_bytes', 'global_admin',
                             'enable_imap', 'enable_pop', 'forward_enabled',
                             'forward_destination', 'reply_enabled',
-                            'reply_subject', 'reply_body', 'displayed_name',
+                            'reply_subject', 'reply_body', 'reply_body_html', 'displayed_name',
                             'spam_enabled', 'spam_mark_as_read', 'email', 'spam_threshold')
     for user_config in users:
         if verbose:

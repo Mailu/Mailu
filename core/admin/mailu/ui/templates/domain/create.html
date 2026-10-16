@@ -21,6 +21,12 @@
   {%- endcall %}
   {%- call macros.card(title=_('Passkey policy')) %}
   <p class="text-body-secondary">{% trans %}These settings apply to passkeys for users in this domain.{% endtrans %}</p>
+  <div class="form-check form-switch mb-3">
+    {{ form.passkey_enforce_aaguid(class_='form-check-input', aria_controls='passkey-aaguid-controls', aria_expanded='true' if form.passkey_enforce_aaguid.data else 'false') }}
+    {{ form.passkey_enforce_aaguid.label(class_='form-check-label') }}
+  </div>
+  <p class="small text-body-secondary">{% trans %}When disabled, the AAGUID list does not restrict passkey enrollment or sign-in.{% endtrans %}</p>
+  <div id="passkey-aaguid-controls" data-toggle-visibility="{{ form.passkey_enforce_aaguid.id }}" {% if not form.passkey_enforce_aaguid.data %}hidden{% endif %}>
   <fieldset class="mb-3">
     <legend class="form-label">{{ form.passkey_aaguid_mode.label.text }}</legend>
     <div class="btn-group" role="group" aria-label="{{ form.passkey_aaguid_mode.label.text }}">
@@ -32,13 +38,20 @@
     {{ macros.form_field_errors(form.passkey_aaguid_mode) }}
   </fieldset>
   {{ macros.form_field(form.passkey_aaguids, rows=5) }}
+  </div>
   {{ macros.form_field(form.passkey_require_uv) }}
+  {{ macros.form_fields((form.passkey_backup_eligible_policy, form.passkey_backup_state_policy)) }}
+  {{ macros.form_field(form.passkey_require_sign_count_increase) }}
+  {{ macros.form_field(form.passkey_attestation_policy) }}
+  <p class="small text-body-secondary">{% trans %}User presence is always required by WebAuthn. Signature-counter enforcement rejects authenticators that do not provide a strictly increasing counter. Attestation requests a statement from the authenticator; it does not by itself establish manufacturer trust.{% endtrans %}</p>
   {{ macros.form_field(form.passkey_device_bound) }}
   {{ macros.form_field(form.passkey_resident_key) }}
   {%- endcall %}
   {%- call macros.card() %}
   {{ macros.form_field(form.comment) }}
-  {{ macros.form_field(form.submit) }}
   {%- endcall %}
+  <div class="clearfix mt-3 text-start">
+    {{ form.submit(value=_('Save domain settings') if domain is defined else _('Create domain'), class_='btn btn-primary float-start') }}
+  </div>
 </form>
 {%- endblock %}

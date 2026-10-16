@@ -19,3 +19,17 @@
     background-color: #ececec;
   }
 }
+
+/* The Elastic login logo defaults to 100px high, which dominates phone screens. */
+.task-login #layout-content #logo {
+  box-sizing: border-box;
+  max-width: min(72vw, 320px);
+  object-fit: contain;
+}
+@media screen and (max-width: 480px) {
+  .task-login #layout-content #logo,
+  html.dark-mode .task-login #layout-content #logo {
+    max-height: 56px;
+    max-width: min(60vw, 220px);
+  }
+}

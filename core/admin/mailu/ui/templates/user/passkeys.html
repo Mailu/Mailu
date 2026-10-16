@@ -1,23 +1,70 @@
 {%- extends "base.html" %}
 
 {%- block title %}{% trans %}Passkeys{% endtrans %}{%- endblock %}
-{%- block subtitle %}{{ user }}{%- endblock %}
+{%- block subtitle %}{% if user.email != current_user.email %}{{ user }}{% endif %}{%- endblock %}
 
 {%- block content %}
 {%- call macros.card(title=_('Registered passkeys')) %}
-<ul class="list-group mb-3">
-  {%- for passkey, credential_id in passkeys %}
-  <li class="list-group-item d-flex justify-content-between align-items-center">
-    {{ passkey.name or _('Passkey') }}
-    <form method="post" action="{{ url_for('.passkey_delete', user_email=user.email, credential_id=credential_id) }}">
-      {{ delete_form.hidden_tag() }}
-      <button class="btn btn-sm btn-danger" type="submit">{% trans %}Delete{% endtrans %}</button>
-    </form>
-  </li>
-  {%- else %}
-  <li class="list-group-item">{% trans %}No passkeys registered{% endtrans %}</li>
-  {%- endfor %}
-</ul>
+<p class="small text-body-secondary">{% trans %}Details reflect the latest WebAuthn registration or sign-in. Older passkeys may not have all details recorded.{% endtrans %}</p>
+<div class="table-responsive">
+  <table class="table table-striped align-middle mb-3">
+    <thead>
+      <tr>
+        <th scope="col">{% trans %}Passkey{% endtrans %}</th>
+        <th scope="col">{% trans %}Created{% endtrans %}</th>
+        <th scope="col">{% trans %}Last used{% endtrans %}</th>
+        <th scope="col">{% trans %}User present{% endtrans %}</th>
+        <th scope="col">{% trans %}User verified{% endtrans %}</th>
+        <th scope="col">{% trans %}Device type{% endtrans %}</th>
+        <th scope="col">{% trans %}Backup eligible{% endtrans %}</th>
+        <th scope="col">{% trans %}Backed up{% endtrans %}</th>
+        <th scope="col">{% trans %}Device-bound{% endtrans %}</th>
+        <th scope="col">{% trans %}Attestation{% endtrans %}</th>
+        <th scope="col">{% trans %}Signature counter{% endtrans %}</th>
+        <th scope="col">{% trans %}Authenticator ID (AAGUID){% endtrans %}</th>
+        <th scope="col" class="text-end">{% trans %}Actions{% endtrans %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for passkey, credential_id in passkeys %}
+      <tr>
+        <th scope="row">{{ passkey.name or _('Passkey') }}</th>
+        <td class="text-nowrap">{{ passkey.created_at | format_date }}</td>
+        <td class="text-nowrap">{{ passkey.last_used_at | format_datetime if passkey.last_used_at else _('Never') }}</td>
+        <td>{% if passkey.user_present is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.user_present %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+        <td>{% if passkey.user_verified is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.user_verified %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+        <td>
+          {% if passkey.credential_device_type == 'single_device' %}{% trans %}Single-device{% endtrans %}
+          {% elif passkey.credential_device_type == 'multi_device' %}{% trans %}Multi-device{% endtrans %}
+          {% else %}{% trans %}Unknown{% endtrans %}{% endif %}
+        </td>
+        <td>{% if passkey.backup_eligible is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.backup_eligible %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+        <td>
+          {% if passkey.backed_up is none %}{% trans %}Unknown{% endtrans %}
+          {% elif passkey.backed_up %}{% trans %}Yes{% endtrans %}
+          {% else %}{% trans %}No{% endtrans %}{% endif %}
+        </td>
+        <td>
+          {% if passkey.device_bound is none %}{% trans %}Unknown{% endtrans %}
+          {% elif passkey.device_bound %}{% trans %}Yes{% endtrans %}
+          {% else %}{% trans %}No{% endtrans %}{% endif %}
+        </td>
+        <td class="text-nowrap">{{ passkey.attestation_format or _('Unknown') }}</td>
+        <td class="text-end">{{ passkey.sign_count }}</td>
+        <td class="font-monospace small text-break">{{ passkey.aaguid }}</td>
+        <td class="text-end">
+          <form method="post" action="{{ url_for('.passkey_delete', user_email=user.email, credential_id=credential_id) }}">
+            {{ delete_form.hidden_tag() }}
+            <button class="btn btn-sm btn-outline-danger" type="submit">{% trans %}Delete{% endtrans %}</button>
+          </form>
+        </td>
+      </tr>
+      {%- else %}
+      <tr><td colspan="13" class="text-body-secondary">{% trans %}No passkeys registered{% endtrans %}</td></tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+</div>
 <hr class="my-4">
 <div class="d-flex align-items-start mb-3">
   <i class="fa-solid fa-key text-primary me-3 mt-1" aria-hidden="true"></i>

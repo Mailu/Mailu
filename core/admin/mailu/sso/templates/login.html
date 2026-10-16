@@ -5,24 +5,17 @@
 {%- endblock %}
 
 {%- block extra_login_options %}
-<span class="text-body-secondary small mx-1">{% trans %}or{% endtrans %}</span>
-{% if config["ADMIN"]|upper != "FALSE" %}
-<button class="passkey-login btn btn-outline-primary" data-destination="admin" type="button">
-    <i class="fa-solid fa-key me-1" aria-hidden="true"></i>{% trans %}Sign in to Admin with a passkey{% endtrans %}
-</button>
-{% endif %}
-{% if config["WEBMAIL"]|upper != "NONE" %}
-<button class="passkey-login btn btn-outline-primary" data-destination="webmail" type="button">
-    <i class="fa-solid fa-key me-1" aria-hidden="true"></i>{% trans %}Sign in to Webmail with a passkey{% endtrans %}
-</button>
-{% endif %}
+<span class="text-body-secondary small text-center">{{ _('or') }}</span>
+<button class="passkey-login btn btn-outline-primary" type="button"><i class="fa-solid fa-key me-1" aria-hidden="true"></i>{{ _('Use a passkey') }}</button>
 <div id="passkey-status" class="alert text-start mt-3 mb-0 w-100 d-none" role="status" aria-live="polite"></div>
 <script>
 (() => {
   const buttons = [...document.querySelectorAll('.passkey-login')];
   const status = document.getElementById('passkey-status');
+  const destinationField = document.getElementById('destination');
   const emailField = document.getElementById('email');
   const form = document.querySelector('form.form');
+  const csrfToken = form.querySelector('[name="csrf_token"]').value;
   const submitButtons = [...form.querySelectorAll('button[type="submit"], input[type="submit"]')];
   const originalLabels = new Map(buttons.map(button => [button, button.innerHTML]));
   const supported = Boolean(window.PublicKeyCredential && navigator.credentials && navigator.credentials.get);
@@ -93,7 +86,7 @@
 
   const verifyCredential = async (credential, signal) => {
     const verifyResponse = await fetch('{{ url_for("sso.passkey_authenticate") }}', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
+      method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
       body: JSON.stringify(serialize(credential)), signal
     });
     const result = await responseJson(verifyResponse, 'Passkey sign-in failed');
@@ -102,7 +95,7 @@
 
   const beginPasskeyLogin = async (button) => {
     if (!supported) {
-      showStatus('This browser does not support passkey sign-in. Use your email and password instead.');
+      showStatus({{ _('This browser does not support passkey sign-in. Use your email and password instead.') | tojson }});
       return;
     }
     cancelAttempt();
@@ -110,33 +103,33 @@
     const id = ++attemptId;
     const controller = new AbortController();
     activeAttempt = {id, controller, button};
+    setBusy(true, button);
     try {
       const startResponse = await fetch('{{ url_for("sso.passkey_authentication_options") }}', {
         method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({email: emailField.value.trim(), target: button.dataset.destination}), signal: controller.signal
+        body: JSON.stringify({email: emailField.value.trim(), target: destinationField.value}), signal: controller.signal
       });
       const options = await responseJson(startResponse, 'Could not start passkey sign-in');
       const allowed = options.allowCredentials || [];
       if (emailField.value.trim() && !allowed.length) {
-        showStatus('No passkey is registered for this email address. Clear the email field to choose a passkey, or sign in with your password.', 'info');
+        showStatus({{ _('No passkey is registered for this email address. Clear the email field to choose a passkey, or sign in with your password.') | tojson }}, 'info');
         return;
       }
       options.challenge = decode(options.challenge);
       if (options.allowCredentials) {
         options.allowCredentials = options.allowCredentials.map(item => ({...item, id: decode(item.id)}));
       }
-      setBusy(true, button);
       const credential = await navigator.credentials.get({publicKey: options, signal: controller.signal});
-      if (!credential) throw new Error('No passkey was selected. Try again or sign in with your password.');
+      if (!credential) throw new Error({{ _('No passkey was selected. Try again or sign in with your password.') | tojson }});
       await verifyCredential(credential, controller.signal);
     } catch (e) {
       if (e.name === 'AbortError') return;
       if (e.name === 'NotAllowedError') {
-        showStatus('No passkey was selected, it was unavailable, or the request timed out. Try again, or sign in with your email and password.');
+        showStatus({{ _('No passkey was selected, it was unavailable, or the request timed out. Try again, or sign in with your email and password.') | tojson }});
       } else if (e.name === 'SecurityError') {
-        showStatus('Passkey sign-in is blocked for this site. Check that you are using the configured Mailu hostname over HTTPS.');
+        showStatus({{ _('Passkey sign-in is blocked for this site. Check that you are using the configured Mailu hostname over HTTPS.') | tojson }});
       } else if (e.name === 'NotSupportedError') {
-        showStatus('This browser or device does not support passkey sign-in. Use a supported browser or sign in with your password.');
+        showStatus({{ _('This browser or device does not support passkey sign-in. Use a supported browser or sign in with your password.') | tojson }});
       } else {
         showStatus(e.message || 'Passkey sign-in failed. Try again or use your password.');
       }
@@ -154,7 +147,7 @@
     conditionalController = controller;
     try {
       if (!await PublicKeyCredential.isConditionalMediationAvailable()) return;
-      const target = buttons[0].dataset.destination;
+      const target = destinationField.value;
       const startResponse = await fetch('{{ url_for("sso.passkey_authentication_options") }}', {
         method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({email: '', target}), signal: controller.signal
@@ -169,14 +162,23 @@
       });
       if (credential) await verifyCredential(credential, controller.signal);
     } catch (e) {
-      if (e.name !== 'AbortError') showStatus(e.message || 'Passkey sign-in failed. Try again or use your password.');
+      if (e.name === 'AbortError') return;
+      if (e.name === 'NotAllowedError') {
+        showStatus({{ _('No passkey was selected, it was unavailable, or the request timed out. Try again, or sign in with your email and password.') | tojson }});
+      } else if (e.name === 'SecurityError') {
+        showStatus({{ _('Passkey sign-in is blocked for this site. Check that you are using the configured Mailu hostname over HTTPS.') | tojson }});
+      } else if (e.name === 'NotSupportedError') {
+        showStatus({{ _('This browser or device does not support passkey sign-in. Use a supported browser or sign in with your password.') | tojson }});
+      } else {
+        showStatus(e.message || {{ _('Passkey autofill sign-in failed. Select “Use a passkey” to try again.') | tojson }});
+      }
     } finally {
       if (conditionalController === controller) conditionalController = null;
     }
   };
 
-  form.addEventListener('submit', cancelAttempt, true);
   buttons.forEach(button => button.addEventListener('click', () => beginPasskeyLogin(button)));
+  destinationField.addEventListener('change', () => { cancelAttempt(); clearStatus(); beginConditionalLogin(); });
   beginConditionalLogin();
 })();
 </script>

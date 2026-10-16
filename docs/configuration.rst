@@ -222,7 +222,7 @@ Advanced settings
 -----------------
 
 
-The ``AUTH_REQUIRE_TOKENS`` (default: False) setting controls whether thick clients can authenticate using passwords or whether they are forced to use tokens/application specific passwords.
+The ``AUTH_REQUIRE_TOKENS`` (default: True) setting requires email clients to authenticate using authentication tokens (application-specific passwords). Create one token per app or device and save it in the client's incoming and outgoing password fields. Web sign-in continues to support account passwords and passkeys. Installations that need legacy password authentication for email clients can explicitly set ``AUTH_REQUIRE_TOKENS=False``.
 
 The ``API_TOKEN`` (default: None) setting configures the authentication token.
 The minimum length is 3 characters.
@@ -416,9 +416,14 @@ Once configured, any request to /sso/login with the correct headers will be auth
 
 Requests to:
 
-- "/sso/login" results the user being redirected to the web administration interface after authentication.
-- "/admin" (``WEB_ADMIN=/admin``) results the user being redirected to the web administration interface  after authentication.
-- "/webmail" (``WEB_WEBMAIL=/webmail``) results the user being redirected to the web administration interface  after authentication.
+- ``/sso/login`` use the browser preference from the last successful sign-in, defaulting to Webmail when enabled.
+- ``/sso/login/admin`` explicitly select ``WEB_ADMIN``.
+- ``/sso/login/webmail`` explicitly select ``WEB_WEBMAIL``.
+- Protected pages under ``WEB_ADMIN`` and ``WEB_WEBMAIL`` return to the original
+  page after authentication. Return destinations are stored server-side rather
+  than placed in internally generated ``?url=`` links.
+
+The ``mailu_signin_target`` cookie remembers only the selected application for one year. Explicit sign-in routes and protected-page return destinations override this preference. Existing same-origin ``?url=`` bookmarks remain supported.
 
 Use ``PROXY_AUTH_LOGOUT_URL`` (default: unset) to redirect users to a specific URL after they have been logged out.
 

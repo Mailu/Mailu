@@ -1,7 +1,7 @@
 {%- import "macros.html" as macros %}
 {%- import "bootstrap/utils.html" as utils %}
 <!doctype html>
-<html lang="{{ get_locale() }}" data-static="/static/" data-bs-theme="light" data-lte-color-mode="off">
+<html data-show-password="{{ _('Show password') }}" data-copied="{{ _('Copied') }}" data-copy-failed="{{ _('Copy failed. Select and copy the text.') }}" lang="{{ get_locale() }}" data-static="/static/" data-bs-theme="light" data-lte-color-mode="off">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,8 +10,9 @@
     <title>Mailu-Admin | {{ config["SITENAME"] }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+    {% block extra_styles %}{% endblock %}
   </head>
-  <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+  <body class="layout-fixed sidebar-expand-lg sidebar-mini sidebar-without-hover bg-body-tertiary">
     <div class="app-wrapper">
       <nav class="app-header navbar navbar-expand bg-body">
         <ul class="navbar-nav">
@@ -70,6 +71,9 @@
         <div class="app-content">
           <div class="container-fluid">
           {{ utils.flashed_messages(container=False, default_category='success') }}
+          {% if user is defined and current_user.is_authenticated and user.email != current_user.email %}
+          <div class="alert alert-info" role="status">{{ _('You are managing another account:') }} <strong>{{ user.email }}</strong></div>
+          {% endif %}
           {%- block content %}{%- endblock %}
           </div>
         </div>
@@ -91,5 +95,6 @@
     </div>
     <script src="{{ url_for('static', filename='vendor.js') }}"></script>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
   </body>
 </html>

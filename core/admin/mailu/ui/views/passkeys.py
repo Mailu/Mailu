@@ -10,7 +10,7 @@ from webauthn import (
 )
 from webauthn.helpers import bytes_to_base64url, base64url_to_bytes
 from webauthn.helpers.structs import (
-    AuthenticatorSelectionCriteria, PublicKeyCredentialDescriptor,
+    AttestationConveyancePreference, AuthenticatorSelectionCriteria, PublicKeyCredentialDescriptor,
     ResidentKeyRequirement, UserVerificationRequirement,
 )
 
@@ -68,6 +68,11 @@ def passkey_registration_options(user_email):
                 else UserVerificationRequirement.PREFERRED
             ),
         ),
+        attestation=(
+            AttestationConveyancePreference.DIRECT
+            if domain.passkey_attestation_policy == 'require'
+            else AttestationConveyancePreference.NONE
+        ),
     )
     flask.session[_challenge_key()] = bytes_to_base64url(options.challenge)
     flask.session['passkey_registration_user'] = user.email
@@ -104,6 +109,7 @@ def passkey_register(user_email):
         return flask.jsonify(error='Passkey registration could not be verified.'), 400
     credential_id = verification.credential_id
     attestation_format = webauthn_config.enum_value(verification.fmt)
+    flags = webauthn_config.authenticator_flags(payload, registration=True)
     if not webauthn_config.aaguid_allowed(user.domain, verification.aaguid):
         flask.current_app.logger.warning(
             'Passkey registration rejected actor=%s user=%s domain=%s aaguid=%s '
@@ -123,6 +129,10 @@ def passkey_register(user_email):
             verification.credential_backed_up, client_ip,
         )
         return flask.jsonify(error='This domain only allows device-bound passkeys.'), 400
+    if not webauthn_config.authenticator_flags_allowed(user.domain, flags):
+        return flask.jsonify(error='This authenticator does not meet the domain backup requirements.'), 400
+    if not webauthn_config.attestation_allowed(user.domain, attestation_format):
+        return flask.jsonify(error='Authenticator attestation does not meet the domain policy.'), 400
     if models.db.session.get(models.Passkey, credential_id):
         flask.current_app.logger.warning(
             'Passkey registration rejected actor=%s user=%s domain=%s credential=%s aaguid=%s '
@@ -141,16 +151,23 @@ def passkey_register(user_email):
             webauthn_config.enum_value(verification.credential_device_type) == 'single_device'
             and not verification.credential_backed_up
         ),
+        user_verified=verification.user_verified,
+        user_present=flags.up,
+        credential_device_type=webauthn_config.enum_value(verification.credential_device_type),
+        backup_eligible=flags.be,
+        backed_up=verification.credential_backed_up,
+        attestation_format=attestation_format,
         name=str(payload.get('name') or 'Passkey')[:255],
     )
     models.db.session.add(credential)
     models.db.session.commit()
     flask.current_app.logger.info(
         'Passkey registered actor=%s user=%s domain=%s credential=%s name=%r aaguid=%s '
-        'attestation=%s user_verified=%s device_type=%s backed_up=%s device_bound=%s sign_count=%s '
+        'attestation=%s up=%s uv=%s be=%s bs=%s device_type=%s backed_up=%s device_bound=%s sign_count=%s '
         'uv_required=%s device_bound_required=%s resident_key=%s rp_id=%s ip=%s',
         actor.email, user.email, user.domain.name, bytes_to_base64url(credential_id)[:16], credential.name,
-        verification.aaguid, attestation_format, verification.user_verified,
+        verification.aaguid, attestation_format, flags.up, verification.user_verified,
+        flags.be, flags.bs,
         webauthn_config.enum_value(verification.credential_device_type),
         verification.credential_backed_up, credential.device_bound, verification.sign_count,
         user.domain.passkey_require_uv, user.domain.passkey_device_bound, user.domain.passkey_resident_key,

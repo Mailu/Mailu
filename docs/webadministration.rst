@@ -49,7 +49,14 @@ Access the web administration interface
 
 The admin GUI is by default accessed via the URL `https://<my domain>/admin`, when it's enabled in the setup utility
 or by manually setting `ADMIN=true` in `mailu.env`.
-To login the admin GUI enter the email address and password of an user.
+Sign in with your email address and password, or use a registered passkey.
+The sign-in page offers a single destination selector for Webmail or Account settings.
+A direct visit uses the destination from your last successful sign-in, remembered in a separate browser cookie. With no preference, Webmail is the default when enabled.
+Bookmark ``/sso/login/admin`` or ``/sso/login/webmail`` to select a destination explicitly.
+These routes also work with trusted proxy authentication and honor custom ``WEB_ADMIN``
+and ``WEB_WEBMAIL`` paths. Protected-page links return you to the requested page after
+sign-in, including after a required password change. All roles continue to open their
+account settings when visiting ``/admin``.
 
 Only global administrator users have access to all configuration settings and the Rspamd webgui. Other users will be
 presented with settings for only their account, and domains they are managers of.
@@ -138,7 +145,7 @@ Under the section `Auto-forward`, the automatic forwarding of received email mes
 
 The option "Keep a copy of the emails" can be ticked, to keep a copy of the received email message in the inbox folder.
 
-In the destination textbox, the email addresses can be entered for automatic forwarding. When entering multiple email addresses the comma (',') must be used as delimiter.
+Search for and select one or more destination addresses in the destination field. You can remove a selected address from the field before saving.
 
 
 Update password
@@ -154,7 +161,23 @@ Auto-reply
 
 On the `auto-reply` page, automatic replies can be configured. This is also known as out of office (ooo) or out of facility (oof) replies.
 
-To enable automatic replies tick the checkbox 'Enable automatic reply'.
+Enable **Automatic reply**, compose a formatted message, and choose **On selected dates**
+or **Until I turn it off**. Drag across the calendar to select your time away;
+on touch screens, press and hold before dragging. You can also enter the first
+and last day directly. The calendar and date fields stay synchronized. Drag or
+resize the selected period to change it.
+
+Both selected days are included: replies stop at the end of the last day away,
+using the mail server timezone shown below the calendar. A one-day vacation uses
+the same first and last day. **Save automatic reply** applies the message and schedule;
+turning the switch off hides the message and schedule controls and retains the saved settings.
+Use **Preview** to see the server-sanitized message before saving. **Back to editing**
+returns to the composer without changing the draft.
+
+Formatted replies are delivered as HTML with a plain-text alternative. Existing
+plain-text API clients remain supported; updating the plain body clears previous
+formatting. The optional ``reply_body_html`` field is included in configuration
+exports. The nullable-column migration retains existing reply text and dates.
 
 Under Reply subject the email subject for automatic replies can be configured. When a reply subject is entered, this subject will be used for the automatic reply.
 
@@ -212,7 +235,7 @@ The purpose of an authentication token is to create a unique and strong password
 The application will use this authentication token instead of the logged in user's password for sending/receiving email.
 This allows safe access to the logged in user's email account. At any moment, the authentication token can be deleted so that the application has no access to the logged in user's email account anymore.
 
-By clicking on the New token button on the top right of the page, a new authentication token can be created. On this page the generated authentication token will only be displayed once.
+Choose **Create and activate token** to make a new authentication token. The generated token is displayed only once.
 After saving the application token it is not possible anymore to view the unique password.
 
 The comment field can be used to enter a description for the authentication token. For example the name of the application the application token is created for.
@@ -225,13 +248,21 @@ Announcement
 ------------
 
 On the `announcement` page, the global administrator can send an email message to all email accounts on the Mailu server. This message will be received as an email message in the inbox folder of each user on the Mailu server.
-On the announcement page there are the following options:
+The composer shows the configured postmaster sender and the number of recipients.
+Use the formatting toolbar for headings, emphasis, lists, and links. Messages are
+sent as HTML with a plain-text alternative; pasted content is sanitized on the server.
+Images and attachments are not supported.
 
-* Announcement subject. The subject of the announcement email message.
+Choose **Send me a test email** to deliver a copy only to your administrator mailbox,
+with ``[TEST]`` in the subject. Your draft remains available for editing.
+Choose **Preview** to review the sanitized message and recipient count, then
+**Send announcement** to confirm the broadcast. Previews expire after 30 minutes
+and can only be sent once. **Back to editing** lets you revise the message.
 
-* Announcement body. The body of the announcement email message.
-
-Click on send to send the announcement email message to all users.
+Delivery results report successful and failed recipients separately. After a partial
+failure, the retained draft offers a retry only to failed recipients; opening a fresh
+announcement starts a new broadcast. Delivery is synchronous and drafts are not saved
+across visits. Leaving a changed composer prompts you before discarding your changes.
 
 
 Administrators
@@ -327,9 +358,13 @@ Edit
 
 This page is only accessible for global administrators. On the edit page, the global settings for the domain can be changed.
 
-Mailu supports signing in to the Admin and Webmail interfaces with passkeys. Users can register, name, and remove their passkeys from their account settings; global administrators can also manage a user's passkeys.
+Mailu supports signing in to the Admin and Webmail interfaces with passkeys. Users can register, name, and remove their passkeys from account settings; global administrators can also manage a user's passkeys. The passkey page shows each credential's creation and last-use times, authenticator flags, device type, backup status, attestation format, signature counter, and AAGUID. Some details may show as unknown for older credentials if they were not recorded at enrollment or a later sign-in.
 
-The passkey policy selects whether the listed authenticator AAGUIDs are allowed or blocked. Enter AAGUID UUIDs in the list, one per line. An empty list does not restrict authenticators. The policy is applied when passkeys are registered and when they are used to sign in. You can also require user verification (PIN or biometrics), require device-bound credentials, and set the resident-key preference. Defaults require user verification and prefer resident credentials without requiring device-bound credentials.
+Domain passkey settings control which credentials may be enrolled and used to sign in. Turn on **Enforce AAGUID restrictions** to apply the allow or block list; enter AAGUID UUIDs one per line. When enforcement is off, the list is ignored. The policy is checked both at enrollment and at sign-in.
+
+The backup eligibility and backup state settings each support **Optional**, **Require**, or **Deny**. Eligibility describes whether an authenticator can back up a credential; state describes whether that credential is currently backed up. Attestation also supports **Optional**, **Require**, or **Deny** and is evaluated at enrollment. Requiring attestation rejects credentials that provide none, but does not by itself verify that an authenticator is trusted by a manufacturer. User verification (such as a PIN or biometrics), device-bound credentials, resident-key preference, and backup flags are also governed by the domain settings.
+
+By default, signature-counter growth is not enforced. Enable **Require signature counter to increase** to reject a sign-in unless its counter is greater than the previously stored counter. Some authenticators do not provide a useful increasing counter, so enabling this can prevent those credentials from signing in. User presence is recorded and displayed; WebAuthn requires it for passkey sign-in.
 
 * Maximum user count. The maximum amount of users that can be created under this domain. Once this limit is reached it is not possible anymore to add users to the domain; and it is also not possible for users to self-register.
 
@@ -488,7 +523,7 @@ The menu item `Webmail` opens the webmail page. This option is only available if
 Client setup
 ------------
 
-The menu item `Client setup` shows all settings for configuring your email client for connecting to Mailu.
+The menu item `Client setup` shows the settings for connecting an email client to Mailu and encourages use of authentication tokens. Create a separate token for each app or device, then save it in the client's incoming and outgoing password fields. The token is intended to be set once and left in the mail client; it is not your password for signing in to the web interface. Email-client password authentication can be restored by an administrator setting ``AUTH_REQUIRE_TOKENS=False``.
 
 
 Website
@@ -508,3 +543,14 @@ Sign out
 --------
 
 The menu item `Sign out` signs out the currently logged in user.
+
+
+Account selection in access forms
+---------------------------------
+
+When adding managers, global administrators, or Anonymous Email Access, search by
+email address or display name and select multiple accounts before submitting.
+Selected accounts appear as removable chips. Accounts already granted the role
+are marked in the results. Search returns at most 50 matches; continue typing to
+narrow large lists. The server checks every selected account before applying the
+batch, using the same permission scope as the corresponding form.

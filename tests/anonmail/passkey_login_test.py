@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime, timezone
 from types import SimpleNamespace
 from webauthn.helpers import bytes_to_base64url
 
@@ -32,11 +33,12 @@ def test_passkey_options_reject_malformed_email_with_json_error(client):
     assert 'valid email address' in response.get_json()['error']
 
 
-def test_login_page_attempts_matching_passkey_when_email_field_blurs(client):
+def test_login_page_supports_conditional_passkeys_and_destination_changes(client):
     response = client.get('/sso/login')
 
     assert response.status_code == 200
-    assert b"emailField.addEventListener('blur'" in response.data
+    assert b"mediation: 'conditional'" in response.data
+    assert b"destinationField.addEventListener('change'" in response.data
     assert b"form.addEventListener('submit', cancelAttempt" in response.data
     assert b"submitButtons.forEach" in response.data
 
@@ -85,6 +87,45 @@ def test_manage_passkeys_page_has_a_name_form_and_sidebar_link(client, user):
     assert b'window.prompt' not in response.data
 
 
+def test_manage_passkeys_page_shows_creation_and_authenticator_details(client, user):
+    models.db.session.add(models.Passkey(
+        user=user,
+        credential_id=b'detailed-credential',
+        public_key=b'public-key',
+        aaguid='adce0002-35bc-c60a-648b-0b25f1f05503',
+        name='Travel laptop',
+        user_verified=True,
+        user_present=True,
+        credential_device_type='multi_device',
+        backup_eligible=True,
+        backed_up=True,
+        attestation_format='packed',
+        device_bound=False,
+        last_used_at=datetime(2025, 2, 3, 4, 5, tzinfo=timezone.utc),
+    ))
+    models.db.session.commit()
+    with client.session_transaction() as session:
+        session['_user_id'] = user.email
+        session['_fresh'] = True
+
+    response = client.get('/admin/user/passkeys')
+
+    assert response.status_code == 200
+    assert b'Travel laptop' in response.data
+    assert b'Created' in response.data
+    assert b'Last used' in response.data
+    assert b'2025' in response.data
+    assert b'Multi-device' in response.data
+    assert b'Backed up' in response.data
+    assert b'User present' in response.data
+    assert b'User verified' in response.data
+    assert b'Backup eligible' in response.data
+    assert b'Attestation' in response.data
+    assert b'Signature counter' in response.data
+    assert b'Authenticator ID (AAGUID)' in response.data
+    assert b'Yes' in response.data
+
+
 def test_global_admin_can_open_target_users_passkey_routes(client, user):
     admin = models.User(localpart='admin', domain=user.domain, global_admin=True)
     admin.set_password('admin-password')
@@ -128,6 +169,9 @@ def test_domain_passkey_policy_renders_in_its_own_card(client, user):
 
     assert response.status_code == 200
     assert b'Passkey policy' in response.data
+    assert b'Enforce AAGUID restrictions' in response.data
+    assert b'id="passkey-aaguid-controls"' in response.data
+    assert b'data-toggle-visibility="passkey_enforce_aaguid"' in response.data
     assert response.data.count(b'class="card card-outline card-primary"') >= 3
 
 
@@ -172,6 +216,9 @@ def test_registration_accepts_webauthn_string_enum_values(client, user, monkeypa
         credential_device_type='single_device',
         credential_backed_up=False,
     ))
+    monkeypatch.setattr(passkey_views.webauthn_config, 'authenticator_flags', lambda *args, **kwargs: SimpleNamespace(
+        up=True, uv=False, be=False, bs=False,
+    ))
     with client.session_transaction() as session:
         session['_user_id'] = user.email
         session['_fresh'] = True
@@ -181,7 +228,12 @@ def test_registration_accepts_webauthn_string_enum_values(client, user, monkeypa
     response = client.post('/admin/user/passkeys', json={'id': 'credential', 'name': 'Test passkey'})
 
     assert response.status_code == 200
-    assert models.db.session.get(models.Passkey, b'credential-id').device_bound is True
+    credential = models.db.session.get(models.Passkey, b'credential-id')
+    assert credential.device_bound is True
+    assert credential.user_verified is False
+    assert credential.user_present is True
+    assert credential.credential_device_type == 'single_device'
+    assert credential.backed_up is False
     assert 'Passkey registered' in caplog.text
     assert 'aaguid=adce0002-35bc-c60a-648b-0b25f1f05503' in caplog.text
     assert 'attestation=none' in caplog.text
@@ -207,6 +259,9 @@ def test_passkey_login_emits_password_style_audit_log(client, user, monkeypatch,
         credential_device_type='single_device',
         credential_backed_up=False,
     ))
+    monkeypatch.setattr(sso_passkeys.webauthn_config, 'authenticator_flags', lambda *args, **kwargs: SimpleNamespace(
+        up=True, uv=True, be=False, bs=False,
+    ))
     with client.session_transaction() as session:
         session['passkey_login_challenge'] = bytes_to_base64url(b'test-challenge')
         session['passkey_login_email'] = user.email
@@ -218,5 +273,43 @@ def test_passkey_login_emits_password_style_audit_log(client, user, monkeypatch,
 
     assert response.status_code == 200
     assert response.get_json()['redirect'] == '/admin/'
+    credential = models.db.session.get(models.Passkey, b'login-credential')
+    assert credential.user_verified is True
+    assert credential.user_present is True
+    assert credential.credential_device_type == 'single_device'
+    assert credential.backed_up is False
+    assert credential.last_used_at is not None
     assert f'Login attempt for: {user.email}/sso/' in caplog.text
     assert 'success: passkey:' in caplog.text
+
+
+def test_passkey_login_rejects_aaguid_blocked_by_domain_policy(client, user, monkeypatch, caplog):
+    import logging
+    from mailu.sso.views import passkeys as sso_passkeys
+
+    caplog.set_level(logging.WARNING)
+    user.domain.passkey_aaguid_mode = 'block'
+    user.domain.passkey_aaguids = 'adce0002-35bc-c60a-648b-0b25f1f05503'
+    user.domain.passkey_enforce_aaguid = True
+    models.db.session.add(models.Passkey(
+        user=user,
+        credential_id=b'blocked-credential',
+        public_key=b'public-key',
+        aaguid='adce0002-35bc-c60a-648b-0b25f1f05503',
+    ))
+    models.db.session.commit()
+    monkeypatch.setattr(
+        sso_passkeys, 'verify_authentication_response',
+        lambda **kwargs: pytest.fail('Blocked AAGUID should be rejected before assertion verification'),
+    )
+    with client.session_transaction() as session:
+        session['passkey_login_challenge'] = bytes_to_base64url(b'test-challenge')
+        session['passkey_login_email'] = user.email
+
+    response = client.post('/sso/passkey/verify', json={
+        'id': bytes_to_base64url(b'blocked-credential'),
+    })
+
+    assert response.status_code == 401
+    assert response.get_json()['error'] == 'Passkey sign-in failed.'
+    assert 'reason=aaguid_policy' in caplog.text

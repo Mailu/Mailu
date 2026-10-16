@@ -3,10 +3,10 @@ from flask_babel import lazy_gettext as _
 import flask_wtf
 
 class LoginForm(flask_wtf.FlaskForm):
-    class Meta:
-        csrf = False
     email = fields.StringField(_('E-mail'), [validators.Email(), validators.DataRequired()], render_kw={'autofocus': True, 'type': 'email', 'autocomplete': 'username webauthn'})
-    pw = fields.PasswordField(_('Password'), [validators.DataRequired()])
+    pw = fields.PasswordField(_('Password'), [validators.DataRequired()], render_kw={'autocomplete': 'current-password'})
+    destination = fields.SelectField(_('After sign-in'), choices=[('webmail', _('Webmail')), ('admin', _('Account settings'))])
+    submit = fields.SubmitField(_('Sign in'))
     pwned = fields.HiddenField(label='', default=-1)
     submitWebmail = fields.SubmitField(_('Sign in'))
     submitAdmin = fields.SubmitField(_('Sign in'))

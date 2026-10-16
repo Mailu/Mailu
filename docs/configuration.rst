@@ -33,6 +33,11 @@ This should not conflict with any networks to which your system is connected.
 (Internal and external!). Normally this does not need to be changed,
 unless there is a conflict with existing networks.
 
+The ``SUBNET6`` (default: unset) defines the IPv6 address range of the docker network used by Mailu.
+It is set by the setup utility when IPv6 is enabled and should be a ULA range (``fd00::/8``).
+When it is set, Mailu services listen on IPv6 addresses as well. Leave it unset to run IPv4 only.
+Enabling IPv6 also requires the Docker network to have IPv6 enabled, see :doc:`faq` for details.
+
 The ``POSTMASTER`` is the local part of the postmaster email address. It is
 recommended to setup a generic value and later configure a mail alias for that
 address.

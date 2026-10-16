@@ -30,7 +30,7 @@ avoid generic all-interfaces addresses like <code>0.0.0.0</code> or <code>::</co
 </div>
 
 <div class="form-group" id="ipv6" style="display: none">
-  <p><span class="label label-danger">Read this:</span> Docker currently does not expose the IPv6 ports properly, as it does not interface with <code>ip6tables</code>. Read <a href="https://mailu.io/{{ version }}/faq.html#how-to-make-ipv6-work">FAQ section</a> and be <b>very careful</b>. We do <b>NOT</b> recommend that you enable this!</p>
+  <p><span class="label label-info">Read this:</span> IPv6 needs the Docker daemon to be configured for IPv6 and the host to have a working IPv6 address. Docker publishes IPv6 ports through <code>ip6tables</code>, which is enabled by default once IPv6 is turned on. Read the <a href="https://mailu.io/{{ version }}/faq.html#how-to-make-ipv6-work">FAQ section</a> before enabling this.</p>
   <label>IPv6 listen address</label>
 <!--   Validates IPv6 address -->
   <input class="form-control" type="text" name="bind6" value="::1" aria-describedby="letsencrypt-loopback-warning">

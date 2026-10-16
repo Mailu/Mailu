@@ -144,15 +144,13 @@ Your mail service will be reachable for IMAP, POP3, SMTP and Webmail at the addr
 How to make IPv6 work?
 ``````````````````````
 
-Docker IPv6 interfacing with ``ip6tables``, which is required for proper IPv6 support, is currently considered experimental.
-
-Although the supposed way to enable IPv6 would be to give each container a publicly routable address, docker's IPv6 support
-uses NAT to pass outside connections to the containers.
-
-Currently we recommend to use `docker-ipv6nat` by `Robert Klarenbeek <https://github.com/robbertkl>` instead of docker's
-experimental support.
+Current Docker releases support IPv6 on user-defined networks and publish IPv6 ports through ``ip6tables``. ``ip6tables`` is
+enabled by default on Linux hosts. See the
+`Docker IPv6 documentation <https://docs.docker.com/engine/daemon/ipv6/>`_ for details.
 
 Before enabling IPv6 you **MUST** disable the userland-proxy in your ``/etc/docker/daemon.json`` to not create an Open Relay!
+With the userland-proxy, containers see the bridge gateway address instead of the real client address, and Mailu trusts its own
+subnet, so anyone could relay mail through your instance.
 
 .. code-block:: json
 
@@ -160,26 +158,14 @@ Before enabling IPv6 you **MUST** disable the userland-proxy in your ``/etc/dock
       "userland-proxy": false
   }
 
-You can enable `docker-ipv6nat` like this:
+Restart Docker afterwards (``sudo systemctl restart docker``).
 
-  docker run -d --name ipv6nat --privileged --network host --restart unless-stopped -v /var/run/docker.sock:/var/run/docker.sock:ro -v /lib/modules:/lib/modules:ro robbertkl/ipv6nat
+Enable IPv6 in the `setup utility`_. This adds ``enable_ipv6: true`` and an IPv6 subnet (``SUBNET6``) to the Mailu network
+in ``docker-compose.yml``, and publishes the front service on ``[BIND6]:port`` as well as on IPv4. Mailu uses its own
+user-defined network, so no IPv6 keys are needed in ``daemon.json`` beyond the userland-proxy setting above.
 
-If you want to try docker's experimental IPv6 support, it can be enabled like this:
-
-.. code-block:: json
-
-  {
-      "userland-proxy": false,
-      "ipv6": true,
-      "experimental": true,
-      "fixed-cidr-v6": "fd00:1234:abcd::/48",
-      "ip6tables": true
-  }
-
-and enabling the IPv6 checkbox in the `setup utility`_.
-
-This setup however is not officially supported, and might result in unforeseen issues.
-With bad misconfiguration you might even cause your instance to become an Open Relay, you have been warned!
+Make sure the host has a global IPv6 address (``ip -6 addr``) and that your firewall allows the mail and web ports over IPv6.
+Also add AAAA records for your mail hostnames, otherwise other servers will only reach you over IPv4.
 
 .. _`setup utility`: https://setup.mailu.io
 

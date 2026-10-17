@@ -44,6 +44,15 @@ def advertise():
             pass
 
 
+@mailu.command('import-legacy-dkim-keys')
+@with_appcontext
+def import_legacy_dkim_keys():
+    """Import historical filesystem DKIM keys after database migrations."""
+    if models.inspect(models.db.engine).has_table('dkim_key'):
+        for domain in models.Domain.query.all():
+            domain._import_legacy_dkim_key()
+
+
 @mailu.command()
 @click.argument('localpart')
 @click.argument('domain_name')

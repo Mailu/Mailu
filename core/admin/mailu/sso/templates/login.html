@@ -178,6 +178,7 @@
   };
 
   buttons.forEach(button => button.addEventListener('click', () => beginPasskeyLogin(button)));
+  form.addEventListener('submit', cancelAttempt);
   destinationField.addEventListener('change', () => { cancelAttempt(); clearStatus(); beginConditionalLogin(); });
   beginConditionalLogin();
 })();

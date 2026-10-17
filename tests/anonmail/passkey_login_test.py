@@ -1,9 +1,15 @@
+import re
 import pytest
 from datetime import datetime, timezone
 from types import SimpleNamespace
 from webauthn.helpers import bytes_to_base64url
 
 from mailu import models
+
+
+def get_csrf_token(client):
+    response = client.get('/sso/login')
+    return re.search(rb'name="csrf_token"[^>]*value="([^"]+)"', response.data).group(1).decode()
 
 
 @pytest.fixture
@@ -22,7 +28,7 @@ def test_passkey_options_allow_discoverable_login(client):
     assert response.status_code == 200
     options = response.get_json()
     assert 'challenge' in options
-    assert options['allowCredentials'] == []
+    assert 'allowCredentials' not in options
     assert options['userVerification'] == 'required'
 
 
@@ -44,7 +50,9 @@ def test_login_page_supports_conditional_passkeys_and_destination_changes(client
 
 
 def test_password_login_redirects_after_nudge_flash(client, user):
+    csrf_token = get_csrf_token(client)
     response = client.post('/sso/login', data={
+        'csrf_token': csrf_token,
         'email': user.email,
         'pw': 'test-password',
         'submitAdmin': 'Sign in Admin',
@@ -59,8 +67,10 @@ def test_password_login_redirects_after_nudge_flash(client, user):
 def test_forced_password_reset_menu_offers_logout(client, user):
     user.change_pw_next_login = True
     models.db.session.commit()
+    csrf_token = get_csrf_token(client)
 
     response = client.post('/sso/login', data={
+        'csrf_token': csrf_token,
         'email': user.email,
         'pw': 'test-password',
         'submitAdmin': 'Sign in Admin',
@@ -253,6 +263,7 @@ def test_passkey_login_emits_password_style_audit_log(client, user, monkeypatch,
         name='Test phone',
     ))
     models.db.session.commit()
+    csrf_token = get_csrf_token(client)
     monkeypatch.setattr(sso_passkeys, 'verify_authentication_response', lambda **kwargs: SimpleNamespace(
         new_sign_count=2,
         user_verified=True,
@@ -269,7 +280,7 @@ def test_passkey_login_emits_password_style_audit_log(client, user, monkeypatch,
 
     response = client.post('/sso/passkey/verify', json={
         'id': bytes_to_base64url(b'login-credential'),
-    })
+    }, headers={'X-CSRFToken': csrf_token})
 
     assert response.status_code == 200
     assert response.get_json()['redirect'] == '/admin/'
@@ -298,6 +309,7 @@ def test_passkey_login_rejects_aaguid_blocked_by_domain_policy(client, user, mon
         aaguid='adce0002-35bc-c60a-648b-0b25f1f05503',
     ))
     models.db.session.commit()
+    csrf_token = get_csrf_token(client)
     monkeypatch.setattr(
         sso_passkeys, 'verify_authentication_response',
         lambda **kwargs: pytest.fail('Blocked AAGUID should be rejected before assertion verification'),
@@ -308,7 +320,7 @@ def test_passkey_login_rejects_aaguid_blocked_by_domain_policy(client, user, mon
 
     response = client.post('/sso/passkey/verify', json={
         'id': bytes_to_base64url(b'blocked-credential'),
-    })
+    }, headers={'X-CSRFToken': csrf_token})
 
     assert response.status_code == 401
     assert response.get_json()['error'] == 'Passkey sign-in failed.'

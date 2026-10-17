@@ -85,7 +85,7 @@ def test_alias_destination_search_excludes_anonymous_aliases(client, users):
     ])
     models.db.session.commit()
 
-    response = client.get('/destinations/options', query_string={'q': 'ux.example'})
+    response = client.get('/admin/destinations/options', query_string={'q': 'ux.example'})
     assert response.status_code == 200
     addresses = {option['value'] for option in response.json['options']}
     assert users[0].email in addresses and users[1].email in addresses
@@ -456,7 +456,7 @@ def test_account_subtitle_only_identifies_another_account(client, users, route):
     assert users[1].email in target_subtitle
 
 
-def test_user_list_keeps_own_account_address(client, users):
+def test_user_list_does_not_link_own_account_address(client, users):
     authenticate(client, users[0])
     page = client.get('/admin/user/list/ux.example').data.decode()
-    assert re.search(r'href="[^"]*/user/edit/' + re.escape(users[0].email) + r'">' + re.escape(users[0].email) + r'</a>', page)
+    assert not re.search(r'href="[^"]*/user/edit/' + re.escape(users[0].email) + r'">' + re.escape(users[0].email) + r'</a>', page)

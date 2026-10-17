@@ -15,7 +15,12 @@ system.drop_privs_to('mailu')
 system.set_env(['SECRET'])
 
 os.system("flask mailu advertise")
-os.system("flask db upgrade")
+if os.system("flask db upgrade") != 0:
+    log.critical("Database migrations failed; refusing to start the admin service")
+    sys.exit(1)
+if os.system("flask mailu import-legacy-dkim-keys") != 0:
+    log.critical("Importing legacy DKIM keys failed; refusing to start the admin service")
+    sys.exit(1)
 
 account = os.environ.get("INITIAL_ADMIN_ACCOUNT")
 domain = os.environ.get("INITIAL_ADMIN_DOMAIN")

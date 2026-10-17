@@ -309,7 +309,7 @@ On the new relayed domain page the following options can be entered for a new re
   lmtp:target:port  resolve A/AAAA of target and use port  lmtp:target:port
   ================  =====================================  =========================
 
-  `target` can also be an IPv4 or IPv6 address (an IPv6 address must be enclosed in []: ``[2001:DB8::]``).
+  `target` can also be an IPv4 or IPv6 address (an IPv6 address must be enclosed in []: ``[2001:DB8::]``, unbracketed IPv6 addresses are rejected).
 
 * Comment. A text field where a comment can be entered to describe the entry.
 

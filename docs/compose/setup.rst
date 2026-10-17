@@ -45,7 +45,7 @@ Bind address
 
 The bind addresses need to match the public IP addresses assigned to your server. For IPv6 you will need the ``<global>`` scope address.
 
-You can find those addresses by running the following:
+You can find those addresses by running the following (``ip -6 addr show scope global`` shows only the global IPv6 addresses):
 
 .. code-block:: bash
 
@@ -61,7 +61,7 @@ You can find those addresses by running the following:
           TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
 If the address is not configured directly (NAT) on any of the network interfaces or if
-you would simply like the server to listen on all interfaces, use ``0.0.0.0`` and ``::``. 
+you would simply like the server to listen on all interfaces, use ``0.0.0.0`` and ``::``.
 Note that running in this mode is not supported and can lead to `issues`_.
 
 .. _issues: https://github.com/Mailu/Mailu/issues/641

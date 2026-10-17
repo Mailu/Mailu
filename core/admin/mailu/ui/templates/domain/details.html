@@ -20,6 +20,9 @@
   <th>{% trans %}Domain name{% endtrans %}</th>
   <td>{{ domain.name }}</td>
 </tr>
+{% if domain.comment %}<tr><th>{{ _('Comment') }}</th><td>{{ domain.comment }}</td></tr>{% endif %}
+<tr><th>{{ _('Created') }}</th><td>{{ domain.created_at | format_date }}</td></tr>
+<tr><th>{{ _('Last edit') }}</th><td>{{ domain.updated_at | format_date }}</td></tr>
 <tr>
   <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa-solid {{ 'fa-circle-check text-success' if domain.check_mx() else 'fa-circle-exclamation text-danger' }}"></i></th>
   <td>{{ macros.clip("dns_mx") }}<pre id="dns_mx" class="pre-config border bg-light">{{ domain.dns_mx }}</pre></td>
@@ -95,6 +98,7 @@
 {% endif %}
 
 {%- for alternative in domain.alternatives %}
+{% set dns_id = "alternative-" ~ loop.index ~ "-" %}
 
 {%- call macros.table(datatable=False) %}
 <tr>
@@ -103,24 +107,24 @@
 </tr>
 <tr>
   <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa-solid {{ 'fa-circle-check text-success' if alternative.check_mx() else 'fa-circle-exclamation text-danger' }}"></i></th>
-  <td>{{ macros.clip("dns_mx") }}<pre id="dns_mx" class="pre-config border bg-light">{{ alternative.dns_mx }}</pre></td>
+  <td>{{ macros.clip(dns_id ~ "dns_mx") }}<pre id="{{ dns_id }}dns_mx" class="pre-config border bg-light">{{ alternative.dns_mx }}</pre></td>
 </tr>
 <tr>
   <th>{% trans %}DNS SPF entries{% endtrans %}</th>
-  <td>{{ macros.clip("dns_spf") }}<pre id="dns_spf" class="pre-config border bg-light">{{ alternative.dns_spf }}</pre>
+  <td>{{ macros.clip(dns_id ~ "dns_spf") }}<pre id="{{ dns_id }}dns_spf" class="pre-config border bg-light">{{ alternative.dns_spf }}</pre>
   </td>
 </tr>
 {%- if alternative.domain.dkim_publickey %}
 <tr>
   <th>{% trans %}DNS DKIM entry{% endtrans %}</th>
-  <td>{{ macros.clip("dns_dkim") }}<pre id="dns_dkim" class="pre-config border bg-light">{{ alternative.dns_dkim }}</pre></td>
+  <td>{{ macros.clip(dns_id ~ "dns_dkim") }}<pre id="{{ dns_id }}dns_dkim" class="pre-config border bg-light">{{ alternative.dns_dkim }}</pre></td>
 </tr>
 <tr>
   <th>{% trans %}DNS DMARC entry{% endtrans %}</th>
   <td>
-    {{ macros.clip("dns_dmarc") }}<pre id="dns_dmarc" class="pre-config border bg-light">{{ alternative.dns_dmarc }}</pre>
+    {{ macros.clip(dns_id ~ "dns_dmarc") }}<pre id="{{ dns_id }}dns_dmarc" class="pre-config border bg-light">{{ alternative.dns_dmarc }}</pre>
     {%- if alternative.dns_dmarc_report_needed %}
-    {{ macros.clip("dns_dmarc_report") }}<pre id="dns_dmarc_report" class="pre-config border bg-light">{{ alternative.dns_dmarc_report }}</pre>
+    {{ macros.clip(dns_id ~ "dns_dmarc_report") }}<pre id="{{ dns_id }}dns_dmarc_report" class="pre-config border bg-light">{{ alternative.dns_dmarc_report }}</pre>
     {%- endif %}
   </td>
 </tr>

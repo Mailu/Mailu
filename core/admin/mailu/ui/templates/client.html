@@ -9,12 +9,10 @@
 {%- endblock %}
 
 {%- block content %}
-{% if config['AUTH_REQUIRE_TOKENS'] %}
 <div class="alert alert-info" role="alert">
-  <p>{% trans %}Your email client must use an authentication token instead of your account password. Enter the token in the client's password field for both incoming and outgoing mail.{% endtrans %}</p>
-  <a href="{{ url_for('.token_create') }}">{% trans %}Create an authentication token{% endtrans %}</a>
+  <p>{% trans %}Create a separate authentication token for each email app or device. Enter the token in the app's password field for both incoming (IMAP) and outgoing (SMTP) mail, and let the app remember it.{% endtrans %}</p>
+  <a class="btn btn-primary" href="{{ url_for('.token_create') }}">{% trans %}Create an authentication token{% endtrans %}</a>
 </div>
-{% endif %}
 {%- call macros.table(title=_("Incoming mail"), datatable=False) %}
   <tbody>
     <tr>
@@ -34,7 +32,7 @@
       <td><pre class="pre-config border bg-light">{{ current_user if current_user.is_authenticated else "******" }}</pre></td>
     </tr>
     <tr>
-      <th>{% if config['AUTH_REQUIRE_TOKENS'] %}{% trans %}Authentication token{% endtrans %}{% else %}{% trans %}Password{% endtrans %}{% endif %}</th>
+      <th>{% trans %}Authentication token{% endtrans %}</th>
       <td><pre class="pre-config border bg-light">*******</pre></td>
     </tr>
   </tbody>
@@ -59,7 +57,7 @@
       <td><pre class="pre-config border bg-light">{{ current_user if current_user.is_authenticated else "******" }}</pre></td>
     </tr>
     <tr>
-      <th>{% if config['AUTH_REQUIRE_TOKENS'] %}{% trans %}Authentication token{% endtrans %}{% else %}{% trans %}Password{% endtrans %}{% endif %}</th>
+      <th>{% trans %}Authentication token{% endtrans %}</th>
       <td><pre class="pre-config border bg-light">*******</pre></td>
     </tr>
   </tbody>

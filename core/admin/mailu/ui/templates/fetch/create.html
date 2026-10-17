@@ -5,7 +5,7 @@
 {%- endblock %}
 
 {%- block subtitle %}
-{{ user }}
+{% if user.email != current_user.email %}{{ user }}{% endif %}
 {%- endblock %}
 
 {%- block content %}

@@ -1,16 +1,42 @@
-{%- extends "base.html" %}
-
-{%- block title %}
-{% trans %}Public announcement{% endtrans %}
-{%- endblock %}
-
-{%- block content %}
-{%- call macros.card() %}
-<form class="form" method="post" role="form">
+{% extends "base.html" %}
+{% block title %}{{ _('Announcement') }}{% endblock %}
+{% block subtitle %}{{ _('Send an email to all mailboxes') }}{% endblock %}
+{% block content %}
+{% if failures %}<div class="alert alert-warning"><p>{{ _('Delivery failed for these mailboxes. Preview again to retry only these recipients.') }}</p><ul>{% for email in failures %}<li>{{ email }}</li>{% endfor %}</ul></div>{% endif %}
+<form class="form mailu-composer" method="post" data-announcement>
   {{ form.hidden_tag() }}
-  {{ macros.form_field(form.announcement_subject) }}
-  {{ macros.form_field(form.announcement_body, rows=10) }}
-  {{ macros.form_field(form.submit) }}
+  {{ macros.form_errors(form) }}
+  {% if retry_token %}<input type="hidden" name="retry_token" value="{{ retry_token }}">{% endif %}
+  <div class="card shadow-sm">
+    <div class="card-header"><h2 class="card-title">{{ _('Review announcement') if draft else _('Compose announcement') }}</h2></div>
+    <div class="card-body">
+      <dl class="row small mb-3"><dt class="col-sm-2">{{ _('From') }}</dt><dd class="col-sm-10">{{ config['POSTMASTER'] }}@{{ config['DOMAIN'] }}</dd>
+      <dt class="col-sm-2">{{ _('To') }}</dt><dd class="col-sm-10">{{ _('Failed deliveries only') if retry_token else _('All mailboxes') }} · {{ draft.recipients|length if draft else recipient_count }} {{ _('recipients') }}</dd></dl>
+      {% if draft %}
+        <h3 class="h5">{{ draft.subject }}</h3>
+        <div class="mailu-message border rounded p-3 mb-3">{{ draft.html|safe }}</div>
+        <details><summary>{{ _('Plain-text version') }}</summary><pre class="pre-config mt-2">{{ draft.plain }}</pre></details>
+        <input type="hidden" name="draft_token" value="{{ draft_token }}">
+        <input type="hidden" name="announcement_subject" value="{{ draft.subject }}">
+        <textarea name="announcement_body" hidden>{{ draft.html }}</textarea>
+        <p class="text-body-secondary mt-3 mb-0">{{ _('Confirm to send this message to the recipients shown above.') }}</p>
+      {% else %}
+        {{ macros.form_field(form.announcement_subject) }}
+        {{ macros.form_field(form.announcement_body, rows=14) }}
+        <p class="small text-body-secondary mb-0">{{ _('Send a test copy to yourself to check how the message appears in your mail client.') }}</p>
+      {% endif %}
+    </div>
+    <div class="card-footer d-flex flex-wrap gap-2">
+      {% if draft %}
+        <button class="btn btn-primary" type="submit" name="action" value="send">{{ _('Send announcement') }}</button>
+        <button class="btn btn-outline-secondary" type="submit" name="action" value="edit">{{ _('Back to editing') }}</button>
+      {% else %}
+        <button class="btn btn-primary" type="submit" name="action" value="preview">{{ _('Preview') }}</button>
+        <button class="btn btn-outline-secondary" type="submit" name="action" value="test">{{ _('Send me a test email') }}</button>
+      {% endif %}
+    </div>
+  </div>
 </form>
-{%- endcall %}
-{%- endblock %}
+{% endblock %}
+{% block extra_scripts %}{% if not draft %}<script src="{{ url_for('static', filename='composer.js') }}"></script>{% endif %}{% endblock %}
+{% block extra_styles %}{% if not draft %}<link rel="stylesheet" href="{{ url_for('static', filename='composer.css') }}">{% endif %}{% endblock %}

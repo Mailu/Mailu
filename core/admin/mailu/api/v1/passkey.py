@@ -11,7 +11,7 @@ from webauthn import generate_registration_options, options_to_json, verify_regi
 from webauthn.helpers import bytes_to_base64url, base64url_to_bytes
 from webauthn.helpers.structs import (
     AuthenticatorSelectionCriteria,
-    PublicKeyCredentialDescriptor, ResidentKeyRequirement,
+    AttestationConveyancePreference, PublicKeyCredentialDescriptor, ResidentKeyRequirement,
     UserVerificationRequirement,
 )
 
@@ -28,6 +28,13 @@ passkey_fields = api.model('PasskeyInfo', {
     'name': fields.String(description='Administrator-provided device name'),
     'aaguid': fields.String(description='Authenticator AAGUID'),
     'device_bound': fields.Boolean(description='Whether the credential is currently device-bound'),
+    'user_verified': fields.Boolean(description='Whether user verification was observed on the latest registration or sign-in'),
+    'user_present': fields.Boolean(description='Whether user presence was observed on the latest registration or sign-in'),
+    'credential_device_type': fields.String(description='WebAuthn credential device type'),
+    'backup_eligible': fields.Boolean(description='Whether this credential can be backed up or synced'),
+    'backed_up': fields.Boolean(description='Whether the credential was reported as backed up on the latest registration or sign-in'),
+    'attestation_format': fields.String(description='Attestation format reported at enrollment; none means no attestation statement'),
+    'last_used_at': fields.DateTime(description='Time of the latest successful passkey sign-in'),
     'sign_count': fields.Integer(description='Authenticator signature counter'),
     'created_at': fields.String(description='Creation date'),
 })
@@ -53,7 +60,7 @@ def _find_user(email):
     return user, None
 
 
-def _check_registration_policy(user, verification):
+def _check_registration_policy(user, verification, flags):
     domain = user.domain
     if not passkey_utils.aaguid_allowed(domain, verification.aaguid):
         return 'Authenticator AAGUID is not allowed for this domain'
@@ -62,6 +69,10 @@ def _check_registration_policy(user, verification):
         or verification.credential_backed_up
     ):
         return 'This domain only allows device-bound passkeys'
+    if not passkey_utils.authenticator_flags_allowed(domain, flags):
+        return 'The authenticator does not meet this domain’s backup requirements'
+    if not passkey_utils.attestation_allowed(domain, passkey_utils.enum_value(verification.fmt)):
+        return 'Authenticator attestation does not meet this domain policy'
     return None
 
 
@@ -82,6 +93,13 @@ class UserPasskeys(Resource):
             'name': item.name,
             'aaguid': item.aaguid,
             'device_bound': item.device_bound,
+            'user_verified': item.user_verified,
+            'user_present': item.user_present,
+            'credential_device_type': item.credential_device_type,
+            'backup_eligible': item.backup_eligible,
+            'backed_up': item.backed_up,
+            'attestation_format': item.attestation_format,
+            'last_used_at': item.last_used_at,
             'sign_count': item.sign_count,
             'created_at': str(item.created_at),
         } for item in user.passkeys]
@@ -117,6 +135,11 @@ class UserPasskeyRegistrationOptions(Resource):
                     if domain.passkey_require_uv
                     else UserVerificationRequirement.PREFERRED
                 ),
+            ),
+            attestation=(
+                AttestationConveyancePreference.DIRECT
+                if domain.passkey_attestation_policy == 'require'
+                else AttestationConveyancePreference.NONE
             ),
         )
         request_id = secrets.token_urlsafe(32)
@@ -185,7 +208,8 @@ class UserPasskeyRegistration(Resource):
                 flask.request.headers.get('X-Real-IP', flask.request.remote_addr),
             )
             return {'code': 400, 'message': 'Passkey registration could not be verified'}, 400
-        if reason := _check_registration_policy(user, verification):
+        flags = passkey_utils.authenticator_flags(data['credential'], registration=True)
+        if reason := _check_registration_policy(user, verification, flags):
             flask.current_app.logger.warning(
                 'API passkey registration rejected user=%s aaguid=%s reason=%s ip=%s',
                 user.email, verification.aaguid, reason,
@@ -206,15 +230,21 @@ class UserPasskeyRegistration(Resource):
                 passkey_utils.enum_value(verification.credential_device_type) == 'single_device'
                 and not verification.credential_backed_up
             ),
+            user_verified=verification.user_verified,
+            user_present=flags.up,
+            credential_device_type=passkey_utils.enum_value(verification.credential_device_type),
+            backup_eligible=flags.be,
+            backed_up=verification.credential_backed_up,
+            attestation_format=passkey_utils.enum_value(verification.fmt),
             name=data['name'].strip()[:255],
         )
         models.db.session.add(item)
         models.db.session.commit()
         flask.current_app.logger.info(
             'API passkey registered actor=api-token user=%s credential=%s name=%r aaguid=%s '
-            'attestation=%s user_verified=%s device_type=%s backed_up=%s device_bound=%s sign_count=%s ip=%s',
+            'attestation=%s up=%s uv=%s be=%s bs=%s device_type=%s backed_up=%s device_bound=%s sign_count=%s ip=%s',
             user.email, bytes_to_base64url(credential_id)[:16], item.name, item.aaguid,
-            attestation, verification.user_verified,
+            attestation, flags.up, verification.user_verified, flags.be, flags.bs,
             passkey_utils.enum_value(verification.credential_device_type),
             verification.credential_backed_up, item.device_bound, verification.sign_count,
             flask.request.headers.get('X-Real-IP', flask.request.remote_addr),
@@ -225,6 +255,13 @@ class UserPasskeyRegistration(Resource):
             'name': item.name,
             'aaguid': item.aaguid,
             'device_bound': item.device_bound,
+            'user_verified': item.user_verified,
+            'user_present': item.user_present,
+            'credential_device_type': item.credential_device_type,
+            'backup_eligible': item.backup_eligible,
+            'backed_up': item.backed_up,
+            'attestation_format': item.attestation_format,
+            'last_used_at': item.last_used_at,
             'sign_count': item.sign_count,
             'created_at': str(item.created_at),
         }

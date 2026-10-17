@@ -29,6 +29,9 @@ def test_api_can_register_list_and_delete_a_users_passkey(client, user, monkeypa
         credential_device_type='single_device',
         credential_backed_up=False,
     ))
+    monkeypatch.setattr(api_module.passkey_utils, 'authenticator_flags', lambda *args, **kwargs: SimpleNamespace(
+        up=True, uv=True, be=False, bs=False,
+    ))
     headers = {'Authorization': 'Bearer not-empty'}
     user_url = f'/api/v1/passkey/user/{user.email}'
 

@@ -1,23 +1,49 @@
-{%- extends "base.html" %}
-
-{%- block title %}
-{% trans %}Automatic reply{% endtrans %}
-{%- endblock %}
-
-{%- block subtitle %}
-{{ user }}
-{%- endblock %}
-
-{%- block content %}
-{%- call macros.card() %}
-<form class="form" method="post" role="form">
-  {{ form.hidden_tag() }}
-  {%- call macros.fieldset(
-      field=form.reply_enabled,
-      enabled=user.reply_enabled,
-      fields=[form.reply_subject, form.reply_body, form.reply_enddate, form.reply_startdate]) %}
-  {%- endcall %}
-  {{ macros.form_field(form.submit) }}
+{% extends "base.html" %}
+{% block title %}{{ _('Automatic reply') }}{% endblock %}
+{% block subtitle %}{% if user.email != current_user.email %}{{ user }} · {% endif %} {{ _('Saved status:') }} {{ reply_status }}{% endblock %}
+{% block content %}
+<form class="form mailu-composer" method="post" data-autoreply data-preview-url="{{ url_for('.user_reply_preview', user_email=user.email) }}">
+  <input type="hidden" name="reply_formatted" value="">
+  {{ form.hidden_tag() }}{{ macros.form_errors(form) }}
+  <div class="card"><div class="card-body">
+    <div class="form-check form-switch mb-1">{{ form.reply_enabled(class_='form-check-input', aria_controls='reply-configuration', aria_expanded='true' if form.reply_enabled.data else 'false') }}{{ form.reply_enabled.label(class_='form-check-label') }}</div>
+    <p class="text-body-secondary small mb-0">{{ _('Turn on automatic reply to edit your message and choose when it is sent. Turning it off keeps your saved settings.') }}</p>
+  </div></div>
+  <div class="row g-3" id="reply-configuration" {% if not form.reply_enabled.data %}hidden{% endif %}>
+    <section class="col-xl-5" aria-labelledby="reply-schedule-heading">
+      <div class="card h-100"><div class="card-body">
+        <h2 class="h5 mb-3" id="reply-schedule-heading">{{ _('When to reply') }}</h2>
+        {% for option in form.reply_schedule %}<div class="form-check mb-2">{{ option(class_='form-check-input') }}{{ option.label(class_='form-check-label') }}</div>{% endfor %}
+        {{ macros.form_field_errors(form.reply_schedule) }}
+        <div id="reply-dates">
+          <p class="small text-body-secondary mt-3">{{ _('Drag across the calendar to select your time away, or enter the dates below. On touch screens, press and hold to select.') }}</p>
+          <div id="reply-calendar" class="mb-3" data-away="{{ _('Away') }}" data-today="{{ _('Today') }}"></div>
+          <div class="row g-2"><div class="col-sm-6">{{ macros.form_field(form.reply_startdate) }}</div><div class="col-sm-6">{{ macros.form_field(form.reply_enddate) }}</div></div>
+          <p class="small mb-1" id="reply-date-summary" role="status" data-summary="{{ _('Replies are sent on every selected day, including the last day.') }}"></p>
+          <p class="small text-body-secondary mb-0">{{ _('Dates follow the mail server timezone:') }} {{ server_timezone }}. {{ _('Replies stop at the end of the last day away.') }}</p>
+        </div>
+      </div></div>
+    </section>
+    <section class="col-xl-7" aria-labelledby="reply-message-heading">
+      <div class="card h-100"><div class="card-body">
+        <h2 class="h5 mb-3" id="reply-message-heading">{{ _('Your automatic reply') }}</h2>
+        <div data-reply-editing>
+        {{ macros.form_field(form.reply_subject) }}
+        <p class="small text-body-secondary">{{ _('Leave the subject empty to reply using the original message subject.') }}</p>
+        {{ macros.form_field(form.reply_body, rows=12, data_mail_editor='true', data_html_field='reply_body_html') }}
+        <button type="button" class="btn btn-outline-secondary" data-reply-preview>{{ _('Preview') }}</button>
+        </div>
+        <div data-reply-preview-content hidden tabindex="-1">
+          <h3 class="h6" data-reply-preview-subject data-default="{{ _('Automatic reply') }}"></h3>
+          <div class="mailu-message border rounded p-3 mb-3" data-reply-preview-body></div>
+          <button type="button" class="btn btn-outline-secondary" data-reply-preview-close>{{ _('Back to editing') }}</button>
+        </div>
+        <p class="alert alert-danger mt-3 d-none" data-reply-preview-error role="alert" data-failed="{{ _('Could not load the preview. Try again.') }}"></p>
+      </div></div>
+    </section>
+  </div>
+  <div class="mt-3">{{ form.submit(class_='btn btn-primary') }}</div>
 </form>
-{%- endcall %}
-{%- endblock %}
+{% endblock %}
+{% block extra_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='composer.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='autoreply.css') }}">{% endblock %}
+{% block extra_scripts %}<script src="{{ url_for('static', filename='composer.js') }}"></script><script src="{{ url_for('static', filename='autoreply.js') }}"></script>{% endblock %}

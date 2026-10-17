@@ -42,7 +42,7 @@ def token_create(user_email):
         flask.flash('Authentication token created')
         return flask.redirect(
             flask.url_for('.token_list', user_email=user.email))
-    return flask.render_template('token/create.html', form=form)
+    return flask.render_template('token/create.html', form=form, user=user)
 
 
 @ui.route('/token/delete/<token_id>', methods=['GET', 'POST'])

@@ -67,6 +67,14 @@
       {%- if current_user.manager_of or current_user.global_admin %}
       <li class="nav-header text-uppercase text-primary" role="none">{% trans %}Administration{% endtrans %}</li>
       {%- endif %}
+      {%- if current_user.manager_of or current_user.global_admin %}
+      <li class="nav-item" role="none">
+        <a href="{{ url_for('.domain_list') }}" class="nav-link" role="menuitem">
+          <i class="nav-icon fa-solid fa-envelope"></i>
+          <p>{% trans %}Mail domains{% endtrans %}</p>
+        </a>
+      </li>
+      {%- endif %}
       {%- if current_user.global_admin %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.announcement') }}" class="nav-link" role="menuitem">
@@ -90,14 +98,6 @@
         <a href="{{ config["WEB_ADMIN"] }}/antispam/" data-clicked="{{ url_for('.antispam') }}" target="_blank" class="nav-link" role="menuitem">
         <i class="nav-icon fa-solid fa-trash-can"></i>
         <p>{% trans %}Antispam{% endtrans %}</p>
-        </a>
-      </li>
-      {%- endif %}
-      {%- if current_user.manager_of or current_user.global_admin %}
-      <li class="nav-item" role="none">
-        <a href="{{ url_for('.domain_list') }}" class="nav-link" role="menuitem">
-          <i class="nav-icon fa-solid fa-envelope"></i>
-          <p>{% trans %}Mail domains{% endtrans %}</p>
         </a>
       </li>
       {%- endif %}

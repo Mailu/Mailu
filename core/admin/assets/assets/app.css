@@ -53,7 +53,7 @@ legend {
 fieldset > legend .form-check {
   margin-left: -.5rem;
 }
-fieldset:disabled :not(legend) label {
+fieldset:disabled label {
   opacity: .5;
 }
 fieldset:disabled .form-control:disabled {
@@ -122,4 +122,67 @@ th[aria-sort="descending"] .mailu-table-sort::after {
 .mailu-version {
   font-size: 60%;
   line-height: 0;
+}
+
+/* Shared task layouts */
+.mailu-signin { min-height: 100dvh; display: flex; flex-direction: column; padding: 2rem 1rem; }
+.mailu-signin-main { width: 100%; max-width: 31rem; margin: auto; flex-shrink: 0; }
+.mailu-signin-brand { display: flex; align-items: center; justify-content: center; gap: .8rem; margin-bottom: 2rem; color: var(--bs-body-color); font-size: 1.5rem; }
+.mailu-signin .card { border-radius: 1rem; }
+.form, .mailu-composer { width: 100%; max-width: none; }
+.form .form-control:not(textarea) { min-height: 2.6rem; }
+.form .form-text { margin-bottom: .4rem; }
+.form label { font-weight: 500; margin-bottom: .35rem; }
+
+.mailu-composer .ql-editor { min-height: 20rem; font: inherit; }
+.mailu-composer .ql-container { height: auto; }
+.mailu-composer .ql-toolbar, .mailu-composer .ql-container { border-color: var(--bs-border-color); }
+.mailu-row-actions summary, details > summary { cursor: pointer; }
+.mailu-row-actions a { white-space: nowrap; text-decoration: none; padding: .3rem .25rem; }
+.mailu-message { overflow-wrap: anywhere; }
+.table td { vertical-align: middle; }
+.table td:first-child { overflow-wrap: anywhere; }
+.sidebar-menu .nav-link[aria-current="page"] { background: var(--bs-primary); color: white; }
+:focus-visible { outline: 3px solid var(--bs-primary); outline-offset: 3px; }
+@media (max-width: 575.98px) {
+  .app-content-header .row { gap: .75rem; }
+  .app-content-header .float-end { float: none !important; }
+  .mailu-table-search { width: 100%; }
+  .mailu-table-search input { flex: 1; min-width: 0; }
+  .mailu-signin { padding: 1rem; }
+}
+
+/* Keep short domain values compact; give the remaining width to names/comments. */
+.mailu-domain-table th:not(:first-child),
+.mailu-domain-table td:not(:first-child) { width: 1%; white-space: nowrap; }
+.mailu-domain-table td:first-child { min-width: 12rem; }
+.mailu-domain-table td { padding: .4rem .6rem; }
+.mailu-domain-comment { max-width: 36rem; overflow-wrap: anywhere; }
+.mailu-count-link { display: inline-block; padding: .3rem .15rem; font-variant-numeric: tabular-nums; text-decoration: none; }
+.mailu-count-link:hover { text-decoration: underline; }
+.mailu-domain-actions { display: flex; align-items: center; gap: .35rem; }
+
+#reply-calendar { font-size: .875rem; }
+#reply-calendar .fc-toolbar-title { font-size: 1.1rem; }
+#reply-calendar .fc-daygrid-day { cursor: crosshair; }
+[data-autoreply] .ql-editor { min-height: 20rem; }
+[data-autoreply] .card.h-100 { margin-bottom: 0; }
+
+.mailu-user-actions { display: flex; flex-wrap: wrap; gap: .35rem; min-width: 22rem; }
+.mailu-user-actions .btn { white-space: nowrap; }
+
+[data-autoreply] [hidden] { display: none !important; }
+
+/* Give settings one consistent rhythm across cards and disclosure sections. */
+.form.mailu-settings { max-width: none; width: 100%; display: flex; flex-direction: column; gap: 1.5rem; }
+.mailu-settings .card { margin-bottom: 0; }
+.mailu-settings > .mb-3 { margin-bottom: 0 !important; }
+.form-range { cursor: pointer; }
+.form-range:disabled { cursor: default; }
+.input-group > .form-range { flex: 1 1 auto; width: 1%; min-width: 6rem; height: 2.6rem; padding: .75rem; border: var(--bs-border-width) solid var(--bs-border-color); background-color: var(--bs-body-bg); }
+@media (min-width: 992px) {
+  .sidebar-mini.sidebar-collapse .user-panel .info { display: none; }
+  .sidebar-mini.sidebar-collapse .user-panel { justify-content: center; padding-inline: 0; }
+  .sidebar-mini.sidebar-collapse .sidebar-brand .brand-link { justify-content: center; padding-inline: 0; }
+  .sidebar-mini.sidebar-collapse .sidebar-brand .brand-image { margin: 0; }
 }

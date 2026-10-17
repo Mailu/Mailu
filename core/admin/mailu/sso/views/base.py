@@ -1,5 +1,5 @@
 from werkzeug.utils import redirect
-from mailu import models, utils, auth_flow, passkeys as passkey_utils
+from mailu import models, utils, auth_flow, signin, passkeys as passkey_utils
 from mailu.sso import sso, forms
 from mailu.ui import access
 
@@ -9,39 +9,42 @@ import flask
 import flask_login
 import secrets
 import ipaddress
-from urllib.parse import urlparse, urljoin, unquote
 from markupsafe import Markup
 
-@sso.route('/login', methods=['GET', 'POST'])
-def login():
-    if flask.request.headers.get(app.config['PROXY_AUTH_HEADER']) and not 'noproxyauth' in flask.request.url:
+@sso.route('/login', methods=['GET', 'POST'], defaults={'target': None})
+@sso.route('/login/<any(admin,webmail):target>', methods=['GET', 'POST'])
+def login(target):
+    if target:
+        signin.target_path(target)
+        signin.clear()
+        signin.remember(signin.target_path(target))
+    elif flask.request.method == 'GET' and 'url' in flask.request.args and 'homepage' not in flask.request.args:
+        # Compatibility for existing bookmarks; new links never generate ?url=.
+        signin.remember(flask.request.args['url'])
+    if flask.request.headers.get(app.config['PROXY_AUTH_HEADER']) and 'noproxyauth' not in flask.request.args:
         return _proxy()
 
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
     client_port = flask.request.headers.get('X-Real-Port', None)
     form = forms.LoginForm()
-    flask.session['passkey_login_redirect'] = _has_usable_redirect()
+    form.destination.choices = [(value, label) for value, label in form.destination.choices
+                                if (value == 'admin' and str(app.config['ADMIN']).upper() != 'FALSE')
+                                or (value == 'webmail' and str(app.config['WEBMAIL']).upper() != 'NONE')]
+    selected = target or flask.request.form.get('destination') or signin.default_target()
+    if signin.pending():
+        selected = 'admin' if signin.pending().startswith(app.config['WEB_ADMIN']) else 'webmail'
+    if form.submitAdmin.data:
+        selected = 'admin'
+    elif form.submitWebmail.data:
+        selected = 'webmail'
+    form.destination.data = selected
     fields = []
-
-    if 'url' in flask.request.args and not 'homepage' in flask.request.url:
-        fields.append(form.submitAdmin)
-    else:
-        form.submitAdmin.label.text = form.submitAdmin.label.text + ' Admin'
-        form.submitWebmail.label.text = form.submitWebmail.label.text + ' Webmail'
-        if str(app.config["WEBMAIL"]).upper() != "NONE":
-            fields.append(form.submitWebmail)
-        if str(app.config["ADMIN"]).upper() != "FALSE":
-            fields.append(form.submitAdmin)
-    fields = [fields]
+    flask.session['passkey_login_redirect'] = signin.pending()
 
     if form.validate_on_submit():
-        if destination := _has_usable_redirect():
-            pass
-        else:
-            if form.submitAdmin.data:
-                destination = app.config['WEB_ADMIN']
-            elif form.submitWebmail.data:
-                destination = app.config['WEB_WEBMAIL']
+        # Preserve old password form submissions while sharing destination policy.
+        selected = target or ('admin' if form.submitAdmin.data else 'webmail' if form.submitWebmail.data else form.destination.data)
+        destination = signin.resolve(selected)
         device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
         username = form.email.data
         if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
@@ -52,6 +55,8 @@ def login():
             return flask.render_template('login.html', form=form, fields=fields)
         user = models.User.login(username, form.pw.data)
         if user:
+            login_destination = destination
+            signin.clear()
             flask.session.regenerate()
             flask_login.login_user(user)
             passkeys_url = flask.url_for('ui.passkey_list')
@@ -68,7 +73,7 @@ def login():
             flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
             if msg := utils.isBadOrPwned(form):
                 flask.flash(msg, "error")
-            return response
+            return signin.remember_preference(response, login_destination)
         else:
             utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username, form.pw.data) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip, username)
             flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: failed: badauth: {utils.truncated_pw_hash(form.pw.data)}')
@@ -124,19 +129,6 @@ def _clear_webmail_cookies(response):
     return response
 
 """
-Redirect to the url passed in parameter if any; Ensure that this is not an open-redirect too...
-https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html
-"""
-def _has_usable_redirect(is_proxied=False):
-    if 'homepage' in flask.request.url and not is_proxied:
-        return None
-    if url := flask.request.args.get('url'):
-        target = urlparse(urljoin(flask.request.url, unquote(url)))
-        if target.netloc == urlparse(flask.request.url).netloc:
-            return target.geturl()
-    return None
-
-"""
 https://mailu.io/master/configuration.html#header-authentication-using-an-external-proxy
 """
 def _proxy():
@@ -152,14 +144,19 @@ def _proxy():
         flask.current_app.logger.error(f'Login failed by proxy - no header: from {client_ip} through {flask.request.remote_addr}.')
         return flask.abort(500, 'No %s header' % app.config['PROXY_AUTH_HEADER'])
 
-    url = _has_usable_redirect(True) or app.config['WEB_ADMIN']
+    url = signin.resolve()
+    login_destination = url
+    signin.clear()
 
     user = models.User.get(email)
     if user:
         flask.session.regenerate()
         flask_login.login_user(user)
         flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
-        return _clear_webmail_cookies(flask.redirect(url))
+        if user.change_pw_next_login:
+            auth_flow.require_actions(flask.session, 'password_change', url)
+            url = flask.url_for('sso.pw_change')
+        return signin.remember_preference(_clear_webmail_cookies(flask.redirect(url)), login_destination)
 
     if not app.config['PROXY_AUTH_CREATE']:
         flask.current_app.logger.warning(f'Login failed by proxy - does not exist: {user} from {client_ip} through {flask.request.remote_addr}.')
@@ -183,4 +180,4 @@ def _proxy():
     flask_login.login_user(user)
     user.send_welcome()
     flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
-    return _clear_webmail_cookies(flask.redirect(url))
+    return signin.remember_preference(_clear_webmail_cookies(flask.redirect(url)), login_destination)

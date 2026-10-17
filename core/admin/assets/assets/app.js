@@ -35,25 +35,21 @@ function hibpCheck(password) {
     });
 }
 
-function copyText(text) {
+async function copyText(text) {
     if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text).catch(function() {
-            copyTextFallback(text);
-        });
-    } else {
-        copyTextFallback(text);
+        try { await navigator.clipboard.writeText(text); return; } catch (_) { /* fallback */ }
     }
-}
-
-function copyTextFallback(text) {
+    const previous = document.activeElement;
     const input = document.createElement('textarea');
     input.value = text;
     input.style.position = 'fixed';
     input.style.opacity = '0';
     document.body.appendChild(input);
     input.select();
-    document.execCommand('copy');
+    const copied = document.execCommand('copy');
     input.remove();
+    previous?.focus();
+    if (!copied) throw new Error('copy');
 }
 
 function element(tag, className, text) {
@@ -73,7 +69,7 @@ class MailuTable {
             numeric: true,
             sensitivity: 'base',
         });
-        this.storageKey = `mailu-table:${window.location.pathname}:${index}`;
+        this.storageKey = `mailu-table:v2:${window.location.pathname}:${index}`;
         this.page = 0;
         this.pageSize = 10;
         this.query = '';
@@ -110,16 +106,26 @@ class MailuTable {
         this.searchInput.placeholder = this.table.dataset.search;
         this.searchInput.setAttribute('aria-label', this.table.dataset.search);
         this.searchInput.value = this.query;
-        toolbar.append(lengthLabel, this.searchInput);
+        const search = element('div', 'mailu-table-search d-flex gap-2 align-items-center');
+        this.clearSearch = element('button', 'btn btn-sm btn-outline-secondary', this.table.dataset.clear);
+        this.clearSearch.type = 'button';
+        this.clearSearch.addEventListener('click', () => {
+            this.query = ''; this.searchInput.value = ''; this.page = 0; this.render(); this.searchInput.focus();
+        });
+        search.append(this.searchInput, this.clearSearch);
+        toolbar.append(lengthLabel, search);
 
         const responsive = element('div', 'table-responsive');
         this.table.before(toolbar, responsive);
         responsive.appendChild(this.table);
 
         this.empty = element('p', 'text-secondary text-center my-3 d-none', this.table.dataset.empty);
+        this.resultCount = element('p', 'small text-body-secondary my-2');
+        this.resultCount.setAttribute('role', 'status');
+        responsive.after(this.resultCount);
         this.pagination = element('nav', 'd-flex justify-content-center align-items-center gap-2 mt-3');
         this.pagination.setAttribute('aria-label', `${this.table.dataset.previous} / ${this.table.dataset.next}`);
-        responsive.after(this.empty, this.pagination);
+        this.resultCount.after(this.empty, this.pagination);
 
         this.lengthSelect.addEventListener('change', () => {
             this.pageSize = Number(this.lengthSelect.value);
@@ -175,7 +181,12 @@ class MailuTable {
             row.hidden = !visible.has(row);
             this.table.tBodies[0].appendChild(row);
         }
+        this.empty.textContent = this.rows.length ? this.table.dataset.empty : this.table.dataset.noRecords;
         this.empty.classList.toggle('d-none', rows.length !== 0);
+        this.clearSearch.hidden = !this.query;
+        this.resultCount.textContent = this.table.dataset.results
+            .replace('_START_', rows.length ? start + 1 : 0)
+            .replace('_END_', Math.min(end, rows.length)).replace('_TOTAL_', rows.length);
         this.updateHeaders();
         this.updatePagination(pageCount);
         try {
@@ -222,7 +233,30 @@ class MailuTable {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    if (document.activeElement.matches('input, textarea')) document.activeElement.select();
+    document.querySelectorAll('#navigation a.nav-link').forEach(link => {
+        if (new URL(link.href).pathname === window.location.pathname) {
+            link.classList.add('active'); link.setAttribute('aria-current', 'page');
+        }
+    });
+    const invalid = document.querySelector('.is-invalid');
+    if (invalid) {
+        invalid.closest('details')?.setAttribute('open', '');
+        invalid.focus();
+    }
+    document.querySelectorAll('input[type="password"]').forEach(input => {
+        const wrapper = element('div', 'input-group');
+        input.before(wrapper); wrapper.append(input);
+        const toggle = element('button', 'btn btn-outline-secondary');
+        toggle.type = 'button';
+        toggle.setAttribute('aria-label', document.documentElement.dataset.showPassword || 'Show password');
+        toggle.setAttribute('aria-pressed', 'false');
+        toggle.innerHTML = '<i class="fa-solid fa-eye" aria-hidden="true"></i>';
+        toggle.addEventListener('click', () => {
+            input.type = input.type === 'password' ? 'text' : 'password';
+            toggle.setAttribute('aria-pressed', String(input.type === 'text'));
+        });
+        wrapper.append(toggle);
+    });
 
     document.querySelectorAll('[data-clicked]').forEach(link => {
         link.addEventListener('click', event => {
@@ -240,14 +274,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    document.querySelectorAll('fieldset legend input[type=checkbox]').forEach(toggle => {
-        toggle.addEventListener('change', function() {
-            const fieldset = this.closest('fieldset');
-            const controls = Array.from(fieldset.querySelectorAll('input, textarea, select')).filter(control => control !== this);
-            fieldset.disabled = !this.checked;
-            controls.forEach(control => { control.disabled = !this.checked; });
-            if (this.checked) controls[0]?.focus();
-        });
+    document.querySelectorAll('fieldset[data-toggle-field]').forEach(fieldset => {
+        const toggle = document.getElementById(fieldset.dataset.toggleField);
+        if (!toggle) return;
+        const update = () => { fieldset.disabled = !toggle.checked; };
+        toggle.addEventListener('change', update);
+        update();
+    });
+
+    document.querySelectorAll('[data-toggle-visibility]').forEach(section => {
+        const toggle = document.getElementById(section.dataset.toggleVisibility);
+        if (!toggle) return;
+        const update = () => {
+            section.hidden = !toggle.checked;
+            toggle.setAttribute('aria-expanded', String(toggle.checked));
+        };
+        toggle.addEventListener('change', update);
+        update();
+    });
+
+    document.querySelectorAll('.sidebar-menu .nav-link').forEach(link => {
+        const label = link.textContent.trim();
+        link.setAttribute('aria-label', label);
+        link.title = label;
     });
 
     document.querySelectorAll('input[type=range]').forEach(input => {
@@ -260,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const maxInBytes = Number(input.max);
             let unit = Number(unitSelect.value);
             const update = (syncAmount = true) => {
-                let value = input.dataset.infinity && input.value === '0' ? '∞' : Number(input.value).toFixed(2);
+                let value = input.dataset.infinity && input.value === '0' ? '∞' : input.value;
                 if (value.endsWith('.00')) value = value.slice(0, -3);
                 if (amountInput) {
                     if (syncAmount) amountInput.value = value === '∞' ? '0' : value;
@@ -273,11 +322,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const amountInUnit = valueInBytes / unit;
                 input.min = minInBytes / unit;
                 input.max = Math.min(maxInBytes / unit, Math.max(1000, amountInUnit));
-                input.step = 1;
+                input.step = 'any';
                 if (amountInput) {
                     amountInput.min = input.min;
-                    amountInput.max = input.max;
-                    amountInput.step = 1;
+                    amountInput.max = maxInBytes / unit;
+                    amountInput.step = 'any';
                 }
                 input.value = amountInUnit;
                 update();
@@ -288,6 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (amountInput) {
                 amountInput.addEventListener('input', () => {
                     if (amountInput.value === '') return;
+                    input.max = Math.min(maxInBytes / unit, Math.max(Number(input.max), Number(amountInput.value)));
                     input.value = amountInput.value;
                     update(false);
                 });
@@ -302,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             unitSelect.addEventListener('change', () => {
                 const amount = Number(input.value);
-                setScale(amount * Number(unitSelect.value));
+                setScale(amount * unit);
             });
             input.form?.addEventListener('submit', () => {
                 if (amountInput && amountInput.value !== '') input.value = amountInput.value;
@@ -324,6 +374,94 @@ document.addEventListener('DOMContentLoaded', function() {
         update();
     });
 
+    document.querySelectorAll('.mailu-user-picker').forEach(select => {
+        const status = element('p', 'form-text mb-3');
+        status.setAttribute('role', 'status');
+        select.after(status);
+        let more = false;
+        let failed = false;
+        const updateStatus = control => {
+            status.textContent = failed ? select.dataset.loadError : select.dataset.selected.replace('_COUNT_', control.items.length)
+                + (more ? '. ' + select.dataset.more : '');
+        };
+        const control = new TomSelect(select, {
+            plugins: ['remove_button'], create: false, maxItems: null, maxOptions: 50,
+            placeholder: select.dataset.placeholder, preload: 'focus', loadThrottle: 250,
+            shouldLoad: () => true, closeAfterSelect: false, hideSelected: true,
+            valueField: 'value', labelField: 'text', searchField: ['text'],
+            render: {
+                no_results: (_, escape) => '<div class="no-results">' + escape(select.dataset.noResults) + '</div>',
+                loading: (_, escape) => '<div class="spinner-border spinner-border-sm" aria-hidden="true"></div><span class="ms-2">' + escape(select.dataset.loading) + '</span>',
+            },
+            load(query, callback) {
+                const url = new URL(select.dataset.optionsUrl, window.location.origin);
+                url.searchParams.set('q', query);
+                fetch(url).then(response => {
+                    if (!response.ok) throw new Error('search');
+                    return response.json();
+                }).then(data => {
+                    more = data.more; failed = false;
+                    callback(data.options); updateStatus(this);
+                }).catch(() => { failed = true; callback(); updateStatus(this); });
+            },
+        });
+        control.control_input.type = 'search';
+        control.control_input.name = 'mailu-account-search';
+        control.control_input.setAttribute('autocomplete', 'off');
+        control.control_input.setAttribute('autocapitalize', 'off');
+        control.control_input.setAttribute('autocorrect', 'off');
+        control.control_input.setAttribute('spellcheck', 'false');
+        for (const attribute of ['data-1p-ignore', 'data-lpignore', 'data-bwignore']) {
+            control.control_input.setAttribute(attribute, 'true');
+        }
+        control.on('change', () => updateStatus(control));
+        updateStatus(control);
+    });
+
+    document.querySelectorAll('.mailu-destination-picker').forEach(select => {
+        const status = element('p', 'form-text mb-3');
+        status.setAttribute('role', 'status');
+        select.after(status);
+        let more = false;
+        let failed = false;
+        let control;
+        const updateStatus = () => {
+            status.textContent = failed ? select.dataset.loadError : select.dataset.selected.replace('_COUNT_', control.items.length)
+                + (more ? '. ' + select.dataset.more : '');
+        };
+        control = new TomSelect(select, {
+            plugins: ['remove_button'], create: true, createOnBlur: true, persist: false,
+            maxItems: null, maxOptions: 50, placeholder: select.dataset.placeholder,
+            preload: 'focus', loadThrottle: 250, shouldLoad: () => true,
+            valueField: 'value', labelField: 'text', searchField: ['text'],
+            render: {
+                no_results: (_, escape) => '<div class="no-results">' + escape(select.dataset.noResults) + '</div>',
+                loading: (_, escape) => '<div class="spinner-border spinner-border-sm" aria-hidden="true"></div><span class="ms-2">' + escape(select.dataset.loading) + '</span>',
+            },
+            load(query, callback) {
+                const url = new URL(select.dataset.optionsUrl, window.location.origin);
+                url.searchParams.set('q', query);
+                fetch(url).then(response => {
+                    if (!response.ok) throw new Error('search');
+                    return response.json();
+            }).then(data => {
+                more = data.more; failed = false;
+                callback(data.options); updateStatus();
+            }).catch(() => { failed = true; callback(); updateStatus(); });
+            },
+        });
+        control.on('change', updateStatus);
+        updateStatus();
+        control.control_input.type = 'search';
+        control.control_input.setAttribute('autocomplete', 'off');
+        control.control_input.setAttribute('autocapitalize', 'off');
+        control.control_input.setAttribute('autocorrect', 'off');
+        control.control_input.setAttribute('spellcheck', 'false');
+        for (const attribute of ['data-1p-ignore', 'data-lpignore', 'data-bwignore']) {
+            control.control_input.setAttribute(attribute, 'true');
+        }
+    });
+
     document.querySelectorAll('.mailselect').forEach(select => {
         new TomSelect(select, {
             create: select.multiple,
@@ -337,10 +475,20 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.mailu-table').forEach((table, index) => new MailuTable(table, index));
 
     document.querySelectorAll('.btn-clip, [data-clipboard-text]').forEach(button => {
-        button.addEventListener('click', event => {
+        button.addEventListener('click', async event => {
             event.preventDefault();
             const target = button.dataset.clipboardTarget;
-            copyText(button.dataset.clipboardText || document.querySelector(target).textContent);
+            let feedback = button.parentElement.querySelector('.mailu-copy-status');
+            if (!feedback) {
+                feedback = element('span', 'mailu-copy-status small ms-2');
+                feedback.setAttribute('role', 'status'); button.after(feedback);
+            }
+            try {
+                await copyText(button.dataset.clipboardText || document.querySelector(target).textContent);
+                feedback.textContent = document.documentElement.dataset.copied || 'Copied';
+            } catch (_) {
+                feedback.textContent = document.documentElement.dataset.copyFailed || 'Copy failed. Select and copy the text.';
+            }
         });
     });
 

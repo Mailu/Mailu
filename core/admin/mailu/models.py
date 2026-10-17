@@ -6,8 +6,8 @@ import json
 import base64
 import hashlib
 
-from datetime import date
-from email.mime import text
+from datetime import date, datetime, timezone
+from email.mime import text, multipart
 from itertools import chain
 
 import flask_sqlalchemy
@@ -27,6 +27,7 @@ from sqlalchemy.ext import declarative
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy.orm import validates
 from werkzeug.utils import cached_property
 
 from mailu import dkim, utils
@@ -196,9 +197,14 @@ class Domain(Base):
     dkim_keys = db.relationship('DkimKey', back_populates='domain', cascade='all, delete-orphan', order_by='DkimKey.selector')
 
     # WebAuthn passkey policy
+    passkey_enforce_aaguid = db.Column(db.Boolean, nullable=False, default=False)
     passkey_aaguid_mode = db.Column(db.String(8), nullable=False, default='allow')
     passkey_aaguids = db.Column(db.Text, nullable=False, default='')
     passkey_require_uv = db.Column(db.Boolean, nullable=False, default=True)
+    passkey_backup_eligible_policy = db.Column(db.String(8), nullable=False, default='optional')
+    passkey_backup_state_policy = db.Column(db.String(8), nullable=False, default='optional')
+    passkey_require_sign_count_increase = db.Column(db.Boolean, nullable=False, default=False)
+    passkey_attestation_policy = db.Column(db.String(8), nullable=False, default='optional')
     passkey_device_bound = db.Column(db.Boolean, nullable=False, default=False)
     passkey_resident_key = db.Column(db.String(16), nullable=False, default='preferred')
 
@@ -541,19 +547,25 @@ class Email(object):
         sqlalchemy.event.listen(cls.localpart, 'set', cls._update_localpart, propagate=True, retval=True)
         sqlalchemy.event.listen(cls.domain_name, 'set', cls._update_domain_name, propagate=True)
 
-    def sendmail(self, subject, body):
+    def sendmail(self, subject, body, *, html_body=None):
         """ send an email to the address """
         try:
             f_addr = f'{app.config["POSTMASTER"]}@{idna.encode(app.config["DOMAIN"]).decode("ascii")}'
             with smtplib.LMTP(host=app.config['FRONT_ADDRESS'], port=2525) as lmtp:
                 to_address = f'{self.localpart}@{idna.encode(self.domain_name).decode("ascii")}'
-                msg = text.MIMEText(body)
+                if html_body is None:
+                    msg = text.MIMEText(body, 'plain', 'utf-8')
+                else:
+                    msg = multipart.MIMEMultipart('alternative')
+                    msg.attach(text.MIMEText(body, 'plain', 'utf-8'))
+                    msg.attach(text.MIMEText(html_body, 'html', 'utf-8'))
                 msg['Subject'] = subject
                 msg['From'] = f_addr
                 msg['To'] = to_address
                 lmtp.sendmail(f_addr, [to_address], msg.as_string())
             return True
-        except smtplib.SMTPException:
+        except (smtplib.SMTPException, OSError):
+            app.logger.exception("Message delivery failed for %s", self.email)
             return False
 
     @classmethod
@@ -651,6 +663,7 @@ class User(Base, Email):
     reply_enabled = db.Column(db.Boolean, nullable=False, default=False)
     reply_subject = db.Column(db.String(255), nullable=True, default=None)
     reply_body = db.Column(db.Text, nullable=True, default=None)
+    reply_body_html = db.Column(db.Text, nullable=True)
     reply_startdate = db.Column(db.Date, nullable=False,
         default=date(1900, 1, 1))
     reply_enddate = db.Column(db.Date, nullable=False,
@@ -685,6 +698,33 @@ class User(Base, Email):
             return ','.join(result)
         else:
             return self.email
+
+    @validates('reply_body')
+    def _plain_reply_changed(self, key, value):
+        # Existing API/CLI clients write plain text; discard stale formatting.
+        if value != self.reply_body:
+            self.reply_body_html = None
+        return value
+
+    @validates('reply_body_html')
+    def _formatted_reply_changed(self, key, value):
+        if not value:
+            return None
+        from mailu.announcements import sanitize
+        html, plain = sanitize(value)
+        self.reply_body = plain
+        return html
+
+    @property
+    def reply_mime(self):
+        if not self.reply_body_html:
+            return None
+        # Stable MIME preserves Sieve vacation duplicate suppression across requests.
+        boundary = 'mailu-vacation-' + hashlib.sha256(((self.reply_body or '') + '\0' + self.reply_body_html).encode()).hexdigest()[:32]
+        message = multipart.MIMEMultipart('alternative', boundary=boundary)
+        message.attach(text.MIMEText(self.reply_body or '', 'plain', 'utf-8'))
+        message.attach(text.MIMEText(self.reply_body_html, 'html', 'utf-8'))
+        return message.as_string()
 
     @property
     def reply_active(self):
@@ -839,6 +879,13 @@ class Passkey(Base):
     sign_count = db.Column(db.BigInteger, nullable=False, default=0)
     aaguid = db.Column(db.String(36), nullable=False)
     device_bound = db.Column(db.Boolean, nullable=True, default=None)
+    user_verified = db.Column(db.Boolean, nullable=True)
+    user_present = db.Column(db.Boolean, nullable=True)
+    backup_eligible = db.Column(db.Boolean, nullable=True)
+    attestation_format = db.Column(db.String(32), nullable=True)
+    credential_device_type = db.Column(db.String(16), nullable=True)
+    backed_up = db.Column(db.Boolean, nullable=True)
+    last_used_at = db.Column(db.DateTime(timezone=True), nullable=True)
     name = db.Column(db.String(255), nullable=False, default='')
     user = db.relationship('User', back_populates='passkeys')
 

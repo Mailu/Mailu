@@ -5,5 +5,12 @@
 {%- endblock %}
 
 {%- block subtitle %}
-{{ user }}
+{% if user.email != current_user.email %}{{ user }}{% endif %}
+{%- endblock %}
+
+{%- block content %}
+{%- call macros.card() %}
+<p>{% trans %}Create one token per email app or device. Copy the token below before saving: it cannot be displayed again. Save it in your app's password field for both incoming and outgoing mail, then let the app remember it.{% endtrans %}</p>
+{{ macros.form(form, cancel=False) }}
+{%- endcall %}
 {%- endblock %}

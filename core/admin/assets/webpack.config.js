@@ -10,6 +10,8 @@ module.exports = {
             import: ['./assets/app.css', './assets/app.js'],
             dependOn: 'vendor',
         },
+        autoreply: { import: './assets/autoreply.js', dependOn: 'vendor' },
+        composer: { import: './assets/composer.js', dependOn: 'vendor' },
         vendor: './assets/vendor.js',
         logo: './assets/mailu.png',
     },

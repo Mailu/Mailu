@@ -13,7 +13,7 @@
 {%- macro form_field_errors(field) %}
   {%- if field.errors %}
     {%- for error in field.errors %}
-      <p class="form-text text-danger">{{ error }}</p>
+      <p class="form-text text-danger" id="{{ field.id }}-error-{{ loop.index }}">{{ error }}</p>
     {%- endfor %}
   {%- endif %}
 {%- endmacro %}
@@ -38,11 +38,15 @@
 {%- endmacro %}
 
 {%- macro form_individual_field(field, prepend='', append='', label=True, class_="") %}
-  {%- set fieldclass=" ".join(["form-control"] + ([class_] if class_ else []) + (["is-invalid"] if field.errors else [])) %}
+  {%- if field.errors %}
+    {%- set _ = kwargs.update({'aria-invalid': 'true', 'aria-describedby': field.id ~ '-error-1'}) %}
+  {%- endif %}
+  {%- set fieldclass=" ".join(["form-range" if field.widget.input_type|default("") == "range" else ("form-select" if field.type in ("SelectField", "SelectMultipleField") else "form-control")] + ([class_] if class_ else []) + (["is-invalid"] if field.errors else [])) %}
   {%- if field.type == "BooleanField" %}
-    <div class="form-check">
+    <div class="form-check{% if class_ %} {{ class_ }}{% endif %}">
       {{ field(class_="form-check-input" + (" is-invalid" if field.errors else ""), **kwargs) }}
       {{ field.label(class_="form-check-label") if label else '' }}
+      {{ form_field_errors(field) }}
     </div>
   {%- else %}
     {{ field.label if label else '' }}{{ form_field_errors(field) }}
@@ -54,7 +58,7 @@
 
 {%- macro form_field(field) %}
   {%- if field.type == 'SubmitField' %}
-  {{- form_fields((field,), label=False, class="btn btn-secondary", **kwargs) }}
+  {{- form_fields((field,), label=False, class="btn btn-primary", **kwargs) }}
   {%- else %}
   {{- form_fields((field,), **kwargs) }}
   {%- endif %}
@@ -76,14 +80,16 @@
   <small class="form-text text-body-secondary">{{ _('0 means unlimited.') }}</small>
 {%- endmacro %}
 
-{%- macro form(form) %}
+{%- macro form(form, cancel=True) %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
+  {{ form_errors(form) }}
   {%- for field in form %}
     {%- if not bootstrap_is_hidden_field(field) %}
       {{ form_field(field) }}
     {%- endif %}
   {%- endfor %}
+  {% if cancel %}<a class="btn btn-outline-secondary" href="{{ path[-1][1] if path is defined and path and path[-1][1] else url_for('ui.index') }}">{{ _('Cancel') }}</a>{% endif %}
 </form>
 {%- endmacro %}
 
@@ -106,7 +112,7 @@
 </div>
 {%- endmacro %}
 
-{%- macro table(title=None, theme="primary", datatable=True, order=None) %}
+{%- macro table(title=None, theme="primary", datatable=True, order=None, class_="") %}
 <div class="row">
   <div class="col-lg-12">
     <div class="card card-outline card-{{ theme }}">
@@ -116,11 +122,14 @@
       </div>
       {%- endif %}
       <div class="card-body">
-        <table class="table table-bordered{% if datatable %} mailu-table{% endif %}"
+        <table class="table table-bordered{% if datatable %} mailu-table{% endif %} {{ class_ }}"
           data-order="{{ order or '[]' | e }}"
           data-search="{{ _('Search') }}"
           data-length-menu="{{ _('Show _MENU_ entries') }}"
           data-empty="{{ _('No matching records found') }}"
+          data-no-records="{{ _('No records yet') }}"
+          data-clear="{{ _('Clear search') }}"
+          data-results="{{ _('_START_–_END_ of _TOTAL_ records') }}"
           data-previous="{{ _('Previous') }}"
           data-next="{{ _('Next') }}">
           {{- caller() }}
@@ -131,22 +140,17 @@
 </div>
 {%- endmacro %}
 
-{%- macro fieldset(title=None, field=None, enabled=None, fields=None) %}
-{%- if field or title %}
-<fieldset{% if not enabled %} disabled{% endif %}>
+{%- macro fieldset(title=None, field=None, enabled=None, fields=None, class_="") %}
 {%- if field %}
-<legend>{{ form_individual_field(field) }}</legend>
-{%- else %}
-<legend>{{ title }}</legend>
+{{ form_field(field, class_=class_) }}
+{%- set enabled = field.data %}
 {%- endif %}
-{%- endif %}
+<fieldset{% if field %} data-toggle-field="{{ field.id }}"{% endif %}{% if not enabled %} disabled{% endif %}>
+{% if title %}<legend>{{ title }}</legend>{% endif %}
 {{- caller() }}
-{%- if fields %}
-  {%- set kwargs = {"enabled" if enabled else "disabled": ""} %}
-  {%- for field in fields %}
-    {{ form_field(field, **kwargs) }}
-  {%- endfor %}
-{%- endif %}
+{%- for dependent in fields or [] %}
+  {{ form_field(dependent) }}
+{%- endfor %}
 </fieldset>
 {%- endmacro %}
 

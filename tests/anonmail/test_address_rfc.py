@@ -166,6 +166,7 @@ def test_eai_localpart_round_trips_through_internal_lookups(
     app, client, monkeypatch
 ):
     """#989: document the EAI support already present below validation."""
+    monkeypatch.setitem(app.config, "AUTH_REQUIRE_TOKENS", False)
     with app.app_context():
         models.db.session.add(models.Domain(name="example.com"))
         user = make_email(models.User, EAI_LOCALPART)

@@ -1,4 +1,6 @@
-from mailu import models, utils, openpgp
+from mailu import models, utils, openpgp, announcements
+from datetime import date, datetime
+from markupsafe import escape
 from mailu.ui import ui, access, forms
 from flask import current_app as app
 
@@ -119,14 +121,15 @@ def user_settings(user_email):
             public_key, uid_keys = openpgp.parse_public_key(submitted_key, user.email,
                 authorize_addresses=lambda addresses: models.wkd_addresses_for_user(user, addresses))
             if public_key is None:
+                form.gpg_key.errors = [utils.flask_babel.gettext('Enter a valid OpenPGP public key for this email address.')]
                 flask.flash('The OpenPGP key is invalid, contains secret material, or has no valid user ID for this email address', 'error')
                 return flask.render_template('user/settings.html', form=form, user=user)
             form.gpg_key.data = public_key
         user.forward_enabled = bool(flask.request.form.get('forward_enabled', False))
         if user.forward_enabled and not form.forward_destination.data:
+            form.forward_destination.errors = [utils.flask_babel.gettext('Destination email address is missing')]
             flask.flash('Destination email address is missing', 'error')
-            return flask.redirect(
-                flask.url_for('.user_settings', user_email=user_email))
+            return flask.render_template('user/settings.html', form=form, user=user)
         form.forward_destination.data = form.forward_destination.data.replace(" ","").split(",")
         form.populate_obj(user)
         if key_changed:
@@ -139,8 +142,7 @@ def user_settings(user_email):
                 flask.url_for('.user_list', domain_name=user.domain.name))
     elif form.is_submitted() and not form.validate():
             flask.flash('Error validating the form', 'error')
-            return flask.redirect(
-                flask.url_for('.user_settings', user_email=user_email))
+            return flask.render_template('user/settings.html', form=form, user=user)
     return flask.render_template('user/settings.html', form=form, user=user)
 
 
@@ -206,14 +208,80 @@ def user_reply(user_email):
     user_email_or_current = user_email or flask_login.current_user.email
     user = models.db.session.get(models.User, user_email_or_current) or flask.abort(404)
     form = forms.UserReplyForm(obj=user)
+    if flask.request.method == 'GET':
+        unlimited = user.reply_startdate == date(1900, 1, 1) and user.reply_enddate == date(2999, 12, 31)
+        form.reply_schedule.data = 'always' if unlimited and user.reply_enabled else 'dates'
+        if unlimited:
+            form.reply_startdate.data = form.reply_enddate.data = None
+    if flask.request.method == 'POST' and flask.request.form.get('reply_formatted') != '1':
+        form.reply_body_html.data = ''
     if form.validate_on_submit():
-        form.populate_obj(user)
-        models.db.session.commit()
-        flask.flash('Auto-reply message updated for %s' % user)
-        if user_email:
-            return flask.redirect(
-                flask.url_for('.user_list', domain_name=user.domain.name))
-    return flask.render_template('user/reply.html', form=form, user=user)
+        if not form.reply_enabled.data:
+            user.reply_enabled = False
+            models.db.session.commit()
+            flask.flash(utils.flask_babel.gettext('Automatic reply is off. Your saved message and dates have been kept.'), 'success')
+            return flask.redirect(flask.url_for('.user_reply', user_email=user_email))
+        html, plain = None, form.reply_body.data or ''
+        try:
+            if form.reply_body_html.data:
+                try:
+                    html, plain = announcements.sanitize(form.reply_body_html.data)
+                except ValueError:
+                    if form.reply_enabled.data:
+                        raise
+                    plain = ''
+            if form.reply_enabled.data and not plain.strip():
+                raise ValueError('Enter a message before continuing.')
+        except ValueError as error:
+            form.reply_body.errors = [utils.flask_babel.gettext(str(error))]
+        else:
+            user.reply_enabled = form.reply_enabled.data
+            user.reply_subject = form.reply_subject.data or ''
+            user.reply_body = plain
+            user.reply_body_html = html
+            if form.reply_schedule.data == 'always':
+                user.reply_startdate, user.reply_enddate = date(1900, 1, 1), date(2999, 12, 31)
+            elif form.reply_startdate.data and form.reply_enddate.data:
+                user.reply_startdate, user.reply_enddate = form.reply_startdate.data, form.reply_enddate.data
+            models.db.session.commit()
+            flask.flash(utils.flask_babel.gettext('Auto-reply message updated for %(user)s', user=user.email), 'success')
+            if user_email:
+                return flask.redirect(flask.url_for('.user_list', domain_name=user.domain.name))
+            return flask.redirect(flask.url_for('.user_reply'))
+    if not user.reply_enabled:
+        status = utils.flask_babel.gettext('Off')
+    elif user.reply_active:
+        status = utils.flask_babel.gettext('Active')
+    elif user.reply_startdate > date.today():
+        status = utils.flask_babel.gettext('Scheduled')
+    else:
+        status = utils.flask_babel.gettext('Ended')
+    return flask.render_template('user/reply.html', form=form, user=user, reply_status=status,
+                                 server_timezone=datetime.now().astimezone().tzname())
+
+
+
+@ui.route('/user/reply/preview', methods=['POST'], defaults={'user_email': None})
+@ui.route('/user/reply/<path:user_email>/preview', methods=['POST'])
+@access.owner(models.User, 'user_email')
+def user_reply_preview(user_email):
+    form = forms.ConfirmationForm()
+    if not form.validate_on_submit():
+        return flask.jsonify(error=utils.flask_babel.gettext('Your session expired. Reload the page and try again.')), 400
+    body = flask.request.form.get('reply_body_html', '')
+    if len(body) > 100000:
+        return flask.jsonify(error=utils.flask_babel.gettext('The message is too long.')), 400
+    try:
+        if body:
+            html, plain = announcements.sanitize(body)
+        else:
+            plain = flask.request.form.get('reply_body', '').strip()
+            if not plain or len(plain) > 100000:
+                raise ValueError('Enter a message before continuing.')
+            html = '<p>' + str(escape(plain)).replace('\n', '<br>') + '</p>'
+    except ValueError as error:
+        return flask.jsonify(error=utils.flask_babel.gettext(str(error))), 400
+    return flask.jsonify(html=html, plain=plain)
 
 
 @ui.route('/user/signup', methods=['GET', 'POST'])

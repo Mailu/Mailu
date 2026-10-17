@@ -5,7 +5,7 @@
 {%- endblock %}
 
 {%- block subtitle %}
-{{ user }}
+{% if user.email != current_user.email %}{{ user }}{% endif %}
 {%- endblock %}
 
 {%- block main_action %}
@@ -13,6 +13,10 @@
 {%- endblock %}
 
 {%- block content %}
+<div class="alert alert-info" role="alert">
+  <p>{% trans %}Authentication tokens are designed to be set once and forgotten in your email app (MUA). Create one per app or device, paste it into the app's incoming and outgoing mail password fields, and save it there. The app will reuse it automatically; you do not need to enter it each time.{% endtrans %}</p>
+  <p class="mb-0">{% trans %}Give each token a recognizable app or device name. Delete its token when you stop using that app or device, or if the token is exposed. Saved tokens cannot be displayed again.{% endtrans %}</p>
+</div>
 {%- call macros.table(order='[[2,"asc"]]') %}
 <thead>
   <tr>

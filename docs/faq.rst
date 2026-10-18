@@ -689,8 +689,11 @@ The ``Admin`` container logs failed logon attempt on the single sign on page.
 You will need to setup the proper Regex in the Fail2Ban configuration.
 Below an example how to do so.
 
-If you use a reverse proxy in front of Mailu, it is vital to set the environment variables REAL_IP_HEADER and REAL_IP_FROM.
-Without these environment variables, Mailu will not trust the remote client IP passed on by the reverse proxy and as a result your reverse proxy will be banned.
+If you use a reverse proxy in front of Mailu, configure Mailu to receive the original client IP.
+For the recommended TCP reverse-proxy setup, set ``PROXY_PROTOCOL`` for the proxied ports and
+``REAL_IP_FROM`` to the proxy's address; leave ``REAL_IP_HEADER`` unset. If your proxy forwards
+client addresses in HTTP headers, set both ``REAL_IP_HEADER`` and ``REAL_IP_FROM`` instead.
+Without the appropriate settings, Mailu may see the proxy's address as the client and ban the proxy.
 
 See the :ref:`configuration reference <reverse_proxy_headers>` for more information.
 

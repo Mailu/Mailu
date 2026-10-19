@@ -65,9 +65,9 @@ def login(target):
                 Markup(passkey_utils.PASSWORD_NUDGE_MARKER), nudge_body,
             )
             flask.flash(nudge, 'info')
-            if user.change_pw_next_login:
-                auth_flow.require_actions(flask.session, 'password_change', destination)
-                destination = flask.url_for('sso.pw_change')
+            if actions := auth_flow.user_required_actions(user):
+                auth_flow.require_actions(flask.session, actions, destination)
+                destination = flask.url_for(auth_flow.ACTION_ENDPOINTS[actions[0]])
             response = _clear_webmail_cookies(flask.redirect(destination))
             response.set_cookie('rate_limit', utils.limiter.device_cookie(username), max_age=31536000, path=flask.url_for('sso.login'), secure=app.config['SESSION_COOKIE_SECURE'], httponly=True)
             flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: success: password: {form.pwned.data}')
@@ -83,6 +83,9 @@ def login(target):
 @sso.route('/pw_change', methods=['GET', 'POST'])
 @access.authenticated
 def pw_change():
+    if flask_login.current_user.passkeys or app.config.get('PASSKEY_REQUIRED', False):
+        flask.flash(_('Password sign-in is disabled because passkeys are required.'), 'info')
+        return flask.redirect(flask.url_for('ui.passkey_list'))
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
     client_port = flask.request.headers.get('X-Real-Port', None)
     form = forms.PWChangeForm()
@@ -109,7 +112,13 @@ def pw_change():
             return auth_flow.complete_action(flask.session, 'password_change')
         flask.flash(_("The current password is incorrect!"), "error")
 
-    return flask.render_template('pw_change.html', form=form)
+    return flask.render_template(
+        'pw_change.html', form=form,
+        required_change=(
+            flask_login.current_user.change_pw_next_login
+            or 'password_change' in flask.session.get(auth_flow.SESSION_ACTIONS, [])
+        ),
+    )
 
 @sso.route('/logout', methods=['GET'])
 @access.authenticated
@@ -153,9 +162,9 @@ def _proxy():
         flask.session.regenerate()
         flask_login.login_user(user)
         flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
-        if user.change_pw_next_login:
-            auth_flow.require_actions(flask.session, 'password_change', url)
-            url = flask.url_for('sso.pw_change')
+        if actions := auth_flow.user_required_actions(user):
+            auth_flow.require_actions(flask.session, actions, url)
+            url = flask.url_for(auth_flow.ACTION_ENDPOINTS[actions[0]])
         return signin.remember_preference(_clear_webmail_cookies(flask.redirect(url)), login_destination)
 
     if not app.config['PROXY_AUTH_CREATE']:
@@ -180,4 +189,7 @@ def _proxy():
     flask_login.login_user(user)
     user.send_welcome()
     flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
+    if actions := auth_flow.user_required_actions(user):
+        auth_flow.require_actions(flask.session, actions, url)
+        url = flask.url_for(auth_flow.ACTION_ENDPOINTS[actions[0]])
     return signin.remember_preference(_clear_webmail_cookies(flask.redirect(url)), login_destination)

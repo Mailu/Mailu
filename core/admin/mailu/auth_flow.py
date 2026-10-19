@@ -11,6 +11,33 @@ SESSION_DESTINATION = 'required_actions_destination'
 # can complete themselves with ``complete_action`` after the user finishes.
 ACTION_ENDPOINTS = {}
 ACTION_ENDPOINTS['password_change'] = 'sso.pw_change'
+ACTION_ENDPOINTS['passkey_enrollment'] = 'ui.passkey_required'
+ACTION_ALLOWED_ENDPOINTS = {
+    'password_change': {
+        'ui.passkey_list', 'ui.passkey_registration_options',
+        'ui.passkey_register',
+    },
+    'passkey_enrollment': {
+        'ui.passkey_required', 'ui.passkey_registration_options',
+        'ui.passkey_register',
+    },
+}
+
+
+def user_required_actions(user):
+    """Return the login actions this user must complete, in order."""
+    if user.passkeys:
+        return []
+    passkeys_required = (
+        flask.current_app.config.get('PASSKEY_REQUIRED', False)
+        or user.domain.passkey_require_enrollment
+    )
+    actions = []
+    if user.change_pw_next_login and not passkeys_required:
+        actions.append('password_change')
+    if user.passkey_enroll_next_login or passkeys_required:
+        actions.append('passkey_enrollment')
+    return actions
 
 
 def require_actions(session, actions, destination=None):
@@ -60,6 +87,12 @@ def enforce_pending_actions():
     handler = ACTION_ENDPOINTS.get(action)
     if handler and endpoint == handler:
         return
+    if endpoint in ACTION_ALLOWED_ENDPOINTS.get(action, ()):
+        if endpoint == 'ui.passkey_required':
+            return
+        user_email = flask.request.view_args.get('user_email') if flask.request.view_args else None
+        if user_email in (None, flask_login.current_user.email):
+            return
     if handler:
         return flask.redirect(flask.url_for(handler))
 

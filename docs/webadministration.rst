@@ -50,8 +50,10 @@ Access the web administration interface
 The admin GUI is by default accessed via the URL `https://<my domain>/admin`, when it's enabled in the setup utility
 or by manually setting `ADMIN=true` in `mailu.env`.
 Sign in with your email address and password, or use a registered passkey.
-The sign-in page offers a single destination selector for Webmail or Account settings.
-A direct visit uses the destination from your last successful sign-in, remembered in a separate browser cookie. With no preference, Webmail is the default when enabled.
+The sign-in page offers a destination selector for Webmail or Account settings.
+A direct visit uses the destination from your last successful sign-in, remembered
+in a separate browser cookie; that destination is pre-selected but can be changed
+on the sign-in page. With no preference, Webmail is the default when enabled.
 Bookmark ``/sso/login/admin`` or ``/sso/login/webmail`` to select a destination explicitly.
 These routes also work with trusted proxy authentication and honor custom ``WEB_ADMIN``
 and ``WEB_WEBMAIL`` paths. Protected-page links return you to the requested page after
@@ -152,6 +154,28 @@ Update password
 ---------------
 
 On the `update password` page, the password of the logged in user can be changed. Changes are effective immediately.
+
+If an administrator requires a password change at next login, the user can
+change the password or choose **Set up a passkey instead**. Registering a passkey
+completes the forced password-change step.
+
+
+Passkeys
+--------
+
+Mailu supports signing in to the Admin and Webmail interfaces with passkeys.
+Users can register, name, and remove their passkeys from **Manage passkeys** in
+their account menu. The page shows each credential's creation and last-use
+times, authenticator flags, device type, backup status, attestation format,
+signature counter, and AAGUID. Some details may show as unknown for older
+credentials if they were not recorded at enrollment or a later sign-in.
+
+When a user's account has a passkey, password sign-in and password change are
+disabled for that account. The ``PASSKEY_REQUIRED`` server setting disables
+password sign-in for every account, including accounts without a passkey; users
+without one need a manager-generated enrollment link. Domain-level enforcement
+does not disable existing passwords. It requires users without a passkey to
+enroll after signing in.
 
 
 .. _webadministration_auto-reply:
@@ -356,9 +380,15 @@ This page is also accessible for domain managers. On the details page all DNS se
 Edit
 ````
 
-This page is only accessible for global administrators. On the edit page, the global settings for the domain can be changed.
+Global administrators can edit all domain settings. Domain managers can open the
+same page for domains they manage, but can change only settings in the Passkey
+policy section.
 
-Mailu supports signing in to the Admin and Webmail interfaces with passkeys. Users can register, name, and remove their passkeys from account settings; global administrators can also manage a user's passkeys. The passkey page shows each credential's creation and last-use times, authenticator flags, device type, backup status, attestation format, signature counter, and AAGUID. Some details may show as unknown for older credentials if they were not recorded at enrollment or a later sign-in.
+The **Require all users to enroll a passkey** option requires users without a
+passkey to set one up after signing in. Existing passwords remain valid for
+sign-in, but users must complete enrollment before accessing other Mailu pages.
+When this option is enabled, the per-user **Require passkey setup at next login**
+option is hidden because enrollment is already required for the whole domain.
 
 Domain passkey settings control which credentials may be enrolled and used to sign in. Turn on **Enforce AAGUID restrictions** to apply the allow or block list; enter AAGUID UUIDs one per line. When enforcement is off, the list is ignored. The policy is checked both at enrollment and at sign-in.
 
@@ -390,7 +420,8 @@ Users
 
 This page is also accessible for domain managers. On the users page new users can be added via the Add user button (top right of page). For existing users the following options are available via the columns Actions and User settings (from left to right)
 
-* Edit. For all available options see :ref:`the Add user page <webadministration_add_user>`.
+* Edit. Configure the user's account details and next-login requirements. For all
+  available options see :ref:`the Add user page <webadministration_add_user>`.
 
 * Delete. Disables the user. For more information on permanently deleting users, refer to the :ref:`How to delete users page<delete_users>`.
 
@@ -399,6 +430,13 @@ This page is also accessible for domain managers. On the users page new users ca
 * Auto-reply. Access the auto-reply page of the user. See the :ref:`auto-reply page <webadministration_auto-reply>` for more information.
 
 * Fetched accounts. Access the fetched accounts page of the user. See the :ref:`fetched accounts page <webadministration_fetched_accounts>` for more information.
+
+* Passkeys. Open the user's passkey page to review or remove registered keys.
+  Use **Edit** to generate a one-time enrollment link for a user who is locked
+  out. The link can be generated by global administrators or managers of the
+  user's domain. It works without an existing sign-in and adds a passkey to the
+  selected account. A link expires after the configured lifetime; generating a
+  replacement invalidates the previous link for that user.
 
 This page also shows an overview of the following settings of an user:
 
@@ -425,7 +463,17 @@ For adding a new user the following options can be configured.
 
 * E-mail. The email address of the new user.
 
-* Password/Confirm password. The password for the new user. The new user can change his password after logging in the Admin GUI.
+* Password/Confirm password. The password for the new user. Under a domain-level
+  passkey requirement, the user can sign in with this password and must enroll a
+  passkey before continuing. When the server-wide ``PASSKEY_REQUIRED`` setting is
+  enabled, password sign-in is disabled and the user needs a manager-generated
+  enrollment link instead.
+
+* Require passkey setup at next login. Require this user to register a passkey
+  before continuing after their next sign-in. This option is hidden when the
+  domain already requires all users to enroll passkeys, or when the server-wide
+  ``PASSKEY_REQUIRED`` policy is enabled. It is available when creating or
+  editing an account.
 
 * Displayed name. The display name of the user within the Admin GUI.
 

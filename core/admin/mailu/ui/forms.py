@@ -75,6 +75,7 @@ class DomainForm(flask_wtf.FlaskForm):
     max_quota_bytes = fields_.IntegerSliderField(_('Maximum user quota'), [validators.NumberRange(min=0, max=MAX_QUOTA_BYTES)], default=0)
     signup_enabled = fields.BooleanField(_('Enable sign-up'), default=False)
     anonmail_enabled = fields.BooleanField(_('Enable Global Anonymous Email Service'), default=False)
+    passkey_require_enrollment = fields.BooleanField(_('Require all users to enroll a passkey'), default=False)
     passkey_enforce_aaguid = fields.BooleanField(_('Enforce AAGUID restrictions'), default=False)
     passkey_aaguid_mode = fields.RadioField(_('AAGUID list behavior'), choices=[
         ('allow', _('Allow only listed AAGUIDs')),
@@ -114,6 +115,49 @@ class DomainForm(flask_wtf.FlaskForm):
 
     def populate_domain(self, domain):
         """Save the domain form fields, excluding the CSRF token and submit control."""
+        for name, field in self._fields.items():
+            if name not in ('csrf_token', 'submit'):
+                setattr(domain, name, field.data)
+
+
+class DomainPasskeyPolicyForm(flask_wtf.FlaskForm):
+    """Passkey policy fields domain managers may edit for their own domain."""
+    passkey_require_enrollment = fields.BooleanField(_('Require all users to enroll a passkey'), default=False)
+    passkey_enforce_aaguid = fields.BooleanField(_('Enforce AAGUID restrictions'), default=False)
+    passkey_aaguid_mode = fields.RadioField(_('AAGUID list behavior'), choices=[
+        ('allow', _('Allow only listed AAGUIDs')),
+        ('block', _('Block listed AAGUIDs')),
+    ], default='allow')
+    passkey_aaguids = fields.TextAreaField(_('AAGUIDs (one UUID per line)'), [validators.Optional()])
+    passkey_require_uv = fields.BooleanField(_('Require user verification (PIN or biometrics)'), default=True)
+    passkey_backup_eligible_policy = fields.SelectField(_('Backup eligibility policy'), choices=[
+        ('optional', _('Optional')),
+        ('require', _('Require backup-eligible passkeys')),
+        ('deny', _('Deny backup-eligible passkeys')),
+    ], default='optional')
+    passkey_backup_state_policy = fields.SelectField(_('Backup state policy'), choices=[
+        ('optional', _('Optional')),
+        ('require', _('Require passkeys to be currently backed up')),
+        ('deny', _('Deny currently backed-up passkeys')),
+    ], default='optional')
+    passkey_require_sign_count_increase = fields.BooleanField(_('Require signature counter to increase at every login'), default=False)
+    passkey_attestation_policy = fields.SelectField(_('Authenticator attestation policy'), choices=[
+        ('optional', _('Optional')),
+        ('require', _('Require an attestation statement')),
+        ('deny', _('Deny an attestation statement')),
+    ], default='optional')
+    passkey_device_bound = fields.BooleanField(_('Only allow device-bound passkeys'), default=False)
+    passkey_resident_key = fields.SelectField(_('Resident passkey preference'), choices=[
+        ('discouraged', _('Discouraged')),
+        ('preferred', _('Preferred')),
+        ('required', _('Required')),
+    ], default='preferred')
+    submit = fields.SubmitField(_('Save'))
+
+    def validate_passkey_aaguids(form, field):
+        _validate_aaguids(field)
+
+    def populate_domain(self, domain):
         for name, field in self._fields.items():
             if name not in ('csrf_token', 'submit'):
                 setattr(domain, name, field.data)
@@ -162,6 +206,7 @@ class UserForm(flask_wtf.FlaskForm):
     comment = fields.StringField(_('Comment'))
     enabled = fields.BooleanField(_('Enabled'), default=True)
     change_pw_next_login = fields.BooleanField(_('Force password change at next login'), default=True)
+    passkey_enroll_next_login = fields.BooleanField(_('Require passkey setup at next login'), default=False)
     submit = fields.SubmitField(_('Save'))
 
 

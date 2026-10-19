@@ -1,3 +1,17 @@
+{% if required_enrollment|default(false) or restricted_navigation|default(false) %}
+<div class="sidebar-wrapper">
+  <nav id="navigation" class="mt-2">
+    <ul class="nav sidebar-menu flex-column" role="menu">
+      <li class="nav-item" role="none">
+        <a href="{{ url_for('sso.logout') }}" class="nav-link" role="menuitem">
+          <i class="nav-icon fa-solid fa-right-from-bracket"></i>
+          <p>{% trans %}Sign out{% endtrans %}</p>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</div>
+{% else %}
 <div class="sidebar-wrapper">
   {%- if current_user.is_authenticated %}
   <div class="user-panel mt-3 pb-3 mb-3 d-flex" title="{{ current_user }}">
@@ -17,12 +31,14 @@
           <p>{% trans %}Settings{% endtrans %}</p>
         </a>
       </li>
+      {% if not config['PASSKEY_REQUIRED'] and not current_user.passkeys %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.user_password_change') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fa-solid fa-lock"></i>
           <p>{% trans %}Update password{% endtrans %}</p>
         </a>
       </li>
+      {% endif %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.passkey_list', user_email=current_user.email) }}" class="nav-link" role="menuitem">
           <i class="nav-icon fa-solid fa-key"></i>
@@ -166,3 +182,4 @@
     </ul>
   </nav>
 </div>
+{% endif %}

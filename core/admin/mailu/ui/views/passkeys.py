@@ -1,20 +1,15 @@
 import hashlib
+import secrets
+from datetime import datetime, timedelta, timezone
 
 import flask
 import flask_login
 from flask_wtf import FlaskForm
 from flask_babel import lazy_gettext as _
-from webauthn import (
-    generate_registration_options, options_to_json,
-    verify_registration_response,
-)
+from webauthn import options_to_json
 from webauthn.helpers import bytes_to_base64url, base64url_to_bytes
-from webauthn.helpers.structs import (
-    AttestationConveyancePreference, AuthenticatorSelectionCriteria, PublicKeyCredentialDescriptor,
-    ResidentKeyRequirement, UserVerificationRequirement,
-)
 
-from mailu import models, passkeys as webauthn_config
+from mailu import models, passkeys as webauthn_config, auth_flow
 from mailu.ui import ui, access
 
 
@@ -28,11 +23,66 @@ def _challenge_key():
 def passkey_list(user_email):
     user_email = user_email or flask_login.current_user.email
     user = models.db.session.get(models.User, user_email) or flask.abort(404)
+    restricted_navigation = (
+        user.email == flask_login.current_user.email
+        and (
+            user.change_pw_next_login
+            or 'password_change' in flask.session.get(auth_flow.SESSION_ACTIONS, [])
+        )
+    )
+    return _render_passkey_list(user, restricted_navigation=restricted_navigation)
+
+
+@ui.route('/user/passkey-required', methods=['GET'])
+@access.authenticated
+def passkey_required():
+    user = flask_login.current_user
+    passkey_required = (
+        flask.current_app.config.get('PASSKEY_REQUIRED', False)
+        or user.domain.passkey_require_enrollment
+    )
+    if user.passkeys or (not user.passkey_enroll_next_login and not passkey_required):
+        if 'passkey_enrollment' in flask.session.get(auth_flow.SESSION_ACTIONS, []):
+            response = auth_flow.complete_action(flask.session, 'passkey_enrollment')
+            return response
+        return flask.redirect(flask.url_for('.passkey_list'))
+    return _render_passkey_list(user, required_enrollment=True)
+
+
+def _render_passkey_list(user, required_enrollment=False, restricted_navigation=False):
     return flask.render_template(
         'user/passkeys.html', user=user,
         passkeys=[(key, bytes_to_base64url(key.credential_id)) for key in user.passkeys],
         delete_form=FlaskForm(),
+        required_enrollment=required_enrollment,
+        restricted_navigation=restricted_navigation,
     )
+
+
+@ui.route('/user/passkeys/<path:user_email>/enrollment-link', methods=['POST'])
+@access.domain_admin(models.User, 'user_email')
+def passkey_enrollment_link(user_email):
+    form = FlaskForm()
+    if not form.validate_on_submit():
+        flask.abort(400)
+    user = models.db.session.get(models.User, user_email) or flask.abort(404)
+    raw_token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+    expires_at = datetime.now(timezone.utc) + timedelta(
+        seconds=flask.current_app.config['PASSKEY_ENROLLMENT_TTL'],
+    )
+    models.PasskeyEnrollment.query.filter_by(user_email=user.email).delete(synchronize_session=False)
+    models.db.session.add(models.PasskeyEnrollment(
+        token_hash=token_hash,
+        user_email=user.email,
+        expires_at=expires_at,
+    ))
+    models.db.session.commit()
+    flask.session['new_passkey_enrollment_url'] = flask.url_for(
+        'sso.passkey_enroll', token=raw_token, _external=True,
+    )
+    flask.session['new_passkey_enrollment_expires_at'] = expires_at
+    return flask.redirect(flask.url_for('ui.user_edit', user_email=user.email))
 
 
 @ui.route('/user/passkeys/options', methods=['POST'], defaults={'user_email': None})
@@ -50,30 +100,7 @@ def passkey_registration_options(user_email):
         domain.passkey_require_uv, domain.passkey_resident_key,
         flask.request.headers.get('X-Real-IP', flask.request.remote_addr),
     )
-    options = generate_registration_options(
-        rp_id=webauthn_config.rp_id(),
-        rp_name=flask.current_app.config['SITENAME'],
-        user_id=hashlib.sha256(user.email.encode()).digest(),
-        user_name=user.email,
-        user_display_name=user.displayed_name or user.email,
-        exclude_credentials=[
-            PublicKeyCredentialDescriptor(id=key.credential_id)
-            for key in user.passkeys
-        ],
-        authenticator_selection=AuthenticatorSelectionCriteria(
-            resident_key=ResidentKeyRequirement(domain.passkey_resident_key),
-            user_verification=(
-                UserVerificationRequirement.REQUIRED
-                if domain.passkey_require_uv
-                else UserVerificationRequirement.PREFERRED
-            ),
-        ),
-        attestation=(
-            AttestationConveyancePreference.DIRECT
-            if domain.passkey_attestation_policy == 'require'
-            else AttestationConveyancePreference.NONE
-        ),
-    )
+    options = webauthn_config.registration_options(user)
     flask.session[_challenge_key()] = bytes_to_base64url(options.challenge)
     flask.session['passkey_registration_user'] = user.email
     return flask.jsonify(flask.json.loads(options_to_json(options)))
@@ -93,73 +120,22 @@ def passkey_register(user_email):
     if not challenge or challenge_user != user.email or not payload:
         return flask.jsonify(error='Registration expired. Please try again.'), 400
     try:
-        verification = verify_registration_response(
-            credential=payload,
-            expected_challenge=base64url_to_bytes(challenge),
-            expected_rp_id=webauthn_config.rp_id(),
-            expected_origin=webauthn_config.origin(),
-            require_user_verification=user.domain.passkey_require_uv,
-        )
-    except Exception as exc:
+        registration = webauthn_config.register_credential(user, payload, challenge)
+    except webauthn_config.PasskeyRegistrationError as exc:
         flask.current_app.logger.warning(
-            'Passkey registration failed actor=%s user=%s domain=%s result=verification_failed '
-            'reason=%s: %s ip=%s',
-            actor.email, user.email, user.domain.name, type(exc).__name__, exc, client_ip,
+            'Passkey registration rejected actor=%s user=%s domain=%s reason=%s ip=%s',
+            actor.email, user.email, user.domain.name, exc.reason, client_ip,
         )
-        return flask.jsonify(error='Passkey registration could not be verified.'), 400
-    credential_id = verification.credential_id
-    attestation_format = webauthn_config.enum_value(verification.fmt)
-    flags = webauthn_config.authenticator_flags(payload, registration=True)
-    if not webauthn_config.aaguid_allowed(user.domain, verification.aaguid):
-        flask.current_app.logger.warning(
-            'Passkey registration rejected actor=%s user=%s domain=%s aaguid=%s '
-            'reason=aaguid_policy ip=%s',
-            actor.email, user.email, user.domain.name, verification.aaguid, client_ip,
-        )
-        return flask.jsonify(error='This authenticator is not allowed for this domain.'), 400
-    if user.domain.passkey_device_bound and (
-        webauthn_config.enum_value(verification.credential_device_type) != 'single_device'
-        or verification.credential_backed_up
-    ):
-        flask.current_app.logger.warning(
-            'Passkey registration rejected actor=%s user=%s domain=%s aaguid=%s '
-            'device_type=%s backed_up=%s reason=device_bound_policy ip=%s',
-            actor.email, user.email, user.domain.name, verification.aaguid,
-            webauthn_config.enum_value(verification.credential_device_type),
-            verification.credential_backed_up, client_ip,
-        )
-        return flask.jsonify(error='This domain only allows device-bound passkeys.'), 400
-    if not webauthn_config.authenticator_flags_allowed(user.domain, flags):
-        return flask.jsonify(error='This authenticator does not meet the domain backup requirements.'), 400
-    if not webauthn_config.attestation_allowed(user.domain, attestation_format):
-        return flask.jsonify(error='Authenticator attestation does not meet the domain policy.'), 400
-    if models.db.session.get(models.Passkey, credential_id):
-        flask.current_app.logger.warning(
-            'Passkey registration rejected actor=%s user=%s domain=%s credential=%s aaguid=%s '
-            'reason=duplicate_credential ip=%s',
-            actor.email, user.email, user.domain.name, bytes_to_base64url(credential_id)[:16],
-            verification.aaguid, client_ip,
-        )
-        return flask.jsonify(error='This passkey is already registered.'), 409
-    credential = models.Passkey(
-        user=user,
-        credential_id=credential_id,
-        public_key=verification.credential_public_key,
-        sign_count=verification.sign_count,
-        aaguid=verification.aaguid,
-        device_bound=(
-            webauthn_config.enum_value(verification.credential_device_type) == 'single_device'
-            and not verification.credential_backed_up
-        ),
-        user_verified=verification.user_verified,
-        user_present=flags.up,
-        credential_device_type=webauthn_config.enum_value(verification.credential_device_type),
-        backup_eligible=flags.be,
-        backed_up=verification.credential_backed_up,
-        attestation_format=attestation_format,
-        name=str(payload.get('name') or 'Passkey')[:255],
-    )
-    models.db.session.add(credential)
+        return flask.jsonify(error=str(exc)), exc.status
+    verification = registration.verification
+    flags = registration.flags
+    credential = registration.credential
+    attestation_format = registration.attestation_format
+    credential_id = credential.credential_id
+    user.passkey_enroll_next_login = False
+    pending_actions = flask.session.get(auth_flow.SESSION_ACTIONS, [])
+    if actor.email == user.email and 'password_change' in pending_actions:
+        user.change_pw_next_login = False
     models.db.session.commit()
     flask.current_app.logger.info(
         'Passkey registered actor=%s user=%s domain=%s credential=%s name=%r aaguid=%s '
@@ -173,6 +149,13 @@ def passkey_register(user_email):
         user.domain.passkey_require_uv, user.domain.passkey_device_bound, user.domain.passkey_resident_key,
         webauthn_config.rp_id(), client_ip,
     )
+    if actor.email == user.email:
+        pending_actions = flask.session.get(auth_flow.SESSION_ACTIONS, [])
+        action = next((action for action in pending_actions
+                       if action in ('password_change', 'passkey_enrollment')), None)
+        if action:
+            response = auth_flow.complete_action(flask.session, action)
+            return flask.jsonify(ok=True, redirect=response.location)
     return flask.jsonify(ok=True)
 
 

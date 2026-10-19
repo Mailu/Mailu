@@ -5,6 +5,11 @@
 
 {%- block content %}
 {%- call macros.card(title=_('Registered passkeys')) %}
+{% if required_enrollment %}
+<div class="alert alert-info" role="alert">
+  {% trans %}Your administrator requires a passkey before you can continue. Add one now to finish signing in.{% endtrans %}
+</div>
+{% endif %}
 <p class="small text-body-secondary">{% trans %}Details reflect the latest WebAuthn registration or sign-in. Older passkeys may not have all details recorded.{% endtrans %}</p>
 <div class="table-responsive">
   <table class="table table-striped align-middle mb-3">
@@ -135,8 +140,8 @@
           }
         })
       });
-      await responseJson(response, 'Passkey registration failed');
-      window.location.reload();
+      const result = await responseJson(response, 'Passkey registration failed');
+      window.location.assign(result.redirect || window.location.href);
     } catch (e) {
       error.textContent = e.name === 'NotAllowedError'
         ? 'Passkey setup was cancelled or timed out. Start again and complete the prompt on your device.'

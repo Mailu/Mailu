@@ -88,6 +88,8 @@ DEFAULT_CONFIG = {
     'PERMANENT_SESSION_LIFETIME': 30*24*3600,
     'SESSION_COOKIE_SECURE': None,
     'PASSKEY_RP_ID': '',
+    'PASSKEY_REQUIRED': False,
+    'PASSKEY_ENROLLMENT_TTL': 7 * 24 * 3600,
     'CREDENTIAL_ROUNDS': 13,
     'TLS_PERMISSIVE': True,
     'TZ': 'Etc/UTC',
@@ -161,6 +163,7 @@ class ConfigManager:
         self.config['SESSION_TIMEOUT'] = int(self.config['SESSION_TIMEOUT'])
         self.config['SESSION_KEY_BITS'] = int(self.config['SESSION_KEY_BITS'])
         self.config['PERMANENT_SESSION_LIFETIME'] = int(self.config['PERMANENT_SESSION_LIFETIME'])
+        self.config['PASSKEY_ENROLLMENT_TTL'] = int(self.config['PASSKEY_ENROLLMENT_TTL'])
         self.config['AUTH_RATELIMIT_IP_V4_MASK'] = int(self.config['AUTH_RATELIMIT_IP_V4_MASK'])
         self.config['AUTH_RATELIMIT_IP_V6_MASK'] = int(self.config['AUTH_RATELIMIT_IP_V6_MASK'])
         self.config['AUTH_RATELIMIT_EXEMPTION'] = set(ipaddress.ip_network(cidr, False) for cidr in (cidr.strip() for cidr in self.config['AUTH_RATELIMIT_EXEMPTION'].split(',')) if cidr)

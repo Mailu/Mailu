@@ -14,6 +14,9 @@
   const status = document.getElementById('passkey-status');
   const destinationField = document.getElementById('destination');
   const emailField = document.getElementById('email');
+  const passwordField = document.getElementById('pw');
+  const passwordContainer = document.getElementById('password-field');
+  let passwordRequired = {{ config['PASSKEY_REQUIRED'] | tojson }};
   const form = document.querySelector('form.form');
   const csrfToken = form.querySelector('[name="csrf_token"]').value;
   const submitButtons = [...form.querySelectorAll('button[type="submit"], input[type="submit"]')];
@@ -22,6 +25,8 @@
   let attemptId = 0;
   let activeAttempt = null;
   let conditionalController = null;
+  let accountLookup = 0;
+  let accountLookupTimer = null;
 
   if (!supported) buttons.forEach(button => { button.hidden = true; });
 
@@ -64,6 +69,40 @@
     status.classList.remove('alert-danger', 'alert-info');
   };
 
+  if (!supported && passwordRequired) {
+    showStatus({{ _('This server requires passkey sign-in. Use a supported browser or device; accounts without a passkey need an enrollment link from an administrator.') | tojson }}, 'info');
+  }
+
+  const updatePasswordVisibility = async () => {
+    const lookup = ++accountLookup;
+    clearStatus();
+    if (passwordContainer) passwordContainer.hidden = passwordRequired;
+    if (passwordField) passwordField.disabled = passwordRequired;
+    const email = emailField.value.trim();
+    if (!email) return;
+    try {
+      const response = await fetch('{{ url_for("sso.passkey_status") }}', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({email})
+      });
+      const options = await responseJson(response, 'Could not check sign-in options');
+      if (lookup !== accountLookup) return;
+      const hasPasskey = Boolean(options.has_passkey);
+      passwordRequired = Boolean(options.password_required);
+      if (passwordContainer) passwordContainer.hidden = passwordRequired || hasPasskey;
+      if (passwordField) passwordField.disabled = passwordRequired || hasPasskey;
+      if (hasPasskey) {
+        showStatus({{ _('This account has a passkey. Continue with “Use a passkey”.') | tojson }}, 'info');
+      } else if (passwordRequired) {
+        showStatus({{ _('This server requires passkey sign-in. Contact an administrator to get a passkey enrollment link.') | tojson }}, 'info');
+      } else if (options.enrollment_required) {
+        showStatus({{ _('After signing in, you must set up a passkey before you can continue.') | tojson }}, 'info');
+      }
+    } catch (_) {
+      // Sign-in remains available if the browser cannot check passkey status.
+    }
+  };
+
   const setBusy = (busy, activeButton=null) => {
     buttons.forEach(button => {
       button.disabled = busy;
@@ -95,7 +134,9 @@
 
   const beginPasskeyLogin = async (button) => {
     if (!supported) {
-      showStatus({{ _('This browser does not support passkey sign-in. Use your email and password instead.') | tojson }});
+      showStatus(passwordRequired
+        ? {{ _('This browser does not support passkey sign-in. Use a supported browser or device.') | tojson }}
+        : {{ _('This browser does not support passkey sign-in. Use your email and password instead.') | tojson }});
       return;
     }
     cancelAttempt();
@@ -112,7 +153,9 @@
       const options = await responseJson(startResponse, 'Could not start passkey sign-in');
       const allowed = options.allowCredentials || [];
       if (emailField.value.trim() && !allowed.length) {
-        showStatus({{ _('No passkey is registered for this email address. Clear the email field to choose a passkey, or sign in with your password.') | tojson }}, 'info');
+        showStatus(passwordRequired
+          ? {{ _('No passkey is registered for this email address. Contact an administrator to get a passkey enrollment link.') | tojson }}
+          : {{ _('No passkey is registered for this email address. Clear the email field to choose a passkey, or sign in with your password.') | tojson }}, 'info');
         return;
       }
       options.challenge = decode(options.challenge);
@@ -120,18 +163,24 @@
         options.allowCredentials = options.allowCredentials.map(item => ({...item, id: decode(item.id)}));
       }
       const credential = await navigator.credentials.get({publicKey: options, signal: controller.signal});
-      if (!credential) throw new Error({{ _('No passkey was selected. Try again or sign in with your password.') | tojson }});
+      if (!credential) throw new Error(passwordRequired
+        ? {{ _('No passkey was selected. Try again.') | tojson }}
+        : {{ _('No passkey was selected. Try again or sign in with your password.') | tojson }});
       await verifyCredential(credential, controller.signal);
     } catch (e) {
       if (e.name === 'AbortError') return;
       if (e.name === 'NotAllowedError') {
-        showStatus({{ _('No passkey was selected, it was unavailable, or the request timed out. Try again, or sign in with your email and password.') | tojson }});
+        showStatus(passwordRequired
+          ? {{ _('No passkey was selected, it was unavailable, or the request timed out. Try again.') | tojson }}
+          : {{ _('No passkey was selected, it was unavailable, or the request timed out. Try again, or sign in with your email and password.') | tojson }});
       } else if (e.name === 'SecurityError') {
         showStatus({{ _('Passkey sign-in is blocked for this site. Check that you are using the configured Mailu hostname over HTTPS.') | tojson }});
       } else if (e.name === 'NotSupportedError') {
-        showStatus({{ _('This browser or device does not support passkey sign-in. Use a supported browser or sign in with your password.') | tojson }});
+        showStatus(passwordRequired
+          ? {{ _('This browser or device does not support passkey sign-in. Use a supported browser or device.') | tojson }}
+          : {{ _('This browser or device does not support passkey sign-in. Use a supported browser or sign in with your password.') | tojson }});
       } else {
-        showStatus(e.message || 'Passkey sign-in failed. Try again or use your password.');
+        showStatus(e.message || (passwordRequired ? {{ _('Passkey sign-in failed. Try again.') | tojson }} : {{ _('Passkey sign-in failed. Try again or use your password.') | tojson }}));
       }
     } finally {
       if (activeAttempt && activeAttempt.id === id) {
@@ -164,11 +213,15 @@
     } catch (e) {
       if (e.name === 'AbortError') return;
       if (e.name === 'NotAllowedError') {
-        showStatus({{ _('No passkey was selected, it was unavailable, or the request timed out. Try again, or sign in with your email and password.') | tojson }});
+        showStatus(passwordRequired
+          ? {{ _('No passkey was selected, it was unavailable, or the request timed out. Try again.') | tojson }}
+          : {{ _('No passkey was selected, it was unavailable, or the request timed out. Try again, or sign in with your email and password.') | tojson }});
       } else if (e.name === 'SecurityError') {
         showStatus({{ _('Passkey sign-in is blocked for this site. Check that you are using the configured Mailu hostname over HTTPS.') | tojson }});
       } else if (e.name === 'NotSupportedError') {
-        showStatus({{ _('This browser or device does not support passkey sign-in. Use a supported browser or sign in with your password.') | tojson }});
+        showStatus(passwordRequired
+          ? {{ _('This browser or device does not support passkey sign-in. Use a supported browser or device.') | tojson }}
+          : {{ _('This browser or device does not support passkey sign-in. Use a supported browser or sign in with your password.') | tojson }});
       } else {
         showStatus(e.message || {{ _('Passkey autofill sign-in failed. Select “Use a passkey” to try again.') | tojson }});
       }
@@ -179,7 +232,15 @@
 
   buttons.forEach(button => button.addEventListener('click', () => beginPasskeyLogin(button)));
   form.addEventListener('submit', cancelAttempt);
+  emailField.addEventListener('input', () => {
+    clearTimeout(accountLookupTimer);
+    accountLookupTimer = setTimeout(updatePasswordVisibility, 300);
+  });
+  emailField.addEventListener('change', updatePasswordVisibility);
+  emailField.addEventListener('blur', updatePasswordVisibility);
+  destinationField.addEventListener('change', updatePasswordVisibility);
   destinationField.addEventListener('change', () => { cancelAttempt(); clearStatus(); beginConditionalLogin(); });
+  updatePasswordVisibility();
   beginConditionalLogin();
 })();
 </script>

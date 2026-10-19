@@ -48,26 +48,31 @@ def domain_create():
         else:
             flask.flash('Domain %s is invalid' % form.name.data, 'error')
     return flask.render_template('domain/create.html', form=form,
-        max_quota_bytes=forms.MAX_QUOTA_BYTES)
+        max_quota_bytes=forms.MAX_QUOTA_BYTES,
+        can_edit_domain_settings=True)
 
 
 @ui.route('/domain/edit/<domain_name>', methods=['GET', 'POST'])
-@access.global_admin
+@access.domain_admin(models.Domain, 'domain_name')
 def domain_edit(domain_name):
     domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
-    form = forms.DomainForm(obj=domain)
+    can_edit_domain_settings = flask_login.current_user.global_admin
+    form_class = forms.DomainForm if can_edit_domain_settings else forms.DomainPasskeyPolicyForm
+    form = form_class(obj=domain)
     max_quota_bytes = max(forms.MAX_QUOTA_BYTES, domain.max_quota_bytes)
-    form.max_quota_bytes.validators = [
-        wtforms.validators.NumberRange(min=0, max=max_quota_bytes)]
-    wtforms_components.read_only(form.name)
-    form.name.validators = []
+    if can_edit_domain_settings:
+        form.max_quota_bytes.validators = [
+            wtforms.validators.NumberRange(min=0, max=max_quota_bytes)]
+        wtforms_components.read_only(form.name)
+        form.name.validators = []
     if form.validate_on_submit():
         form.populate_domain(domain)
         models.db.session.commit()
         flask.flash('Domain %s saved' % domain)
         return flask.redirect(flask.url_for('.domain_list'))
     return flask.render_template('domain/edit.html', form=form,
-        domain=domain, max_quota_bytes=max_quota_bytes)
+        domain=domain, max_quota_bytes=max_quota_bytes,
+        can_edit_domain_settings=can_edit_domain_settings)
 
 
 @ui.route('/domain/delete/<domain_name>', methods=['GET', 'POST'])

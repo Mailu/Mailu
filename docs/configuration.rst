@@ -244,6 +244,28 @@ It defaults to the first hostname in ``HOSTNAMES``. Set it to the domain users
 access the web interface through if that differs from the first hostname. Passkeys
 require a secure browser context, normally HTTPS.
 
+The ``PASSKEY_REQUIRED`` setting (default: ``False``) requires every account
+to use a passkey, across all domains. When enabled, password sign-in is disabled
+and the login form only offers passkey sign-in. Accounts without a passkey need
+a one-time enrollment link from their domain administrator before they can sign
+in. This is a server-wide passwordless policy.
+
+Domain managers can instead enable **Require all users to enroll a passkey** in
+the domain's passkey policy. This requires users without a passkey to set one up
+after signing in, while allowing them to use their existing password to sign in.
+They cannot continue to other Mailu pages until enrollment is complete. A manager
+can create a one-time enrollment link from the user's edit page to help a locked
+out user. Global administrators can manage all domain settings; domain managers
+can edit only the passkey policy. For a per-user requirement, use **Require
+passkey setup at next login** on the user's create or edit form; this option is hidden if
+the domain already requires passkeys or the server-wide setting is enabled.
+
+The ``PASSKEY_ENROLLMENT_TTL`` setting controls how long a domain manager's
+one-time passkey enrollment link remains valid, in seconds. It defaults to
+``604800`` (one week). Each link can be used once to add a passkey to the
+selected account. Generating a replacement invalidates any previous link for
+that account.
+
 ``SESSION_TIMEOUT`` (default: 3600) is the maximum amount of time in seconds between
 requests before a session is invalidated. ``PERMANENT_SESSION_LIFETIME`` (default: 108000)
 is the maximum amount of time in seconds a session can be kept alive for if it hasn't timed-out.

@@ -32,8 +32,8 @@
   <tr>
     <td>
       <a href="{{ url_for('.domain_details', domain_name=domain.name) }}" title="{% trans %}Details{% endtrans %}"><i class="fa-solid fa-list"></i></a>&nbsp;
-      {%- if current_user.global_admin %}
       <a href="{{ url_for('.domain_edit', domain_name=domain.name) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa-solid fa-pencil"></i></a>&nbsp;
+      {%- if current_user.global_admin %}
       <a href="{{ url_for('.domain_delete', domain_name=domain.name) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa-solid fa-trash"></i></a>&nbsp;
       {%- endif %}
     </td>

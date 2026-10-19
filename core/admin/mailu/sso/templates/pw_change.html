@@ -8,6 +8,11 @@
   {{ macros.form_field(form.pw) }}
   {{ macros.form_field(form.pw2) }}
   {{ macros.form_field(form.submit) }}
+  {% if required_change %}
+  <p class="mt-3 mb-0">
+    <a href="{{ url_for('ui.passkey_list') }}">{% trans %}Set up a passkey instead{% endtrans %}</a>
+  </p>
+  {% endif %}
 </form>
 {%- endcall %}
 {%- endblock %}

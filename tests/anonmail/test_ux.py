@@ -66,6 +66,21 @@ def test_proxy_explicit_route_and_password_change(client, app, users):
     with client.session_transaction() as session:
         assert session['required_actions_destination'].endswith('/admin')
 
+def test_password_change_passkey_escape_uses_logout_only_menu(client, users):
+    users[1].change_pw_next_login = True
+    models.db.session.commit()
+    authenticate(client, users[1])
+
+    forced_change = client.get('/sso/pw_change')
+    assert b'href="/admin/user/passkeys"' in forced_change.data
+
+    response = client.get('/admin/user/passkeys')
+
+    assert response.status_code == 200
+    assert b'Sign out' in response.data
+    assert b'My account' not in response.data
+    assert b'Auto-reply' not in response.data
+
 def test_passkey_options_keep_destination_after_retry(client, users):
     client.get('/admin/user/password?x=1')
     client.get('/sso/login')

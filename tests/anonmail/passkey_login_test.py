@@ -39,6 +39,19 @@ def test_passkey_options_reject_malformed_email_with_json_error(client):
     assert 'valid email address' in response.get_json()['error']
 
 
+def test_passkey_options_and_status_are_not_rate_limited(client, monkeypatch, user):
+    from mailu import utils
+
+    monkeypatch.setattr(utils.limiter, 'should_rate_limit_ip', lambda *args: pytest.fail('passkey sign-in is not IP rate-limited'))
+    monkeypatch.setattr(utils.limiter, 'should_rate_limit_user', lambda *args: pytest.fail('passkey sign-in is not user rate-limited'))
+
+    options = client.post('/sso/passkey/options', json={'email': user.email})
+    status = client.post('/sso/passkey/status', json={'email': user.email})
+
+    assert options.status_code == 200
+    assert status.status_code == 200
+
+
 def test_login_page_supports_conditional_passkeys_and_destination_changes(client):
     response = client.get('/sso/login')
 
@@ -154,6 +167,26 @@ def test_global_admin_can_open_target_users_passkey_routes(client, user):
     assert options.get_json()['user']['name'] == user.email
 
 
+def test_user_edit_enrollment_link_is_copyable_not_clickable(client, user):
+    admin = models.User(localpart='admin', domain=user.domain, global_admin=True)
+    admin.set_password('admin-password')
+    models.db.session.add(admin)
+    models.db.session.commit()
+    with client.session_transaction() as session:
+        session['_user_id'] = admin.email
+        session['_fresh'] = True
+        session['new_passkey_enrollment_url'] = 'https://mail.example/sso/passkey/enroll/one-time-token'
+        session['new_passkey_enrollment_expires_at'] = datetime.now(timezone.utc)
+
+    response = client.get(f'/admin/user/edit/{user.email}')
+
+    assert response.status_code == 200
+    assert b'Copy to clipboard' in response.data
+    assert b'data-clipboard-target="#passkey-enrollment-link"' in response.data
+    assert b'https://mail.example/sso/passkey/enroll/one-time-token' in response.data
+    assert b'href="https://mail.example/sso/passkey/enroll/one-time-token"' not in response.data
+
+
 def test_user_cannot_open_another_users_passkey_page(client, user):
     other = models.User(localpart='bob', domain=user.domain)
     other.set_password('other-password')
@@ -216,16 +249,19 @@ def test_registration_accepts_webauthn_string_enum_values(client, user, monkeypa
     from mailu.ui.views import passkeys as passkey_views
 
     caplog.set_level(logging.INFO)
-    monkeypatch.setattr(passkey_views, 'verify_registration_response', lambda **kwargs: SimpleNamespace(
-        credential_id=b'credential-id',
-        credential_public_key=b'public-key',
-        sign_count=1,
-        aaguid='adce0002-35bc-c60a-648b-0b25f1f05503',
-        fmt='none',
-        user_verified=False,
-        credential_device_type='single_device',
-        credential_backed_up=False,
-    ))
+    monkeypatch.setattr(
+        passkey_views.webauthn_config, 'verify_registration_response',
+        lambda **kwargs: SimpleNamespace(
+            credential_id=b'credential-id',
+            credential_public_key=b'public-key',
+            sign_count=1,
+            aaguid='adce0002-35bc-c60a-648b-0b25f1f05503',
+            fmt='none',
+            user_verified=False,
+            credential_device_type='single_device',
+            credential_backed_up=False,
+        ),
+    )
     monkeypatch.setattr(passkey_views.webauthn_config, 'authenticator_flags', lambda *args, **kwargs: SimpleNamespace(
         up=True, uv=False, be=False, bs=False,
     ))
@@ -252,6 +288,7 @@ def test_registration_accepts_webauthn_string_enum_values(client, user, monkeypa
 def test_passkey_login_emits_password_style_audit_log(client, user, monkeypatch, caplog):
     import logging
     from mailu.sso.views import passkeys as sso_passkeys
+    from mailu import utils
 
     caplog.set_level(logging.INFO)
     models.db.session.add(models.Passkey(
@@ -273,6 +310,7 @@ def test_passkey_login_emits_password_style_audit_log(client, user, monkeypatch,
     monkeypatch.setattr(sso_passkeys.webauthn_config, 'authenticator_flags', lambda *args, **kwargs: SimpleNamespace(
         up=True, uv=True, be=False, bs=False,
     ))
+    monkeypatch.setattr(utils.limiter, 'rate_limit_user', lambda *args, **kwargs: pytest.fail('passkey sign-in is not rate-limited'))
     with client.session_transaction() as session:
         session['passkey_login_challenge'] = bytes_to_base64url(b'test-challenge')
         session['passkey_login_email'] = user.email
@@ -284,6 +322,10 @@ def test_passkey_login_emits_password_style_audit_log(client, user, monkeypatch,
 
     assert response.status_code == 200
     assert response.get_json()['redirect'] == '/admin/'
+    assert any(
+        cookie.startswith('rate_limit=') and 'Path=/sso/login' in cookie
+        for cookie in response.headers.getlist('Set-Cookie')
+    )
     credential = models.db.session.get(models.Passkey, b'login-credential')
     assert credential.user_verified is True
     assert credential.user_present is True

@@ -480,6 +480,15 @@ Why does a passkey show unknown details?
 
 Older passkeys may have been enrolled before Mailu recorded all authenticator details. A successful sign-in records the flags returned by that authentication, the latest signature counter, and the last-use time. The attestation format is available only from enrollment, so it can remain unknown for a passkey enrolled before that information was stored. Removing and registering the passkey again records its enrollment details, but requires setting it up again in the authenticator.
 
+I cannot sign in because my administrator requires a passkey
+````````````````````````````````````````````````````````````
+
+If passkeys are required for your domain, sign in with your existing password;
+Mailu will then require you to register a passkey before you can continue. If
+the server-wide ``PASSKEY_REQUIRED`` setting is enabled, password sign-in is
+disabled. Ask a domain manager for a one-time passkey enrollment link. The link
+can also be used when you are locked out or cannot complete normal sign-in.
+
 .. _delete_users:
 
 How to delete users?

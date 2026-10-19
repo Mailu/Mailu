@@ -1,17 +1,136 @@
-"""WebAuthn configuration helpers."""
+"""WebAuthn configuration and registration helpers."""
+
+from dataclasses import dataclass
+import hashlib
+import re
+import uuid
 
 from flask import current_app, request
-import uuid
-import re
-
+from webauthn import generate_registration_options, verify_registration_response
 from webauthn.helpers import (
-    parse_authentication_credential_json, parse_registration_credential_json,
-    parse_authenticator_data,
+    base64url_to_bytes, parse_authentication_credential_json,
+    parse_registration_credential_json, parse_authenticator_data,
     parse_attestation_object,
+)
+from webauthn.helpers.structs import (
+    AttestationConveyancePreference, AuthenticatorSelectionCriteria,
+    PublicKeyCredentialDescriptor, ResidentKeyRequirement, UserVerificationRequirement,
 )
 
 
 PASSWORD_NUDGE_MARKER = 'data-flash-id="password-passkey-nudge"'
+
+
+@dataclass
+class PasskeyRegistration:
+    credential: object
+    verification: object
+    flags: object
+    attestation_format: str
+
+
+class PasskeyRegistrationError(Exception):
+    def __init__(self, message, status=400, reason='verification_failed'):
+        super().__init__(message)
+        self.status = status
+        self.reason = reason
+
+
+def registration_options(user):
+    """Build registration options from the user's domain policy."""
+    domain = user.domain
+    return generate_registration_options(
+        rp_id=rp_id(),
+        rp_name=current_app.config['SITENAME'],
+        user_id=hashlib.sha256(user.email.encode()).digest(),
+        user_name=user.email,
+        user_display_name=user.displayed_name or user.email,
+        exclude_credentials=[
+            PublicKeyCredentialDescriptor(id=key.credential_id) for key in user.passkeys
+        ],
+        authenticator_selection=AuthenticatorSelectionCriteria(
+            resident_key=ResidentKeyRequirement(domain.passkey_resident_key),
+            user_verification=(
+                UserVerificationRequirement.REQUIRED if domain.passkey_require_uv
+                else UserVerificationRequirement.PREFERRED
+            ),
+        ),
+        attestation=(
+            AttestationConveyancePreference.DIRECT
+            if domain.passkey_attestation_policy == 'require'
+            else AttestationConveyancePreference.NONE
+        ),
+    )
+
+
+def register_credential(user, payload, challenge):
+    """Verify and stage a credential using the domain's passkey policy.
+
+    Callers control the authorization for the user and commit the database
+    transaction after applying any flow-specific account changes.
+    """
+    domain = user.domain
+    try:
+        verification = verify_registration_response(
+            credential=payload,
+            expected_challenge=base64url_to_bytes(challenge),
+            expected_rp_id=rp_id(),
+            expected_origin=origin(),
+            require_user_verification=domain.passkey_require_uv,
+        )
+    except Exception as exc:
+        raise PasskeyRegistrationError('Passkey registration could not be verified.') from exc
+
+    attestation_format = enum_value(verification.fmt)
+    flags = authenticator_flags(payload, registration=True)
+    if not aaguid_allowed(domain, verification.aaguid):
+        raise PasskeyRegistrationError(
+            'This authenticator is not allowed for this domain.', reason='aaguid_policy',
+        )
+    if domain.passkey_device_bound and (
+        enum_value(verification.credential_device_type) != 'single_device'
+        or verification.credential_backed_up
+    ):
+        raise PasskeyRegistrationError(
+            'This domain only allows device-bound passkeys.', reason='device_bound_policy',
+        )
+    if not authenticator_flags_allowed(domain, flags):
+        raise PasskeyRegistrationError(
+            'This authenticator does not meet the domain backup requirements.', reason='backup_policy',
+        )
+    if not attestation_allowed(domain, attestation_format):
+        raise PasskeyRegistrationError(
+            'Authenticator attestation does not meet the domain policy.', reason='attestation_policy',
+        )
+
+    from . import models
+    credential_id = verification.credential_id
+    if models.db.session.get(models.Passkey, credential_id):
+        raise PasskeyRegistrationError(
+            'This passkey is already registered.', status=409, reason='duplicate_credential',
+        )
+
+    credential = models.Passkey(
+        user=user,
+        credential_id=credential_id,
+        public_key=verification.credential_public_key,
+        sign_count=verification.sign_count,
+        aaguid=verification.aaguid,
+        device_bound=(
+            enum_value(verification.credential_device_type) == 'single_device'
+            and not verification.credential_backed_up
+        ),
+        user_verified=verification.user_verified,
+        user_present=flags.up,
+        credential_device_type=enum_value(verification.credential_device_type),
+        backup_eligible=flags.be,
+        backed_up=verification.credential_backed_up,
+        attestation_format=attestation_format,
+        name=str(payload.get('name') or 'Passkey')[:255],
+    )
+    models.db.session.add(credential)
+    user.passkey_enroll_next_login = False
+    return PasskeyRegistration(credential, verification, flags, attestation_format)
 
 
 def rp_id():

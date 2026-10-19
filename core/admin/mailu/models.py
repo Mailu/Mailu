@@ -197,6 +197,7 @@ class Domain(Base):
     dkim_keys = db.relationship('DkimKey', back_populates='domain', cascade='all, delete-orphan', order_by='DkimKey.selector')
 
     # WebAuthn passkey policy
+    passkey_require_enrollment = db.Column(db.Boolean, nullable=False, default=False)
     passkey_enforce_aaguid = db.Column(db.Boolean, nullable=False, default=False)
     passkey_aaguid_mode = db.Column(db.String(8), nullable=False, default='allow')
     passkey_aaguids = db.Column(db.Text, nullable=False, default='')
@@ -675,6 +676,7 @@ class User(Base, Email):
     spam_mark_as_read = db.Column(db.Boolean, nullable=False, default=True)
     spam_threshold = db.Column(db.Integer, nullable=False, default=lambda:int(app.config.get("DEFAULT_SPAM_THRESHOLD", 80)))
     change_pw_next_login = db.Column(db.Boolean, nullable=False, default=False)
+    passkey_enroll_next_login = db.Column(db.Boolean, nullable=False, default=False)
     gpg_key = db.Column(db.Text, nullable=True)
 
     passkeys = db.relationship('Passkey', back_populates='user', cascade='all, delete-orphan')
@@ -848,7 +850,12 @@ set() containing the sessions to keep
     def login(cls, email, password):
         """ login user when enabled and password is valid """
         user = db.session.get(cls, email)
-        return user if (user and user.enabled and user.check_password(password)) else None
+        return user if (
+            user and user.enabled
+            and not app.config.get('PASSKEY_REQUIRED', False)
+            and not user.passkeys
+            and user.check_password(password)
+        ) else None
 
 
 class WkdKey(Base):
@@ -888,6 +895,17 @@ class Passkey(Base):
     last_used_at = db.Column(db.DateTime(timezone=True), nullable=True)
     name = db.Column(db.String(255), nullable=False, default='')
     user = db.relationship('User', back_populates='passkeys')
+
+
+class PasskeyEnrollment(Base):
+    """A short-lived, single-use passkey enrollment grant."""
+
+    __tablename__ = 'passkey_enrollment'
+
+    token_hash = db.Column(db.String(64), primary_key=True)
+    user_email = db.Column(db.String(255), db.ForeignKey('user.email', ondelete='CASCADE'), nullable=False, index=True)
+    expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    user = db.relationship('User')
 
 
 class Alias(Base, Email):

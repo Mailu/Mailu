@@ -16,12 +16,36 @@
 
   {%- call macros.card(_("General")) %}
   {{ macros.form_field(form.localpart, append='<span class="input-group-text">@'+domain.name+'</span>', autofocus=true, autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false") }}
-  {{ macros.form_fields((form.pw, form.pw2)) }}
+  {% if (user is not defined and not config['PASSKEY_REQUIRED']) or (user is defined and not config['PASSKEY_REQUIRED'] and not user.passkeys) %}
+    {{ macros.form_fields((form.pw, form.pw2)) }}
+  {% else %}
+    <p class="text-body-secondary">{% if config['PASSKEY_REQUIRED'] %}{% trans %}Password sign-in is disabled by the server because passkeys are required.{% endtrans %}{% else %}{% trans %}Password sign-in is disabled for this account because it has a passkey.{% endtrans %}{% endif %}</p>
+  {% endif %}
   {{ macros.form_field(form.displayed_name) }}
   {{ macros.form_field(form.comment) }}
   {{ macros.form_field(form.enabled) }}
-  {{ macros.form_field(form.change_pw_next_login) }}
+  {% if not config['PASSKEY_REQUIRED'] and not domain.passkey_require_enrollment and (user is not defined or not user.passkeys) %}
+    {{ macros.form_field(form.change_pw_next_login) }}
+    {{ macros.form_field(form.passkey_enroll_next_login) }}
+  {% endif %}
   {%- endcall %}
+
+  {% if user is defined and can_generate_enrollment_link %}
+  {%- call macros.card(title=_('Passkey recovery')) %}
+  {% if enrollment_url %}
+  <div class="alert alert-success" role="status">
+    <p>{% trans %}One-time passkey enrollment link, valid until{% endtrans %} {{ enrollment_expires_at | format_datetime }}:</p>
+    <label class="visually-hidden" for="passkey-enrollment-link">{% trans %}One-time passkey enrollment link{% endtrans %}</label>
+    <textarea class="form-control font-monospace small" id="passkey-enrollment-link" rows="2" readonly>{{ enrollment_url }}</textarea>
+    <button type="button" class="btn btn-outline-primary btn-sm btn-clip mt-2" data-clipboard-target="#passkey-enrollment-link">
+      <i class="fa-solid fa-copy me-1" aria-hidden="true"></i>{% trans %}Copy to clipboard{% endtrans %}
+    </button>
+  </div>
+  {% endif %}
+  <button class="btn btn-outline-primary" type="submit" formnovalidate formaction="{{ url_for('ui.passkey_enrollment_link', user_email=user.email) }}" formmethod="post">{% trans %}Generate one-time enrollment link{% endtrans %}</button>
+  <p class="form-text">{% trans %}The link expires after the configured enrollment-link lifetime and can be used once to add a passkey to this account.{% endtrans %}</p>
+  {%- endcall %}
+  {% endif %}
 
   {%- call macros.card(_("Features and quotas"), theme="success") %}
   {{ macros.form_field(form.quota_bytes, step=1, max=max_quota_bytes, data_infinity="true",

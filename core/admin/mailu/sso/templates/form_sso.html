@@ -2,16 +2,11 @@
 {% block content %}
 <form class="form" method="post">
   {{ form.hidden_tag() }}
-  {% if not session.get('signin_destination') %}
-    {{ macros.form_field(form.destination) }}
-  {% else %}
-    {{ form.destination(class_='d-none', tabindex='-1', aria_hidden='true') }}
-    <p class="text-body-secondary">{{ _('Continue to') }} {{ _('Account settings') if form.destination.data == 'admin' else _('Webmail') }}</p>
-  {% endif %}
+  {{ macros.form_field(form.destination) }}
   {{ macros.form_field(form.email) }}
-  {{ macros.form_field(form.pw) }}
+  {% if not config['PASSKEY_REQUIRED'] %}<div id="password-field">{{ macros.form_field(form.pw) }}</div>{% endif %}
   <div class="d-grid gap-3 mt-4">
-    {{ form.submit(class_="btn btn-primary") }}
+    {% if not config['PASSKEY_REQUIRED'] %}{{ form.submit(class_="btn btn-primary") }}{% endif %}
     {% block extra_login_options %}{% endblock %}
   </div>
 </form>

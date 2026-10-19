@@ -9,6 +9,7 @@
   {{ form.hidden_tag() }}
   {% set quota_bytes = form.max_quota_bytes.data or 0 %}
   {% set quota_unit = 1000000000 if quota_bytes % 1000000000 == 0 else 1000000 %}
+  {% if can_edit_domain_settings %}
   {%- call macros.card() %}
   {{ macros.form_field(form.name, autofocus=True, autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false") }}
   {{ macros.form_fields((form.max_users, form.max_aliases)) }}
@@ -19,8 +20,14 @@
   {{ macros.form_field(form.signup_enabled) }}
   {{ macros.form_field(form.anonmail_enabled) }}
   {%- endcall %}
+  {% endif %}
   {%- call macros.card(title=_('Passkey policy')) %}
   <p class="text-body-secondary">{% trans %}These settings apply to passkeys for users in this domain.{% endtrans %}</p>
+  <div class="form-check form-switch mb-3">
+    {{ form.passkey_require_enrollment(class_='form-check-input') }}
+    {{ form.passkey_require_enrollment.label(class_='form-check-label') }}
+  </div>
+  <p class="small text-body-secondary">{% trans %}Users without a passkey must enroll one after signing in. New users will also be required to enroll.{% endtrans %}</p>
   <div class="form-check form-switch mb-3">
     {{ form.passkey_enforce_aaguid(class_='form-check-input', aria_controls='passkey-aaguid-controls', aria_expanded='true' if form.passkey_enforce_aaguid.data else 'false') }}
     {{ form.passkey_enforce_aaguid.label(class_='form-check-label') }}
@@ -47,11 +54,13 @@
   {{ macros.form_field(form.passkey_device_bound) }}
   {{ macros.form_field(form.passkey_resident_key) }}
   {%- endcall %}
+  {% if can_edit_domain_settings %}
   {%- call macros.card() %}
   {{ macros.form_field(form.comment) }}
   {%- endcall %}
+  {% endif %}
   <div class="clearfix mt-3 text-start">
-    {{ form.submit(value=_('Save domain settings') if domain is defined else _('Create domain'), class_='btn btn-primary float-start') }}
+    {{ form.submit(value=_('Save domain settings') if can_edit_domain_settings and domain is defined else _('Save passkey policy') if domain is defined else _('Create domain'), class_='btn btn-primary float-start') }}
   </div>
 </form>
 {%- endblock %}

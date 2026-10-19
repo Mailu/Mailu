@@ -8,6 +8,7 @@ import flask
 import flask_login
 import wtforms
 import wtforms_components
+import secrets
 
 @ui.route('/user/list/<domain_name>', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
@@ -39,7 +40,8 @@ def user_create(domain_name):
         return flask.redirect(
             flask.url_for('.user_list', domain_name=domain.name))
     form = forms.UserForm()
-    form.pw.validators = [wtforms.validators.DataRequired()]
+    password_disabled = app.config.get('PASSKEY_REQUIRED', False)
+    form.pw.validators = [] if password_disabled else [wtforms.validators.DataRequired()]
     max_quota_bytes = min(domain.max_quota_bytes or forms.MAX_QUOTA_BYTES, forms.MAX_QUOTA_BYTES)
     form.quota_bytes.validators = [
         wtforms.validators.NumberRange(min=0, max=max_quota_bytes)]
@@ -54,7 +56,7 @@ def user_create(domain_name):
         else:
             user = models.User(domain=domain)
             form.populate_obj(user)
-            user.set_password(form.pw.data)
+            user.set_password(form.pw.data or secrets.token_urlsafe())
             models.db.session.add(user)
             models.db.session.commit()
             user.send_welcome()
@@ -83,23 +85,47 @@ def user_edit(user_email):
     form = forms.UserForm(obj=user)
     wtforms_components.read_only(form.localpart)
     form.localpart.validators = []
+    password_disabled = app.config.get('PASSKEY_REQUIRED', False)
+    if user.passkeys or password_disabled:
+        form.pw.validators = []
+        form.pw2.validators = []
     form.quota_bytes.validators = [
         wtforms.validators.NumberRange(min=0, max=max_quota_bytes)]
     if form.validate_on_submit():
-        if form.pw.data:
+        if form.pw.data and not user.passkeys and not password_disabled:
             if msg := utils.isBadOrPwned(form):
                 flask.flash(msg, "error")
-                return flask.render_template('user/edit.html', form=form, user=user,
-                    domain=user.domain, max_quota_bytes=max_quota_bytes)
+                return _render_user_edit(form, user, max_quota_bytes)
+        keep_passkey_enrollment_flag = (
+            user.passkey_enroll_next_login
+            if user.domain.passkey_require_enrollment
+            else None
+        )
         form.populate_obj(user)
-        if form.pw.data:
+        if keep_passkey_enrollment_flag is not None:
+            user.passkey_enroll_next_login = keep_passkey_enrollment_flag
+        if form.pw.data and not user.passkeys and not password_disabled:
             user.set_password(form.pw.data, keep_sessions=set(flask.session))
         models.db.session.commit()
         flask.flash('User %s updated' % user)
         return flask.redirect(
             flask.url_for('.user_list', domain_name=user.domain.name))
-    return flask.render_template('user/edit.html', form=form, user=user,
-        domain=user.domain, max_quota_bytes=max_quota_bytes)
+    return _render_user_edit(form, user, max_quota_bytes)
+
+
+def _render_user_edit(form, user, max_quota_bytes):
+    can_generate_enrollment_link = (
+        user.email != flask_login.current_user.email
+        and (flask_login.current_user.global_admin
+             or user.domain in flask_login.current_user.get_managed_domains())
+    )
+    return flask.render_template(
+        'user/edit.html', form=form, user=user, domain=user.domain,
+        max_quota_bytes=max_quota_bytes,
+        can_generate_enrollment_link=can_generate_enrollment_link,
+        enrollment_url=flask.session.pop('new_passkey_enrollment_url', None),
+        enrollment_expires_at=flask.session.pop('new_passkey_enrollment_expires_at', None),
+    )
 
 
 @ui.route('/user/settings', methods=['GET', 'POST'], defaults={'user_email': None})
@@ -173,6 +199,9 @@ def _wkd_domain_from_request(domain_name=None):
 def _process_password_change(form, user_email):
     user_email_or_current = user_email or flask_login.current_user.email
     user = models.db.session.get(models.User, user_email_or_current) or flask.abort(404)
+    if user.passkeys or app.config.get('PASSKEY_REQUIRED', False):
+        flask.flash(utils.flask_babel.gettext('Password sign-in is disabled because passkeys are required.'), 'info')
+        return flask.redirect(flask.url_for('.passkey_list', user_email=user.email))
     if form.validate_on_submit():
         if form.pw.data != form.pw2.data:
             flask.flash('Passwords do not match', 'error')

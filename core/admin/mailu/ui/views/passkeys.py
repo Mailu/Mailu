@@ -1,7 +1,3 @@
-import hashlib
-import secrets
-from datetime import datetime, timedelta, timezone
-
 import flask
 import flask_login
 from flask_wtf import FlaskForm
@@ -9,7 +5,7 @@ from flask_babel import lazy_gettext as _
 from webauthn import options_to_json
 from webauthn.helpers import bytes_to_base64url, base64url_to_bytes
 
-from mailu import models, passkeys as webauthn_config, auth_flow
+from mailu import models, passkeys as webauthn_config, auth_flow, setup_tokens
 from mailu.ui import ui, access
 
 
@@ -59,29 +55,22 @@ def _render_passkey_list(user, required_enrollment=False, restricted_navigation=
     )
 
 
+@ui.route('/user/setup-link/<path:user_email>', methods=['POST'])
 @ui.route('/user/passkeys/<path:user_email>/enrollment-link', methods=['POST'])
 @access.domain_admin(models.User, 'user_email')
-def passkey_enrollment_link(user_email):
+def account_setup_link(user_email):
     form = FlaskForm()
     if not form.validate_on_submit():
         flask.abort(400)
     user = models.db.session.get(models.User, user_email) or flask.abort(404)
-    raw_token = secrets.token_urlsafe(32)
-    token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
-    expires_at = datetime.now(timezone.utc) + timedelta(
-        seconds=flask.current_app.config['PASSKEY_ENROLLMENT_TTL'],
+    raw_token, expires_at = setup_tokens.issue(
+        user, flask.current_app.config['ACCOUNT_SETUP_TOKEN_TTL'],
     )
-    models.PasskeyEnrollment.query.filter_by(user_email=user.email).delete(synchronize_session=False)
-    models.db.session.add(models.PasskeyEnrollment(
-        token_hash=token_hash,
-        user_email=user.email,
-        expires_at=expires_at,
-    ))
     models.db.session.commit()
-    flask.session['new_passkey_enrollment_url'] = flask.url_for(
-        'sso.passkey_enroll', token=raw_token, _external=True,
+    flask.session['new_account_setup_url'] = flask.url_for(
+        'sso.account_setup', token=raw_token, _external=True,
     )
-    flask.session['new_passkey_enrollment_expires_at'] = expires_at
+    flask.session['new_account_setup_expires_at'] = expires_at
     return flask.redirect(flask.url_for('ui.user_edit', user_email=user.email))
 
 

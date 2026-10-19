@@ -1,26 +1,47 @@
 {%- extends "base_sso.html" %}
 
-{%- block title %}{% trans %}Add a passkey{% endtrans %}{%- endblock %}
+{%- block title %}{% trans %}Set up your account{% endtrans %}{%- endblock %}
 
 {% block content %}
-<p class="text-body-secondary">{% trans %}Add a passkey to{% endtrans %} <strong>{{ user.email }}</strong></p>
-<form id="enrollment-form" class="form">
-  {{ form.hidden_tag() }}
+<p class="text-body-secondary">{% trans %}Set up sign-in for{% endtrans %} <strong>{{ user.email }}</strong>.</p>
+
+{% if allow_password %}
+<section class="mb-4">
+  <h2 class="h5">{% trans %}Set a password{% endtrans %}</h2>
+  <form class="form" method="post" action="{{ url_for('sso.account_setup_password', token=token) }}">
+    {{ password_form.hidden_tag() }}
+    {{ macros.form_field(password_form.pw, autocomplete="new-password") }}
+    {{ macros.form_field(password_form.pw2, autocomplete="new-password") }}
+    {{ macros.form_field(password_form.submit) }}
+  </form>
+</section>
+<hr>
+<section class="mt-4">
+  <h2 class="h5">{% trans %}Or set up a passkey{% endtrans %}</h2>
+</section>
+{% else %}
+<div class="alert alert-info" role="status">
+  {% trans %}A passkey is required for this account. Set one up to continue.{% endtrans %}
+</div>
+{% endif %}
+
+<form id="account-setup-passkey-form" class="form">
+  {{ registration_form.hidden_tag() }}
   <div class="mb-3">
     <label class="form-label" for="passkey-name">{% trans %}Passkey name{% endtrans %}</label>
     <input class="form-control" id="passkey-name" name="name" maxlength="255" value="{% trans %}New passkey{% endtrans %}" required>
   </div>
-  <button class="btn btn-primary" id="enroll" type="submit">{% trans %}Add passkey{% endtrans %}</button>
+  <button class="btn btn-primary" id="setup-passkey" type="submit">{% trans %}Set up a passkey{% endtrans %}</button>
 </form>
-<div id="enrollment-status" class="alert d-none mt-3" role="status" aria-live="polite"></div>
+<div id="account-setup-status" class="alert d-none mt-3" role="status" aria-live="polite"></div>
 <script>
 (() => {
-  const form = document.getElementById('enrollment-form');
-  const button = document.getElementById('enroll');
-  const status = document.getElementById('enrollment-status');
+  const form = document.getElementById('account-setup-passkey-form');
+  const button = document.getElementById('setup-passkey');
+  const status = document.getElementById('account-setup-status');
   const csrf = form.querySelector('[name="csrf_token"]').value;
-  const optionsUrl = {{ url_for('sso.passkey_enrollment_options', token=request.view_args.token) | tojson }};
-  const registerUrl = {{ url_for('sso.passkey_enrollment_register', token=request.view_args.token) | tojson }};
+  const optionsUrl = {{ passkey_options_url | tojson }};
+  const registerUrl = {{ passkey_register_url | tojson }};
   const decode = value => Uint8Array.from(atob(value.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
   const encode = value => btoa(String.fromCharCode(...new Uint8Array(value))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const json = async (response, action) => {

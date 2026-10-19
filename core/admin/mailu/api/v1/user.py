@@ -1,9 +1,11 @@
+import flask
 from flask_restx import Resource, fields, marshal
 import datetime
+import secrets
 
 from . import api, response_fields
 from .. import common
-from ... import models, utils
+from ... import models, utils, setup_tokens
 
 db = models.db
 
@@ -27,6 +29,7 @@ user_fields_get = api.model('UserGet', {
     'global_admin': fields.Boolean(description='Make the user a global administrator'),
     'enabled': fields.Boolean(description='Enable the user. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail'),
     'change_pw_next_login': fields.Boolean(description='Force the user to change their password at next login'),
+    'passkey_enroll_next_login': fields.Boolean(description='Require the user to set up a passkey before continuing after their next login'),
     'enable_imap': fields.Boolean(description='Allow email retrieval via IMAP'),
     'enable_pop': fields.Boolean(description='Allow email retrieval via POP3'),
     'allow_spoofing': fields.Boolean(description='Allow the user to spoof the sender (send email as anyone)'),
@@ -46,12 +49,13 @@ user_fields_get = api.model('UserGet', {
 
 user_fields_post = api.model('UserCreate', {
     'email': fields.String(description='The email address of the user', example='John.Doe@example.com', attribute='_email', required=True),
-    'raw_password': fields.String(description='The raw (plain text) password of the user. Mailu will hash the password using BCRYPT-SHA256', example='secret', required=True),
+    'raw_password': fields.String(description='Optional raw (plain text) password. Mailu will hash the password using BCRYPT-SHA256', example='secret'),
     'comment': fields.String(description='A description for the user. This description is shown on the Users page', example='my comment'),
     'quota_bytes': fields.Integer(description='The maximum quota for the user’s email box in bytes', example='1000000000'),
     'global_admin': fields.Boolean(description='Make the user a global administrator'),
     'enabled': fields.Boolean(description='Enable the user. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail'),
     'change_pw_next_login': fields.Boolean(description='Force the user to change their password at next login'),
+    'passkey_enroll_next_login': fields.Boolean(description='Require the user to set up a passkey before continuing after their next login'),
     'enable_imap': fields.Boolean(description='Allow email retrieval via IMAP'),
     'enable_pop': fields.Boolean(description='Allow email retrieval via POP3'),
     'allow_spoofing': fields.Boolean(description='Allow the user to spoof the sender (send email as anyone)'),
@@ -76,6 +80,7 @@ user_fields_put = api.model('UserUpdate', {
     'global_admin': fields.Boolean(description='Make the user a global administrator'),
     'enabled': fields.Boolean(description='Enable the user. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail'),
     'change_pw_next_login': fields.Boolean(description='Force the user to change their password at next login'),
+    'passkey_enroll_next_login': fields.Boolean(description='Require the user to set up a passkey before continuing after their next login'),
     'enable_imap': fields.Boolean(description='Allow email retrieval via IMAP'),
     'enable_pop': fields.Boolean(description='Allow email retrieval via POP3'),
     'allow_spoofing': fields.Boolean(description='Allow the user to spoof the sender (send email as anyone)'),
@@ -138,6 +143,10 @@ class Users(Resource):
         user_new = models.User(email=data['email'])
         if 'raw_password' in data:
             user_new.set_password(data['raw_password'])
+        else:
+            # Passwordless API-created accounts need a stored hash until the
+            # account owner chooses a password or registers a passkey.
+            user_new.set_password(secrets.token_urlsafe(32))
         if 'comment' in data:
             user_new.comment = data['comment']
         if 'quota_bytes' in data:
@@ -148,6 +157,8 @@ class Users(Resource):
             user_new.enabled = data['enabled']
         if 'change_pw_next_login' in data:
             user_new.change_pw_next_login = data['change_pw_next_login']
+        if 'passkey_enroll_next_login' in data:
+            user_new.passkey_enroll_next_login = data['passkey_enroll_next_login']
         if 'enable_imap' in data:
             user_new.enable_imap = data['enable_imap']
         if 'enable_pop' in data:
@@ -244,6 +255,8 @@ class User(Resource):
             user_found.enabled = data['enabled']
         if 'change_pw_next_login' in data:
             user_found.change_pw_next_login = data['change_pw_next_login']
+        if 'passkey_enroll_next_login' in data:
+            user_found.passkey_enroll_next_login = data['passkey_enroll_next_login']
         if 'enable_imap' in data:
             user_found.enable_imap = data['enable_imap']
         if 'enable_pop' in data:
@@ -304,3 +317,40 @@ class User(Resource):
         db.session.delete(email_found)
         db.session.commit()
         return { 'code': 200, 'message': f'User {email} has been deleted'}, 200
+
+
+setup_link_response = api.model('AccountSetupLinkResponse', {
+    'code': fields.Integer,
+    'message': fields.String,
+    'url': fields.String(description='Single-use account setup or recovery URL'),
+    'expires_at': fields.DateTime(description='Expiration time in UTC'),
+})
+
+
+@user.route('/<string:email>/setup-link')
+class UserSetupLink(Resource):
+    @user.doc('generate_user_setup_link')
+    @user.response(200, 'Single-use setup link generated', setup_link_response)
+    @user.response(400, 'Invalid email address', response_fields)
+    @user.response(401, 'Authorization header missing')
+    @user.response(403, 'Invalid authorization header')
+    @user.response(404, 'User not found', response_fields)
+    @user.doc(security='Bearer')
+    @common.api_token_authorization
+    def post(self, email):
+        """Generate a single-use account setup or recovery link for a user."""
+        if not utils.is_valid_email(email):
+            return {'code': 400, 'message': f'Provided email address {email} is not valid'}, 400
+        account = models.db.session.get(models.User, email)
+        if not account:
+            return {'code': 404, 'message': f'User {email} cannot be found'}, 404
+        raw_token, expires_at = setup_tokens.issue(
+            account, flask.current_app.config['ACCOUNT_SETUP_TOKEN_TTL'],
+        )
+        models.db.session.commit()
+        return {
+            'code': 200,
+            'message': f'Account setup link generated for {email}',
+            'url': flask.url_for('sso.account_setup', token=raw_token, _external=True),
+            'expires_at': expires_at,
+        }, 200

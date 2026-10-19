@@ -17,3 +17,12 @@ class PWChangeForm(flask_wtf.FlaskForm):
     pw2 = fields.PasswordField(_('New password (again)'), [validators.DataRequired()])
     pwned = fields.HiddenField(label='', default=-1)
     submit = fields.SubmitField(_('Change password'))
+
+
+class AccountSetupForm(flask_wtf.FlaskForm):
+    pw = fields.PasswordField(_('New password'), [validators.DataRequired(), validators.Length(min=8)])
+    pw2 = fields.PasswordField(_('New password (again)'), [
+        validators.DataRequired(), validators.EqualTo('pw'),
+    ])
+    pwned = fields.HiddenField(label='', default=-1)
+    submit = fields.SubmitField(_('Set password'))

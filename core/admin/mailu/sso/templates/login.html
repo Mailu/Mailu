@@ -70,7 +70,7 @@
   };
 
   if (!supported && passwordRequired) {
-    showStatus({{ _('This server requires passkey sign-in. Use a supported browser or device; accounts without a passkey need an enrollment link from an administrator.') | tojson }}, 'info');
+    showStatus({{ _('This server requires passkey sign-in. Use a supported browser or device; accounts without a passkey need an account setup link from an administrator.') | tojson }}, 'info');
   }
 
   const updatePasswordVisibility = async () => {
@@ -94,7 +94,7 @@
       if (hasPasskey) {
         showStatus({{ _('This account has a passkey. Continue with “Use a passkey”.') | tojson }}, 'info');
       } else if (passwordRequired) {
-        showStatus({{ _('This server requires passkey sign-in. Contact an administrator to get a passkey enrollment link.') | tojson }}, 'info');
+        showStatus({{ _('This server requires passkey sign-in. Contact an administrator to get an account setup link.') | tojson }}, 'info');
       } else if (options.enrollment_required) {
         showStatus({{ _('After signing in, you must set up a passkey before you can continue.') | tojson }}, 'info');
       }
@@ -154,7 +154,7 @@
       const allowed = options.allowCredentials || [];
       if (emailField.value.trim() && !allowed.length) {
         showStatus(passwordRequired
-          ? {{ _('No passkey is registered for this email address. Contact an administrator to get a passkey enrollment link.') | tojson }}
+          ? {{ _('No passkey is registered for this email address. Contact an administrator to get an account setup link.') | tojson }}
           : {{ _('No passkey is registered for this email address. Clear the email field to choose a passkey, or sign in with your password.') | tojson }}, 'info');
         return;
       }

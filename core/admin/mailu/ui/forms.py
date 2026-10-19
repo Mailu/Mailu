@@ -195,9 +195,6 @@ class RelayForm(flask_wtf.FlaskForm):
 
 class UserForm(flask_wtf.FlaskForm):
     localpart = fields.StringField(_('E-mail'), [validators.DataRequired(), validLocalpart], render_kw=NO_AUTOCOMPLETE)
-    pw = fields.PasswordField(_('Password'))
-    pw2 = fields.PasswordField(_('Confirm password'), [checkStrippable, validators.EqualTo('pw')])
-    pwned = fields.HiddenField(label='', default=-1)
     quota_bytes = fields_.IntegerSliderField(_('Quota'), [validators.NumberRange(min=0, max=MAX_QUOTA_BYTES)], default=10**9)
     enable_imap = fields.BooleanField(_('Allow IMAP access'), default=True)
     enable_pop = fields.BooleanField(_('Allow POP3 access'), default=True)
@@ -206,7 +203,7 @@ class UserForm(flask_wtf.FlaskForm):
     comment = fields.StringField(_('Comment'))
     enabled = fields.BooleanField(_('Enabled'), default=True)
     change_pw_next_login = fields.BooleanField(_('Force password change at next login'), default=True)
-    passkey_enroll_next_login = fields.BooleanField(_('Require passkey setup at next login'), default=False)
+    passkey_enroll_next_login = fields.BooleanField(_('Require passkey'), default=False)
     submit = fields.SubmitField(_('Save'))
 
 

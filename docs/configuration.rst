@@ -247,24 +247,25 @@ require a secure browser context, normally HTTPS.
 The ``PASSKEY_REQUIRED`` setting (default: ``False``) requires every account
 to use a passkey, across all domains. When enabled, password sign-in is disabled
 and the login form only offers passkey sign-in. Accounts without a passkey need
-a one-time enrollment link from their domain administrator before they can sign
-in. This is a server-wide passwordless policy.
+a one-time account setup link from their domain administrator before they can
+sign in. This is a server-wide passwordless policy.
 
 Domain managers can instead enable **Require all users to enroll a passkey** in
 the domain's passkey policy. This requires users without a passkey to set one up
 after signing in, while allowing them to use their existing password to sign in.
 They cannot continue to other Mailu pages until enrollment is complete. A manager
-can create a one-time enrollment link from the user's edit page to help a locked
-out user. Global administrators can manage all domain settings; domain managers
+can create a one-time setup or recovery link from the user's edit page to help a
+locked-out user. The link can also set or reset a password when the account is
+allowed to use passwords. Global administrators can manage all domain settings; domain managers
 can edit only the passkey policy. For a per-user requirement, use **Require
-passkey setup at next login** on the user's create or edit form; this option is hidden if
+passkey** on the user's create or edit form; this option is hidden if
 the domain already requires passkeys or the server-wide setting is enabled.
 
-The ``PASSKEY_ENROLLMENT_TTL`` setting controls how long a domain manager's
-one-time passkey enrollment link remains valid, in seconds. It defaults to
-``604800`` (one week). Each link can be used once to add a passkey to the
-selected account. Generating a replacement invalidates any previous link for
-that account.
+The ``ACCOUNT_SETUP_TOKEN_TTL`` setting controls how long one-time account setup
+and recovery links remain valid, in seconds. It defaults to ``604800`` (one
+week). A link can be used once to set a password or add a passkey, subject to
+account passkey policies. Generating a replacement invalidates any previous
+link for that account.
 
 ``SESSION_TIMEOUT`` (default: 3600) is the maximum amount of time in seconds between
 requests before a session is invalidated. ``PERMANENT_SESSION_LIFETIME`` (default: 108000)

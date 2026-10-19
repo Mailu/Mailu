@@ -486,8 +486,16 @@ I cannot sign in because my administrator requires a passkey
 If passkeys are required for your domain, sign in with your existing password;
 Mailu will then require you to register a passkey before you can continue. If
 the server-wide ``PASSKEY_REQUIRED`` setting is enabled, password sign-in is
-disabled. Ask a domain manager for a one-time passkey enrollment link. The link
+disabled. Ask a domain manager for a one-time account setup link. The link
 can also be used when you are locked out or cannot complete normal sign-in.
+
+How do I reset a password?
+``````````````````````````
+
+Ask a domain manager to generate a one-time setup or recovery link from your
+user's edit page. The link lets you set a new password or set up a passkey,
+depending on the account's passkey policy. It can be used once and expires
+after the configured lifetime.
 
 .. _delete_users:
 

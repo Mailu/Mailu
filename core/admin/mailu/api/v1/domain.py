@@ -17,6 +17,7 @@ domain_fields = api.model('Domain', {
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
+    'passkey_require_enrollment': fields.Boolean(description='require every user to enroll a passkey before continuing after sign-in'),
     'passkey_enforce_aaguid': fields.Boolean(description='enforce the domain AAGUID policy'),
     'passkey_aaguid_mode': fields.String(description='Whether listed passkey AAGUIDs are allowed or blocked', enum=['allow', 'block']),
     'passkey_aaguids': fields.String(description='Comma or newline separated passkey AAGUID UUIDs'),
@@ -36,6 +37,7 @@ domain_fields_update = api.model('DomainUpdate', {
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
+    'passkey_require_enrollment': fields.Boolean(description='require every user to enroll a passkey before continuing after sign-in'),
     'passkey_enforce_aaguid': fields.Boolean(description='enforce the domain AAGUID policy'),
     'passkey_aaguid_mode': fields.String(description='Whether listed passkey AAGUIDs are allowed or blocked', enum=['allow', 'block']),
     'passkey_aaguids': fields.String(description='Comma or newline separated passkey AAGUID UUIDs'),
@@ -57,6 +59,7 @@ domain_fields_get = api.model('DomainGet', {
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
     'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
+    'passkey_require_enrollment': fields.Boolean(description='require every user to enroll a passkey before continuing after sign-in'),
     'passkey_enforce_aaguid': fields.Boolean(description='enforce the domain AAGUID policy'),
     'passkey_aaguid_mode': fields.String(description='Whether listed passkey AAGUIDs are allowed or blocked', enum=['allow', 'block']),
     'passkey_aaguids': fields.String(description='Comma or newline separated passkey AAGUID UUIDs'),
@@ -104,7 +107,7 @@ def _set_passkey_policy(domain, data):
         except (TypeError, ValueError):
             return 'passkey_aaguids must contain valid AAGUID UUIDs'
     for name in (
-        'passkey_require_uv', 'passkey_device_bound',
+        'passkey_require_enrollment', 'passkey_require_uv', 'passkey_device_bound',
         'passkey_require_sign_count_increase',
     ):
         if name in data:

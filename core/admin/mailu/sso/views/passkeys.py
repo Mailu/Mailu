@@ -1,9 +1,12 @@
 import flask
 import flask_login
+import hashlib
+import hmac
+import secrets
 from flask_babel import lazy_gettext as _
 from datetime import datetime, timezone
-import hashlib
 from flask_wtf.csrf import validate_csrf
+from sqlalchemy.exc import IntegrityError
 from wtforms.validators import ValidationError
 from webauthn import (
     generate_authentication_options, options_to_json,
@@ -13,8 +16,8 @@ from webauthn.helpers import bytes_to_base64url, base64url_to_bytes
 from webauthn.helpers.structs import PublicKeyCredentialDescriptor, UserVerificationRequirement
 from flask_wtf import FlaskForm
 
-from mailu import models, utils, signin, passkeys as webauthn_config, auth_flow
-from mailu.sso import sso
+from mailu import models, utils, signin, passkeys as webauthn_config, auth_flow, setup_tokens
+from mailu.sso import sso, forms
 
 
 def _csrf_error():
@@ -27,59 +30,169 @@ def _csrf_error():
     return None
 
 
-def _enrollment_grant(token):
-    token_hash = hashlib.sha256(token.encode()).hexdigest()
-    grant = models.db.session.get(models.PasskeyEnrollment, token_hash)
-    if not grant:
-        return None
-    expires_at = grant.expires_at
-    if expires_at.tzinfo is None:
-        expires_at = expires_at.replace(tzinfo=timezone.utc)
-    if expires_at <= datetime.now(timezone.utc):
-        models.db.session.delete(grant)
-        models.db.session.commit()
-        return None
-    return grant
+def _account_setup_requires_passkey(user):
+    return bool(
+        user.passkey_enroll_next_login
+        or user.domain.passkey_require_enrollment
+        or flask.current_app.config.get('PASSKEY_REQUIRED', False)
+    )
 
 
-@sso.route('/passkey/enroll/<token>', methods=['GET'])
-def passkey_enroll(token):
-    grant = _enrollment_grant(token) or flask.abort(404)
-    if not grant.user.enabled:
-        flask.abort(404)
+def _render_account_setup(user, token, password_form=None, registration_form=None,
+                          allow_password=None, passkey_options_url=None,
+                          passkey_register_url=None, status=200):
+    if allow_password is None:
+        allow_password = not _account_setup_requires_passkey(user) and not user.passkeys
     response = flask.make_response(flask.render_template(
-        'passkey_enroll.html', user=grant.user, form=FlaskForm(),
-    ))
+        'account_setup.html', user=user, token=token,
+        password_form=password_form or forms.AccountSetupForm(),
+        registration_form=registration_form or FlaskForm(),
+        allow_password=allow_password,
+        passkey_options_url=passkey_options_url or flask.url_for(
+            'sso.account_setup_options', token=token,
+        ),
+        passkey_register_url=passkey_register_url or flask.url_for(
+            'sso.account_setup_register', token=token,
+        ),
+    ), status)
     response.headers['Referrer-Policy'] = 'no-referrer'
     response.headers['Cache-Control'] = 'no-store'
     return response
 
 
-@sso.route('/passkey/enroll/<token>/options', methods=['POST'])
-def passkey_enrollment_options(token):
+@sso.route('/account/setup/<token>', methods=['GET'], endpoint='account_setup')
+@sso.route('/passkey/enroll/<token>', methods=['GET'], endpoint='passkey_enroll')
+def account_setup(token):
+    grant = setup_tokens.lookup(token) or flask.abort(404)
+    if not grant.user.enabled:
+        flask.abort(404)
+    return _render_account_setup(grant.user, token)
+
+
+def _pending_passkey_signup(token):
+    state = flask.session.get('pending_passkey_signup')
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    if (not state or not hmac.compare_digest(state.get('token_hash', ''), token_hash)
+            or state.get('expires_at', 0) <= datetime.now(timezone.utc).timestamp()):
+        return None, None
+    domain = models.db.session.get(models.Domain, state.get('domain_name'))
+    if not domain or not domain.signup_enabled:
+        return None, None
+    try:
+        localpart, domain_name = state['email'].rsplit('@', 1)
+    except (KeyError, ValueError):
+        return None, None
+    if domain_name != domain.name:
+        return None, None
+    user = models.User(localpart=localpart, domain=domain)
+    user.quota_bytes = state['quota_bytes']
+    return state, user
+
+
+def _signup_address_conflict(user):
+    domain = user.domain
+    if domain.has_email(user.localpart) or models.Alias.resolve(user.localpart, domain.name):
+        return True
+    return domain.max_users != -1 and len(domain.users) >= domain.max_users
+
+
+@sso.route('/account/setup/signup/<token>', methods=['GET'])
+def passkey_signup(token):
+    state, user = _pending_passkey_signup(token)
+    if not state or not user:
+        flask.abort(404)
+    if _signup_address_conflict(user):
+        flask.session.pop('pending_passkey_signup', None)
+        flask.flash(_('That email address is no longer available. Start signup again with a different address.'), 'error')
+        return flask.redirect(flask.url_for('ui.user_signup', domain_name=user.domain.name))
+    return _render_account_setup(
+        user, token, allow_password=False,
+        passkey_options_url=flask.url_for('sso.passkey_signup_options', token=token),
+        passkey_register_url=flask.url_for('sso.passkey_signup_register', token=token),
+    )
+
+
+@sso.route('/account/setup/signup/<token>/options', methods=['POST'])
+def passkey_signup_options(token):
     if error := _csrf_error():
         return error
-    grant = _enrollment_grant(token)
-    if not grant or not grant.user.enabled:
-        return flask.jsonify(error='This enrollment link has expired or was already used.'), 410
-    user = grant.user
+    state, user = _pending_passkey_signup(token)
+    if not state or not user:
+        return flask.jsonify(error='This signup attempt has expired. Start again.'), 410
+    if _signup_address_conflict(user):
+        flask.session.pop('pending_passkey_signup', None)
+        return flask.jsonify(error='This email address is no longer available. Start signup again.'), 409
     options = webauthn_config.registration_options(user)
-    flask.session['passkey_enrollment_hash'] = grant.token_hash
-    flask.session['passkey_enrollment_challenge'] = bytes_to_base64url(options.challenge)
+    flask.session['passkey_signup_hash'] = state['token_hash']
+    flask.session['passkey_signup_challenge'] = bytes_to_base64url(options.challenge)
     return flask.jsonify(flask.json.loads(options_to_json(options)))
 
 
-@sso.route('/passkey/enroll/<token>/register', methods=['POST'])
-def passkey_enrollment_register(token):
+@sso.route('/account/setup/signup/<token>/register', methods=['POST'])
+def passkey_signup_register(token):
     if error := _csrf_error():
         return error
-    token_hash = hashlib.sha256(token.encode()).hexdigest()
-    challenge = flask.session.pop('passkey_enrollment_challenge', None)
-    session_hash = flask.session.pop('passkey_enrollment_hash', None)
-    grant = _enrollment_grant(token)
+    state, user = _pending_passkey_signup(token)
+    challenge = flask.session.pop('passkey_signup_challenge', None)
+    session_hash = flask.session.pop('passkey_signup_hash', None)
     payload = flask.request.get_json(silent=True)
-    if not grant or not grant.user.enabled or session_hash != token_hash or not challenge or not payload:
-        return flask.jsonify(error='This enrollment link has expired. Start again with a new link.'), 410
+    if (not state or not user or session_hash != state['token_hash']
+            or not challenge or not payload):
+        return flask.jsonify(error='This signup attempt has expired. Start again.'), 410
+    if _signup_address_conflict(user):
+        flask.session.pop('pending_passkey_signup', None)
+        return flask.jsonify(error='This email address is no longer available. Start signup again.'), 409
+    try:
+        webauthn_config.register_credential(user, payload, challenge)
+    except webauthn_config.PasskeyRegistrationError as exc:
+        flask.current_app.logger.warning(
+            'Public passkey signup rejected user=%s reason=%s', user.email, exc.reason,
+        )
+        return flask.jsonify(error=str(exc)), exc.status
+
+    user.password = models.User.get_password_context().hash(secrets.token_urlsafe(32))
+    user.change_pw_next_login = False
+    try:
+        models.db.session.add(user)
+        models.db.session.commit()
+    except IntegrityError:
+        models.db.session.rollback()
+        flask.session.pop('pending_passkey_signup', None)
+        return flask.jsonify(error='This email address is no longer available. Start signup again.'), 409
+
+    user.send_welcome()
+    flask_login.logout_user()
+    flask.session.clear()
+    flask.flash(_('Your account is ready. You can now sign in with your passkey.'), 'success')
+    return flask.jsonify(ok=True, redirect=flask.url_for('sso.login'))
+
+
+@sso.route('/account/setup/<token>/options', methods=['POST'], endpoint='account_setup_options')
+@sso.route('/passkey/enroll/<token>/options', methods=['POST'], endpoint='passkey_enrollment_options')
+def account_setup_options(token):
+    if error := _csrf_error():
+        return error
+    grant = setup_tokens.lookup(token)
+    if not grant or not grant.user.enabled:
+        return flask.jsonify(error='This account setup link has expired or was already used.'), 410
+    user = grant.user
+    options = webauthn_config.registration_options(user)
+    flask.session['account_setup_hash'] = grant.token_hash
+    flask.session['account_setup_challenge'] = bytes_to_base64url(options.challenge)
+    return flask.jsonify(flask.json.loads(options_to_json(options)))
+
+
+@sso.route('/account/setup/<token>/register', methods=['POST'], endpoint='account_setup_register')
+@sso.route('/passkey/enroll/<token>/register', methods=['POST'], endpoint='passkey_enrollment_register')
+def account_setup_register(token):
+    if error := _csrf_error():
+        return error
+    grant = setup_tokens.lookup(token)
+    challenge = flask.session.pop('account_setup_challenge', None)
+    session_hash = flask.session.pop('account_setup_hash', None)
+    payload = flask.request.get_json(silent=True)
+    if not grant or not grant.user.enabled or session_hash != grant.token_hash or not challenge or not payload:
+        return flask.jsonify(error='This account setup link has expired. Start again with a new link.'), 410
     user = grant.user
     try:
         registration = webauthn_config.register_credential(user, payload, challenge)
@@ -89,15 +202,12 @@ def passkey_enrollment_register(token):
             user.email, exc.reason,
         )
         return flask.jsonify(error=str(exc)), exc.status
-    consumed = models.PasskeyEnrollment.query.filter_by(token_hash=token_hash).filter(
-        models.PasskeyEnrollment.expires_at > datetime.now(timezone.utc),
-    ).delete(synchronize_session=False)
-    if consumed != 1:
+    if not setup_tokens.consume(token):
         models.db.session.rollback()
-        return flask.jsonify(error='This enrollment link has expired or was already used.'), 410
+        return flask.jsonify(error='This account setup link has expired or was already used.'), 410
     user.passkey_enroll_next_login = False
     models.db.session.commit()
-    flask.session.pop('passkey_enrollment_hash', None)
+    flask.session.pop('account_setup_hash', None)
     if (flask_login.current_user.is_authenticated
             and flask_login.current_user.email == user.email
             and 'passkey_enrollment' in flask.session.get(auth_flow.SESSION_ACTIONS, [])):
@@ -105,8 +215,41 @@ def passkey_enrollment_register(token):
         return flask.jsonify(ok=True, redirect=response.location)
     flask_login.logout_user()
     flask.session.clear()
-    flask.flash(_('Passkey added. You can now sign in with it.'), 'success')
+    flask.flash(_('Passkey added. You can now sign in.'), 'success')
     return flask.jsonify(ok=True, redirect=flask.url_for('sso.login'))
+
+
+@sso.route('/account/setup/<token>/password', methods=['POST'])
+def account_setup_password(token):
+    grant = setup_tokens.lookup(token)
+    if not grant or not grant.user.enabled:
+        flask.abort(404)
+    user = grant.user
+    if _account_setup_requires_passkey(user) or user.passkeys:
+        flask.abort(403)
+
+    form = forms.AccountSetupForm()
+    if form.validate_on_submit():
+        if form.pw.data != form.pw.data.strip():
+            form.pw.errors.append(_('Passwords should not start or end with whitespaces'))
+        elif msg := utils.isBadOrPwned(form):
+            form.pw.errors.append(msg)
+        else:
+            if not setup_tokens.consume(token):
+                models.db.session.rollback()
+                return flask.jsonify(error='This setup link has expired or was already used.'), 410
+            user.set_password(form.pw.data)
+            user.change_pw_next_login = False
+            models.db.session.commit()
+            flask_login.logout_user()
+            flask.session.clear()
+            flask.flash(_('Password set. You can now sign in.'), 'success')
+            return flask.redirect(flask.url_for('sso.login'))
+
+    return _render_account_setup(
+        user, token, password_form=form,
+        status=400 if flask.request.method == 'POST' else 200,
+    )
 
 
 @sso.route('/passkey/options', methods=['POST'])

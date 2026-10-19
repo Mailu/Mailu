@@ -175,16 +175,16 @@ def test_user_edit_enrollment_link_is_copyable_not_clickable(client, user):
     with client.session_transaction() as session:
         session['_user_id'] = admin.email
         session['_fresh'] = True
-        session['new_passkey_enrollment_url'] = 'https://mail.example/sso/passkey/enroll/one-time-token'
-        session['new_passkey_enrollment_expires_at'] = datetime.now(timezone.utc)
+        session['new_account_setup_url'] = 'https://mail.example/sso/account/setup/one-time-token'
+        session['new_account_setup_expires_at'] = datetime.now(timezone.utc)
 
     response = client.get(f'/admin/user/edit/{user.email}')
 
     assert response.status_code == 200
     assert b'Copy to clipboard' in response.data
-    assert b'data-clipboard-target="#passkey-enrollment-link"' in response.data
-    assert b'https://mail.example/sso/passkey/enroll/one-time-token' in response.data
-    assert b'href="https://mail.example/sso/passkey/enroll/one-time-token"' not in response.data
+    assert b'data-clipboard-target="#account-setup-link"' in response.data
+    assert b'https://mail.example/sso/account/setup/one-time-token' in response.data
+    assert b'href="https://mail.example/sso/account/setup/one-time-token"' not in response.data
 
 
 def test_user_cannot_open_another_users_passkey_page(client, user):

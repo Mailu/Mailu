@@ -1,5 +1,6 @@
-from mailu import models, utils, openpgp, announcements
-from datetime import date, datetime
+from mailu import models, utils, openpgp, announcements, setup_tokens
+from datetime import date, datetime, timedelta, timezone
+import hashlib
 from markupsafe import escape
 from mailu.ui import ui, access, forms
 from flask import current_app as app
@@ -40,29 +41,30 @@ def user_create(domain_name):
         return flask.redirect(
             flask.url_for('.user_list', domain_name=domain.name))
     form = forms.UserForm()
-    password_disabled = app.config.get('PASSKEY_REQUIRED', False)
-    form.pw.validators = [] if password_disabled else [wtforms.validators.DataRequired()]
     max_quota_bytes = min(domain.max_quota_bytes or forms.MAX_QUOTA_BYTES, forms.MAX_QUOTA_BYTES)
     form.quota_bytes.validators = [
         wtforms.validators.NumberRange(min=0, max=max_quota_bytes)]
     form.quota_bytes.default = min(int(app.config['DEFAULT_QUOTA']), max_quota_bytes)
     if form.validate_on_submit():
-        if msg := utils.isBadOrPwned(form):
-            flask.flash(msg, "error")
-            return flask.render_template('user/create.html',
-                domain=domain, form=form, max_quota_bytes=max_quota_bytes)
         if domain.has_email(form.localpart.data):
             flask.flash('Email is already used', 'error')
         else:
             user = models.User(domain=domain)
             form.populate_obj(user)
-            user.set_password(form.pw.data or secrets.token_urlsafe())
+            user.change_pw_next_login = False
+            user.set_password(secrets.token_urlsafe(32))
             models.db.session.add(user)
+            raw_token, expires_at = setup_tokens.issue(
+                user, app.config['ACCOUNT_SETUP_TOKEN_TTL'],
+            )
             models.db.session.commit()
             user.send_welcome()
-            flask.flash('User %s created' % user)
-            return flask.redirect(
-                flask.url_for('.user_list', domain_name=domain.name))
+            flask.session['new_account_setup_url'] = flask.url_for(
+                'sso.account_setup', token=raw_token, _external=True,
+            )
+            flask.session['new_account_setup_expires_at'] = expires_at
+            flask.flash('User %s created. Copy the one-time setup link below.' % user)
+            return flask.redirect(flask.url_for('.user_edit', user_email=user.email))
     elif not form.is_submitted():
         # only (re)apply the dynamic field defaults on the initial GET; on a
         # failed submit keep the entered values and validation errors
@@ -85,17 +87,9 @@ def user_edit(user_email):
     form = forms.UserForm(obj=user)
     wtforms_components.read_only(form.localpart)
     form.localpart.validators = []
-    password_disabled = app.config.get('PASSKEY_REQUIRED', False)
-    if user.passkeys or password_disabled:
-        form.pw.validators = []
-        form.pw2.validators = []
     form.quota_bytes.validators = [
         wtforms.validators.NumberRange(min=0, max=max_quota_bytes)]
     if form.validate_on_submit():
-        if form.pw.data and not user.passkeys and not password_disabled:
-            if msg := utils.isBadOrPwned(form):
-                flask.flash(msg, "error")
-                return _render_user_edit(form, user, max_quota_bytes)
         keep_passkey_enrollment_flag = (
             user.passkey_enroll_next_login
             if user.domain.passkey_require_enrollment
@@ -104,8 +98,6 @@ def user_edit(user_email):
         form.populate_obj(user)
         if keep_passkey_enrollment_flag is not None:
             user.passkey_enroll_next_login = keep_passkey_enrollment_flag
-        if form.pw.data and not user.passkeys and not password_disabled:
-            user.set_password(form.pw.data, keep_sessions=set(flask.session))
         models.db.session.commit()
         flask.flash('User %s updated' % user)
         return flask.redirect(
@@ -123,8 +115,8 @@ def _render_user_edit(form, user, max_quota_bytes):
         'user/edit.html', form=form, user=user, domain=user.domain,
         max_quota_bytes=max_quota_bytes,
         can_generate_enrollment_link=can_generate_enrollment_link,
-        enrollment_url=flask.session.pop('new_passkey_enrollment_url', None),
-        enrollment_expires_at=flask.session.pop('new_passkey_enrollment_expires_at', None),
+        account_setup_url=flask.session.pop('new_account_setup_url', None),
+        account_setup_expires_at=flask.session.pop('new_account_setup_expires_at', None),
     )
 
 
@@ -333,14 +325,54 @@ def user_signup(domain_name=None):
     else:
         form = forms.UserSignupFormCaptcha()
 
+    requested_method = (
+        flask.request.form.get('signup_method')
+        if flask.request.method == 'POST'
+        else flask.request.args.get('method')
+    )
+    signup_method = requested_method if requested_method in ('password', 'passkey') else 'passkey'
+    if app.config.get('PASSKEY_REQUIRED', False):
+        signup_method = 'passkey'
+    if signup_method == 'passkey':
+        form.pw.validators = []
+        form.pw2.validators = []
+
     if form.validate_on_submit():
         if domain.has_email(form.localpart.data) or models.Alias.resolve(form.localpart.data, domain_name):
             flask.flash('Email is already used', 'error')
+            return flask.render_template(
+                'user/signup.html', domain=domain, form=form,
+                signup_method=signup_method,
+            )
         else:
-            if msg := utils.isBadOrPwned(form):
+            if signup_method != 'passkey' and app.config.get('PASSKEY_REQUIRED', False):
+                flask.flash('Password sign-up is disabled because passkeys are required.', 'error')
+                return flask.render_template(
+                    'user/signup.html', domain=domain, form=form,
+                    signup_method=signup_method,
+                )
+            if signup_method != 'passkey' and (msg := utils.isBadOrPwned(form)):
                 flask.flash(msg, "error")
-                return flask.render_template('user/signup.html', domain=domain, form=form)
+                return flask.render_template(
+                    'user/signup.html', domain=domain, form=form,
+                    signup_method=signup_method,
+                )
             flask.session.regenerate()
+            if signup_method == 'passkey':
+                token = secrets.token_urlsafe(32)
+                flask.session['pending_passkey_signup'] = {
+                    'token_hash': hashlib.sha256(token.encode()).hexdigest(),
+                    'email': f'{form.localpart.data}@{domain.name}'.lower(),
+                    'domain_name': domain.name,
+                    'quota_bytes': quota_bytes,
+                    'expires_at': (datetime.now(timezone.utc) + timedelta(
+                        seconds=app.config['ACCOUNT_SETUP_TOKEN_TTL'],
+                    )).timestamp(),
+                }
+                return flask.redirect(flask.url_for(
+                    'sso.passkey_signup', token=token,
+                ))
+
             user = models.User(domain=domain)
             form.populate_obj(user)
             user.change_pw_next_login = True
@@ -351,4 +383,7 @@ def user_signup(domain_name=None):
             user.send_welcome()
             flask.flash('Successfully signed up %s' % user)
             return flask.redirect(flask.url_for('.index'))
-    return flask.render_template('user/signup.html', domain=domain, form=form)
+    return flask.render_template(
+        'user/signup.html', domain=domain, form=form,
+        signup_method=signup_method,
+    )

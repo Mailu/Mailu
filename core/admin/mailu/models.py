@@ -897,8 +897,8 @@ class Passkey(Base):
     user = db.relationship('User', back_populates='passkeys')
 
 
-class PasskeyEnrollment(Base):
-    """A short-lived, single-use passkey enrollment grant."""
+class AccountSetupToken(Base):
+    """A short-lived, single-use grant to set an account password or passkey."""
 
     __tablename__ = 'passkey_enrollment'
 
@@ -906,6 +906,11 @@ class PasskeyEnrollment(Base):
     user_email = db.Column(db.String(255), db.ForeignKey('user.email', ondelete='CASCADE'), nullable=False, index=True)
     expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
     user = db.relationship('User')
+
+
+# Keep the old Python name for integrations while the existing database table
+# is still named passkey_enrollment.
+PasskeyEnrollment = AccountSetupToken
 
 
 class Alias(Base, Email):

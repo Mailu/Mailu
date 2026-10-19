@@ -11,13 +11,52 @@
 {%- block content %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
+  {% if config['PASSKEY_REQUIRED'] %}
+    <input type="hidden" name="signup_method" value="passkey">
+  {% else %}
+    <input type="hidden" name="signup_method" id="signup-method" value="{{ signup_method }}">
+  {% endif %}
   {%- call macros.card() %}
   {{ macros.form_field(form.localpart, append='<span class="input-group-text">@'+domain.name+'</span>', autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false") }}
-  {{ macros.form_fields((form.pw, form.pw2)) }}
   {%- if form.captcha %}
     {{ macros.form_field(form.captcha, autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false") }}
   {%- endif %}
-  {{ macros.form_field(form.submit) }}
+  {% if config['PASSKEY_REQUIRED'] %}
+    <p class="text-body-secondary">{% trans %}This server requires passkeys. Create your account with a passkey.{% endtrans %}</p>
+    <button class="btn btn-primary" type="submit" formnovalidate>{% trans %}Sign up with a passkey{% endtrans %}</button>
+  {% else %}
+    <div class="btn-group mb-3" role="group" aria-label="{% trans %}Signup method{% endtrans %}">
+      <button class="btn btn-outline-primary{% if signup_method == 'passkey' %} active{% endif %}" type="button" data-signup-choice="passkey" aria-pressed="{{ 'true' if signup_method == 'passkey' else 'false' }}">{% trans %}Passkey{% endtrans %}</button>
+      <button class="btn btn-outline-primary{% if signup_method == 'password' %} active{% endif %}" type="button" data-signup-choice="password" aria-pressed="{{ 'true' if signup_method == 'password' else 'false' }}">{% trans %}Password{% endtrans %}</button>
+    </div>
+    <section data-signup-panel="passkey"{% if signup_method != 'passkey' %} hidden{% endif %}>
+      <p class="text-body-secondary">{% trans %}Create your account with a passkey. You can use it to sign in without a password.{% endtrans %}</p>
+      <button class="btn btn-primary" type="submit" formnovalidate>{% trans %}Sign up with a passkey{% endtrans %}</button>
+    </section>
+    <section data-signup-panel="password"{% if signup_method != 'password' %} hidden{% endif %}>
+      <p class="text-body-secondary">{% trans %}Create your account with a password.{% endtrans %}</p>
+      {{ macros.form_fields((form.pw, form.pw2)) }}
+      <button class="btn btn-primary" type="submit">{% trans %}Sign up with a password{% endtrans %}</button>
+    </section>
+  {% endif %}
   {%- endcall %}
 </form>
+{% if not config['PASSKEY_REQUIRED'] %}
+<script>
+  document.querySelectorAll('[data-signup-choice]').forEach(button => {
+    button.addEventListener('click', () => {
+      const choice = button.dataset.signupChoice;
+      document.getElementById('signup-method').value = choice;
+      document.querySelectorAll('[data-signup-choice]').forEach(option => {
+        const selected = option === button;
+        option.classList.toggle('active', selected);
+        option.setAttribute('aria-pressed', selected);
+      });
+      document.querySelectorAll('[data-signup-panel]').forEach(panel => {
+        panel.hidden = panel.dataset.signupPanel !== choice;
+      });
+    });
+  });
+</script>
+{% endif %}
 {%- endblock %}

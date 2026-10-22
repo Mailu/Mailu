@@ -71,6 +71,11 @@
   </table>
 </div>
 <hr class="my-4">
+{% if user.email == demo_account_email %}
+<div class="alert alert-info mb-0" role="alert">
+  {% trans %}Password changes and passkey creation are disabled for this user on the demo server. You can create other users to try these features.{% endtrans %}
+</div>
+{% else %}
 <div class="d-flex align-items-start mb-3">
   <i class="fa-solid fa-key text-primary me-3 mt-1" aria-hidden="true"></i>
   <div>
@@ -90,7 +95,9 @@
   <button class="btn btn-primary" id="add-passkey" type="submit"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>{% trans %}Add passkey{% endtrans %}</button>
 </form>
 <div id="passkey-error" class="alert alert-danger mt-3 d-none" role="alert" aria-live="polite"></div>
+{% endif %}
 {%- endcall %}
+{% if user.email != demo_account_email %}
 <script>
 (() => {
   const decode = value => Uint8Array.from(atob(value.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
@@ -155,4 +162,5 @@
   });
 })();
 </script>
+{% endif %}
 {%- endblock %}

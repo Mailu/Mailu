@@ -5,7 +5,7 @@ from flask_babel import lazy_gettext as _
 from webauthn import options_to_json
 from webauthn.helpers import bytes_to_base64url, base64url_to_bytes
 
-from mailu import models, passkeys as webauthn_config, auth_flow, setup_tokens
+from mailu import models, utils, passkeys as webauthn_config, auth_flow, setup_tokens
 from mailu.ui import ui, access
 
 
@@ -52,6 +52,7 @@ def _render_passkey_list(user, required_enrollment=False, restricted_navigation=
         delete_form=FlaskForm(),
         required_enrollment=required_enrollment,
         restricted_navigation=restricted_navigation,
+        demo_account_email=utils.DEMO_ACCOUNT_EMAIL,
     )
 
 
@@ -80,6 +81,8 @@ def account_setup_link(user_email):
 def passkey_registration_options(user_email):
     user_email = user_email or flask_login.current_user.email
     user = models.db.session.get(models.User, user_email) or flask.abort(404)
+    if utils.is_demo_account(user):
+        return flask.jsonify(error=utils.DEMO_ACCOUNT_NOTICE), 403
     actor = flask_login.current_user
     domain = user.domain
     flask.current_app.logger.debug(
@@ -101,6 +104,8 @@ def passkey_registration_options(user_email):
 def passkey_register(user_email):
     user_email = user_email or flask_login.current_user.email
     user = models.db.session.get(models.User, user_email) or flask.abort(404)
+    if utils.is_demo_account(user):
+        return flask.jsonify(error=utils.DEMO_ACCOUNT_NOTICE), 403
     actor = flask_login.current_user
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
     challenge = flask.session.pop(_challenge_key(), None)

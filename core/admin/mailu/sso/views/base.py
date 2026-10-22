@@ -83,6 +83,11 @@ def login(target):
 @sso.route('/pw_change', methods=['GET', 'POST'])
 @access.authenticated
 def pw_change():
+    if utils.is_demo_account(flask_login.current_user):
+        return flask.render_template(
+            'pw_change.html', form=forms.PWChangeForm(), required_change=False,
+            demo_account_email=utils.DEMO_ACCOUNT_EMAIL,
+        )
     if flask_login.current_user.passkeys or app.config.get('PASSKEY_REQUIRED', False):
         flask.flash(_('Password sign-in is disabled because passkeys are required.'), 'info')
         return flask.redirect(flask.url_for('ui.passkey_list'))
@@ -118,6 +123,7 @@ def pw_change():
             flask_login.current_user.change_pw_next_login
             or 'password_change' in flask.session.get(auth_flow.SESSION_ACTIONS, [])
         ),
+        demo_account_email=utils.DEMO_ACCOUNT_EMAIL,
     )
 
 @sso.route('/logout', methods=['GET'])

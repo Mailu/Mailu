@@ -1,3 +1,33 @@
+{%- macro color_mode_init() %}
+  <script>
+    // Apply before styles load to avoid a light flash. AdminLTE handles toggling.
+    (() => {
+      let theme = 'auto';
+      try {
+        const stored = localStorage.getItem('lte-theme');
+        if (['light', 'dark', 'auto'].includes(stored)) theme = stored;
+        localStorage.setItem('lte-theme', theme);
+      } catch (_) {}
+      document.documentElement.dataset.bsTheme = theme === 'auto'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme;
+      document.documentElement.setAttribute('data-lte-theme-resolved', '');
+    })();
+  </script>
+{%- endmacro %}
+
+{%- macro color_mode_toggle() %}
+  <div class="dropdown">
+    <button class="btn btn-sm btn-link text-body dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i> {{ _('Appearance') }}
+    </button>
+    <div class="dropdown-menu dropdown-menu-end">
+      <button class="dropdown-item" type="button" data-bs-theme-value="light" aria-pressed="false">{{ _('Light') }}</button>
+      <button class="dropdown-item" type="button" data-bs-theme-value="dark" aria-pressed="false">{{ _('Dark') }}</button>
+      <button class="dropdown-item" type="button" data-bs-theme-value="auto" aria-pressed="false">{{ _('System') }}</button>
+    </div>
+  </div>
+{%- endmacro %}
+
 {%- macro form_errors(form) %}
   {%- if form.errors %}
     {%- for fieldname, errors in form.errors.items() %}

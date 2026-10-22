@@ -136,7 +136,28 @@ th[aria-sort="descending"] .mailu-table-sort::after {
 
 .mailu-composer .ql-editor { min-height: 20rem; font: inherit; }
 .mailu-composer .ql-container { height: auto; }
-.mailu-composer .ql-toolbar, .mailu-composer .ql-container { border-color: var(--bs-border-color); }
+.mailu-composer .ql-toolbar.ql-snow, .mailu-composer .ql-container.ql-snow { border-color: var(--bs-border-color); }
+/* Reuse Bootstrap's palette for widgets that ship with hardcoded colors. */
+.mailu-composer .ql-snow .ql-picker,
+.mailu-composer .ql-snow .ql-picker.ql-expanded .ql-picker-label { color: var(--bs-body-color); }
+.mailu-composer .ql-snow .ql-picker-options,
+.mailu-composer .ql-snow .ql-tooltip,
+.mailu-composer .ql-snow .ql-tooltip input[type=text] {
+  background-color: var(--bs-body-bg);
+  border-color: var(--bs-border-color);
+  color: var(--bs-body-color);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+.mailu-composer .ql-toolbar.ql-snow .ql-picker.ql-expanded :is(.ql-picker-label, .ql-picker-options) { border-color: var(--bs-border-color); }
+.mailu-composer .ql-editor.ql-blank::before { color: var(--bs-secondary-color); }
+.mailu-composer .ql-snow a,
+.mailu-composer .ql-snow :is(button:hover, button:focus, button.ql-active, .ql-picker-label:hover, .ql-picker-item:hover, .ql-picker-item.ql-selected) { color: var(--bs-link-color); }
+/* Quill sets icon colors separately for each hover/focus/selected state. */
+.mailu-composer .ql-snow :is(.ql-stroke, .ql-stroke-miter) { stroke: currentColor !important; }
+.mailu-composer .ql-snow .ql-fill { fill: currentColor !important; }
+.ts-wrapper.multi .ts-control > div { background: var(--bs-secondary-bg); color: var(--bs-body-color); }
+.ts-wrapper.multi .ts-control > div.active { background: var(--bs-primary); color: var(--bs-white); }
+.ts-dropdown :is(.optgroup-header, .create) { color: var(--bs-secondary-color); }
 .mailu-row-actions summary, details > summary { cursor: pointer; }
 .mailu-row-actions a { white-space: nowrap; text-decoration: none; padding: .3rem .25rem; }
 .mailu-message { overflow-wrap: anywhere; }
@@ -162,7 +183,25 @@ th[aria-sort="descending"] .mailu-table-sort::after {
 .mailu-count-link:hover { text-decoration: underline; }
 .mailu-domain-actions { display: flex; align-items: center; gap: .35rem; }
 
-#reply-calendar { font-size: .875rem; }
+#reply-calendar {
+  font-size: .875rem;
+  --fc-monarch-background: var(--bs-body-bg);
+  --fc-monarch-foreground: var(--bs-body-color);
+  --fc-monarch-faint-foreground: var(--bs-secondary-color);
+  --fc-monarch-muted-foreground: var(--bs-secondary-color);
+  --fc-monarch-border: var(--bs-border-color);
+  --fc-monarch-strong-border: var(--bs-border-color);
+  --fc-monarch-primary: var(--bs-primary);
+  --fc-monarch-primary-foreground: var(--bs-white);
+  --fc-monarch-event: var(--bs-primary);
+  --fc-monarch-event-contrast: var(--bs-white);
+  --fc-monarch-popover: var(--bs-body-bg);
+  --fc-monarch-popover-foreground: var(--bs-body-color);
+  --fc-monarch-secondary: var(--bs-primary-bg-subtle);
+  --fc-monarch-secondary-foreground: var(--bs-primary-text-emphasis);
+  --fc-monarch-secondary-over: var(--bs-secondary-bg);
+  --fc-monarch-secondary-down: var(--bs-tertiary-bg);
+}
 #reply-calendar .fc-toolbar-title { font-size: 1.1rem; }
 #reply-calendar .fc-daygrid-day { cursor: crosshair; }
 [data-autoreply] .ql-editor { min-height: 20rem; }

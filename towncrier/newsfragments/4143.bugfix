@@ -1,0 +1,1 @@
+Mitigate known PHP2Shell attack paths (CVE-2026-109618 and CVE-2026-109619) in webmail pending a patched PHP runtime.

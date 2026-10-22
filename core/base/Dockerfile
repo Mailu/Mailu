@@ -2,7 +2,7 @@
 
 # base system image (intermediate)
 # When updating this tag, first mirror it with .github/workflows/mirror.yml.
-ARG DISTRO=ghcr.io/mailu/alpine:3.24.2
+ARG DISTRO=ghcr.io/mailu/alpine:3.24.3
 FROM $DISTRO AS system
 
 ENV TZ=Etc/UTC LANG=C.UTF-8

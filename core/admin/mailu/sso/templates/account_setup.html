@@ -5,6 +5,11 @@
 {% block content %}
 <p class="text-body-secondary">{% trans %}Set up sign-in for{% endtrans %} <strong>{{ user.email }}</strong>.</p>
 
+{% if user.email == demo_account_email %}
+<div class="alert alert-info" role="alert">
+  {% trans %}Password changes and passkey creation are disabled for this user on the demo server. You can create other users to try these features.{% endtrans %}
+</div>
+{% else %}
 {% if allow_password %}
 <section class="mb-4">
   <h2 class="h5">{% trans %}Set a password{% endtrans %}</h2>
@@ -92,4 +97,5 @@
   });
 })();
 </script>
+{% endif %}
 {% endblock %}

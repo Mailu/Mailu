@@ -48,6 +48,7 @@ def _render_account_setup(user, token, password_form=None, registration_form=Non
         password_form=password_form or forms.AccountSetupForm(),
         registration_form=registration_form or FlaskForm(),
         allow_password=allow_password,
+        demo_account_email=utils.DEMO_ACCOUNT_EMAIL,
         passkey_options_url=passkey_options_url or flask.url_for(
             'sso.account_setup_options', token=token,
         ),
@@ -176,6 +177,8 @@ def account_setup_options(token):
     if not grant or not grant.user.enabled:
         return flask.jsonify(error='This account setup link has expired or was already used.'), 410
     user = grant.user
+    if utils.is_demo_account(user):
+        return flask.jsonify(error=utils.DEMO_ACCOUNT_NOTICE), 403
     options = webauthn_config.registration_options(user)
     flask.session['account_setup_hash'] = grant.token_hash
     flask.session['account_setup_challenge'] = bytes_to_base64url(options.challenge)
@@ -194,6 +197,8 @@ def account_setup_register(token):
     if not grant or not grant.user.enabled or session_hash != grant.token_hash or not challenge or not payload:
         return flask.jsonify(error='This account setup link has expired. Start again with a new link.'), 410
     user = grant.user
+    if utils.is_demo_account(user):
+        return flask.jsonify(error=utils.DEMO_ACCOUNT_NOTICE), 403
     try:
         registration = webauthn_config.register_credential(user, payload, challenge)
     except webauthn_config.PasskeyRegistrationError as exc:
@@ -225,6 +230,8 @@ def account_setup_password(token):
     if not grant or not grant.user.enabled:
         flask.abort(404)
     user = grant.user
+    if utils.is_demo_account(user):
+        flask.abort(403, utils.DEMO_ACCOUNT_NOTICE)
     if _account_setup_requires_passkey(user) or user.passkeys:
         flask.abort(403)
 

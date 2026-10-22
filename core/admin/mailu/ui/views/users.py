@@ -191,6 +191,11 @@ def _wkd_domain_from_request(domain_name=None):
 def _process_password_change(form, user_email):
     user_email_or_current = user_email or flask_login.current_user.email
     user = models.db.session.get(models.User, user_email_or_current) or flask.abort(404)
+    if utils.is_demo_account(user):
+        return flask.render_template(
+            'user/password.html', form=form, user=user,
+            demo_account_email=utils.DEMO_ACCOUNT_EMAIL,
+        )
     if user.passkeys or app.config.get('PASSKEY_REQUIRED', False):
         flask.flash(utils.flask_babel.gettext('Password sign-in is disabled because passkeys are required.'), 'info')
         return flask.redirect(flask.url_for('.passkey_list', user_email=user.email))
@@ -210,7 +215,10 @@ def _process_password_change(form, user_email):
                     domain_name=user.domain.name))
         else:
             flask.flash('Wrong current password', 'error')
-    return flask.render_template('user/password.html', form=form, user=user)
+    return flask.render_template(
+        'user/password.html', form=form, user=user,
+        demo_account_email=utils.DEMO_ACCOUNT_EMAIL,
+    )
 
 @ui.route('/user/password', methods=['GET', 'POST'], defaults={'user_email': None})
 @access.owner(models.User, 'user_email')

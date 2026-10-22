@@ -59,6 +59,16 @@ resolver = dns.resolver.Resolver()
 resolver.use_edns(0, dns.flags.DO, 1232)
 resolver.flags = dns.flags.AD | dns.flags.RD
 
+DEMO_ACCOUNT_EMAIL = 'admin@test.mailu.io'
+DEMO_ACCOUNT_NOTICE = (
+    'Password changes and passkey creation are disabled for this user on the '
+    'demo server. You can create other users to try these features.'
+)
+
+
+def is_demo_account(user):
+    return user.email == DEMO_ACCOUNT_EMAIL
+
 
 def is_valid_localpart(localpart):
     """Validate an RFC 5321/6531 dot-atom local-part."""

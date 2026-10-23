@@ -34,6 +34,8 @@ import flask_login
 import flask_migrate
 import flask_babel
 import ipaddress
+from ipaddress import IPv4Address, IPv6Address
+
 import redis
 from wonderwords import RandomWord
 
@@ -128,21 +130,28 @@ def has_dane_record(domain, timeout=10):
 # Rate limiter
 limiter = limiter.LimitWraperFactory()
 
+def normalize_ip(ip) -> IPv4Address | IPv6Address:
+    # Dual-stack listeners see IPv4 clients as IPv4-mapped IPv6 addresses (::ffff:a.b.c.d)
+    addr = ipaddress.ip_address(ip)
+    if addr.version == 6 and addr.ipv4_mapped:
+        return addr.ipv4_mapped
+    return addr
+
 def extract_network_from_ip(ip):
-    n = ipaddress.ip_network(ip)
+    n = ipaddress.ip_network(str(normalize_ip(ip)))
     if n.version == 4:
         return str(n.supernet(prefixlen_diff=(32-app.config["AUTH_RATELIMIT_IP_V4_MASK"])).network_address)
     else:
         return str(n.supernet(prefixlen_diff=(128-app.config["AUTH_RATELIMIT_IP_V6_MASK"])).network_address)
 
 def is_exempt_from_ratelimits(ip):
-    ip = ipaddress.ip_address(ip)
+    ip = normalize_ip(ip)
     return any(ip in cidr for cidr in app.config['AUTH_RATELIMIT_EXEMPTION'])
 
 def is_ip_in_subnet(ip, subnets=[]):
     if isinstance(subnets, str):
         subnets = [subnets]
-    ip = ipaddress.ip_address(ip)
+    ip = normalize_ip(ip)
     try:
         return any(ip in cidr for cidr in [ipaddress.ip_network(subnet, strict=False) for subnet in subnets])
     except:

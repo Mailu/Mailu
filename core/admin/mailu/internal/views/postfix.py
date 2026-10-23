@@ -88,6 +88,9 @@ def postfix_transport(email):
             # invalid target (rest should be :port)
             flask.abort(400)
     else:
+        if target.count(':') > 1:
+            # invalid target (unbracketed IPv6 address, must be [host]:port)
+            flask.abort(400)
         if ':' in target:
             host, port = target.rsplit(':', 1)
         else:

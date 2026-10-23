@@ -5,7 +5,6 @@ import glob
 import shutil
 import multiprocessing
 import sys
-import re
 
 from podop import run_server
 from socrate import system, conf
@@ -49,7 +48,13 @@ def is_valid_postconf_line(line):
 
 # Postfix requires IPv6 addresses to be wrapped in square brackets
 if 'RELAYNETS' in os.environ:
-    os.environ["RELAYNETS"] = re.sub(r'([0-9a-fA-F]+:[0-9a-fA-F:]+)/', '[\\1]/', os.environ["RELAYNETS"])
+    relaynets = []
+    for net in os.environ["RELAYNETS"].split(','):
+        addr, sep, prefix = net.strip().partition('/')
+        if ':' in addr and not addr.startswith('['):
+            addr = f'[{addr}]'
+        relaynets.append(addr + sep + prefix)
+    os.environ["RELAYNETS"] = ','.join(relaynets)
 
 context = dict(os.environ, DEFER_ON_TLS_ERROR=env.get('DEFER_ON_TLS_ERROR', True))
 

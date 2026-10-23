@@ -1,10 +1,11 @@
 {%- import "macros.html" as macros %}
 {%- import "bootstrap/utils.html" as utils %}
 <!doctype html>
-<html data-show-password="{{ _('Show password') }}" data-copied="{{ _('Copied') }}" data-copy-failed="{{ _('Copy failed. Select and copy the text.') }}" lang="{{ get_locale() }}" data-static="/static/" data-bs-theme="light">
+<html data-show-password="{{ _('Show password') }}" data-copied="{{ _('Copied') }}" data-copy-failed="{{ _('Copy failed. Select and copy the text.') }}" lang="{{ get_locale() }}" data-static="/static/" data-bs-theme="auto">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ _('Change password') if current_user.is_authenticated else _('Sign in') }} | {{ config['SITENAME'] }}</title>
+  {{ macros.color_mode_init() }}
   <link rel="stylesheet" href="{{ url_for('static', filename='vendor.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
 </head>
@@ -24,10 +25,13 @@
       {% if not current_user.is_authenticated and config['ADMIN'] and signup_domains %} · <a href="{{ url_for('ui.user_signup') }}">{{ _('Sign up') }}</a>{% endif %}
       {% if not current_user.is_authenticated and config['ADMIN'] and config['DOMAIN_REGISTRATION'] %} · <a href="{{ url_for('ui.domain_signup') }}">{{ _('Register a domain') }}</a>{% endif %}
       {% if current_user.is_authenticated %} · <a href="{{ url_for('sso.logout') }}">{{ _('Sign out') }}</a>{% endif %}</div>
+      <div class="d-flex align-items-center gap-2">
+      {{ macros.color_mode_toggle() }}
       <div class="dropdown"><button class="btn btn-sm btn-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">{{ _('Language') }}: {{ get_locale() }}</button>
         <div class="dropdown-menu dropdown-menu-end" id="mailu-languages">
           {% for locale in config.translations.values() %}<a class="dropdown-item" href="{{ url_for('sso.set_language', language=locale) }}">{{ locale.get_language_name().title() }}</a>{% endfor %}
         </div>
+      </div>
       </div>
     </div>
   </main>

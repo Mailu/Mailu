@@ -60,6 +60,10 @@ and ``WEB_WEBMAIL`` paths. Protected-page links return you to the requested page
 sign-in, including after a required password change. All roles continue to open their
 account settings when visiting ``/admin``.
 
+The admin GUI and sign-in page follow your system's light or dark color scheme by default.
+Use **Appearance** to choose **Light**, **Dark**, or **System**. Your choice is saved
+in your browser and shared between the admin GUI and sign-in page.
+
 Only global administrator users have access to all configuration settings and the Rspamd webgui. Other users will be
 presented with settings for only their account, and domains they are managers of.
 To create a user who is a global administrator for a new installation, the Mailu.env file can be adapted.

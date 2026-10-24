@@ -23,6 +23,11 @@ advertises BURL after authentication to the submission service. A mail client
 must implement the relevant extensions to use them; clients without BURL
 support continue to submit message content over SMTP normally.
 
+Roundcube leaves IMAP METADATA available. SnappyMail supports both METADATA and
+PREVIEW, and Mailu enables those capabilities in its SnappyMail defaults.
+Neither webmail currently implements SMTP BURL, so they continue to submit
+message content over SMTP normally.
+
 Treat URLAUTH URLs as authorization-bearing references to mailbox content. Let
 the mail client generate and use these URLs rather than sharing or editing them
 manually.

@@ -34,3 +34,13 @@ def test_front_proxies_submission_auth_to_storage_dovecot():
 
     assert 'reply.proxy_mech = "PLAIN"' in branch
     assert 'reply.proxy_noauth' not in branch
+
+
+def test_snappymail_exposes_supported_imap_metadata_and_preview():
+    config = (ROOT / 'webmails/snappymail/defaults/default.json').read_text()
+    disabled = re.search(r'"disabled_capabilities": \[(.*?)\]', config, re.DOTALL).group(1)
+
+    assert '"METADATA"' not in disabled
+    assert '"PREVIEW"' not in disabled
+    assert '"OBJECTID"' in disabled
+    assert '"STATUS=SIZE"' in disabled

@@ -10,9 +10,10 @@ BURL lets a submission client send a reference to message content already
 available from IMAP instead of downloading that content and uploading it again
 over SMTP. The client obtains an authorized IMAP URL with URLAUTH and submits it
 using BURL (`RFC 4467 <https://www.rfc-editor.org/rfc/rfc4467.html>`_ and
-`RFC 4468 <https://www.rfc-editor.org/rfc/rfc4468.html>`_). Mailu's storage
-Dovecot resolves the URL and passes the resulting message to the normal
-outgoing mail path.
+`RFC 4468 <https://www.rfc-editor.org/rfc/rfc4468.html>`_). For authenticated
+submission, the front proxies the connection to the storage Dovecot service.
+That service resolves the URL and passes the resulting message to Postfix over
+the internal submission relay.
 
 Using these extensions
 ----------------------

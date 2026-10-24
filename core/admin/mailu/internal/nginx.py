@@ -156,7 +156,9 @@ def get_server(protocol, authenticated=False):
         else:
             hostname, port = app.config['SMTP_ADDRESS'], 25
     elif protocol == 'submission':
-        hostname, port = app.config['SMTP_ADDRESS'], 10025
+        # Dovecot on the IMAP service owns the mailbox storage and handles
+        # BURL/URLAUTH before relaying the message to Postfix.
+        hostname, port = app.config['IMAP_ADDRESS'], 2587
     elif protocol == 'lmtp':
         hostname, port = app.config['IMAP_ADDRESS'], 2525
     elif protocol == 'sieve':

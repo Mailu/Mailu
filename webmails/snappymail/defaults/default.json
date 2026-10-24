@@ -32,9 +32,7 @@
         "spam_headers": "",
         "virus_headers": "",
         "disabled_capabilities": [
-            "METADATA",
             "OBJECTID",
-            "PREVIEW",
             "STATUS=SIZE"
         ]
     },

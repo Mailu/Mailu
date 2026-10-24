@@ -80,9 +80,16 @@ os.makedirs(base + "configs", exist_ok=True)
 conf.jinja("/defaults/default.json", context, "/data/_data_/_default_/domains/default.json")
 conf.jinja("/defaults/application.ini", context, "/data/_data_/_default_/configs/application.ini")
 conf.jinja("/defaults/php.ini", context, "/etc/php84/php.ini")
+snappymail_plugin = "/data/_data_/_default_/plugins/mailu-identities"
+shutil.copytree(
+    "/var/www/snappymail/mailu-plugins/mailu-identities",
+    snappymail_plugin,
+    dirs_exist_ok=True,
+)
 
 # setup permissions
 os.system("chown -R mailu:mailu /data")
+os.system(f"chown -R root:root {snappymail_plugin} && chmod -R a-w {snappymail_plugin}")
 
 def demote(username='mailu'):
     def result():

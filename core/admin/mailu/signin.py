@@ -51,7 +51,7 @@ def pending():
     return None
 
 def resolve(target=None):
-    return pending() or target_path(target or default_target())
+    return target_path(target) if target else pending() or target_path(default_target())
 
 def clear():
     flask.session.pop(KEY, None)

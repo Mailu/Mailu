@@ -72,8 +72,101 @@ class mailu extends rcube_plugin
 
   function login($args)
   {
+    $this->sync_identities();
     header('Location: index.php', true, 302);
     exit();
+  }
+
+  /**
+   * Keep Mailu-managed sender aliases in sync after a successful SSO login.
+   * User-created identities are left alone; only identities recorded in the
+   * user's Roundcube preferences are removed when Mailu no longer provides
+   * the corresponding alias.
+   */
+  private function sync_identities()
+  {
+    if (($_SERVER['HTTP_X_REMOTE_USER_ALIASES_COMPLETE'] ?? '') !== 'true') {
+      return;
+    }
+
+    $rcmail = rcmail::get_instance();
+    $aliases = [];
+    foreach (explode(',', $_SERVER['HTTP_X_REMOTE_USER_ALIASES'] ?? '') as $email) {
+      if (!$email || strpos($email, '@') === false) {
+        continue;
+      }
+      $email = strtolower(rcube_utils::idn_to_ascii($email));
+      $aliases[$email] = true;
+    }
+
+    $prefs = $rcmail->user->get_prefs();
+    $previously_managed = $prefs['mailu_alias_identities'] ?? [];
+    if (!is_array($previously_managed)) {
+      $previously_managed = [];
+    }
+    $previously_managed = array_filter($previously_managed, 'is_string');
+    $previously_managed = array_fill_keys(array_map('strtolower', $previously_managed), true);
+
+    $identities = $rcmail->user->list_identities();
+    $identities_by_email = [];
+    foreach ($identities as $identity) {
+      $email = strtolower(rcube_utils::idn_to_ascii($identity['email']));
+      $identities_by_email[$email] = $identity;
+    }
+
+    $managed = [];
+
+    foreach ($previously_managed as $email => $_) {
+      if (isset($aliases[$email])) {
+        if (isset($identities_by_email[$email])) {
+          $managed[$email] = true;
+        }
+        continue;
+      }
+
+      if (!isset($identities_by_email[$email])) {
+        continue;
+      }
+      $identity = $identities_by_email[$email];
+      if (!empty($identity['standard']) || $rcmail->user->delete_identity($identity['identity_id']) !== true) {
+        $managed[$email] = true;
+      }
+      unset($identities_by_email[$email]);
+    }
+
+    $default_identity = $rcmail->user->get_identity();
+    foreach ($aliases as $email => $_) {
+      if (isset($identities_by_email[$email])) {
+        // Do not claim or later delete identities that the user created.
+        continue;
+      }
+
+      $record = [
+        'user_id' => $rcmail->user->ID,
+        'standard' => 0,
+        'name' => $default_identity['name'] ?? '',
+        'email' => $email,
+        'organization' => $default_identity['organization'] ?? '',
+        'reply-to' => '',
+        'bcc' => '',
+        'signature' => $default_identity['signature'] ?? '',
+        'html_signature' => $default_identity['html_signature'] ?? 0,
+      ];
+      $plugin = $rcmail->plugins->exec_hook('identity_create', [
+        'login' => true,
+        'record' => $record,
+      ]);
+
+      if (!empty($plugin['abort']) || empty($plugin['record']['email'])
+          || !$rcmail->user->insert_identity($plugin['record'])) {
+        continue;
+      }
+      $managed[strtolower(rcube_utils::idn_to_ascii($plugin['record']['email']))] = true;
+    }
+
+    $rcmail->user->save_prefs([
+      'mailu_alias_identities' => array_keys($managed),
+    ]);
   }
 
   function login_failed($args)

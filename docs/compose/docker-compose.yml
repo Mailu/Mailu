@@ -83,8 +83,9 @@ services:
     image: mailu/postfix:$VERSION
     restart: always
     env_file: .env
-    # Postfix's postdrop helper requires setgid execution, so no-new-privileges
-    # cannot be enabled for this container.
+    # Keep no-new-privileges disabled here: postdrop relies on setgid execution
+    # to write to the maildrop queue. CAP_SETGID does not restore that transition,
+    # and group_add would expose the postdrop group to inheriting processes.
     cap_drop:
       - ALL
     cap_add:

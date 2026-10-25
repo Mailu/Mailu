@@ -6,6 +6,7 @@ import os.path
 import time
 import logging as log
 import sys
+import subprocess
 from socrate import system, supervisor
 
 os.system("chown mailu:mailu -R /dkim")
@@ -25,11 +26,19 @@ admin_secrets = {
     if name in os.environ
 }
 
-os.system("flask mailu advertise")
-if os.system("flask db upgrade") != 0:
+def run_as_mailu(*command):
+    """Run initialization commands as the user that owns admin state."""
+    return subprocess.run(
+        command,
+        preexec_fn=lambda: system.drop_privs_to("mailu"),
+        check=False,
+    ).returncode
+
+run_as_mailu("flask", "mailu", "advertise")
+if run_as_mailu("flask", "db", "upgrade") != 0:
     log.critical("Database migrations failed; refusing to start the admin service")
     sys.exit(1)
-if os.system("flask mailu import-legacy-dkim-keys") != 0:
+if run_as_mailu("flask", "mailu", "import-legacy-dkim-keys") != 0:
     log.critical("Importing legacy DKIM keys failed; refusing to start the admin service")
     sys.exit(1)
 
@@ -40,7 +49,7 @@ password = os.environ.get("INITIAL_ADMIN_PW")
 if account is not None and domain is not None and password is not None:
     mode = os.environ.get("INITIAL_ADMIN_MODE", default="ifmissing")
     log.info("Creating initial admin account %s@%s with mode %s", account, domain, mode)
-    os.system("flask mailu admin %s %s '%s' --mode %s" % (account, domain, password, mode))
+    run_as_mailu("flask", "mailu", "admin", account, domain, password, "--mode", mode)
 
 def test_unsupported():
     import codecs

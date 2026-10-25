@@ -272,7 +272,8 @@ def passkey_authentication_options():
         destination = flask.current_app.config['WEB_WEBMAIL']
     else:
         return flask.jsonify(error='Invalid sign-in destination.'), 400
-    destination = signin.pending() or destination
+    if payload.get('explicit') is not True:
+        destination = signin.pending() or destination
     flask.session['passkey_login_destination'] = destination
     user = models.User.get(email) if email else None
     credentials = user.passkeys if user and user.enabled else []

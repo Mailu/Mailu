@@ -81,6 +81,28 @@ def user_authentication():
         email = flask_login.current_user.get_id()
         response.headers["X-User"] = models.IdnaEmail.process_bind_param(flask_login, email, "")
         response.headers["X-User-Token"] = utils.gen_temp_token(email, flask.session)
+        original_uri = flask.request.headers.get("X-Mailu-Original-URI", "").split("?", 1)[0]
+        if original_uri.endswith("/sso.php"):
+            storage_email = models.IdnaEmail.process_bind_param(flask_login, email, "")
+            aliases = models.Alias.query.filter(
+                sqlalchemy.cast(models.Alias.destination, sqlalchemy.String).contains(
+                    storage_email, autoescape=True
+                )
+            ).all()
+            addresses = sorted({
+                models.IdnaEmail.process_bind_param(flask_login, alias.email, "")
+                for alias in aliases
+                if not alias.wildcard
+                and not alias.disabled
+                and (not alias.owner or alias.owner.enabled)
+                and storage_email in alias.destination
+            })
+            serialized_aliases = ",".join(addresses)
+            if len(serialized_aliases) <= 2048:
+                response.headers["X-User-Aliases"] = serialized_aliases
+                response.headers["X-User-Aliases-Complete"] = "true"
+            else:
+                response.headers["X-User-Aliases-Complete"] = "false"
         return response
     return flask.abort(403)
 

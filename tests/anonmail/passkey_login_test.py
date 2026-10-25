@@ -1,10 +1,11 @@
 import re
 import pytest
+import time
 from datetime import datetime, timezone
 from types import SimpleNamespace
 from webauthn.helpers import bytes_to_base64url
 
-from mailu import models
+from mailu import models, signin
 
 
 def get_csrf_token(client):
@@ -60,6 +61,23 @@ def test_login_page_supports_conditional_passkeys_and_destination_changes(client
     assert b"destinationField.addEventListener('change'" in response.data
     assert b"form.addEventListener('submit', cancelAttempt" in response.data
     assert b"submitButtons.forEach" in response.data
+
+
+def test_explicit_destination_overrides_pending_webmail_return(app, client):
+    with app.test_request_context('/sso/login'):
+        signin.remember('/webmail/?homepage')
+        assert signin.resolve('admin') == app.config['WEB_ADMIN']
+
+    with client.session_transaction() as session:
+        session[signin.KEY] = {
+            'path': '/webmail/?homepage',
+            'expires': time.time() + 1800,
+        }
+
+    response = client.post('/sso/passkey/options', json={'target': 'admin', 'explicit': True})
+    assert response.status_code == 200
+    with client.session_transaction() as session:
+        assert session['passkey_login_destination'] == app.config['WEB_ADMIN']
 
 
 def test_password_login_redirects_after_nudge_flash(client, user):

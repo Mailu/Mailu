@@ -46,6 +46,18 @@ def test_explicit_route_overrides_pending_link(client, users):
     client.get('/sso/login/webmail')
     assert password_login(client, '/sso/login/webmail').location == '/webmail'
 
+def test_explicit_destination_selection_overrides_pending_link(client, users):
+    client.get(
+        '/sso/login',
+        query_string={'url': 'http://localhost/webmail/?return=mail'},
+    )
+    response = password_login(
+        client,
+        destination='admin',
+        destination_explicit='1',
+    )
+    assert response.location == '/admin'
+
 @pytest.mark.parametrize('url', ['https://evil.example/', '//evil.example/', 'https://localhost.evil.example/', '/sso/login', '/\\evil.example/'])
 def test_legacy_external_redirect_rejected(client, users, url):
     client.get('/sso/login', query_string={'url': url})
@@ -95,8 +107,8 @@ def test_alias_destination_search_excludes_anonymous_aliases(client, users):
     authenticate(client, users[0])
     domain = users[0].domain
     models.db.session.add_all([
-        models.Alias(localpart='team', domain=domain),
-        models.Alias(localpart='private', domain=domain, owner_email=users[1].email),
+        models.Alias(localpart='team', domain_name=domain.name),
+        models.Alias(localpart='private', domain_name=domain.name, owner_email=users[1].email),
     ])
     models.db.session.commit()
 

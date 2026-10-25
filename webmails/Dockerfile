@@ -72,6 +72,7 @@ RUN set -euxo pipefail \
 # SnappyMail login
 COPY snappymail/login/include.php /var/www/snappymail/
 COPY snappymail/login/sso.php /var/www/snappymail/
+COPY snappymail/plugins/mailu-identities/ /var/www/snappymail/mailu-plugins/mailu-identities/
 
 # Parsed and moved at startup
 COPY snappymail/defaults/application.ini /defaults/

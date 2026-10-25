@@ -74,7 +74,7 @@ def test_explicit_destination_overrides_pending_webmail_return(app, client):
             'expires': time.time() + 1800,
         }
 
-    response = client.post('/sso/passkey/options', json={'target': 'admin'})
+    response = client.post('/sso/passkey/options', json={'target': 'admin', 'explicit': True})
     assert response.status_code == 200
     with client.session_transaction() as session:
         assert session['passkey_login_destination'] == app.config['WEB_ADMIN']

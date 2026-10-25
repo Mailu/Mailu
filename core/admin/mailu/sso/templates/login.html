@@ -13,6 +13,7 @@
   const buttons = [...document.querySelectorAll('.passkey-login')];
   const status = document.getElementById('passkey-status');
   const destinationField = document.getElementById('destination');
+  const explicitDestinationField = document.getElementById('destination_explicit');
   const emailField = document.getElementById('email');
   const passwordField = document.getElementById('pw');
   const passwordContainer = document.getElementById('password-field');
@@ -148,7 +149,8 @@
     try {
       const startResponse = await fetch('{{ url_for("sso.passkey_authentication_options") }}', {
         method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({email: emailField.value.trim(), target: destinationField.value}), signal: controller.signal
+        body: JSON.stringify({email: emailField.value.trim(), target: destinationField.value,
+          explicit: explicitDestinationField.value === '1'}), signal: controller.signal
       });
       const options = await responseJson(startResponse, 'Could not start passkey sign-in');
       const allowed = options.allowCredentials || [];
@@ -199,7 +201,7 @@
       const target = destinationField.value;
       const startResponse = await fetch('{{ url_for("sso.passkey_authentication_options") }}', {
         method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({email: '', target}), signal: controller.signal
+        body: JSON.stringify({email: '', target, explicit: explicitDestinationField.value === '1'}), signal: controller.signal
       });
       const options = await responseJson(startResponse, 'Could not start passkey sign-in');
       options.challenge = decode(options.challenge);
@@ -238,8 +240,13 @@
   });
   emailField.addEventListener('change', updatePasswordVisibility);
   emailField.addEventListener('blur', updatePasswordVisibility);
-  destinationField.addEventListener('change', updatePasswordVisibility);
-  destinationField.addEventListener('change', () => { cancelAttempt(); clearStatus(); beginConditionalLogin(); });
+  destinationField.addEventListener('change', () => {
+    explicitDestinationField.value = '1';
+    updatePasswordVisibility();
+    cancelAttempt();
+    clearStatus();
+    beginConditionalLogin();
+  });
   updatePasswordVisibility();
   beginConditionalLogin();
 })();

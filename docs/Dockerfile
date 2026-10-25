@@ -38,5 +38,7 @@ COPY --from=build /build/$VERSION /build/$VERSION
 
 EXPOSE 80/tcp
 
+HEALTHCHECK CMD wget -q -O /dev/null "http://127.0.0.1/${VERSION}/"
+
 CMD ["nginx", "-g", "daemon off;"]
 RUN echo $pinned_version >> /version

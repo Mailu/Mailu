@@ -11,4 +11,4 @@ RUN echo $VERSION >/version
 HEALTHCHECK CMD true
 
 USER mailu
-CMD ["/bin/bash", "-c", "sleep infinity"]
+CMD ["env", "-i", "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", "/bin/sleep", "infinity"]

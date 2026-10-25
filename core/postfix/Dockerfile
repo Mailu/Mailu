@@ -11,12 +11,14 @@ RUN set -euxo pipefail \
 
 COPY conf/ /conf/
 COPY start.py /
+COPY chroot.py /
+COPY mta_sts.py /
 
 RUN echo $VERSION >/version
 
 #EXPOSE 25/tcp 10025/tcp
-HEALTHCHECK --start-period=30s CMD ! /usr/libexec/postfix/master -t
+HEALTHCHECK --start-period=30s CMD /usr/local/bin/supervisor-healthcheck && postfix status
 
 VOLUME ["/queue"]
 
-CMD /start.py
+CMD ["/start.py"]

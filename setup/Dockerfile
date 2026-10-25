@@ -11,6 +11,7 @@ COPY templates /data/templates
 COPY static ./static
 COPY server.py ./server.py
 COPY main.py ./main.py
+COPY start.py /start.py
 
 RUN echo $VERSION >> /version
 
@@ -18,4 +19,4 @@ EXPOSE 80/tcp
 HEALTHCHECK --start-period=350s CMD curl -m3 -skfLo /dev/null http://localhost/
 USER mailu
 
-CMD gunicorn -w 4 -b :80 --access-logfile - --error-logfile - --preload main:app
+CMD ["/start.py"]

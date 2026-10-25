@@ -1,0 +1,1 @@
+Use supervisord only in containers that manage multiple services or scheduled tasks. Single-service containers use direct entrypoints; sensitive environment variables are filtered before launching subprocesses, and healthchecks test service readiness.

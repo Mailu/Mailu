@@ -7,7 +7,7 @@ import requests
 import shutil
 import sys
 import time
-from socrate import system,conf
+from socrate import system, conf, supervisor
 
 env = system.set_env()
 
@@ -22,6 +22,8 @@ for rspamd_file in glob.glob("/conf/*"):
 for override_file in glob.glob("/overrides/*"):
     if os.path.basename(override_file) not in config_files:
         shutil.copyfile(override_file, os.path.join("/etc/rspamd/local.d", os.path.basename(override_file)))
+
+supervisor.clean_environment()
 
 # Admin may not be up just yet
 healthcheck = f'http://{env["ADMIN_ADDRESS"]}:8080/internal/rspamd/local_domains'
@@ -44,8 +46,6 @@ if env.get('DMARC_SEND_REPORTS', False):
         f.write('su rspamd -s /bin/sh -c "/usr/bin/rspamadm dmarc_report $(date -d @$(($(date +%s)-86400)) +%Y%m%d)" >>/proc/1/fd/1 2>&1\n')
     # make executable
     os.chmod('/etc/periodic/daily/dmarc-reports', 0o755)
-    # start crond
-    os.system("/usr/sbin/crond")
 else:
     log.info("DMARC reporting is disabled")
 
@@ -53,4 +53,9 @@ else:
 os.system("mkdir -m 755 -p /run/rspamd")
 os.system("chown rspamd:rspamd /run/rspamd")
 os.system("find /var/lib/rspamd | grep -v /filter | xargs -n1 chown rspamd:rspamd")
-os.execv("/usr/bin/rspamd", ["rspamd", "-f", "-u", "rspamd", "-g", "rspamd"])
+programs = [
+    {"name": "rspamd", "command": ["/usr/bin/rspamd", "-f", "-u", "rspamd", "-g", "rspamd"]},
+]
+if env.get('DMARC_SEND_REPORTS', False):
+    programs.append({"name": "cron", "command": ["/usr/sbin/crond", "-f", "-l", "2", "-L", "/proc/1/fd/1"]})
+supervisor.start(programs)

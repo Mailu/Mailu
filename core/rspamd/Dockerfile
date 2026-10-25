@@ -40,8 +40,8 @@ COPY start.py /
 RUN echo $VERSION >/version
 
 #EXPOSE 11332/tcp 11334/tcp 11335/tcp
-HEALTHCHECK --start-period=350s CMD curl -m3 -skfLo /dev/null http://localhost:11334/
+HEALTHCHECK --start-period=350s CMD curl -m3 -skfLo /dev/null http://localhost:11334/ && /usr/local/bin/supervisor-healthcheck
 
 VOLUME ["/var/lib/rspamd"]
 
-CMD /start.py
+CMD ["/start.py"]

@@ -2,10 +2,12 @@
 #               (yes)   (yes)   (yes)   (never) (100)
 
 # Exposed SMTP service
-smtp      inet  n       -       n       -       -       smtpd
+smtp      inet  n       -       y       -       -       smtpd
+  -o podop=socketmap:unix:/private/podop.socket:
 
 # Internal SMTP service
-10025     inet  n       -       n       -       -       smtpd
+10025     inet  n       -       y       -       -       smtpd
+  -o podop=socketmap:unix:/private/podop.socket:
   -o smtpd_sasl_auth_enable=yes
   -o smtpd_discard_ehlo_keywords=pipelining,silent-discard
   -o smtpd_client_restrictions=$check_ratelimit,reject_unlisted_sender,reject_authenticated_sender_login_mismatch,permit

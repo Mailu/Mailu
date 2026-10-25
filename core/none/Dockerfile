@@ -8,7 +8,9 @@ LABEL version=$VERSION
 
 RUN echo $VERSION >/version
 
-HEALTHCHECK CMD true
+COPY start.py /
+
+HEALTHCHECK CMD /usr/local/bin/supervisor-healthcheck
 
 USER mailu
-CMD ["env", "-i", "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", "/bin/sleep", "infinity"]
+CMD ["/start.py"]

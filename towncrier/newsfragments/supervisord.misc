@@ -1,1 +1,1 @@
-Use supervisord only in containers that manage multiple services or scheduled tasks. Single-service containers use direct entrypoints; sensitive environment variables are filtered before launching subprocesses, and healthchecks test service readiness.
+Run Mailu containers under supervisord for consistent process management and healthchecks. Filtered subprocess output uses a bounded queue and drops log lines under sustained sink backpressure rather than stalling the service. Sensitive environment variables are passed only to the processes that need them.

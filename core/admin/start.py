@@ -115,7 +115,7 @@ if log.root.level <= log.INFO:
 
 cmdline.append("mailu:create_app()")
 
-system.drop_privs_to("mailu")
-os.environ.update(admin_secrets)
-os.environ["HOME"] = "/app"
-os.execvp(cmdline[0], cmdline)
+supervisor.start(
+    [{"name": "admin", "command": cmdline, "user": "mailu", "environment": {"HOME": "/app"}}],
+    secret_env={"admin": admin_secrets},
+)

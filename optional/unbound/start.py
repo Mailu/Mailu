@@ -20,4 +20,6 @@ if os.path.exists(anchor):
 
 conf.jinja("/unbound.conf", os.environ, "/etc/unbound/unbound.conf")
 
-os.execv("/usr/sbin/unbound", ["/usr/sbin/unbound", "-d", "-c", "/etc/unbound/unbound.conf"])
+supervisor.start([
+    {"name": "unbound", "command": ["/usr/sbin/unbound", "-d", "-c", "/etc/unbound/unbound.conf"]},
+])

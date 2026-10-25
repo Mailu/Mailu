@@ -10,7 +10,7 @@ ARG VERSION
 LABEL version=$VERSION
 
 RUN set -euxo pipefail \
-  ; apk add --no-cache bash inotify-tools tzdata util-linux
+  ; apk add --no-cache bash inotify-tools supervisor tzdata util-linux
 
 COPY run.sh /
 COPY start.sh /
@@ -20,6 +20,6 @@ RUN echo $VERSION >/version
 VOLUME ["/traefik"]
 VOLUME ["/output"]
 
-HEALTHCHECK --start-period=10s CMD ps ax | grep -q '[r]un.sh'
+HEALTHCHECK --start-period=10s CMD supervisorctl -c /tmp/mailu-supervisorctl.conf status certdumper | grep -q RUNNING
 
 ENTRYPOINT ["/start.sh"]

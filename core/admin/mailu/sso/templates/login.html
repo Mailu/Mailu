@@ -15,8 +15,6 @@
   const destinationField = document.getElementById('destination');
   const explicitDestinationField = document.getElementById('destination_explicit');
   const emailField = document.getElementById('email');
-  const passwordField = document.getElementById('pw');
-  const passwordContainer = document.getElementById('password-field');
   let passwordRequired = {{ config['PASSKEY_REQUIRED'] | tojson }};
   const form = document.querySelector('form.form');
   const csrfToken = form.querySelector('[name="csrf_token"]').value;
@@ -26,8 +24,6 @@
   let attemptId = 0;
   let activeAttempt = null;
   let conditionalController = null;
-  let accountLookup = 0;
-  let accountLookupTimer = null;
 
   if (!supported) buttons.forEach(button => { button.hidden = true; });
 
@@ -73,36 +69,6 @@
   if (!supported && passwordRequired) {
     showStatus({{ _('This server requires passkey sign-in. Use a supported browser or device; accounts without a passkey need an account setup link from an administrator.') | tojson }}, 'info');
   }
-
-  const updatePasswordVisibility = async () => {
-    const lookup = ++accountLookup;
-    clearStatus();
-    if (passwordContainer) passwordContainer.hidden = passwordRequired;
-    if (passwordField) passwordField.disabled = passwordRequired;
-    const email = emailField.value.trim();
-    if (!email) return;
-    try {
-      const response = await fetch('{{ url_for("sso.passkey_status") }}', {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({email})
-      });
-      const options = await responseJson(response, 'Could not check sign-in options');
-      if (lookup !== accountLookup) return;
-      const hasPasskey = Boolean(options.has_passkey);
-      passwordRequired = Boolean(options.password_required);
-      if (passwordContainer) passwordContainer.hidden = passwordRequired || hasPasskey;
-      if (passwordField) passwordField.disabled = passwordRequired || hasPasskey;
-      if (hasPasskey) {
-        showStatus({{ _('This account has a passkey. Continue with “Use a passkey”.') | tojson }}, 'info');
-      } else if (passwordRequired) {
-        showStatus({{ _('This server requires passkey sign-in. Contact an administrator to get an account setup link.') | tojson }}, 'info');
-      } else if (options.enrollment_required) {
-        showStatus({{ _('After signing in, you must set up a passkey before you can continue.') | tojson }}, 'info');
-      }
-    } catch (_) {
-      // Sign-in remains available if the browser cannot check passkey status.
-    }
-  };
 
   const setBusy = (busy, activeButton=null) => {
     buttons.forEach(button => {
@@ -153,13 +119,6 @@
           explicit: explicitDestinationField.value === '1'}), signal: controller.signal
       });
       const options = await responseJson(startResponse, 'Could not start passkey sign-in');
-      const allowed = options.allowCredentials || [];
-      if (emailField.value.trim() && !allowed.length) {
-        showStatus(passwordRequired
-          ? {{ _('No passkey is registered for this email address. Contact an administrator to get an account setup link.') | tojson }}
-          : {{ _('No passkey is registered for this email address. Clear the email field to choose a passkey, or sign in with your password.') | tojson }}, 'info');
-        return;
-      }
       options.challenge = decode(options.challenge);
       if (options.allowCredentials) {
         options.allowCredentials = options.allowCredentials.map(item => ({...item, id: decode(item.id)}));
@@ -234,20 +193,12 @@
 
   buttons.forEach(button => button.addEventListener('click', () => beginPasskeyLogin(button)));
   form.addEventListener('submit', cancelAttempt);
-  emailField.addEventListener('input', () => {
-    clearTimeout(accountLookupTimer);
-    accountLookupTimer = setTimeout(updatePasswordVisibility, 300);
-  });
-  emailField.addEventListener('change', updatePasswordVisibility);
-  emailField.addEventListener('blur', updatePasswordVisibility);
   destinationField.addEventListener('change', () => {
     explicitDestinationField.value = '1';
-    updatePasswordVisibility();
     cancelAttempt();
     clearStatus();
     beginConditionalLogin();
   });
-  updatePasswordVisibility();
   beginConditionalLogin();
 })();
 </script>

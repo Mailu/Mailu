@@ -34,6 +34,7 @@ def create_app_from_config(config):
     app.temp_token_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('WEBMAIL_TEMP_TOKEN_KEY', 'utf-8'), 'sha256').digest()
     app.srs_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('SRS_KEY', 'utf-8'), 'sha256').digest()
     app.truncated_pw_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('TRUNCATED_PW_KEY', 'utf-8'), 'sha256').digest()
+    app.passkey_filler_key = hmac.new(bytearray(app.secret_key, 'utf-8'), bytearray('PASSKEY_LOGIN_FILLER_KEY', 'utf-8'), 'sha256').digest()
 
     # Initialize list of translations
     with app.app_context():

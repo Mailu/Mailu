@@ -40,7 +40,7 @@
       </li>
       {% endif %}
       <li class="nav-item" role="none">
-        <a href="{{ url_for('.passkey_list', user_email=current_user.email) }}" class="nav-link" role="menuitem">
+        <a href="{{ url_for('.passkey_list') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fa-solid fa-key"></i>
           <p>{% trans %}Manage passkeys{% endtrans %}</p>
         </a>

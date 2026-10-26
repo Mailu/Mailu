@@ -84,9 +84,21 @@ def login(target):
                 flask.flash(msg, "error")
             return signin.remember_preference(response, login_destination)
         else:
-            utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username, form.pw.data) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip, username)
-            flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: failed: badauth: {utils.truncated_pw_hash(form.pw.data)}')
-            flask.flash(_('Wrong e-mail or password'), 'error')
+            failed_user = models.User.get(username)
+            if failed_user:
+                utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username, form.pw.data)
+            else:
+                utils.limiter.rate_limit_ip(client_ip, username)
+            if (failed_user and failed_user.enabled and failed_user.passkeys
+                    and failed_user.check_password(form.pw.data)):
+                flask.current_app.logger.info(
+                    f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} '
+                    f'from: {client_ip}/{client_port}: failed: passkey_required'
+                )
+                flask.flash(_('This account uses passkeys. Select “Use a passkey” to sign in.'), 'info')
+            else:
+                flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: failed: badauth: {utils.truncated_pw_hash(form.pw.data)}')
+                flask.flash(_('Wrong e-mail or password'), 'error')
     return flask.render_template('login.html', form=form, fields=fields)
 
 @sso.route('/pw_change', methods=['GET', 'POST'])

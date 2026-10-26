@@ -25,24 +25,24 @@
 <tr><th>{{ _('Last edit') }}</th><td>{{ domain.updated_at | format_date }}</td></tr>
 <tr>
   <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa-solid {{ 'fa-circle-check text-success' if domain.check_mx() else 'fa-circle-exclamation text-danger' }}"></i></th>
-  <td>{{ macros.clip("dns_mx") }}<pre id="dns_mx" class="pre-config border bg-light">{{ domain.dns_mx }}</pre></td>
+  <td>{{ macros.clip("dns_mx") }}<pre id="dns_mx" class="pre-config border bg-body-tertiary">{{ domain.dns_mx }}</pre></td>
 </tr>
 <tr>
   <th>{% trans %}DNS SPF entries{% endtrans %}</th>
-  <td>{{ macros.clip("dns_spf") }}<pre id="dns_spf" class="pre-config border bg-light">{{ domain.dns_spf }}</pre>
+  <td>{{ macros.clip("dns_spf") }}<pre id="dns_spf" class="pre-config border bg-body-tertiary">{{ domain.dns_spf }}</pre>
   </td>
 </tr>
 {%- if domain.dkim_publickey %}
 <tr>
   <th>{% trans %}DNS DKIM entry{% endtrans %}</th>
-  <td>{{ macros.clip("dns_dkim") }}<pre id="dns_dkim" class="pre-config border bg-light">{{ domain.dns_dkim }}</pre></td>
+  <td>{{ macros.clip("dns_dkim") }}<pre id="dns_dkim" class="pre-config border bg-body-tertiary">{{ domain.dns_dkim }}</pre></td>
 </tr>
 <tr>
   <th>{% trans %}DNS DMARC entry{% endtrans %}</th>
   <td>
-    {{ macros.clip("dns_dmarc") }}<pre id="dns_dmarc" class="pre-config border bg-light">{{ domain.dns_dmarc }}</pre>
+    {{ macros.clip("dns_dmarc") }}<pre id="dns_dmarc" class="pre-config border bg-body-tertiary">{{ domain.dns_dmarc }}</pre>
     {%- if domain.dns_dmarc_report_needed %}
-    {{ macros.clip("dns_dmarc_report") }}<pre id="dns_dmarc_report" class="pre-config border bg-light">{{ domain.dns_dmarc_report }}</pre>
+    {{ macros.clip("dns_dmarc_report") }}<pre id="dns_dmarc_report" class="pre-config border bg-body-tertiary">{{ domain.dns_dmarc_report }}</pre>
     {%- endif %}
   </td>
 </tr>
@@ -50,12 +50,12 @@
 {%- if domain.dns_tlsa|length > 0 %}
 <tr>
   <th>{% trans %}DNS TLSA entry{% endtrans %}<br><span class="text-secondary small fw-normal">Let's Encrypt ISRG Roots</span></th>
-  <td>{{ macros.clip("dns_tlsa") }}<pre id="dns_tlsa" class="pre-config border bg-light">{{ domain.dns_tlsa | join("\n") }}</pre></td>
+  <td>{{ macros.clip("dns_tlsa") }}<pre id="dns_tlsa" class="pre-config border bg-body-tertiary">{{ domain.dns_tlsa | join("\n") }}</pre></td>
 </tr>
 {%- endif %}
 <tr>
   <th>{% trans %}DNS client auto-configuration entries{% endtrans %}</th>
-  <td>{{ macros.clip("dns_autoconfig") }}<pre id="dns_autoconfig" class="pre-config border bg-light">
+  <td>{{ macros.clip("dns_autoconfig") }}<pre id="dns_autoconfig" class="pre-config border bg-body-tertiary">
 {%- for line in domain.dns_autoconfig %}
 {{ line }}
 {%- endfor -%}
@@ -73,7 +73,7 @@
 <tr><th>{% trans %}DKIM keys{% endtrans %}</th><td>
 {% for key in domain.dkim_keys %}
 <div class="mb-3"><strong>DKIM {{ key.algorithm|upper }} / {{ key.selector }}</strong> - {% if key.active %}{% trans %}Signing{% endtrans %}{% elif key.retired %}{% trans %}Retired{% endtrans %}{% else %}{% trans %}Staged{% endtrans %}{% endif %}<br><span class="text-secondary small">{% trans %}Created{% endtrans %}: {{ key.created_at | format_date }}</span>
-<pre class="pre-config border bg-light">{{ key.dns_record(domain.name) }}</pre>
+<pre class="pre-config border bg-body-tertiary">{{ key.dns_record(domain.name) }}</pre>
 {% if domain in current_user.get_managed_domains() %}
 {% if key.retired %}
 <form method="post" action="{{ url_for('.domain_dkim_delete', key_id=key.id) }}"><button class="btn btn-secondary" type="submit">{% trans %}Delete{% endtrans %}</button></form>
@@ -107,24 +107,24 @@
 </tr>
 <tr>
   <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa-solid {{ 'fa-circle-check text-success' if alternative.check_mx() else 'fa-circle-exclamation text-danger' }}"></i></th>
-  <td>{{ macros.clip(dns_id ~ "dns_mx") }}<pre id="{{ dns_id }}dns_mx" class="pre-config border bg-light">{{ alternative.dns_mx }}</pre></td>
+  <td>{{ macros.clip(dns_id ~ "dns_mx") }}<pre id="{{ dns_id }}dns_mx" class="pre-config border bg-body-tertiary">{{ alternative.dns_mx }}</pre></td>
 </tr>
 <tr>
   <th>{% trans %}DNS SPF entries{% endtrans %}</th>
-  <td>{{ macros.clip(dns_id ~ "dns_spf") }}<pre id="{{ dns_id }}dns_spf" class="pre-config border bg-light">{{ alternative.dns_spf }}</pre>
+  <td>{{ macros.clip(dns_id ~ "dns_spf") }}<pre id="{{ dns_id }}dns_spf" class="pre-config border bg-body-tertiary">{{ alternative.dns_spf }}</pre>
   </td>
 </tr>
 {%- if alternative.domain.dkim_publickey %}
 <tr>
   <th>{% trans %}DNS DKIM entry{% endtrans %}</th>
-  <td>{{ macros.clip(dns_id ~ "dns_dkim") }}<pre id="{{ dns_id }}dns_dkim" class="pre-config border bg-light">{{ alternative.dns_dkim }}</pre></td>
+  <td>{{ macros.clip(dns_id ~ "dns_dkim") }}<pre id="{{ dns_id }}dns_dkim" class="pre-config border bg-body-tertiary">{{ alternative.dns_dkim }}</pre></td>
 </tr>
 <tr>
   <th>{% trans %}DNS DMARC entry{% endtrans %}</th>
   <td>
-    {{ macros.clip(dns_id ~ "dns_dmarc") }}<pre id="{{ dns_id }}dns_dmarc" class="pre-config border bg-light">{{ alternative.dns_dmarc }}</pre>
+    {{ macros.clip(dns_id ~ "dns_dmarc") }}<pre id="{{ dns_id }}dns_dmarc" class="pre-config border bg-body-tertiary">{{ alternative.dns_dmarc }}</pre>
     {%- if alternative.dns_dmarc_report_needed %}
-    {{ macros.clip(dns_id ~ "dns_dmarc_report") }}<pre id="{{ dns_id }}dns_dmarc_report" class="pre-config border bg-light">{{ alternative.dns_dmarc_report }}</pre>
+    {{ macros.clip(dns_id ~ "dns_dmarc_report") }}<pre id="{{ dns_id }}dns_dmarc_report" class="pre-config border bg-body-tertiary">{{ alternative.dns_dmarc_report }}</pre>
     {%- endif %}
   </td>
 </tr>

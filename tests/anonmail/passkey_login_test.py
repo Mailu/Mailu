@@ -185,6 +185,19 @@ def test_forced_password_reset_menu_offers_logout(client, user):
     assert b'Sign in' not in response.data
 
 
+@pytest.mark.parametrize('action', ['passkey_enrollment', 'password_change'])
+def test_passkey_create_page_is_allowed_during_required_action(client, user, action):
+    with client.session_transaction() as session:
+        session['_user_id'] = user.email
+        session['_fresh'] = True
+        session['required_actions'] = [action]
+
+    response = client.get('/admin/user/passkeys/create')
+
+    assert response.status_code == 200
+    assert b'id="passkey-enrollment-form"' in response.data
+
+
 def test_manage_passkeys_page_has_a_create_action_and_generic_sidebar_link(client, user):
     with client.session_transaction() as session:
         session['_user_id'] = user.email

@@ -16,9 +16,15 @@ services:
       - DAC_OVERRIDE
       - SETUID
       - SETGID
+      # postfix set-permissions needs FSETID to set postdrop's setgid bit.
+      - FSETID
       - SYS_CHROOT
       - CHOWN
       - KILL
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 524288
     logging:
       driver: journald
       options:
@@ -69,6 +75,10 @@ services:
       - DAC_OVERRIDE
       - SYS_CHROOT
       - KILL
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 524288
     logging:
       driver: journald
       options:
@@ -94,6 +104,7 @@ services:
       - FOWNER
       - SETUID
       - SETGID
+      - FSETID
       - SYS_CHROOT
       - CHOWN
       - KILL

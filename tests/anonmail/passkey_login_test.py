@@ -30,7 +30,7 @@ def test_passkey_options_allow_discoverable_login(client):
     options = response.get_json()
     assert 'challenge' in options
     assert 'allowCredentials' not in options
-    assert options['userVerification'] == 'required'
+    assert options['userVerification'] == 'preferred'
 
 
 def test_passkey_options_reject_malformed_email_with_json_error(client):
@@ -40,17 +40,86 @@ def test_passkey_options_reject_malformed_email_with_json_error(client):
     assert 'valid email address' in response.get_json()['error']
 
 
-def test_passkey_options_and_status_are_not_rate_limited(client, monkeypatch, user):
+def test_passkey_options_are_not_rate_limited(client, monkeypatch, user):
     from mailu import utils
 
     monkeypatch.setattr(utils.limiter, 'should_rate_limit_ip', lambda *args: pytest.fail('passkey sign-in is not IP rate-limited'))
     monkeypatch.setattr(utils.limiter, 'should_rate_limit_user', lambda *args: pytest.fail('passkey sign-in is not user rate-limited'))
 
     options = client.post('/sso/passkey/options', json={'email': user.email})
-    status = client.post('/sso/passkey/status', json={'email': user.email})
 
     assert options.status_code == 200
-    assert status.status_code == 200
+    assert len(options.get_json()['allowCredentials']) == 10
+
+
+def test_username_first_options_hide_account_and_passkey_count(client, user):
+    user.domain.passkey_require_uv = False
+    models.db.session.commit()
+
+    def options(email):
+        response = client.post('/sso/passkey/options', json={'email': email})
+        assert response.status_code == 200
+        return response.get_json()
+
+    unknown_options = options('nobody@passkey-login.example')
+    password_only_options = options(user.email)
+    unknown = unknown_options['allowCredentials']
+    password_only = password_only_options['allowCredentials']
+    assert len(unknown) == len(password_only) == 10
+    assert unknown_options['userVerification'] == password_only_options['userVerification'] == 'preferred'
+    assert [item['id'] for item in unknown] == [item['id'] for item in options(
+        'nobody@passkey-login.example')['allowCredentials']]
+
+    user.passkeys.extend(models.Passkey(
+        credential_id=f'credential-{index}'.encode(),
+        user_email=user.email,
+        public_key=b'public-key',
+        aaguid='00000000-0000-0000-0000-000000000000',
+    ) for index in range(2))
+    models.db.session.commit()
+    with_passkeys = options(user.email)['allowCredentials']
+    assert len(with_passkeys) == 10
+    assert {item['id'] for item in with_passkeys}.issuperset(
+        bytes_to_base64url(f'credential-{index}'.encode()) for index in range(2)
+    )
+
+    user.passkeys.extend(models.Passkey(
+        credential_id=f'credential-{index}'.encode(),
+        user_email=user.email,
+        public_key=b'public-key',
+        aaguid='00000000-0000-0000-0000-000000000000',
+    ) for index in range(2, 10))
+    models.db.session.commit()
+    ten_passkeys = options(user.email)['allowCredentials']
+    assert len(ten_passkeys) == 10
+    assert {item['id'] for item in ten_passkeys} == {
+        bytes_to_base64url(f'credential-{index}'.encode()) for index in range(10)
+    }
+
+
+def test_username_first_options_return_all_credentials_above_ten(client, user):
+    user.passkeys.extend(models.Passkey(
+        credential_id=f'credential-{index}'.encode(),
+        user_email=user.email,
+        public_key=b'public-key',
+        aaguid='00000000-0000-0000-0000-000000000000',
+    ) for index in range(11))
+    models.db.session.commit()
+
+    response = client.post('/sso/passkey/options', json={'email': user.email})
+
+    assert response.status_code == 200
+    credentials = response.get_json()['allowCredentials']
+    assert len(credentials) == 11
+    assert {item['id'] for item in credentials} == {
+        bytes_to_base64url(f'credential-{index}'.encode()) for index in range(11)
+    }
+
+
+def test_passkey_status_endpoint_is_removed(client, user):
+    response = client.post('/sso/passkey/status', json={'email': user.email})
+
+    assert response.status_code == 404
 
 
 def test_login_page_supports_conditional_passkeys_and_destination_changes(client):
@@ -58,6 +127,8 @@ def test_login_page_supports_conditional_passkeys_and_destination_changes(client
 
     assert response.status_code == 200
     assert b"mediation: 'conditional'" in response.data
+    assert b'/sso/passkey/status' not in response.data
+    assert b'updatePasswordVisibility' not in response.data
     assert b"destinationField.addEventListener('change'" in response.data
     assert b"form.addEventListener('submit', cancelAttempt" in response.data
     assert b"submitButtons.forEach" in response.data

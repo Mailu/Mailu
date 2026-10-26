@@ -37,10 +37,7 @@
   {%- for passkey, credential_id in passkeys %}
   <tr>
     <td>
-      <form method="post" action="{{ url_for('.passkey_delete', user_email=user.email, credential_id=credential_id) }}">
-        {{ delete_form.hidden_tag() }}
-        <button class="btn btn-sm btn-outline-danger" type="submit">{% trans %}Delete{% endtrans %}</button>
-      </form>
+      <a href="{{ url_for('.passkey_delete', user_email=user.email, credential_id=credential_id) }}" title="{% trans %}Delete{% endtrans %}" aria-label="{% trans %}Delete{% endtrans %}"><i class="fa-solid fa-trash" aria-hidden="true"></i></a>
     </td>
     <th scope="row">{{ passkey.name or _('Passkey') }}</th>
     <td class="text-nowrap">{{ passkey.created_at | format_date }}</td>

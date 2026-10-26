@@ -225,6 +225,8 @@ def test_manage_passkeys_page_shows_creation_and_authenticator_details(client, u
 
     assert response.status_code == 200
     assert b'Travel laptop' in response.data
+    assert b'class="fa-solid fa-trash"' in response.data
+    assert b'<button class="btn btn-sm btn-outline-danger"' not in response.data
     assert b'Created' in response.data
     assert b'Last used' in response.data
     assert b'2025' in response.data

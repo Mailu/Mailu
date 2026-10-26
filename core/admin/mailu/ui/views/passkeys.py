@@ -84,7 +84,6 @@ def _render_passkey_list(user, required_enrollment=False, restricted_navigation=
     return flask.render_template(
         'user/passkeys.html', user=user,
         passkeys=[(key, bytes_to_base64url(key.credential_id)) for key in user.passkeys],
-        delete_form=FlaskForm(),
         required_enrollment=required_enrollment,
         restricted_navigation=restricted_navigation,
         demo_account_email=utils.DEMO_ACCOUNT_EMAIL,
@@ -188,13 +187,11 @@ def passkey_register(user_email):
     return flask.jsonify(ok=True)
 
 
-@ui.route('/user/passkeys/<credential_id>/delete', methods=['POST'], defaults={'user_email': None})
-@ui.route('/user/passkeys/<path:user_email>/<credential_id>/delete', methods=['POST'])
+@ui.route('/user/passkeys/<credential_id>/delete', methods=['GET', 'POST'], defaults={'user_email': None})
+@ui.route('/user/passkeys/<path:user_email>/<credential_id>/delete', methods=['GET', 'POST'])
+@access.confirmation_required("delete a passkey")
 @access.owner(models.User, 'user_email')
 def passkey_delete(credential_id, user_email):
-    form = FlaskForm()
-    if not form.validate_on_submit():
-        flask.abort(400)
     try:
         credential_key = base64url_to_bytes(credential_id)
     except Exception:

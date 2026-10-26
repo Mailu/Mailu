@@ -7,6 +7,18 @@ services:
     image: mailu/nginx:$VERSION
     restart: always
     env_file: .env
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+      - SYS_CHROOT
+      - CHOWN
+      - KILL
     logging:
       driver: journald
       options:
@@ -44,6 +56,19 @@ services:
     image: mailu/dovecot:$VERSION
     restart: always
     env_file: .env
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETUID
+      - SETGID
+      - FOWNER
+      - DAC_OVERRIDE
+      - SYS_CHROOT
+      - KILL
     logging:
       driver: journald
       options:
@@ -58,6 +83,20 @@ services:
     image: mailu/postfix:$VERSION
     restart: always
     env_file: .env
+    # Keep no-new-privileges disabled here: postdrop relies on setgid execution
+    # to write to the maildrop queue. CAP_SETGID does not restore that transition,
+    # and group_add would expose the postdrop group to inheriting processes.
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETUID
+      - SETGID
+      - SYS_CHROOT
+      - CHOWN
+      - KILL
     logging:
       driver: journald
       options:

@@ -239,6 +239,10 @@ correct syntax. The following file names will be taken as override configuration
    - All ``$ROOT/overrides/postfix/*.map`` files
    - For both ``postfix.cf`` and ``postfix.master``, you need to put one configuration per line, as they are fed line-by-line
      to postfix.
+   - Mailu's SMTP server services run chrooted under ``/queue``. A custom
+     chrooted Postfix service can access the Postfix Podop socket at
+     ``/private/podop.socket``; unchrooted services should use
+     ``/tmp/podop.socket``.
    - ``logrotate.conf`` as ``$ROOT/overrides/postfix/logrotate.conf`` - Replaces the logrotate.conf file used for rotating ``POSTFIX_LOG_FILE``.
 - `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory. This file must be written in the
   Dovecot 2.4 syntax, see :ref:`dovecot24-override-label`.

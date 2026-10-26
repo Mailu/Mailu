@@ -8,7 +8,7 @@ import shutil
 import hmac
 import tempfile
 
-from socrate import conf, system
+from socrate import conf, system, supervisor
 
 env = os.environ
 
@@ -147,6 +147,7 @@ def initialize_database(image_version_path="/version", marker_path="/data/.round
             os.unlink(temporary_path)
 
 
+supervisor.clean_environment()
 initialize_database()
 
 # Configure nginx
@@ -154,9 +155,8 @@ conf.jinja("/conf/nginx-webmail.conf", context, "/etc/nginx/http.d/webmail.conf"
 if os.path.exists("/var/run/nginx.pid"):
     os.system("nginx -s reload")
 
-system.clean_env()
-
-# run nginx
-os.system("php-fpm84")
-os.execv("/usr/sbin/nginx", ["nginx", "-g", "daemon off;"])
+supervisor.start([
+    {"name": "php-fpm", "command": ["php-fpm84", "-F"]},
+    {"name": "nginx", "command": ["/usr/sbin/nginx", "-g", "daemon off;"]},
+])
 

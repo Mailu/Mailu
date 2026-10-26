@@ -9,7 +9,7 @@ import tempfile
 import shlex
 import subprocess
 import requests
-from socrate import system
+from socrate import system, supervisor
 import sys
 import traceback
 
@@ -109,6 +109,7 @@ if __name__ == "__main__":
     os.chmod("/data/fetchids", 0o700)
     system.drop_privs_to('fetchmail')
     config = system.set_env()
+    supervisor.clean_environment()
     while True:
         delay = int(os.environ.get('FETCHMAIL_DELAY', 60))
         print("Sleeping for {} seconds".format(delay))

@@ -27,6 +27,8 @@ RUN set -euxo pipefail \
 # Build nginx deployment image including generated html
 FROM nginx:1.31.6-alpine
 
+RUN apk add --no-cache supervisor
+
 ARG version=master
 ARG pinned_version=master
 ENV VERSION=$version
@@ -34,9 +36,13 @@ ENV TZ=Etc/UTC
 LABEL version=$VERSION
 
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./start.sh /start.sh
 COPY --from=build /build/$VERSION /build/$VERSION
+RUN chmod 755 /start.sh
 
 EXPOSE 80/tcp
 
-CMD ["nginx", "-g", "daemon off;"]
+HEALTHCHECK CMD supervisorctl -c /tmp/mailu-supervisorctl.conf status nginx | grep -q RUNNING && wget -q -O /dev/null "http://127.0.0.1/${VERSION}/"
+
+CMD ["/start.sh"]
 RUN echo $pinned_version >> /version

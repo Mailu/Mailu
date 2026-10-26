@@ -6,19 +6,39 @@ import os.path
 import time
 import logging as log
 import sys
-from socrate import system
+import subprocess
+from socrate import system, supervisor
 
 os.system("chown mailu:mailu -R /dkim")
 os.system("find /data | grep -v /fetchmail | xargs -n1 chown mailu:mailu")
-system.drop_privs_to('mailu')
-
 system.set_env(['SECRET'])
 
-os.system("flask mailu advertise")
-if os.system("flask db upgrade") != 0:
+admin_secrets = {
+    name: os.environ[name]
+    for name in (
+        "SECRET_KEY", "SECRET_KEY_FILE",
+        "DB_PW", "DB_PW_FILE",
+        "SQLALCHEMY_DATABASE_URI", "SQLALCHEMY_DATABASE_URI_FILE",
+        "SQLALCHEMY_DATABASE_URI_ROUNDCUBE", "SQLALCHEMY_DATABASE_URI_ROUNDCUBE_FILE",
+        "RECAPTCHA_PRIVATE_KEY", "RECAPTCHA_PRIVATE_KEY_FILE",
+        "API_TOKEN", "API_TOKEN_FILE",
+    )
+    if name in os.environ
+}
+
+def run_as_mailu(*command):
+    """Run initialization commands as the user that owns admin state."""
+    return subprocess.run(
+        command,
+        preexec_fn=lambda: system.drop_privs_to("mailu"),
+        check=False,
+    ).returncode
+
+run_as_mailu("flask", "mailu", "advertise")
+if run_as_mailu("flask", "db", "upgrade") != 0:
     log.critical("Database migrations failed; refusing to start the admin service")
     sys.exit(1)
-if os.system("flask mailu import-legacy-dkim-keys") != 0:
+if run_as_mailu("flask", "mailu", "import-legacy-dkim-keys") != 0:
     log.critical("Importing legacy DKIM keys failed; refusing to start the admin service")
     sys.exit(1)
 
@@ -29,7 +49,7 @@ password = os.environ.get("INITIAL_ADMIN_PW")
 if account is not None and domain is not None and password is not None:
     mode = os.environ.get("INITIAL_ADMIN_MODE", default="ifmissing")
     log.info("Creating initial admin account %s@%s with mode %s", account, domain, mode)
-    os.system("flask mailu admin %s %s '%s' --mode %s" % (account, domain, password, mode))
+    run_as_mailu("flask", "mailu", "admin", account, domain, password, "--mode", mode)
 
 def test_unsupported():
     import codecs
@@ -68,6 +88,8 @@ def test_DNS():
 test_DNS()
 test_unsupported()
 
+supervisor.clean_environment()
+
 subnet = os.environ.get("SUBNET")
 forwarded_allow_networks = list(filter(None, [subnet, os.environ.get("SUBNET6")]))
 if subnet:
@@ -86,9 +108,9 @@ cmdline = [
     "--threads", os.environ.get('CPU_COUNT', '1'),
     # If SUBNET6 is defined, gunicorn must listen on IPv6 as well as IPv4
     "-b", f"{'[::]' if os.environ.get('SUBNET6') else '0.0.0.0'}:8080",
-    "--logger-class mailu.Logger",
-    f"--log-level {os.environ.get('LOG_LEVEL', 'INFO')}",
-    "--worker-tmp-dir /dev/shm",
+    "--logger-class", "mailu.Logger",
+    "--log-level", os.environ.get('LOG_LEVEL', 'INFO'),
+    "--worker-tmp-dir", "/dev/shm",
     "--error-logfile", "-",
     "--preload",
     "--http-protocols", "h2,h1",
@@ -100,6 +122,9 @@ cmdline = [
 if log.root.level <= log.INFO:
 	cmdline.extend(["--access-logfile", "-"])
 
-cmdline.append("'mailu:create_app()'")
+cmdline.append("mailu:create_app()")
 
-os.system(" ".join(cmdline))
+supervisor.start(
+    [{"name": "admin", "command": cmdline, "user": "mailu", "environment": {"HOME": "/app"}}],
+    secret_env={"admin": admin_secrets},
+)

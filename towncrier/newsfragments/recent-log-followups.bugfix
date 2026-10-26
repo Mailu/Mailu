@@ -1,0 +1,1 @@
+Correct legacy boolean values for full-text search, raise Dovecot's file descriptor limits to match its configured login capacity, and retain Postfix's postdrop setgid permissions under the container capability restrictions.

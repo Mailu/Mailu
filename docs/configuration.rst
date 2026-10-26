@@ -146,6 +146,8 @@ email traffic from ``POSTMASTER@DOMAIN``.
 The ``FULL_TEXT_SEARCH`` variable (default: 'en') is a comma separated list of
 ISO 639-1 language codes, as listed under `Dovecot languages`_. This feature can
 be disabled (e.g. for performance reasons) by setting the variable to ``off``.
+Legacy boolean values such as ``on``, ``true``, ``yes``, and ``1`` enable
+English indexing; ``off``, ``false``, ``no``, and ``0`` disable indexing.
 
 You can set a global ``DEFAULT_QUOTA`` to be used for mailboxes when the domain has
 no specific quota configured.

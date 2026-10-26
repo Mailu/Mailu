@@ -163,7 +163,7 @@ def test_password_login_redirects_after_nudge_flash(client, user):
     assert response.status_code == 200
     assert response.request.path != '/sso/login'
     assert b'Manage passkeys</a>' in response.data
-    assert b'href="/admin/user/passkeys/' in response.data
+    assert b'href="/admin/user/passkeys"' in response.data
 
 
 def test_forced_password_reset_menu_offers_logout(client, user):
@@ -185,7 +185,7 @@ def test_forced_password_reset_menu_offers_logout(client, user):
     assert b'Sign in' not in response.data
 
 
-def test_manage_passkeys_page_has_a_name_form_and_sidebar_link(client, user):
+def test_manage_passkeys_page_has_a_create_action_and_generic_sidebar_link(client, user):
     with client.session_transaction() as session:
         session['_user_id'] = user.email
         session['_fresh'] = True
@@ -193,9 +193,10 @@ def test_manage_passkeys_page_has_a_name_form_and_sidebar_link(client, user):
     response = client.get('/admin/user/passkeys')
 
     assert response.status_code == 200
-    assert b'id="passkey-enrollment-form"' in response.data
-    assert b'id="passkey-name"' in response.data
-    assert f'href="/admin/user/passkeys/{user.email}"'.encode() in response.data
+    assert b'id="passkey-enrollment-form"' not in response.data
+    assert b'href="/admin/user/passkeys/create"' in response.data
+    assert b'href="/admin/user/passkeys"' in response.data
+    assert f'href="/admin/user/passkeys/{user.email}"'.encode() not in response.data
     assert b'window.prompt' not in response.data
 
 

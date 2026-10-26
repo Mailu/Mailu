@@ -2,165 +2,67 @@
 
 {%- block title %}{% trans %}Passkeys{% endtrans %}{%- endblock %}
 {%- block subtitle %}{% if user.email != current_user.email %}{{ user }}{% endif %}{%- endblock %}
+{%- block main_action %}
+{% if user.email != demo_account_email %}
+<a class="btn btn-primary float-end" href="{{ url_for('.passkey_create', user_email=user.email if user.email != current_user.email else None) }}">{% if required_enrollment %}{% trans %}Set up a passkey{% endtrans %}{% else %}{% trans %}New passkey{% endtrans %}{% endif %}</a>
+{% endif %}
+{%- endblock %}
 
 {%- block content %}
-{%- call macros.card(title=_('Registered passkeys')) %}
 {% if required_enrollment %}
 <div class="alert alert-info" role="alert">
   {% trans %}Your administrator requires a passkey before you can continue. Add one now to finish signing in.{% endtrans %}
 </div>
 {% endif %}
 <p class="small text-body-secondary">{% trans %}Details reflect the latest WebAuthn registration or sign-in. Older passkeys may not have all details recorded.{% endtrans %}</p>
-<div class="table-responsive">
-  <table class="table table-striped align-middle mb-3">
-    <thead>
-      <tr>
-        <th scope="col">{% trans %}Passkey{% endtrans %}</th>
-        <th scope="col">{% trans %}Created{% endtrans %}</th>
-        <th scope="col">{% trans %}Last used{% endtrans %}</th>
-        <th scope="col">{% trans %}User present{% endtrans %}</th>
-        <th scope="col">{% trans %}User verified{% endtrans %}</th>
-        <th scope="col">{% trans %}Device type{% endtrans %}</th>
-        <th scope="col">{% trans %}Backup eligible{% endtrans %}</th>
-        <th scope="col">{% trans %}Backed up{% endtrans %}</th>
-        <th scope="col">{% trans %}Device-bound{% endtrans %}</th>
-        <th scope="col">{% trans %}Attestation{% endtrans %}</th>
-        <th scope="col">{% trans %}Signature counter{% endtrans %}</th>
-        <th scope="col">{% trans %}Authenticator ID (AAGUID){% endtrans %}</th>
-        <th scope="col" class="text-end">{% trans %}Actions{% endtrans %}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {%- for passkey, credential_id in passkeys %}
-      <tr>
-        <th scope="row">{{ passkey.name or _('Passkey') }}</th>
-        <td class="text-nowrap">{{ passkey.created_at | format_date }}</td>
-        <td class="text-nowrap">{{ passkey.last_used_at | format_datetime if passkey.last_used_at else _('Never') }}</td>
-        <td>{% if passkey.user_present is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.user_present %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
-        <td>{% if passkey.user_verified is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.user_verified %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
-        <td>
-          {% if passkey.credential_device_type == 'single_device' %}{% trans %}Single-device{% endtrans %}
-          {% elif passkey.credential_device_type == 'multi_device' %}{% trans %}Multi-device{% endtrans %}
-          {% else %}{% trans %}Unknown{% endtrans %}{% endif %}
-        </td>
-        <td>{% if passkey.backup_eligible is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.backup_eligible %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
-        <td>
-          {% if passkey.backed_up is none %}{% trans %}Unknown{% endtrans %}
-          {% elif passkey.backed_up %}{% trans %}Yes{% endtrans %}
-          {% else %}{% trans %}No{% endtrans %}{% endif %}
-        </td>
-        <td>
-          {% if passkey.device_bound is none %}{% trans %}Unknown{% endtrans %}
-          {% elif passkey.device_bound %}{% trans %}Yes{% endtrans %}
-          {% else %}{% trans %}No{% endtrans %}{% endif %}
-        </td>
-        <td class="text-nowrap">{{ passkey.attestation_format or _('Unknown') }}</td>
-        <td class="text-end">{{ passkey.sign_count }}</td>
-        <td class="font-monospace small text-break">{{ passkey.aaguid }}</td>
-        <td class="text-end">
-          <form method="post" action="{{ url_for('.passkey_delete', user_email=user.email, credential_id=credential_id) }}">
-            {{ delete_form.hidden_tag() }}
-            <button class="btn btn-sm btn-outline-danger" type="submit">{% trans %}Delete{% endtrans %}</button>
-          </form>
-        </td>
-      </tr>
-      {%- else %}
-      <tr><td colspan="13" class="text-body-secondary">{% trans %}No passkeys registered{% endtrans %}</td></tr>
-      {%- endfor %}
-    </tbody>
-  </table>
-</div>
-<hr class="my-4">
+{%- call macros.table(order='[[1,"asc"]]') %}
+<thead>
+  <tr>
+    <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}Passkey{% endtrans %}</th>
+    <th>{% trans %}Created{% endtrans %}</th>
+    <th>{% trans %}Last used{% endtrans %}</th>
+    <th>{% trans %}User present{% endtrans %}</th>
+    <th>{% trans %}User verified{% endtrans %}</th>
+    <th>{% trans %}Device type{% endtrans %}</th>
+    <th>{% trans %}Backup eligible{% endtrans %}</th>
+    <th>{% trans %}Backed up{% endtrans %}</th>
+    <th>{% trans %}Device-bound{% endtrans %}</th>
+    <th>{% trans %}Attestation{% endtrans %}</th>
+    <th>{% trans %}Signature counter{% endtrans %}</th>
+    <th>{% trans %}Authenticator ID (AAGUID){% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
+  {%- for passkey, credential_id in passkeys %}
+  <tr>
+    <td>
+      <form method="post" action="{{ url_for('.passkey_delete', user_email=user.email, credential_id=credential_id) }}">
+        {{ delete_form.hidden_tag() }}
+        <button class="btn btn-sm btn-outline-danger" type="submit">{% trans %}Delete{% endtrans %}</button>
+      </form>
+    </td>
+    <th scope="row">{{ passkey.name or _('Passkey') }}</th>
+    <td class="text-nowrap">{{ passkey.created_at | format_date }}</td>
+    <td class="text-nowrap">{{ passkey.last_used_at | format_datetime if passkey.last_used_at else _('Never') }}</td>
+    <td>{% if passkey.user_present is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.user_present %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+    <td>{% if passkey.user_verified is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.user_verified %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+    <td>{% if passkey.credential_device_type == 'single_device' %}{% trans %}Single-device{% endtrans %}{% elif passkey.credential_device_type == 'multi_device' %}{% trans %}Multi-device{% endtrans %}{% else %}{% trans %}Unknown{% endtrans %}{% endif %}</td>
+    <td>{% if passkey.backup_eligible is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.backup_eligible %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+    <td>{% if passkey.backed_up is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.backed_up %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+    <td>{% if passkey.device_bound is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.device_bound %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+    <td class="text-nowrap">{{ passkey.attestation_format or _('Unknown') }}</td>
+    <td class="text-end">{{ passkey.sign_count }}</td>
+    <td class="font-monospace small text-break">{{ passkey.aaguid }}</td>
+  </tr>
+  {%- else %}
+  <tr><td colspan="13" class="text-body-secondary">{% trans %}No passkeys registered{% endtrans %}</td></tr>
+  {%- endfor %}
+</tbody>
+{%- endcall %}
 {% if user.email == demo_account_email %}
 <div class="alert alert-info mb-0" role="alert">
   {% trans %}Password changes and passkey creation are disabled for this user on the demo server. You can create other users to try these features.{% endtrans %}
 </div>
-{% else %}
-<div class="d-flex align-items-start mb-3">
-  <i class="fa-solid fa-key text-primary me-3 mt-1" aria-hidden="true"></i>
-  <div>
-    <h4 class="mb-1">{% trans %}Add a new passkey{% endtrans %}</h4>
-    <p class="text-body-secondary mb-0">{% trans %}Choose a name to identify this device in your passkey list.{% endtrans %}</p>
-  </div>
-</div>
-<form id="passkey-enrollment-form" class="mt-3">
-  <div class="mb-3">
-    <label class="form-label" for="passkey-name">{% trans %}New passkey name (required){% endtrans %}</label>
-    <div class="input-group">
-      <span class="input-group-text"><i class="fa-solid fa-tag" aria-hidden="true"></i></span>
-      <input class="form-control" id="passkey-name" name="name" type="text" maxlength="255" autocomplete="off" aria-describedby="passkey-name-help" required value="{% trans %}New passkey{% endtrans %}">
-    </div>
-    <div class="form-text" id="passkey-name-help">{% trans %}For example, your phone or laptop.{% endtrans %}</div>
-  </div>
-  <button class="btn btn-primary" id="add-passkey" type="submit"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>{% trans %}Add passkey{% endtrans %}</button>
-</form>
-<div id="passkey-error" class="alert alert-danger mt-3 d-none" role="alert" aria-live="polite"></div>
-{% endif %}
-{%- endcall %}
-{% if user.email != demo_account_email %}
-<script>
-(() => {
-  const decode = value => Uint8Array.from(atob(value.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
-  const encode = value => btoa(String.fromCharCode(...new Uint8Array(value))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  const button = document.getElementById('add-passkey');
-  const enrollmentForm = document.getElementById('passkey-enrollment-form');
-  const nameField = document.getElementById('passkey-name');
-  const optionsUrl = {{ url_for('ui.passkey_registration_options', user_email=user.email) | tojson }};
-  const registerUrl = {{ url_for('ui.passkey_register', user_email=user.email) | tojson }};
-  const originalLabel = button.textContent;
-  const responseJson = async (response, action) => {
-    let data;
-    try { data = await response.json(); }
-    catch (_) { throw new Error(`${action} failed: server returned HTTP ${response.status}, not JSON. Contact your administrator if this repeats.`); }
-    if (!response.ok) throw new Error(data.error || `${action} failed (HTTP ${response.status}).`);
-    return data;
-  };
-  enrollmentForm.addEventListener('submit', async event => {
-    event.preventDefault();
-    const name = nameField.value.trim();
-    if (!name) {
-      nameField.focus();
-      nameField.reportValidity();
-      return;
-    }
-    const error = document.getElementById('passkey-error');
-    error.textContent = '';
-    error.classList.add('d-none');
-    button.disabled = true;
-    button.setAttribute('aria-busy', 'true');
-    button.textContent = 'Waiting for your authenticator...';
-    try {
-      const start = await fetch(optionsUrl, {method: 'POST'});
-      const options = await responseJson(start, 'Could not start passkey registration');
-      options.challenge = decode(options.challenge);
-      options.user.id = decode(options.user.id);
-      if (options.excludeCredentials) options.excludeCredentials = options.excludeCredentials.map(item => ({...item, id: decode(item.id)}));
-      const credential = await navigator.credentials.create({publicKey: options});
-      const response = await fetch(registerUrl, {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          id: credential.id, rawId: encode(credential.rawId), type: credential.type, name,
-          response: {
-            attestationObject: encode(credential.response.attestationObject),
-            clientDataJSON: encode(credential.response.clientDataJSON),
-            transports: credential.response.getTransports ? credential.response.getTransports() : []
-          }
-        })
-      });
-      const result = await responseJson(response, 'Passkey registration failed');
-      window.location.assign(result.redirect || window.location.href);
-    } catch (e) {
-      error.textContent = e.name === 'NotAllowedError'
-        ? 'Passkey setup was cancelled or timed out. Start again and complete the prompt on your device.'
-        : (e.message || 'Passkey registration failed.');
-      error.classList.remove('d-none');
-    } finally {
-      button.disabled = false;
-      button.removeAttribute('aria-busy');
-      button.textContent = originalLabel;
-    }
-  });
-})();
-</script>
 {% endif %}
 {%- endblock %}

@@ -27,7 +27,10 @@ RUN set -euxo pipefail \
 # Build nginx deployment image including generated html
 FROM nginx:1.31.6-alpine
 
-RUN apk add --no-cache supervisor
+# TODO: Remove or reconsider this upgrade once cached Python and libexpat stay
+# aligned; the cached Python build can fail importing pyexpat in Supervisor.
+RUN apk add --no-cache supervisor \
+  && apk upgrade --no-cache python3
 
 ARG version=master
 ARG pinned_version=master

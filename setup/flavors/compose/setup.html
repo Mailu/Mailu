@@ -26,6 +26,16 @@ files before going any further.</p>
 <p>When you are done checking them, check them one last time.</p>
 {% endcall %}
 
+{% call macros.panel("info", "Host system settings") %}
+<p>Redis recommends enabling memory overcommit on the Docker host so that
+background saves can succeed. This is a host-level setting and cannot be set
+in the Compose file. Apply it now and make it persist across reboots:</p>
+
+<pre><code>sudo sysctl -w vm.overcommit_memory=1
+printf 'vm.overcommit_memory = 1\n' | sudo tee /etc/sysctl.d/99-mailu.conf
+</code></pre>
+{% endcall %}
+
 {% call macros.panel("info", "Step 3 - Start the Compose project") %}
 <p>To start your compose project, simply run the Docker Compose <code>up</code>
 command using <code>-p mailu</code> flag for project name.</p>

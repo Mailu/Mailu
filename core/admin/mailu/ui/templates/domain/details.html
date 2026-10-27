@@ -24,7 +24,7 @@
 <tr><th>{{ _('Created') }}</th><td>{{ domain.created_at | format_date }}</td></tr>
 <tr><th>{{ _('Last edit') }}</th><td>{{ domain.updated_at | format_date }}</td></tr>
 <tr>
-  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa-solid {{ 'fa-circle-check text-success-emphasis' if domain.check_mx() else 'fa-circle-exclamation text-danger-emphasis' }}"></i></th>
+  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa-solid {{ 'fa-circle-check text-success' if domain.check_mx() else 'fa-circle-exclamation text-danger' }}"></i></th>
   <td>{{ macros.clip("dns_mx") }}<pre id="dns_mx" class="pre-config border bg-body-tertiary">{{ domain.dns_mx }}</pre></td>
 </tr>
 <tr>
@@ -106,7 +106,7 @@
   <td>{{ alternative.name }}</td>
 </tr>
 <tr>
-  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa-solid {{ 'fa-circle-check text-success-emphasis' if alternative.check_mx() else 'fa-circle-exclamation text-danger-emphasis' }}"></i></th>
+  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa-solid {{ 'fa-circle-check text-success' if alternative.check_mx() else 'fa-circle-exclamation text-danger' }}"></i></th>
   <td>{{ macros.clip(dns_id ~ "dns_mx") }}<pre id="{{ dns_id }}dns_mx" class="pre-config border bg-body-tertiary">{{ alternative.dns_mx }}</pre></td>
 </tr>
 <tr>

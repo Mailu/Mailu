@@ -33,7 +33,7 @@
     {%- for fieldname, errors in form.errors.items() %}
       {%- if bootstrap_is_hidden_field(form[fieldname]) %}
         {%- for error in errors %}
-          <p class="form-text text-danger-emphasis">{{error}}</p>
+          <p class="form-text text-danger">{{error}}</p>
         {%- endfor %}
       {%- endif %}
     {%- endfor %}
@@ -43,7 +43,7 @@
 {%- macro form_field_errors(field) %}
   {%- if field.errors %}
     {%- for error in field.errors %}
-      <p class="form-text text-danger-emphasis" id="{{ field.id }}-error-{{ loop.index }}">{{ error }}</p>
+      <p class="form-text text-danger" id="{{ field.id }}-error-{{ loop.index }}">{{ error }}</p>
     {%- endfor %}
   {%- endif %}
 {%- endmacro %}

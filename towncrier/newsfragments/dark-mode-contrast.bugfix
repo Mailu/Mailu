@@ -1,1 +1,1 @@
-Fix dark-mode contrast for address searches, editor menus, disabled fields, validation messages, helper text, and outline buttons in the admin and sign-in pages.
+Fix dark-mode contrast for address searches, editor menus, disabled fields, validation messages, helper text, and outline buttons in the admin and sign-in pages, preserving original light-theme validation and search-highlight colors and distinct button colors in both themes.

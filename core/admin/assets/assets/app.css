@@ -62,6 +62,12 @@ fieldset:disabled label,
 .form-select:disabled {
   color: var(--bs-secondary-color);
 }
+[data-bs-theme="dark"] .text-danger {
+  color: var(--bs-danger-text-emphasis) !important;
+}
+[data-bs-theme="dark"] .text-success {
+  color: var(--bs-success-text-emphasis) !important;
+}
 
 /* fix animation for icons in menu text */
 .sidebar-wrapper .nav-link p svg {
@@ -165,7 +171,7 @@ th[aria-sort="descending"] .mailu-table-sort::after {
 .ts-wrapper.multi.disabled .ts-control > div,
 .ts-wrapper.multi.disabled .ts-control > div.active { background: var(--bs-secondary-bg); color: var(--bs-secondary-color); }
 .ts-dropdown :is(.optgroup-header, .create) { color: var(--bs-secondary-color); }
-.ts-dropdown [data-selectable] .highlight { background: var(--bs-primary-bg-subtle); color: var(--bs-primary-text-emphasis); }
+[data-bs-theme="dark"] .ts-dropdown [data-selectable] .highlight { background: var(--bs-primary-bg-subtle); color: var(--bs-primary-text-emphasis); }
 .mailu-row-actions summary, details > summary { cursor: pointer; }
 .mailu-row-actions a { white-space: nowrap; text-decoration: none; padding: .3rem .25rem; }
 .mailu-message { overflow-wrap: anywhere; }

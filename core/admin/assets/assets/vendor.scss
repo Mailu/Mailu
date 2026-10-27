@@ -1,3 +1,36 @@
 $primary: #2176ae;
 
 @import "admin-lte/src/scss/adminlte";
+
+/* Keep the base hues saturated, shading enough for text on light surfaces. */
+@function mailu-outline-color($color) {
+  $shade: 0%;
+  @while contrast-ratio($body-tertiary-bg, shade-color($color, $shade)) < $min-contrast-ratio {
+    $shade: $shade + 5%;
+  }
+  @return shade-color($color, $shade);
+}
+
+:root,
+[data-bs-theme="light"] {
+  @each $color in (primary, secondary, success, info, warning, danger) {
+    --mailu-outline-#{$color}: #{mailu-outline-color(map-get($theme-colors, $color))};
+    --mailu-outline-#{$color}-border: var(--bs-#{$color});
+  }
+}
+
+[data-bs-theme="dark"] {
+  @each $color in (primary, secondary, success, info, warning, danger) {
+    --mailu-outline-#{$color}: var(--bs-#{$color}-text-emphasis);
+    --mailu-outline-#{$color}-border: var(--mailu-outline-#{$color});
+  }
+}
+
+@each $color in (primary, secondary, success, info, warning, danger) {
+  .btn-outline-#{$color} {
+    --bs-btn-color: var(--mailu-outline-#{$color});
+    --bs-btn-border-color: var(--mailu-outline-#{$color}-border);
+    --bs-btn-disabled-color: var(--mailu-outline-#{$color});
+    --bs-btn-disabled-border-color: var(--mailu-outline-#{$color}-border);
+  }
+}

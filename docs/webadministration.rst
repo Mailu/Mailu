@@ -63,6 +63,8 @@ account settings when visiting ``/admin``.
 The admin GUI and sign-in page follow your system's light or dark color scheme by default.
 Use **Appearance** to choose **Light**, **Dark**, or **System**. Your choice is saved
 in your browser and shared between the admin GUI and sign-in page.
+Error and success indicators retain their red or green meaning in either theme.
+Address searches highlight matching text in yellow in light mode and blue in dark mode.
 
 Only global administrator users have access to all configuration settings and the Rspamd webgui. Other users will be
 presented with settings for only their account, and domains they are managers of.

@@ -119,7 +119,7 @@ class MailuTable {
         this.table.before(toolbar, responsive);
         responsive.appendChild(this.table);
 
-        this.empty = element('p', 'text-secondary text-center my-3 d-none', this.table.dataset.empty);
+        this.empty = element('p', 'text-body-secondary text-center my-3 d-none', this.table.dataset.empty);
         this.resultCount = element('p', 'small text-body-secondary my-2');
         this.resultCount.setAttribute('role', 'status');
         responsive.after(this.resultCount);

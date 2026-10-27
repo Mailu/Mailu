@@ -71,7 +71,7 @@
   {%- if field.errors %}
     {%- set _ = kwargs.update({'aria-invalid': 'true', 'aria-describedby': field.id ~ '-error-1'}) %}
   {%- endif %}
-  {%- set fieldclass=" ".join(["form-range" if field.widget.input_type|default("") == "range" else ("form-select" if field.type in ("SelectField", "SelectMultipleField") else "form-control")] + ([class_] if class_ else []) + (["is-invalid"] if field.errors else [])) %}
+  {%- set fieldclass=" ".join(["form-range" if field.widget.input_type|default("") == "range" else ("form-select" if field.widget.__class__.__name__ == "Select" else "form-control")] + ([class_] if class_ else []) + (["is-invalid"] if field.errors else [])) %}
   {%- if field.type == "BooleanField" %}
     <div class="form-check{% if class_ %} {{ class_ }}{% endif %}">
       {{ field(class_="form-check-input" + (" is-invalid" if field.errors else ""), **kwargs) }}

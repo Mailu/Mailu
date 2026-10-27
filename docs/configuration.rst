@@ -340,6 +340,14 @@ Make sure to set a ``REAL_IP_FROM`` only pointing to IP addresses or networks
 that you trust; accepting the ``PROXY`` protocol from untrusted sources is a serious security vulnerability,
 allowing a potential attacker to spoof their source address.
 
+The ``POSTFIX_QUEUE_EXCLUSIVE`` (default: False) setting tells the postfix container
+that no other postfix instance uses its mail queue. On startup it then removes a
+leftover ``/queue/pid/master.pid`` even when the file is still locked. Without it,
+the file is only removed when nothing holds its lock. On a network filesystem
+(NFS, CephFS) a lock can outlive a postfix that was killed or lost its storage
+connection, and postfix then refuses to start until the lock expires. Only enable
+this setting when the queue volume is never shared by two running postfix containers.
+
 Antivirus settings
 ------------------
 

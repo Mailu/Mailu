@@ -16,7 +16,13 @@ log_filters = [
 ]
 env = system.set_env()
 
-os.system("flock -n /queue/pid/master.pid rm /queue/pid/master.pid")
+if env.get('POSTFIX_QUEUE_EXCLUSIVE', False) is True:
+    # the queue belongs to this container alone: a lock on master.pid can only be
+    # stale, e.g. held by a dead client on a network filesystem
+    if os.path.exists('/queue/pid/master.pid'):
+        os.remove('/queue/pid/master.pid')
+else:
+    os.system("flock -n /queue/pid/master.pid rm /queue/pid/master.pid")
 
 def is_valid_postconf_line(line):
     return not line.startswith("#") \

@@ -1,0 +1,1 @@
+Add POSTFIX_QUEUE_EXCLUSIVE: the postfix container removes a leftover master.pid even when a stale lock on a network filesystem still holds it

@@ -16,7 +16,7 @@ COPY start.py /start.py
 RUN echo $VERSION >> /version
 
 EXPOSE 80/tcp
-HEALTHCHECK --start-period=350s CMD curl -m3 -skfLo /dev/null http://localhost/ && /usr/local/bin/supervisor-healthcheck
+HEALTHCHECK --start-period=350s CMD /usr/local/bin/supervisor-healthcheck && curl -m3 -skfLo /dev/null http://localhost/
 USER mailu
 
 CMD ["/start.py"]

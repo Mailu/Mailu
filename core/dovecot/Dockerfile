@@ -16,7 +16,7 @@ COPY start.py /
 RUN echo $VERSION >/version
 
 # EXPOSE 110/tcp 143/tcp 993/tcp 4190/tcp 2525/tcp
-HEALTHCHECK CMD kill -0 `cat /run/dovecot/master.pid` && /usr/local/bin/supervisor-healthcheck
+HEALTHCHECK CMD /usr/local/bin/supervisor-healthcheck
 
 VOLUME ["/mail"]
 

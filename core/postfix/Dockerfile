@@ -17,7 +17,7 @@ COPY mta_sts.py /
 RUN echo $VERSION >/version
 
 #EXPOSE 25/tcp 10025/tcp
-HEALTHCHECK --start-period=30s CMD /usr/local/bin/supervisor-healthcheck && postfix status
+HEALTHCHECK --start-period=30s CMD /usr/local/bin/supervisor-healthcheck
 
 VOLUME ["/queue"]
 

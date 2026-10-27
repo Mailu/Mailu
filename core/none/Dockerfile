@@ -7,6 +7,8 @@ ARG VERSION=local
 LABEL version=$VERSION
 
 RUN echo $VERSION >/version
+RUN touch /etc/supervisord.conf && chown mailu:mailu /etc/supervisord.conf \
+  ; mkdir -p /run/mailu-supervisor && chown mailu:mailu /run/mailu-supervisor
 
 COPY start.py /
 

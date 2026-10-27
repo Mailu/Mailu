@@ -27,7 +27,10 @@ RUN set -euxo pipefail \
 # Build nginx deployment image including generated html
 FROM nginx:1.31.6-alpine
 
-RUN apk add --no-cache supervisor
+# TODO: Remove or reconsider this upgrade once cached Python and libexpat stay
+# aligned; the cached Python build can fail importing pyexpat in Supervisor.
+RUN apk add --no-cache supervisor \
+  && apk upgrade --no-cache python3
 
 ARG version=master
 ARG pinned_version=master
@@ -42,7 +45,7 @@ RUN chmod 755 /start.sh
 
 EXPOSE 80/tcp
 
-HEALTHCHECK CMD supervisorctl -c /tmp/mailu-supervisorctl.conf status nginx | grep -q RUNNING && wget -q -O /dev/null "http://127.0.0.1/${VERSION}/"
+HEALTHCHECK CMD supervisorctl status nginx | grep -q RUNNING && wget -q -O /dev/null "http://127.0.0.1/${VERSION}/"
 
 CMD ["/start.sh"]
 RUN echo $pinned_version >> /version

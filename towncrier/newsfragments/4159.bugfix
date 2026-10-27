@@ -1,0 +1,1 @@
+Stop deleting PID files during startup and remove PID-file-based container healthchecks. Service health now relies on supervisord state and existing service probes. The generated Compose deployment keeps Postfix's default queue PID directory in container-local tmpfs.

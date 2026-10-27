@@ -9,16 +9,18 @@ def test_supervisord_forwards_ld_preload_without_leaking_secrets(monkeypatch, tm
     monkeypatch.setenv("LD_PRELOAD", "/usr/lib/libhardened_malloc.so")
     monkeypatch.setenv("RATELIMIT_STORAGE_URL", "redis://redis:6379/2")
     monkeypatch.setenv("SECRET_KEY", "container-secret")
-    monkeypatch.setattr(supervisor, "SUPERVISOR_CTL_CONFIG", str(tmp_path / "ctl.conf"))
-    monkeypatch.setattr(supervisor, "SUPERVISOR_PID", str(tmp_path / "supervisord.pid"))
+    original_directory = os.getcwd()
+    monkeypatch.setattr(supervisor, "SUPERVISOR_CONFIG", str(tmp_path / "supervisord.conf"))
+    monkeypatch.setattr(supervisor, "SUPERVISOR_RUNTIME_DIR", str(tmp_path / "run"))
+    monkeypatch.setattr(supervisor, "SUPERVISOR_PID", str(tmp_path / "run" / "supervisord.pid"))
     monkeypatch.setattr(supervisor, "SUPERVISOR_SOCKET", str(tmp_path / "supervisor.sock"))
 
     captured = {}
 
     def capture_execve(_path, argv, environment):
         captured["environment"] = environment
-        config_fd = int(argv[-1].rsplit("/", 1)[1])
-        captured["config"] = os.pread(config_fd, 65536, 0).decode()
+        captured["argv"] = argv
+        captured["config"] = (tmp_path / "supervisord.conf").read_text()
         raise RuntimeError("captured supervisord exec")
 
     monkeypatch.setattr(supervisor.os, "execve", capture_execve)
@@ -36,6 +38,10 @@ def test_supervisord_forwards_ld_preload_without_leaking_secrets(monkeypatch, tm
     assert captured["environment"]["RATELIMIT_STORAGE_URL"] == "redis://redis:6379/2"
     assert not supervisor._is_sensitive("RATELIMIT_STORAGE_URL")
     assert "SECRET_KEY" not in captured["environment"]
+    assert captured["argv"] == ["supervisord", "-n", "-c", str(tmp_path / "supervisord.conf")]
+    assert "pidfile={}/run/supervisord.pid".format(tmp_path) in captured["config"]
+    assert "serverurl=unix://{}/supervisor.sock".format(tmp_path) in captured["config"]
+    assert "directory={}".format(original_directory) in captured["config"]
 
     programs = captured["config"].split("[program:")
     needs_secret, no_secret = programs[1:]

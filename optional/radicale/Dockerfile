@@ -12,7 +12,7 @@ COPY start.py /
 RUN echo $VERSION >/version
 
 #EXPOSE 5232/tcp
-HEALTHCHECK CMD ["/bin/sh", "-c", "ps ax | grep [/]radicale.conf && /usr/local/bin/supervisor-healthcheck"]
+HEALTHCHECK CMD /usr/local/bin/supervisor-healthcheck
 
 VOLUME ["/data"]
 

@@ -10,18 +10,18 @@ esac
 umask 077
 control_password=$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')
 
-cat >/tmp/mailu-supervisord.conf <<EOF
+cat >/etc/supervisord.conf <<EOF
 [supervisord]
 user=root
+pidfile=/run/mailu-supervisor/supervisord.pid
 nodaemon=true
 logfile=/dev/stdout
 logfile_maxbytes=0
-pidfile=/tmp/mailu-supervisord.pid
 childlogdir=/tmp
 loglevel=info
 
 [unix_http_server]
-file=/tmp/mailu-supervisor.sock
+file=/run/mailu-supervisor/supervisor.sock
 chmod=0700
 username=mailu-supervisorctl
 password=$control_password
@@ -30,7 +30,7 @@ password=$control_password
 supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
 
 [supervisorctl]
-serverurl=unix:///tmp/mailu-supervisor.sock
+serverurl=unix:///run/mailu-supervisor/supervisor.sock
 username=mailu-supervisorctl
 password=$control_password
 
@@ -50,13 +50,8 @@ stdout_logfile_maxbytes=0
 environment=DOMAIN="$domain",TRAEFIK_VERSION="$traefik_version"
 EOF
 
-cat >/tmp/mailu-supervisorctl.conf <<EOF
-[supervisorctl]
-serverurl=unix:///tmp/mailu-supervisor.sock
-username=mailu-supervisorctl
-password=$control_password
-EOF
-chmod 600 /tmp/mailu-supervisorctl.conf
+chmod 600 /etc/supervisord.conf
+mkdir -p /run/mailu-supervisor
 
 exec /usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin TZ=Etc/UTC LANG=C.UTF-8 \
-    /usr/bin/supervisord -n -c /tmp/mailu-supervisord.conf
+    /usr/bin/supervisord -n -c /etc/supervisord.conf

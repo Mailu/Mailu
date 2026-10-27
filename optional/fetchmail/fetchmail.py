@@ -17,7 +17,6 @@ import traceback
 FETCHMAIL = """
 fetchmail -N \
     --idfile /data/fetchids --uidl \
-    --pidfile /dev/shm/fetchmail.pid \
     --sslcertck --sslcertpath /etc/ssl/certs \
     {} -f {}
 """

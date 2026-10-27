@@ -42,7 +42,7 @@ RUN chmod 755 /start.sh
 
 EXPOSE 80/tcp
 
-HEALTHCHECK CMD supervisorctl -c /tmp/mailu-supervisorctl.conf status nginx | grep -q RUNNING && wget -q -O /dev/null "http://127.0.0.1/${VERSION}/"
+HEALTHCHECK CMD supervisorctl status nginx | grep -q RUNNING && wget -q -O /dev/null "http://127.0.0.1/${VERSION}/"
 
 CMD ["/start.sh"]
 RUN echo $pinned_version >> /version

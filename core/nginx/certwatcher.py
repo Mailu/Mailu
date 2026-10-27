@@ -5,8 +5,9 @@ happens to externally supplied certificates. Only executed by start.py in case
 of TLS_FLAVOR=[mail, cert]
 """
 
-from os.path import exists, split as path_split, join as path_join
+from os.path import split as path_split, join as path_join
 from os import system, getenv
+import subprocess
 import time
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler, FileDeletedEvent, \
@@ -24,12 +25,12 @@ class ChangeHandler(FileSystemEventHandler):
     @staticmethod
     def reload_nginx():
         "merely reload nginx without re-configuring everything"
-        if exists("/var/run/nginx.pid"):
-            print("Reloading a running nginx")
-            system("nginx -s reload")
-        if exists("/run/dovecot/master.pid"):
-            print("Reloading a running dovecot")
-            system("doveadm reload")
+        print("Reloading nginx and dovecot")
+        for process in ("nginx", "dovecot"):
+            subprocess.run(
+                ["supervisorctl", "signal", "HUP", process],
+                check=True,
+            )
 
     @staticmethod
     def reexec_config():

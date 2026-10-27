@@ -115,6 +115,8 @@ services:
     volumes:
       - "$ROOT/mailqueue:/queue"
       - "$ROOT/overrides/postfix:/overrides:ro"
+    tmpfs:
+      - /queue/pid
     depends_on:
       - front
 

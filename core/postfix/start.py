@@ -16,8 +16,6 @@ log_filters = [
 ]
 env = system.set_env()
 
-os.system("flock -n /queue/pid/master.pid rm /queue/pid/master.pid")
-
 def is_valid_postconf_line(line):
     return not line.startswith("#") \
             and not line == ''

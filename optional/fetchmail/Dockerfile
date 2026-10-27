@@ -15,6 +15,6 @@ COPY start.py /
 
 RUN echo $VERSION >/version
 
-HEALTHCHECK --start-period=350s CMD ["/bin/sh", "-c", "ps ax | grep [/]fetchmail.py && /usr/local/bin/supervisor-healthcheck"]
+HEALTHCHECK --start-period=350s CMD /usr/local/bin/supervisor-healthcheck
 
 CMD ["/start.py"]

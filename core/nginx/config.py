@@ -106,7 +106,7 @@ sI1ANRYvqSFC2X1VRZfDg+wD6E21BccmifG4yWc=
 -----END CERTIFICATE-----
 ''')
 
-args = system.set_env(cleanup_pids=False)
+args = system.set_env()
 log.basicConfig(stream=sys.stderr, level=args.get("LOG_LEVEL", "WARNING"))
 bootstrap = "--bootstrap" in sys.argv
 
@@ -229,12 +229,8 @@ subprocess.run(
     stdout=subprocess.DEVNULL,
 )
 if not bootstrap:
-    reload_commands = (
-        (["nginx", "-s", "reload"], "/var/run/nginx.pid"),
-        (["doveadm", "reload"], "/run/dovecot/master.pid"),
-    )
-    for _, pid_file in reload_commands:
-        if not os.path.exists(pid_file):
-            raise RuntimeError(f"Cannot reload service without {pid_file}")
-    for command, _ in reload_commands:
-        subprocess.run(command, check=True)
+    for process in ("nginx", "dovecot"):
+        subprocess.run(
+                ["supervisorctl", "signal", "HUP", process],
+            check=True,
+        )

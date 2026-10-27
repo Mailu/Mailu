@@ -49,7 +49,7 @@ def sigterm_handler(_signo, _stack_frame):
     log.critical("Received SIGTERM, terminating.")
     sys.exit(143)
 
-def set_env(required_secrets=[], cleanup_pids=True):
+def set_env(required_secrets=[]):
     log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", 'WARNING'))
     signal.signal(signal.SIGTERM, sigterm_handler)
 
@@ -74,9 +74,6 @@ def set_env(required_secrets=[], cleanup_pids=True):
     # derive the keys we need
     for secret in required_secrets:
         os.environ[f'{secret}_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray(secret, 'utf-8'), 'sha256').hexdigest()
-
-    if cleanup_pids:
-        os.system(r'find /run -xdev -type f -name \*.pid -print -delete')
 
     return {
             key: _coerce_value(os.environ.get(key, value))

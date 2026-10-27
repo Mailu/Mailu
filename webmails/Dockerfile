@@ -100,6 +100,6 @@ VOLUME /overrides
 
 CMD ["/start.py"]
 
-HEALTHCHECK CMD curl -m3 -f -L http://localhost/ping && /usr/local/bin/supervisor-healthcheck
+HEALTHCHECK CMD /usr/local/bin/supervisor-healthcheck && curl -m3 -f -L http://localhost/ping
 
 RUN echo $VERSION >> /version

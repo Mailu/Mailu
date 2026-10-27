@@ -137,3 +137,35 @@ def test_log_filter_forwards_sigterm_and_kills_child_that_ignores_it(tmp_path):
         time.sleep(0.05)
     else:
         raise AssertionError("log filter left a child running after SIGTERM")
+
+
+def test_log_filter_forwards_sighup_without_stopping_child(tmp_path):
+    pid_file = tmp_path / "child.pid"
+    hup_file = tmp_path / "child.hup"
+    child = (
+        "import os, signal, sys, time; "
+        "signal.signal(signal.SIGHUP, lambda *_: open(sys.argv[2], 'w').write('reloaded')); "
+        "open(sys.argv[1], 'w').write(str(os.getpid())); "
+        "time.sleep(30)"
+    )
+    wrapper = subprocess.Popen(
+        [sys.executable, "-m", "socrate.log_filter", "--", sys.executable, "-c", child, str(pid_file), str(hup_file)],
+        env=dict(os.environ),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    deadline = time.monotonic() + 3
+    while not pid_file.exists() and time.monotonic() < deadline:
+        time.sleep(0.05)
+    assert pid_file.exists()
+
+    wrapper.send_signal(signal.SIGHUP)
+    deadline = time.monotonic() + 3
+    while not hup_file.exists() and time.monotonic() < deadline:
+        time.sleep(0.05)
+    assert hup_file.read_text() == "reloaded"
+    assert wrapper.poll() is None
+
+    wrapper.send_signal(signal.SIGTERM)
+    wrapper.communicate(timeout=8)
+    assert wrapper.returncode == 128 + signal.SIGTERM

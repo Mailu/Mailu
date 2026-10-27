@@ -10,10 +10,6 @@ log_filters = [
 system.set_env()
 supervisor.clean_environment()
 
-# Check if a stale pid file exists
-if os.path.exists("/var/run/nginx.pid"):
-    os.remove("/var/run/nginx.pid")
-
 subprocess.run(["/config.py", "--bootstrap"], check=True)
 programs = [
     {"name": "dovecot", "command": ["/usr/sbin/dovecot", "-c", "/etc/dovecot/proxy.conf", "-F"]},

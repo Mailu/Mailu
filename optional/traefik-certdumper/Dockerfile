@@ -20,6 +20,6 @@ RUN echo $VERSION >/version
 VOLUME ["/traefik"]
 VOLUME ["/output"]
 
-HEALTHCHECK --start-period=10s CMD supervisorctl -c /tmp/mailu-supervisorctl.conf status certdumper | grep -q RUNNING
+HEALTHCHECK --start-period=10s CMD supervisorctl status certdumper | grep -q RUNNING
 
 ENTRYPOINT ["/start.sh"]

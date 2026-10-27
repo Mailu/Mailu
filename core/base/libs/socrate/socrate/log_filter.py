@@ -167,13 +167,17 @@ def main():
 
     patterns = _patterns()
     requested_signal = {"value": None}
+    requested_child_signal = {"value": None}
 
-    def request_stop(signum, _frame):
-        requested_signal["value"] = signum
+    def request_signal(signum, _frame):
+        if signum == signal.SIGHUP:
+            requested_child_signal["value"] = signum
+        else:
+            requested_signal["value"] = signum
 
     original_handlers = {
-        signum: signal.signal(signum, request_stop)
-        for signum in (signal.SIGTERM, signal.SIGINT)
+        signum: signal.signal(signum, request_signal)
+        for signum in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP)
     }
     process = None
     selector = None
@@ -208,6 +212,10 @@ def main():
 
         group_stopped = False
         while selector.get_map() or process.poll() is None:
+            if requested_child_signal["value"] is not None:
+                _signal_process_group(process, requested_child_signal["value"])
+                requested_child_signal["value"] = None
+
             if requested_signal["value"] is not None:
                 _stop_process_group(process)
                 group_stopped = True

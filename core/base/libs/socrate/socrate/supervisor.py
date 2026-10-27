@@ -5,12 +5,12 @@ import shlex
 import sys
 import base64
 import secrets
-import tempfile
 
 
-SUPERVISOR_CTL_CONFIG = "/tmp/mailu-supervisorctl.conf"
-SUPERVISOR_PID = "/tmp/mailu-supervisord.pid"
-SUPERVISOR_SOCKET = "/tmp/mailu-supervisor.sock"
+SUPERVISOR_CONFIG = "/etc/supervisord.conf"
+SUPERVISOR_RUNTIME_DIR = "/run/mailu-supervisor"
+SUPERVISOR_PID = SUPERVISOR_RUNTIME_DIR + "/supervisord.pid"
+SUPERVISOR_SOCKET = SUPERVISOR_RUNTIME_DIR + "/supervisor.sock"
 
 
 def _is_sensitive(name):
@@ -53,16 +53,17 @@ def start(programs, secret_env=None):
     """
     secret_env = secret_env or {}
     parent_env = dict(os.environ)
+    program_directory = os.getcwd()
     control_username = "mailu-supervisorctl"
     control_password = secrets.token_urlsafe(32)
     config = ["[supervisord]"]
     if os.geteuid() == 0:
         config.append("user=root")
     config.extend([
+        "pidfile={}".format(SUPERVISOR_PID),
         "nodaemon=true",
         "logfile=/dev/stdout",
         "logfile_maxbytes=0",
-        "pidfile={}".format(SUPERVISOR_PID),
         "childlogdir=/tmp",
         "loglevel=info",
         "",
@@ -93,6 +94,7 @@ def start(programs, secret_env=None):
             "",
             "[program:{}]".format(name),
             "command={}".format(shlex.join(command)),
+            "directory={}".format(program.get("directory", program_directory)),
             "priority={}".format(program.get("priority", 999)),
             "autostart=true",
             "autorestart=true",
@@ -114,37 +116,22 @@ def start(programs, secret_env=None):
                 for key, value in sorted(environment.items())
             )))
 
-    ctl_config = (
-        "[supervisorctl]\n"
-        "serverurl=unix://{}\n"
-        "username={}\n"
-        "password={}\n"
-    ).format(SUPERVISOR_SOCKET, control_username, control_password)
-    os.makedirs(os.path.dirname(SUPERVISOR_CTL_CONFIG), exist_ok=True)
     old_umask = os.umask(0o077)
     try:
-        with open(SUPERVISOR_CTL_CONFIG, "w") as handle:
-            handle.write(ctl_config)
-        os.chmod(SUPERVISOR_CTL_CONFIG, 0o600)
+        os.makedirs(SUPERVISOR_RUNTIME_DIR, exist_ok=True)
+        with open(SUPERVISOR_CONFIG, "w") as handle:
+            handle.write("\n".join(config) + "\n")
+            handle.write((
+                "\n[supervisorctl]\n"
+                "serverurl=unix://{}\n"
+                "username={}\n"
+                "password={}\n"
+            ).format(SUPERVISOR_SOCKET, control_username, control_password))
+        os.chmod(SUPERVISOR_CONFIG, 0o600)
     finally:
         os.umask(old_umask)
 
-    configuration = "\n".join(config) + "\n"
-    config_fd = None
-    if hasattr(os, "memfd_create"):
-        try:
-            config_fd = os.memfd_create("mailu-supervisord", 0)
-        except OSError:
-            pass
-    if config_fd is None:
-        handle = tempfile.TemporaryFile(dir="/dev/shm")
-        config_fd = handle.fileno()
-    os.write(config_fd, configuration.encode())
-    os.fchmod(config_fd, 0o600)
-    os.lseek(config_fd, 0, os.SEEK_SET)
-    os.set_inheritable(config_fd, True)
-
-    for stale_path in (SUPERVISOR_PID, SUPERVISOR_SOCKET):
+    for stale_path in (SUPERVISOR_SOCKET,):
         try:
             os.unlink(stale_path)
         except FileNotFoundError:
@@ -156,6 +143,9 @@ def start(programs, secret_env=None):
     }
     sys.stdout.flush()
     sys.stderr.flush()
-    config_path = "/proc/self/fd/{}".format(config_fd)
-    os.execve("/usr/bin/supervisord", ["supervisord", "-n", "-c", config_path], clean_env)
+    os.execve(
+        "/usr/bin/supervisord",
+        ["supervisord", "-n", "-c", SUPERVISOR_CONFIG],
+        clean_env,
+    )
     sys.exit(1)

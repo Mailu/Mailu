@@ -152,8 +152,6 @@ initialize_database()
 
 # Configure nginx
 conf.jinja("/conf/nginx-webmail.conf", context, "/etc/nginx/http.d/webmail.conf")
-if os.path.exists("/var/run/nginx.pid"):
-    os.system("nginx -s reload")
 
 supervisor.start([
     {"name": "php-fpm", "command": ["php-fpm84", "-F"]},

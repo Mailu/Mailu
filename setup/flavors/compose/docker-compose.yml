@@ -183,6 +183,8 @@ services:
     volumes:
       - "{{ root }}/mailqueue:/queue"
       - "{{ root }}/overrides/postfix:/overrides:ro"
+    tmpfs:
+      - /queue/pid
     depends_on:
       - front
     {% if resolver_enabled %}

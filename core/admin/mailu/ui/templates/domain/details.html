@@ -24,7 +24,7 @@
 <tr><th>{{ _('Created') }}</th><td>{{ domain.created_at | format_date }}</td></tr>
 <tr><th>{{ _('Last edit') }}</th><td>{{ domain.updated_at | format_date }}</td></tr>
 <tr>
-  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa-solid {{ 'fa-circle-check text-success' if domain.check_mx() else 'fa-circle-exclamation text-danger' }}"></i></th>
+  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa-solid {{ 'fa-circle-check text-success-emphasis' if domain.check_mx() else 'fa-circle-exclamation text-danger-emphasis' }}"></i></th>
   <td>{{ macros.clip("dns_mx") }}<pre id="dns_mx" class="pre-config border bg-body-tertiary">{{ domain.dns_mx }}</pre></td>
 </tr>
 <tr>
@@ -49,7 +49,7 @@
 {%- endif %}
 {%- if domain.dns_tlsa|length > 0 %}
 <tr>
-  <th>{% trans %}DNS TLSA entry{% endtrans %}<br><span class="text-secondary small fw-normal">Let's Encrypt ISRG Roots</span></th>
+  <th>{% trans %}DNS TLSA entry{% endtrans %}<br><span class="text-body-secondary small fw-normal">Let's Encrypt ISRG Roots</span></th>
   <td>{{ macros.clip("dns_tlsa") }}<pre id="dns_tlsa" class="pre-config border bg-body-tertiary">{{ domain.dns_tlsa | join("\n") }}</pre></td>
 </tr>
 {%- endif %}
@@ -72,7 +72,7 @@
 {% if domain.dkim_keys %}
 <tr><th>{% trans %}DKIM keys{% endtrans %}</th><td>
 {% for key in domain.dkim_keys %}
-<div class="mb-3"><strong>DKIM {{ key.algorithm|upper }} / {{ key.selector }}</strong> - {% if key.active %}{% trans %}Signing{% endtrans %}{% elif key.retired %}{% trans %}Retired{% endtrans %}{% else %}{% trans %}Staged{% endtrans %}{% endif %}<br><span class="text-secondary small">{% trans %}Created{% endtrans %}: {{ key.created_at | format_date }}</span>
+<div class="mb-3"><strong>DKIM {{ key.algorithm|upper }} / {{ key.selector }}</strong> - {% if key.active %}{% trans %}Signing{% endtrans %}{% elif key.retired %}{% trans %}Retired{% endtrans %}{% else %}{% trans %}Staged{% endtrans %}{% endif %}<br><span class="text-body-secondary small">{% trans %}Created{% endtrans %}: {{ key.created_at | format_date }}</span>
 <pre class="pre-config border bg-body-tertiary">{{ key.dns_record(domain.name) }}</pre>
 {% if domain in current_user.get_managed_domains() %}
 {% if key.retired %}
@@ -106,7 +106,7 @@
   <td>{{ alternative.name }}</td>
 </tr>
 <tr>
-  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa-solid {{ 'fa-circle-check text-success' if alternative.check_mx() else 'fa-circle-exclamation text-danger' }}"></i></th>
+  <th>{% trans %}DNS MX entry{% endtrans %} <i class="fa-solid {{ 'fa-circle-check text-success-emphasis' if alternative.check_mx() else 'fa-circle-exclamation text-danger-emphasis' }}"></i></th>
   <td>{{ macros.clip(dns_id ~ "dns_mx") }}<pre id="{{ dns_id }}dns_mx" class="pre-config border bg-body-tertiary">{{ alternative.dns_mx }}</pre></td>
 </tr>
 <tr>

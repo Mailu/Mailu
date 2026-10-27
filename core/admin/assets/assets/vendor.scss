@@ -1,3 +1,13 @@
 $primary: #2176ae;
 
 @import "admin-lte/src/scss/adminlte";
+
+/* Use theme-aware text colors on the transparent backgrounds of outline buttons. */
+@each $color in (primary, secondary, success, info, warning, danger) {
+  .btn-outline-#{$color} {
+    --bs-btn-color: var(--bs-#{$color}-text-emphasis);
+    --bs-btn-border-color: var(--bs-#{$color}-text-emphasis);
+    --bs-btn-disabled-color: var(--bs-#{$color}-text-emphasis);
+    --bs-btn-disabled-border-color: var(--bs-#{$color}-text-emphasis);
+  }
+}

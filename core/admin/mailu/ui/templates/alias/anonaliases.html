@@ -35,7 +35,7 @@
 </thead>
 <tbody>
   {%- for alias in aliases %}
-  <tr{% if alias.disabled %} class="text-muted"{% endif %}>
+  <tr{% if alias.disabled %} class="text-body-secondary"{% endif %}>
     <td>
       {% if alias.disabled %}
       <a href="{{ url_for('.anonalias_enable', alias_email=alias.email) }}" title="{% trans %}Enable{% endtrans %}"><i class="fa-solid fa-check"></i></a>&nbsp;

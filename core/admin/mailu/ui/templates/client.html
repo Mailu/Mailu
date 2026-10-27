@@ -25,15 +25,15 @@
     </tr>
     <tr>
       <th>{% trans %}Server name{% endtrans %}</th>
-      <td><pre class="pre-config border bg-light">{{ config["HOSTNAME"] }}</pre></td>
+      <td><pre class="pre-config border bg-body-tertiary">{{ config["HOSTNAME"] }}</pre></td>
     </tr>
     <tr>
       <th>{% trans %}Username{% endtrans %}</th>
-      <td><pre class="pre-config border bg-light">{{ current_user if current_user.is_authenticated else "******" }}</pre></td>
+      <td><pre class="pre-config border bg-body-tertiary">{{ current_user if current_user.is_authenticated else "******" }}</pre></td>
     </tr>
     <tr>
       <th>{% trans %}Authentication token{% endtrans %}</th>
-      <td><pre class="pre-config border bg-light">*******</pre></td>
+      <td><pre class="pre-config border bg-body-tertiary">*******</pre></td>
     </tr>
   </tbody>
 {%- endcall %}
@@ -50,15 +50,15 @@
     </tr>
     <tr>
       <th>{% trans %}Server name{% endtrans %}</th>
-      <td><pre class="pre-config border bg-light">{{ config["HOSTNAME"] }}</pre></td>
+      <td><pre class="pre-config border bg-body-tertiary">{{ config["HOSTNAME"] }}</pre></td>
     </tr>
     <tr>
       <th>{% trans %}Username{% endtrans %}</th>
-      <td><pre class="pre-config border bg-light">{{ current_user if current_user.is_authenticated else "******" }}</pre></td>
+      <td><pre class="pre-config border bg-body-tertiary">{{ current_user if current_user.is_authenticated else "******" }}</pre></td>
     </tr>
     <tr>
       <th>{% trans %}Authentication token{% endtrans %}</th>
-      <td><pre class="pre-config border bg-light">*******</pre></td>
+      <td><pre class="pre-config border bg-body-tertiary">*******</pre></td>
     </tr>
   </tbody>
 {%- endcall %}

@@ -11,9 +11,10 @@ RUN set -euxo pipefail \
   ; mkdir -p /data
 
 COPY fetchmail.py /
+COPY start.py /
 
 RUN echo $VERSION >/version
 
-HEALTHCHECK --start-period=350s CMD ["/bin/sh", "-c", "ps ax | grep [/]fetchmail.py"]
+HEALTHCHECK --start-period=350s CMD ["/bin/sh", "-c", "ps ax | grep [/]fetchmail.py && /usr/local/bin/supervisor-healthcheck"]
 
-CMD ["/fetchmail.py"]
+CMD ["/start.py"]

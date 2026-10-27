@@ -20,6 +20,11 @@ Other reasons are:
 - Due to usage of proxy protocol it is less likely that Mailu becomes an open relay due to misconfiguration of special headers.
 - No special scripting is required to copy over certs from the proxy to Mailu
 
+For Mailu traffic, configure the proxy to route TLS connections by SNI and pass them through to
+Mailu over TCP. Do not terminate TLS at the proxy and forward decrypted HTTP to Mailu. TLS
+passthrough lets Mailu manage HTTPS and use the PROXY protocol to receive the original client
+address. The examples below use this approach.
+
 When using Mailu with Traefik as reverse proxy. Traefik is configured to use proxy protocol for all ports, but port 80.
 Port 80 is configured to let through the letsencrypt HTTP challenges for Mailu.
 This means that if Traefik must request certificates for other services than Mailu, Traefik should use the TLS (TLS-ALPN-01)

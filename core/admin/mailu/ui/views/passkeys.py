@@ -5,7 +5,7 @@ from flask_babel import lazy_gettext as _
 from webauthn import options_to_json
 from webauthn.helpers import bytes_to_base64url, base64url_to_bytes
 
-from mailu import models, passkeys as webauthn_config, auth_flow, setup_tokens
+from mailu import models, utils, passkeys as webauthn_config, auth_flow, setup_tokens
 from mailu.ui import ui, access
 
 
@@ -29,6 +29,41 @@ def passkey_list(user_email):
     return _render_passkey_list(user, restricted_navigation=restricted_navigation)
 
 
+@ui.route('/user/passkeys/create', methods=['GET'], defaults={'user_email': None})
+@ui.route('/user/passkeys/<path:user_email>/create', methods=['GET'])
+@access.owner(models.User, 'user_email')
+def passkey_create(user_email):
+    user_email = user_email or flask_login.current_user.email
+    user = models.db.session.get(models.User, user_email) or flask.abort(404)
+    restricted_navigation = user.email == flask_login.current_user.email and (
+        user.change_pw_next_login
+        or 'password_change' in flask.session.get(auth_flow.SESSION_ACTIONS, [])
+    )
+    required_enrollment = (
+        user.passkey_enroll_next_login
+        or user.domain.passkey_require_enrollment
+        or flask.current_app.config.get('PASSKEY_REQUIRED', False)
+    )
+    return flask.render_template(
+        'user/passkey_create.html', user=user,
+        demo_account_email=utils.DEMO_ACCOUNT_EMAIL,
+        restricted_navigation=restricted_navigation,
+        required_enrollment=required_enrollment,
+        passkeys_url=flask.url_for(
+            '.passkey_list',
+            user_email=user.email if user.email != flask_login.current_user.email else None,
+        ),
+        passkey_options_url=flask.url_for(
+            '.passkey_registration_options',
+            user_email=user.email if user.email != flask_login.current_user.email else None,
+        ),
+        passkey_register_url=flask.url_for(
+            '.passkey_register',
+            user_email=user.email if user.email != flask_login.current_user.email else None,
+        ),
+    )
+
+
 @ui.route('/user/passkey-required', methods=['GET'])
 @access.authenticated
 def passkey_required():
@@ -49,9 +84,9 @@ def _render_passkey_list(user, required_enrollment=False, restricted_navigation=
     return flask.render_template(
         'user/passkeys.html', user=user,
         passkeys=[(key, bytes_to_base64url(key.credential_id)) for key in user.passkeys],
-        delete_form=FlaskForm(),
         required_enrollment=required_enrollment,
         restricted_navigation=restricted_navigation,
+        demo_account_email=utils.DEMO_ACCOUNT_EMAIL,
     )
 
 
@@ -80,6 +115,8 @@ def account_setup_link(user_email):
 def passkey_registration_options(user_email):
     user_email = user_email or flask_login.current_user.email
     user = models.db.session.get(models.User, user_email) or flask.abort(404)
+    if utils.is_demo_account(user):
+        return flask.jsonify(error=utils.DEMO_ACCOUNT_NOTICE), 403
     actor = flask_login.current_user
     domain = user.domain
     flask.current_app.logger.debug(
@@ -101,6 +138,8 @@ def passkey_registration_options(user_email):
 def passkey_register(user_email):
     user_email = user_email or flask_login.current_user.email
     user = models.db.session.get(models.User, user_email) or flask.abort(404)
+    if utils.is_demo_account(user):
+        return flask.jsonify(error=utils.DEMO_ACCOUNT_NOTICE), 403
     actor = flask_login.current_user
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
     challenge = flask.session.pop(_challenge_key(), None)
@@ -148,13 +187,11 @@ def passkey_register(user_email):
     return flask.jsonify(ok=True)
 
 
-@ui.route('/user/passkeys/<credential_id>/delete', methods=['POST'], defaults={'user_email': None})
-@ui.route('/user/passkeys/<path:user_email>/<credential_id>/delete', methods=['POST'])
+@ui.route('/user/passkeys/<credential_id>/delete', methods=['GET', 'POST'], defaults={'user_email': None})
+@ui.route('/user/passkeys/<path:user_email>/<credential_id>/delete', methods=['GET', 'POST'])
+@access.confirmation_required("delete a passkey")
 @access.owner(models.User, 'user_email')
 def passkey_delete(credential_id, user_email):
-    form = FlaskForm()
-    if not form.validate_on_submit():
-        flask.abort(400)
     try:
         credential_key = base64url_to_bytes(credential_id)
     except Exception:

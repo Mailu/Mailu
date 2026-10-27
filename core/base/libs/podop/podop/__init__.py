@@ -36,13 +36,20 @@ def run_server(verbosity, server_type, socket, tables):
     # get_event_loop() does not create a loop when none is running.
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    server = loop.run_until_complete(loop.create_unix_server(
-        SERVER_TYPES[server_type].factory(table_map), socket
-    ))
+    sockets = socket if isinstance(socket, (tuple, list)) else (socket,)
+    servers = [
+        loop.run_until_complete(loop.create_unix_server(
+            SERVER_TYPES[server_type].factory(table_map), socket_path
+        ))
+        for socket_path in sockets
+    ]
     try:
         loop.run_forever()
     except KeyboardInterrupt:
         pass
-    server.close()
-    loop.run_until_complete(server.wait_closed())
+    for server in servers:
+        server.close()
+    loop.run_until_complete(asyncio.gather(
+        *(server.wait_closed() for server in servers)
+    ))
     loop.close()

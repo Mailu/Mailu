@@ -2,22 +2,26 @@
 
 import os
 import subprocess
-from socrate import system
+from socrate import system, supervisor
 
-system.set_env(log_filters=[
+log_filters = [
     rb'could not be resolved \(\d\: [^\)]+\) while in resolving client address, client\: [^,]+, server: [^\:]+\:(25|110|143|587|465|993|995)$'
-])
+]
+system.set_env()
+supervisor.clean_environment()
 
 # Check if a stale pid file exists
 if os.path.exists("/var/run/nginx.pid"):
     os.remove("/var/run/nginx.pid")
 
-if os.environ["TLS_FLAVOR"] in [ "letsencrypt","mail-letsencrypt" ]:
-    subprocess.Popen(["/letsencrypt.py"])
-elif os.environ["TLS_FLAVOR"] in [ "mail", "cert" ]:
-    subprocess.Popen(["/certwatcher.py"])
-
 subprocess.run(["/config.py", "--bootstrap"], check=True)
-os.system("dovecot -c /etc/dovecot/proxy.conf")
-cmd = ['/usr/sbin/nginx', '-g', 'daemon off;']
-system.run_process_and_forward_output(cmd)
+programs = [
+    {"name": "dovecot", "command": ["/usr/sbin/dovecot", "-c", "/etc/dovecot/proxy.conf", "-F"]},
+    {"name": "nginx", "command": ["/usr/sbin/nginx", "-g", "daemon off;"], "log_filters": log_filters},
+]
+if os.environ["TLS_FLAVOR"] in ["letsencrypt", "mail-letsencrypt"]:
+    programs.append({"name": "certbot-renewal", "command": ["/letsencrypt.py"]})
+elif os.environ["TLS_FLAVOR"] in ["mail", "cert"]:
+    programs.append({"name": "certificate-watcher", "command": ["/certwatcher.py"]})
+
+supervisor.start(programs)

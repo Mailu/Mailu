@@ -16,10 +16,11 @@ RUN set -euxo pipefail \
   ; chmod 755 olefy.py
 
 COPY start.py /
+COPY run_olefy.py /
 
 RUN echo $VERSION >/version
 
-HEALTHCHECK --start-period=60s CMD echo PING|nc -q1 127.0.0.1 11343|grep "PONG"
+HEALTHCHECK --start-period=60s CMD echo PING|nc -q1 127.0.0.1 11343|grep "PONG" && /usr/local/bin/supervisor-healthcheck
 #EXPOSE 11343/tcp
 
 USER nobody:nobody
@@ -34,4 +35,4 @@ ENV \
     OLEFY_DEL_TMP="1" \
     OLEFY_DEL_TMP_FAILED="1"
 
-CMD /start.py
+CMD ["/start.py"]

@@ -3,6 +3,7 @@ import flask_login
 import hashlib
 import hmac
 import secrets
+import idna
 from flask_babel import lazy_gettext as _
 from datetime import datetime, timezone
 from flask_wtf.csrf import validate_csrf
@@ -18,6 +19,36 @@ from flask_wtf import FlaskForm
 
 from mailu import models, utils, signin, passkeys as webauthn_config, auth_flow, setup_tokens
 from mailu.sso import sso, forms
+
+
+PASSKEY_LOGIN_CREDENTIAL_SLOTS = 10
+
+
+def _login_credential_ids(email, credentials):
+    """Return a ten-slot allow-list for username-first passkey login."""
+    credential_ids = sorted(key.credential_id for key in credentials)
+    if len(credential_ids) < PASSKEY_LOGIN_CREDENTIAL_SLOTS:
+        localpart, domain = email.rsplit('@', 1)
+        canonical_email = f'{localpart.lower()}@{idna.encode(domain.lower()).decode("ascii")}'
+        email_bytes = canonical_email.encode('utf-8')
+        filler_ids = set()
+        slot = 0
+        while len(credential_ids) + len(filler_ids) < PASSKEY_LOGIN_CREDENTIAL_SLOTS:
+            message = b'PASSKEY_LOGIN_FILLER\0' + email_bytes + b'\0' + slot.to_bytes(4, 'big')
+            filler_id = hmac.new(
+                flask.current_app.passkey_filler_key, message, digestmod='sha256',
+            ).digest()
+            if filler_id not in credential_ids:
+                filler_ids.add(filler_id)
+            slot += 1
+        credential_ids.extend(filler_ids)
+
+    # Avoid placing real credential IDs in a recognizable prefix of the list.
+    ordering_key = flask.current_app.passkey_filler_key
+    credential_ids.sort(key=lambda credential_id: hmac.new(
+        ordering_key, b'PASSKEY_LOGIN_ORDER\0' + credential_id, digestmod='sha256',
+    ).digest())
+    return credential_ids
 
 
 def _csrf_error():
@@ -48,6 +79,7 @@ def _render_account_setup(user, token, password_form=None, registration_form=Non
         password_form=password_form or forms.AccountSetupForm(),
         registration_form=registration_form or FlaskForm(),
         allow_password=allow_password,
+        demo_account_email=utils.DEMO_ACCOUNT_EMAIL,
         passkey_options_url=passkey_options_url or flask.url_for(
             'sso.account_setup_options', token=token,
         ),
@@ -176,6 +208,8 @@ def account_setup_options(token):
     if not grant or not grant.user.enabled:
         return flask.jsonify(error='This account setup link has expired or was already used.'), 410
     user = grant.user
+    if utils.is_demo_account(user):
+        return flask.jsonify(error=utils.DEMO_ACCOUNT_NOTICE), 403
     options = webauthn_config.registration_options(user)
     flask.session['account_setup_hash'] = grant.token_hash
     flask.session['account_setup_challenge'] = bytes_to_base64url(options.challenge)
@@ -194,6 +228,8 @@ def account_setup_register(token):
     if not grant or not grant.user.enabled or session_hash != grant.token_hash or not challenge or not payload:
         return flask.jsonify(error='This account setup link has expired. Start again with a new link.'), 410
     user = grant.user
+    if utils.is_demo_account(user):
+        return flask.jsonify(error=utils.DEMO_ACCOUNT_NOTICE), 403
     try:
         registration = webauthn_config.register_credential(user, payload, challenge)
     except webauthn_config.PasskeyRegistrationError as exc:
@@ -225,6 +261,8 @@ def account_setup_password(token):
     if not grant or not grant.user.enabled:
         flask.abort(404)
     user = grant.user
+    if utils.is_demo_account(user):
+        flask.abort(403, utils.DEMO_ACCOUNT_NOTICE)
     if _account_setup_requires_passkey(user) or user.passkeys:
         flask.abort(403)
 
@@ -265,9 +303,11 @@ def passkey_authentication_options():
         destination = flask.current_app.config['WEB_WEBMAIL']
     else:
         return flask.jsonify(error='Invalid sign-in destination.'), 400
-    destination = signin.pending() or destination
+    if payload.get('explicit') is not True:
+        destination = signin.pending() or destination
     flask.session['passkey_login_destination'] = destination
     user = models.User.get(email) if email else None
+    domain = models.db.session.get(models.Domain, email.rsplit('@', 1)[1]) if email else None
     credentials = user.passkeys if user and user.enabled else []
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
     flask.current_app.logger.debug(
@@ -277,12 +317,16 @@ def passkey_authentication_options():
     options = generate_authentication_options(
         rp_id=webauthn_config.rp_id(),
         allow_credentials=(
-            [PublicKeyCredentialDescriptor(id=key.credential_id) for key in credentials]
+            [PublicKeyCredentialDescriptor(id=credential_id)
+             for credential_id in _login_credential_ids(email, credentials)]
             if email else None
         ),
+        # The domain policy is intentionally visible in username-first options.
+        # For discoverable login the account is not known yet, so request UV only
+        # as preferred and let verification enforce the credential's domain policy.
         user_verification=(
             UserVerificationRequirement.REQUIRED
-            if not email or (user and user.domain.passkey_require_uv)
+            if domain and domain.passkey_require_uv
             else UserVerificationRequirement.PREFERRED
         ),
     )
@@ -297,26 +341,6 @@ def passkey_authentication_options():
         # member entirely so browsers treat every discoverable credential as eligible.
         options_json.pop('allowCredentials', None)
     return flask.jsonify(options_json)
-
-
-@sso.route('/passkey/status', methods=['POST'])
-def passkey_status():
-    payload = flask.request.get_json(silent=True) or {}
-    email = (payload.get('email') or '').strip()
-    if not email or not utils.is_valid_email(email):
-        return flask.jsonify(error='Enter a valid email address.'), 400
-    user = models.User.get(email)
-    return flask.jsonify(
-        has_passkey=bool(user and user.enabled and user.passkeys),
-        password_required=bool(flask.current_app.config.get('PASSKEY_REQUIRED', False)),
-        enrollment_required=bool(
-            user and user.enabled and not user.passkeys and (
-                user.passkey_enroll_next_login
-                or user.domain.passkey_require_enrollment
-                or flask.current_app.config.get('PASSKEY_REQUIRED', False)
-            )
-        ),
-    )
 
 @sso.route('/passkey/verify', methods=['POST'])
 def passkey_authenticate():

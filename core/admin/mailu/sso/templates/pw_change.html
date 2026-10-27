@@ -2,6 +2,11 @@
 
 {%- block content %}
 {%- call macros.card() %}
+{% if current_user.email == demo_account_email %}
+<div class="alert alert-info mb-0" role="alert">
+  {% trans %}Password changes and passkey creation are disabled for this user on the demo server. You can create other users to try these features.{% endtrans %}
+</div>
+{% else %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
   {{ macros.form_field(form.oldpw) }}
@@ -14,5 +19,6 @@
   </p>
   {% endif %}
 </form>
+{% endif %}
 {%- endcall %}
 {%- endblock %}

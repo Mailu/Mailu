@@ -51,10 +51,16 @@ function auth_passdb_lookup(req)
         host = server,
         port = port,
         nopassword = "Y",
-        proxy_noauth = "Y",
       }
       if req.protocol == "imap" then
+        reply.proxy_noauth = "Y"
         reply.proxy_mech = "PLAIN"
+      elseif req.protocol == "submission" then
+        -- The storage submission service must accept the authenticated SMTP
+        -- identity before it can relay the transaction and fetch BURL content.
+        reply.proxy_mech = "PLAIN"
+      else
+        reply.proxy_noauth = "Y"
       end
       return dovecot.auth.PASSDB_RESULT_OK, reply
     else

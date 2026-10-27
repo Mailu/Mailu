@@ -30,9 +30,27 @@ TLS certificates
 Sets the ``TLS_FLAVOR`` to one of the following
 values:
 
-- ``cert`` is the default and requires certificates to be setup manually;
-- ``letsencrypt`` will use the *Letsencrypt!* CA to obtain certificates automatically;
+- ``cert`` is the default and requires certificates to be set up manually. Mailu redirects
+  HTTP requests to HTTPS;
+- ``letsencrypt`` will use the *Letsencrypt!* CA to obtain certificates automatically. Mailu
+  redirects HTTP requests to HTTPS;
+- ``mail`` requires certificates to be set up manually and disables Mailu's HTTP-to-HTTPS redirect;
+- ``mail-letsencrypt`` obtains certificates automatically and disables Mailu's HTTP-to-HTTPS
+  redirect;
 - ``notls`` will disable TLS, this is not recommended except for testing.
+
+For reverse-proxy setups, we recommend routing TLS connections by SNI and passing them through to
+Mailu over TCP with the PROXY protocol enabled. This lets Mailu handle TLS and preserves the client
+address. See :doc:`/reverse` for examples. With this setup, use ``cert`` for manually supplied
+certificates or ``letsencrypt`` for certificates managed by Mailu.
+
+The ``mail`` flavors are for setups where an external proxy terminates HTTPS and forwards plain
+HTTP to Mailu. They are not recommended for typical reverse-proxy deployments: ``cert`` and
+``letsencrypt`` can redirect requests to HTTPS when ``X-Forwarded-Proto`` is ``http`` or unset,
+which can cause a loop if the proxy continues forwarding over HTTP. The setup utility does not
+offer the ``mail`` flavors; set them manually in ``mailu.env`` only when needed. ``mail-letsencrypt``
+also requires inbound HTTP on port 80 for ACME HTTP-01 validation. If the proxy receives port 80,
+it must forward ``/.well-known/acme-challenge/`` requests to Mailu's front container.
 
 .. note::
 
@@ -45,7 +63,7 @@ Bind address
 
 The bind addresses need to match the public IP addresses assigned to your server. For IPv6 you will need the ``<global>`` scope address.
 
-You can find those addresses by running the following:
+You can find those addresses by running the following (``ip -6 addr show scope global`` shows only the global IPv6 addresses):
 
 .. code-block:: bash
 
@@ -61,7 +79,7 @@ You can find those addresses by running the following:
           TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
 If the address is not configured directly (NAT) on any of the network interfaces or if
-you would simply like the server to listen on all interfaces, use ``0.0.0.0`` and ``::``. 
+you would simply like the server to listen on all interfaces, use ``0.0.0.0`` and ``::``.
 Note that running in this mode is not supported and can lead to `issues`_.
 
 .. _issues: https://github.com/Mailu/Mailu/issues/641
@@ -87,8 +105,8 @@ Finish setting up TLS
 Mailu relies heavily on TLS and must have a key pair and a certificate
 available, at least for the hostname configured in the ``mailu.env`` file.
 
-If you set ``TLS_FLAVOR`` to ``cert`` then you must create a ``certs`` directory
-in your root path and setup a key-certificate pair there:
+If you set ``TLS_FLAVOR`` to ``cert`` or ``mail`` then you must create a ``certs`` directory
+in your root path and set up a key-certificate pair there:
 
 - ``cert.pem`` contains the certificate (override with ``TLS_CERT_FILENAME``),
 - ``key.pem`` contains the key pair (override with ``TLS_KEYPAIR_FILENAME``).

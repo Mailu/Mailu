@@ -70,6 +70,13 @@ virtual_mailbox_domains = ${podop}:domain
 virtual_mailbox_maps = ${podop}:alias
 ```
 
+Mailu's Postfix container runs its two SMTP server services chrooted under
+``/queue``. Podop therefore listens on both its regular socket at
+``/tmp/podop.socket`` and a second socket at ``/queue/private/podop.socket``.
+Inside the Postfix chroot, the second socket is available as
+``/private/podop.socket``; Mailu configures the chrooted SMTP services to use
+that path automatically.
+
 Dovecot usage
 =============
 

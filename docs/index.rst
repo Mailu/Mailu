@@ -41,6 +41,7 @@ the version of Mailu that you are running.
 
    general
    features
+   imap-metadata
    faq
    releases
    demo

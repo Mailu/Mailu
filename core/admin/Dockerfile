@@ -23,9 +23,9 @@ RUN set -euxo pipefail \
 RUN echo $VERSION >/version
 
 #EXPOSE 8080/tcp
-HEALTHCHECK CMD curl -m3 -skfLo /dev/null http://localhost:8080/ping
+HEALTHCHECK CMD curl -m3 -skfLo /dev/null http://localhost:8080/ping && /usr/local/bin/supervisor-healthcheck
 
 VOLUME ["/data","/dkim"]
 
 ENV FLASK_APP=mailu
-CMD /start.py
+CMD ["/start.py"]

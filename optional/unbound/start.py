@@ -5,9 +5,10 @@ import logging as log
 import pwd
 import subprocess
 import sys
-from socrate import conf, system
+from socrate import conf, system, supervisor
 
 system.set_env()
+supervisor.clean_environment()
 
 anchor = "/etc/unbound/trusted-key.key"
 result = subprocess.run(["/usr/sbin/unbound-anchor", "-a", anchor], check=False)
@@ -19,5 +20,6 @@ if os.path.exists(anchor):
 
 conf.jinja("/unbound.conf", os.environ, "/etc/unbound/unbound.conf")
 
-os.execv("/usr/sbin/unbound", ["unbound", "-c", "/etc/unbound/unbound.conf"])
-print('Unbound has terminated. If the container keeps restarting, check the internet connectivity of other containers using for instance "docker compose exec front ping example.com"')
+supervisor.start([
+    {"name": "unbound", "command": ["/usr/sbin/unbound", "-d", "-c", "/etc/unbound/unbound.conf"]},
+])

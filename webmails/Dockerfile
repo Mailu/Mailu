@@ -72,6 +72,7 @@ RUN set -euxo pipefail \
 # SnappyMail login
 COPY snappymail/login/include.php /var/www/snappymail/
 COPY snappymail/login/sso.php /var/www/snappymail/
+COPY snappymail/plugins/mailu-identities/ /var/www/snappymail/mailu-plugins/mailu-identities/
 
 # Parsed and moved at startup
 COPY snappymail/defaults/application.ini /defaults/
@@ -97,8 +98,8 @@ COPY snuffleupagus.rules /etc/snuffleupagus.rules.tpl
 VOLUME /data
 VOLUME /overrides
 
-CMD /start.py
+CMD ["/start.py"]
 
-HEALTHCHECK CMD curl -m3 -f -L http://localhost/ping || exit 1
+HEALTHCHECK CMD curl -m3 -f -L http://localhost/ping && /usr/local/bin/supervisor-healthcheck
 
 RUN echo $VERSION >> /version

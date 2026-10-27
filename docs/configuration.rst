@@ -33,6 +33,11 @@ This should not conflict with any networks to which your system is connected.
 (Internal and external!). Normally this does not need to be changed,
 unless there is a conflict with existing networks.
 
+The ``SUBNET6`` (default: unset) defines the IPv6 address range of the docker network used by Mailu.
+It is set by the setup utility when IPv6 is enabled and should be a ULA range (``fd00::/8``).
+When it is set, Mailu services listen on IPv6 addresses as well. Leave it unset to run IPv4 only.
+Enabling IPv6 also requires the Docker network to have IPv6 enabled, see :doc:`faq` for details.
+
 The ``POSTMASTER`` is the local part of the postmaster email address. It is
 recommended to setup a generic value and later configure a mail alias for that
 address.
@@ -141,6 +146,8 @@ email traffic from ``POSTMASTER@DOMAIN``.
 The ``FULL_TEXT_SEARCH`` variable (default: 'en') is a comma separated list of
 ISO 639-1 language codes, as listed under `Dovecot languages`_. This feature can
 be disabled (e.g. for performance reasons) by setting the variable to ``off``.
+Legacy boolean values such as ``on``, ``true``, ``yes``, and ``1`` enable
+English indexing; ``off``, ``false``, ``no``, and ``0`` disable indexing.
 
 You can set a global ``DEFAULT_QUOTA`` to be used for mailboxes when the domain has
 no specific quota configured.
@@ -304,11 +311,12 @@ and will improve compatibility with 3rd party tools.
 .. _reverse_proxy_headers:
 
 The ``REAL_IP_HEADER`` (default: unset) and ``REAL_IP_FROM`` (default: unset) settings
-controls whether HTTP headers such as ``X-Forwarded-For`` or ``X-Real-IP`` should be trusted.
-The former should be the name of the HTTP header to extract the client IP address from and the
-later a comma separated list of IP addresses designating which proxies to trust.
-If you are using Mailu behind a reverse proxy, you should set both. Setting the former without
-the latter introduces a security vulnerability allowing a potential attacker to spoof their source address.
+control whether HTTP headers such as ``X-Forwarded-For`` or ``X-Real-IP`` should be trusted.
+These settings are for HTTP-header-based proxies. For the recommended TCP reverse-proxy setup,
+use ``PROXY_PROTOCOL`` and ``REAL_IP_FROM`` instead, and leave ``REAL_IP_HEADER`` unset. If your
+proxy forwards client addresses in HTTP headers, set ``REAL_IP_HEADER`` to the header name and
+``REAL_IP_FROM`` to a comma-separated list of trusted proxy addresses. Setting the former without
+the latter introduces a security vulnerability that allows an attacker to spoof their source address.
 
 The ``TZ`` sets the timezone Mailu will use. The timezone naming convention usually uses a ``Region/City`` format. See `TZ database name`_  for a list of valid timezones This defaults to ``Etc/UTC``. Warning: if you are observing different timestamps in your log files you should change your hosts timezone to UTC instead of changing TZ to your local timezone. Using UTC allows easy log correlation with remote MTAs.
 

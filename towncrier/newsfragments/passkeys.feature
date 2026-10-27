@@ -1,1 +1,1 @@
-Add passkey sign-in to the Admin and Webmail interfaces. Users can manage their passkeys in account settings, and global administrators can configure per-domain authenticator AAGUID allow or block policies and other passkey requirements.
+Add passkey sign-in to the Admin and Webmail interfaces. Users can manage their passkeys in account settings, and global administrators can configure per-domain authenticator AAGUID allow or block policies and other passkey requirements. Passkey management uses a dedicated registration page and a generic account route.

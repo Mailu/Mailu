@@ -97,11 +97,11 @@ digraph mailu {
     front -> front [label = "8000/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> admin [label = "8080/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> imap [label = "4190/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
-    front -> imap [label = "2525/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> imap [label = "2525/tcp (LMTP)"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> imap [label = "2587/tcp (authenticated submission)"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> imap [label = "143/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> imap [label = "110/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> smtp [label = "25/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
-    front -> smtp [label = "10025/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> webmail [label = "80/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> antispam [label = "11334/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> webdav [label = "5232/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
@@ -113,6 +113,7 @@ digraph mailu {
     imap -> admin [label = "8080/tcp"; color="cyan"; fontcolor="cyan";];
     imap -> antispam [label = "11334/tcp"; color="cyan"; fontcolor="cyan";];
     imap -> proxy [label = "25/tcp"; color="cyan"; fontcolor="cyan";];
+    imap -> smtp [label = "10025/tcp (submission relay)"; color="cyan"; fontcolor="cyan";];
     imap -> fts_attachments [label = "9998/tcp"; color="cyan"; fontcolor="cyan";];
     
     webmail -> front [label = "14190/tcp"; color="darkgoldenrod"; fontcolor="darkgoldenrod";];

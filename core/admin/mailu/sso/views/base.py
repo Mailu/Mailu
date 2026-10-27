@@ -30,21 +30,30 @@ def login(target):
     form.destination.choices = [(value, label) for value, label in form.destination.choices
                                 if (value == 'admin' and str(app.config['ADMIN']).upper() != 'FALSE')
                                 or (value == 'webmail' and str(app.config['WEBMAIL']).upper() != 'NONE')]
-    selected = target or flask.request.form.get('destination') or signin.default_target()
-    if signin.pending():
-        selected = 'admin' if signin.pending().startswith(app.config['WEB_ADMIN']) else 'webmail'
+    pending_destination = signin.pending()
+    explicit_selection = target is not None or form.destination_explicit.data == '1'
+    selected = target or form.destination.data or signin.default_target()
     if form.submitAdmin.data:
         selected = 'admin'
+        explicit_selection = True
     elif form.submitWebmail.data:
         selected = 'webmail'
-    form.destination.data = selected
+        explicit_selection = True
+    elif pending_destination and not explicit_selection:
+        selected = 'admin' if pending_destination.startswith(app.config['WEB_ADMIN']) else 'webmail'
+    if target:
+        form.destination_explicit.data = '1'
+    if (flask.request.method != 'POST' or not explicit_selection
+            or 'destination' not in flask.request.form):
+        form.destination.data = selected
     fields = []
     flask.session['passkey_login_redirect'] = signin.pending()
 
     if form.validate_on_submit():
         # Preserve old password form submissions while sharing destination policy.
         selected = target or ('admin' if form.submitAdmin.data else 'webmail' if form.submitWebmail.data else form.destination.data)
-        destination = signin.resolve(selected)
+        explicit_selection = target is not None or form.destination_explicit.data == '1' or form.submitAdmin.data or form.submitWebmail.data
+        destination = signin.resolve(selected if explicit_selection or not signin.pending() else None)
         device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
         username = form.email.data
         if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
@@ -75,14 +84,31 @@ def login(target):
                 flask.flash(msg, "error")
             return signin.remember_preference(response, login_destination)
         else:
-            utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username, form.pw.data) if models.User.get(username) else utils.limiter.rate_limit_ip(client_ip, username)
-            flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: failed: badauth: {utils.truncated_pw_hash(form.pw.data)}')
-            flask.flash(_('Wrong e-mail or password'), 'error')
+            failed_user = models.User.get(username)
+            if failed_user:
+                utils.limiter.rate_limit_user(username, client_ip, device_cookie, device_cookie_username, form.pw.data)
+            else:
+                utils.limiter.rate_limit_ip(client_ip, username)
+            if (failed_user and failed_user.enabled and failed_user.passkeys
+                    and failed_user.check_password(form.pw.data)):
+                flask.current_app.logger.info(
+                    f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} '
+                    f'from: {client_ip}/{client_port}: failed: passkey_required'
+                )
+                flask.flash(_('This account uses passkeys. Select “Use a passkey” to sign in.'), 'info')
+            else:
+                flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: failed: badauth: {utils.truncated_pw_hash(form.pw.data)}')
+                flask.flash(_('Wrong e-mail or password'), 'error')
     return flask.render_template('login.html', form=form, fields=fields)
 
 @sso.route('/pw_change', methods=['GET', 'POST'])
 @access.authenticated
 def pw_change():
+    if utils.is_demo_account(flask_login.current_user):
+        return flask.render_template(
+            'pw_change.html', form=forms.PWChangeForm(), required_change=False,
+            demo_account_email=utils.DEMO_ACCOUNT_EMAIL,
+        )
     if flask_login.current_user.passkeys or app.config.get('PASSKEY_REQUIRED', False):
         flask.flash(_('Password sign-in is disabled because passkeys are required.'), 'info')
         return flask.redirect(flask.url_for('ui.passkey_list'))
@@ -118,6 +144,7 @@ def pw_change():
             flask_login.current_user.change_pw_next_login
             or 'password_change' in flask.session.get(auth_flow.SESSION_ACTIONS, [])
         ),
+        demo_account_email=utils.DEMO_ACCOUNT_EMAIL,
     )
 
 @sso.route('/logout', methods=['GET'])

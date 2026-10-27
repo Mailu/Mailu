@@ -14,11 +14,11 @@ ACTION_ENDPOINTS['password_change'] = 'sso.pw_change'
 ACTION_ENDPOINTS['passkey_enrollment'] = 'ui.passkey_required'
 ACTION_ALLOWED_ENDPOINTS = {
     'password_change': {
-        'ui.passkey_list', 'ui.passkey_registration_options',
+        'ui.passkey_list', 'ui.passkey_create', 'ui.passkey_registration_options',
         'ui.passkey_register',
     },
     'passkey_enrollment': {
-        'ui.passkey_required', 'ui.passkey_registration_options',
+        'ui.passkey_required', 'ui.passkey_list', 'ui.passkey_create', 'ui.passkey_registration_options',
         'ui.passkey_register',
     },
 }

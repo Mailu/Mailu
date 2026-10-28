@@ -367,7 +367,10 @@ def passkey_authenticate():
             email or None, bytes_to_base64url(credential_id)[:16],
             flask.request.headers.get('X-Real-IP', flask.request.remote_addr),
         )
-        return flask.jsonify(error='Passkey sign-in failed.'), 401
+        return flask.jsonify(error=str(_(
+            'This passkey is not available for an enabled account. Check the email address '
+            'and choose a passkey registered to that account.'
+        ))), 401
     domain = credential.user.domain
     if not webauthn_config.aaguid_allowed(domain, credential.aaguid):
         flask.current_app.logger.warning(
@@ -377,7 +380,10 @@ def passkey_authenticate():
             credential.aaguid,
             flask.request.headers.get('X-Real-IP', flask.request.remote_addr),
         )
-        return flask.jsonify(error='Passkey sign-in failed.'), 401
+        return flask.jsonify(error=str(_(
+            'This authenticator is blocked by the domain AAGUID policy. Ask your domain '
+            'administrator to allow this authenticator.'
+        ))), 401
     current_sign_count = credential.sign_count
     current_device_bound = credential.device_bound
     try:
@@ -401,7 +407,23 @@ def passkey_authenticate():
             type(exc).__name__, exc,
             flask.request.headers.get('X-Real-IP', flask.request.remote_addr),
         )
-        return flask.jsonify(error='Passkey sign-in failed.'), 401
+        error_text = str(exc).lower()
+        if domain.passkey_require_uv and ('user verification' in error_text or 'user_verified' in error_text):
+            message = str(_(
+                'This domain requires user verification. Retry and complete PIN, biometric, '
+                'or device verification on your passkey.'
+            ))
+        elif domain.passkey_require_sign_count_increase and ('sign count' in error_text or 'counter' in error_text):
+            message = str(_(
+                'This domain requires the passkey signature counter to increase, but it did not. '
+                'Use another passkey or ask your domain administrator to change this requirement.'
+            ))
+        else:
+            message = str(_(
+                'The passkey response could not be verified. Its signature, site, or sign-in '
+                'challenge did not match; check the Mailu hostname and try again.'
+            ))
+        return flask.jsonify(error=message), 401
     flags = webauthn_config.authenticator_flags(payload)
     if not webauthn_config.authenticator_flags_allowed(domain, flags):
         flask.current_app.logger.warning(
@@ -411,7 +433,11 @@ def passkey_authenticate():
             flags.up, flags.uv, flags.be, flags.bs,
             flask.request.headers.get('X-Real-IP', flask.request.remote_addr),
         )
-        return flask.jsonify(error='Passkey sign-in failed.'), 401
+        policy_errors = webauthn_config.authenticator_flag_policy_errors(domain, flags)
+        return flask.jsonify(error=str(_(
+            'This passkey does not meet the domain backup policy: %(reasons)s. Change the backup '
+            'eligibility or backup state policy, or use a passkey that meets it.'
+        ) % {'reasons': '; '.join(policy_errors)})), 401
     if not webauthn_config.sign_count_allowed(domain, current_sign_count, verification.new_sign_count):
         flask.current_app.logger.warning(
             'Passkey authentication rejected user=%s credential=%s sign_count=%s->%s '
@@ -420,7 +446,10 @@ def passkey_authenticate():
             current_sign_count, verification.new_sign_count,
             flask.request.headers.get('X-Real-IP', flask.request.remote_addr),
         )
-        return flask.jsonify(error='Passkey sign-in failed.'), 401
+        return flask.jsonify(error=str(_(
+            'This domain requires the passkey signature counter to increase, but it did not. '
+            'Use another passkey or ask your domain administrator to change this requirement.'
+        ))), 401
     if domain.passkey_device_bound and (
         webauthn_config.enum_value(verification.credential_device_type) != 'single_device'
         or verification.credential_backed_up
@@ -434,7 +463,11 @@ def passkey_authenticate():
             verification.credential_backed_up,
             flask.request.headers.get('X-Real-IP', flask.request.remote_addr),
         )
-        return flask.jsonify(error='Passkey sign-in failed.'), 401
+        return flask.jsonify(error=str(_(
+            'This domain only allows device-bound passkeys. This passkey is synced, backed up, '
+            'or reported as a multi-device credential; use a device-bound passkey or ask your '
+            'domain administrator to change this requirement.'
+        ))), 401
     credential.sign_count = verification.new_sign_count
     credential.device_bound = (
         webauthn_config.enum_value(verification.credential_device_type) == 'single_device'

@@ -80,32 +80,32 @@ class DomainForm(flask_wtf.FlaskForm):
     passkey_aaguid_mode = fields.RadioField(_('AAGUID list behavior'), choices=[
         ('allow', _('Allow only listed AAGUIDs')),
         ('block', _('Block listed AAGUIDs')),
-    ], default='allow')
+    ], default='allow', widget=widgets.ListWidget(prefix_label=False), option_widget=widgets.RadioInput())
     passkey_aaguids = fields.TextAreaField(_('AAGUIDs (one UUID per line)'), [validators.Optional()])
     passkey_require_uv = fields.BooleanField(_('Require user verification (PIN or biometrics)'), default=True)
-    passkey_backup_eligible_policy = fields.SelectField(_('Backup eligibility policy'), choices=[
+    passkey_backup_eligible_policy = fields.RadioField(_('Backup eligibility policy'), choices=[
         ('optional', _('Optional')),
         ('require', _('Require backup-eligible passkeys')),
         ('deny', _('Deny backup-eligible passkeys')),
-    ], default='optional')
-    passkey_backup_state_policy = fields.SelectField(_('Backup state policy'), choices=[
+    ], default='optional', widget=widgets.ListWidget(prefix_label=False), option_widget=widgets.RadioInput())
+    passkey_backup_state_policy = fields.RadioField(_('Backup state policy'), choices=[
         ('optional', _('Optional')),
         ('require', _('Require passkeys to be currently backed up')),
         ('deny', _('Deny currently backed-up passkeys')),
-    ], default='optional')
+    ], default='optional', widget=widgets.ListWidget(prefix_label=False), option_widget=widgets.RadioInput())
     passkey_require_sign_count_increase = fields.BooleanField(_('Require signature counter to increase at every login'), default=False)
-    passkey_attestation_policy = fields.SelectField(_('Authenticator attestation policy'), choices=[
+    passkey_attestation_policy = fields.RadioField(_('Authenticator attestation policy'), choices=[
         ('optional', _('Optional')),
         ('require', _('Require an attestation statement')),
         ('deny', _('Deny an attestation statement')),
-    ], default='optional')
+    ], default='optional', widget=widgets.ListWidget(prefix_label=False), option_widget=widgets.RadioInput())
     passkey_device_bound = fields.BooleanField(_('Only allow device-bound passkeys'), default=False)
-    passkey_resident_key = fields.SelectField(
+    passkey_resident_key = fields.RadioField(
         _('Resident passkey preference'), choices=[
             ('discouraged', _('Discouraged')),
             ('preferred', _('Preferred')),
             ('required', _('Required')),
-        ], default='preferred',
+        ], default='preferred', widget=widgets.ListWidget(prefix_label=False), option_widget=widgets.RadioInput(),
     )
     comment = fields.StringField(_('Comment'), render_kw=AUTOFOCUS)
     submit = fields.SubmitField(_('Save'))
@@ -127,31 +127,31 @@ class DomainPasskeyPolicyForm(flask_wtf.FlaskForm):
     passkey_aaguid_mode = fields.RadioField(_('AAGUID list behavior'), choices=[
         ('allow', _('Allow only listed AAGUIDs')),
         ('block', _('Block listed AAGUIDs')),
-    ], default='allow')
+    ], default='allow', widget=widgets.ListWidget(prefix_label=False), option_widget=widgets.RadioInput())
     passkey_aaguids = fields.TextAreaField(_('AAGUIDs (one UUID per line)'), [validators.Optional()])
     passkey_require_uv = fields.BooleanField(_('Require user verification (PIN or biometrics)'), default=True)
-    passkey_backup_eligible_policy = fields.SelectField(_('Backup eligibility policy'), choices=[
+    passkey_backup_eligible_policy = fields.RadioField(_('Backup eligibility policy'), choices=[
         ('optional', _('Optional')),
         ('require', _('Require backup-eligible passkeys')),
         ('deny', _('Deny backup-eligible passkeys')),
-    ], default='optional')
-    passkey_backup_state_policy = fields.SelectField(_('Backup state policy'), choices=[
+    ], default='optional', widget=widgets.ListWidget(prefix_label=False), option_widget=widgets.RadioInput())
+    passkey_backup_state_policy = fields.RadioField(_('Backup state policy'), choices=[
         ('optional', _('Optional')),
         ('require', _('Require passkeys to be currently backed up')),
         ('deny', _('Deny currently backed-up passkeys')),
-    ], default='optional')
+    ], default='optional', widget=widgets.ListWidget(prefix_label=False), option_widget=widgets.RadioInput())
     passkey_require_sign_count_increase = fields.BooleanField(_('Require signature counter to increase at every login'), default=False)
-    passkey_attestation_policy = fields.SelectField(_('Authenticator attestation policy'), choices=[
+    passkey_attestation_policy = fields.RadioField(_('Authenticator attestation policy'), choices=[
         ('optional', _('Optional')),
         ('require', _('Require an attestation statement')),
         ('deny', _('Deny an attestation statement')),
-    ], default='optional')
+    ], default='optional', widget=widgets.ListWidget(prefix_label=False), option_widget=widgets.RadioInput())
     passkey_device_bound = fields.BooleanField(_('Only allow device-bound passkeys'), default=False)
-    passkey_resident_key = fields.SelectField(_('Resident passkey preference'), choices=[
+    passkey_resident_key = fields.RadioField(_('Resident passkey preference'), choices=[
         ('discouraged', _('Discouraged')),
         ('preferred', _('Preferred')),
         ('required', _('Required')),
-    ], default='preferred')
+    ], default='preferred', widget=widgets.ListWidget(prefix_label=False), option_widget=widgets.RadioInput())
     submit = fields.SubmitField(_('Save'))
 
     def validate_passkey_aaguids(form, field):

@@ -75,11 +75,22 @@
 <div class="mb-3"><strong>DKIM {{ key.algorithm|upper }} / {{ key.selector }}</strong> - {% if key.active %}{% trans %}Signing{% endtrans %}{% elif key.retired %}{% trans %}Retired{% endtrans %}{% else %}{% trans %}Staged{% endtrans %}{% endif %}<br><span class="text-secondary small">{% trans %}Created{% endtrans %}: {{ key.created_at | format_date }}</span>
 <pre class="pre-config border bg-light">{{ key.dns_record(domain.name) }}</pre>
 {% if domain in current_user.get_managed_domains() %}
-{% if key.retired %}
-<form method="post" action="{{ url_for('.domain_dkim_delete', key_id=key.id) }}"><button class="btn btn-secondary" type="submit">{% trans %}Delete{% endtrans %}</button></form>
-{% else %}
-<form method="post" action="{{ url_for('.domain_dkim_toggle', key_id=key.id) }}">{{ dkim_toggle_form.hidden_tag() }}<button class="btn btn-secondary" type="submit">{% if key.active %}{% trans %}Stop signing{% endtrans %}{% else %}{% trans %}Promote to signing{% endtrans %}{% endif %}</button></form>
-{% endif %}
+<form method="post">
+  {{ dkim_toggle_form.hidden_tag() }}
+  <fieldset>
+    <legend class="form-label">{% trans %}DKIM status{% endtrans %}</legend>
+    <div class="btn-group" role="group" aria-label="{% trans %}DKIM status{% endtrans %}">
+      <input class="btn-check" type="radio" id="dkim-{{ key.id }}-staged" name="status" value="staged" disabled {% if not key.active and not key.retired %}checked{% endif %}>
+      <label class="btn btn-outline-primary" for="dkim-{{ key.id }}-staged">{% trans %}Staged{% endtrans %}</label>
+      <input class="btn-check" type="radio" id="dkim-{{ key.id }}-active" name="status" value="active" {% if key.active %}checked disabled{% elif key.retired %}disabled{% else %}onchange="this.form.action='{{ url_for('.domain_dkim_status', key_id=key.id, status='active') }}';this.form.submit()"{% endif %}>
+      <label class="btn btn-outline-primary" for="dkim-{{ key.id }}-active">{% trans %}Signing{% endtrans %}</label>
+      <input class="btn-check" type="radio" id="dkim-{{ key.id }}-retired" name="status" value="retired" {% if key.retired %}checked disabled{% else %}onchange="this.form.action='{{ url_for('.domain_dkim_status', key_id=key.id, status='retired') }}';this.form.submit()"{% endif %}>
+      <label class="btn btn-outline-primary" for="dkim-{{ key.id }}-retired">{% trans %}Retired{% endtrans %}</label>
+      <input class="btn-check" type="radio" id="dkim-{{ key.id }}-delete" name="status" value="delete" onchange="this.form.action='{{ url_for('.domain_dkim_status', key_id=key.id, status='delete') }}';this.form.submit()">
+      <label class="btn btn-outline-danger" for="dkim-{{ key.id }}-delete">{% trans %}Delete{% endtrans %}</label>
+    </div>
+  </fieldset>
+</form>
 {% endif %}
 </div>
 {% endfor %}

@@ -47,12 +47,45 @@
   {{ macros.form_field(form.passkey_aaguids, rows=5) }}
   </div>
   {{ macros.form_field(form.passkey_require_uv) }}
-  {{ macros.form_fields((form.passkey_backup_eligible_policy, form.passkey_backup_state_policy)) }}
+  <div class="row">
+    {% for field in (form.passkey_backup_eligible_policy, form.passkey_backup_state_policy) %}
+    <div class="col-lg-6 col-12">
+      <fieldset class="mb-3">
+        <legend class="form-label">{{ field.label.text }}</legend>
+        <div class="btn-group d-flex" role="group" aria-label="{{ field.label.text }}">
+          {% for choice in field %}
+          {{ choice(class_="btn-check", autocomplete="off") }}
+          {{ choice.label(class_="btn btn-outline-primary flex-fill") }}
+          {% endfor %}
+        </div>
+        {{ macros.form_field_errors(field) }}
+      </fieldset>
+    </div>
+    {% endfor %}
+  </div>
   {{ macros.form_field(form.passkey_require_sign_count_increase) }}
-  {{ macros.form_field(form.passkey_attestation_policy) }}
+  <fieldset class="mb-3">
+    <legend class="form-label">{{ form.passkey_attestation_policy.label.text }}</legend>
+    <div class="btn-group d-flex" role="group" aria-label="{{ form.passkey_attestation_policy.label.text }}">
+      {% for choice in form.passkey_attestation_policy %}
+      {{ choice(class_="btn-check", autocomplete="off") }}
+      {{ choice.label(class_="btn btn-outline-primary flex-fill") }}
+      {% endfor %}
+    </div>
+    {{ macros.form_field_errors(form.passkey_attestation_policy) }}
+  </fieldset>
   <p class="small text-body-secondary">{% trans %}User presence is always required by WebAuthn. Signature-counter enforcement rejects authenticators that do not provide a strictly increasing counter. Attestation requests a statement from the authenticator; it does not by itself establish manufacturer trust.{% endtrans %}</p>
   {{ macros.form_field(form.passkey_device_bound) }}
-  {{ macros.form_field(form.passkey_resident_key) }}
+  <fieldset class="mb-3">
+    <legend class="form-label">{{ form.passkey_resident_key.label.text }}</legend>
+    <div class="btn-group" role="group" aria-label="{{ form.passkey_resident_key.label.text }}">
+      {% for choice in form.passkey_resident_key %}
+      {{ choice(class_="btn-check", autocomplete="off") }}
+      {{ choice.label(class_="btn btn-outline-primary") }}
+      {% endfor %}
+    </div>
+    {{ macros.form_field_errors(form.passkey_resident_key) }}
+  </fieldset>
   {%- endcall %}
   {% if can_edit_domain_settings %}
   {%- call macros.card() %}

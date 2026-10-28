@@ -88,6 +88,12 @@ fieldset:disabled .form-control:disabled {
 .ts-wrapper {
   width: 100%;
 }
+
+.mailu-login-destinations .btn {
+  flex: 1 1 50%;
+  padding: .6rem .75rem;
+  font-weight: 600;
+}
 .input-group > .quota-amount {
   flex: 0 0 7rem;
   width: 7rem;

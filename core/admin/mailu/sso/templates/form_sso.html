@@ -2,7 +2,15 @@
 {% block content %}
 <form class="form" method="post">
   {{ form.hidden_tag() }}
-  {{ macros.form_field(form.destination) }}
+  <fieldset class="mb-4">
+    <legend class="form-label small text-body-secondary mb-2">{{ form.destination.label.text }}</legend>
+    <div class="btn-group w-100 mailu-login-destinations" role="group" aria-label="{{ form.destination.label.text }}">
+      {% for choice in form.destination %}
+      {{ choice(class_="btn-check", autocomplete="off") }}
+      {{ choice.label(class_="btn btn-outline-primary") }}
+      {% endfor %}
+    </div>
+  </fieldset>
   {{ macros.form_field(form.email) }}
   {% if not config['PASSKEY_REQUIRED'] %}<div id="password-field">{{ macros.form_field(form.pw) }}</div>{% endif %}
   <div class="d-grid gap-3 mt-4">

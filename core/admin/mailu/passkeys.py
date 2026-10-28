@@ -6,6 +6,7 @@ import re
 import uuid
 
 from flask import current_app, request
+from flask_babel import lazy_gettext as _
 from webauthn import generate_registration_options, verify_registration_response
 from webauthn.helpers import (
     base64url_to_bytes, parse_authentication_credential_json,
@@ -85,22 +86,32 @@ def register_credential(user, payload, challenge):
     flags = authenticator_flags(payload, registration=True)
     if not aaguid_allowed(domain, verification.aaguid):
         raise PasskeyRegistrationError(
-            'This authenticator is not allowed for this domain.', reason='aaguid_policy',
+            str(_('This authenticator is blocked by the domain AAGUID policy. Ask the domain '
+                 'administrator to allow its AAGUID.')), reason='aaguid_policy',
         )
     if domain.passkey_device_bound and (
         enum_value(verification.credential_device_type) != 'single_device'
         or verification.credential_backed_up
     ):
         raise PasskeyRegistrationError(
-            'This domain only allows device-bound passkeys.', reason='device_bound_policy',
+            str(_('This domain only allows device-bound passkeys, but this authenticator is synced, '
+                 'backed up, or reports a multi-device credential.')), reason='device_bound_policy',
         )
-    if not authenticator_flags_allowed(domain, flags):
+    backup_errors = authenticator_flag_policy_errors(domain, flags)
+    if backup_errors:
         raise PasskeyRegistrationError(
-            'This authenticator does not meet the domain backup requirements.', reason='backup_policy',
+            str(_('This passkey does not meet the domain backup policy: %(reasons)s.') % {
+                'reasons': '; '.join(backup_errors),
+            }), reason='backup_policy',
         )
     if not attestation_allowed(domain, attestation_format):
+        if domain.passkey_attestation_policy == 'require':
+            detail = _('the domain requires an attestation statement, but this authenticator provided none')
+        else:
+            detail = _('the domain denies attestation statements, but this authenticator provided one')
         raise PasskeyRegistrationError(
-            'Authenticator attestation does not meet the domain policy.', reason='attestation_policy',
+            str(_('Attestation policy rejected this passkey: %(detail)s.') % {'detail': detail}),
+            reason='attestation_policy',
         )
 
     from . import models
@@ -195,13 +206,23 @@ def authenticator_flags(credential, registration=False):
 
 
 def authenticator_flags_allowed(domain, flags):
+    return not authenticator_flag_policy_errors(domain, flags)
+
+
+def authenticator_flag_policy_errors(domain, flags):
+    """Describe backup flag policy failures for a verified authenticator."""
+    errors = []
     eligibility = domain.passkey_backup_eligible_policy
     backup_state = domain.passkey_backup_state_policy
-    if eligibility == 'require' and not flags.be or eligibility == 'deny' and flags.be:
-        return False
-    if backup_state == 'require' and not flags.bs or backup_state == 'deny' and flags.bs:
-        return False
-    return True
+    if eligibility == 'require' and not flags.be:
+        errors.append(str(_('the domain requires a backup-eligible passkey, but this passkey is not backup-eligible')))
+    elif eligibility == 'deny' and flags.be:
+        errors.append(str(_('the domain denies backup-eligible passkeys, but this passkey is backup-eligible')))
+    if backup_state == 'require' and not flags.bs:
+        errors.append(str(_('the domain requires a currently backed-up passkey, but this passkey is not backed up')))
+    elif backup_state == 'deny' and flags.bs:
+        errors.append(str(_('the domain denies currently backed-up passkeys, but this passkey is backed up')))
+    return errors
 
 
 def attestation_allowed(domain, attestation_format):

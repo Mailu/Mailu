@@ -1,425 +1,1020 @@
 # Translations template for PROJECT.
-# Copyright (C) 2024 ORGANIZATION
+# Copyright (C) 2026 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-20 12:30+0000\n"
+"POT-Creation-Date: 2026-10-28 17:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.15.0\n"
+"Generated-By: Babel 2.17.0\n"
 
-#: mailu/ui/templates/macros.html:105
-msgid "Search"
+#: mailu/passkeys.py:89
+msgid ""
+"This authenticator is blocked by the domain AAGUID policy. Ask the domain"
+" administrator to allow its AAGUID."
 msgstr ""
 
-#: mailu/ui/templates/macros.html:106
-msgid "Show _MENU_ entries"
+#: mailu/passkeys.py:97
+msgid ""
+"This domain only allows device-bound passkeys, but this authenticator is "
+"synced, backed up, or reports a multi-device credential."
 msgstr ""
 
-#: mailu/ui/templates/macros.html:107
-msgid "No matching records found"
+#: mailu/passkeys.py:103
+#, python-format
+msgid "This passkey does not meet the domain backup policy: %(reasons)s."
 msgstr ""
 
-#: mailu/ui/templates/macros.html:108
-msgid "Previous"
+#: mailu/passkeys.py:109
+msgid ""
+"the domain requires an attestation statement, but this authenticator "
+"provided none"
 msgstr ""
 
-#: mailu/ui/templates/macros.html:109
-msgid "Next"
+#: mailu/passkeys.py:111
+msgid ""
+"the domain denies attestation statements, but this authenticator provided"
+" one"
 msgstr ""
 
-#: mailu/sso/forms.py:8 mailu/ui/forms.py:91
+#: mailu/passkeys.py:113
+#, python-format
+msgid "Attestation policy rejected this passkey: %(detail)s."
+msgstr ""
+
+#: mailu/passkeys.py:218
+msgid ""
+"the domain requires a backup-eligible passkey, but this passkey is not "
+"backup-eligible"
+msgstr ""
+
+#: mailu/passkeys.py:220
+msgid ""
+"the domain denies backup-eligible passkeys, but this passkey is backup-"
+"eligible"
+msgstr ""
+
+#: mailu/passkeys.py:222
+msgid ""
+"the domain requires a currently backed-up passkey, but this passkey is "
+"not backed up"
+msgstr ""
+
+#: mailu/passkeys.py:224
+msgid ""
+"the domain denies currently backed-up passkeys, but this passkey is "
+"backed up"
+msgstr ""
+
+#: mailu/sso/forms.py:6 mailu/ui/forms.py:197
 msgid "E-mail"
 msgstr ""
 
-#: mailu/sso/forms.py:9 mailu/ui/forms.py:92 mailu/ui/forms.py:108
-#: mailu/ui/forms.py:128 mailu/ui/forms.py:135 mailu/ui/forms.py:197
-#: mailu/ui/templates/client.html:31 mailu/ui/templates/client.html:56
+#: mailu/sso/forms.py:7 mailu/ui/forms.py:212 mailu/ui/forms.py:234
+#: mailu/ui/forms.py:241 mailu/ui/forms.py:335
+#: mailu/ui/templates/user/signup.html:30
 msgid "Password"
 msgstr ""
 
-#: mailu/sso/forms.py:11 mailu/sso/forms.py:12 mailu/sso/templates/login.html:4
-#: mailu/sso/templates/sidebar_sso.html:42 mailu/ui/templates/sidebar.html:144
+#: mailu/sso/forms.py:8
+msgid "After sign-in"
+msgstr ""
+
+#: mailu/sso/forms.py:8 mailu/ui/templates/sidebar.html:127
+msgid "Webmail"
+msgstr ""
+
+#: mailu/sso/forms.py:8
+msgid "Account settings"
+msgstr ""
+
+#: mailu/sso/forms.py:10 mailu/sso/forms.py:12 mailu/sso/forms.py:13
+#: mailu/sso/templates/base_sso.html:7 mailu/sso/templates/base_sso.html:19
+#: mailu/sso/templates/login.html:4 mailu/sso/templates/sidebar_sso.html:50
+#: mailu/ui/templates/sidebar.html:170
 msgid "Sign in"
 msgstr ""
 
-#: mailu/sso/forms.py:15 mailu/ui/forms.py:134
+#: mailu/sso/forms.py:16 mailu/ui/forms.py:240
 msgid "Current password"
 msgstr ""
 
-#: mailu/sso/forms.py:16
+#: mailu/sso/forms.py:17 mailu/sso/forms.py:24
 msgid "New password"
 msgstr ""
 
-#: mailu/sso/forms.py:17
+#: mailu/sso/forms.py:18 mailu/sso/forms.py:25
 msgid "New password (again)"
 msgstr ""
 
-#: mailu/sso/forms.py:19
+#: mailu/sso/forms.py:20 mailu/sso/templates/base_sso.html:7
+#: mailu/sso/templates/base_sso.html:19
 msgid "Change password"
 msgstr ""
 
-#: mailu/sso/templates/base_sso.html:8 mailu/ui/templates/base.html:8
-msgid "Admin page for"
+#: mailu/sso/forms.py:29
+msgid "Set password"
 msgstr ""
 
-#: mailu/sso/templates/base_sso.html:19 mailu/ui/templates/base.html:19
-msgid "toggle sidebar"
+#: mailu/sso/templates/account_setup.html:3
+msgid "Set up your account"
 msgstr ""
 
-#: mailu/sso/templates/base_sso.html:37 mailu/ui/templates/base.html:37
-msgid "change language"
+#: mailu/sso/templates/account_setup.html:6
+msgid "Set up sign-in for"
 msgstr ""
 
-#: mailu/sso/templates/sidebar_sso.html:4 mailu/ui/templates/sidebar.html:96
-msgid "Go to"
+#: mailu/sso/templates/account_setup.html:10
+#: mailu/sso/templates/pw_change.html:7
+#: mailu/ui/templates/user/passkey_create.html:14
+#: mailu/ui/templates/user/passkeys.html:62
+#: mailu/ui/templates/user/password.html:16
+msgid ""
+"Password changes and passkey creation are disabled for this user on the "
+"demo server. You can create other users to try these features."
 msgstr ""
 
-#: mailu/sso/templates/sidebar_sso.html:9 mailu/ui/templates/client.html:4
-#: mailu/ui/templates/sidebar.html:52 mailu/ui/templates/sidebar.html:109
+#: mailu/sso/templates/account_setup.html:15
+msgid "Set a password"
+msgstr ""
+
+#: mailu/sso/templates/account_setup.html:25
+msgid "Or set up a passkey"
+msgstr ""
+
+#: mailu/sso/templates/account_setup.html:29
+msgid "A passkey is required for this account. Set one up to continue."
+msgstr ""
+
+#: mailu/sso/templates/account_setup.html:36
+msgid "Passkey name"
+msgstr ""
+
+#: mailu/sso/templates/account_setup.html:37
+#: mailu/ui/templates/user/passkey_create.html:23
+#: mailu/ui/templates/user/passkeys.html:7
+msgid "New passkey"
+msgstr ""
+
+#: mailu/sso/templates/account_setup.html:39
+#: mailu/ui/templates/user/passkeys.html:7
+msgid "Set up a passkey"
+msgstr ""
+
+#: mailu/sso/templates/account_setup.html:64
+msgid "This browser does not support passkey registration."
+msgstr ""
+
+#: mailu/sso/templates/account_setup.html:88
+msgid "Passkey registration succeeded but no login redirect was returned."
+msgstr ""
+
+#: mailu/sso/templates/account_setup.html:91
+msgid ""
+"Passkey setup was cancelled or timed out. Start again and complete the "
+"prompt on your device."
+msgstr ""
+
+#: mailu/sso/templates/account_setup.html:92
+msgid "Passkey registration failed."
+msgstr ""
+
+#: mailu/sso/templates/base_sso.html:4 mailu/ui/templates/base.html:4
+msgid "Show password"
+msgstr ""
+
+#: mailu/sso/templates/base_sso.html:4 mailu/ui/templates/base.html:4
+msgid "Copied"
+msgstr ""
+
+#: mailu/sso/templates/base_sso.html:4 mailu/ui/templates/base.html:4
+msgid "Copy failed. Select and copy the text."
+msgstr ""
+
+#: mailu/sso/templates/base_sso.html:24 mailu/sso/templates/sidebar_sso.html:9
+#: mailu/ui/templates/client.html:4 mailu/ui/templates/sidebar.html:78
+#: mailu/ui/templates/sidebar.html:135
 msgid "Client setup"
 msgstr ""
 
-#: mailu/sso/templates/sidebar_sso.html:16 mailu/ui/templates/sidebar.html:116
-msgid "Website"
-msgstr ""
-
-#: mailu/sso/templates/sidebar_sso.html:22 mailu/ui/templates/sidebar.html:122
+#: mailu/sso/templates/base_sso.html:24 mailu/sso/templates/sidebar_sso.html:22
+#: mailu/ui/templates/sidebar.html:148
 msgid "Help"
 msgstr ""
 
-#: mailu/sso/templates/sidebar_sso.html:35
-#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:129
-msgid "Register a domain"
-msgstr ""
-
-#: mailu/sso/templates/sidebar_sso.html:55 mailu/ui/forms.py:111
-#: mailu/ui/templates/sidebar.html:151 mailu/ui/templates/user/signup.html:4
+#: mailu/sso/templates/base_sso.html:25 mailu/sso/templates/sidebar_sso.html:64
+#: mailu/ui/forms.py:215 mailu/ui/templates/sidebar.html:177
+#: mailu/ui/templates/user/signup.html:4
 #: mailu/ui/templates/user/signup_domain.html:4
 msgid "Sign up"
 msgstr ""
 
-#: mailu/sso/views/base.py:48
+#: mailu/sso/templates/base_sso.html:26 mailu/sso/templates/sidebar_sso.html:35
+#: mailu/ui/templates/domain/signup.html:4 mailu/ui/templates/sidebar.html:155
+msgid "Register a domain"
+msgstr ""
+
+#: mailu/sso/templates/base_sso.html:27 mailu/sso/templates/sidebar_sso.html:43
+#: mailu/ui/templates/sidebar.html:8 mailu/ui/templates/sidebar.html:163
+msgid "Sign out"
+msgstr ""
+
+#: mailu/sso/templates/base_sso.html:30
+msgid "Language"
+msgstr ""
+
+#: mailu/sso/templates/login.html:8
+msgid "or"
+msgstr ""
+
+#: mailu/sso/templates/login.html:9
+msgid "Use a passkey"
+msgstr ""
+
+#: mailu/sso/templates/login.html:71
+msgid ""
+"This server requires passkey sign-in. Use a supported browser or device; "
+"accounts without a passkey need an account setup link from an "
+"administrator."
+msgstr ""
+
+#: mailu/sso/templates/login.html:79
+msgid "Waiting for passkey..."
+msgstr ""
+
+#: mailu/sso/templates/login.html:106
+msgid ""
+"This browser does not support passkey sign-in. Use a supported browser or"
+" device."
+msgstr ""
+
+#: mailu/sso/templates/login.html:107
+msgid ""
+"This browser does not support passkey sign-in. Use your email and "
+"password instead."
+msgstr ""
+
+#: mailu/sso/templates/login.html:129
+msgid "No passkey was selected. Try again."
+msgstr ""
+
+#: mailu/sso/templates/login.html:130
+msgid "No passkey was selected. Try again or sign in with your password."
+msgstr ""
+
+#: mailu/sso/templates/login.html:136 mailu/sso/templates/login.html:179
+msgid ""
+"No passkey was selected, it was unavailable, or the request timed out. "
+"Try again."
+msgstr ""
+
+#: mailu/sso/templates/login.html:137 mailu/sso/templates/login.html:180
+msgid ""
+"No passkey was selected, it was unavailable, or the request timed out. "
+"Try again, or sign in with your email and password."
+msgstr ""
+
+#: mailu/sso/templates/login.html:139 mailu/sso/templates/login.html:182
+msgid ""
+"Passkey sign-in is blocked for this site. Check that you are using the "
+"configured Mailu hostname over HTTPS."
+msgstr ""
+
+#: mailu/sso/templates/login.html:142 mailu/sso/templates/login.html:185
+msgid ""
+"This browser or device does not support passkey sign-in. Use a supported "
+"browser or device."
+msgstr ""
+
+#: mailu/sso/templates/login.html:143 mailu/sso/templates/login.html:186
+msgid ""
+"This browser or device does not support passkey sign-in. Use a supported "
+"browser or sign in with your password."
+msgstr ""
+
+#: mailu/sso/templates/login.html:145
+msgid "Passkey sign-in failed. Try again."
+msgstr ""
+
+#: mailu/sso/templates/login.html:145
+msgid "Passkey sign-in failed. Try again or use your password."
+msgstr ""
+
+#: mailu/sso/templates/login.html:188
+msgid "Passkey autofill sign-in failed. Select “Use a passkey” to try again."
+msgstr ""
+
+#: mailu/sso/templates/pw_change.html:18
+msgid "Set up a passkey instead"
+msgstr ""
+
+#: mailu/sso/templates/sidebar_sso.html:4 mailu/ui/templates/sidebar.html:122
+msgid "Go to"
+msgstr ""
+
+#: mailu/sso/templates/sidebar_sso.html:16 mailu/ui/templates/sidebar.html:142
+msgid "Website"
+msgstr ""
+
+#: mailu/sso/views/base.py:60
 msgid "Too many attempts from your IP (rate-limit)"
 msgstr ""
 
-#: mailu/sso/views/base.py:51
+#: mailu/sso/views/base.py:63
 msgid "Too many attempts for this user (rate-limit)"
 msgstr ""
 
-#: mailu/sso/views/base.py:69
+#: mailu/sso/views/base.py:72
+#, python-brace-format
+msgid ""
+"For phishing-resistant sign-in, use a passkey next time. <a "
+"href=\"{}\">Manage passkeys</a>."
+msgstr ""
+
+#: mailu/sso/views/base.py:98
+msgid "This account uses passkeys. Select “Use a passkey” to sign in."
+msgstr ""
+
+#: mailu/sso/views/base.py:101
 msgid "Wrong e-mail or password"
 msgstr ""
 
-#: mailu/sso/views/base.py:85
+#: mailu/sso/views/base.py:113 mailu/ui/views/users.py:200
+msgid "Password sign-in is disabled because passkeys are required."
+msgstr ""
+
+#: mailu/sso/views/base.py:125
 msgid "The new password can't be the same as the old password"
 msgstr ""
 
-#: mailu/sso/views/base.py:88
+#: mailu/sso/views/base.py:128
 msgid "The new passwords don't match"
 msgstr ""
 
-#: mailu/sso/views/base.py:100
+#: mailu/sso/views/base.py:139
 msgid "The current password is incorrect!"
 msgstr ""
 
-#: mailu/ui/forms.py:34 mailu/ui/forms.py:37
+#: mailu/sso/views/passkeys.py:138
+msgid ""
+"That email address is no longer available. Start signup again with a "
+"different address."
+msgstr ""
+
+#: mailu/sso/views/passkeys.py:198
+msgid "Your account is ready. You can now sign in with your passkey."
+msgstr ""
+
+#: mailu/sso/views/passkeys.py:254
+msgid "Passkey added. You can now sign in."
+msgstr ""
+
+#: mailu/sso/views/passkeys.py:272 mailu/ui/forms.py:19
+msgid "Passwords should not start or end with whitespaces"
+msgstr ""
+
+#: mailu/sso/views/passkeys.py:284
+msgid "Password set. You can now sign in."
+msgstr ""
+
+#: mailu/sso/views/passkeys.py:371
+msgid ""
+"This passkey is not available for an enabled account. Check the email "
+"address and choose a passkey registered to that account."
+msgstr ""
+
+#: mailu/sso/views/passkeys.py:384
+msgid ""
+"This authenticator is blocked by the domain AAGUID policy. Ask your "
+"domain administrator to allow this authenticator."
+msgstr ""
+
+#: mailu/sso/views/passkeys.py:413
+msgid ""
+"This domain requires user verification. Retry and complete PIN, "
+"biometric, or device verification on your passkey."
+msgstr ""
+
+#: mailu/sso/views/passkeys.py:418 mailu/sso/views/passkeys.py:450
+msgid ""
+"This domain requires the passkey signature counter to increase, but it "
+"did not. Use another passkey or ask your domain administrator to change "
+"this requirement."
+msgstr ""
+
+#: mailu/sso/views/passkeys.py:423
+msgid ""
+"The passkey response could not be verified. Its signature, site, or sign-"
+"in challenge did not match; check the Mailu hostname and try again."
+msgstr ""
+
+#: mailu/sso/views/passkeys.py:438
+#, python-format
+msgid ""
+"This passkey does not meet the domain backup policy: %(reasons)s. Change "
+"the backup eligibility or backup state policy, or use a passkey that "
+"meets it."
+msgstr ""
+
+#: mailu/sso/views/passkeys.py:467
+msgid ""
+"This domain only allows device-bound passkeys. This passkey is synced, "
+"backed up, or reported as a multi-device credential; use a device-bound "
+"passkey or ask your domain administrator to change this requirement."
+msgstr ""
+
+#: mailu/ui/forms.py:24 mailu/ui/forms.py:42 mailu/ui/forms.py:45
 msgid "Invalid email address."
 msgstr ""
 
-#: mailu/ui/forms.py:47
+#: mailu/ui/forms.py:55
 msgid "Invalid list of folders."
 msgstr ""
 
-#: mailu/ui/forms.py:56
+#: mailu/ui/forms.py:64
 msgid "Confirm"
 msgstr ""
 
-#: mailu/ui/forms.py:59 mailu/ui/forms.py:69
-#: mailu/ui/templates/domain/details.html:26
+#: mailu/ui/forms.py:72 mailu/ui/forms.py:175
+#: mailu/ui/templates/domain/details.html:20
 #: mailu/ui/templates/domain/list.html:19 mailu/ui/templates/relay/list.html:18
 msgid "Domain name"
 msgstr ""
 
-#: mailu/ui/forms.py:60
+#: mailu/ui/forms.py:73
 msgid "Maximum user count"
 msgstr ""
 
-#: mailu/ui/forms.py:61
+#: mailu/ui/forms.py:74
 msgid "Maximum alias count"
 msgstr ""
 
-#: mailu/ui/forms.py:62
+#: mailu/ui/forms.py:75
 msgid "Maximum user quota"
 msgstr ""
 
-#: mailu/ui/forms.py:63 mailu/ui/templates/domain/list.html:24
+#: mailu/ui/forms.py:76 mailu/ui/templates/domain/list.html:24
 msgid "Enable sign-up"
 msgstr ""
 
-#: mailu/ui/forms.py:64 mailu/ui/forms.py:86 mailu/ui/forms.py:100
-#: mailu/ui/forms.py:155 mailu/ui/forms.py:175
-#: mailu/ui/templates/alias/list.html:22 mailu/ui/templates/domain/list.html:23
-#: mailu/ui/templates/relay/list.html:20 mailu/ui/templates/token/list.html:21
-#: mailu/ui/templates/user/list.html:24
+#: mailu/ui/forms.py:77
+msgid "Enable Global Anonymous Email Service"
+msgstr ""
+
+#: mailu/ui/forms.py:78 mailu/ui/forms.py:125
+msgid "Require all users to enroll a passkey"
+msgstr ""
+
+#: mailu/ui/forms.py:79 mailu/ui/forms.py:126
+msgid "Enforce AAGUID restrictions"
+msgstr ""
+
+#: mailu/ui/forms.py:80 mailu/ui/forms.py:127
+msgid "AAGUID list behavior"
+msgstr ""
+
+#: mailu/ui/forms.py:81 mailu/ui/forms.py:128
+msgid "Allow only listed AAGUIDs"
+msgstr ""
+
+#: mailu/ui/forms.py:82 mailu/ui/forms.py:129
+msgid "Block listed AAGUIDs"
+msgstr ""
+
+#: mailu/ui/forms.py:84 mailu/ui/forms.py:131
+msgid "AAGUIDs (one UUID per line)"
+msgstr ""
+
+#: mailu/ui/forms.py:85 mailu/ui/forms.py:132
+msgid "Require user verification (PIN or biometrics)"
+msgstr ""
+
+#: mailu/ui/forms.py:86 mailu/ui/forms.py:133
+msgid "Backup eligibility policy"
+msgstr ""
+
+#: mailu/ui/forms.py:87 mailu/ui/forms.py:92 mailu/ui/forms.py:98
+#: mailu/ui/forms.py:134 mailu/ui/forms.py:139 mailu/ui/forms.py:145
+msgid "Optional"
+msgstr ""
+
+#: mailu/ui/forms.py:88 mailu/ui/forms.py:135
+msgid "Require backup-eligible passkeys"
+msgstr ""
+
+#: mailu/ui/forms.py:89 mailu/ui/forms.py:136
+msgid "Deny backup-eligible passkeys"
+msgstr ""
+
+#: mailu/ui/forms.py:91 mailu/ui/forms.py:138
+msgid "Backup state policy"
+msgstr ""
+
+#: mailu/ui/forms.py:93 mailu/ui/forms.py:140
+msgid "Require passkeys to be currently backed up"
+msgstr ""
+
+#: mailu/ui/forms.py:94 mailu/ui/forms.py:141
+msgid "Deny currently backed-up passkeys"
+msgstr ""
+
+#: mailu/ui/forms.py:96 mailu/ui/forms.py:143
+msgid "Require signature counter to increase at every login"
+msgstr ""
+
+#: mailu/ui/forms.py:97 mailu/ui/forms.py:144
+msgid "Authenticator attestation policy"
+msgstr ""
+
+#: mailu/ui/forms.py:99 mailu/ui/forms.py:146
+msgid "Require an attestation statement"
+msgstr ""
+
+#: mailu/ui/forms.py:100 mailu/ui/forms.py:147
+msgid "Deny an attestation statement"
+msgstr ""
+
+#: mailu/ui/forms.py:102 mailu/ui/forms.py:149
+msgid "Only allow device-bound passkeys"
+msgstr ""
+
+#: mailu/ui/forms.py:104 mailu/ui/forms.py:150
+msgid "Resident passkey preference"
+msgstr ""
+
+#: mailu/ui/forms.py:105 mailu/ui/forms.py:151
+msgid "Discouraged"
+msgstr ""
+
+#: mailu/ui/forms.py:106 mailu/ui/forms.py:152
+msgid "Preferred"
+msgstr ""
+
+#: mailu/ui/forms.py:107 mailu/ui/forms.py:153
+msgid "Required"
+msgstr ""
+
+#: mailu/ui/forms.py:110 mailu/ui/forms.py:192 mailu/ui/forms.py:203
+#: mailu/ui/forms.py:281 mailu/ui/forms.py:301
+#: mailu/ui/templates/alias/list.html:22
+#: mailu/ui/templates/domain/details.html:23
+#: mailu/ui/templates/domain/list.html:23 mailu/ui/templates/relay/list.html:20
+#: mailu/ui/templates/token/list.html:25 mailu/ui/templates/user/list.html:25
 msgid "Comment"
 msgstr ""
 
-#: mailu/ui/forms.py:65 mailu/ui/forms.py:80 mailu/ui/forms.py:87
-#: mailu/ui/forms.py:103 mailu/ui/forms.py:159 mailu/ui/forms.py:176
+#: mailu/ui/forms.py:111 mailu/ui/forms.py:155 mailu/ui/forms.py:186
+#: mailu/ui/forms.py:193 mailu/ui/forms.py:207 mailu/ui/forms.py:302
 msgid "Save"
 msgstr ""
 
-#: mailu/ui/forms.py:70
+#: mailu/ui/forms.py:171
+msgid "Enter valid AAGUID UUIDs, one per line."
+msgstr ""
+
+#: mailu/ui/forms.py:176
 msgid "Initial admin"
 msgstr ""
 
-#: mailu/ui/forms.py:71
+#: mailu/ui/forms.py:177
 msgid "Admin password"
 msgstr ""
 
-#: mailu/ui/forms.py:72 mailu/ui/forms.py:93 mailu/ui/forms.py:109
+#: mailu/ui/forms.py:178 mailu/ui/forms.py:213
 msgid "Confirm password"
 msgstr ""
 
-#: mailu/ui/forms.py:75
+#: mailu/ui/forms.py:181
 msgid "Create"
 msgstr ""
 
-#: mailu/ui/forms.py:79
+#: mailu/ui/forms.py:185
 msgid "Alternative name"
 msgstr ""
 
-#: mailu/ui/forms.py:84
+#: mailu/ui/forms.py:190
 msgid "Relayed domain name"
 msgstr ""
 
-#: mailu/ui/forms.py:85 mailu/ui/templates/relay/list.html:19
+#: mailu/ui/forms.py:191 mailu/ui/templates/relay/list.html:19
 msgid "Remote host"
 msgstr ""
 
-#: mailu/ui/forms.py:95 mailu/ui/templates/domain/list.html:22
-#: mailu/ui/templates/user/list.html:23
+#: mailu/ui/forms.py:198 mailu/ui/templates/domain/list.html:22
+#: mailu/ui/templates/user/list.html:24
 #: mailu/ui/templates/user/signup_domain.html:17
 msgid "Quota"
 msgstr ""
 
-#: mailu/ui/forms.py:96
+#: mailu/ui/forms.py:199
 msgid "Allow IMAP access"
 msgstr ""
 
-#: mailu/ui/forms.py:97
+#: mailu/ui/forms.py:200
 msgid "Allow POP3 access"
 msgstr ""
 
-#: mailu/ui/forms.py:98
+#: mailu/ui/forms.py:201
 msgid "Allow the user to spoof the sender (send email as anyone)"
 msgstr ""
 
-#: mailu/ui/forms.py:99 mailu/ui/forms.py:117
-#: mailu/ui/templates/user/settings.html:15
+#: mailu/ui/forms.py:202 mailu/ui/forms.py:221
+#: mailu/ui/templates/user/settings.html:21
 msgid "Displayed name"
 msgstr ""
 
-#: mailu/ui/forms.py:101
+#: mailu/ui/forms.py:204
 msgid "Enabled"
 msgstr ""
 
-#: mailu/ui/forms.py:102
+#: mailu/ui/forms.py:205
 msgid "Force password change at next login"
 msgstr ""
 
-#: mailu/ui/forms.py:107
+#: mailu/ui/forms.py:206
+msgid "Require passkey"
+msgstr ""
+
+#: mailu/ui/forms.py:211
 msgid "Email address"
 msgstr ""
 
-#: mailu/ui/forms.py:118
+#: mailu/ui/forms.py:222
+msgid "OpenPGP public key"
+msgstr ""
+
+#: mailu/ui/forms.py:223
+msgid "Publish OpenPGP key"
+msgstr ""
+
+#: mailu/ui/forms.py:224
 msgid "Enable spam filter"
 msgstr ""
 
-#: mailu/ui/forms.py:119
+#: mailu/ui/forms.py:225
 msgid "Enable marking spam mails as read"
 msgstr ""
 
-#: mailu/ui/forms.py:120
+#: mailu/ui/forms.py:226
 msgid "Spam filter tolerance"
 msgstr ""
 
-#: mailu/ui/forms.py:121
+#: mailu/ui/forms.py:227
 msgid "Enable forwarding"
 msgstr ""
 
-#: mailu/ui/forms.py:122
+#: mailu/ui/forms.py:228
 msgid "Keep a copy of the emails"
 msgstr ""
 
-#: mailu/ui/forms.py:123 mailu/ui/forms.py:174
+#: mailu/ui/forms.py:229 mailu/ui/forms.py:300
+#: mailu/ui/templates/alias/anonaliases.html:29
 #: mailu/ui/templates/alias/list.html:21
 msgid "Destination"
 msgstr ""
 
-#: mailu/ui/forms.py:124
+#: mailu/ui/forms.py:230
 msgid "Save settings"
 msgstr ""
 
-#: mailu/ui/forms.py:129 mailu/ui/forms.py:136
+#: mailu/ui/forms.py:235 mailu/ui/forms.py:242
 msgid "Password check"
 msgstr ""
 
-#: mailu/ui/forms.py:131 mailu/ui/forms.py:138
-#: mailu/ui/templates/sidebar.html:25
+#: mailu/ui/forms.py:237 mailu/ui/forms.py:244
+#: mailu/ui/templates/sidebar.html:38
 msgid "Update password"
 msgstr ""
 
-#: mailu/ui/forms.py:141
+#: mailu/ui/forms.py:247
 msgid "Enable automatic reply"
 msgstr ""
 
-#: mailu/ui/forms.py:142
+#: mailu/ui/forms.py:248
 msgid "Reply subject"
 msgstr ""
 
-#: mailu/ui/forms.py:143
-msgid "Reply body"
+#: mailu/ui/forms.py:249
+msgid "Message"
 msgstr ""
 
-#: mailu/ui/forms.py:145
-msgid "Start of vacation"
+#: mailu/ui/forms.py:251 mailu/ui/templates/user/reply.html:15
+msgid "When to reply"
 msgstr ""
 
-#: mailu/ui/forms.py:146
-msgid "End of vacation"
+#: mailu/ui/forms.py:251
+msgid "On selected dates"
 msgstr ""
 
-#: mailu/ui/forms.py:147
-msgid "Update"
+#: mailu/ui/forms.py:251
+msgid "Until I turn it off"
 msgstr ""
 
-#: mailu/ui/forms.py:152
-msgid "Your token (write it down, as it will never be displayed again)"
+#: mailu/ui/forms.py:252
+msgid "First day away"
 msgstr ""
 
-#: mailu/ui/forms.py:157 mailu/ui/templates/token/list.html:22
+#: mailu/ui/forms.py:253
+msgid "Last day away"
+msgstr ""
+
+#: mailu/ui/forms.py:254
+msgid "Save automatic reply"
+msgstr ""
+
+#: mailu/ui/forms.py:268
+msgid "Choose both the first and last day away."
+msgstr ""
+
+#: mailu/ui/forms.py:271
+msgid "The last day away must be on or after the first day."
+msgstr ""
+
+#: mailu/ui/forms.py:278
+msgid "Authentication token (shown once)"
+msgstr ""
+
+#: mailu/ui/forms.py:283 mailu/ui/templates/token/list.html:26
 msgid "Authorized IP"
 msgstr ""
 
-#: mailu/ui/forms.py:171
+#: mailu/ui/forms.py:285
+msgid "Create and activate token"
+msgstr ""
+
+#: mailu/ui/forms.py:297 mailu/ui/templates/alias/anonaliases.html:27
 msgid "Alias"
 msgstr ""
 
-#: mailu/ui/forms.py:173
+#: mailu/ui/forms.py:299
 msgid "Use SQL LIKE Syntax (e.g. for catch-all aliases)"
 msgstr ""
 
-#: mailu/ui/forms.py:180
-msgid "Admin email"
+#: mailu/ui/forms.py:306 mailu/ui/forms.py:311 mailu/ui/forms.py:316
+msgid "Accounts"
 msgstr ""
 
-#: mailu/ui/forms.py:181 mailu/ui/forms.py:186 mailu/ui/forms.py:201
+#: mailu/ui/forms.py:307 mailu/ui/forms.py:312 mailu/ui/forms.py:340
 msgid "Submit"
 msgstr ""
 
-#: mailu/ui/forms.py:185
-msgid "Manager email"
+#: mailu/ui/forms.py:317 mailu/ui/templates/manager/access_create.html:18
+#: mailu/ui/templates/manager/access_list.html:12
+msgid "Grant access"
 msgstr ""
 
-#: mailu/ui/forms.py:190
+#: mailu/ui/forms.py:321 mailu/ui/templates/alias/anonaliases.html:28
+#: mailu/ui/templates/user/signup_domain.html:15
+msgid "Domain"
+msgstr ""
+
+#: mailu/ui/forms.py:322
+msgid "Hostname (optional)"
+msgstr ""
+
+#: mailu/ui/forms.py:323
+msgid "Note (optional)"
+msgstr ""
+
+#: mailu/ui/forms.py:324 mailu/ui/templates/alias/anonaliases.html:13
+msgid "Generate alias"
+msgstr ""
+
+#: mailu/ui/forms.py:328
 msgid "Protocol"
 msgstr ""
 
-#: mailu/ui/forms.py:193
+#: mailu/ui/forms.py:331
 msgid "Hostname or IP"
 msgstr ""
 
-#: mailu/ui/forms.py:194 mailu/ui/templates/client.html:19
-#: mailu/ui/templates/client.html:44
+#: mailu/ui/forms.py:332 mailu/ui/templates/client.html:23
+#: mailu/ui/templates/client.html:48
 msgid "TCP port"
 msgstr ""
 
-#: mailu/ui/forms.py:195
+#: mailu/ui/forms.py:333
 msgid "Enable TLS"
 msgstr ""
 
-#: mailu/ui/forms.py:196 mailu/ui/templates/client.html:27
-#: mailu/ui/templates/client.html:52 mailu/ui/templates/fetch/list.html:21
+#: mailu/ui/forms.py:334 mailu/ui/templates/client.html:31
+#: mailu/ui/templates/client.html:56 mailu/ui/templates/fetch/list.html:21
 msgid "Username"
 msgstr ""
 
-#: mailu/ui/forms.py:198
+#: mailu/ui/forms.py:336
 msgid "Keep emails on the server"
 msgstr ""
 
-#: mailu/ui/forms.py:199
+#: mailu/ui/forms.py:337
 msgid "Rescan emails locally"
 msgstr ""
 
-#: mailu/ui/forms.py:200
+#: mailu/ui/forms.py:338
 msgid "Keep original metadata"
 msgstr ""
 
-#: mailu/ui/forms.py:201
+#: mailu/ui/forms.py:339
 msgid "Folders to fetch on the server"
 msgstr ""
 
-#: mailu/ui/forms.py:205
+#: mailu/ui/forms.py:344
 msgid "Announcement subject"
 msgstr ""
 
-#: mailu/ui/forms.py:207
+#: mailu/ui/forms.py:345
+msgid "Enter a subject on one line."
+msgstr ""
+
+#: mailu/ui/forms.py:346
 msgid "Announcement body"
 msgstr ""
 
-#: mailu/ui/forms.py:209
+#: mailu/ui/forms.py:348
 msgid "Send"
 msgstr ""
 
-#: mailu/ui/templates/announcement.html:4
-msgid "Public announcement"
+#: mailu/ui/user_picker.py:37
+msgid "Already has access"
 msgstr ""
 
-#: mailu/ui/templates/antispam.html:4 mailu/ui/templates/sidebar.html:82
-#: mailu/ui/templates/user/settings.html:19
+#: mailu/ui/user_picker.py:69
+msgid "Search by email or name; select one or more accounts"
+msgstr ""
+
+#: mailu/ui/user_picker.py:70
+msgid "No matching accounts"
+msgstr ""
+
+#: mailu/ui/templates/alias/create.html:21 mailu/ui/user_picker.py:71
+msgid "Searching…"
+msgstr ""
+
+#: mailu/ui/user_picker.py:72
+msgid "Could not load accounts. Try searching again."
+msgstr ""
+
+#: mailu/ui/user_picker.py:73
+msgid "More than 50 matches. Keep typing to narrow the search."
+msgstr ""
+
+#: mailu/ui/user_picker.py:74
+msgid "_COUNT_ accounts selected"
+msgstr ""
+
+#: mailu/ui/user_picker.py:84
+msgid "Some selected accounts are unavailable or outside your permissions."
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:2 mailu/ui/templates/sidebar.html:98
+msgid "Announcement"
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:3
+msgid "Send an email to all mailboxes"
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:5
+msgid ""
+"Delivery failed for these mailboxes. Preview again to retry only these "
+"recipients."
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:11
+msgid "Review announcement"
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:11
+msgid "Compose announcement"
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:13
+msgid "From"
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:14
+msgid "To"
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:14
+msgid "Failed deliveries only"
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:14
+msgid "All mailboxes"
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:14
+msgid "recipients"
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:18
+msgid "Plain-text version"
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:22
+msgid "Confirm to send this message to the recipients shown above."
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:26
+msgid ""
+"Send a test copy to yourself to check how the message appears in your "
+"mail client."
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:31
+msgid "Send announcement"
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:32
+#: mailu/ui/templates/user/reply.html:39
+msgid "Back to editing"
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:34
+#: mailu/ui/templates/user/reply.html:34
+msgid "Preview"
+msgstr ""
+
+#: mailu/ui/templates/announcement.html:35
+msgid "Send me a test email"
+msgstr ""
+
+#: mailu/ui/templates/antispam.html:4 mailu/ui/templates/sidebar.html:116
+#: mailu/ui/templates/user/settings.html:32
 msgid "Antispam"
 msgstr ""
 
-#: mailu/ui/templates/antispam.html:8
+#: mailu/ui/templates/antispam.html:8 mailu/ui/templates/antispam.html:12
 msgid "RSPAMD status page"
+msgstr ""
+
+#: mailu/ui/templates/base.html:8
+msgid "Admin page for"
+msgstr ""
+
+#: mailu/ui/templates/base.html:21
+msgid "toggle sidebar"
+msgstr ""
+
+#: mailu/ui/templates/base.html:40
+msgid "change language"
+msgstr ""
+
+#: mailu/ui/templates/base.html:77
+msgid "You are managing another account:"
 msgstr ""
 
 #: mailu/ui/templates/client.html:8
 msgid "configure your email client"
 msgstr ""
 
-#: mailu/ui/templates/client.html:12
+#: mailu/ui/templates/client.html:13
+msgid ""
+"Create a separate authentication token for each email app or device. "
+"Enter the token in the app's password field for both incoming (IMAP) and "
+"outgoing (SMTP) mail, and let the app remember it."
+msgstr ""
+
+#: mailu/ui/templates/client.html:14 mailu/ui/templates/token/create.html:4
+#: mailu/ui/templates/user/settings.html:15
+msgid "Create an authentication token"
+msgstr ""
+
+#: mailu/ui/templates/client.html:16
 msgid "Incoming mail"
 msgstr ""
 
-#: mailu/ui/templates/client.html:15 mailu/ui/templates/client.html:40
+#: mailu/ui/templates/client.html:19 mailu/ui/templates/client.html:44
 msgid "Mail protocol"
 msgstr ""
 
-#: mailu/ui/templates/client.html:23 mailu/ui/templates/client.html:48
+#: mailu/ui/templates/client.html:27 mailu/ui/templates/client.html:52
 msgid "Server name"
 msgstr ""
 
-#: mailu/ui/templates/client.html:37
+#: mailu/ui/templates/client.html:35 mailu/ui/templates/client.html:60
+msgid "Authentication token"
+msgstr ""
+
+#: mailu/ui/templates/client.html:41
 msgid "Outgoing mail"
 msgstr ""
 
-#: mailu/ui/templates/client.html:62
+#: mailu/ui/templates/client.html:66
 msgid "If you use an Apple device,"
 msgstr ""
 
-#: mailu/ui/templates/client.html:63
+#: mailu/ui/templates/client.html:67
 msgid "click here to auto-configure it."
 msgstr ""
 
@@ -432,6 +1027,10 @@ msgstr ""
 msgid "You are about to %(action)s. Please confirm your action."
 msgstr ""
 
+#: mailu/ui/templates/confirm.html:16 mailu/ui/templates/macros.html:122
+msgid "Cancel"
+msgstr ""
+
 #: mailu/ui/templates/docker-error.html:4
 msgid "Docker error"
 msgstr ""
@@ -440,57 +1039,115 @@ msgstr ""
 msgid "An error occurred while talking to the Docker server."
 msgstr ""
 
-#: mailu/ui/templates/macros.html:128
+#: mailu/ui/templates/macros.html:21
+msgid "Appearance"
+msgstr ""
+
+#: mailu/ui/templates/macros.html:24
+msgid "Light"
+msgstr ""
+
+#: mailu/ui/templates/macros.html:25
+msgid "Dark"
+msgstr ""
+
+#: mailu/ui/templates/macros.html:26
+msgid "System"
+msgstr ""
+
+#: mailu/ui/templates/macros.html:98
+msgid "Quota unit"
+msgstr ""
+
+#: mailu/ui/templates/macros.html:106
+msgid "Quota amount; enter 0 for unlimited"
+msgstr ""
+
+#: mailu/ui/templates/macros.html:110
+msgid "0 means unlimited."
+msgstr ""
+
+#: mailu/ui/templates/macros.html:157
+msgid "Search"
+msgstr ""
+
+#: mailu/ui/templates/macros.html:158
+msgid "Show _MENU_ entries"
+msgstr ""
+
+#: mailu/ui/templates/macros.html:159
+msgid "No matching records found"
+msgstr ""
+
+#: mailu/ui/templates/macros.html:160
+msgid "No records yet"
+msgstr ""
+
+#: mailu/ui/templates/macros.html:161
+msgid "Clear search"
+msgstr ""
+
+#: mailu/ui/templates/macros.html:162
+msgid "_START_–_END_ of _TOTAL_ records"
+msgstr ""
+
+#: mailu/ui/templates/macros.html:163
+msgid "Previous"
+msgstr ""
+
+#: mailu/ui/templates/macros.html:164
+msgid "Next"
+msgstr ""
+
+#: mailu/ui/templates/macros.html:187
 msgid "copy to clipboard"
 msgstr ""
 
-#: mailu/ui/templates/sidebar.html:15
+#: mailu/ui/templates/sidebar.html:27
 msgid "My account"
 msgstr ""
 
-#: mailu/ui/templates/sidebar.html:19 mailu/ui/templates/user/list.html:36
+#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/user/list.html:37
 msgid "Settings"
 msgstr ""
 
-#: mailu/ui/templates/sidebar.html:31 mailu/ui/templates/user/list.html:37
+#: mailu/ui/templates/sidebar.html:45 mailu/ui/templates/user/list.html:38
+#: mailu/ui/templates/user/list.html:47
+msgid "Manage passkeys"
+msgstr ""
+
+#: mailu/ui/templates/sidebar.html:51 mailu/ui/templates/user/list.html:39
 msgid "Auto-reply"
 msgstr ""
 
-#: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:38
-#: mailu/ui/templates/user/list.html:39
+#: mailu/ui/templates/fetch/list.html:4 mailu/ui/templates/sidebar.html:58
+#: mailu/ui/templates/user/list.html:41
 msgid "Fetched accounts"
 msgstr ""
 
-#: mailu/ui/templates/sidebar.html:45 mailu/ui/templates/token/list.html:4
+#: mailu/ui/templates/sidebar.html:65 mailu/ui/templates/token/list.html:4
 msgid "Authentication tokens"
 msgstr ""
 
-#: mailu/ui/templates/sidebar.html:58
+#: mailu/ui/templates/alias/anonaliases.html:4
+#: mailu/ui/templates/sidebar.html:71
+msgid "Anonymous Aliases"
+msgstr ""
+
+#: mailu/ui/templates/sidebar.html:84
 msgid "Administration"
-msgstr ""
-
-#: mailu/ui/templates/sidebar.html:64
-msgid "Announcement"
-msgstr ""
-
-#: mailu/ui/templates/sidebar.html:70
-msgid "Administrators"
-msgstr ""
-
-#: mailu/ui/templates/sidebar.html:76
-msgid "Relayed domains"
 msgstr ""
 
 #: mailu/ui/templates/sidebar.html:90
 msgid "Mail domains"
 msgstr ""
 
-#: mailu/ui/templates/sidebar.html:101
-msgid "Webmail"
+#: mailu/ui/templates/sidebar.html:104
+msgid "Administrators"
 msgstr ""
 
-#: mailu/ui/templates/sidebar.html:137
-msgid "Sign out"
+#: mailu/ui/templates/sidebar.html:110
+msgid "Relayed domains"
 msgstr ""
 
 #: mailu/ui/templates/working.html:4
@@ -501,6 +1158,13 @@ msgstr ""
 msgid "Add a global administrator"
 msgstr ""
 
+#: mailu/ui/templates/admin/create.html:11
+#: mailu/ui/templates/manager/create.html:15
+msgid ""
+"Search for accounts by email or display name. Select several accounts to "
+"add them together."
+msgstr ""
+
 #: mailu/ui/templates/admin/list.html:4
 msgid "Global administrators"
 msgstr ""
@@ -509,12 +1173,16 @@ msgstr ""
 msgid "Add administrator"
 msgstr ""
 
-#: mailu/ui/templates/admin/list.html:17 mailu/ui/templates/alias/list.html:19
+#: mailu/ui/templates/admin/list.html:17
+#: mailu/ui/templates/alias/anonaliases.html:26
+#: mailu/ui/templates/alias/list.html:19
 #: mailu/ui/templates/alternative/list.html:19
 #: mailu/ui/templates/domain/list.html:17 mailu/ui/templates/fetch/list.html:19
+#: mailu/ui/templates/manager/access_list.html:19
 #: mailu/ui/templates/manager/list.html:19
-#: mailu/ui/templates/relay/list.html:17 mailu/ui/templates/token/list.html:19
+#: mailu/ui/templates/relay/list.html:17 mailu/ui/templates/token/list.html:23
 #: mailu/ui/templates/user/list.html:19
+#: mailu/ui/templates/user/passkeys.html:21
 msgid "Actions"
 msgstr ""
 
@@ -526,20 +1194,115 @@ msgstr ""
 #: mailu/ui/templates/admin/list.html:25 mailu/ui/templates/alias/list.html:31
 #: mailu/ui/templates/domain/list.html:35 mailu/ui/templates/fetch/list.html:35
 #: mailu/ui/templates/manager/list.html:27
-#: mailu/ui/templates/relay/list.html:29 mailu/ui/templates/user/list.html:33
+#: mailu/ui/templates/relay/list.html:29 mailu/ui/templates/user/list.html:34
 msgid "Edit"
 msgstr ""
 
-#: mailu/ui/templates/admin/list.html:26 mailu/ui/templates/alias/list.html:32
+#: mailu/ui/templates/admin/list.html:26
+#: mailu/ui/templates/alias/anonaliases.html:46
+#: mailu/ui/templates/alias/list.html:32
 #: mailu/ui/templates/alternative/list.html:29
-#: mailu/ui/templates/domain/list.html:36 mailu/ui/templates/fetch/list.html:36
+#: mailu/ui/templates/domain/details.html:90
+#: mailu/ui/templates/domain/list.html:37 mailu/ui/templates/fetch/list.html:36
 #: mailu/ui/templates/manager/list.html:28
-#: mailu/ui/templates/relay/list.html:30 mailu/ui/templates/token/list.html:31
+#: mailu/ui/templates/relay/list.html:30 mailu/ui/templates/token/list.html:35
+#: mailu/ui/templates/user/passkeys.html:40
 msgid "Delete"
+msgstr ""
+
+#: mailu/ui/templates/alias/anonaliases.html:8
+msgid "Anonymous Email Service (Anonymous Aliases)"
+msgstr ""
+
+#: mailu/ui/templates/alias/anonaliases.html:20
+msgid ""
+"You do not have access to any domains for creating anonymous aliases. "
+"Please contact your administrator to grant you access."
+msgstr ""
+
+#: mailu/ui/templates/alias/anonaliases.html:30
+msgid "Note"
+msgstr ""
+
+#: mailu/ui/templates/alias/anonaliases.html:31
+msgid "Hostname"
+msgstr ""
+
+#: mailu/ui/templates/alias/anonaliases.html:32
+#: mailu/ui/templates/alias/list.html:23
+#: mailu/ui/templates/alternative/list.html:21
+#: mailu/ui/templates/domain/details.html:24
+#: mailu/ui/templates/domain/details.html:75
+#: mailu/ui/templates/domain/list.html:26 mailu/ui/templates/fetch/list.html:27
+#: mailu/ui/templates/relay/list.html:21 mailu/ui/templates/token/list.html:27
+#: mailu/ui/templates/user/list.html:26
+#: mailu/ui/templates/user/passkeys.html:23
+msgid "Created"
+msgstr ""
+
+#: mailu/ui/templates/alias/anonaliases.html:33
+#: mailu/ui/templates/fetch/list.html:26
+msgid "Status"
+msgstr ""
+
+#: mailu/ui/templates/alias/anonaliases.html:41
+msgid "Enable"
+msgstr ""
+
+#: mailu/ui/templates/alias/anonaliases.html:43
+msgid "Disable"
+msgstr ""
+
+#: mailu/ui/templates/alias/anonaliases.html:45
+msgid "Copy"
+msgstr ""
+
+#: mailu/ui/templates/alias/anonaliases.html:56 mailu/ui/views/users.py:283
+msgid "Active"
+msgstr ""
+
+#: mailu/ui/templates/alias/anonaliases.html:58
+msgid "Disabled"
+msgstr ""
+
+#: mailu/ui/templates/alias/anonaliases_create.html:4
+msgid "Generate Anonymous Alias"
 msgstr ""
 
 #: mailu/ui/templates/alias/create.html:4
 msgid "Create alias"
+msgstr ""
+
+#: mailu/ui/templates/alias/create.html:18
+msgid ""
+"When enabled, % matches zero or more characters and _ matches exactly one"
+" character in the alias."
+msgstr ""
+
+#: mailu/ui/templates/alias/create.html:19
+msgid ""
+"For example, sales% matches sales and sales-team. Use % alone for a "
+"catch-all alias."
+msgstr ""
+
+#: mailu/ui/templates/alias/create.html:21
+msgid "Search managed addresses or enter an external email"
+msgstr ""
+
+#: mailu/ui/templates/alias/create.html:21
+msgid "No matching addresses"
+msgstr ""
+
+#: mailu/ui/templates/alias/create.html:21
+msgid "Could not load addresses. Try searching again."
+msgstr ""
+
+#: mailu/ui/templates/alias/create.html:21
+msgid "More than 50 addresses. Keep typing to narrow the search."
+msgstr ""
+
+#: mailu/ui/templates/alias/create.html:21
+msgid "_COUNT_ destinations selected"
 msgstr ""
 
 #: mailu/ui/templates/alias/edit.html:4
@@ -554,20 +1317,17 @@ msgstr ""
 msgid "Add alias"
 msgstr ""
 
-#: mailu/ui/templates/alias/list.html:23
-#: mailu/ui/templates/alternative/list.html:21
-#: mailu/ui/templates/domain/list.html:25 mailu/ui/templates/fetch/list.html:27
-#: mailu/ui/templates/relay/list.html:21 mailu/ui/templates/token/list.html:23
-#: mailu/ui/templates/user/list.html:25
-msgid "Created"
-msgstr ""
-
 #: mailu/ui/templates/alias/list.html:24
 #: mailu/ui/templates/alternative/list.html:22
-#: mailu/ui/templates/domain/list.html:26 mailu/ui/templates/fetch/list.html:28
-#: mailu/ui/templates/relay/list.html:22 mailu/ui/templates/token/list.html:24
-#: mailu/ui/templates/user/list.html:26
+#: mailu/ui/templates/domain/details.html:25
+#: mailu/ui/templates/domain/list.html:27 mailu/ui/templates/fetch/list.html:28
+#: mailu/ui/templates/relay/list.html:22 mailu/ui/templates/token/list.html:28
+#: mailu/ui/templates/user/list.html:27
 msgid "Last edit"
+msgstr ""
+
+#: mailu/ui/templates/alias/list.html:29
+msgid "Anonymous Alias"
 msgstr ""
 
 #: mailu/ui/templates/alternative/create.html:4
@@ -591,44 +1351,133 @@ msgstr ""
 msgid "New domain"
 msgstr ""
 
+#: mailu/ui/templates/domain/create.html:24
+msgid "Passkey policy"
+msgstr ""
+
+#: mailu/ui/templates/domain/create.html:25
+msgid "These settings apply to passkeys for users in this domain."
+msgstr ""
+
+#: mailu/ui/templates/domain/create.html:30
+msgid ""
+"Users without a passkey must enroll one after signing in. New users will "
+"also be required to enroll."
+msgstr ""
+
+#: mailu/ui/templates/domain/create.html:35
+msgid ""
+"When disabled, the AAGUID list does not restrict passkey enrollment or "
+"sign-in."
+msgstr ""
+
+#: mailu/ui/templates/domain/create.html:77
+msgid ""
+"User presence is always required by WebAuthn. Signature-counter "
+"enforcement rejects authenticators that do not provide a strictly "
+"increasing counter. Attestation requests a statement from the "
+"authenticator; it does not by itself establish manufacturer trust."
+msgstr ""
+
+#: mailu/ui/templates/domain/create.html:96
+msgid "Save domain settings"
+msgstr ""
+
+#: mailu/ui/templates/domain/create.html:96
+msgid "Save passkey policy"
+msgstr ""
+
+#: mailu/ui/templates/domain/create.html:96
+msgid "Create domain"
+msgstr ""
+
 #: mailu/ui/templates/domain/details.html:4
 msgid "Domain details"
 msgstr ""
 
-#: mailu/ui/templates/domain/details.html:15
-msgid "Regenerate keys"
-msgstr ""
-
-#: mailu/ui/templates/domain/details.html:17
-msgid "Generate keys"
-msgstr ""
-
-#: mailu/ui/templates/domain/details.html:19
+#: mailu/ui/templates/domain/details.html:13
 msgid "Download zonefile"
 msgstr ""
 
-#: mailu/ui/templates/domain/details.html:30
+#: mailu/ui/templates/domain/details.html:27
+#: mailu/ui/templates/domain/details.html:120
 msgid "DNS MX entry"
 msgstr ""
 
-#: mailu/ui/templates/domain/details.html:34
+#: mailu/ui/templates/domain/details.html:31
+#: mailu/ui/templates/domain/details.html:124
 msgid "DNS SPF entries"
 msgstr ""
 
-#: mailu/ui/templates/domain/details.html:40
+#: mailu/ui/templates/domain/details.html:37
+#: mailu/ui/templates/domain/details.html:130
 msgid "DNS DKIM entry"
 msgstr ""
 
-#: mailu/ui/templates/domain/details.html:44
+#: mailu/ui/templates/domain/details.html:41
+#: mailu/ui/templates/domain/details.html:134
 msgid "DNS DMARC entry"
 msgstr ""
 
-#: mailu/ui/templates/domain/details.html:53
+#: mailu/ui/templates/domain/details.html:52
 msgid "DNS TLSA entry"
 msgstr ""
 
-#: mailu/ui/templates/domain/details.html:58
+#: mailu/ui/templates/domain/details.html:57
 msgid "DNS client auto-configuration entries"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:65
+#: mailu/ui/templates/domain/list.html:25
+msgid "Anonymous Email Service"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:66
+msgid "enabled"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:66
+msgid "disabled"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:73
+msgid "DKIM keys"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:75
+#: mailu/ui/templates/domain/details.html:86
+msgid "Signing"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:75
+#: mailu/ui/templates/domain/details.html:88
+msgid "Retired"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:75
+#: mailu/ui/templates/domain/details.html:84
+msgid "Staged"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:81
+#: mailu/ui/templates/domain/details.html:82
+msgid "DKIM status"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:101
+msgid "DKIM key management"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:103
+msgid "Stage DKIM RSA key"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:104
+msgid "Stage DKIM Ed25519 key"
+msgstr ""
+
+#: mailu/ui/templates/domain/details.html:116
+msgid "Alternative Domain name"
 msgstr ""
 
 #: mailu/ui/templates/domain/edit.html:4
@@ -651,43 +1500,49 @@ msgstr ""
 msgid "Alias count"
 msgstr ""
 
-#: mailu/ui/templates/domain/list.html:33
+#: mailu/ui/templates/domain/list.html:34
 msgid "Details"
 msgstr ""
 
-#: mailu/ui/templates/domain/list.html:40
+#: mailu/ui/templates/domain/list.html:41
 msgid "Users"
 msgstr ""
 
-#: mailu/ui/templates/domain/list.html:41
+#: mailu/ui/templates/domain/list.html:42
 msgid "Aliases"
 msgstr ""
 
-#: mailu/ui/templates/domain/list.html:42
+#: mailu/ui/templates/domain/list.html:43
 msgid "Managers"
 msgstr ""
 
 #: mailu/ui/templates/domain/list.html:44
+msgid "Anonalias Access"
+msgstr ""
+
+#: mailu/ui/templates/domain/list.html:46
 msgid "Alternatives"
 msgstr ""
 
-#: mailu/ui/templates/domain/list.html:52 mailu/ui/templates/fetch/list.html:40
+#: mailu/ui/templates/domain/list.html:54
+#: mailu/ui/templates/domain/list.html:55 mailu/ui/templates/fetch/list.html:40
 #: mailu/ui/templates/fetch/list.html:41
 msgid "yes"
 msgstr ""
 
-#: mailu/ui/templates/domain/list.html:52 mailu/ui/templates/fetch/list.html:40
+#: mailu/ui/templates/domain/list.html:54
+#: mailu/ui/templates/domain/list.html:55 mailu/ui/templates/fetch/list.html:40
 #: mailu/ui/templates/fetch/list.html:41
 msgid "no"
 msgstr ""
 
-#: mailu/ui/templates/domain/signup.html:13
+#: mailu/ui/templates/domain/signup.html:12
 msgid ""
 "In order to register a new domain, you must first setup the\n"
 "    domain zone so that the domain <code>MX</code> points to this server"
 msgstr ""
 
-#: mailu/ui/templates/domain/signup.html:18
+#: mailu/ui/templates/domain/signup.html:17
 msgid ""
 "If you do not know how to setup an <code>MX</code> record for your DNS "
 "zone,\n"
@@ -730,8 +1585,30 @@ msgstr ""
 msgid "Last check"
 msgstr ""
 
-#: mailu/ui/templates/fetch/list.html:26
-msgid "Status"
+#: mailu/ui/templates/manager/access_create.html:4
+msgid "Grant Anonymous Email Access"
+msgstr ""
+
+#: mailu/ui/templates/manager/access_create.html:12
+msgid "Back to list"
+msgstr ""
+
+#: mailu/ui/templates/manager/access_create.html:21
+msgid ""
+"Search for accounts by email or display name. Select several accounts to "
+"grant access together."
+msgstr ""
+
+#: mailu/ui/templates/manager/access_list.html:4
+msgid "Anonymous Email Access"
+msgstr ""
+
+#: mailu/ui/templates/manager/access_list.html:20
+msgid "User"
+msgstr ""
+
+#: mailu/ui/templates/manager/access_list.html:27
+msgid "Revoke"
 msgstr ""
 
 #: mailu/ui/templates/manager/create.html:4
@@ -762,15 +1639,33 @@ msgstr ""
 msgid "New relayed domain"
 msgstr ""
 
-#: mailu/ui/templates/token/create.html:4
-msgid "Create an authentication token"
+#: mailu/ui/templates/token/create.html:13
+msgid ""
+"Create one token per email app or device. Copy the token below before "
+"saving: it cannot be displayed again. Save it in your app's password "
+"field for both incoming and outgoing mail, then let the app remember it."
 msgstr ""
 
 #: mailu/ui/templates/token/list.html:12
 msgid "New token"
 msgstr ""
 
-#: mailu/ui/templates/token/list.html:20
+#: mailu/ui/templates/token/list.html:17
+msgid ""
+"Authentication tokens are designed to be set once and forgotten in your "
+"email app (MUA). Create one per app or device, paste it into the app's "
+"incoming and outgoing mail password fields, and save it there. The app "
+"will reuse it automatically; you do not need to enter it each time."
+msgstr ""
+
+#: mailu/ui/templates/token/list.html:18
+msgid ""
+"Give each token a recognizable app or device name. Delete its token when "
+"you stop using that app or device, or if the token is exposed. Saved "
+"tokens cannot be displayed again."
+msgstr ""
+
+#: mailu/ui/templates/token/list.html:24
 msgid "ID"
 msgstr ""
 
@@ -778,11 +1673,43 @@ msgstr ""
 msgid "New user"
 msgstr ""
 
-#: mailu/ui/templates/user/create.html:15
+#: mailu/ui/templates/user/create.html:17
 msgid "General"
 msgstr ""
 
-#: mailu/ui/templates/user/create.html:24
+#: mailu/ui/templates/user/create.html:20
+msgid ""
+"A one-time account setup link will be generated after the account is "
+"created. The user can use it to choose a password or set up a passkey."
+msgstr ""
+
+#: mailu/ui/templates/user/create.html:34
+msgid "Account setup and recovery"
+msgstr ""
+
+#: mailu/ui/templates/user/create.html:37
+msgid "One-time account setup or recovery link, valid until"
+msgstr ""
+
+#: mailu/ui/templates/user/create.html:38
+msgid "One-time account setup or recovery link"
+msgstr ""
+
+#: mailu/ui/templates/user/create.html:41
+msgid "Copy to clipboard"
+msgstr ""
+
+#: mailu/ui/templates/user/create.html:45
+msgid "Generate one-time setup or recovery link"
+msgstr ""
+
+#: mailu/ui/templates/user/create.html:46
+msgid ""
+"The link expires after the configured lifetime and can be used once to "
+"set a password or add a passkey to this account."
+msgstr ""
+
+#: mailu/ui/templates/user/create.html:50
 msgid "Features and quotas"
 msgstr ""
 
@@ -802,50 +1729,354 @@ msgstr ""
 msgid "User settings"
 msgstr ""
 
-#: mailu/ui/templates/user/list.html:22
+#: mailu/ui/templates/user/list.html:22 mailu/ui/templates/user/passkeys.html:3
+msgid "Passkeys"
+msgstr ""
+
+#: mailu/ui/templates/user/list.html:23
 msgid "Features"
 msgstr ""
 
-#: mailu/ui/templates/user/password.html:4
+#: mailu/ui/templates/user/passkey_create.html:3
+msgid "Add a passkey"
+msgstr ""
+
+#: mailu/ui/templates/user/passkey_create.html:7
+msgid "Back to passkeys"
+msgstr ""
+
+#: mailu/ui/templates/user/passkey_create.html:17
+msgid "Choose a name to identify this device in your passkey list."
+msgstr ""
+
+#: mailu/ui/templates/user/passkey_create.html:20
+msgid "New passkey name (required)"
+msgstr ""
+
+#: mailu/ui/templates/user/passkey_create.html:25
+msgid "For example, your phone or laptop."
+msgstr ""
+
+#: mailu/ui/templates/user/passkey_create.html:27
+msgid "Add passkey"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:14
+msgid ""
+"Your administrator requires a passkey before you can continue. Add one "
+"now to finish signing in."
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:17
+msgid ""
+"Details reflect the latest WebAuthn registration or sign-in. Older "
+"passkeys may not have all details recorded."
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:22
+#: mailu/ui/templates/user/passkeys.html:42
+#: mailu/ui/templates/user/signup.html:29
+msgid "Passkey"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:24
+msgid "Last used"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:25
+msgid "User present"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:26
+msgid "User verified"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:27
+msgid "Device type"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:28
+msgid "Backup eligible"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:29
+msgid "Backed up"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:30
+msgid "Device-bound"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:31
+msgid "Attestation"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:32
+msgid "Signature counter"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:33
+msgid "Authenticator ID (AAGUID)"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:44
+msgid "Never"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:45
+#: mailu/ui/templates/user/passkeys.html:46
+#: mailu/ui/templates/user/passkeys.html:47
+#: mailu/ui/templates/user/passkeys.html:48
+#: mailu/ui/templates/user/passkeys.html:49
+#: mailu/ui/templates/user/passkeys.html:50
+#: mailu/ui/templates/user/passkeys.html:51
+msgid "Unknown"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:45
+#: mailu/ui/templates/user/passkeys.html:46
+#: mailu/ui/templates/user/passkeys.html:48
+#: mailu/ui/templates/user/passkeys.html:49
+#: mailu/ui/templates/user/passkeys.html:50
+msgid "Yes"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:45
+#: mailu/ui/templates/user/passkeys.html:46
+#: mailu/ui/templates/user/passkeys.html:48
+#: mailu/ui/templates/user/passkeys.html:49
+#: mailu/ui/templates/user/passkeys.html:50
+msgid "No"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:47
+msgid "Single-device"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:47
+msgid "Multi-device"
+msgstr ""
+
+#: mailu/ui/templates/user/passkeys.html:56
+msgid "No passkeys registered"
+msgstr ""
+
+#: mailu/ui/templates/user/password.html:5
 msgid "Password update"
 msgstr ""
 
-#: mailu/ui/templates/user/reply.html:4
+#: mailu/ui/templates/user/reply.html:2 mailu/ui/templates/user/reply.html:37
 msgid "Automatic reply"
 msgstr ""
 
+#: mailu/ui/templates/user/reply.html:3
+msgid "Saved status:"
+msgstr ""
+
+#: mailu/ui/templates/user/reply.html:10
+msgid ""
+"Turn on automatic reply to edit your message and choose when it is sent. "
+"Turning it off keeps your saved settings."
+msgstr ""
+
+#: mailu/ui/templates/user/reply.html:19
+msgid ""
+"Drag across the calendar to select your time away, or enter the dates "
+"below. On touch screens, press and hold to select."
+msgstr ""
+
+#: mailu/ui/templates/user/reply.html:20
+msgid "Away"
+msgstr ""
+
+#: mailu/ui/templates/user/reply.html:20
+msgid "Today"
+msgstr ""
+
+#: mailu/ui/templates/user/reply.html:22
+msgid "Replies are sent on every selected day, including the last day."
+msgstr ""
+
+#: mailu/ui/templates/user/reply.html:23
+msgid "Dates follow the mail server timezone:"
+msgstr ""
+
+#: mailu/ui/templates/user/reply.html:23
+msgid "Replies stop at the end of the last day away."
+msgstr ""
+
+#: mailu/ui/templates/user/reply.html:29
+msgid "Your automatic reply"
+msgstr ""
+
+#: mailu/ui/templates/user/reply.html:32
+msgid "Leave the subject empty to reply using the original message subject."
+msgstr ""
+
+#: mailu/ui/templates/user/reply.html:41
+msgid "Could not load the preview. Try again."
+msgstr ""
+
+#: mailu/ui/templates/user/settings.html:14
+msgid ""
+"No authentication tokens are configured for this account. Create a token "
+"to connect your email app, and save it in the app's password fields for "
+"incoming and outgoing mail."
+msgstr ""
+
+#: mailu/ui/templates/user/settings.html:26
+msgid "Advanced: OpenPGP"
+msgstr ""
+
 #: mailu/ui/templates/user/settings.html:27
+msgid ""
+"Upload your ASCII-armored public key to publish it through Web Key "
+"Directory (WKD). The key must include a user ID matching this email "
+"address. Active aliases currently routed to your mailbox are also "
+"published when the key includes a matching user ID for the alias."
+msgstr ""
+
+#: mailu/ui/templates/user/settings.html:40
 msgid "Auto-forward"
+msgstr ""
+
+#: mailu/ui/templates/user/signup.html:25
+msgid "This server requires passkeys. Create your account with a passkey."
+msgstr ""
+
+#: mailu/ui/templates/user/signup.html:26
+#: mailu/ui/templates/user/signup.html:34
+msgid "Sign up with a passkey"
+msgstr ""
+
+#: mailu/ui/templates/user/signup.html:28
+msgid "Signup method"
+msgstr ""
+
+#: mailu/ui/templates/user/signup.html:33
+msgid ""
+"Create your account with a passkey. You can use it to sign in without a "
+"password."
+msgstr ""
+
+#: mailu/ui/templates/user/signup.html:37
+msgid "Create your account with a password."
+msgstr ""
+
+#: mailu/ui/templates/user/signup.html:39
+msgid "Sign up with a password"
 msgstr ""
 
 #: mailu/ui/templates/user/signup_domain.html:8
 msgid "pick a domain for the new account"
 msgstr ""
 
-#: mailu/ui/templates/user/signup_domain.html:15
-msgid "Domain"
-msgstr ""
-
 #: mailu/ui/templates/user/signup_domain.html:16
 msgid "Available slots"
 msgstr ""
 
-#: mailu/ui/templates/client.html
-msgid "Your email client must use an authentication token instead of your account password. Enter the token in the client's password field for both incoming and outgoing mail."
+#: mailu/ui/views/admins.py:27
+#, python-format
+msgid "Added %(count)s global administrators."
 msgstr ""
 
-#: mailu/ui/templates/client.html
-msgid "Create an authentication token"
+#: mailu/ui/views/base.py:33
+msgid "This preview expired or was already sent. Preview your message again."
 msgstr ""
 
-#: mailu/ui/templates/client.html
-msgid "Authentication token"
+#: mailu/ui/views/base.py:40
+#, python-format
+msgid "%(sent)s delivered; %(failed)s failed."
 msgstr ""
 
-#: mailu/ui/templates/alias/create.html
-msgid "When enabled, % matches zero or more characters and _ matches exactly one character in the alias."
+#: mailu/ui/views/base.py:55
+#, python-format
+msgid "Test email sent to %(email)s."
 msgstr ""
 
-#: mailu/ui/templates/alias/create.html
-msgid "For example, sales% matches sales and sales-team. Use % alone for a catch-all alias."
+#: mailu/ui/views/base.py:57
+msgid "The test email could not be delivered. Your draft is unchanged."
+msgstr ""
+
+#: mailu/ui/views/base.py:61
+msgid ""
+"This retry expired. Start a new announcement to choose all recipients "
+"again."
+msgstr ""
+
+#: mailu/ui/views/domains.py:140
+#, python-format
+msgid "generate a DKIM key for %(domain)s"
+msgstr ""
+
+#: mailu/ui/views/domains.py:174
+#, python-format
+msgid "delete DKIM key hash %(selector)s"
+msgstr ""
+
+#: mailu/ui/views/domains.py:177
+#, python-format
+msgid "enable DKIM signing for DKIM key hash %(selector)s"
+msgstr ""
+
+#: mailu/ui/views/domains.py:178
+#, python-format
+msgid "retire DKIM key hash %(selector)s"
+msgstr ""
+
+#: mailu/ui/views/managers.py:29
+#, python-format
+msgid "Added %(count)s domain managers."
+msgstr ""
+
+#: mailu/ui/views/managers.py:92
+msgid ""
+"Access changed while you were editing. Review the selected accounts and "
+"try again."
+msgstr ""
+
+#: mailu/ui/views/managers.py:94
+#, python-format
+msgid "Granted access to %(count)s accounts."
+msgstr ""
+
+#: mailu/ui/views/passkeys.py:216
+msgid "Passkey deleted"
+msgstr ""
+
+#: mailu/ui/views/users.py:142
+msgid "Enter a valid OpenPGP public key for this email address."
+msgstr ""
+
+#: mailu/ui/views/users.py:148
+msgid "Destination email address is missing"
+msgstr ""
+
+#: mailu/ui/views/users.py:251
+msgid "Automatic reply is off. Your saved message and dates have been kept."
+msgstr ""
+
+#: mailu/ui/views/users.py:276
+#, python-format
+msgid "Auto-reply message updated for %(user)s"
+msgstr ""
+
+#: mailu/ui/views/users.py:281
+msgid "Off"
+msgstr ""
+
+#: mailu/ui/views/users.py:285
+msgid "Scheduled"
+msgstr ""
+
+#: mailu/ui/views/users.py:287
+msgid "Ended"
+msgstr ""
+
+#: mailu/ui/views/users.py:299
+msgid "Your session expired. Reload the page and try again."
+msgstr ""
+
+#: mailu/ui/views/users.py:302
+msgid "The message is too long."
 msgstr ""

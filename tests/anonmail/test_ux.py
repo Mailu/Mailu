@@ -266,7 +266,11 @@ def test_successful_login_remembers_destination(client, users, target):
     assert cookie and cookie.value == target
     client.get('/sso/logout')
     response = client.get('/sso/login')
-    assert ('value="' + target + '" selected').encode() in response.data or ('selected value="' + target + '"').encode() in response.data
+    destination_radios = re.findall(rb'<input[^>]*name="destination"[^>]*>', response.data)
+    assert any(
+        ('value="' + target + '"').encode() in radio and b'checked' in radio
+        for radio in destination_radios
+    )
     other = 'webmail' if target == 'admin' else 'admin'
     client.get('/sso/login/' + other)
     assert password_login(client, '/sso/login/' + other).location == ('/webmail' if other == 'webmail' else '/admin')

@@ -1,6 +1,7 @@
 from mailu import models, utils
 from mailu.ui import ui, forms, access
 from flask import current_app as app
+from flask_babel import lazy_gettext as _
 
 import validators
 import flask
@@ -122,7 +123,7 @@ def domain_download_zonefile(domain_name):
 
 @ui.route('/domain/genkeys/<domain_name>', methods=['GET', 'POST'])
 @access.domain_admin(models.Domain, 'domain_name')
-@access.confirmation_required("generate a DKIM key for {domain_name}")
+@access.confirmation_required(lambda domain_name: _dkim_generate_action(domain_name))
 def domain_genkeys(domain_name):
     domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     algorithm = flask.request.values.get('algorithm', 'rsa')
@@ -135,36 +136,46 @@ def domain_genkeys(domain_name):
         flask.url_for(".domain_details", domain_name=domain_name))
 
 
-@ui.route('/domain/dkim/<int:key_id>/active', methods=['POST'])
+def _dkim_generate_action(domain_name):
+    return str(_('generate a DKIM key for %(domain)s') % {'domain': domain_name})
+
+
+@ui.route('/domain/dkim/<int:key_id>/active', defaults={'status': 'toggle'}, methods=['POST'])
+@ui.route('/domain/dkim/<int:key_id>/<any(active,retired,delete):status>', methods=['POST'])
 @access.domain_admin(models.DkimKey, 'key_id')
-@access.confirmation_required("change signing status for DKIM key {key_id}")
-def domain_dkim_toggle(key_id):
+@access.confirmation_required(lambda key_id, status: _dkim_status_action(key_id, status))
+def domain_dkim_status(key_id, status):
     form = forms.DkimToggleForm()
     if not form.validate_on_submit():
         flask.abort(400)
     key = models.db.session.get(models.DkimKey, key_id) or flask.abort(404)
-    if key.active:
+    if status == 'delete':
+        domain_name = key.domain_name
+        models.db.session.delete(key)
+        models.db.session.commit()
+        return flask.redirect(flask.url_for('.domain_details', domain_name=domain_name))
+    requested_status = ('retired' if key.active else 'active') if status == 'toggle' else status
+    if requested_status == 'retired' and key.active:
         key.active = False
         key.retired = True
-    elif key.retired:
+    elif requested_status == 'active' and not key.active and not key.retired:
+        key.active = True
+    elif requested_status == 'active' and key.retired:
         flask.abort(409)
     else:
-        key.active = True
+        flask.abort(409)
     models.db.session.commit()
     return flask.redirect(flask.url_for('.domain_details', domain_name=key.domain_name))
 
 
-@ui.route('/domain/dkim/<int:key_id>/delete', methods=['POST'])
-@access.domain_admin(models.DkimKey, 'key_id')
-@access.confirmation_required("delete DKIM key {key_id}")
-def domain_dkim_delete(key_id):
+def _dkim_status_action(key_id, status):
     key = models.db.session.get(models.DkimKey, key_id) or flask.abort(404)
-    if key.active:
-        flask.abort(409)
-    domain_name = key.domain_name
-    models.db.session.delete(key)
-    models.db.session.commit()
-    return flask.redirect(flask.url_for('.domain_details', domain_name=domain_name))
+    if status == 'delete':
+        return str(_('delete DKIM key hash %(selector)s') % {'selector': key.selector})
+    target_status = ('retired' if key.active else 'active') if status == 'toggle' else status
+    if target_status == 'active':
+        return str(_('enable DKIM signing for DKIM key hash %(selector)s') % {'selector': key.selector})
+    return str(_('retire DKIM key hash %(selector)s') % {'selector': key.selector})
 
 
 @ui.route('/domain/signup', methods=['GET', 'POST'])

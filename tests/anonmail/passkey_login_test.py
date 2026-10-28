@@ -470,5 +470,8 @@ def test_passkey_login_rejects_aaguid_blocked_by_domain_policy(client, user, mon
     }, headers={'X-CSRFToken': csrf_token})
 
     assert response.status_code == 401
-    assert response.get_json()['error'] == 'Passkey sign-in failed.'
+    assert response.get_json()['error'] == (
+        'This authenticator is blocked by the domain AAGUID policy. Ask your domain '
+        'administrator to allow this authenticator.'
+    )
     assert 'reason=aaguid_policy' in caplog.text

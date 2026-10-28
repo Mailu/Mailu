@@ -12,7 +12,7 @@
 {%- call macros.card(theme="warning") %}
 <p>{% trans action %}You are about to {{ action }}. Please confirm your action.{% endtrans %}</p>
 <form class="form" method="post">{{ form.hidden_tag() }}
-<button class="btn btn-danger" type="submit">{{ action }}</button>
+{{ form.submit(value=action, class_='btn btn-danger') }}
 <a class="btn btn-outline-secondary" href="{{ url_for('ui.index') }}">{{ _('Cancel') }}</a></form>
 {%- endcall %}
 {%- endblock %}

@@ -133,10 +133,11 @@ def confirmation_required(action):
         @functools.wraps(function)
         def wrapper(*args, **kwargs):
             form = forms.ConfirmationForm()
-            if form.validate_on_submit():
+            if form.validate_on_submit() and form.submit.data:
                 return function(*args, **kwargs)
+            action_text = action(*args, **kwargs) if callable(action) else action.format(*args, **kwargs)
             return flask.render_template(
-                "confirm.html", action=action.format(*args, **kwargs),
+                "confirm.html", action=action_text,
                 form=form
             )
         return wrapper

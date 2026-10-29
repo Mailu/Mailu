@@ -1,0 +1,1 @@
+Improve contrast for admin and sign-in outline buttons, disabled controls, dark-theme error and success indicators, and address-search highlights, preserving light-theme validation and highlight colors and distinct button hues in both themes.

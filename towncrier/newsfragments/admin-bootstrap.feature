@@ -1,0 +1,1 @@
+Use ``flask mailu user add`` to create an account and get a one-time setup URL, or ``flask mailu user reset`` to issue a fresh setup or recovery URL. ``flask mailu user`` and ``flask mailu admin`` list accounts; their ``add`` and ``remove`` subcommands manage users and global administrator privileges.

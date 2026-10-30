@@ -45,3 +45,16 @@ def test_user_and_admin_groups_list_add_and_remove_accounts(app):
     result = runner.invoke(app.cli, ['mailu', 'user', 'remove', user.email])
     assert result.exit_code == 0, result.output
     assert not user.enabled
+
+
+def test_user_add_with_password_does_not_issue_setup_link(app):
+    runner = app.test_cli_runner()
+    result = runner.invoke(app.cli, [
+        'mailu', 'user', 'add', 'passworduser@example.com', 'secret-password',
+    ])
+    assert result.exit_code == 0, result.output
+    assert 'setup link' not in result.output.lower()
+    assert models.db.session.get(models.User, 'passworduser@example.com').check_password(
+        'secret-password',
+    )
+    assert models.AccountSetupToken.query.count() == 0

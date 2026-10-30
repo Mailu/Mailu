@@ -90,16 +90,21 @@ def user_add(username, password):
         localpart=localpart, domain=domain, global_admin=False,
         change_pw_next_login=True,
     )
-    account.set_password(password or secrets.token_urlsafe(48))
-    db.session.add(account)
-    raw_token, expires_at = setup_tokens.issue(
-        account, app.config['ACCOUNT_SETUP_TOKEN_TTL'],
+    create_setup_link = password is None
+    account.set_password(
+        password if password is not None else secrets.token_urlsafe(48),
     )
+    db.session.add(account)
+    if create_setup_link:
+        raw_token, expires_at = setup_tokens.issue(
+            account, app.config['ACCOUNT_SETUP_TOKEN_TTL'],
+        )
     db.session.commit()
-    hostname = app.config['HOSTNAMES'].split(',')[0]
-    with app.test_request_context(base_url=f"https://{hostname}"):
-        link = url_for('sso.account_setup', token=raw_token, _external=True)
-    click.echo(f"One-time account setup link (expires {expires_at.isoformat()}): {link}")
+    if create_setup_link:
+        hostname = app.config['HOSTNAMES'].split(',')[0]
+        with app.test_request_context(base_url=f"https://{hostname}"):
+            link = url_for('sso.account_setup', token=raw_token, _external=True)
+        click.echo(f"One-time account setup link (expires {expires_at.isoformat()}): {link}")
 
 
 @user.command('remove')

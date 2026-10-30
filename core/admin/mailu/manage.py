@@ -5,15 +5,18 @@ import sys
 import os
 import socket
 import uuid
+import secrets
 
 import click
 import yaml
 
 from flask import current_app as app
+from flask import url_for
 from flask.cli import FlaskGroup, with_appcontext
 
 from mailu import models
 from mailu.schemas import MailuSchema, Logger, RenderJSON
+from mailu import setup_tokens
 
 
 db = models.db
@@ -53,71 +56,126 @@ def import_legacy_dkim_keys():
             domain._import_legacy_dkim_key()
 
 
-@mailu.command()
-@click.argument('localpart')
-@click.argument('domain_name')
-@click.argument('password')
-@click.option('-m', '--mode', default='create', metavar='MODE', help='''\b'create' (default): create user. it's an error if user already exists
-'ifmissing': only update password if user is missing
-'update': create user or update password if user exists
-''')
+def _user_email(username):
+    if '@' in username:
+        return username
+    return f"{username}@{app.config['DOMAIN']}"
+
+
+@mailu.group(invoke_without_command=True)
 @with_appcontext
-def admin(localpart, domain_name, password, mode):
-    """ Create an admin user
-    """
+@click.pass_context
+def user(ctx):
+    """List and manage user accounts."""
+    if ctx.invoked_subcommand is None:
+        for account in models.User.query.order_by(models.User.email).all():
+            click.echo(account.email)
 
-    if not mode in ('create', 'update', 'ifmissing'):
-        raise click.ClickException(f'invalid mode: {mode!r}')
 
+@user.command('add')
+@click.argument('username')
+@click.argument('password', required=False)
+@with_appcontext
+def user_add(username, password):
+    """Create a user and print a one-time setup URL."""
+    email = _user_email(username)
+    localpart, domain_name = email.rsplit('@', 1)
     domain = models.db.session.get(models.Domain, domain_name)
     if not domain:
         domain = models.Domain(name=domain_name)
         db.session.add(domain)
-
-    email = f'{localpart}@{domain_name}'
-    if user := models.db.session.get(models.User, email):
-        if mode == 'ifmissing':
-            print(f'user {email!r} exists, not updating')
-            return
-        elif mode == 'update':
-            user.set_password(password)
-            db.session.commit()
-            print("updated admin password")
-        else:
-            raise click.ClickException(f'user {email!r} exists, not created')
-    else:
-        user = models.User(
-            localpart=localpart,
-            domain=domain,
-            global_admin=True
-        )
-        db.session.add(user)
-        user.set_password(password)
-        db.session.commit()
-        print("created admin user")
-
-
-@mailu.command()
-@click.argument('localpart')
-@click.argument('domain_name')
-@click.argument('password')
-@with_appcontext
-def user(localpart, domain_name, password):
-    """ Create a user
-    """
-    domain = models.db.session.get(models.Domain, domain_name)
-    if not domain:
-        domain = models.Domain(name=domain_name)
-        db.session.add(domain)
-    user = models.User(
-        localpart=localpart,
-        domain=domain,
-        global_admin=False,
+    if models.db.session.get(models.User, email):
+        raise click.ClickException(f'user {email!r} already exists')
+    account = models.User(
+        localpart=localpart, domain=domain, global_admin=False,
         change_pw_next_login=True,
     )
-    user.set_password(password)
-    db.session.add(user)
+    account.set_password(password or secrets.token_urlsafe(48))
+    db.session.add(account)
+    raw_token, expires_at = setup_tokens.issue(
+        account, app.config['ACCOUNT_SETUP_TOKEN_TTL'],
+    )
     db.session.commit()
+    hostname = app.config['HOSTNAMES'].split(',')[0]
+    with app.test_request_context(base_url=f"https://{hostname}"):
+        link = url_for('sso.account_setup', token=raw_token, _external=True)
+    click.echo(f"One-time account setup link (expires {expires_at.isoformat()}): {link}")
+
+
+@user.command('remove')
+@click.argument('username')
+@click.option('--really', is_flag=True, help='Permanently delete the user.')
+@with_appcontext
+def user_remove(username, really):
+    """Disable or permanently delete a user account."""
+    email = _user_email(username)
+    account = models.db.session.get(models.User, email)
+    if not account:
+        raise click.ClickException(f'user {email!r} does not exist')
+    if really:
+        db.session.delete(account)
+    else:
+        account.enabled = False
+    db.session.commit()
+    click.echo(f"removed user {email!r}")
+
+
+@user.command('reset')
+@click.argument('username')
+@with_appcontext
+def user_reset(username):
+    """Issue a fresh one-time account setup or recovery URL."""
+    email = _user_email(username)
+    account = models.db.session.get(models.User, email)
+    if not account:
+        raise click.ClickException(f'user {email!r} does not exist')
+    raw_token, expires_at = setup_tokens.issue(
+        account, app.config['ACCOUNT_SETUP_TOKEN_TTL'],
+    )
+    db.session.commit()
+    hostname = app.config['HOSTNAMES'].split(',')[0]
+    with app.test_request_context(base_url=f"https://{hostname}"):
+        link = url_for('sso.account_setup', token=raw_token, _external=True)
+    click.echo(f"One-time account setup or recovery link (expires {expires_at.isoformat()}): {link}")
+
+
+@mailu.group(invoke_without_command=True)
+@with_appcontext
+@click.pass_context
+def admin(ctx):
+    """List and manage global administrator accounts."""
+    if ctx.invoked_subcommand is None:
+        admins = models.User.query.filter_by(global_admin=True).order_by(models.User.email)
+        for account in admins.all():
+            click.echo(account.email)
+
+
+@admin.command('add')
+@click.argument('username')
+@with_appcontext
+def admin_add(username):
+    """Grant global administrator privileges to a user."""
+    email = _user_email(username)
+    account = models.db.session.get(models.User, email)
+    if not account:
+        raise click.ClickException(f'user {email!r} does not exist')
+    account.global_admin = True
+    db.session.commit()
+    click.echo(f"added global administrator {email!r}")
+
+
+@admin.command('remove')
+@click.argument('username')
+@with_appcontext
+def admin_remove(username):
+    """Revoke global administrator privileges from a user."""
+    email = _user_email(username)
+    account = models.db.session.get(models.User, email)
+    if not account:
+        raise click.ClickException(f'user {email!r} does not exist')
+    account.global_admin = False
+    db.session.commit()
+    click.echo(f"removed global administrator {email!r}")
 
 
 @mailu.command()

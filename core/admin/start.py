@@ -42,15 +42,6 @@ if run_as_mailu("flask", "mailu", "import-legacy-dkim-keys") != 0:
     log.critical("Importing legacy DKIM keys failed; refusing to start the admin service")
     sys.exit(1)
 
-account = os.environ.get("INITIAL_ADMIN_ACCOUNT")
-domain = os.environ.get("INITIAL_ADMIN_DOMAIN")
-password = os.environ.get("INITIAL_ADMIN_PW")
-
-if account is not None and domain is not None and password is not None:
-    mode = os.environ.get("INITIAL_ADMIN_MODE", default="ifmissing")
-    log.info("Creating initial admin account %s@%s with mode %s", account, domain, mode)
-    run_as_mailu("flask", "mailu", "admin", account, domain, password, "--mode", mode)
-
 def test_unsupported():
     import codecs
     if os.path.isfile(codecs.decode('/.qbpxrerai', 'rot13')) or os.environ.get(codecs.decode('V_XABJ_ZL_FRGHC_QBRFAG_SVG_ERDHVERZRAGF_NAQ_JBAG_SVYR_VFFHRF_JVGUBHG_CNGPURF', 'rot13'), None) or os.environ.get(codecs.decode('ZNVYH_URYZ_PUNEG', 'rot13'), None):

@@ -12,6 +12,12 @@ authorization = {
         'type': 'apiKey',
         'in': 'header',
         'name': 'Authorization'
+    },
+    # per-user credentials ('email:token'), used by the /alias/me endpoints
+    'Authentication': {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'Authentication'
     }
 }
 

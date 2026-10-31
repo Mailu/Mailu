@@ -124,7 +124,7 @@ def create_app_from_config(config):
     @app.before_request
     def redirect_unknown_hostname():
         if (app.testing or flask.request.path in ('/ping', '/.well-known/webauthn')
-                or flask.request.path.startswith('/.well-known/openpgpkey/')):
+                or flask.request.path.startswith(('/internal/', '/.well-known/openpgpkey/'))):
             return None
         request_hostname = (
             urlsplit(f'//{flask.request.host}').hostname or ''

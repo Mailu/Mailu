@@ -1,0 +1,1 @@
+Internal Mailu service requests continue to reach the admin endpoints when they use Docker service hostnames.

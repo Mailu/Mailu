@@ -26,7 +26,11 @@ technical addresses.
 
 The ``HOSTNAMES`` are all public hostnames for the mail server. Mailu supports
 a mail server with multiple hostnames. The first declared hostname is the main
-hostname and will be exposed over SMTP, IMAP, etc.
+hostname and will be exposed over SMTP, IMAP, etc. Requests made using a
+hostname that is not configured are redirected to the main hostname. Mailu
+publishes the configured HTTPS origins at
+``/.well-known/webauthn`` so browsers can use passkeys on each configured
+hostname.
 
 The ``SUBNET`` defines the address range of the docker network used by Mailu.
 This should not conflict with any networks to which your system is connected.
@@ -249,7 +253,9 @@ intend to access it over plain HTTP.
 The ``PASSKEY_RP_ID`` setting selects the WebAuthn relying-party ID for passkeys.
 It defaults to the first hostname in ``HOSTNAMES``. Set it to the domain users
 access the web interface through if that differs from the first hostname. Passkeys
-require a secure browser context, normally HTTPS.
+require a secure browser context, normally HTTPS. When multiple hostnames are
+configured, Mailu serves them as related origins for this RP ID from
+``https://<PASSKEY_RP_ID>/.well-known/webauthn``.
 
 The ``PASSKEY_REQUIRED`` setting (default: ``False``) requires every account
 to use a passkey, across all domains. When enabled, password sign-in is disabled

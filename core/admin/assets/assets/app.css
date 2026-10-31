@@ -93,6 +93,12 @@ fieldset:disabled label,
   white-space: nowrap;
 }
 
+/* Keep disabled users visibly distinct while respecting the active color mode. */
+.table tr.user-disabled {
+  --bs-table-bg: var(--bs-secondary-bg);
+  --bs-table-color: var(--bs-secondary-color);
+}
+
 /* keep Tom Select aligned with regular Bootstrap controls */
 .ts-wrapper {
   width: 100%;

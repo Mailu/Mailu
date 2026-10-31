@@ -7,6 +7,7 @@ import flask_bootstrap
 from mailu import utils, debug, models, manage, configuration
 from mailu.gunicorn_logging import Logger, NoPingFilter
 import logging
+from urllib.parse import urlsplit, urlunsplit
 
 import hmac
 
@@ -96,6 +97,16 @@ def create_app_from_config(config):
     app.add_url_rule('/.well-known/openpgpkey/<domain_name>/hu/<key_hash>', 'wkd_advanced_lookup', wkd_lookup)
     app.add_url_rule('/.well-known/openpgpkey/policy', 'wkd_policy', wkd_policy)
     app.add_url_rule('/.well-known/openpgpkey/<domain_name>/policy', 'wkd_advanced_policy', wkd_policy)
+    @app.get('/.well-known/webauthn')
+    def webauthn_related_origins():
+        origins = [
+            f'https://{hostname}'
+            for hostname in app.config['HOSTNAMES'].split(',')
+        ]
+        response = flask.jsonify(origins=origins)
+        response.headers['Cache-Control'] = 'public, max-age=3600'
+        return response
+
     app.register_blueprint(internal.internal, url_prefix='/internal')
     app.register_blueprint(sso.sso, url_prefix='/sso')
     api.register(app, web_api_root=app.config.get('WEB_API'))
@@ -109,6 +120,25 @@ def create_app_from_config(config):
         return response
 
     from mailu.auth_flow import enforce_pending_actions
+
+    @app.before_request
+    def redirect_unknown_hostname():
+        if (app.testing or flask.request.path in ('/ping', '/.well-known/webauthn')
+                or flask.request.path.startswith(('/internal/', '/.well-known/openpgpkey/'))):
+            return None
+        request_hostname = (
+            urlsplit(f'//{flask.request.host}').hostname or ''
+        ).lower().rstrip('.')
+        configured_hostnames = {
+            hostname.lower().rstrip('.')
+            for hostname in app.config['HOSTNAMES'].split(',')
+        }
+        if request_hostname not in configured_hostnames:
+            target = urlsplit(flask.request.url)._replace(
+                netloc=app.config['HOSTNAME'],
+            )
+            return flask.redirect(urlunsplit(target), code=302)
+
     app.before_request(enforce_pending_actions)
     return app
 

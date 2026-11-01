@@ -20,6 +20,9 @@
   </p>
   {{ macros.form_field(form.destination, class_='mailu-destination-picker', autocomplete='off', data_options_url=url_for('ui.destination_options'), data_placeholder=_('Search managed addresses or enter an external email'), data_no_results=_('No matching addresses'), data_loading=_('Searching…'), data_load_error=_('Could not load addresses. Try searching again.'), data_more=_('More than 50 addresses. Keep typing to narrow the search.'), data_selected=_('_COUNT_ destinations selected')) }}
   {{ macros.form_field(form.comment) }}
+  {%- if form.allow_login %}
+  {{ macros.form_field(form.allow_login) }}
+  {%- endif %}
   {{ macros.form_field(form.submit) }}
 </form>
 {%- endcall %}

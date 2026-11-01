@@ -530,6 +530,8 @@ The following options are available when adding an alias:
 
 * Comment. A description for the alias. This description is visible on the Alias list page.
 
+* Allow login with this address. This option is only available for global administrators. When enabled, users can authenticate across IMAP, POP3, SMTP, and Webmail using the alias address and the destination mailbox's password. This requires the alias to have exactly one local mailbox destination and not use SQL LIKE wildcard syntax. Outbound rate limits and quotas are attributed to the destination mailbox.
+
 
 Managers
 ````````

@@ -19,6 +19,9 @@
     <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
     <th>{% trans %}Email{% endtrans %}</th>
     <th>{% trans %}Destination{% endtrans %}</th>
+    {%- if current_user.global_admin %}
+    <th>{% trans %}Login{% endtrans %}</th>
+    {%- endif %}
     <th>{% trans %}Comment{% endtrans %}</th>
     <th>{% trans %}Created{% endtrans %}</th>
     <th>{% trans %}Last edit{% endtrans %}</th>
@@ -33,6 +36,9 @@
     </td>
     <td>{{ alias }}</td>
     <td>{{ alias.destination|join(', ') or '-' }}</td>
+    {%- if current_user.global_admin %}
+    <td>{{ '✓' if alias.allow_login else '–' }}</td>
+    {%- endif %}
     <td>{{ alias.comment or '' }}</td>
     <td data-sort="{{ alias.created_at or '0000-00-00' }}">{{ alias.created_at | format_date }}</td>
     <td data-sort="{{ alias.updated_at or '0000-00-00' }}">{{ alias.updated_at | format_date }}</td>

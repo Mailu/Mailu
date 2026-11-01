@@ -196,36 +196,20 @@ every Web interface.
 
 .. _admin_account:
 
-Admin account - automatic creation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-For administrative tasks, an admin user account will be needed. You can create it manually,
-after deploying the system, or automatically.
-To create it manually, follow the specific deployment method documentation.
-
-To have the account created automatically, you just need to define a few environment variables:
-
-- ``INITIAL_ADMIN_ACCOUNT``: the admin username: The first part of the e-mail address before the @.
-- ``INITIAL_ADMIN_DOMAIN``: the domain appendix: Most probably identical to the ``DOMAIN`` variable.
-- ``INITIAL_ADMIN_PW``: the admin password.
-- ``INITIAL_ADMIN_MODE``: use one of the options below for configuring how the admin account must be created:
-
-  - ``create``: (default) creates a new admin account and raises an exception when it already exists.
-  - ``ifmissing``: creates a new admin account when the admin account does not exist.
-  - ``update``: creates a new admin account when it does not exist, or update the password of an existing admin account.
-
-Note: It is recommended to set ``INITIAL_ADMIN_MODE`` to either ``update`` or ``ifmissing``. Leaving it with the
-default value will cause an error when the system is restarted.
-
-An example:
+Admin account - initial setup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To create the first administrator, create a user and request a one-time setup link,
+then promote the account to global administrator:
 
 .. code-block:: bash
 
-  INITIAL_ADMIN_ACCOUNT=me
-  INITIAL_ADMIN_DOMAIN=example.net
-  INITIAL_ADMIN_PW=password
-  INITIAL_ADMIN_MODE=ifmissing
+  docker compose exec admin flask mailu user add me@example.net
+  docker compose exec admin flask mailu admin add me@example.net
 
-Depending on your particular deployment you most probably will want to change the default.
+Omitting the password creates a random password and prints a one-time setup link
+in the command output. Open it to set a password or register a passkey. The link expires after the configured account setup token
+lifetime and can only be used once. Keep the link private: anyone who can use it
+can take control of the account.
 
 .. _advanced_settings:
 

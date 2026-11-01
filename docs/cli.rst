@@ -7,7 +7,8 @@ Managing domains, users and aliases can be done from CLI using the commands:
 * alias-delete
 * domain
 * password
-* user
+* user (list, add, remove)
+* admin (list, add, remove)
 * user-import
 * user-delete
 * config-update
@@ -49,9 +50,28 @@ password
 user
 ----
 
+List users, add a user, issue a fresh setup or recovery URL, or disable one.
+Adding or resetting a user prints a one-time setup URL. Permanently delete with
+``--really``.
+
 .. code-block:: bash
 
-  docker compose exec admin flask mailu user myuser example.net 'password123'
+  docker compose exec admin flask mailu user
+  docker compose exec admin flask mailu user add myuser@example.net
+  docker compose exec admin flask mailu user reset myuser@example.net
+  docker compose exec admin flask mailu user remove myuser@example.net
+
+
+admin
+-----
+
+List global administrators or add/remove global administrator privileges:
+
+.. code-block:: bash
+
+  docker compose exec admin flask mailu admin
+  docker compose exec admin flask mailu admin add myuser@example.net
+  docker compose exec admin flask mailu admin remove myuser@example.net
 
 
 user-import

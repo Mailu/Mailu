@@ -176,6 +176,7 @@ def postfix_sender_login(sender):
     # their own domain — scoping the lookup to the sender's domain prevents a
     # domain manager from granting themselves cross-domain spoofing (#2686).
     destinations.update(i[0] for i in models.User.query.filter_by(allow_spoofing=True, domain_name=domain_name).with_entities(models.User.email).all())
+    destinations.update(models.Alias.logins_for(destinations))
     if destinations:
         return flask.jsonify(",".join(idna_encode(destinations)))
     return flask.abort(404)
@@ -184,11 +185,12 @@ def postfix_sender_login(sender):
 def postfix_sender_rate(sender):
     """ Rate limit outbound emails per sender login
     """
-    if sender in flask.current_app.config['MESSAGE_RATELIMIT_EXEMPTION']:
+    user, _ = models.User.resolve_login(sender)
+    if user is None:
         flask.abort(404)
-    if _unsupported_address(sender, require_mailbox=True):
-        return flask.abort(404)
-    user = models.User.get(sender) or flask.abort(404)
+    if sender in flask.current_app.config['MESSAGE_RATELIMIT_EXEMPTION'] or \
+       user.email in flask.current_app.config['MESSAGE_RATELIMIT_EXEMPTION']:
+        flask.abort(404)
     return flask.abort(404) if user.sender_limiter.hit() else flask.jsonify("450 4.2.1 You are sending too many emails too fast.")
 
 # idna encode domain part of each address in list of addresses

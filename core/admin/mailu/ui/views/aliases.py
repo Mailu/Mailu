@@ -7,6 +7,21 @@ import flask_login
 import wtforms_components
 
 
+def _handle_allow_login_field(form):
+    """ Only global admins may view or toggle allow_login """
+    if not flask_login.current_user.global_admin:
+        del form.allow_login
+        return False
+    return True
+
+
+def _validate_allow_login(form):
+    """ Return error message if allow_login is selected on an invalid alias """
+    if not getattr(form, 'allow_login', None) or not form.allow_login.data:
+        return None
+    return models.Alias.login_problem(form)
+
+
 @ui.route('/alias/list/<domain_name>', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
 def alias_list(domain_name):
@@ -38,12 +53,17 @@ def alias_create(domain_name):
         return flask.redirect(
             flask.url_for('.alias_list', domain_name=domain.name))
     form = forms.AliasForm()
+    can_manage_login = _handle_allow_login_field(form)
     if form.validate_on_submit():
         if domain.has_email(form.localpart.data):
             flask.flash('Email is already used', 'error')
+        elif can_manage_login and (problem := _validate_allow_login(form)):
+            flask.flash('Login not allowed: %s' % problem, 'error')
         else:
             alias = models.Alias(domain=domain)
             form.populate_obj(alias)
+            if not can_manage_login:
+                alias.allow_login = False
             models.db.session.add(alias)
             models.db.session.commit()
             flask.flash('Alias %s created' % alias)
@@ -59,12 +79,19 @@ def alias_edit(alias):
     form = forms.AliasForm(obj=alias)
     wtforms_components.read_only(form.localpart)
     form.localpart.validators = []
+    can_manage_login = _handle_allow_login_field(form)
     if form.validate_on_submit():
-        form.populate_obj(alias)
-        models.db.session.commit()
-        flask.flash('Alias %s updated' % alias)
-        return flask.redirect(
-            flask.url_for('.alias_list', domain_name=alias.domain.name))
+        if can_manage_login and (problem := _validate_allow_login(form)):
+            flask.flash('Login not allowed: %s' % problem, 'error')
+        else:
+            prev_allow_login = alias.allow_login
+            form.populate_obj(alias)
+            if not can_manage_login:
+                alias.allow_login = prev_allow_login
+            models.db.session.commit()
+            flask.flash('Alias %s updated' % alias)
+            return flask.redirect(
+                flask.url_for('.alias_list', domain_name=alias.domain.name))
     return flask.render_template('alias/edit.html',
         form=form, alias=alias, domain=alias.domain)
 

@@ -20,6 +20,19 @@ alias
 .. code-block:: bash
 
   docker compose exec admin flask mailu alias foo example.net "mail1@example.com,mail2@example.com"
+  # Enable login for a single-destination alias
+  docker compose exec admin flask mailu alias foo example.net mail1@example.com --login
+
+
+alias-login
+-----------
+
+.. code-block:: bash
+
+  # Enable login with an existing alias
+  docker compose exec admin flask mailu alias-login foo@example.net
+  # Disable login with an existing alias
+  docker compose exec admin flask mailu alias-login foo@example.net --off
 
 
 alias-delete

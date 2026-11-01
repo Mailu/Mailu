@@ -299,6 +299,8 @@ class AliasForm(flask_wtf.FlaskForm):
         _('Use SQL LIKE Syntax (e.g. for catch-all aliases)'))
     destination = DestinationField(_('Destination'))
     comment = fields.StringField(_('Comment'), render_kw=AUTOFOCUS)
+    allow_login = fields.BooleanField(
+        _('Allow login with this address (uses the destination mailbox\'s password)'))
     submit = fields.SubmitField(_('Save'))
 
 

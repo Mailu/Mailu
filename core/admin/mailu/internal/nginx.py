@@ -38,7 +38,27 @@ STATUSES = {
 
 WEBMAIL_PORTS = ['14190', '10143', '10025']
 
-def check_credentials(user, password, ip, protocol=None, auth_port=None, source_port=None, raw_user=None):
+class _AliasLoginUser:
+    """ Proxy a User so log lines read "mailbox (via alias x)" """
+
+    def __init__(self, user, via_alias):
+        object.__setattr__(self, '_user', user)
+        object.__setattr__(self, '_via', via_alias)
+
+    def __getattr__(self, name):
+        return getattr(self._user, name)
+
+    def __str__(self):
+        return f'{self._user} (via alias {self._via})'
+
+    __repr__ = __str__
+
+
+def check_credentials(
+    user, password, ip, protocol=None, auth_port=None, source_port=None, raw_user=None, via_alias=None
+):
+    if user and via_alias:
+        user = _AliasLoginUser(user, via_alias)
     if not user or not user.enabled or (protocol == "imap" and not user.enable_imap and not auth_port in WEBMAIL_PORTS) or (protocol == "pop3" and not user.enable_pop):
         app.logger.info(f'Login attempt for: {user or raw_user!r}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: account disabled')
         return False
@@ -111,14 +131,20 @@ def handle_authentication(headers):
             app.logger.warning(f'Received undecodable user/password from front: {headers.get("Auth-User", "")!r}')
         else:
             try:
-                user = models.db.session.get(models.User, user_email) if '@' in user_email else None
+                user, via_alias = models.User.resolve_login(user_email) if '@' in user_email else (None, None)
             except sqlalchemy.exc.StatementError as exc:
                 exc = str(exc).split('\n', 1)[0]
                 app.logger.warning(f'Invalid user {user_email!r}: {exc}')
             else:
                 is_valid_user = user is not None
+                if via_alias:
+                    app.logger.info(f'Login name {via_alias!r} is an alias login for mailbox {user.email!r}')
+                    user_email = user.email
                 ip = urllib.parse.unquote(headers["Client-Ip"])
-                if check_credentials(user, password, ip, protocol, headers["Auth-Port"], headers['Client-Port'], user_email):
+                if check_credentials(
+                    user, password, ip, protocol, headers["Auth-Port"],
+                    headers['Client-Port'], user_email, via_alias
+                ):
                     server, port = get_server(headers["Auth-Protocol"], True)
                     return {
                         "Auth-Status": "OK",

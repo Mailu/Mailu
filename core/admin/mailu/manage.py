@@ -442,8 +442,9 @@ def alias_delete(email):
 @click.argument('domain_name')
 @click.argument('destination')
 @click.option('-w', '--wildcard', is_flag=True)
+@click.option('-l', '--login', is_flag=True, default=False, help='Allow login with this alias')
 @with_appcontext
-def alias(localpart, domain_name, destination, wildcard=False):
+def alias(localpart, domain_name, destination, wildcard=False, login=False):
     """ Create an alias
     """
     domain = models.db.session.get(models.Domain, domain_name)
@@ -455,9 +456,34 @@ def alias(localpart, domain_name, destination, wildcard=False):
         domain=domain,
         wildcard=wildcard,
         destination=destination.split(','),
-        email=f'{localpart}@{domain_name}'
+        email=f'{localpart}@{domain_name}',
+        allow_login=login
     )
+    if login:
+        if problem := models.Alias.login_problem(alias):
+            raise click.ClickException(f'Cannot enable login: {problem}')
     db.session.add(alias)
+    db.session.commit()
+
+
+@mailu.command('alias-login')
+@click.argument('email')
+@click.option('--off', is_flag=True, default=False, help='Disable login with this alias')
+@with_appcontext
+def alias_login(email, off=False):
+    """ Enable or disable login for an alias
+    """
+    alias = models.db.session.get(models.Alias, email)
+    if not alias:
+        raise click.ClickException(f'Alias {email} does not exist')
+    if off:
+        alias.allow_login = False
+        click.echo(f'Login disabled for alias {email}')
+    else:
+        alias.allow_login = True
+        if problem := models.Alias.login_problem(alias):
+            raise click.ClickException(f'Cannot enable login: {problem}')
+        click.echo(f'Login enabled for alias {email}')
     db.session.commit()
 
 

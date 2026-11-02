@@ -681,6 +681,28 @@ class User(Base, Email):
 
     passkeys = db.relationship('Passkey', back_populates='user', cascade='all, delete-orphan')
 
+    @classmethod
+    def resolve_login(cls, name):
+        """ Map a login name to (user, alias):
+        The mailbox itself gives (user, None).
+        An alias enabled for login gives (user, alias email).
+        Anything else gives (None, None).
+        """
+        if not name or '@' not in name:
+            return None, None
+        if user := db.session.get(cls, name):
+            return user, None
+        try:
+            alias = db.session.get(Alias, name)
+            if alias and (target_email := alias.login_target):
+                if user := db.session.get(cls, target_email):
+                    return user, alias.email
+        except sqlalchemy.exc.SQLAlchemyError as exc:
+            db.session.rollback()
+            app.logger.error(f'alias login: lookup failed for {name!r}: {exc}')
+            return None, None
+        return None, None
+
     # Flask-login attributes
     is_authenticated = True
     is_active = True
@@ -849,7 +871,7 @@ set() containing the sessions to keep
     @classmethod
     def login(cls, email, password):
         """ login user when enabled and password is valid """
-        user = db.session.get(cls, email)
+        user, _ = cls.resolve_login(email)
         return user if (
             user and user.enabled
             and not app.config.get('PASSKEY_REQUIRED', False)
@@ -929,6 +951,70 @@ class Alias(Base, Email):
     owner_email = db.Column(db.String(255), db.ForeignKey('user.email'), nullable=True)
     owner = db.relationship('User', backref=db.backref('owned_aliases', cascade='all, delete-orphan'))
     disabled = db.Column(db.Boolean, nullable=False, default=False)
+    allow_login = db.Column(db.Boolean, nullable=False, default=False)
+
+    @property
+    def login_target(self):
+        """ return destination mailbox email if this alias is valid and enabled for login, or None """
+        if not self.allow_login or self.disabled or self.wildcard:
+            return None
+        if self.owner_email and (not self.owner or not self.owner.enabled):
+            return None
+        if len(self.destination) != 1:
+            return None
+        dest = self.destination[0]
+        if not dest or '@' not in dest:
+            return None
+        user = db.session.get(User, dest)
+        if user and user.enabled:
+            return user.email
+        return None
+
+    @classmethod
+    def login_problem(cls, alias):
+        """ return an error message string if alias cannot be used for login, or None if valid """
+        if alias is None:
+            return 'no such alias'
+        if getattr(alias, 'wildcard', False):
+            return 'wildcard aliases cannot be used to log in'
+        destination = getattr(alias, 'destination', None) or []
+        if len(destination) == 0:
+            return 'alias has no destination'
+        if len(destination) > 1:
+            return 'an alias used to log in must have exactly one destination'
+        dest = destination[0]
+        if not dest or '@' not in dest:
+            return 'invalid destination email address'
+        user = db.session.get(User, dest)
+        if user is None:
+            return 'the destination of an alias used to log in must be a mailbox on this server'
+        if not user.enabled:
+            return 'the destination mailbox is disabled'
+        if getattr(alias, 'disabled', False):
+            return 'the alias is disabled'
+        owner = getattr(alias, 'owner', None)
+        if getattr(alias, 'owner_email', None) and owner and not owner.enabled:
+            return 'the owner of this alias is disabled'
+        return None
+
+    @classmethod
+    def logins_for(cls, mailboxes):
+        """ active alias login names whose destination is in mailboxes """
+        wanted = {m.lower() for m in mailboxes if m}
+        if not wanted:
+            return []
+        try:
+            candidates = cls.query.filter_by(allow_login=True, wildcard=False, disabled=False).all()
+        except sqlalchemy.exc.SQLAlchemyError as exc:
+            db.session.rollback()
+            app.logger.error(f'alias logins_for query failed: {exc}')
+            return []
+        logins = []
+        for candidate in candidates:
+            target = candidate.login_target
+            if target and target.lower() in wanted:
+                logins.append(candidate.email)
+        return logins
 
     @classmethod
     def resolve(cls, localpart, domain_name):

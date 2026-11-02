@@ -127,24 +127,34 @@ def basic_authentication():
             # malformed header: fall through to the generic 401 below
             user_email = None
         if user_email is not None:
-            if utils.limiter.should_rate_limit_user(user_email, client_ip):
+            user, via_alias = models.User.resolve_login(user_email) if '@' in user_email else (None, None)
+            target_username = user.email if via_alias else user_email
+            if utils.limiter.should_rate_limit_user(target_username, client_ip):
                 response = flask.Response(status=401)
                 response.headers["WWW-Authenticate"] = 'Basic realm="Authentication rate limit for this username exceeded"'
                 response.headers['Retry-After'] = '60'
                 return response
             try:
-                user = models.db.session.get(models.User, user_email) if '@' in user_email else None
+                if not via_alias:
+                    user = models.db.session.get(models.User, user_email) if '@' in user_email else None
             except sqlalchemy.exc.StatementError as exc:
                 exc = str(exc).split('\n', 1)[0]
                 app.logger.warning(f'Invalid user {user_email!r}: {exc}')
             else:
-                if user is not None and nginx.check_credentials(user, password.decode('utf-8'), client_ip, "web", flask.request.headers.get('X-Real-Port', None), user_email):
+                port = flask.request.headers.get('X-Real-Port', None)
+                if user is not None and nginx.check_credentials(
+                    user, password.decode('utf-8'), client_ip, "web",
+                    port, target_username, via_alias
+                ):
                     response = flask.Response()
                     response.headers["X-User"] = models.IdnaEmail.process_bind_param(flask_login, user.email, "")
                     utils.limiter.exempt_ip_from_ratelimits(client_ip)
                     return response
                 # We failed check_credentials
-                utils.limiter.rate_limit_user(user_email, client_ip) if user else utils.limiter.rate_limit_ip(client_ip, user_email)
+                if user:
+                    utils.limiter.rate_limit_user(target_username, client_ip)
+                else:
+                    utils.limiter.rate_limit_ip(client_ip, target_username)
     response = flask.Response(status=401)
     response.headers["WWW-Authenticate"] = 'Basic realm="Login Required"'
     return response

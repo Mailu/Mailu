@@ -16,18 +16,32 @@ def _get_user_or_404(user_email):
         user = None
     return user or flask.abort(404)
 
+def _resolve_user_or_404(user_email):
+    """ Look up a user or an alias enabled for login, returning (user, via_alias)
+        or a clean 404 rather than 500 when address is invalid. """
+    try:
+        user, via_alias = models.User.resolve_login(user_email)
+    except sqlalchemy.exc.StatementError:
+        user, via_alias = None, None
+    if user is None:
+        flask.abort(404)
+    return user, via_alias
+
 @internal.route("/dovecot/passdb/<path:user_email>")
 def dovecot_passdb_dict(user_email):
-    user = _get_user_or_404(user_email)
+    user, via_alias = _resolve_user_or_404(user_email)
     allow_nets = []
     allow_nets.append(app.config["SUBNET"])
     if app.config["SUBNET6"]:
         allow_nets.append(app.config["SUBNET6"])
-    return flask.jsonify({
+    result = {
         "password": None,
         "nopassword": "Y",
         "allow_real_nets": ",".join(allow_nets)
-    })
+    }
+    if via_alias:
+        result["user"] = user.email
+    return flask.jsonify(result)
 
 @internal.route("/dovecot/userdb/")
 def dovecot_userdb_dict_list():

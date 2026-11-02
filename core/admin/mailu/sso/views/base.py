@@ -56,6 +56,12 @@ def login(target):
         destination = signin.resolve(selected if explicit_selection or not signin.pending() else None)
         device_cookie, device_cookie_username = utils.limiter.parse_device_cookie(flask.request.cookies.get('rate_limit'))
         username = form.email.data
+        login_user, via_alias = models.User.resolve_login(username)
+        if via_alias:
+            flask.current_app.logger.info(
+                f'Login name {via_alias!r} is an alias login for mailbox {login_user.email!r}'
+            )
+            username = login_user.email
         if username != device_cookie_username and utils.limiter.should_rate_limit_ip(client_ip):
             flask.flash(_('Too many attempts from your IP (rate-limit)'), 'error')
             return flask.render_template('login.html', form=form, fields=fields)

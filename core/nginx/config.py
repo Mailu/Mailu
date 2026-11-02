@@ -155,7 +155,7 @@ def format_for_dane(fullchain, output):
     chain=[]
     with open(fullchain, 'rb') as f:
         chain = x509.load_pem_x509_certificates(f.read())
-    builder = PolicyBuilder().store(Store([ISRG_ROOT_X1, ISRG_ROOT_X2, ISRG_ROOT_YE, ISRG_ROOT_YR]))
+    builder = PolicyBuilder().store(Store([ISRG_ROOT_X1, ISRG_ROOT_X2]))
 
     verifier = builder.build_server_verifier(DNSName(chain[0].subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value))
     valid_chain = verifier.verify(chain[0], chain[1:])

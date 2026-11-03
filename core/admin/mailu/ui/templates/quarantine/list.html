@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{% trans %}Quarantine{% endtrans %}{% endblock %}
+{% block subtitle %}{% trans %}Review rejected and greylisted messages, then release or remove their saved copies.{% endtrans %}{% endblock %}
+{% block main_action %}
+{% if has_messages %}
+<a class="btn btn-outline-danger float-end" href="{{ url_for('.quarantine_flush') }}">{% trans %}Flush visible{% endtrans %}</a>
+{% endif %}
+{% endblock %}
+{% block content %}
+{% call macros.table(order='[[0,"desc"]]', class_="align-middle") %}
+<thead><tr>
+  <th>{% trans %}Received{% endtrans %}</th>
+  <th>{% trans %}Subject{% endtrans %}</th>
+  <th>{% trans %}Sender{% endtrans %}</th>
+  <th>{% trans %}Recipients{% endtrans %}</th>
+  <th>{% trans %}Score{% endtrans %}</th>
+  <th>{% trans %}Size{% endtrans %}</th>
+  <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
+</tr></thead>
+<tbody>
+{% for message in messages %}
+<tr{% if message.greylisted %} class="table-warning"{% endif %}>
+  <td class="text-nowrap">{{ message.received }}</td>
+  <td class="text-break">{{ message.subject or message.header_subject or _('(no subject)') }}</td>
+  <td class="text-break">{{ message['from'] or message.header_from or '' }}</td>
+  <td class="text-break">{{ message.recipients|join(', ') }}</td>
+  <td data-order="{{ message.score if message.score is not none else '' }}">{{ message.score if message.score is not none else '—' }}</td>
+  <td class="text-nowrap" data-order="{{ message.size if message.size is defined else '' }}">{{ message.size|filesizeformat if message.size is defined else '—' }}</td>
+  <td class="text-nowrap">
+    {% if message.greylisted %}
+      {% if message.size is defined %}
+      <a class="btn btn-sm btn-warning" href="{{ url_for('.greylist_release', record_id=message.id) }}">{% trans %}Release now{% endtrans %}</a>
+      {% else %}
+      <span class="badge text-bg-warning">{% trans %}Greylisted · awaiting retry{% endtrans %}</span>
+      {% endif %}
+      <a class="btn btn-sm btn-outline-danger" href="{{ url_for('.quarantine_delete', message_id=message.id) }}">{% trans %}Delete copy{% endtrans %}</a>
+    {% else %}
+    <a class="btn btn-sm btn-outline-primary" href="{{ url_for('.quarantine_detail', message_id=message.id) }}">{% trans %}View{% endtrans %}</a>
+    <a class="btn btn-sm btn-primary" href="{{ url_for('.quarantine_release', message_id=message.id) }}">{% trans %}Release{% endtrans %}</a>
+    <a class="btn btn-sm btn-outline-danger" href="{{ url_for('.quarantine_delete', message_id=message.id) }}">{% trans %}Delete{% endtrans %}</a>
+    {% endif %}
+  </td>
+</tr>
+{% endfor %}
+</tbody>
+{% endcall %}
+{% endblock %}

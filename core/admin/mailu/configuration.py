@@ -35,6 +35,9 @@ DEFAULT_CONFIG = {
     'STATS_ENDPOINT': '202406.{}.stats.mailu.io',
     # Common configuration variables
     'SECRET_KEY': 'changeMe',
+    'QUARANTINE_KEY': '',
+    'QUARANTINE_RETENTION_DAYS': 90,
+    'QUARANTINE_MAX_MESSAGE_BYTES': 52428800,
     'DOMAIN': 'mailu.io',
     'HOSTNAMES': 'mail.mailu.io,alternative.mailu.io,yetanother.mailu.io',
     'POSTMASTER': 'postmaster',
@@ -148,6 +151,8 @@ class ConfigManager:
         self.config['ACCOUNT_SETUP_TOKEN_TTL'] = int(
             self.config['ACCOUNT_SETUP_TOKEN_TTL'],
         )
+        self.config['QUARANTINE_RETENTION_DAYS'] = int(self.config['QUARANTINE_RETENTION_DAYS'])
+        self.config['QUARANTINE_MAX_MESSAGE_BYTES'] = int(self.config['QUARANTINE_MAX_MESSAGE_BYTES'])
 
         # automatically set the sqlalchemy string
         if self.config['DB_FLAVOR']:

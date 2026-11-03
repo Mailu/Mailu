@@ -12,6 +12,7 @@ RUN set -euxo pipefail \
 COPY --from=assets /work/static/ ./mailu/static/
 
 COPY audit.py /
+COPY quarantine_cleanup.py /
 COPY start.py /
 
 COPY migrations/ ./migrations/

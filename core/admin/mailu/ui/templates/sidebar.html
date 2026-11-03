@@ -31,6 +31,12 @@
           <p>{% trans %}Settings{% endtrans %}</p>
         </a>
       </li>
+      <li class="nav-item" role="none">
+        <a href="{{ url_for('.quarantine_list') }}" class="nav-link" role="menuitem">
+          <i class="nav-icon fa-solid fa-box-archive"></i>
+          <p>{% trans %}Quarantine{% endtrans %}</p>
+        </a>
+      </li>
       {% if not config['PASSKEY_REQUIRED'] and not current_user.passkeys %}
       <li class="nav-item" role="none">
         <a href="{{ url_for('.user_password_change') }}" class="nav-link" role="menuitem">
@@ -88,6 +94,12 @@
         <a href="{{ url_for('.domain_list') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fa-solid fa-envelope"></i>
           <p>{% trans %}Mail domains{% endtrans %}</p>
+        </a>
+      </li>
+      <li class="nav-item" role="none">
+        <a href="{{ url_for('.spam_settings_page') }}" class="nav-link" role="menuitem">
+          <i class="nav-icon fa-solid fa-shield-halved"></i>
+          <p>{% trans %}Spam settings{% endtrans %}</p>
         </a>
       </li>
       {%- endif %}

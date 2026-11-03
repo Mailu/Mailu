@@ -46,6 +46,13 @@ def global_admin(args, kwargs):
     return flask_login.current_user.global_admin
 
 
+@permissions_wrapper
+def spam_admin(args, kwargs):
+    """Shared spam settings are editable by global or domain administrators."""
+    user = flask_login.current_user
+    return user.global_admin or bool(user.get_managed_domains())
+
+
 def _can_manage_user(actor, target):
     """ Whether ``actor`` may manage the account of ``target`` (a User).
 

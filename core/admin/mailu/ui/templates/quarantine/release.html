@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{% if greylisted %}{% trans %}Release greylisted message{% endtrans %}{% else %}{% trans %}Release quarantined message{% endtrans %}{% endif %}{% endblock %}
+{% block content %}
+{% call macros.card(theme="warning") %}
+<p class="mb-3">{% if greylisted %}{% trans %}Send this saved message to the selected recipients now, without waiting for the sender to retry.{% endtrans %}{% else %}{% trans %}Choose which original recipients should receive this quarantined message.{% endtrans %}{% endif %}</p>
+<form method="post">
+  {{ form.hidden_tag() }}
+  <fieldset class="mb-3">
+    <legend class="h6">{{ message.subject or message.header_subject or _('(no subject)') }}</legend>
+    {% for recipient in recipients %}
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="recipients" id="recipient-{{ loop.index }}" value="{{ recipient }}" checked>
+      <label class="form-check-label" for="recipient-{{ loop.index }}">{{ recipient }}</label>
+    </div>
+    {% endfor %}
+  </fieldset>
+  {{ form.submit(value=_('Release selected'), class_='btn btn-primary') }}
+  <a class="btn btn-outline-secondary" href="{% if greylisted %}{{ url_for('.quarantine_list') }}{% else %}{{ url_for('.quarantine_detail', message_id=message.id) }}{% endif %}">{% trans %}Cancel{% endtrans %}</a>
+</form>
+{% endcall %}
+{% endblock %}

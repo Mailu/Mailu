@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% if flush %}
+  {% set page_title = _('Flush visible held messages') %}
+{% else %}
+  {% set page_title = _('Delete held message') %}
+{% endif %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+{% call macros.card(theme="danger") %}
+{% if flush %}
+  <p>{% trans count=count %}Permanently delete all {{ count }} held messages visible to you and their metadata?{% endtrans %}</p>
+{% else %}
+  <p>{% trans %}Permanently delete this saved message and its metadata?{% endtrans %}</p>
+  <p class="fw-semibold">{{ message.subject or message.header_subject or _('(no subject)') }}</p>
+{% endif %}
+<form method="post">
+  {{ form.hidden_tag() }}
+  {{ form.submit(value=_('Delete permanently'), class_='btn btn-danger') }}
+  <a class="btn btn-outline-secondary" href="{{ url_for('.quarantine_list') }}">{% trans %}Cancel{% endtrans %}</a>
+</form>
+{% endcall %}
+{% endblock %}

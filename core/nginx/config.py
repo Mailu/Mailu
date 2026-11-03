@@ -8,6 +8,7 @@ from socrate import system, conf
 
 from cryptography import x509
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, load_pem_private_key
+from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.verification import PolicyBuilder, Store, DNSName
 from cryptography.x509.oid import NameOID
 import hashlib
@@ -121,13 +122,15 @@ with open("/etc/resolv.conf") as handle:
 # TLS configuration
 cert_name = args.get("TLS_CERT_FILENAME", "cert.pem")
 keypair_name = args.get("TLS_KEYPAIR_FILENAME", "key.pem")
+letsencrypt_shortchain = str(args.get("LETSENCRYPT_SHORTCHAIN", True)).lower() not in ("false", "no", "0")
+ecdsa_chain_name = "front-chain.pem" if letsencrypt_shortchain else "fullchain.pem"
 args["TLS"] = {
     "cert": ("/certs/%s" % cert_name, "/certs/%s" % keypair_name),
     "letsencrypt": ("/certs/letsencrypt/live/mailu/fullchain.pem",
-        "/certs/letsencrypt/live/mailu/privkey.pem", "/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem", "/certs/letsencrypt/live/mailu-ecdsa/privkey.pem"),
+        "/certs/letsencrypt/live/mailu/privkey.pem", f"/certs/letsencrypt/live/mailu-ecdsa/{ecdsa_chain_name}", "/certs/letsencrypt/live/mailu-ecdsa/privkey.pem"),
     "mail": ("/certs/%s" % cert_name, "/certs/%s" % keypair_name),
     "mail-letsencrypt": ("/certs/letsencrypt/live/mailu/fullchain.pem",
-        "/certs/letsencrypt/live/mailu/privkey.pem", "/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem", "/certs/letsencrypt/live/mailu-ecdsa/privkey.pem"),
+        "/certs/letsencrypt/live/mailu/privkey.pem", f"/certs/letsencrypt/live/mailu-ecdsa/{ecdsa_chain_name}", "/certs/letsencrypt/live/mailu-ecdsa/privkey.pem"),
     "notls": None
 }[args["TLS_FLAVOR"]]
 
@@ -187,6 +190,26 @@ def format_for_dane(fullchain, output):
         for cert in valid_chain:
             f.write(f'{cert.public_bytes(encoding=Encoding.PEM).decode("ascii").strip()}\n')
 
+
+def format_for_front_ecdsa(fullchain, output):
+    """Build the short ECC-only Let's Encrypt chain for front TLS services."""
+    if not os.path.exists(fullchain):
+        return
+    with open(fullchain, 'rb') as f:
+        chain = x509.load_pem_x509_certificates(f.read())
+    verifier = PolicyBuilder().store(Store([ISRG_ROOT_X2])).build_server_verifier(
+        DNSName(chain[0].subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value)
+    )
+    valid_chain = verifier.verify(chain[0], chain[1:])
+    if valid_chain[-1].public_bytes(Encoding.DER) != ISRG_ROOT_X2.public_bytes(Encoding.DER):
+        raise ValueError('The ECDSA certificate chain does not end at ISRG Root X2')
+    served_chain = valid_chain[:-1]
+    if not all(isinstance(cert.public_key(), ec.EllipticCurvePublicKey) for cert in served_chain):
+        raise ValueError('The ECDSA certificate chain contains a non-ECC certificate')
+    with open(output, 'wt') as f:
+        for cert in served_chain:
+            f.write(f'{cert.public_bytes(encoding=Encoding.PEM).decode("ascii").strip()}\n')
+
 if args['TLS_FLAVOR'] in ['letsencrypt', 'mail-letsencrypt']:
     try:
         validate_keypair(
@@ -199,6 +222,10 @@ if args['TLS_FLAVOR'] in ['letsencrypt', 'mail-letsencrypt']:
         )
         format_for_dane('/certs/letsencrypt/live/mailu/fullchain.pem', '/certs/letsencrypt/live/mailu/DANE-chain.pem')
         format_for_dane('/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem', '/certs/letsencrypt/live/mailu-ecdsa/DANE-chain.pem')
+        format_for_front_ecdsa(
+            '/certs/letsencrypt/live/mailu-ecdsa/fullchain.pem',
+            '/certs/letsencrypt/live/mailu-ecdsa/front-chain.pem',
+        )
     except Exception:
         if not bootstrap:
             raise

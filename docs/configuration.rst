@@ -75,6 +75,12 @@ there is a good way to disable rate limiting altogether.
 
 The ``TLS_FLAVOR`` sets how Mailu obtains a x509 certificate. More on :ref:`tls_flavor`.
 
+The ``LETSENCRYPT_SHORTCHAIN`` setting (default: ``True``) controls the ECDSA
+chain served by front TLS services when ``TLS_FLAVOR`` is ``letsencrypt`` or
+``mail-letsencrypt``. Set it to ``False`` to serve Certbot's full ECDSA chain,
+which includes the cross-signed ISRG Root X2 certificate for clients that only
+trust ISRG Root X1. SMTP port 25 continues to use its DANE-specific chains.
+
 The ``DEFAULT_SPAM_THRESHOLD`` (default: 80) is the default spam tolerance used when creating a new user.
 
 Mail settings
@@ -291,9 +297,12 @@ See the `python docs`_ for more information.
 
 .. _`python docs`: https://docs.python.org/3.6/library/logging.html#logging-levels
 
-Let's Encrypt certificate chains are served as issued by Certbot. Nginx uses the
-ECDSA certificate, except on SMTP port 25 where Mailu serves both RSA and ECDSA
-chains with a DNS-published ISRG trust anchor for DANE validation.
+With ``TLS_FLAVOR=letsencrypt``, front TLS services offer both RSA and ECDSA
+certificates. The RSA chain keeps its path through ISRG Root X1 for compatibility;
+the ECDSA chain includes the Root YE certificate signed by ISRG Root X2 but
+omits X2 itself. This keeps the transmitted chain ECC-only and shorter; clients
+must already trust ISRG Root X2. SMTP port 25 continues to serve the RSA and
+ECDSA DANE chains, including their DNS-published ISRG trust anchors.
 
 The ``TLS_PERMISSIVE`` (default: true) setting controls whether ciphers and protocols offered on port 25
 for STARTTLS are optimized for maximum compatibility. We **strongly recommend** that you do **not** change

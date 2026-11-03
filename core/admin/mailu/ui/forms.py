@@ -64,6 +64,32 @@ class ConfirmationForm(flask_wtf.FlaskForm):
     submit = fields.SubmitField(_('Confirm'))
 
 
+class SpamSettingsForm(flask_wtf.FlaskForm):
+    """Global Rspamd maps, shared by administrators of every domain."""
+    arc_signers = fields.TextAreaField(_('Trusted ARC signer domains'), [validators.Length(max=65536)])
+    greylist_ips = fields.TextAreaField(_('Greylist whitelist IPs and CIDRs'), [validators.Length(max=65536)])
+    greylist_domains = fields.TextAreaField(_('Greylist whitelist domains'), [validators.Length(max=65536)])
+    url_regexps = fields.TextAreaField(_('URL patterns to reject'), [validators.Length(max=65536)])
+    blacklist_domains = fields.TextAreaField(_('Blacklisted sender domains'), [validators.Length(max=65536)])
+    whitelist_domains = fields.TextAreaField(_('Whitelisted sender domains'), [validators.Length(max=65536)])
+    redirector_domains = fields.TextAreaField(_('URL redirector domains'), [validators.Length(max=65536)])
+    summary_enabled = fields.BooleanField(_('Enable quarantine summary emails'), default=False)
+    summary_periodicity = fields.RadioField(_('Summary frequency'), choices=[
+        ('1d', _('Every day')),
+        ('1w', _('Every week')),
+        ('1m', _('Every month')),
+    ], default='1w', widget=widgets.ListWidget(prefix_label=False), option_widget=widgets.RadioInput())
+    summary_subject = fields.StringField(_('Summary email subject'), [
+        validators.DataRequired(), validators.Length(max=255),
+        validators.Regexp(r'^[^\r\n]+\Z', message=_('Enter a subject on one line.')),
+    ])
+    summary_template = fields.TextAreaField(_('Summary email template (HTML)'), [
+        validators.DataRequired(), validators.Length(max=65536),
+    ])
+    send_test = fields.SubmitField(_('Send me a test'))
+    submit = fields.SubmitField(_('Save spam settings'))
+
+
 class DkimToggleForm(flask_wtf.FlaskForm):
     pass
 

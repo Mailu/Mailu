@@ -2,6 +2,15 @@ import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 document.querySelectorAll('textarea[data-mail-editor], #announcement_body').forEach(textarea => {
   const htmlField = document.getElementById(textarea.dataset.htmlField || '');
+  const templateEditor = textarea.dataset.templateEditor === 'true';
+  const quarantineUrlToken = '{{ quarantine_url }}';
+  const quarantineUrlMarker = 'https://mailu-template-placeholder.invalid/';
+  const protectTemplateUrls = html => templateEditor
+    ? html.replace(/href=(["'])\s*\{\{\s*quarantine_url\s*\}\}\s*\1/gi, `href="${quarantineUrlMarker}"`)
+    : html;
+  const restoreTemplateUrls = html => templateEditor
+    ? html.replaceAll(quarantineUrlMarker, quarantineUrlToken)
+    : html;
   const container = document.createElement('div');
   container.id = `${textarea.id}-editor`;
   textarea.after(container);
@@ -11,7 +20,7 @@ document.querySelectorAll('textarea[data-mail-editor], #announcement_body').forE
     modules: {toolbar: [[{header: [2, 3, false]}], ['bold', 'italic', 'underline'], [{list: 'ordered'}, {list: 'bullet'}], ['link', 'clean']]}
   });
   if (htmlField && !htmlField.value) editor.setText(textarea.value);
-  else editor.clipboard.dangerouslyPasteHTML(htmlField ? htmlField.value : textarea.value);
+  else editor.clipboard.dangerouslyPasteHTML(protectTemplateUrls(htmlField ? htmlField.value : textarea.value));
   textarea.hidden = true;
   textarea.required = false;
   const editable = container.querySelector('.ql-editor');
@@ -19,7 +28,7 @@ document.querySelectorAll('textarea[data-mail-editor], #announcement_body').forE
   editable.setAttribute('aria-multiline', 'true');
   textarea.labels[0]?.setAttribute('for', container.id);
   const synchronize = () => {
-    textarea.value = htmlField ? editor.getText() : editor.getSemanticHTML();
+    textarea.value = htmlField ? editor.getText() : restoreTemplateUrls(editor.getSemanticHTML());
     if (htmlField) {
       htmlField.value = editor.getSemanticHTML();
       const marker = textarea.form.querySelector('[name=reply_formatted]');

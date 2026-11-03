@@ -9,7 +9,7 @@ import sys
 import time
 from socrate import system, conf, supervisor
 
-env = system.set_env()
+env = system.set_env(['QUARANTINE'])
 
 # Actual startup script
 

@@ -80,6 +80,8 @@ virtual_mailbox_maps = ${podop}mailbox
 relay_domains = ${podop}transport
 transport_maps = lmdb:/etc/postfix/transport.map, ${podop}transport
 virtual_transport = lmtp:inet:{{ FRONT_ADDRESS }}:2525
+# Postfix requires single-recipient LMTP deliveries when adding X-Original-To.
+lmtp_destination_recipient_limit = 1
 
 # Sender and recipient canonical maps, mostly for SRS
 sender_canonical_maps = ${podop}sendermap

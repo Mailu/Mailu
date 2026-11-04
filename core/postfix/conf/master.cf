@@ -50,7 +50,8 @@ relay     unix  -       -       n       -       -       smtp
 error     unix  -       -       n       -       -       error
 retry     unix  -       -       n       -       -       error
 discard   unix  -       -       n       -       -       discard
-lmtp      unix  -       -       n       -       -       lmtp
+# Preserve the original SMTP recipient as X-Original-To for Dovecot.
+lmtp      unix  -       -       n       -       -       lmtp flags=O
 anvil     unix  -       -       n       -       1       anvil
 scache    unix  -       -       n       -       1       scache
 postlog   unix-dgram n  -       n       -       1       postlogd

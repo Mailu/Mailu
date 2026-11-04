@@ -10,12 +10,12 @@ require "date";
 require "comparator-i;ascii-numeric";
 require "spamtestplus";
 require "editheader";
-require "index";
 
-if header :index 2 :matches "Received" "from * by * for <*>; *"
+# Postfix adds X-Original-To for LMTP; Dovecot exposes it as envelope "to".
+if envelope :matches "to" "*"
 {
   deleteheader "Delivered-To";
-  addheader "Delivered-To" "<${3}>";
+  addheader "Delivered-To" "<${1}>";
 }
 
 {% if user.spam_enabled %}

@@ -347,7 +347,6 @@ Please note that the shipped image for PostgreSQL database is fully deprecated n
 - Features: updated roundcube to 1.5 and carddav to 4.2.2 using php8 ([#2035](https://github.com/Mailu/Mailu/issues/2035))
 - Features: use dovecot-fts-xapian from alpine package ([#2072](https://github.com/Mailu/Mailu/issues/2072))
 - Features: Make the rate limit apply to a subnet rather than a specific IP (/24 for v4 and /56 for v6) ([#116](https://github.com/Mailu/Mailu/issues/116))
-- Features: Add instructions on how to create DNS records for email client auto-configuration (RFC6186 style) ([#224](https://github.com/Mailu/Mailu/issues/224))
 - Features: Remove the Received header with PRIMARY_HOSTNAME [PUBLIC_IP] ([#466](https://github.com/Mailu/Mailu/issues/466))
 - Features: Centralize the authentication of webmails behind the admin interface ([#783](https://github.com/Mailu/Mailu/issues/783))
 - Features: Add sending quotas per user ([#1031](https://github.com/Mailu/Mailu/issues/1031))

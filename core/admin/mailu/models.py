@@ -271,42 +271,27 @@ class Domain(Base):
 
     @cached_property
     def dns_autoconfig(self):
-        """ return list of auto configuration records (RFC6186) """
-        ports = {int(port.strip()) for port in app.config['PORTS'].split(',')}.union({465, 993})
+        """Return legacy autoconfig aliases and WebDAV discovery records."""
         hostname = app.config['HOSTNAME']
-        protocols = [
-            ('imap', 143, 20),
-            ('pop3', 110, 20),
-            ('submission', 587, 20),
-        ]
-        if app.config['TLS_FLAVOR'] != 'notls':
-            protocols.extend([
-                ('autodiscover', 443, 10),
-                ('submissions', 465, 10),
-                ('imaps', 993, 10),
-                ('pop3s', 995, 10),
-            ])
-
         webdav_records = []
         if app.config['WEBDAV'] != 'none':
             if app.config['TLS_FLAVOR'] == 'notls':
-                protocols.extend([('carddav', 80, 10), ('caldav', 80, 10)])
-                webdav_protocols = ('carddav', 'caldav')
+                webdav_protocols = (('carddav', 80), ('caldav', 80))
             else:
-                protocols.extend([('carddavs', 443, 10), ('caldavs', 443, 10)])
-                webdav_protocols = ('carddavs', 'caldavs')
-            webdav_records = [
-                f'_{proto}._tcp.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN TXT "path=/webdav/"'
-                for proto in webdav_protocols
-            ]
+                webdav_protocols = (('carddavs', 443), ('caldavs', 443))
+            ports = {int(port.strip()) for port in app.config['PORTS'].split(',')}
+            domain = idna.encode(self.name.lower()).decode("ascii")
+            target = idna.encode(hostname.lower()).decode("ascii")
+            for proto, port in webdav_protocols:
+                srv_target = f'10 1 {port} {target}.' if port in ports else '0 0 0 .'
+                webdav_records.append(
+                    f'_{proto}._tcp.{domain}. 600 IN SRV {srv_target}'
+                )
+                webdav_records.append(
+                    f'_{proto}._tcp.{domain}. 600 IN TXT "path=/webdav/"'
+                )
 
-        srv_records = [
-            f'_{proto}._tcp.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN SRV {prio} 1 {port} {idna.encode(hostname.lower()).decode("ascii")}.' if port in ports else f'_{proto}._tcp.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN SRV 0 0 0 .'
-            for proto, port, prio
-            in protocols
-        ]
-
-        return srv_records + webdav_records + [
+        return webdav_records + [
             f'autoconfig.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN CNAME {idna.encode(hostname.lower()).decode("ascii")}.',
             f'autodiscover.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN CNAME {idna.encode(hostname.lower()).decode("ascii")}.'
         ]

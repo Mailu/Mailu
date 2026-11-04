@@ -99,7 +99,9 @@ def get_settings():
             settings["redirector_domains"] = _append_lines(
                 settings["redirector_domains"], local_domains
             )
-        settings["summary_enabled"] = record.value.get("summary_enabled") is True
+        settings["summary_enabled"] = record.value.get(
+            "summary_enabled", settings["summary_enabled"]
+        ) is True
         periodicity = record.value.get("summary_periodicity")
         if periodicity in SUMMARY_PERIODICITIES:
             settings["summary_periodicity"] = periodicity

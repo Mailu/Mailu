@@ -1,1 +1,1 @@
-Use theme-aware secondary styling for greylisted rows and their release buttons.
+Style greylisted rows and their release buttons like disabled users in the admin tables.

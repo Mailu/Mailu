@@ -20,6 +20,7 @@ def test_spam_settings_defaults_are_seeded_and_served_as_maps(app):
             'google.com', 'microsoft.com', 'yahoo.com', 'mailgun.org',
             'mailchannels.net', 'dkim.mimecast.com', 'checkpointcloudsec.com',
             'pphosted.com', 'sendgrid.net', 'amazonses.com',
+            'alternate.example.net', 'example.net', 'mail.example.org',
         ]
         assert spam_settings.map_content('redirector-domains').splitlines() == [
             'alternate.example.net', 'example.net', 'mail.example.org',
@@ -54,7 +55,9 @@ def test_legacy_spam_settings_seed_new_defaults_once(app):
         models.db.session.commit()
 
         settings = spam_settings.get_settings()
-        assert settings['arc_signers'].splitlines()[-1] == 'amazonses.com'
+        assert settings['summary_enabled'] is True
+        assert 'amazonses.com' in settings['arc_signers'].splitlines()
+        assert settings['arc_signers'].splitlines()[-1] == 'example.net'
         assert settings['redirector_domains'] == 'example.net'
         assert settings['arc_signers'].splitlines()[-2:] == ['amazonses.com', 'example.net']
 

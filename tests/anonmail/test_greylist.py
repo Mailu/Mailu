@@ -212,8 +212,8 @@ def test_domain_admin_sees_greylist_and_can_release_it_on_quarantine_page(app, t
     assert b'Flush all' in response.data
     assert b'Flush visible' not in response.data
     assert b'Release now' in response.data
-    assert b'class="text-bg-secondary"' in response.data
-    assert b'text-body-secondary' in response.data
+    assert b'class="text-body-secondary"' in response.data
+    assert b'btn-outline-secondary' in response.data
     assert b'&lt;script&gt;alert(1)&lt;/script&gt;' in response.data
     assert b'<script>alert(1)</script>' not in response.data
 

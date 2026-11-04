@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import flask
 from flask import current_app as app
 
-from mailu import models, quarantine
+from mailu import greylist, models, quarantine
 from mailu.internal import internal
 
 
@@ -57,4 +57,5 @@ def rspamd_quarantine():
     except OSError:
         app.logger.exception('Could not persist quarantined message')
         flask.abort(503)
+    greylist.clear(metadata)
     return flask.jsonify({'id': message_id}), 201

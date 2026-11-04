@@ -129,6 +129,37 @@ def test_clear_endpoint_handles_delivery_actions_but_preserves_rejects(app, tmp_
     assert greylist.get(greylist._key(rejected_id)) is not None
 
 
+def test_quarantine_endpoint_clears_matching_greylist_copy(app, tmp_path, monkeypatch):
+    monkeypatch.setattr(greylist, 'directory', lambda: tmp_path)
+    monkeypatch.setattr(quarantine, 'directory', lambda: tmp_path)
+    app.config['WTF_CSRF_ENABLED'] = False
+    message_id = '<later-quarantined@example.net>'
+    message = b'Subject: quarantined\r\nMessage-ID: ' + message_id.encode() + b'\r\n\r\nbody'
+    with app.app_context():
+        greylist.record({
+            'message_id': message_id, 'action': 'soft reject',
+            'rcpt': ['user@example.net'],
+        }, message)
+        [greylist_entry] = greylist.entries()
+
+    client = app.test_client()
+    auth = ('quarantine', app.config['QUARANTINE_KEY'])
+    response = client.post('/internal/rspamd/quarantine', auth=auth, data={
+        'metadata': json.dumps({
+            'message_id': message_id, 'action': 'reject',
+            'rcpt': ['user@example.net'], 'symbols': [],
+        }),
+        'message': (io.BytesIO(message), 'message.eml'),
+    })
+
+    assert response.status_code == 201
+    with app.app_context():
+        assert greylist.get(greylist_entry['id']) is None
+        [quarantine_entry] = quarantine.all_entries()
+        assert quarantine_entry['kind'] == 'quarantine'
+        assert quarantine.get(response.json['id']) is not None
+
+
 def test_quarantine_and_greylist_records_share_one_repository(app, tmp_path, monkeypatch):
     monkeypatch.setattr(greylist, 'directory', lambda: tmp_path)
     monkeypatch.setattr(quarantine, 'directory', lambda: tmp_path)

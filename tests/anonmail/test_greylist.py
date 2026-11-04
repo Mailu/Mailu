@@ -209,6 +209,8 @@ def test_domain_admin_sees_greylist_and_can_release_it_on_quarantine_page(app, t
         session['_fresh'] = True
     response = client.get('/admin/quarantine')
     assert response.status_code == 200
+    assert b'Flush all' in response.data
+    assert b'Flush visible' not in response.data
     assert b'Release now' in response.data
     assert b'class="table-warning"' in response.data
     assert b'&lt;script&gt;alert(1)&lt;/script&gt;' in response.data

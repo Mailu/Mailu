@@ -3,7 +3,7 @@
 {% block subtitle %}{% trans %}Review rejected and greylisted messages, then release or remove their saved copies.{% endtrans %}{% endblock %}
 {% block main_action %}
 {% if has_messages %}
-<a class="btn btn-outline-danger float-end" href="{{ url_for('.quarantine_flush') }}">{% trans %}Flush visible{% endtrans %}</a>
+<a class="btn btn-outline-danger float-end" href="{{ url_for('.quarantine_flush') }}">{% trans %}Flush all{% endtrans %}</a>
 {% endif %}
 {% endblock %}
 {% block content %}

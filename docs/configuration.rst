@@ -30,7 +30,9 @@ hostname and will be exposed over SMTP, IMAP, etc. Requests made using a
 hostname that is not configured are redirected to the main hostname. Mailu
 publishes the configured HTTPS origins at
 ``/.well-known/webauthn`` so browsers can use passkeys on each configured
-hostname.
+hostname. Mailu also publishes mail client configuration at
+``/.well-known/client-autoconfig.xml`` and retains the legacy Thunderbird
+AutoConfig URLs for older clients.
 
 The ``SUBNET`` defines the address range of the docker network used by Mailu.
 This should not conflict with any networks to which your system is connected.

@@ -9,15 +9,25 @@ def test_spam_settings_defaults_are_seeded_and_served_as_maps(app):
             models.Domain(name='example.net'),
             models.Domain(name='mail.example.org'),
         ])
+        models.db.session.add(models.Alternative(
+            name='alternate.example.net', domain_name='example.net',
+        ))
         models.db.session.commit()
+        settings = spam_settings.get_settings()
+        assert settings['summary_enabled'] is True
+        assert settings['summary_periodicity'] == '1w'
         assert spam_settings.map_content('arc-signers').splitlines() == [
             'google.com', 'microsoft.com', 'yahoo.com', 'mailgun.org',
             'mailchannels.net', 'dkim.mimecast.com', 'checkpointcloudsec.com',
             'pphosted.com', 'sendgrid.net', 'amazonses.com',
+            'alternate.example.net', 'example.net', 'mail.example.org',
         ]
         assert spam_settings.map_content('redirector-domains').splitlines() == [
-            'example.net', 'mail.example.org',
+            'alternate.example.net', 'example.net', 'mail.example.org',
         ]
+        assert set(spam_settings.map_content('arc-signers').splitlines()[-3:]) == {
+            'alternate.example.net', 'example.net', 'mail.example.org',
+        }
         assert spam_settings.map_content('greylist-domains') == '\n'
         assert spam_settings.map_content('unknown') is None
 
@@ -45,8 +55,11 @@ def test_legacy_spam_settings_seed_new_defaults_once(app):
         models.db.session.commit()
 
         settings = spam_settings.get_settings()
-        assert settings['arc_signers'].splitlines()[-1] == 'amazonses.com'
+        assert settings['summary_enabled'] is True
+        assert 'amazonses.com' in settings['arc_signers'].splitlines()
+        assert settings['arc_signers'].splitlines()[-1] == 'example.net'
         assert settings['redirector_domains'] == 'example.net'
+        assert settings['arc_signers'].splitlines()[-2:] == ['amazonses.com', 'example.net']
 
         spam_settings.save_settings(settings)
         settings['redirector_domains'] = ''

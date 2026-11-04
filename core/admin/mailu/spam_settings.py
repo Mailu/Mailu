@@ -9,7 +9,7 @@ from mailu import models
 
 
 CONFIG_KEY = "rspamd_spam_settings"
-SETTINGS_VERSION = 1
+SETTINGS_VERSION = 2
 LEGACY_ARC_SIGNERS = "google.com\nmicrosoft.com\nyahoo.com"
 
 MAP_DEFAULTS = {
@@ -26,7 +26,7 @@ MAP_DEFAULTS = {
 }
 
 SUMMARY_DEFAULTS = {
-    "summary_enabled": False,
+    "summary_enabled": True,
     "summary_periodicity": "1w",
     "summary_subject": "Quarantine summary for {{ mailbox }}",
     "summary_template": """<h2>Your quarantine summary</h2>
@@ -82,9 +82,9 @@ def get_settings():
     """Return persisted settings merged with defaults for new fields."""
     record = models.db.session.get(models.Config, CONFIG_KEY)
     settings = deepcopy(DEFAULTS)
-    settings["redirector_domains"] = "\n".join(
-        domain.name for domain in models.Domain.query.order_by(models.Domain.name).all()
-    )
+    local_domains = _local_domains()
+    settings["arc_signers"] = _append_lines(MAP_DEFAULTS["arc_signers"], local_domains)
+    settings["redirector_domains"] = "\n".join(local_domains)
     if record and isinstance(record.value, dict):
         for key in MAP_DEFAULTS:
             value = record.value.get(key)
@@ -95,11 +95,13 @@ def get_settings():
         if record.value.get("_defaults_version", 0) < SETTINGS_VERSION:
             if settings["arc_signers"].strip() == LEGACY_ARC_SIGNERS:
                 settings["arc_signers"] = MAP_DEFAULTS["arc_signers"]
-            if not settings["redirector_domains"].strip():
-                settings["redirector_domains"] = "\n".join(
-                    domain.name for domain in models.Domain.query.order_by(models.Domain.name).all()
-                )
-        settings["summary_enabled"] = record.value.get("summary_enabled") is True
+            settings["arc_signers"] = _append_lines(settings["arc_signers"], local_domains)
+            settings["redirector_domains"] = _append_lines(
+                settings["redirector_domains"], local_domains
+            )
+        settings["summary_enabled"] = record.value.get(
+            "summary_enabled", settings["summary_enabled"]
+        ) is True
         periodicity = record.value.get("summary_periodicity")
         if periodicity in SUMMARY_PERIODICITIES:
             settings["summary_periodicity"] = periodicity
@@ -109,6 +111,25 @@ def get_settings():
                 settings[key] = (normalize_template_placeholders(value)
                                  if key == 'summary_template' else value)
     return settings
+
+
+def _local_domains():
+    """Return configured domain names and alternatives in stable order."""
+    names = {name for (name,) in models.Domain.query.with_entities(models.Domain.name).all()}
+    names.update(name for (name,) in
+                 models.Alternative.query.with_entities(models.Alternative.name).all())
+    return sorted(names, key=str.casefold)
+
+
+def _append_lines(value, additions):
+    """Append unique map entries while preserving existing custom entries."""
+    lines = normalize_lines(value)
+    seen = {line.casefold() for line in lines}
+    for line in additions:
+        if line.casefold() not in seen:
+            lines.append(line)
+            seen.add(line.casefold())
+    return "\n".join(lines)
 
 
 def normalize_lines(value, *, max_lines=1000, max_line_length=2048):

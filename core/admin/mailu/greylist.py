@@ -67,6 +67,21 @@ def record(metadata, raw_message=None):
     return True
 
 
+def clear(metadata):
+    """Remove a pending greylist copy once the message is quarantined."""
+    if not isinstance(metadata, dict):
+        return False
+    message_id = metadata.get('message_id') or metadata.get('message-id')
+    key = _key(message_id)
+    if key is None:
+        return False
+    try:
+        return quarantine_repository.delete(directory(), key, 'greylist')
+    except OSError:
+        current_app.logger.exception('Could not clear quarantined message from greylist')
+        return False
+
+
 def entries():
     """List unexpired pending messages in the shared repository."""
     quarantine_repository.cleanup_expired(

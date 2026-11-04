@@ -176,7 +176,8 @@ def test_quarantine_list_and_release_use_message_uuid(app, client, tmp_path, mon
         assert f'{prefix}/quarantine/{message_id}/release'.encode() in listing.data
         assert f'{prefix}/quarantine/{delete_id}/delete'.encode() in listing.data
         assert b'View' in listing.data and b'Release' in listing.data and b'Delete' in listing.data
-        assert b'Flush visible' in listing.data
+        assert b'Flush all' in listing.data
+        assert b'Flush visible' not in listing.data
         assert b'data-order="21"' in listing.data
         delete_url = f'{prefix}/quarantine/{delete_id}/delete'
         assert client.get(delete_url).status_code == 200

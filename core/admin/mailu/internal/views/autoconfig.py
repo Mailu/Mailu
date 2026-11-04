@@ -56,6 +56,55 @@ def autoconfig_mozilla():
 </clientConfig>\r\n'''
     return flask.Response(xml, mimetype='text/xml', status=200)
 
+
+@internal.route("/autoconfig/client")
+def autoconfig_client():
+    """Return the draft -07 AutoConfig format at its well-known URL."""
+    hostname = escape(app.config['HOSTNAME'])
+    scheme = 'http' if app.config['TLS_FLAVOR'] == 'notls' else 'https'
+    webdav_xml = ''
+    if app.config['WEBDAV'] != 'none':
+        webdav_url = f'{scheme}://{hostname}/webdav/'
+        webdav_xml = f'''<addressbook type="carddav">
+<url>{webdav_url}</url>
+<authentication system="http">Basic</authentication>
+<username>%EMAILADDRESS%</username>
+</addressbook>
+<calendar type="caldav">
+<url>{webdav_url}</url>
+<authentication system="http">Basic</authentication>
+<username>%EMAILADDRESS%</username>
+</calendar>'''
+    xml = f'''<?xml version="1.0" encoding="UTF-8"?>
+<clientConfig version="1.2">
+<emailProvider id="{hostname}">
+<displayName>Email</displayName>
+<displayShortName>Email</displayShortName>
+
+<incomingServer type="imap">
+<hostname>{hostname}</hostname>
+<port>993</port>
+<socketType>SSL</socketType>
+<authentication>password-cleartext</authentication>
+<username>%EMAILADDRESS%</username>
+</incomingServer>
+
+<outgoingServer type="smtp">
+<hostname>{hostname}</hostname>
+<port>465</port>
+<socketType>SSL</socketType>
+<authentication>password-cleartext</authentication>
+<username>%EMAILADDRESS%</username>
+</outgoingServer>
+
+<documentation url="https://{hostname}/admin/client">
+<descr lang="en">Configure your email client</descr>
+</documentation>
+</emailProvider>
+{webdav_xml}
+</clientConfig>\r\n'''
+    return flask.Response(xml, mimetype='text/xml', status=200)
+
 @internal.route("/autoconfig/microsoft.json")
 def autoconfig_microsoft_json():
     proto = flask.request.args.get('Protocol', 'Autodiscoverv1')

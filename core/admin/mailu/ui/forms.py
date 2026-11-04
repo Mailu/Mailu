@@ -73,7 +73,7 @@ class SpamSettingsForm(flask_wtf.FlaskForm):
     blacklist_domains = fields.TextAreaField(_('Blacklisted sender domains'), [validators.Length(max=65536)])
     whitelist_domains = fields.TextAreaField(_('Whitelisted sender domains'), [validators.Length(max=65536)])
     redirector_domains = fields.TextAreaField(_('URL redirector domains'), [validators.Length(max=65536)])
-    summary_enabled = fields.BooleanField(_('Enable quarantine summary emails'), default=False)
+    summary_enabled = fields.BooleanField(_('Enable quarantine summary emails'), default=True)
     summary_periodicity = fields.RadioField(_('Summary frequency'), choices=[
         ('1d', _('Every day')),
         ('1w', _('Every week')),

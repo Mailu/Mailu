@@ -1,2 +1,2 @@
-Allow administrators to configure daily, weekly, or monthly per-mailbox
-quarantine summaries with a test-send button and sanitized HTML template.
+Enable weekly per-mailbox quarantine summaries by default; administrators can
+still choose daily, weekly, or monthly delivery and edit the template.

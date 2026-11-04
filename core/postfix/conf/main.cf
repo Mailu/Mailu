@@ -136,5 +136,7 @@ milter_default_action = tempfail
 ###############
 # Extra Settings
 ###############
+maximal_queue_lifetime = 30d
+always_add_missing_headers = yes
 {# Ensure that the rendered file ends with newline in order to make `postconf` work correctly #}
 {{- "\n" }}

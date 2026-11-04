@@ -19,7 +19,7 @@
 </tr></thead>
 <tbody>
 {% for message in messages %}
-<tr{% if message.greylisted %} class="table-warning"{% endif %}>
+<tr{% if message.greylisted %} class="text-bg-secondary"{% endif %}>
   <td class="text-nowrap">{{ message.received }}</td>
   <td class="text-break">{{ message.subject or message.header_subject or _('(no subject)') }}</td>
   <td class="text-break">{{ message['from'] or message.header_from or '' }}</td>
@@ -29,9 +29,9 @@
   <td class="text-nowrap">
     {% if message.greylisted %}
       {% if message.size is defined %}
-      <a class="btn btn-sm btn-warning" href="{{ url_for('.greylist_release', record_id=message.id) }}">{% trans %}Release now{% endtrans %}</a>
+      <a class="btn btn-sm btn-secondary text-bg-secondary" href="{{ url_for('.greylist_release', record_id=message.id) }}">{% trans %}Release now{% endtrans %}</a>
       {% else %}
-      <span class="badge text-bg-warning">{% trans %}Greylisted · awaiting retry{% endtrans %}</span>
+      <span class="badge text-body-secondary">{% trans %}Greylisted · awaiting retry{% endtrans %}</span>
       {% endif %}
       <a class="btn btn-sm btn-outline-danger" href="{{ url_for('.quarantine_delete', message_id=message.id) }}">{% trans %}Delete copy{% endtrans %}</a>
     {% else %}

@@ -52,7 +52,12 @@ def test_mailu_issues_pkce_tokens_and_supports_refresh_and_revocation(app, clien
     response = client.get('/admin/oauth2/authorize', query_string=authorization)
     assert response.status_code == 200
     assert user.email.encode() in response.data
-    form_data = dict(authorization, csrf_token=csrf_token(response), approve='Allow access')
+    form_data = dict(
+        authorization,
+        csrf_token=csrf_token(response),
+        selected_scopes=['imap', 'smtp', 'offline_access'],
+        approve='Allow access',
+    )
     response = client.post('/admin/oauth2/authorize', data=form_data)
     assert response.status_code == 302
     callback = urlsplit(response.headers['Location'])

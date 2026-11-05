@@ -32,7 +32,7 @@ def test_legacy_autoconfig_prefers_oauth_with_password_fallback(client):
     root = ET.fromstring(response.get_data(as_text=True))
 
     assert root.attrib['version'] == '1.1'
-    assert [item.text for item in root.findall('.//authentication')] == [
+    assert [item.text for item in root.findall('.//emailProvider//authentication')] == [
         'OAuth2', 'password-cleartext', 'OAuth2', 'password-cleartext',
     ]
     assert root.find('oAuth2') is None

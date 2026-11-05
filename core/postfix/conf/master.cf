@@ -17,6 +17,7 @@ smtp      inet  n       -       y       -       -       smtpd
 # Internal quarantine reinjection. Keep Postfix routing, but do not rescan a
 # message after an administrator has learned it as ham and explicitly released it.
 10026     inet  n       -       y       -       -       smtpd
+  -o podop=socketmap:unix:/private/podop.socket:
   -o smtpd_milters=
   -o smtpd_sasl_auth_enable=no
   -o smtpd_client_restrictions=permit_mynetworks,reject

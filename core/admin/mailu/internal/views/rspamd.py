@@ -38,7 +38,19 @@ def rspamd_dkim_key(domain_name):
 
 @internal.route("/rspamd/local_domains", methods=['GET'])
 def rspamd_local_domains():
-    return '\n'.join(domain[0] for domain in models.Domain.query.with_entities(models.Domain.name).all() + models.Alternative.query.with_entities(models.Alternative.name).all())
+    domains = {domain[0] for domain in models.Domain.query.with_entities(models.Domain.name).all()}
+    domains.update(domain[0] for domain in
+                   models.Alternative.query.with_entities(models.Alternative.name).all())
+    content = '\n'.join(sorted(domains, key=str.casefold))
+    return rspamd_map_response(content)
+
+
+def rspamd_map_response(content):
+    """Serve an Rspamd map with cache validation headers."""
+    response = flask.Response(content, mimetype='text/plain; charset=utf-8')
+    response.headers['Cache-Control'] = 'public, max-age=30'
+    response.set_etag(hashlib.sha256(content.encode('utf-8')).hexdigest())
+    return response.make_conditional(flask.request)
 
 
 @internal.route('/rspamd/spam-map/<map_name>', methods=['GET'])
@@ -46,10 +58,7 @@ def rspamd_spam_map(map_name):
     content = spam_settings.map_content(map_name)
     if content is None:
         flask.abort(404)
-    response = flask.Response(content, mimetype='text/plain; charset=utf-8')
-    response.headers['Cache-Control'] = 'public, max-age=30'
-    response.set_etag(hashlib.sha256(content.encode('utf-8')).hexdigest())
-    return response
+    return rspamd_map_response(content)
 
 
 @internal.route('/rspamd/greylist', methods=['POST'])

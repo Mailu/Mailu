@@ -1,1 +1,1 @@
-Released quarantine and greylist messages now re-enter Postfix after ham learning, allowing normal alias, forwarding, mailbox, and relay routing without rerunning Rspamd.
+Released quarantine and greylist messages now re-enter Postfix after ham learning, allowing normal alias, forwarding, mailbox, and relay routing without rerunning Rspamd. The chrooted reinjection listener uses Postfix's Podop socket for recipient lookups. Rspamd map endpoints now share a 30-second cache policy and return 304 responses when their ETag is unchanged.

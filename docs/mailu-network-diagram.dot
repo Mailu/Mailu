@@ -123,7 +123,8 @@ digraph mailu {
     webmail -> proxy [label = "443/tcp"; color="darkgoldenrod"; fontcolor="darkgoldenrod";];
     
     admin -> redis [label = "6379/tcp"; color="green"; fontcolor="green";];
-    admin -> front [label = "2525/tcp"; color="green"; fontcolor="green";];
+    admin -> front [label = "2525/tcp (LMTP notifications)"; color="green"; fontcolor="green";];
+    admin -> smtp [label = "10026/tcp (quarantine reinjection; no Rspamd milter)"; color="green"; fontcolor="green";];
     
     antispam -> redis [label = "6379/tcp"; color="magenta"; fontcolor="magenta";];
     antispam -> admin [label = "8080/tcp"; color="magenta"; fontcolor="magenta";];

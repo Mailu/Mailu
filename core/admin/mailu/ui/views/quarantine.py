@@ -5,8 +5,11 @@ import flask
 import flask_login
 from flask import current_app as app
 
-from mailu import greylist, models, quarantine
+from mailu import greylist, quarantine, utils
 from mailu.ui import access, forms, ui
+
+
+QUARANTINE_REINJECTION_PORT = 10026
 
 
 def _visible(metadata, user):
@@ -18,11 +21,47 @@ def _visible_recipients(metadata, user):
 
 
 def _release_recipients(metadata, user):
-    recipients = _visible_recipients(metadata, user)
+    if user.global_admin:
+        # Preserve the original SMTP route so Postfix can apply aliases,
+        # forwarding and relayed-domain transports again.
+        recipients = metadata.get('envelope_recipients') or metadata.get('recipients', [])
+        if isinstance(recipients, str):
+            recipients = [recipients]
+        if not isinstance(recipients, list):
+            recipients = []
+        recipients = [address.strip() for address in recipients
+                      if isinstance(address, str) and utils.is_valid_email(address.strip())]
+    else:
+        recipients = [address for address in _visible_recipients(metadata, user)
+                      if utils.is_valid_email(address)]
     if not any(address.lower() == user.email.lower() for address in metadata.get('recipients', [])
                if isinstance(address, str)):
         recipients.append(user.email)
-    return recipients
+    return list(dict.fromkeys(recipients))
+
+
+def _release_sender(metadata):
+    """Return the captured SMTP envelope sender, including the null sender."""
+    sender = metadata.get('from') or metadata.get('sender') or ''
+    if sender in ('', '<>'):
+        return ''
+    if not isinstance(sender, str) or not utils.is_valid_email(sender):
+        flask.abort(400)
+    return sender
+
+
+def _reinject(raw_message, metadata, recipients, record_id, message_type):
+    """Put a learned message back into Postfix without invoking Rspamd again."""
+    sender = _release_sender(metadata)
+    try:
+        with smtplib.SMTP(host=app.config.get('SMTP_ADDRESS', 'smtp'),
+                          port=QUARANTINE_REINJECTION_PORT, timeout=10) as smtp:
+            refused = smtp.sendmail(sender, recipients, raw_message)
+            if refused:
+                raise smtplib.SMTPRecipientsRefused(refused)
+    except (smtplib.SMTPException, OSError):
+        app.logger.exception('%s release failed for %s', message_type, record_id)
+        flask.abort(503)
 
 
 @ui.route('/quarantine')
@@ -91,29 +130,19 @@ def quarantine_release(message_id):
         return flask.render_template('quarantine/release.html', message=metadata,
                                      recipients=recipients, form=form)
     selected = list(dict.fromkeys(flask.request.form.getlist('recipients')))
-    if not selected or any(recipient not in recipients for recipient in selected):
+    if not selected or any(recipient not in recipients or not utils.is_valid_email(recipient)
+                           for recipient in selected):
         flask.abort(400)
-    mailboxes = [models.User.get(recipient) for recipient in selected]
-    if any(not mailbox or not mailbox.enabled for mailbox in mailboxes):
-        flask.abort(404)
     learning_failures = quarantine.learn_ham(path.read_bytes())
-    sender = f"{app.config['POSTMASTER']}@{app.config['DOMAIN']}"
-    try:
-        with smtplib.LMTP(host=app.config['FRONT_ADDRESS'], port=2525, timeout=10) as lmtp:
-            refused = lmtp.sendmail(sender, selected, path.read_bytes())
-            if refused:
-                raise smtplib.SMTPRecipientsRefused(refused)
-    except (smtplib.SMTPException, OSError):
-        app.logger.exception('Quarantine release failed for %s', message_id)
-        flask.abort(503)
+    _reinject(path.read_bytes(), metadata, selected, message_id, 'Quarantine')
     quarantine.delete(message_id)
     if learning_failures:
         reason = '; '.join(learning_failures)
         app.logger.warning('Rspamd ham learning failed for quarantine message %s: %s',
                            message_id, reason)
-        flask.flash(f'Message released, but Rspamd ham learning failed ({reason}).', 'warning')
+        flask.flash(f'Message re-injected, but Rspamd ham learning failed ({reason}).', 'warning')
     else:
-        flask.flash('Message released to the mailbox and learned as ham.', 'success')
+        flask.flash('Message re-injected into Mailu and learned as ham.', 'success')
     return flask.redirect(flask.url_for('.quarantine_list'))
 
 
@@ -130,30 +159,20 @@ def greylist_release(record_id):
         return flask.render_template('quarantine/release.html', message=metadata,
                                      recipients=recipients, form=form, greylisted=True)
     selected = list(dict.fromkeys(flask.request.form.getlist('recipients')))
-    if not selected or any(recipient not in recipients for recipient in selected):
+    if not selected or any(recipient not in recipients or not utils.is_valid_email(recipient)
+                           for recipient in selected):
         flask.abort(400)
-    mailboxes = [models.User.get(recipient) for recipient in selected]
-    if any(not mailbox or not mailbox.enabled for mailbox in mailboxes):
-        flask.abort(404)
     raw_message = path.read_bytes()
     learning_failures = quarantine.learn_ham(raw_message)
-    sender = f"{app.config['POSTMASTER']}@{app.config['DOMAIN']}"
-    try:
-        with smtplib.LMTP(host=app.config['FRONT_ADDRESS'], port=2525, timeout=10) as lmtp:
-            refused = lmtp.sendmail(sender, selected, raw_message)
-            if refused:
-                raise smtplib.SMTPRecipientsRefused(refused)
-    except (smtplib.SMTPException, OSError):
-        app.logger.exception('Greylisted message release failed for %s', record_id)
-        flask.abort(503)
+    _reinject(raw_message, metadata, selected, record_id, 'Greylisted message')
     greylist.delete(record_id)
     if learning_failures:
         reason = '; '.join(learning_failures)
         app.logger.warning('Rspamd ham learning failed for released greylisted message %s: %s',
                            record_id, reason)
-        flask.flash(f'Message released, but Rspamd ham learning failed ({reason}).', 'warning')
+        flask.flash(f'Message re-injected, but Rspamd ham learning failed ({reason}).', 'warning')
     else:
-        flask.flash('Message released to the mailbox and learned as ham.', 'success')
+        flask.flash('Message re-injected into Mailu and learned as ham.', 'success')
     return flask.redirect(flask.url_for('.quarantine_list'))
 
 

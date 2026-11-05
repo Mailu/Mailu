@@ -220,7 +220,7 @@ def test_domain_admin_sees_greylist_and_can_release_it_on_quarantine_page(app, t
     released = []
     monkeypatch.setattr('mailu.ui.views.quarantine.quarantine.learn_ham', lambda raw: [])
 
-    class FakeLMTP:
+    class FakeSMTP:
         def __init__(self, **kwargs):
             pass
 
@@ -234,7 +234,7 @@ def test_domain_admin_sees_greylist_and_can_release_it_on_quarantine_page(app, t
             released.append((recipients, message))
             return {}
 
-    monkeypatch.setattr('mailu.ui.views.quarantine.smtplib.LMTP', FakeLMTP)
+    monkeypatch.setattr('mailu.ui.views.quarantine.smtplib.SMTP', FakeSMTP)
     release_url = f"/admin/quarantine/greylist/{entry['id']}/release"
     assert client.get(release_url).status_code == 200
     result = client.post(release_url, data={'recipients': 'user@example.net', 'submit': 'Release selected'})

@@ -12,7 +12,7 @@ import yaml
 from flask import current_app as app
 from flask.cli import FlaskGroup, with_appcontext
 
-from mailu import models
+from mailu import models, oauth2
 from mailu.schemas import MailuSchema, Logger, RenderJSON
 
 
@@ -51,6 +51,17 @@ def import_legacy_dkim_keys():
     if models.inspect(models.db.engine).has_table('dkim_key'):
         for domain in models.Domain.query.all():
             domain._import_legacy_dkim_key()
+
+
+@mailu.command('cleanup-oauth2')
+@with_appcontext
+def cleanup_oauth2():
+    """Remove expired OAuth authorization codes and old grant rows."""
+    removed_codes, removed_grants = oauth2.cleanup_expired_records()
+    click.echo(
+        f'Removed {removed_codes} expired OAuth authorization codes and '
+        f'{removed_grants} expired OAuth grants'
+    )
 
 
 @mailu.command()

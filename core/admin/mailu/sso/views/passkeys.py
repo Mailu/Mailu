@@ -182,7 +182,7 @@ def passkey_signup_register(token):
         )
         return flask.jsonify(error=str(exc)), exc.status
 
-    user.password = models.User.get_password_context().hash(secrets.token_urlsafe(32))
+    user.set_password(secrets.token_urlsafe(32))
     user.change_pw_next_login = False
     try:
         models.db.session.add(user)

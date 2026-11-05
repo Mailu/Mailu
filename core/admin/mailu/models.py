@@ -5,8 +5,9 @@ import os
 import json
 import base64
 import hashlib
+import secrets
 
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from email.mime import text, multipart
 from itertools import chain
 
@@ -271,42 +272,27 @@ class Domain(Base):
 
     @cached_property
     def dns_autoconfig(self):
-        """ return list of auto configuration records (RFC6186) """
-        ports = {int(port.strip()) for port in app.config['PORTS'].split(',')}.union({465, 993})
+        """Return legacy autoconfig aliases and WebDAV discovery records."""
         hostname = app.config['HOSTNAME']
-        protocols = [
-            ('imap', 143, 20),
-            ('pop3', 110, 20),
-            ('submission', 587, 20),
-        ]
-        if app.config['TLS_FLAVOR'] != 'notls':
-            protocols.extend([
-                ('autodiscover', 443, 10),
-                ('submissions', 465, 10),
-                ('imaps', 993, 10),
-                ('pop3s', 995, 10),
-            ])
-
         webdav_records = []
         if app.config['WEBDAV'] != 'none':
             if app.config['TLS_FLAVOR'] == 'notls':
-                protocols.extend([('carddav', 80, 10), ('caldav', 80, 10)])
-                webdav_protocols = ('carddav', 'caldav')
+                webdav_protocols = (('carddav', 80), ('caldav', 80))
             else:
-                protocols.extend([('carddavs', 443, 10), ('caldavs', 443, 10)])
-                webdav_protocols = ('carddavs', 'caldavs')
-            webdav_records = [
-                f'_{proto}._tcp.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN TXT "path=/webdav/"'
-                for proto in webdav_protocols
-            ]
+                webdav_protocols = (('carddavs', 443), ('caldavs', 443))
+            ports = {int(port.strip()) for port in app.config['PORTS'].split(',')}
+            domain = idna.encode(self.name.lower()).decode("ascii")
+            target = idna.encode(hostname.lower()).decode("ascii")
+            for proto, port in webdav_protocols:
+                srv_target = f'10 1 {port} {target}.' if port in ports else '0 0 0 .'
+                webdav_records.append(
+                    f'_{proto}._tcp.{domain}. 600 IN SRV {srv_target}'
+                )
+                webdav_records.append(
+                    f'_{proto}._tcp.{domain}. 600 IN TXT "path=/webdav/"'
+                )
 
-        srv_records = [
-            f'_{proto}._tcp.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN SRV {prio} 1 {port} {idna.encode(hostname.lower()).decode("ascii")}.' if port in ports else f'_{proto}._tcp.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN SRV 0 0 0 .'
-            for proto, port, prio
-            in protocols
-        ]
-
-        return srv_records + webdav_records + [
+        return webdav_records + [
             f'autoconfig.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN CNAME {idna.encode(hostname.lower()).decode("ascii")}.',
             f'autodiscover.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN CNAME {idna.encode(hostname.lower()).decode("ascii")}.'
         ]
@@ -817,6 +803,9 @@ in clear-text regardless of the presence of the cache.
 set() containing the sessions to keep
         """
         self.password = password if raw else User.get_password_context().hash(password)
+        if sqlalchemy.inspect(self).persistent:
+            from mailu.oauth2 import force_user_reauthentication
+            force_user_reauthentication(self, 'password changed')
         if keep_sessions is not True and self.email is not None:
             utils.MailuSessionExtension.prune_sessions(uid=self.email, keep=keep_sessions)
 
@@ -1077,6 +1066,58 @@ class Token(Base):
 
     def __repr__(self):
         return f'<Token #{self.id}: {self.comment or self.ip or self.password}>'
+
+
+class OAuth2AuthorizationCode(Base):
+    """One-time, PKCE-bound authorization code for a native mail client."""
+
+    __tablename__ = 'oauth2_authorization_code'
+
+    code_hash = db.Column(db.String(64), primary_key=True)
+    user_email = db.Column(db.String(255), db.ForeignKey(User.email, ondelete='CASCADE'), nullable=False, index=True)
+    user = db.relationship(User, backref=db.backref('oauth2_authorization_codes', cascade='all, delete-orphan'))
+    client_id = db.Column(db.String(80), nullable=False)
+    redirect_uri = db.Column(db.String(2048), nullable=False)
+    scope = db.Column(db.String(255), nullable=False)
+    code_challenge = db.Column(db.String(128), nullable=False)
+    expires_at = db.Column(db.Integer, nullable=False, index=True)
+
+
+class OAuth2Grant(Base):
+    """Revocable OAuth access and refresh tokens for one authorized client."""
+
+    __tablename__ = 'oauth2_grant'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_email = db.Column(db.String(255), db.ForeignKey(User.email, ondelete='CASCADE'), nullable=False, index=True)
+    user = db.relationship(User, backref=db.backref('oauth2_grants', cascade='all, delete-orphan'))
+    grant_id = db.Column(
+        db.String(22), nullable=False, unique=True,
+        default=lambda: secrets.token_urlsafe(16),
+    )
+    client_id = db.Column(db.String(80), nullable=False)
+    token_generation = db.Column(db.Integer, nullable=False, default=0)
+    scope = db.Column(db.String(255), nullable=False)
+    access_expires_at = db.Column(db.Integer, nullable=False, index=True)
+    refresh_expires_at = db.Column(db.Integer, nullable=True, index=True)
+    client_name = db.Column(db.String(120), nullable=False, default='Mail app')
+    last_refresh_at = db.Column(db.Integer, nullable=True)
+
+    @property
+    def access_expiration(self):
+        return datetime.fromtimestamp(self.access_expires_at, timezone.utc)
+
+    @property
+    def last_refresh(self):
+        return datetime.fromtimestamp(self.last_refresh_at, timezone.utc) if self.last_refresh_at else None
+
+    @property
+    def last_token_rotation(self):
+        if self.last_refresh_at:
+            return datetime.fromtimestamp(self.last_refresh_at, timezone.utc)
+        return self.access_expiration - timedelta(
+            seconds=app.config['OAUTH2_ACCESS_TOKEN_TTL'],
+        )
 
 
 class Fetch(Base):

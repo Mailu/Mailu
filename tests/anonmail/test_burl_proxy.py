@@ -21,6 +21,7 @@ def test_front_accepts_the_public_urlauth_host():
     config = (ROOT / 'core/nginx/dovecot/proxy.conf').read_text()
 
     assert 'imap_urlauth_host = {{ HOSTNAMES.split(",")[0] }}' in config
+    assert 'issuers = {{ oauth2_issuers }}' in config
     assert re.search(r'imap_capability\s*\{\s*METADATA = yes\s*URLAUTH = yes', config)
 
 

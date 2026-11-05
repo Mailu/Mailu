@@ -136,6 +136,19 @@ def test_quarantine_release_always_offers_logged_in_user_once():
     ]
 
 
+def test_global_admin_release_preserves_original_envelope_recipients():
+    admin = type('Admin', (), {
+        'global_admin': True, 'email': 'admin@example.com', 'manager_of': [],
+    })()
+    metadata = {
+        'recipients': ['mailbox@example.com'],
+        'envelope_recipients': ['alias@relay.example.net'],
+    }
+    assert _release_recipients(metadata, admin) == [
+        'alias@relay.example.net', 'admin@example.com',
+    ]
+
+
 def test_quarantine_symbols_are_presented_as_named_scores_and_options():
     assert _symbols([
         {'name': 'BAYES_SPAM', 'score': 3.2, 'options': ['high']},
@@ -152,6 +165,7 @@ def test_quarantine_symbols_are_presented_as_named_scores_and_options():
 def test_quarantine_list_and_release_use_message_uuid(app, client, tmp_path, monkeypatch):
     monkeypatch.setattr(quarantine, 'directory', lambda: tmp_path)
     app.config['WTF_CSRF_ENABLED'] = False
+    app.config.setdefault('SMTP_ADDRESS', 'smtp')
     with app.app_context():
         domain = models.Domain(name='example.com')
         models.db.session.add(domain)
@@ -162,7 +176,8 @@ def test_quarantine_list_and_release_use_message_uuid(app, client, tmp_path, mon
         models.db.session.commit()
         message_id = quarantine.store(
             b'Subject: test\r\n\r\nbody',
-            {'recipients': [admin.email], 'subject': 'test', 'score': 12.0},
+            {'recipients': [admin.email], 'subject': 'test', 'score': 12.0,
+             'from': 'sender@example.net'},
         )
         delete_id = quarantine.store(b'Subject: delete\r\n\r\nbody',
                                      {'recipients': [admin.email], 'subject': 'delete'})
@@ -192,9 +207,9 @@ def test_quarantine_list_and_release_use_message_uuid(app, client, tmp_path, mon
         learned = []
         monkeypatch.setattr(quarantine, 'learn_ham', lambda raw: learned.append(raw) or [])
 
-        class FakeLMTP:
+        class FakeSMTP:
             def __init__(self, **kwargs):
-                pass
+                smtp_options.append(kwargs)
 
             def __enter__(self):
                 return self
@@ -206,10 +221,14 @@ def test_quarantine_list_and_release_use_message_uuid(app, client, tmp_path, mon
                 deliveries.append((sender, recipients, message))
                 return {}
 
-        monkeypatch.setattr('mailu.ui.views.quarantine.smtplib.LMTP', FakeLMTP)
+        smtp_options = []
+        monkeypatch.setattr('mailu.ui.views.quarantine.smtplib.SMTP', FakeSMTP)
         response = client.post(release_url, data={'recipients': admin.email, 'submit': 'Release'})
         assert response.status_code == 302
-        assert deliveries == [(f"{app.config['POSTMASTER']}@{app.config['DOMAIN']}",
+        assert smtp_options == [{
+            'host': app.config.get('SMTP_ADDRESS', 'smtp'), 'port': 10026, 'timeout': 10,
+        }]
+        assert deliveries == [('sender@example.net',
                                [admin.email], b'Subject: test\r\n\r\nbody')]
         assert learned == [b'Subject: test\r\n\r\nbody']
         assert quarantine.get(message_id) is None
@@ -234,6 +253,70 @@ def test_quarantine_list_and_release_use_message_uuid(app, client, tmp_path, mon
         assert client.get(flush_url).status_code == 200
         assert client.post(flush_url, data={'submit': 'Delete permanently'}).status_code == 302
         assert quarantine.get(flush_id) is None
+
+
+def test_quarantine_release_reinjects_external_recipient(app, client, tmp_path, monkeypatch):
+    monkeypatch.setattr(quarantine, 'directory', lambda: tmp_path)
+    app.config['WTF_CSRF_ENABLED'] = False
+    app.config.setdefault('SMTP_ADDRESS', 'smtp')
+    relay_recipient = 'recipient@relay.example.net'
+    with app.app_context():
+        domain = models.Domain(name='example.com')
+        models.db.session.add(domain)
+        admin = models.User(localpart='admin', domain_name='example.com', global_admin=True)
+        admin.set_password('password')
+        models.db.session.add_all([admin, models.Relay(name='relay.example.net', smtp='smtp:25')])
+        models.db.session.commit()
+        message_id = quarantine.store(
+            b'Subject: relayed message\r\n\r\nbody',
+            {
+                'recipients': [relay_recipient],
+                'envelope_recipients': [relay_recipient],
+                'from': 'sender@example.net',
+                'subject': 'relayed message',
+            },
+        )
+        with client.session_transaction() as session:
+            session['_user_id'] = admin.get_id()
+            session['_fresh'] = True
+
+    page = client.get(f"{app.config['WEB_ADMIN']}/quarantine/{message_id}/release")
+    assert page.status_code == 200
+    assert relay_recipient.encode() in page.data
+
+    events = []
+    monkeypatch.setattr(quarantine, 'learn_ham', lambda raw: events.append(('learn', raw)) or [])
+
+    class FakeSMTP:
+        def __init__(self, **kwargs):
+            events.append(('connect', kwargs))
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def sendmail(self, sender, recipients, message):
+            events.append(('send', sender, recipients, message))
+            return {}
+
+    monkeypatch.setattr('mailu.ui.views.quarantine.smtplib.SMTP', FakeSMTP)
+    response = client.post(
+        f"{app.config['WEB_ADMIN']}/quarantine/{message_id}/release",
+        data={'recipients': relay_recipient, 'submit': 'Release'},
+    )
+
+    assert response.status_code == 302
+    assert events == [
+        ('learn', b'Subject: relayed message\r\n\r\nbody'),
+        ('connect', {
+            'host': app.config.get('SMTP_ADDRESS', 'smtp'), 'port': 10026, 'timeout': 10,
+        }),
+        ('send', 'sender@example.net', [relay_recipient],
+         b'Subject: relayed message\r\n\r\nbody'),
+    ]
+    assert quarantine.get(message_id) is None
 
 
 def test_quarantine_flush_only_deletes_messages_visible_to_user(app, client, tmp_path, monkeypatch):

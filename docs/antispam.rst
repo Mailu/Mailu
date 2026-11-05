@@ -20,8 +20,9 @@ Rspamd rejects non-compliant email messages and email messages that contain viru
 
 Rejected messages are retained in the quarantine for 90 days. Administrators can
 view all quarantined messages, while mailbox users can view messages addressed
-to them. Release submits the original message through Mailu's internal LMTP
-delivery path, bypassing the original Rspamd decision. A bounded text preview
+to them. Release submits the original message to Postfix through an internal
+reinjection listener, bypassing the original Rspamd decision while preserving
+normal mailbox, alias, forwarding, and relay routing. A bounded text preview
 is escaped before display; attachments are not rendered in the quarantine view.
 
 Rspamd's rejection thresholds remain configurable in the Rspamd WebUI. Lowering
@@ -212,11 +213,16 @@ highlight. Both rejected and greylisted copies use the same file-backed
 repository, with a record kind controlling their lifecycle: rejected messages
 are retained for 90 days and pending greylist retries for seven. Mailu
 temporarily saves a greylisted copy so an administrator can release it
-immediately through the internal LMTP delivery path. Rspamd retry scans are
+immediately through Postfix's internal reinjection listener. Rspamd retry scans are
 correlated by Message-ID; an accepted retry removes only the pending greylist
 record. Since a greylisted message was already temporarily rejected, the sender
 may still retry after an administrator releases the saved copy, which can result
 in a duplicate delivery.
+
+Releasing a message first submits it to Rspamd's ham learners, then injects it
+through a private Postfix SMTP listener. This bypasses a second Rspamd decision
+while allowing Postfix to apply the selected envelope recipients' normal alias,
+forwarding, mailbox, and relay routing.
 
 The same Spam settings page can enable quarantine summary emails and set a daily,
 weekly, or monthly cadence. Each enabled mailbox receives only the quarantined

@@ -2,7 +2,7 @@
 {% block title %}{% if greylisted %}{% trans %}Release greylisted message{% endtrans %}{% else %}{% trans %}Release quarantined message{% endtrans %}{% endif %}{% endblock %}
 {% block content %}
 {% call macros.card(theme="warning") %}
-<p class="mb-3">{% if greylisted %}{% trans %}Send this saved message to the selected recipients now, without waiting for the sender to retry.{% endtrans %}{% else %}{% trans %}Choose which original recipients should receive this quarantined message.{% endtrans %}{% endif %}</p>
+<p class="mb-3">{% if greylisted %}{% trans %}Re-inject this saved message through Mailu to the selected recipients now, without waiting for the sender to retry.{% endtrans %}{% else %}{% trans %}Choose which recipients should receive this quarantined message. Mailu will apply its normal delivery routing.{% endtrans %}{% endif %}</p>
 <form method="post">
   {{ form.hidden_tag() }}
   <fieldset class="mb-3">

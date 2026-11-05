@@ -1,0 +1,38 @@
+{%- extends "base.html" %}
+
+{%- block title %}
+{% trans %}Authorized mail apps{% endtrans %}
+{%- endblock %}
+
+{% block content %}
+<div class="alert alert-info" role="alert">
+  {% trans %}These OAuth sessions let mail apps connect without storing an app token. Revoke a session if you no longer use that device. Your existing authentication tokens are managed separately.{% endtrans %}
+</div>
+{%- call macros.table(order='[[3,"desc"]]') %}
+<thead>
+  <tr>
+    <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}Mail app{% endtrans %}</th>
+    <th>{% trans %}Created{% endtrans %}</th>
+    <th>{% trans %}Last re-authentication{% endtrans %}</th>
+    <th>{% trans %}Last token rotation{% endtrans %}</th>
+    <th>{% trans %}Permissions{% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
+  {% for grant in grants %}
+  <tr{% if grant.id in expired_grant_ids %} class="user-disabled text-body-secondary"{% endif %}>
+    <td class="text-nowrap">
+      <a href="{{ url_for('.oauth2_token_reauthenticate', grant_id=grant.id) }}" title="{% trans %}Force re-authentication{% endtrans %}"><i class="fa-solid fa-rotate"></i></a>&nbsp;
+      <a href="{{ url_for('.oauth2_token_revoke', grant_id=grant.id) }}" title="{% trans %}Revoke{% endtrans %}"><i class="fa-solid fa-trash"></i></a>
+    </td>
+    <td>{{ grant.client_name }}</td>
+    <td data-sort="{{ grant.created_at or '0000-00-00' }}">{{ grant.created_at | format_date }}</td>
+    <td data-sort="{{ grant.last_refresh_at or 0 }}">{{ grant.last_refresh | format_datetime if grant.last_refresh else _('Never') }}</td>
+    <td data-sort="{{ grant.last_token_rotation.timestamp() }}">{{ grant.last_token_rotation | format_datetime }}</td>
+    <td>{{ grant.scope }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
+{%- endcall %}
+{% endblock %}

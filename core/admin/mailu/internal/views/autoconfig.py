@@ -5,6 +5,17 @@ from xml.sax.saxutils import escape, quoteattr
 from flask import current_app as app
 import flask
 
+
+def oauth2_xml():
+    return f'''<oAuth2>
+<issuer>{escape(app.config['OAUTH2_ISSUER'])}</issuer>
+<authURL>{escape(app.config['OAUTH2_AUTH_URL'])}</authURL>
+<tokenURL>{escape(app.config['OAUTH2_TOKEN_URL'])}</tokenURL>
+<scope>{escape(app.config['OAUTH2_SCOPE'])}</scope>
+<clientID>{escape(app.config['OAUTH2_CLIENT_ID'])}</clientID>
+</oAuth2>'''
+
+
 @internal.route("/autoconfig/mozilla")
 def autoconfig_mozilla():
     # https://wiki.mozilla.org/Thunderbird:Autoconfiguration:ConfigFileFormat
@@ -35,6 +46,7 @@ def autoconfig_mozilla():
 <port>993</port>
 <socketType>SSL</socketType>
 <username>%EMAILADDRESS%</username>
+<authentication>OAuth2</authentication>
 <authentication>password-cleartext</authentication>
 </incomingServer>
 
@@ -43,6 +55,7 @@ def autoconfig_mozilla():
 <port>465</port>
 <socketType>SSL</socketType>
 <username>%EMAILADDRESS%</username>
+<authentication>OAuth2</authentication>
 <authentication>password-cleartext</authentication>
 <addThisServer>true</addThisServer>
 <useGlobalPreferredServer>false</useGlobalPreferredServer>
@@ -85,6 +98,7 @@ def autoconfig_client():
 <hostname>{hostname}</hostname>
 <port>993</port>
 <socketType>SSL</socketType>
+<authentication>OAuth2</authentication>
 <authentication>password-cleartext</authentication>
 <username>%EMAILADDRESS%</username>
 </incomingServer>
@@ -93,6 +107,7 @@ def autoconfig_client():
 <hostname>{hostname}</hostname>
 <port>465</port>
 <socketType>SSL</socketType>
+<authentication>OAuth2</authentication>
 <authentication>password-cleartext</authentication>
 <username>%EMAILADDRESS%</username>
 </outgoingServer>
@@ -102,6 +117,7 @@ def autoconfig_client():
 </documentation>
 </emailProvider>
 {webdav_xml}
+{oauth2_xml()}
 </clientConfig>\r\n'''
     return flask.Response(xml, mimetype='text/xml', status=200)
 

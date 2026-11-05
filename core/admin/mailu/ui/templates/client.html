@@ -11,7 +11,8 @@
 {%- block content %}
 <div class="alert alert-info" role="alert">
   <p>{% trans %}Create a separate authentication token for each email app or device. Enter the token in the app's password field for both incoming (IMAP) and outgoing (SMTP) mail, and let the app remember it.{% endtrans %}</p>
-  <a class="btn btn-primary" href="{{ url_for('.token_create') }}">{% trans %}Create an authentication token{% endtrans %}</a>
+  <a class="btn btn-primary me-2" href="{{ url_for('.token_create') }}">{% trans %}Create an authentication token{% endtrans %}</a>
+  <a class="btn btn-primary" href="{{ url_for('.thunderbird_oauth_addon', v=thunderbird_addon_version) }}">{% trans %}Download Thunderbird OAuth2 add-on (.xpi){% endtrans %}</a>
 </div>
 {%- call macros.table(title=_("Incoming mail"), datatable=False) %}
   <tbody>

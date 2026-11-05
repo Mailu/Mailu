@@ -5,6 +5,7 @@ from passlib import pwd
 
 import flask
 import flask_login
+import time
 import wtforms_components
 
 
@@ -56,3 +57,81 @@ def token_delete(token_id):
     flask.flash('Authentication token deleted')
     return flask.redirect(
         flask.url_for('.token_list', user_email=user.email))
+
+
+@ui.route('/oauth2/tokens', defaults={'user_email': None})
+@ui.route('/oauth2/tokens/<path:user_email>')
+@access.owner(models.User, 'user_email')
+def oauth2_token_list(user_email):
+    user_email = user_email or flask_login.current_user.email
+    user = models.db.session.get(models.User, user_email) or flask.abort(404)
+    now = int(time.time())
+    refresh_ttl = flask.current_app.config['OAUTH2_REFRESH_TOKEN_TTL']
+    refresh_idle = flask.current_app.config['OAUTH2_REFRESH_TOKEN_IDLE']
+    expired_grant_ids = set()
+    for grant in user.oauth2_grants:
+        if grant.refresh_expires_at is None:
+            needs_reauthentication = grant.access_expires_at <= now
+        else:
+            last_use = grant.last_refresh_at
+            if last_use is None:
+                last_use = grant.refresh_expires_at - refresh_ttl
+            needs_reauthentication = (
+                grant.refresh_expires_at <= now
+                or last_use is None
+                or last_use + refresh_idle <= now
+            )
+        if needs_reauthentication:
+            expired_grant_ids.add(grant.id)
+    return flask.render_template(
+        'oauth2_tokens.html',
+        user=user,
+        expired_grant_ids=expired_grant_ids,
+        grants=sorted(user.oauth2_grants,
+                      key=lambda grant: grant.last_refresh_at or 0, reverse=True),
+    )
+
+
+@ui.route('/oauth2/tokens/revoke/<int:grant_id>', methods=['GET', 'POST'])
+@access.owner(models.OAuth2Grant, 'grant_id')
+@access.confirmation_required(lambda grant_id: _oauth_revoke_confirmation(grant_id))
+def oauth2_token_revoke(grant_id):
+    grant = models.db.session.get(models.OAuth2Grant, grant_id) or flask.abort(404)
+    user_email = grant.user.email
+    models.db.session.delete(grant)
+    models.db.session.commit()
+    flask.flash('Mail app access revoked')
+    return flask.redirect(flask.url_for('.oauth2_token_list', user_email=user_email))
+
+
+@ui.route('/oauth2/tokens/reauthenticate/<int:grant_id>', methods=['GET', 'POST'])
+@access.owner(models.OAuth2Grant, 'grant_id')
+@access.confirmation_required(lambda grant_id: _oauth_reauthentication_confirmation(grant_id))
+def oauth2_token_reauthenticate(grant_id):
+    grant = models.db.session.get(models.OAuth2Grant, grant_id) or flask.abort(404)
+    user_email = grant.user.email
+    now = int(time.time())
+    grant.access_expires_at = min(grant.access_expires_at, now)
+    if grant.refresh_expires_at is not None:
+        grant.refresh_expires_at = min(grant.refresh_expires_at, now)
+    models.db.session.commit()
+    flask.flash('Mail app must sign in again')
+    return flask.redirect(flask.url_for('.oauth2_token_list', user_email=user_email))
+
+
+def _oauth_revoke_confirmation(grant_id):
+    grant = models.db.session.get(models.OAuth2Grant, grant_id) or flask.abort(404)
+    return utils.flask_babel.gettext(
+        'revoke OAuth access for %(client)s (grant #%(grant_id)s)',
+        client=grant.client_name or 'Mail app',
+        grant_id=grant.id,
+    )
+
+
+def _oauth_reauthentication_confirmation(grant_id):
+    grant = models.db.session.get(models.OAuth2Grant, grant_id) or flask.abort(404)
+    return utils.flask_babel.gettext(
+        'force %(client)s (grant #%(grant_id)s) to authenticate again by expiring its OAuth tokens',
+        client=grant.client_name or 'Mail app',
+        grant_id=grant.id,
+    )

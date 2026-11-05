@@ -93,6 +93,8 @@ DEFAULT_CONFIG = {
     'PASSKEY_RP_ID': '',
     'PASSKEY_REQUIRED': False,
     'ACCOUNT_SETUP_TOKEN_TTL': 7 * 24 * 3600,
+    'OAUTH2_REFRESH_TOKEN_TTL': 90 * 24 * 3600,
+    'OAUTH2_REFRESH_TOKEN_IDLE': 7 * 24 * 3600,
     'CREDENTIAL_ROUNDS': 13,
     'TLS_PERMISSIVE': True,
     'TZ': 'Etc/UTC',
@@ -151,6 +153,16 @@ class ConfigManager:
         self.config['ACCOUNT_SETUP_TOKEN_TTL'] = int(
             self.config['ACCOUNT_SETUP_TOKEN_TTL'],
         )
+        self.config['OAUTH2_REFRESH_TOKEN_TTL'] = int(
+            self.config['OAUTH2_REFRESH_TOKEN_TTL'],
+        )
+        self.config['OAUTH2_REFRESH_TOKEN_IDLE'] = int(
+            self.config['OAUTH2_REFRESH_TOKEN_IDLE'],
+        )
+        if self.config['OAUTH2_REFRESH_TOKEN_TTL'] <= 0:
+            raise ValueError('OAUTH2_REFRESH_TOKEN_TTL must be a positive number of seconds')
+        if self.config['OAUTH2_REFRESH_TOKEN_IDLE'] <= 0:
+            raise ValueError('OAUTH2_REFRESH_TOKEN_IDLE must be a positive number of seconds')
         self.config['QUARANTINE_RETENTION_DAYS'] = int(self.config['QUARANTINE_RETENTION_DAYS'])
         self.config['QUARANTINE_MAX_MESSAGE_BYTES'] = int(self.config['QUARANTINE_MAX_MESSAGE_BYTES'])
 
@@ -178,6 +190,13 @@ class ConfigManager:
         hostnames = [host.strip() for host in self.config['HOSTNAMES'].split(',')]
         self.config['HOSTNAMES'] = ','.join(hostnames)
         self.config['HOSTNAME'] = hostnames[0]
+        oauth2_scheme = 'http' if self.config['TLS_FLAVOR'] == 'notls' else 'https'
+        self.config['OAUTH2_ISSUER'] = f"{oauth2_scheme}://{self.config['HOSTNAME']}"
+        oauth2_prefix = f"{self.config['WEB_ADMIN'].rstrip('/')}/oauth2"
+        self.config['OAUTH2_AUTH_URL'] = f"{self.config['OAUTH2_ISSUER']}{oauth2_prefix}/authorize"
+        self.config['OAUTH2_TOKEN_URL'] = f"{self.config['OAUTH2_ISSUER']}{oauth2_prefix}/token"
+        self.config['OAUTH2_CLIENT_ID'] = 'mailu'
+        self.config['OAUTH2_SCOPE'] = 'imap smtp pop3 sieve offline_access'
         self.config['DEFAULT_SPAM_THRESHOLD'] = int(self.config['DEFAULT_SPAM_THRESHOLD'])
         self.config['ANONMAIL_MAX_RETRIES'] = int(self.config['ANONMAIL_MAX_RETRIES'])
         self.config['PROXY_AUTH_WHITELIST'] = set(ipaddress.ip_network(cidr, False) for cidr in (cidr.strip() for cidr in self.config['PROXY_AUTH_WHITELIST'].split(',')) if cidr)

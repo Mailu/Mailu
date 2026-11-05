@@ -475,5 +475,66 @@ The ``mailu_signin_target`` cookie remembers only the selected application for o
 
 Use ``PROXY_AUTH_LOGOUT_URL`` (default: unset) to redirect users to a specific URL after they have been logged out.
 
+OAuth2 authentication for native mail clients
+----------------------------------------------
+
+Mailu provides an OAuth 2.0 issuer for native mail clients. The issuer uses
+the primary ``HOSTNAME`` and the configured ``WEB_ADMIN`` path. OAuth is always
+available and needs no extra environment variables. The draft -07 AutoConfig
+document advertises the Mailu authorization and token endpoints, the public
+``mailu`` client ID, and the ``imap smtp pop3 sieve offline_access`` scopes. Password
+authentication and existing app tokens remain available.
+
+OAuth access and refresh tokens use a dedicated signing key stored in Mailu's
+database-backed config table. It is generated when OAuth tokens are first
+issued and is independent of ``SECRET_KEY``, so rotating ``SECRET_KEY`` does not
+invalidate OAuth tokens. Back up and share the database across admin replicas;
+deleting or replacing this config entry invalidates OAuth tokens.
+
+The authorization-code flow requires PKCE with ``S256``. Users sign in with
+their Mailu account in the browser and approve mailbox access. Mailu issues
+access tokens (24 hours by default) and rotating refresh tokens. Set
+``OAUTH2_ACCESS_TOKEN_TTL`` in ``mailu.env`` to configure access-token lifetime
+in seconds. Reuse of a rotated refresh
+token revokes the entire grant family. For grants with ``offline_access``, an
+access token never outlives the refresh token's absolute expiry or current idle
+deadline. Set ``OAUTH2_REFRESH_TOKEN_TTL`` in
+``mailu.env`` to control the absolute refresh token lifetime in seconds
+(default: 7776000, or 90 days), and ``OAUTH2_REFRESH_TOKEN_IDLE`` to control
+the maximum inactivity period (default: 604800, or one week). In the account settings,
+users can review and revoke authorized mail apps separately from static app
+tokens. The authorized-app list shows the client name, last token refresh, and
+last mail connection address. Dovecot checks access tokens against Mailu's
+private introspection endpoint and accepts ``OAUTHBEARER`` and ``XOAUTH2`` for
+IMAP, SMTP, POP3, and ManageSieve. Thunderbird uses XOAUTH2. Each protocol
+checks its corresponding scope,
+and POP3 remains subject to the user's POP3 setting. Both the draft -07 and
+legacy Thunderbird AutoConfig formats
+prefer OAuth2 while retaining password authentication as a fallback. The
+Thunderbird provider add-on on ``/admin/client`` recognizes every hostname in
+``HOSTNAMES``.
+
+OAuth authorization server metadata is available at
+``/.well-known/oauth-authorization-server``. It advertises the authorization,
+token, and revocation endpoints, supported scopes and grants, query response
+mode, ``none`` client authentication at the token and revocation endpoints,
+and PKCE with ``S256``.
+
+Authorization responses include the ``iss`` parameter from RFC 9207 when the
+issuer uses HTTPS, and metadata advertises this support. Password changes
+expire existing OAuth access and refresh tokens and require each mail app to
+authenticate again. The consent screen shows the public client ID; this ID
+identifies the client registration but does not prove which application is
+using it.
+
+The consent screen lets users select the protocol scopes granted to each app.
+The buttons appear in IMAP, POP3 (when enabled for the user), SMTP, SIEVE,
+and ``offline_access`` order; hover over a button for its description.
+``offline_access`` allows an app to refresh its access token without
+another sign-in. If it is not granted, Mailu does not issue a refresh token and
+the user must authorize the app again after the access token expires. The
+Thunderbird add-on publishes a self-hosted update manifest; its manifest is
+cached for one day and each versioned XPI is cached for one year.
+
 .. _`1972`: https://github.com/Mailu/Mailu/issues/1972
 .. _`2692`: https://github.com/Mailu/Mailu/issues/2692

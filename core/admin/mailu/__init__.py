@@ -90,7 +90,7 @@ def create_app_from_config(config):
     app.route('/ping')(ping)
 
     # Import views
-    from mailu import ui, internal, sso, api
+    from mailu import ui, internal, sso, api, oauth2
     from mailu.ui.views.users import wkd_lookup, wkd_policy
     app.register_blueprint(ui.ui, url_prefix=app.config['WEB_ADMIN'])
     app.add_url_rule('/.well-known/openpgpkey/hu/<key_hash>', 'wkd_lookup', wkd_lookup)
@@ -109,6 +109,12 @@ def create_app_from_config(config):
 
     app.register_blueprint(internal.internal, url_prefix='/internal')
     app.register_blueprint(sso.sso, url_prefix='/sso')
+    oauth2_prefix = f"{app.config['WEB_ADMIN'].rstrip('/')}/oauth2"
+    app.register_blueprint(oauth2.oauth2, url_prefix=oauth2_prefix)
+    app.add_url_rule(
+        '/.well-known/oauth-authorization-server',
+        'oauth2_server_metadata', oauth2.server_metadata,
+    )
     api.register(app, web_api_root=app.config.get('WEB_API'))
     @app.after_request
     def add_wkd_cors_headers(response):

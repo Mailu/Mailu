@@ -5,8 +5,9 @@ import os
 import json
 import base64
 import hashlib
+import secrets
 
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from email.mime import text, multipart
 from itertools import chain
 
@@ -802,6 +803,9 @@ in clear-text regardless of the presence of the cache.
 set() containing the sessions to keep
         """
         self.password = password if raw else User.get_password_context().hash(password)
+        if sqlalchemy.inspect(self).persistent:
+            from mailu.oauth2 import force_user_reauthentication
+            force_user_reauthentication(self, 'password changed')
         if keep_sessions is not True and self.email is not None:
             utils.MailuSessionExtension.prune_sessions(uid=self.email, keep=keep_sessions)
 
@@ -1062,6 +1066,58 @@ class Token(Base):
 
     def __repr__(self):
         return f'<Token #{self.id}: {self.comment or self.ip or self.password}>'
+
+
+class OAuth2AuthorizationCode(Base):
+    """One-time, PKCE-bound authorization code for a native mail client."""
+
+    __tablename__ = 'oauth2_authorization_code'
+
+    code_hash = db.Column(db.String(64), primary_key=True)
+    user_email = db.Column(db.String(255), db.ForeignKey(User.email, ondelete='CASCADE'), nullable=False, index=True)
+    user = db.relationship(User, backref=db.backref('oauth2_authorization_codes', cascade='all, delete-orphan'))
+    client_id = db.Column(db.String(80), nullable=False)
+    redirect_uri = db.Column(db.String(2048), nullable=False)
+    scope = db.Column(db.String(255), nullable=False)
+    code_challenge = db.Column(db.String(128), nullable=False)
+    expires_at = db.Column(db.Integer, nullable=False, index=True)
+
+
+class OAuth2Grant(Base):
+    """Revocable OAuth access and refresh tokens for one authorized client."""
+
+    __tablename__ = 'oauth2_grant'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_email = db.Column(db.String(255), db.ForeignKey(User.email, ondelete='CASCADE'), nullable=False, index=True)
+    user = db.relationship(User, backref=db.backref('oauth2_grants', cascade='all, delete-orphan'))
+    grant_id = db.Column(
+        db.String(22), nullable=False, unique=True,
+        default=lambda: secrets.token_urlsafe(16),
+    )
+    client_id = db.Column(db.String(80), nullable=False)
+    token_generation = db.Column(db.Integer, nullable=False, default=0)
+    scope = db.Column(db.String(255), nullable=False)
+    access_expires_at = db.Column(db.Integer, nullable=False, index=True)
+    refresh_expires_at = db.Column(db.Integer, nullable=True, index=True)
+    client_name = db.Column(db.String(120), nullable=False, default='Mail app')
+    last_refresh_at = db.Column(db.Integer, nullable=True)
+
+    @property
+    def access_expiration(self):
+        return datetime.fromtimestamp(self.access_expires_at, timezone.utc)
+
+    @property
+    def last_refresh(self):
+        return datetime.fromtimestamp(self.last_refresh_at, timezone.utc) if self.last_refresh_at else None
+
+    @property
+    def last_token_rotation(self):
+        if self.last_refresh_at:
+            return datetime.fromtimestamp(self.last_refresh_at, timezone.utc)
+        return self.access_expiration - timedelta(
+            seconds=app.config['OAUTH2_ACCESS_TOKEN_TTL'],
+        )
 
 
 class Fetch(Base):

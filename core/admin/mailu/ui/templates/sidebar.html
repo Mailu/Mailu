@@ -72,6 +72,12 @@
         </a>
       </li>
       <li class="nav-item" role="none">
+        <a href="{{ url_for('.oauth2_token_list') }}" class="nav-link" role="menuitem">
+          <i class="nav-icon fa-solid fa-shield-halved"></i>
+          <p>{% trans %}Authorized mail apps{% endtrans %}</p>
+        </a>
+      </li>
+      <li class="nav-item" role="none">
         <a href="{{ url_for('.anonalias_list') }}" class="nav-link" role="menuitem">
           <i class="nav-icon fa-solid fa-user-secret"></i>
           <p>{% trans %}Anonymous Aliases{% endtrans %}</p>

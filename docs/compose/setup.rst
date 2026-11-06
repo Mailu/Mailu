@@ -120,18 +120,15 @@ You may now start Mailu. Move the to the Mailu directory and run:
 
   docker compose up -d
 
-Finally, you need an admin user account. 
-
-You can have the system create it automatically:
-use the environment variables ``INITIAL_ADMIN_*`` as described in :ref:`admin_account`
-
-Else, if you don't go with the automatic way, you need to manually create the admin account now:
+Finally, create the first admin account and obtain its one-time setup link:
 
 .. code-block:: bash
 
-  docker compose exec admin flask mailu admin me example.net 'password'
+  docker compose exec admin flask mailu user add me@example.net
+  docker compose exec admin flask mailu admin add me@example.net
 
-This will create a user named ``me@example.net`` with password ``password`` and administration privileges.
-Connect to the Web admin interface and change the password to a strong one.
+Omitting the password creates a random password and prints a one-time setup link
+in the first command's output. Open it to set the account password or register a
+passkey. The second command grants the account global administrator privileges.
 
   .. note:: It is vitally important that either a user with the same email as ``POSTMASTER`` in your ``mailu.env`` exists, or you remember to create an alias with this name after you log in. All kinds of strange errors will occur as a result of not doing so!

@@ -87,7 +87,7 @@ ENV \
     WEBMAIL_ADDRESS="127.0.0.1" \
     WEBDAV_ADDRESS="127.0.0.1"
 
-CMD ["/bin/bash", "-c", "flask db upgrade &>/dev/null && flask mailu admin '${DEV_ADMIN/@*}' '${DEV_ADMIN#*@}' '${DEV_PASSWORD}' --mode ifmissing >/dev/null; flask --debug run --host=0.0.0.0 --port=8080"]
+CMD ["/bin/bash", "-c", "flask db upgrade &>/dev/null && flask mailu user add '${DEV_ADMIN}' '${DEV_PASSWORD}' >/dev/null && flask mailu admin add '${DEV_ADMIN}' >/dev/null; flask --debug run --host=0.0.0.0 --port=8080"]
 EOF
 
 # build

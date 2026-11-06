@@ -78,7 +78,7 @@ DKIM private keys store. Read/write access by Admin. Read only access by rSpamD.
 - Old path: `/mailu/certs`
 - New path: `/mailu/config/share/certs` (Proposal in anticipation of the RFC outcome at: https://github.com/Mailu/Mailu/issues/1222.)
 
-TLS certificates. Write access from `nginx` in case `TLS_FLAVOR=letsencrypt`. Or write access from `treafik-certdumper` or any other tool obtaining certificates.
+TLS certificates. Write access from `nginx` in case `TLS_FLAVOR=letsencrypt`, or from any other tool obtaining certificates.
 
 `letsencrypt` setting is not compatible with replicated setups. Multiple instances would disrupt the ACME challenge verification and cause race conditions on requesting certificates. In such cases certificates will need to be provided by other tools.
 

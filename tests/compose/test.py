@@ -86,12 +86,14 @@ def hooks():
 
 # Start up containers
 sys.stdout.flush()
-deadline=datetime.datetime.now()+datetime.timedelta(minutes=timeout)
-deadline=calendar.timegm(deadline.timetuple())
 print(subprocess.check_output(f"docker compose -f {compose_file} up -d", shell=True).decode())
 print()
 print(subprocess.check_output("docker ps -a", shell=True).decode())
 print()
+# Image pulls and container creation happen during `compose up`; start the
+# health-check timeout only once those have completed.
+deadline=datetime.datetime.now()+datetime.timedelta(minutes=timeout)
+deadline=calendar.timegm(deadline.timetuple())
 while not health_checks(deadline):
     sys.stdout.flush()
     time.sleep(1)

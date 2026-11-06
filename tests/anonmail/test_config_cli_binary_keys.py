@@ -6,14 +6,18 @@ import json
 from mailu import models, oauth2, spam_settings
 
 
-def test_config_export_includes_effective_spam_defaults_without_saved_row(app):
+def test_config_export_includes_effective_spam_defaults_without_saved_row(app, tmp_path):
     with app.app_context():
+        output_file = tmp_path / 'config.json'
         exported = app.test_cli_runner().invoke(
-            args=['mailu', 'config-export', '--json'],
+            args=[
+                'mailu', 'config-export', '--json', '--output-file',
+                str(output_file),
+            ],
         )
 
         assert exported.exit_code == 0, exported.output
-        data = json.loads(exported.output)
+        data = json.loads(output_file.read_text())
         spam_config = next(
             item['value'] for item in data['config']
             if item['name'] == spam_settings.CONFIG_KEY
@@ -24,7 +28,7 @@ def test_config_export_includes_effective_spam_defaults_without_saved_row(app):
         assert spam_config['summary_periodicity'] == '1w'
 
 
-def test_config_cli_round_trips_binary_keys_and_durable_oauth_state(app):
+def test_config_cli_round_trips_binary_keys_and_durable_oauth_state(app, tmp_path):
     with app.app_context():
         domain = models.Domain(name='example.com')
         domain.generate_dkim_key(algorithm='ed25519', active=True)
@@ -71,12 +75,15 @@ def test_config_cli_round_trips_binary_keys_and_durable_oauth_state(app):
         expected_dkim_keys = {key.private_key for key in domain.dkim_keys}
 
         runner = app.test_cli_runner()
+        output_file = tmp_path / 'config.json'
         exported = runner.invoke(
-            args=['mailu', 'config-export', '--json', '--secrets'],
+            args=['mailu', 'config-export', '--json', '--secrets',
+                  '--output-file', str(output_file)],
         )
 
         assert exported.exit_code == 0, exported.output
-        data = json.loads(exported.output)
+        export_text = output_file.read_text()
+        data = json.loads(export_text)
         passkey_data = data['user'][0]['passkeys'][0]
         grant_data = data['user'][0]['oauth2_grants'][0]
         assert 'oauth2_authorization_codes' not in data['user'][0]
@@ -117,7 +124,7 @@ def test_config_cli_round_trips_binary_keys_and_durable_oauth_state(app):
 
         imported = runner.invoke(
             args=['mailu', 'config-import', '--secrets', '-'],
-            input=exported.output,
+            input=export_text,
         )
         assert imported.exit_code == 0, imported.output
 

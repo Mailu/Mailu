@@ -1,9 +1,10 @@
 """ Mailu command line interface
 """
 
-import sys
+from copy import copy
 import os
 import socket
+import sys
 import uuid
 
 import click
@@ -414,6 +415,9 @@ def config_export(full=False, secrets=False, color=False, dns=False, output=None
     try:
         schema = MailuSchema(only=only, context=context)
         if as_json:
+            # Marshmallow schema options are shared; copy them so a JSON export
+            # doesn't switch later YAML loads to JSON.
+            schema.opts = copy(schema.opts)
             schema.opts.render_module = RenderJSON
             log.lexer = 'json'
             log.strip = True

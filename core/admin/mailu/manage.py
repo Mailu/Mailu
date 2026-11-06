@@ -1,9 +1,10 @@
 """ Mailu command line interface
 """
 
-import sys
+from copy import copy
 import os
 import socket
+import sys
 import uuid
 
 import click
@@ -332,7 +333,8 @@ def config_update(verbose=False, delete_objects=False):
 
 @mailu.command()
 @click.option('-v', '--verbose', count=True, help='Increase verbosity.')
-@click.option('-s', '--secrets', is_flag=True, help='Show secret attributes in messages.')
+@click.option('-s', '--secrets', is_flag=True,
+              help='Show secret attributes in messages and import secret keys and grants.')
 @click.option('-d', '--debug', is_flag=True, help='Enable debug output.')
 @click.option('-q', '--quiet', is_flag=True, help='Quiet mode - only show errors.')
 @click.option('-c', '--color', is_flag=True, help='Force colorized output.')
@@ -353,6 +355,7 @@ def config_import(verbose=0, secrets=False, debug=False, quiet=False, color=Fals
 
     context = {
         'import': True,
+        'secrets': secrets,
         'update': update,
         'clear': not update,
         'callback': log.track_serialize,
@@ -386,7 +389,7 @@ def config_import(verbose=0, secrets=False, debug=False, quiet=False, color=Fals
 @mailu.command()
 @click.option('-f', '--full', is_flag=True, help='Include attributes with default value.')
 @click.option('-s', '--secrets', is_flag=True,
-              help='Include secret attributes (dkim-key, passwords).')
+              help='Include secret attributes (DKIM keys, OAuth2 signing key and grants, passwords).')
 @click.option('-d', '--dns', is_flag=True, help='Include dns records.')
 @click.option('-c', '--color', is_flag=True, help='Force colorized output.')
 @click.option('-o', '--output-file', 'output', default=sys.stdout, type=click.File(mode='w'),
@@ -412,6 +415,9 @@ def config_export(full=False, secrets=False, color=False, dns=False, output=None
     try:
         schema = MailuSchema(only=only, context=context)
         if as_json:
+            # Marshmallow schema options are shared; copy them so a JSON export
+            # doesn't switch later YAML loads to JSON.
+            schema.opts = copy(schema.opts)
             schema.opts.render_module = RenderJSON
             log.lexer = 'json'
             log.strip = True

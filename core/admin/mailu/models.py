@@ -1318,11 +1318,15 @@ class MailuConfig:
     def __init__(self):
 
         # section-name -> attr
-        self._sections = {
-            name: getattr(self, name)
-            for name in dir(self)
-            if isinstance(getattr(self, name), self.MailuCollection)
-        }
+        self._sections = {}
+        for name, collection in vars(type(self)).items():
+            if isinstance(collection, self.MailuCollection):
+                # Keep cached database rows local to this config export/import.
+                # Sharing these class-level collections leaks one app context's
+                # rows into later config operations.
+                section = self.MailuCollection(collection.model)
+                setattr(self, name, section)
+                self._sections[name] = section
 
         # known models
         self._models = tuple(section.model for section in self._sections.values())

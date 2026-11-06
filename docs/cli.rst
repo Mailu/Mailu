@@ -145,7 +145,7 @@ The purpose of this command is to export the complete configuration in YAML or J
 
  Options:
    -f, --full                  Include attributes with default value.
-   -s, --secrets               Include secret attributes (dkim-key, passwords).
+   -s, --secrets               Include secret attributes (DKIM keys, OAuth2 signing key and grants, passwords).
    -d, --dns                   Include dns records.
    -c, --color                 Force colorized output.
    -o, --output-file FILENAME  Save configuration to file.
@@ -153,10 +153,10 @@ The purpose of this command is to export the complete configuration in YAML or J
    -?, -h, --help              Show this message and exit.
 
 Only non-default attributes are exported. If you want to export all attributes use ``--full``.
-If you want to export plain-text secrets (dkim-keys, passwords) you have to add the ``--secrets`` option.
+If you want to export secrets (DKIM private keys, passwords, the OAuth2 signing key, and durable OAuth2 grants) you have to add the ``--secrets`` option. Raw key bytes are encoded as base64 so they survive a YAML or JSON round-trip. Authorization codes are temporary and are not exported. Import such an export with ``config-import --secrets``.
 To include dns records (mx, spf, dkim and dmarc) add the ``--dns`` option.
 
-By default all configuration objects are exported (domain, user, alias, relay). You can specify
+By default all portable configuration objects are exported (domain, user, alias, relay, and shared spam settings). Effective spam settings are included even before an administrator has saved custom values. You can specify
 filters to export only some objects or attributes (try: ``user`` or ``domain.name``).
 Attributes explicitly specified in filters are automatically exported: there is no need to add ``--secrets`` or ``--full``.
 
@@ -183,7 +183,7 @@ This command imports configuration data from an external YAML or JSON source.
 
  Options:
    -v, --verbose   Increase verbosity.
-   -s, --secrets   Show secret attributes in messages.
+   -s, --secrets   Show secret attributes in messages and import secret keys and grants.
    -q, --quiet     Quiet mode - only show errors.
    -c, --color     Force colorized output.
    -u, --update    Update mode - merge input with existing config.
@@ -224,7 +224,7 @@ mail-config.yml contains the configuration and looks like this:
 config-import shows the number of created/modified/deleted objects after import.
 To suppress all messages except error messages use ``--quiet``.
 By adding the ``--verbose`` switch the import gets more detailed and shows exactly what attributes changed.
-In all log messages plain-text secrets (dkim-keys, passwords) are hidden by default. Use ``--secrets`` to log secrets.
+In all log messages secrets (DKIM keys, passwords) are hidden by default. Use ``--secrets`` to log and import secret key material.
 If you want to test what would be done when importing without committing any changes, use ``--dry-run``.
 
 By default config-import replaces the whole configuration. ``--update`` allows to modify the existing configuration instead.

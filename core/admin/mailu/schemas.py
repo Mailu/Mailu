@@ -4,6 +4,8 @@
 from copy import deepcopy
 from collections import Counter
 from datetime import timezone
+import base64
+import binascii
 
 import inspect
 import json
@@ -28,7 +30,7 @@ from pygments.lexers import get_lexer_by_name
 from pygments.lexers.data import YamlLexer
 from pygments.formatters import get_formatter_by_name
 
-from mailu import models, dkim
+from mailu import models, dkim, spam_settings
 
 
 ma = Marshmallow()
@@ -40,6 +42,25 @@ class ContextNested(fields.Nested):
         nested = self.nested
         if isinstance(nested, type) and issubclass(nested, Schema):
             self.nested = lambda: nested(context=parent.context)
+
+
+class OAuth2ConfigNested(ContextNested):
+    """Expose portable settings, and the OAuth signing key in secret exports."""
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        allowed = {'rspamd_spam_settings'}
+        if self.parent.context.get('secrets'):
+            allowed.add('oauth2_signing_key')
+        items = [item for item in value if item.name in allowed]
+        if not any(item.name == spam_settings.CONFIG_KEY for item in items):
+            items.append(models.Config(
+                name=spam_settings.CONFIG_KEY,
+                value=spam_settings.get_settings(),
+            ))
+        return super()._serialize(
+            sorted(items, key=lambda item: item.name),
+            attr, obj, **kwargs,
+        )
 
 
 ### import logging and schema colorization ###
@@ -596,6 +617,63 @@ class DkimKeyField(fields.String):
         else:
             return value
 
+class Base64BytesField(fields.String):
+    """Serialize binary key material as portable base64 text."""
+
+    default_error_messages = {'invalid': 'Not a valid base64 encoded value.'}
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        if value is None:
+            return None
+        return base64.b64encode(value).decode('ascii')
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        if not isinstance(value, str):
+            raise self.make_error('invalid')
+        try:
+            return base64.b64decode(value, validate=True)
+        except (binascii.Error, ValueError) as exc:
+            raise self.make_error('invalid') from exc
+
+
+class ConfigValueField(fields.Field):
+    """Encode OAuth key bytes as base64 and pass structured settings through."""
+
+    default_error_messages = {
+        'invalid': 'Invalid config value.',
+        'secret_required': 'Importing the OAuth2 signing key requires --secrets.',
+    }
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        if obj.name == 'oauth2_signing_key':
+            try:
+                key = bytes.fromhex(value)
+            except (TypeError, ValueError) as exc:
+                raise self.make_error('invalid') from exc
+            return base64.b64encode(key).decode('ascii')
+        if obj.name == 'rspamd_spam_settings' and isinstance(value, dict):
+            return value
+        raise self.make_error('invalid')
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        name = data.get('name')
+        if name == 'oauth2_signing_key':
+            if not self.parent.context.get('secrets'):
+                raise self.make_error('secret_required')
+            if not isinstance(value, str):
+                raise self.make_error('invalid')
+            try:
+                key = base64.b64decode(value, validate=True)
+            except (binascii.Error, ValueError) as exc:
+                raise self.make_error('invalid') from exc
+            if len(key) != 32:
+                raise self.make_error('invalid')
+            return key.hex()
+        if name == 'rspamd_spam_settings' and isinstance(value, dict):
+            return value
+        raise self.make_error('invalid')
+
+
 class PasswordField(fields.Str):
     """ Serialize a hashed password hash by stripping the obsolete {SCHEME}
         Deserialize a plain password or hashed password into a hashed password
@@ -1086,6 +1164,20 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
 ### schema definitions ###
 
 @mapped
+class DkimKeySchema(BaseSchema):
+    """Marshmallow schema for a database-backed DKIM signing key."""
+    class Meta:
+        model = models.DkimKey
+        load_instance = True
+        include_fk = True
+        exclude = ['domain', 'id']
+        primary_keys = ['domain_name', 'selector']
+
+    private_key = Base64BytesField(required=True)
+    domain_name = fields.String(required=True)
+
+
+@mapped
 class DomainSchema(BaseSchema):
     """ Marshmallow schema for Domain model """
     class Meta:
@@ -1093,6 +1185,8 @@ class DomainSchema(BaseSchema):
         model = models.Domain
         load_instance = True
         include_relationships = True
+        # Domain-bound database relationships stay excluded except for dkim_keys,
+        # which has a schema that encodes its private bytes for secret exports.
         exclude = ['users', 'managers', 'aliases']
 
         # Anonymous Email Service domain flags
@@ -1100,6 +1194,7 @@ class DomainSchema(BaseSchema):
 
         include_by_context = {
             ('dns',): {'dkim_publickey', 'dns_mx', 'dns_spf', 'dns_dkim', 'dns_dmarc'},
+            ('secrets',): {'dkim_keys'},
         }
         hide_by_context = {
             ('secrets',): {'dkim_key'},
@@ -1114,7 +1209,8 @@ class DomainSchema(BaseSchema):
             'dns_dmarc': [None],
         }
 
-    dkim_key = DkimKeyField(allow_none=True)
+    dkim_keys = ContextNested(DkimKeySchema, many=True)
+    dkim_key = DkimKeyField(allow_none=True, load_only=True)
     dkim_publickey = fields.String(dump_only=True)
     dns_mx = fields.String(dump_only=True)
     dns_spf = fields.String(dump_only=True)
@@ -1129,10 +1225,12 @@ class TokenSchema(BaseSchema):
         """ Schema config """
         model = models.Token
         load_instance = True
+        include_fk = True
 
         sibling = True
 
     password = PasswordField(required=True, metadata={'model': models.User})
+    user_email = fields.String(required=True)
     hash_password = fields.Boolean(load_only=True, load_default=False)
 
 
@@ -1143,6 +1241,7 @@ class FetchSchema(BaseSchema):
         """ Schema config """
         model = models.Fetch
         load_instance = True
+        include_fk = True
 
         sibling = True
         include_by_context = {
@@ -1151,6 +1250,34 @@ class FetchSchema(BaseSchema):
         hide_by_context = {
             ('secrets',): {'password'},
         }
+
+    user_email = fields.String(required=True)
+
+
+@mapped
+class PasskeySchema(BaseSchema):
+    """Marshmallow schema for a user's binary WebAuthn credential."""
+    class Meta:
+        model = models.Passkey
+        load_instance = True
+        include_fk = True
+        exclude = ['user']
+
+    credential_id = Base64BytesField(required=True)
+    public_key = Base64BytesField(required=True)
+
+
+@mapped
+class OAuth2GrantSchema(BaseSchema):
+    """Schema for durable OAuth grants; authorization codes are transient."""
+    class Meta:
+        model = models.OAuth2Grant
+        load_instance = True
+        include_fk = True
+        exclude = ['id', 'user']
+        primary_keys = ['grant_id']
+
+    user_email = fields.String(required=True)
 
 
 @mapped
@@ -1161,7 +1288,13 @@ class UserSchema(BaseSchema):
         model = models.User
         load_instance = True
         include_relationships = True
-        exclude = ['_email', 'domain', 'localpart', 'domain_name', 'quota_bytes_used']
+        # OAuth relationships contain runtime state and aren't part of config
+        # import/export. Passkeys are included below with binary-safe fields.
+        exclude = [
+            '_email', 'domain', 'localpart', 'domain_name', 'quota_bytes_used',
+            'oauth2_authorization_codes',
+        ]
+        include_by_context = {('secrets',): {'oauth2_grants'}}
 
         primary_keys = ['email']
         exclude_by_value = {
@@ -1176,6 +1309,8 @@ class UserSchema(BaseSchema):
     email = fields.String(required=True)
     tokens = ContextNested(TokenSchema, many=True)
     fetches = ContextNested(FetchSchema, many=True)
+    passkeys = ContextNested(PasskeySchema, many=True)
+    oauth2_grants = ContextNested(OAuth2GrantSchema, many=True)
 
     password = PasswordField(required=True, metadata={'model': models.User})
     hash_password = fields.Boolean(load_only=True, load_default=False)
@@ -1215,6 +1350,8 @@ class ConfigSchema(BaseSchema):
         model = models.Config
         load_instance = True
 
+    value = ConfigValueField()
+
 
 @mapped
 class RelaySchema(BaseSchema):
@@ -1233,7 +1370,7 @@ class MailuSchema(Schema, Storage):
         model = models.MailuConfig
         render_module = RenderYAML
 
-        order = ['domain', 'user', 'alias', 'relay'] # 'config'
+        order = ['domain', 'user', 'alias', 'relay', 'config']
 
     def __init__(self, *args, **kwargs):
         self.context = kwargs.pop('context', {})
@@ -1252,9 +1389,11 @@ class MailuSchema(Schema, Storage):
         if 'config' not in self.context:
             self.context['config'] = models.MailuConfig()
         if self.context.get('clear'):
-            self.context['config'].clear(
-                models = {field.nested.opts.model for field in self.fields.values()}
-            )
+            model_set = {
+                field.schema.opts.model for field in self.fields.values()
+                if field.schema.opts.model is not models.Config
+            }
+            self.context['config'].clear(models=model_set)
         return data
 
     @post_load
@@ -1271,4 +1410,4 @@ class MailuSchema(Schema, Storage):
     user = ContextNested(UserSchema, many=True)
     alias = ContextNested(AliasSchema, many=True)
     relay = ContextNested(RelaySchema, many=True)
-#    config = fields.Nested(ConfigSchema, many=True)
+    config = OAuth2ConfigNested(ConfigSchema, many=True)

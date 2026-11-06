@@ -38,9 +38,6 @@ def admin_delete(admin):
         user.global_admin  = False
         models.db.session.commit()
         flask.flash('User %s is no longer admin' % user)
-        return flask.redirect(flask.url_for('.admin_list'))
     else:
         flask.flash('No such user', 'error')
-    flask.flash('Alias %s deleted' % alias)
-    return flask.redirect(
-        flask.url_for('.alias_list', domain_name=alias.domain.name))
+    return flask.redirect(flask.url_for('.admin_list'))

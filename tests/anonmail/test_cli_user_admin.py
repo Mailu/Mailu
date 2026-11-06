@@ -9,7 +9,7 @@ def test_user_and_admin_groups_list_add_and_remove_accounts(app):
     ])
     assert result.exit_code == 0, result.output
     assert 'One-time account setup link' in result.output
-    assert 'https://mail.mailu.io/account/setup/' in result.output
+    assert 'https://mail.mailu.io/sso/account/setup/' in result.output
 
     user = models.db.session.get(models.User, 'firstadmin@example.com')
     assert user is not None

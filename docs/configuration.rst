@@ -171,6 +171,10 @@ no specific quota configured.
 Web settings
 ------------
 
+- ``WEBMAIL`` selects the webmail application to run. The supported values are
+  ``none`` (disable webmail), ``roundcube`` and ``snappymail``. This is normally
+  selected in the setup utility and does not need to be changed manually.
+
 - ``WEB_ADMIN`` contains the path to the main admin interface
 
 - ``WEB_WEBMAIL`` contains the path to the Web email client.

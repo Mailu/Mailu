@@ -1,0 +1,1 @@
+Authenticate and retry GitHub-hosted image dependencies to reduce build failures from transient upstream download errors while preserving archive signature and checksum checks.

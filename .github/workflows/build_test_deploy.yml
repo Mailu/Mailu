@@ -9,8 +9,9 @@
 # ${{ secrets.Docker_Password2 }}
 #    Second Password of docker login for logging in docker for pulling images (higher pull rate limit)
 # ${{ secrets.Release_Token }}
-#    Token with contents and workflows write access, used to create release tags
-#    and authenticate downloads from upstream GitHub repositories.
+#    Token with contents and workflows write access, used to create release tags.
+# ${{ secrets.UPSTREAM_GITHUB_TOKEN }}
+#    Token used to authenticate downloads from upstream GitHub repositories.
 ################################################
 
 name: build-test-deploy
@@ -58,6 +59,8 @@ on:
       Docker_Password2:
         required: false
       Release_Token:
+        required: false
+      UPSTREAM_GITHUB_TOKEN:
         required: false
 
   workflow_dispatch:
@@ -171,7 +174,7 @@ jobs:
           DOCKER_LOGIN: ${{ secrets.Docker_Login }}
           DOCKER_PASSW: ${{ secrets.Docker_Password }}
           GHCR_TOKEN: ${{ github.token }}
-          UPSTREAM_GITHUB_TOKEN: ${{ secrets.Release_Token }}
+          UPSTREAM_GITHUB_TOKEN: ${{ secrets.UPSTREAM_GITHUB_TOKEN }}
           GHCR_USER: ${{ github.repository_owner }}
           TARGET: ${{ matrix.target }}
           BUILDX_NO_DEFAULT_ATTESTATIONS: 1
@@ -249,7 +252,7 @@ jobs:
           DOCKER_LOGIN2: ${{ secrets.Docker_Login2 }}
           DOCKER_PASSW2: ${{ secrets.Docker_Password2 }}
           GHCR_TOKEN: ${{ github.token }}
-          UPSTREAM_GITHUB_TOKEN: ${{ secrets.Release_Token }}
+          UPSTREAM_GITHUB_TOKEN: ${{ secrets.UPSTREAM_GITHUB_TOKEN }}
           GHCR_USER: ${{ github.repository_owner }}
           TARGET: ${{ matrix.target }}
           BUILDX_NO_DEFAULT_ATTESTATIONS: 1
@@ -331,7 +334,7 @@ jobs:
           DOCKER_LOGIN: ${{ secrets.Docker_Login }}
           DOCKER_PASSW: ${{ secrets.Docker_Password }}
           GHCR_TOKEN: ${{ github.token }}
-          UPSTREAM_GITHUB_TOKEN: ${{ secrets.Release_Token }}
+          UPSTREAM_GITHUB_TOKEN: ${{ secrets.UPSTREAM_GITHUB_TOKEN }}
           GHCR_USER: ${{ github.repository_owner }}
           TARGET: ${{ matrix.target }}
           BUILDX_NO_DEFAULT_ATTESTATIONS: 1
@@ -412,7 +415,7 @@ jobs:
           DOCKER_LOGIN2: ${{ secrets.Docker_Login2 }}
           DOCKER_PASSW2: ${{ secrets.Docker_Password2 }}
           GHCR_TOKEN: ${{ github.token }}
-          UPSTREAM_GITHUB_TOKEN: ${{ secrets.Release_Token }}
+          UPSTREAM_GITHUB_TOKEN: ${{ secrets.UPSTREAM_GITHUB_TOKEN }}
           GHCR_USER: ${{ github.repository_owner }}
           TARGET: ${{ matrix.target }}
           BUILDX_NO_DEFAULT_ATTESTATIONS: 1

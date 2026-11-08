@@ -93,6 +93,7 @@ target "base" {
   inherits = ["defaults"]
   context = "core/base/"
   tags = tag("base")
+  secret = [{ id = "github_token", type = "env" }]
 }
 
 target "assets" {
@@ -112,6 +113,7 @@ target "docs" {
     version = "${LABEL_VERSION}"
     pinned_version = "${PINNED_LABEL_VERSION}"
   }
+  secret = [{ id = "github_token", type = "env" }]
 }
 
 target "setup" {
@@ -170,6 +172,7 @@ target "oletools" {
     base = "docker-image://${DOCKER_ORG}/base:${MAILU_VERSION}"
   }
   tags = tag("oletools")
+  secret = [{ id = "github_token", type = "env" }]
 }
 
 target "imap" {
@@ -200,6 +203,7 @@ target "webmail" {
     base = "docker-image://${DOCKER_ORG}/base:${MAILU_VERSION}"
   }
   tags = tag("webmail")
+  secret = [{ id = "github_token", type = "env" }]
 }
 
 # -----------------------------------------------------------------------------------------

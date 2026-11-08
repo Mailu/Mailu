@@ -194,10 +194,10 @@ jobs:
               ; /usr/bin/docker buildx create --name "builder-$BUILDER" --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
               --file ./tests/build-ci.hcl \
-              --set "base.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
-              --set "docs.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
-              --set "oletools.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
-              --set "webmail.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
+              --set "base.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "docs.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "oletools.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "webmail.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
               --set "*.cache-from=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache" \
               --set "*.cache-to=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache,mode=max" \
               --set "*.platform=$ARCH" "$TARGET" \
@@ -272,10 +272,10 @@ jobs:
               ; /usr/bin/docker buildx create --name "builder-$BUILDER" --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
               --file ./tests/build-ci.hcl \
-              --set "base.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
-              --set "docs.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
-              --set "oletools.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
-              --set "webmail.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
+              --set "base.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "docs.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "oletools.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "webmail.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
               --set "*.cache-from=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache-arm" \
               --set "*.cache-to=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache-arm,mode=max" \
               --set "*.platform=$ARCH" "$TARGET" \
@@ -354,10 +354,10 @@ jobs:
               ; /usr/bin/docker buildx create --name "builder-$BUILDER" --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
               --file ./tests/build-ci.hcl \
-              --set "base.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
-              --set "docs.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
-              --set "oletools.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
-              --set "webmail.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
+              --set "base.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "docs.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "oletools.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "webmail.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
               --set "*.cache-from=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache" \
               --set "*.cache-to=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache,mode=max" \
               --set "*.platform=$ARCH" "$TARGET" \
@@ -435,10 +435,10 @@ jobs:
               ; /usr/bin/docker buildx create --name "builder-$BUILDER" --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
               --file ./tests/build-ci.hcl \
-              --set "base.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
-              --set "docs.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
-              --set "oletools.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
-              --set "webmail.secret=id=github_token,env=UPSTREAM_GITHUB_TOKEN" \
+              --set "base.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "docs.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "oletools.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "webmail.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
               --set "*.cache-from=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache-arm" \
               --set "*.cache-to=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache-arm,mode=max" \
               --set "*.platform=$ARCH" "$TARGET" \

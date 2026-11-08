@@ -124,7 +124,8 @@ jobs:
       - name: Create matrix
         id: targets
         run: |
-          matrix=$(docker buildx bake -f "$HCL_FILE" --print | jq -cr '.group.default.targets')
+          set -euo pipefail
+          matrix=$(docker buildx bake -f ./tests/build.hcl --print | jq -er '.group.default.targets | select(type == "array" and length > 0)')
           printf 'matrix=%s\n' "$matrix" >> "$GITHUB_OUTPUT"
       - name: Show matrix
         env:

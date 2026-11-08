@@ -1403,7 +1403,17 @@ class MailuConfig:
         db.session.flush()
 
     def check(self):
-        """ check for duplicate domain names """
+        """Check the imported configuration for invalid domain references."""
+        with db.session.no_autoflush:
+            domain_names = {domain.name for domain in self.domain}
+            for collection in (self.user, self.alias):
+                for item in collection:
+                    if item.domain_name not in domain_names:
+                        raise ValueError(
+                            f'{item.__class__.__name__} {item.email!r} refers to '
+                            f'missing domain {item.domain_name!r}'
+                        )
+
         dup = set()
         for fqdn in chain(
             db.session.query(Domain.name),

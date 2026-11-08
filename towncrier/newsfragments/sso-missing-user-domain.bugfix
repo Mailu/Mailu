@@ -1,1 +1,1 @@
-SSO login and passkey enrollment now handle users whose domain relationship is missing.
+Full configuration imports now reject users and aliases whose domains are missing, preventing orphaned entries. SSO login and passkey enrollment also handle pre-existing users whose domain relationship is missing.

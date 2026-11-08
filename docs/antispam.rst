@@ -228,5 +228,6 @@ The same Spam settings page can enable quarantine summary emails and set a daily
 weekly, or monthly cadence. Each enabled mailbox receives only the quarantined
 messages addressed to it. The default English HTML template includes links to
 each message; templates are sanitized before delivery and must contain the
-``quarantine_table`` placeholder. Use **Send me a test** to send the current
+``quarantine_table`` placeholder. The Admin job checks hourly and sends a
+summary when its selected interval is due. Use **Send me a test** to send the current
 template to the signed-in administrator without saving it.

@@ -25,7 +25,10 @@ class NoPingFilter(logging.Filter):
         self.skipAccessLogs = filterAccessLogs
 
     def filter(self, record):
-        if self.skipAccessLogs and record.args['r'].endswith(' HTTP/1.1'):
+        request = record.args.get('r', '') if isinstance(record.args, dict) else ''
+        if not isinstance(request, str):
+            return True
+        if self.skipAccessLogs and request.endswith(' HTTP/1.1'):
             return False
         parts = request.split(" ", 2)
         if len(parts) >= 2:

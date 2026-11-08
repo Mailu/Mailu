@@ -1,0 +1,1 @@
+SSO login and passkey enrollment now handle users whose domain relationship is missing.

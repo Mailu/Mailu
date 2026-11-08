@@ -24,18 +24,24 @@ ACTION_ALLOWED_ENDPOINTS = {
 }
 
 
+def passkeys_required(user):
+    """Return whether configuration requires this user to enroll a passkey."""
+    domain = user.domain
+    return (
+        flask.current_app.config.get('PASSKEY_REQUIRED', False)
+        or (domain is not None and domain.passkey_require_enrollment)
+    )
+
+
 def user_required_actions(user):
     """Return the login actions this user must complete, in order."""
     if user.passkeys:
         return []
-    passkeys_required = (
-        flask.current_app.config.get('PASSKEY_REQUIRED', False)
-        or user.domain.passkey_require_enrollment
-    )
+    required = passkeys_required(user)
     actions = []
-    if user.change_pw_next_login and not passkeys_required:
+    if user.change_pw_next_login and not required:
         actions.append('password_change')
-    if user.passkey_enroll_next_login or passkeys_required:
+    if user.passkey_enroll_next_login or required:
         actions.append('passkey_enrollment')
     return actions
 

@@ -64,8 +64,7 @@ def _csrf_error():
 def _account_setup_requires_passkey(user):
     return bool(
         user.passkey_enroll_next_login
-        or user.domain.passkey_require_enrollment
-        or flask.current_app.config.get('PASSKEY_REQUIRED', False)
+        or auth_flow.passkeys_required(user)
     )
 
 

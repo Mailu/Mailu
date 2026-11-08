@@ -1,0 +1,1 @@
+Retry the verified Roundcube download when a transient release response would otherwise fail the webmail image build.

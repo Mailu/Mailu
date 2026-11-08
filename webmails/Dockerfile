@@ -38,9 +38,18 @@ ENV CARDDAV_URL=https://github.com/mstilkerich/rcmcarddav/releases/download/v5.1
 
 RUN set -euxo pipefail \
   ; cd /var/www \
-  ; curl -sLo /dev/shm/roundcube.tgz ${ROUNDCUBE_URL} \
-  ; curl -sLo /dev/shm/roundcube.tgz.asc ${ROUNDCUBE_URL}.asc \
-  ; gpg --status-fd 1 --verify /dev/shm/roundcube.tgz.asc /dev/shm/roundcube.tgz \
+  ; for attempt in 1 2 3; do \
+      if curl --fail --silent --show-error --location --max-time 120 -o /dev/shm/roundcube.tgz ${ROUNDCUBE_URL} \
+        && curl --fail --silent --show-error --location --max-time 120 -o /dev/shm/roundcube.tgz.asc ${ROUNDCUBE_URL}.asc \
+        && gpg --status-fd 1 --verify /dev/shm/roundcube.tgz.asc /dev/shm/roundcube.tgz; then \
+        break; \
+      fi; \
+      if [ "$attempt" -eq 3 ]; then \
+        echo "Failed to download and verify Roundcube after 3 attempts" >&2; \
+        exit 1; \
+      fi; \
+      sleep 5; \
+    done \
   ; tar xzf /dev/shm/roundcube.tgz \
   ; curl -sL ${CARDDAV_URL} | tar xz \
   ; mv roundcubemail-* roundcube \

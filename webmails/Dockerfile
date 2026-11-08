@@ -88,7 +88,7 @@ COPY roundcube/config/config.inc.carddav.php /var/www/roundcube/plugins/carddav/
 
 # snappymail
 
-ENV SNAPPYMAIL_URL=https://github.com/the-djmaze/snappymail/releases/download/v2.38.2/snappymail-2.38.2.tar.gz
+ENV SNAPPYMAIL_URL=https://github.com/the-djmaze/snappymail/releases/download/v3.0.0/snappymail-3.0.0.tar.gz
 
 RUN --mount=type=secret,id=github_token,required=false set -euxo pipefail \
   ; set +x \
@@ -111,8 +111,8 @@ RUN --mount=type=secret,id=github_token,required=false set -euxo pipefail \
   ; mkdir  /var/www/snappymail \
   ; cd /var/www/snappymail \
   ; for attempt in 1 2 3; do \
-      if download_release_asset the-djmaze/snappymail v2.38.2 snappymail-2.38.2.tar.gz /dev/shm/snappymail.tgz ${SNAPPYMAIL_URL} \
-        && download_release_asset the-djmaze/snappymail v2.38.2 snappymail-2.38.2.tar.gz.asc /dev/shm/snappymail.tgz.asc ${SNAPPYMAIL_URL}.asc \
+      if download_release_asset the-djmaze/snappymail v3.0.0 snappymail-3.0.0.tar.gz /dev/shm/snappymail.tgz ${SNAPPYMAIL_URL} \
+        && download_release_asset the-djmaze/snappymail v3.0.0 snappymail-3.0.0.tar.gz.asc /dev/shm/snappymail.tgz.asc ${SNAPPYMAIL_URL}.asc \
         && gpg --status-fd 1 --verify /dev/shm/snappymail.tgz.asc /dev/shm/snappymail.tgz; then \
         break; \
       fi; \

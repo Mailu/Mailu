@@ -17,6 +17,9 @@ RUN set -euxo pipefail \
   ; ! [[ "$(apk --print-arch)" == x86_64 ]] \
     || apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc
 
+COPY download-github-asset /usr/local/bin/download-github-asset
+RUN chmod 755 /usr/local/bin/download-github-asset
+
 WORKDIR /app
 
 COPY supervisor-healthcheck /usr/local/bin/supervisor-healthcheck
@@ -82,14 +85,7 @@ RUN --mount=type=secret,id=github_token,required=false set -euxo pipefail \
   # bcrypt 4.3 builds from source on arm/v7 and uses Python's stable ABI.
   ; PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 pip install -r requirements-${MAILU_DEPS}.txt \
   ; set +x \
-  ; if [ -n "$github_token" ]; then \
-      curl --fail --silent --show-error --location --connect-timeout 15 --max-time 120 --retry 3 --retry-all-errors --retry-delay 5 \
-        -H "Authorization: Bearer $github_token" -H 'Accept: application/vnd.github+json' \
-        -o /tmp/snuffleupagus.tgz "https://api.github.com/repos/jvoisin/snuffleupagus/tarball/v${SNUFFLEUPAGUS_VERSION}"; \
-    else \
-      curl --fail --silent --show-error --location --connect-timeout 15 --max-time 120 --retry 3 --retry-all-errors --retry-delay 5 \
-        -o /tmp/snuffleupagus.tgz ${SNUFFLEUPAGUS_URL}; \
-    fi \
+  ; download-github-asset "${SNUFFLEUPAGUS_URL}" /tmp/snuffleupagus.tgz \
   ; mkdir -p snuffleupagus-${SNUFFLEUPAGUS_VERSION} \
   ; tar xzf /tmp/snuffleupagus.tgz --strip-components=1 -C snuffleupagus-${SNUFFLEUPAGUS_VERSION} \
   ; rm /tmp/snuffleupagus.tgz \

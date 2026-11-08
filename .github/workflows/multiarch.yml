@@ -134,6 +134,7 @@ jobs:
       Docker_Login2: ${{ secrets.Docker_Login2 }}
       Docker_Password2: ${{ secrets.Docker_Password2 }}
       Release_Token: ${{ secrets.Release_Token }}
+      UPSTREAM_GITHUB_TOKEN: ${{ secrets.UPSTREAM_GITHUB_TOKEN }}
 
  # This job is watched by bors. It only complets if building,testing and deploy worked.
   ci-success:

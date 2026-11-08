@@ -1,0 +1,1 @@
+Fix admin Gunicorn access logging filters raising a ``NameError`` for requests.

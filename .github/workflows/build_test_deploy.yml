@@ -10,6 +10,8 @@
 #    Second Password of docker login for logging in docker for pulling images (higher pull rate limit)
 # ${{ secrets.Release_Token }}
 #    Token with contents and workflows write access, used to create release tags.
+# ${{ secrets.UPSTREAM_GITHUB_TOKEN }}
+#    Token used to authenticate downloads from upstream GitHub repositories.
 ################################################
 
 name: build-test-deploy
@@ -57,6 +59,8 @@ on:
       Docker_Password2:
         required: false
       Release_Token:
+        required: false
+      UPSTREAM_GITHUB_TOKEN:
         required: false
 
   workflow_dispatch:
@@ -120,7 +124,8 @@ jobs:
       - name: Create matrix
         id: targets
         run: |
-          matrix=$(docker buildx bake -f "$HCL_FILE" --print | jq -cr '.group.default.targets')
+          set -euo pipefail
+          matrix=$(docker buildx bake -f ./tests/build.hcl --print | jq -cer '.group.default.targets | select(type == "array" and length > 0)')
           printf 'matrix=%s\n' "$matrix" >> "$GITHUB_OUTPUT"
       - name: Show matrix
         env:
@@ -170,6 +175,7 @@ jobs:
           DOCKER_LOGIN: ${{ secrets.Docker_Login }}
           DOCKER_PASSW: ${{ secrets.Docker_Password }}
           GHCR_TOKEN: ${{ github.token }}
+          UPSTREAM_GITHUB_TOKEN: ${{ secrets.UPSTREAM_GITHUB_TOKEN }}
           GHCR_USER: ${{ github.repository_owner }}
           TARGET: ${{ matrix.target }}
           BUILDX_NO_DEFAULT_ATTESTATIONS: 1
@@ -189,6 +195,10 @@ jobs:
               ; /usr/bin/docker buildx create --name "builder-$BUILDER" --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
               --file ./tests/build-ci.hcl \
+              --set "base.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "docs.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "oletools.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "webmail.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
               --set "*.cache-from=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache" \
               --set "*.cache-to=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache,mode=max" \
               --set "*.platform=$ARCH" "$TARGET" \
@@ -243,6 +253,7 @@ jobs:
           DOCKER_LOGIN2: ${{ secrets.Docker_Login2 }}
           DOCKER_PASSW2: ${{ secrets.Docker_Password2 }}
           GHCR_TOKEN: ${{ github.token }}
+          UPSTREAM_GITHUB_TOKEN: ${{ secrets.UPSTREAM_GITHUB_TOKEN }}
           GHCR_USER: ${{ github.repository_owner }}
           TARGET: ${{ matrix.target }}
           BUILDX_NO_DEFAULT_ATTESTATIONS: 1
@@ -262,6 +273,10 @@ jobs:
               ; /usr/bin/docker buildx create --name "builder-$BUILDER" --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
               --file ./tests/build-ci.hcl \
+              --set "base.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "docs.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "oletools.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "webmail.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
               --set "*.cache-from=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache-arm" \
               --set "*.cache-to=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache-arm,mode=max" \
               --set "*.platform=$ARCH" "$TARGET" \
@@ -320,6 +335,7 @@ jobs:
           DOCKER_LOGIN: ${{ secrets.Docker_Login }}
           DOCKER_PASSW: ${{ secrets.Docker_Password }}
           GHCR_TOKEN: ${{ github.token }}
+          UPSTREAM_GITHUB_TOKEN: ${{ secrets.UPSTREAM_GITHUB_TOKEN }}
           GHCR_USER: ${{ github.repository_owner }}
           TARGET: ${{ matrix.target }}
           BUILDX_NO_DEFAULT_ATTESTATIONS: 1
@@ -339,6 +355,10 @@ jobs:
               ; /usr/bin/docker buildx create --name "builder-$BUILDER" --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
               --file ./tests/build-ci.hcl \
+              --set "base.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "docs.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "oletools.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "webmail.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
               --set "*.cache-from=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache" \
               --set "*.cache-to=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache,mode=max" \
               --set "*.platform=$ARCH" "$TARGET" \
@@ -396,6 +416,7 @@ jobs:
           DOCKER_LOGIN2: ${{ secrets.Docker_Login2 }}
           DOCKER_PASSW2: ${{ secrets.Docker_Password2 }}
           GHCR_TOKEN: ${{ github.token }}
+          UPSTREAM_GITHUB_TOKEN: ${{ secrets.UPSTREAM_GITHUB_TOKEN }}
           GHCR_USER: ${{ github.repository_owner }}
           TARGET: ${{ matrix.target }}
           BUILDX_NO_DEFAULT_ATTESTATIONS: 1
@@ -415,6 +436,10 @@ jobs:
               ; /usr/bin/docker buildx create --name "builder-$BUILDER" --driver docker-container --use \
               ; /usr/bin/docker buildx bake --push \
               --file ./tests/build-ci.hcl \
+              --set "base.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "docs.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "oletools.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
+              --set "webmail.secret.github_token=env=UPSTREAM_GITHUB_TOKEN" \
               --set "*.cache-from=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache-arm" \
               --set "*.cache-to=type=registry,ref=ghcr.io/$CACHE_ORG/$TARGET:buildcache-arm,mode=max" \
               --set "*.platform=$ARCH" "$TARGET" \

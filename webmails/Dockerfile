@@ -38,26 +38,10 @@ ENV CARDDAV_URL=https://github.com/mstilkerich/rcmcarddav/releases/download/v5.1
 
 RUN --mount=type=secret,id=github_token,required=false set -euxo pipefail \
   ; set +x \
-  ; github_token="$(cat /run/secrets/github_token 2>/dev/null || true)" \
-  ; download_release_asset() { \
-      repo="$1"; tag="$2"; name="$3"; destination="$4"; fallback_url="$5"; \
-      if [ -n "$github_token" ]; then \
-        release_data="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 120 --retry 3 --retry-all-errors --retry-delay 5 \
-          -H "Authorization: Bearer $github_token" -H 'Accept: application/vnd.github+json' \
-          "https://api.github.com/repos/$repo/releases/tags/$tag")" || return 1; \
-        asset_id="$(printf '%s' "$release_data" | python3 -c 'import json,sys; print(next(a["id"] for a in json.load(sys.stdin)["assets"] if a["name"] == sys.argv[1]))' "$name")" || return 1; \
-        curl --fail --silent --show-error --location --connect-timeout 15 --max-time 120 --retry 3 --retry-all-errors --retry-delay 5 \
-          -H "Authorization: Bearer $github_token" -H 'Accept: application/octet-stream' \
-          -o "$destination" "https://api.github.com/repos/$repo/releases/assets/$asset_id" || return 1; \
-      else \
-        curl --fail --silent --show-error --location --connect-timeout 15 --max-time 120 --retry 3 --retry-all-errors --retry-delay 5 \
-          -o "$destination" "$fallback_url" || return 1; \
-      fi; \
-    } \
   ; cd /var/www \
   ; for attempt in 1 2 3; do \
-      if download_release_asset roundcube/roundcubemail 1.6.20 roundcubemail-1.6.20-complete.tar.gz /dev/shm/roundcube.tgz ${ROUNDCUBE_URL} \
-        && download_release_asset roundcube/roundcubemail 1.6.20 roundcubemail-1.6.20-complete.tar.gz.asc /dev/shm/roundcube.tgz.asc ${ROUNDCUBE_URL}.asc \
+      if download-github-asset "${ROUNDCUBE_URL}" /dev/shm/roundcube.tgz \
+        && download-github-asset "${ROUNDCUBE_URL}.asc" /dev/shm/roundcube.tgz.asc \
         && gpg --status-fd 1 --verify /dev/shm/roundcube.tgz.asc /dev/shm/roundcube.tgz; then \
         break; \
       fi; \
@@ -67,8 +51,7 @@ RUN --mount=type=secret,id=github_token,required=false set -euxo pipefail \
       fi; \
       sleep 5; \
     done \
-  ; download_release_asset mstilkerich/rcmcarddav v5.1.3 carddav-v5.1.3.tar.gz /dev/shm/carddav.tgz ${CARDDAV_URL} \
-  ; unset github_token \
+  ; download-github-asset "${CARDDAV_URL}" /dev/shm/carddav.tgz \
   ; set -x \
   ; tar xzf /dev/shm/roundcube.tgz \
   ; tar xzf /dev/shm/carddav.tgz \
@@ -92,27 +75,11 @@ ENV SNAPPYMAIL_URL=https://github.com/the-djmaze/snappymail/releases/download/v3
 
 RUN --mount=type=secret,id=github_token,required=false set -euxo pipefail \
   ; set +x \
-  ; github_token="$(cat /run/secrets/github_token 2>/dev/null || true)" \
-  ; download_release_asset() { \
-      repo="$1"; tag="$2"; name="$3"; destination="$4"; fallback_url="$5"; \
-      if [ -n "$github_token" ]; then \
-        release_data="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 120 --retry 3 --retry-all-errors --retry-delay 5 \
-          -H "Authorization: Bearer $github_token" -H 'Accept: application/vnd.github+json' \
-          "https://api.github.com/repos/$repo/releases/tags/$tag")" || return 1; \
-        asset_id="$(printf '%s' "$release_data" | python3 -c 'import json,sys; print(next(a["id"] for a in json.load(sys.stdin)["assets"] if a["name"] == sys.argv[1]))' "$name")" || return 1; \
-        curl --fail --silent --show-error --location --connect-timeout 15 --max-time 120 --retry 3 --retry-all-errors --retry-delay 5 \
-          -H "Authorization: Bearer $github_token" -H 'Accept: application/octet-stream' \
-          -o "$destination" "https://api.github.com/repos/$repo/releases/assets/$asset_id" || return 1; \
-      else \
-        curl --fail --silent --show-error --location --connect-timeout 15 --max-time 120 --retry 3 --retry-all-errors --retry-delay 5 \
-          -o "$destination" "$fallback_url" || return 1; \
-      fi; \
-    } \
   ; mkdir  /var/www/snappymail \
   ; cd /var/www/snappymail \
   ; for attempt in 1 2 3; do \
-      if download_release_asset the-djmaze/snappymail v3.0.0 snappymail-3.0.0.tar.gz /dev/shm/snappymail.tgz ${SNAPPYMAIL_URL} \
-        && download_release_asset the-djmaze/snappymail v3.0.0 snappymail-3.0.0.tar.gz.asc /dev/shm/snappymail.tgz.asc ${SNAPPYMAIL_URL}.asc \
+      if download-github-asset "${SNAPPYMAIL_URL}" /dev/shm/snappymail.tgz \
+        && download-github-asset "${SNAPPYMAIL_URL}.asc" /dev/shm/snappymail.tgz.asc \
         && gpg --status-fd 1 --verify /dev/shm/snappymail.tgz.asc /dev/shm/snappymail.tgz; then \
         break; \
       fi; \
@@ -122,7 +89,6 @@ RUN --mount=type=secret,id=github_token,required=false set -euxo pipefail \
       fi; \
       sleep 5; \
     done \
-  ; unset github_token \
   ; set -x \
   ; cat /dev/shm/snappymail.tgz | tar xz
 

@@ -1,0 +1,1 @@
+Check quarantine summary deadlines hourly on a fixed schedule, so delivery timing no longer drifts with Admin container restarts. Normalize rich-text editor changes to all supported summary template placeholders, including ``period``.

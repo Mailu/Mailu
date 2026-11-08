@@ -38,7 +38,7 @@
   {% endcall %}
 
   {% call macros.card(_('Quarantine email summaries')) %}
-    <p class="text-body-secondary">{% trans %}Send each mailbox a summary of messages addressed to it. Items are linked directly to that mailbox's quarantine view. The daily Admin job sends summaries when their selected interval is due.{% endtrans %}</p>
+    <p class="text-body-secondary">{% trans %}Send each mailbox a summary of messages addressed to it. Items are linked directly to that mailbox's quarantine view. The Admin job checks hourly and sends summaries when their selected interval is due.{% endtrans %}</p>
     <div class="form-check form-switch mb-3">
       {{ form.summary_enabled(class_='form-check-input', aria_controls='summary-configuration', aria_expanded='true' if form.summary_enabled.data else 'false') }}
       {{ form.summary_enabled.label(class_='form-check-label') }}

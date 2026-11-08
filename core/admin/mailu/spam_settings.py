@@ -51,6 +51,12 @@ MAP_FIELDS = {
 _HREF_ATTRIBUTE = re.compile(r'(?P<prefix>\bhref\s*=\s*)(?P<quote>["\'])(?P<value>.*?)(?P=quote)', re.IGNORECASE | re.DOTALL)
 _QUARANTINE_URL_TOKEN = re.compile(r'\{\{\s*quarantine_url\s*\}\}', re.IGNORECASE)
 _TEMPLATE_TOKEN = re.compile(r'\{\{(.*?)\}\}', re.DOTALL)
+_SUMMARY_PLACEHOLDERS = {
+    "mailbox": "mailbox",
+    "period": "period",
+    "quarantine_url": "quarantine_url",
+    "quarantine_table": "quarantine_table",
+}
 
 
 def normalize_template_placeholders(template):
@@ -62,8 +68,9 @@ def normalize_template_placeholders(template):
     def normalize_token(match):
         text = html.unescape(re.sub(r'<[^>]*>', '', match.group(1)))
         compact = re.sub(r'\s+', '', text.replace('\u00a0', ' ')).lower()
-        if compact == 'quarantine_table':
-            return '{{ quarantine_table }}'
+        placeholder = _SUMMARY_PLACEHOLDERS.get(compact)
+        if placeholder:
+            return f'{{{{ {placeholder} }}}}'
         return match.group(0)
 
     template = _TEMPLATE_TOKEN.sub(normalize_token, template)

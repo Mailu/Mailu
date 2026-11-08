@@ -56,35 +56,14 @@ COPY roundcube/config/config.inc.carddav.php /var/www/roundcube/plugins/carddav/
 
 # snappymail
 
-<<<<<<< HEAD
-ENV SNAPPYMAIL_URL https://github.com/the-djmaze/snappymail/releases/download/v2.38.2/snappymail-2.38.2.tar.gz
-=======
 ENV SNAPPYMAIL_URL=https://github.com/the-djmaze/snappymail/releases/download/v3.0.0/snappymail-3.0.0.tar.gz
->>>>>>> 688c8d6 (Upgrade SnappyMail to v3.0.0)
 
 RUN set -euxo pipefail \
   ; mkdir  /var/www/snappymail \
   ; cd /var/www/snappymail \
-<<<<<<< HEAD
   ; curl -sLo /dev/shm/snappymail.tgz  ${SNAPPYMAIL_URL} \
   ; curl -sLo /dev/shm/snappymail.tgz.asc  ${SNAPPYMAIL_URL}.asc \
   ; gpg --status-fd 1 --verify /dev/shm/snappymail.tgz.asc /dev/shm/snappymail.tgz \
-=======
-  ; for attempt in 1 2 3; do \
-      if download_release_asset the-djmaze/snappymail v3.0.0 snappymail-3.0.0.tar.gz /dev/shm/snappymail.tgz ${SNAPPYMAIL_URL} \
-        && download_release_asset the-djmaze/snappymail v3.0.0 snappymail-3.0.0.tar.gz.asc /dev/shm/snappymail.tgz.asc ${SNAPPYMAIL_URL}.asc \
-        && gpg --status-fd 1 --verify /dev/shm/snappymail.tgz.asc /dev/shm/snappymail.tgz; then \
-        break; \
-      fi; \
-      if [ "$attempt" -eq 3 ]; then \
-        echo "Failed to download and verify SnappyMail after 3 attempts" >&2; \
-        exit 1; \
-      fi; \
-      sleep 5; \
-    done \
-  ; unset github_token \
-  ; set -x \
->>>>>>> 688c8d6 (Upgrade SnappyMail to v3.0.0)
   ; cat /dev/shm/snappymail.tgz | tar xz
 
 # SnappyMail login

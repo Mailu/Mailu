@@ -41,8 +41,7 @@ def passkey_create(user_email):
     )
     required_enrollment = (
         user.passkey_enroll_next_login
-        or user.domain.passkey_require_enrollment
-        or flask.current_app.config.get('PASSKEY_REQUIRED', False)
+        or auth_flow.passkeys_required(user)
     )
     return flask.render_template(
         'user/passkey_create.html', user=user,
@@ -68,10 +67,7 @@ def passkey_create(user_email):
 @access.authenticated
 def passkey_required():
     user = flask_login.current_user
-    passkey_required = (
-        flask.current_app.config.get('PASSKEY_REQUIRED', False)
-        or user.domain.passkey_require_enrollment
-    )
+    passkey_required = auth_flow.passkeys_required(user)
     if user.passkeys or (not user.passkey_enroll_next_login and not passkey_required):
         if 'passkey_enrollment' in flask.session.get(auth_flow.SESSION_ACTIONS, []):
             response = auth_flow.complete_action(flask.session, 'passkey_enrollment')

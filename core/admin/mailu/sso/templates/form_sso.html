@@ -2,7 +2,7 @@
 {% block content %}
 <form class="form" method="post">
   {{ form.hidden_tag() }}
-  <fieldset class="mb-4">
+  <fieldset class="mb-4{% if form.destination.choices|length < 2 %} d-none{% endif %}">
     <legend class="form-label small text-body-secondary mb-2">{{ form.destination.label.text }}</legend>
     <div class="btn-group w-100 mailu-login-destinations" role="group" aria-label="{{ form.destination.label.text }}">
       {% for choice in form.destination %}

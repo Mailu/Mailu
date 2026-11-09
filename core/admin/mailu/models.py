@@ -705,6 +705,7 @@ class User(Base, Email):
         default=date(2999, 12, 31))
 
     # Settings
+    webmail_preference = db.Column(db.String(32), nullable=True)
     displayed_name = db.Column(db.String(160), nullable=False, default='')
     spam_enabled = db.Column(db.Boolean, nullable=False, default=True)
     spam_mark_as_read = db.Column(db.Boolean, nullable=False, default=True)

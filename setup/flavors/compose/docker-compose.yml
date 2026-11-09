@@ -62,7 +62,7 @@ services:
     {% endfor %}
     networks:
       - default
-{% if webmail_type != 'none' %}
+{% if webmail_enabled %}
       - webmail
 {% endif %}
 {% if webdav_enabled %}
@@ -326,8 +326,8 @@ services:
     {% endif %}
   {% endif %}
 
-  # Webmail
-  {% if webmail_type != 'none' %}
+{% if webmail_enabled %}
+  # Webmail service
   webmail:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-{{ version }}}
     restart: always
@@ -338,12 +338,13 @@ services:
         tag: mailu-webmail
     volumes:
       - "{{ root }}/webmail:/data"
-      - "{{ root }}/overrides/{{ webmail_type }}:/overrides:ro"
+      - "{{ root }}/overrides/roundcube:/roundcube-overrides:ro"
+      - "{{ root }}/overrides/snappymail:/snappymail-overrides:ro"
     networks:
       - webmail
     depends_on:
       - front
-  {% endif %}
+{% endif %}
 
 networks:
   default:
@@ -362,7 +363,7 @@ networks:
   radicale:
     driver: bridge
 {% endif %}
-{% if webmail_type != 'none' %}
+{% if webmail_enabled %}
   webmail:
     driver: bridge
 {% endif %}

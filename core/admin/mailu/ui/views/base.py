@@ -1,4 +1,4 @@
-from mailu import models, utils, announcements, oauth2
+from mailu import models, utils, announcements, oauth2, webmail
 from mailu.ui import ui, forms, access
 
 import hashlib
@@ -81,8 +81,12 @@ def announcement():
                                  recipient_count=len(retry['recipients']) if retry else len(recipients), failures=failures, retry_token=retry_token)
 
 @ui.route('/webmail', methods=['GET'])
-def webmail():
-    return flask.redirect(app.config['WEB_WEBMAIL'])
+@access.authenticated
+def webmail_redirect():
+    client = webmail.selected(app.config, flask_login.current_user.webmail_preference)
+    if not client:
+        flask.abort(404)
+    return flask.redirect('/' + client + '/')
 
 @ui.route('/client', methods=['GET'])
 def client():

@@ -9,7 +9,7 @@ from mailu import models, announcements
 
 @pytest.fixture
 def users(app, client):
-    app.config.update(WTF_CSRF_ENABLED=False, WEBMAIL='roundcube', ADMIN=True)
+    app.config.update(WTF_CSRF_ENABLED=False, WEBMAIL_AVAILABLE='roundcube', ADMIN=True)
     domain = models.Domain(name='ux.example')
     admin = models.User(localpart='admin', domain=domain, global_admin=True)
     user = models.User(localpart='alice', domain=domain)
@@ -140,7 +140,7 @@ def test_anonymous_login_and_passkey_verification_require_csrf(client, app, user
     assert verification.json['error'] == 'Sign-in expired. Please try again.'
 
 def test_disabled_destination(client, app, users):
-    app.config['WEBMAIL'] = 'none'
+    app.config['WEBMAIL_AVAILABLE'] = 'none'
     assert client.get('/sso/login/webmail').status_code == 404
     assert password_login(client).location == '/admin'
 
@@ -491,3 +491,41 @@ def test_user_list_does_not_link_own_account_address(client, users):
     authenticate(client, users[0])
     page = client.get('/admin/user/list/ux.example').data.decode()
     assert not re.search(r'href="[^"]*/user/edit/' + re.escape(users[0].email) + r'">' + re.escape(users[0].email) + r'</a>', page)
+
+
+def test_webmail_preference_redirect_and_disabled_fallback(client, app, users):
+    app.config['WEBMAIL_AVAILABLE'] = 'roundcube,snappymail'
+    users[1].webmail_preference = 'snappymail'
+    models.db.session.commit()
+    authenticate(client, users[1])
+    assert client.get('/admin/webmail').location == '/snappymail/'
+    app.config['WEBMAIL_AVAILABLE'] = 'roundcube'
+    assert client.get('/admin/webmail').location == '/roundcube/'
+    app.config['WEBMAIL_AVAILABLE'] = 'none'
+    assert client.get('/admin/webmail').status_code == 404
+
+
+def test_webmail_settings_only_offer_enabled_clients(client, app, users):
+    app.config['WEBMAIL_AVAILABLE'] = 'snappymail'
+    authenticate(client, users[1])
+    response = client.get('/admin/user/settings')
+    assert response.status_code == 200
+    assert b'value="snappymail"' in response.data
+    assert b'value="roundcube"' not in response.data
+
+
+def test_none_hides_webmail_on_signin(client, app, users):
+    app.config['WEBMAIL_AVAILABLE'] = 'roundcube,none'
+    login_page = client.get('/sso/login')
+    assert b'value="webmail"' not in login_page.data
+    assert b'class="mb-4 d-none"' in login_page.data
+
+
+def test_none_hides_webmail_choices_and_links(client, app, users):
+    app.config['WEBMAIL_AVAILABLE'] = 'roundcube,none'
+    authenticate(client, users[1])
+    response = client.get('/admin/user/settings')
+    assert response.status_code == 200
+    assert b'name="webmail_preference"' not in response.data
+    assert b'href="/webmail"' not in response.data
+    assert client.get('/admin/webmail').status_code == 404

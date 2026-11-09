@@ -15,7 +15,7 @@ $config['enable_spellcheck'] = true;
 $config['spellcheck_engine'] = 'enchant';
 $config['spellcheck_languages'] = array('en'=>'English (US)', 'uk'=>'English (UK)', 'de'=>'Deutsch', 'fr'=>'French', 'ru'=>'Russian');
 $config['session_lifetime'] = {{ (((PERMANENT_SESSION_LIFETIME | default(10800)) | int)/3600) | int }};
-$config['request_path'] = '{{ WEB_WEBMAIL or "none" }}';
+$config['request_path'] = '/roundcube';
 $config['trusted_host_patterns'] = [ {{ HOSTNAMES.split(",") | map("tojson") | join(',') }}];
 
 {% if (FULL_TEXT_SEARCH or '').lower() not in ['off', 'false', '0'] %}
@@ -56,8 +56,8 @@ $config['managesieve_mbox_encoding'] = 'UTF8';
 
 // roundcube customization
 $config['product_name'] = 'Mailu Webmail';
-{%- if ADMIN and WEB_ADMIN %}
-$config['support_url'] = '../..{{ WEB_ADMIN }}';
+{%- if ADMIN %}
+$config['support_url'] = '../../admin';
 {%- endif %}
 $config['plugins'] = array({{ PLUGINS }});
 
@@ -71,7 +71,7 @@ $config['sso_logout_url'] = '/sso/logout';
 $config['enigma_pgp_homedir'] = '/data/gpg';
 
 // configure mailu button
-$config['show_mailu_button'] = {{ 'true' if ADMIN and WEB_ADMIN else 'false' }};
+$config['show_mailu_button'] = {{ 'true' if ADMIN else 'false' }};
 
 // set From header for DKIM signed message delivery reports
 $config['mdn_use_from'] = true;
@@ -81,6 +81,6 @@ $config['quota_zero_as_unlimited'] = true;
 
 // includes
 {%- for inc in INCLUDES %}
-include('/overrides/{{ inc }}');
+include('{{ OVERRIDE_DIRECTORY }}/{{ inc }}');
 {%- endfor %}
 

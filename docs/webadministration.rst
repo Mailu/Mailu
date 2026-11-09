@@ -55,8 +55,7 @@ A direct visit uses the destination from your last successful sign-in, remembere
 in a separate browser cookie; that destination is pre-selected but can be changed
 on the sign-in page. With no preference, Webmail is the default when enabled.
 Bookmark ``/sso/login/admin`` or ``/sso/login/webmail`` to select a destination explicitly.
-These routes also work with trusted proxy authentication and honor custom ``WEB_ADMIN``
-and ``WEB_WEBMAIL`` paths. Protected-page links return you to the requested page after
+These routes also work with trusted proxy authentication and use the fixed ``/admin`` and ``/webmail`` paths. Protected-page links return you to the requested page after
 sign-in, including after a required password change. All roles continue to open their
 account settings when visiting ``/admin``.
 

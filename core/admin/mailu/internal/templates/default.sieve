@@ -1,4 +1,5 @@
 require "variables";
+require "vnd.dovecot.execute";
 require "vacation";
 require "fileinto";
 require "envelope";
@@ -10,6 +11,14 @@ require "date";
 require "comparator-i;ascii-numeric";
 require "spamtestplus";
 require "editheader";
+
+# Create the protected home before any delivery action. The provisioner
+# verifies the account and ownership independently of these arguments.
+if not mailboxexists "INBOX" {
+  if execute "provision-mailbox" ["{{ user.email | sieve_string }}"] {
+    # Continue with the normal delivery rules.
+  }
+}
 
 # Postfix adds X-Original-To for LMTP; Dovecot exposes it as envelope "to".
 if envelope :matches "to" "*"

@@ -1,3 +1,4 @@
+from mailu import webmail
 from mailu import models, utils, openpgp, announcements, setup_tokens
 from datetime import date, datetime, timedelta, timezone
 import hashlib
@@ -127,6 +128,10 @@ def user_settings(user_email):
     user_email_or_current = user_email or flask_login.current_user.email
     user = models.db.session.get(models.User, user_email_or_current) or flask.abort(404)
     form = forms.UserSettingsForm(obj=user)
+    enabled_webmails = webmail.available(flask.current_app.config)
+    form.webmail_preference.choices = [(name, {'roundcube': 'Roundcube', 'snappymail': 'SnappyMail'}[name]) for name in enabled_webmails]
+    if 'webmail_preference' not in flask.request.form:
+        form.webmail_preference.data = webmail.selected(flask.current_app.config, user.webmail_preference)
     utils.formatCSVField(form.forward_destination)
     if form.validate_on_submit():
         submitted_key = (form.gpg_key.data or '').strip()
@@ -149,7 +154,10 @@ def user_settings(user_email):
             flask.flash('Destination email address is missing', 'error')
             return flask.render_template('user/settings.html', form=form, user=user)
         form.forward_destination.data = form.forward_destination.data.replace(" ","").split(",")
+        old_webmail_preference = user.webmail_preference
         form.populate_obj(user)
+        if not enabled_webmails:
+            user.webmail_preference = old_webmail_preference
         if key_changed:
             models.update_wkd_keys(user, uid_keys)
         models.db.session.commit()

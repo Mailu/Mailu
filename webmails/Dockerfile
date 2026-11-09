@@ -111,7 +111,7 @@ RUN set -euxo pipefail \
   ; chmod -R a+rX /var/www/roundcube
 
 # common
-COPY start.py /
+COPY start.py overrides.py /
 COPY php.ini /defaults/
 COPY php-webmail.conf /etc/php84/php-fpm.d/
 COPY nginx-webmail.conf /conf/

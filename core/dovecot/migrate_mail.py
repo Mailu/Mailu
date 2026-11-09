@@ -15,6 +15,7 @@ import urllib.error
 
 from fts_settings import normalize_languages
 from socrate.system import mailbox_shard
+from socrate.mailbox import harden_parents
 
 LOG = logging.getLogger("mail-migration")
 MARKER = "/mail/.mail-layout-v1"
@@ -284,6 +285,7 @@ def migrate_user(user):
             if not os.path.islink(path):
                 os.chown(path, uid, gid)
                 os.chmod(path, 0o600)
+    harden_parents([user["home"]])
     LOG.info("Completed %s", email)
 
 

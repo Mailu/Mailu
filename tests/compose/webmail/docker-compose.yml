@@ -103,7 +103,7 @@ services:
       default:
         ipv4_address: 192.168.203.254
 
-  # Webmail
+  # Both webmails run in the same service.
   webmail:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-local}
     restart: always

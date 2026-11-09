@@ -4,7 +4,7 @@ import os
 import logging as log
 import subprocess
 import sys
-from socrate import system, conf
+from socrate import system, conf, webmail
 
 from cryptography import x509
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, load_pem_private_key
@@ -110,6 +110,10 @@ sI1ANRYvqSFC2X1VRZfDg+wD6E21BccmifG4yWc=
 args = system.set_env()
 log.basicConfig(stream=sys.stderr, level=args.get("LOG_LEVEL", "WARNING"))
 bootstrap = "--bootstrap" in sys.argv
+
+args['WEBMAIL_AVAILABLE'] = webmail.available(args.get('WEBMAIL_AVAILABLE'))
+if not args['WEBMAIL_AVAILABLE'] and args.get('WEBROOT_REDIRECT') == '/webmail':
+    args['WEBROOT_REDIRECT'] = '/admin' if args.get('ADMIN') else ''
 
 args['TLS_PERMISSIVE'] = system.parse_bool(args.get('TLS_PERMISSIVE'), True)
 

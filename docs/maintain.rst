@@ -154,7 +154,10 @@ backup of the source until the import is verified.
    ``/mail/<domain>/<shard>/<localpart>``. Mail is stored in its ``mail/``
    subdirectory, persistent indexes in ``indexes/``, personal Sieve scripts in
    ``sieve/``, and IMAP metadata in ``metadata/``. The reported file owner must
-   match the account's UID/GID.
+   match the account's UID/GID. Mailbox homes are created on the first
+   delivery or authenticated mail session. Existing homes with unexpected
+   ownership or permissions are not changed. The mailbox root and its
+   domain and shard directories permit traversal but not directory listing.
 
 This staging workflow also works after the initial ``mail-layout-v1`` migration:
 the IMAP startup script checks for recognized Maildirs under legacy

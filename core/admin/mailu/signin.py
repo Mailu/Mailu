@@ -2,6 +2,7 @@
 from urllib.parse import urljoin, urlsplit, unquote
 import time
 import flask
+from mailu import webmail
 
 KEY = 'signin_destination'
 PREFERENCE_COOKIE = 'mailu_signin_target'
@@ -10,7 +11,7 @@ def target_path(target):
     config = flask.current_app.config
     if target == 'admin' and str(config['ADMIN']).upper() != 'FALSE':
         return config['WEB_ADMIN']
-    if target == 'webmail' and str(config['WEBMAIL']).upper() != 'NONE':
+    if target == 'webmail' and webmail.available(config):
         return config['WEB_WEBMAIL']
     flask.abort(404)
 
@@ -18,9 +19,9 @@ def default_target():
     preference = flask.request.cookies.get(PREFERENCE_COOKIE)
     if preference == 'admin' and str(flask.current_app.config['ADMIN']).upper() != 'FALSE':
         return preference
-    if preference == 'webmail' and str(flask.current_app.config['WEBMAIL']).upper() != 'NONE':
+    if preference == 'webmail' and webmail.available(flask.current_app.config):
         return preference
-    return 'webmail' if str(flask.current_app.config['WEBMAIL']).upper() != 'NONE' else 'admin'
+    return 'webmail' if webmail.available(flask.current_app.config) else 'admin'
 
 def local_destination(value):
     if not isinstance(value, str) or not value or any(c in unquote(value) for c in ('\\', '\r', '\n')):

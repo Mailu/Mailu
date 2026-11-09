@@ -9,6 +9,7 @@ import hmac
 import tempfile
 
 from socrate import conf, system, supervisor
+from overrides import roundcube_overrides, apply_snappymail_overrides
 
 env = os.environ
 
@@ -64,7 +65,7 @@ else:
 context["PLUGINS"] = ",".join(f"'{p}'" for p in plugins)
 
 # add overrides
-context["INCLUDES"] = sorted(inc for inc in os.listdir("/overrides") if inc.endswith((".inc", ".inc.php"))) if os.path.isdir("/overrides") else []
+context["OVERRIDE_DIRECTORY"], context["INCLUDES"] = roundcube_overrides()
 
 # create config files
 conf.jinja("/conf/config.inc.php", context, "/var/www/roundcube/config/config.inc.php")
@@ -79,6 +80,7 @@ os.makedirs(base + "configs", exist_ok=True)
 
 conf.jinja("/defaults/default.json", context, "/data/_data_/_default_/domains/default.json")
 conf.jinja("/defaults/application.ini", context, "/data/_data_/_default_/configs/application.ini")
+apply_snappymail_overrides("/data/_data_/_default_/configs/application.ini", "/snappymail-overrides/application.ini")
 conf.jinja("/defaults/php.ini", context, "/etc/php84/php.ini")
 snappymail_plugin = "/data/_data_/_default_/plugins/mailu-identities"
 shutil.copytree(

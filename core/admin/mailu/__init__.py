@@ -60,9 +60,11 @@ def create_app_from_config(config):
     # TODO: move this to blueprints when needed
     @app.context_processor
     def inject_defaults():
+        from mailu import webmail
         signup_domains = models.Domain.query.filter_by(signup_enabled=True).all()
         return dict(
             signup_domains= signup_domains,
+            available_webmails=webmail.available(app.config),
             config        = app.config,
             get_locale    = utils.get_locale,
         )

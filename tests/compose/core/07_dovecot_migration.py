@@ -31,6 +31,15 @@ system.parse_bool = parse_bool
 socrate.system = system
 sys.modules["socrate"] = socrate
 sys.modules["socrate.system"] = system
+# The mailbox helper only uses the standard library; load the real module
+# instead of hiding it behind the minimal socrate.system stub.
+mailbox_spec = importlib.util.spec_from_file_location(
+    "socrate.mailbox", ROOT / "core/base/libs/socrate/socrate/mailbox.py"
+)
+mailbox = importlib.util.module_from_spec(mailbox_spec)
+mailbox_spec.loader.exec_module(mailbox)
+sys.modules["socrate.mailbox"] = mailbox
+socrate.mailbox = mailbox
 
 
 def load_script(name):

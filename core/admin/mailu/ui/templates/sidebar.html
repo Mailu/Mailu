@@ -154,6 +154,14 @@
         </a>
       </li>
       {%- endif %}
+      {%- if config['WEBDAV'] == 'radicale' and current_user.is_authenticated %}
+      <li class="nav-item" role="none">
+        <a href="/webdav/.web/" class="nav-link" role="menuitem">
+          <i class="nav-icon fa-regular fa-address-book"></i>
+          <p>{% trans %}Contacts and calendars{% endtrans %}</p>
+        </a>
+      </li>
+      {%- endif %}
       <li class="nav-item" role="none">
         <a href="{{ config["WEBSITE"] }}" target="_blank" class="nav-link" role="menuitem" rel="noreferrer">
         <i class="nav-icon fa-solid fa-globe"></i>

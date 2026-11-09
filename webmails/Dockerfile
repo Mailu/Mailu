@@ -67,7 +67,7 @@ RUN --mount=type=secret,id=github_token,required=false set -euxo pipefail \
 
 COPY roundcube/config/config.inc.php /conf/
 COPY roundcube/login/ /var/www/roundcube/plugins/mailu/
-COPY roundcube/config/config.inc.carddav.php /var/www/roundcube/plugins/carddav/config.inc.php
+COPY roundcube/config/config.inc.carddav.php /conf/
 
 # snappymail
 
@@ -96,6 +96,7 @@ RUN --mount=type=secret,id=github_token,required=false set -euxo pipefail \
 COPY snappymail/login/include.php /var/www/snappymail/
 COPY snappymail/login/sso.php /var/www/snappymail/
 COPY snappymail/plugins/mailu-identities/ /var/www/snappymail/mailu-plugins/mailu-identities/
+COPY snappymail/plugins/mailu-carddav/ /var/www/snappymail/mailu-plugins/mailu-carddav/
 
 # Parsed and moved at startup
 COPY snappymail/defaults/application.ini /defaults/

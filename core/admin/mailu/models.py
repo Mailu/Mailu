@@ -283,7 +283,7 @@ class Domain(Base):
         """Return legacy autoconfig aliases and WebDAV discovery records."""
         hostname = app.config['HOSTNAME']
         webdav_records = []
-        if app.config['WEBDAV'] != 'none':
+        if app.config['WEBDAV'] == 'radicale':
             if app.config['TLS_FLAVOR'] == 'notls':
                 webdav_protocols = (('carddav', 80), ('caldav', 80))
             else:

@@ -441,6 +441,8 @@ For Roundcube, refer to the `roundcube documentation`_ for the URL specification
 .. _`DB URL`: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls
 .. _`roundcube documentation`: https://github.com/roundcube/roundcubemail/blob/master/config/defaults.inc.php#L28
 
+.. _webmail-settings:
+
 Webmail settings
 ----------------
 
@@ -485,6 +487,39 @@ If ``ROUNDCUBE_PLUGINS`` is not set the following plugins are enabled by default
 To disable all plugins just set ``ROUNDCUBE_PLUGINS`` to ``mailu``.
 
 To configure a plugin add php files named ``*.inc.php`` to roundcube's :ref:`override section <override-label>`.
+
+With ``WEBDAV=radicale``, the default ``carddav`` plugin automatically discovers
+the user's Mailu address books. SnappyMail's ``mailu-carddav`` plugin configures
+CardDAV synchronization unless the user has saved their own sync settings.
+Keep ``mailu-carddav`` in ``[plugins] enabled_list`` when overriding SnappyMail's
+plugin list if automatic setup is wanted.
+
+Roundcube's CardDAV plugin uses a separate ``$prefs`` configuration, rather than
+Roundcube's ``$config`` array. To add server-wide presets or customize these
+settings, create ``overrides/roundcube/carddav.php`` (without ``.inc`` in its
+name). For example, a shared read-only address book with service credentials::
+
+    <?php
+    $prefs['Company'] = [
+        'accountname' => 'Company contacts',
+        'username' => 'directory-reader',
+        'password' => 'external-service-app-password',
+        'discovery_url' => 'https://contacts.example.org/dav/',
+        'readonly' => true,
+        'fixed' => ['username', 'password', 'discovery_url'],
+    ];
+
+The file is loaded after Mailu's defaults; ``unset($prefs['Mailu']);`` disables
+the automatic Mailu preset. See the `RCMCardDAV administrator settings
+<https://github.com/mstilkerich/rcmcarddav/blob/v5.1.3/doc/ADMIN-SETTINGS.md>`_
+for other preset options. For per-user external credentials, users can add an
+account in **Settings → CardDAV** instead. The ``%p`` preset placeholder refers
+to Mailu's temporary webmail session token, so it cannot be used as a password
+for an external DAV service.
+
+Automatic Mailu CardDAV requests use the front container's HTTP or HTTPS port.
+The front recognizes temporary webmail tokens only for connections originating
+in ``SUBNET`` or ``SUBNET6``. Client discovery advertises the public ``/webdav/`` URL.
 
 .. _header_authentication:
 

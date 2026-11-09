@@ -63,6 +63,29 @@
     </tr>
   </tbody>
 {%- endcall %}
+{% if config['WEBDAV'] == 'radicale' %}
+{%- call macros.table(title=_("Contacts and calendars"), datatable=False) %}
+  <tbody>
+    <tr>
+      <th>{% trans %}Protocols{% endtrans %}</th>
+      <td>CardDAV / CalDAV</td>
+    </tr>
+    <tr>
+      <th>{% trans %}Server URL{% endtrans %}</th>
+      <td><pre class="pre-config border bg-body-tertiary">{{ 'http' if config['TLS_FLAVOR'] == 'notls' else 'https' }}://{{ config['HOSTNAME'] }}/webdav/</pre></td>
+    </tr>
+    <tr>
+      <th>{% trans %}Username{% endtrans %}</th>
+      <td><pre class="pre-config border bg-body-tertiary">{{ current_user if current_user.is_authenticated else "******" }}</pre></td>
+    </tr>
+    <tr>
+      <th>{% trans %}Password{% endtrans %}</th>
+      <td>{% trans %}Use an authentication token for this device.{% endtrans %}</td>
+    </tr>
+  </tbody>
+{%- endcall %}
+<p><a href="/webdav/.web/">{% trans %}Manage contacts and calendars{% endtrans %}</a></p>
+{% endif %}
 <blockquote>
   {% trans %}If you use an Apple device,{% endtrans %}
   <a href="/apple.mobileconfig">{% trans %}click here to auto-configure it.{% endtrans %}</a>

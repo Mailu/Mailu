@@ -1,4 +1,7 @@
 from xml.etree import ElementTree as ET
+import plistlib
+
+import pytest
 
 from mailu.models import Domain
 
@@ -29,19 +32,25 @@ def test_webdav_dns_discovery_records(app):
     assert not any('carddav' in record or 'caldav' in record for record in records)
 
 
-def test_webdav_autoconfig_is_conditional_and_valid_xml(app, client):
+@pytest.mark.parametrize('tls_flavor,scheme', [('notls', 'http'), ('cert', 'https')])
+def test_webdav_autoconfig_is_conditional_and_valid_xml(app, client, tls_flavor, scheme):
     app.config.update(
         HOSTNAME='mail.example.org',
         SITENAME='Mailu',
         WEBDAV='radicale',
-        TLS_FLAVOR='notls',
+        TLS_FLAVOR=tls_flavor,
     )
 
     mozilla = client.get('/internal/autoconfig/mozilla').get_data(as_text=True)
     assert '<addressBook type="carddav">' in mozilla
     assert '<calendar type="caldav">' in mozilla
-    assert 'http://mail.example.org/webdav/' in mozilla
+    assert f'{scheme}://mail.example.org/webdav/' in mozilla
     ET.fromstring(mozilla)
+
+    draft = ET.fromstring(client.get('/internal/autoconfig/client').data)
+    assert draft.findtext('addressbook/url') == f'{scheme}://mail.example.org/webdav/'
+    assert draft.findtext('calendar/url') == f'{scheme}://mail.example.org/webdav/'
+    assert draft.findtext('addressbook/username') == '%EMAILADDRESS%'
 
     autodiscover_request = b'''<?xml version="1.0"?>
 <Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/outlook/requestschema/2006">
@@ -52,16 +61,24 @@ def test_webdav_autoconfig_is_conditional_and_valid_xml(app, client):
 </Autodiscover>'''
     microsoft = client.post('/internal/autoconfig/microsoft', data=autodiscover_request).get_data(as_text=True)
     assert '<Type>DAV</Type>' in microsoft
-    assert '<Server>http://mail.example.org/webdav/</Server>' in microsoft
+    assert f'<Server>{scheme}://mail.example.org/webdav/</Server>' in microsoft
     ET.fromstring(microsoft)
 
     apple = client.get('/internal/autoconfig/apple').get_data(as_text=True)
     assert '<string>com.apple.carddav.account</string>' in apple
     assert '<string>com.apple.caldav.account</string>' in apple
-    assert '<string>http://mail.example.org/webdav/</string>' in apple
-    ET.fromstring(apple)
+    assert f'<string>{scheme}://mail.example.org/webdav/</string>' in apple
+    payloads = plistlib.loads(apple.encode())['PayloadContent']
+    for payload, protocol in zip(payloads[1:], ['CardDAV', 'CalDAV']):
+        assert payload[f'{protocol}UseSSL'] == (scheme == 'https')
+        assert payload[f'{protocol}HostName'] == 'mail.example.org'
 
-    app.config['WEBDAV'] = 'none'
-    disabled = client.get('/internal/autoconfig/mozilla').get_data(as_text=True)
-    assert '<addressBook' not in disabled
-    assert '<calendar' not in disabled
+    for setting in ['none', '', 'unknown']:
+        app.config['WEBDAV'] = setting
+        for endpoint in ['mozilla', 'client', 'apple']:
+            disabled = client.get(f'/internal/autoconfig/{endpoint}').get_data(as_text=True)
+            assert 'carddav' not in disabled.lower()
+            assert 'caldav' not in disabled.lower()
+        disabled = client.post('/internal/autoconfig/microsoft', data=autodiscover_request).text
+        assert '<Type>DAV</Type>' not in disabled
+        assert not any('dav' in record for record in Domain(name='example.org').dns_autoconfig)

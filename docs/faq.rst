@@ -352,16 +352,47 @@ After successfull login the domain part will be striped and the rest used as use
 How do I use webdav (radicale)?
 ```````````````````````````````
 
-| For first time set up, the user must access radicale via the url `https://mail.example.com/webdav/.web` and then
-| 1. Log in using the  user's full email address and password.
-| 2. Click 'Create new addressbook or calendar'
-| 3. Follow instructions for creating an addressbook (for contact management) and calendar.
-|
-| Subsequently to use webdav (radicale), you can configure your carddav/caldav client to use the following url:
-| `https://mail.example.com/webdav/user@example.com`
-| As username you must provide the complete email address (user@example.com).
-| As password you must provide the password of the email address.
-| The user must be an existing Mailu user.
+Enable WebDAV in the setup utility and regenerate your Compose configuration.
+With ``WEBDAV=radicale``, Roundcube and SnappyMail automatically connect to the
+user's address book at the next webmail login. Roundcube requires its ``carddav``
+plugin, which is enabled by default. SnappyMail synchronizes one address book;
+Roundcube discovers all of the user's address books. Existing local contacts
+are retained; they are not automatically moved out of Roundcube's local address
+book. SnappyMail uses its normal CardDAV synchronization to merge contacts.
+
+A ``Contacts`` address book is created for new DAV users. Existing users who
+have no address book receive one when Radicale starts. Existing address books
+are preserved. Radicale runs as the unprivileged ``mailu`` user; startup updates
+ownership of existing DAV data so that older volumes remain usable. The
+container drops all Linux capabilities except those needed to update volume
+ownership and switch to the ``mailu`` user, and disallows gaining privileges.
+
+Open **Contacts and calendars** in Mailu, or visit
+``https://mail.example.com/webdav/.web/``, to create calendars and manage
+collections. This interface uses the Mailu browser login. DAV apps use
+``https://mail.example.com/webdav/`` with the full email address as username
+and a device authentication token as password.
+
+When enabled, Mailu includes DAV settings in its Apple configuration profile,
+AutoConfig responses and Autodiscover response, and suggests the CardDAV and
+CalDAV DNS SRV/TXT records in the domain details. Publish those DNS records to
+enable DNS discovery. ``/.well-known/carddav`` and ``/.well-known/caldav`` also
+redirect to the DAV service. Support for DAV fields varies between clients;
+apps that do not support them can use the server URL above.
+
+Can I use an external CardDAV server in webmail?
+````````````````````````````````````````````````
+
+Yes, including when Mailu's own WebDAV service is disabled. In Roundcube, open
+**Settings → CardDAV** and add an account. In SnappyMail, open **Settings →
+Contacts → Remote synchronization (CardDAV)** and enter the external server URL,
+username and password or app password supplied by that service. SnappyMail uses
+one sync account: saving your own settings replaces its automatic Mailu setup,
+and subsequent logins preserve that choice, including disabling synchronization.
+Mailu's webmail session token cannot authenticate to an external service.
+
+Administrators can also supply Roundcube CardDAV presets through
+``overrides/roundcube/carddav.php``; see :ref:`webmail-settings`.
 
 *issue reference:* `1591`_.
 

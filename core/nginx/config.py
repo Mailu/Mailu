@@ -248,6 +248,7 @@ if args.get("TLS_ERROR"):
 # Build final configuration paths
 conf.jinja("/conf/tls.conf", args, "/etc/nginx/tls.conf")
 conf.jinja("/conf/proxy.conf", args, "/etc/nginx/proxy.conf")
+conf.jinja("/conf/webdav.conf", args, "/etc/nginx/webdav.conf")
 conf.jinja("/conf/nginx.conf", args, "/etc/nginx/nginx.conf")
 conf.jinja("/dovecot_conf/login.lua", args, "/etc/dovecot/login.lua")
 conf.jinja("/dovecot_conf/proxy.conf", args, "/etc/dovecot/proxy.conf")

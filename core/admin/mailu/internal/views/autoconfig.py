@@ -27,7 +27,7 @@ def autoconfig_mozilla():
     # https://wiki.mozilla.org/Thunderbird:Autoconfiguration:ConfigFileFormat
     hostname = configured_hostname()
     webdav_xml = ''
-    if app.config['WEBDAV'] != 'none':
+    if app.config['WEBDAV'] == 'radicale':
         scheme = 'http' if app.config['TLS_FLAVOR'] == 'notls' else 'https'
         webdav_xml = f'''<addressBook type="carddav">
 <username>%EMAILADDRESS%</username>
@@ -82,7 +82,7 @@ def autoconfig_client():
     hostname = configured_hostname()
     scheme = 'http' if app.config['TLS_FLAVOR'] == 'notls' else 'https'
     webdav_xml = ''
-    if app.config['WEBDAV'] != 'none':
+    if app.config['WEBDAV'] == 'radicale':
         webdav_url = f'{scheme}://{hostname}/webdav/'
         webdav_xml = f'''<addressbook type="carddav">
 <url>{webdav_url}</url>
@@ -173,7 +173,7 @@ def autoconfig_microsoft():
         schema = quoteattr(schema)
         email = escape(email)
         webdav_protocol = ''
-        if app.config['WEBDAV'] != 'none':
+        if app.config['WEBDAV'] == 'radicale':
             scheme = 'http' if app.config['TLS_FLAVOR'] == 'notls' else 'https'
             webdav_protocol = f'''<Protocol>
             <Type>DAV</Type>
@@ -221,7 +221,7 @@ def autoconfig_apple():
     hostname = app.config['HOSTNAME']
     sitename = app.config['SITENAME']
     webdav_payloads = ''
-    if app.config['WEBDAV'] != 'none':
+    if app.config['WEBDAV'] == 'radicale':
         scheme = 'http' if app.config['TLS_FLAVOR'] == 'notls' else 'https'
         use_ssl = '<false/>' if scheme == 'http' else '<true/>'
         webdav_payloads = f'''<dict>

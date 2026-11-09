@@ -11,6 +11,7 @@ import tenacity
 
 
 def mailbox_shard(address: str) -> str:
+    """Return the shared two-character storage shard for a stable key."""
     digest = hashlib.blake2s(
         address.encode("utf-8"), digest_size=2
     ).digest()

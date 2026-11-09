@@ -1,6 +1,8 @@
 """Quarantine operations and summaries backed by a shared message repository."""
 import calendar
+import fcntl
 import html
+import os
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -63,10 +65,6 @@ def visible_entries(user, source_entries=None):
 
 
 def get(message_id):
-    try:
-        message_id = str(uuid.UUID(message_id))
-    except (ValueError, TypeError, AttributeError):
-        return None
     return quarantine_repository.get(
         directory(), message_id, 'quarantine',
         current_app.config['QUARANTINE_RETENTION_DAYS'],
@@ -75,33 +73,31 @@ def get(message_id):
 
 def get_any(record_id):
     """Read a rejected or greylisted record by its public repository ID."""
-    try:
-        message_id = str(uuid.UUID(record_id))
-    except (ValueError, TypeError, AttributeError):
-        if not isinstance(record_id, str) or not re.fullmatch(r'[0-9a-f]{64}', record_id):
-            return None
-        return quarantine_repository.get(
-            directory(), record_id, 'greylist',
-            quarantine_repository.GREYLIST_RETENTION_DAYS,
-        )
-    return get(message_id)
+    return get(record_id) or quarantine_repository.get(
+        directory(), record_id, 'greylist', quarantine_repository.GREYLIST_RETENTION_DAYS,
+    )
 
 
 def store(raw_message, metadata):
     if not raw_message or len(raw_message) > current_app.config['QUARANTINE_MAX_MESSAGE_BYTES']:
         raise ValueError('message size is invalid')
-    message_id = str(uuid.uuid4())
-    return quarantine_repository.store(directory(), message_id, raw_message, metadata, 'quarantine')
+    message_id = metadata.get('message_id') or metadata.get('message-id')
+    root = directory()
+    record_id = quarantine_repository.message_key(message_id, 'quarantine')
+    # Serialize ID allocation across admin workers so simultaneous deliveries
+    # with the same sender-controlled Message-ID cannot overwrite each other.
+    lock = os.open(root, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if not record_id or quarantine_repository.exists(root, record_id):
+            record_id = str(uuid.uuid4())
+        return quarantine_repository.store(root, record_id, raw_message, metadata, 'quarantine')
+    finally:
+        os.close(lock)
 
 
 def delete(message_id):
-    try:
-        message_id = str(uuid.UUID(message_id))
-    except (ValueError, TypeError, AttributeError):
-        if not isinstance(message_id, str) or not re.fullmatch(r'[0-9a-f]{64}', message_id):
-            return False
-        return quarantine_repository.delete(directory(), message_id, 'greylist')
-    return quarantine_repository.delete(directory(), message_id, 'quarantine')
+    return quarantine_repository.delete(directory(), message_id)
 
 
 def flush(message_ids):

@@ -2,7 +2,7 @@ import io
 import json
 from datetime import datetime, timezone
 
-from mailu import greylist, models, quarantine
+from mailu import greylist, models, quarantine, quarantine_repository
 
 
 def test_greylisted_message_is_removed_when_retry_passes(app, tmp_path, monkeypatch):
@@ -25,7 +25,7 @@ def test_greylist_entries_expire(app, tmp_path, monkeypatch):
     monkeypatch.setattr(greylist, 'directory', lambda: tmp_path)
     with app.app_context():
         greylist.record({'message_id': 'expired@example.net', 'action': 'soft reject'})
-        [path] = tmp_path.glob('*.json')
+        [path] = tmp_path.glob('??/*.json')
         data = path.read_text(encoding='utf-8').replace(
             datetime.now(timezone.utc).date().isoformat(), '2000-01-01'
         )
@@ -34,10 +34,13 @@ def test_greylist_entries_expire(app, tmp_path, monkeypatch):
         assert not path.exists()
 
 
-def test_greylist_record_rejects_invalid_message_ids(tmp_path, monkeypatch):
+def test_greylist_without_valid_message_id_uses_generated_id(app, tmp_path, monkeypatch):
     monkeypatch.setattr(greylist, 'directory', lambda: tmp_path)
-    assert greylist.record({'message_id': 'bad\x01id', 'action': 'soft reject'}) is None
-    assert list(tmp_path.glob('*.json')) == []
+    assert greylist.record({'message_id': 'bad\x01id', 'action': 'soft reject'}, b'raw')
+    with app.app_context():
+        [entry] = greylist.entries()
+        assert greylist.get(entry['id'])[1].read_bytes() == b'raw'
+        assert greylist.delete(entry['id'])
 
 
 def test_greylist_message_copy_is_removed_after_accepted_retry(app, tmp_path, monkeypatch):
@@ -50,7 +53,7 @@ def test_greylist_message_copy_is_removed_after_accepted_retry(app, tmp_path, mo
 
         assert greylist.record({**metadata, 'action': 'no action'}) is False
         assert greylist.entries() == []
-        assert list(tmp_path.iterdir()) == []
+        assert list(tmp_path.glob('??/*')) == []
 
 
 def test_greylist_endpoint_stores_multipart_copy_and_clears_on_delivery(app, tmp_path, monkeypatch):
@@ -68,7 +71,7 @@ def test_greylist_endpoint_stores_multipart_copy_and_clears_on_delivery(app, tmp
     assert response.status_code == 200
     [entry] = greylist.entries()
     assert entry['kind'] == 'greylist'
-    assert (tmp_path / f"{entry['id']}.json").is_file()
+    assert (tmp_path / quarantine_repository.record_shard(entry['id']) / f"{entry['id']}.json").is_file()
     assert greylist.get(entry['id'])[1].read_bytes() == message
 
     response = client.post('/internal/rspamd/greylist', auth=auth, json={
@@ -76,7 +79,7 @@ def test_greylist_endpoint_stores_multipart_copy_and_clears_on_delivery(app, tmp
     })
     assert response.status_code == 200
     assert greylist.entries() == []
-    assert list(tmp_path.iterdir()) == []
+    assert list(tmp_path.glob('??/*')) == []
 
 
 def test_accepted_retry_clear_keeps_rejected_messages_and_clears_greylist_only(
@@ -175,8 +178,8 @@ def test_quarantine_and_greylist_records_share_one_repository(app, tmp_path, mon
         )
         entries = quarantine.all_entries()
         assert {entry['kind'] for entry in entries} == {'greylist', 'quarantine'}
-        assert len(list(tmp_path.glob('*.json'))) == 2
-        assert len(list(tmp_path.glob('*.eml'))) == 2
+        assert len(list(tmp_path.glob('??/*.json'))) == 2
+        assert len(list(tmp_path.glob('??/*.eml'))) == 2
         assert quarantine.flush(entry['id'] for entry in entries) == 2
         assert quarantine.all_entries() == []
 
@@ -255,3 +258,48 @@ def test_domain_admin_sees_greylist_and_can_release_it_on_quarantine_page(app, t
     assert client.get(delete_url).status_code == 200
     assert client.post(delete_url, data={'submit': 'Delete permanently'}).status_code == 302
     assert greylist.get(delete_entry['id']) is None
+
+
+def test_quarantine_and_greylist_share_message_id_without_collision(app, tmp_path, monkeypatch):
+    monkeypatch.setattr(quarantine, 'directory', lambda: tmp_path)
+    monkeypatch.setattr(greylist, 'directory', lambda: tmp_path)
+    metadata = {'message_id': '<same@example.net>', 'action': 'soft reject'}
+    with app.app_context():
+        assert greylist.record(metadata, b'grey')
+        held = quarantine.store(b'held', metadata)
+        assert held != greylist._key(metadata['message_id'])
+        assert quarantine.get(held)[1].read_bytes() == b'held'
+        assert greylist.get(greylist._key(metadata['message_id']))[1].read_bytes() == b'grey'
+        assert greylist.clear(metadata)
+        assert quarantine.get(held) is not None
+        assert quarantine.get_any(held) is not None
+        assert quarantine.delete(held)
+
+
+def test_migrated_greylist_is_rekeyed_and_cleared(app, tmp_path, monkeypatch):
+    import hashlib
+    monkeypatch.setattr(greylist, 'directory', lambda: tmp_path)
+    message_id = 'old@example.net'
+    old_key = hashlib.sha256(message_id.encode()).hexdigest()
+    (tmp_path / f'{old_key}.json').write_text(json.dumps({
+        'kind': 'greylist', 'message_id': message_id,
+        'received': datetime.now(timezone.utc).isoformat(),
+    }), encoding='utf-8')
+    (tmp_path / f'{old_key}.eml').write_bytes(b'legacy')
+    assert quarantine_repository.migrate_flat_repository(tmp_path) == 1
+    new_key = greylist._key(message_id)
+    assert greylist.get(new_key)[1].read_bytes() == b'legacy'
+    assert greylist.record({'message_id': message_id, 'action': 'accept'}) is False
+    assert greylist.get(new_key) is None
+    assert not (tmp_path / f'{old_key}.json').exists()
+
+
+def test_quarantine_keeps_multiple_messages_with_same_message_id(app, tmp_path, monkeypatch):
+    monkeypatch.setattr(quarantine, 'directory', lambda: tmp_path)
+    with app.app_context():
+        metadata = {'message_id': '<same@example.net>'}
+        first = quarantine.store(b'first', metadata)
+        second = quarantine.store(b'second', metadata)
+        assert first != second
+        assert quarantine.get(first)[1].read_bytes() == b'first'
+        assert quarantine.get(second)[1].read_bytes() == b'second'

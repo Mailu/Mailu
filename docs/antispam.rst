@@ -18,6 +18,18 @@ Rspamd rejects non-compliant email messages and email messages that contain viru
 
 * Email messages with a score of 3 or lower will be accepted.
 
+Quarantine and greylist copies are stored under ``/data/quarantine`` in
+two-character shard directories. New records use a BLAKE2s hash of the
+Message-ID, with separate namespaces for quarantine and greylisting. The first
+ten bits select the directory, encoded in lowercase base32. A generated ID is
+used when the Message-ID is missing or invalid, and for additional quarantined
+messages with the same ID. Such greylisted messages cannot be matched to a
+later retry and remain until deleted or expired. On the first start after upgrading, existing flat records are moved into
+shards before the admin service starts; old greylist IDs are recalculated, so
+links to those IDs change. The migration resumes if interrupted and startup
+fails if it encounters conflicting files. Stop older admin instances before
+the upgrade, and include the entire repository in backups.
+
 Rejected messages are retained in the quarantine for 90 days. Administrators can
 view all quarantined messages, while mailbox users can view messages addressed
 to them. Release submits the original message to Postfix through an internal

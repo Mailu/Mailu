@@ -57,6 +57,15 @@ def import_legacy_dkim_keys():
             domain._import_legacy_dkim_key()
 
 
+@mailu.command('migrate-quarantine-storage')
+@with_appcontext
+def migrate_quarantine_storage():
+    """Move legacy quarantine and greylist files to the sharded layout."""
+    from mailu import quarantine, quarantine_repository
+    count = quarantine_repository.migrate_flat_repository(quarantine.directory())
+    click.echo(f'Migrated {count} quarantine and greylist records')
+
+
 @mailu.command('cleanup-oauth2')
 @with_appcontext
 def cleanup_oauth2():

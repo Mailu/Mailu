@@ -3,7 +3,7 @@ import os
 import base64
 import io
 
-from mailu import models, quarantine
+from mailu import models, quarantine, quarantine_repository
 from mailu.ui.views.quarantine import _release_recipients, _symbols, _visible, _visible_recipients
 
 
@@ -30,11 +30,12 @@ def test_quarantine_expiry_removes_message_and_metadata(app, tmp_path, monkeypat
     app.config['QUARANTINE_RETENTION_DAYS'] = 90
     with app.app_context():
         message_id = quarantine.store(b'raw', {'recipients': ['user@example.com']})
-        for path in (tmp_path / f'{message_id}.eml', tmp_path / f'{message_id}.json'):
+        shard = tmp_path / quarantine_repository.record_shard(message_id)
+        for path in (shard / f'{message_id}.eml', shard / f'{message_id}.json'):
             os.utime(path, (0, 0))
         assert quarantine.entries() == []
-        assert not (tmp_path / f'{message_id}.eml').exists()
-        assert not (tmp_path / f'{message_id}.json').exists()
+        assert not (shard / f'{message_id}.eml').exists()
+        assert not (shard / f'{message_id}.json').exists()
 
 
 def test_quarantine_flush_only_removes_requested_messages(app, tmp_path, monkeypatch):
@@ -98,7 +99,7 @@ def test_expired_message_cannot_be_opened(app, tmp_path, monkeypatch):
     app.config['QUARANTINE_RETENTION_DAYS'] = 90
     with app.app_context():
         message_id = quarantine.store(b'raw', {'recipients': ['user@example.com']})
-        os.utime(tmp_path / f'{message_id}.json', (0, 0))
+        os.utime(tmp_path / quarantine_repository.record_shard(message_id) / f'{message_id}.json', (0, 0))
         assert quarantine.get(message_id) is None
 
 
@@ -375,3 +376,62 @@ def test_internal_capture_requires_secret_and_stores_multipart(client, app, tmp_
     record = quarantine.get(accepted.json['id'])
     assert record[1].read_bytes() == b'Subject: held\r\n\r\nbody'
     assert record[0]['recipients'] == ['user@example.com']
+
+
+def test_migrated_quarantine_preserves_id_and_expiry(tmp_path):
+    import uuid
+
+    record_id = str(uuid.uuid4())
+    metadata = tmp_path / f'{record_id}.json'
+    metadata.write_text('{}', encoding='utf-8')
+    (tmp_path / f'{record_id}.eml').write_bytes(b'legacy')
+    os.utime(metadata, (0, 0))
+    assert quarantine_repository.migrate_flat_repository(tmp_path) == 1
+    assert not metadata.exists()
+    assert [entry['id'] for entry in quarantine_repository.entries(tmp_path)] == [record_id]
+    assert quarantine_repository.cleanup_expired(tmp_path, 90) == 1
+    assert quarantine_repository.migrate_flat_repository(tmp_path) == 0
+
+
+def test_migration_resumes_after_interruption(tmp_path, monkeypatch):
+    import uuid
+    import pytest
+
+    record_id = str(uuid.uuid4())
+    metadata = tmp_path / f'{record_id}.json'
+    message = tmp_path / f'{record_id}.eml'
+    metadata.write_text('{}', encoding='utf-8')
+    message.write_bytes(b'legacy')
+    original = quarantine_repository._link_for_migration
+    calls = []
+
+    def interrupted(source, target):
+        calls.append(source)
+        if len(calls) == 2:
+            raise OSError('interrupted')
+        original(source, target)
+
+    monkeypatch.setattr(quarantine_repository, '_link_for_migration', interrupted)
+    with pytest.raises(OSError):
+        quarantine_repository.migrate_flat_repository(tmp_path)
+    assert metadata.exists() and message.exists()
+    assert not (tmp_path / '.sharded-v1').exists()
+    monkeypatch.setattr(quarantine_repository, '_link_for_migration', original)
+    assert quarantine_repository.migrate_flat_repository(tmp_path) == 1
+    assert quarantine_repository.get(tmp_path, record_id, 'quarantine', 90)[1].read_bytes() == b'legacy'
+
+
+def test_migration_refuses_conflicting_destination(tmp_path):
+    import uuid
+    import pytest
+
+    record_id = str(uuid.uuid4())
+    metadata = tmp_path / f'{record_id}.json'
+    metadata.write_text('{}', encoding='utf-8')
+    target = tmp_path / quarantine_repository.record_shard(record_id)
+    target.mkdir()
+    (target / metadata.name).write_text('{"other":true}', encoding='utf-8')
+    with pytest.raises(FileExistsError):
+        quarantine_repository.migrate_flat_repository(tmp_path)
+    assert metadata.read_text() == '{}'
+    assert not (tmp_path / '.sharded-v1').exists()

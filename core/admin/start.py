@@ -52,6 +52,10 @@ if run_as_mailu("flask", "mailu", "import-legacy-dkim-keys") != 0:
     log.critical("Importing legacy DKIM keys failed; refusing to start the admin service")
     sys.exit(1)
 
+if run_as_mailu("flask", "mailu", "migrate-quarantine-storage") != 0:
+    log.critical("Quarantine storage migration failed; refusing to start the admin service")
+    sys.exit(1)
+
 def test_unsupported():
     import codecs
     if os.path.isfile(codecs.decode('/.qbpxrerai', 'rot13')) or os.environ.get(codecs.decode('V_XABJ_ZL_FRGHC_QBRFAG_SVG_ERDHVERZRAGF_NAQ_JBAG_SVYR_VFFHRF_JVGUBHG_CNGPURF', 'rot13'), None) or os.environ.get(codecs.decode('ZNVYH_URYZ_PUNEG', 'rot13'), None):

@@ -1,8 +1,7 @@
 """Greylist state machine backed by the shared quarantine repository."""
 
-import hashlib
 import math
-import re
+import uuid
 from datetime import datetime, timedelta, timezone
 from flask import current_app
 
@@ -11,7 +10,6 @@ from mailu import quarantine, quarantine_repository
 
 RETENTION = timedelta(days=quarantine_repository.GREYLIST_RETENTION_DAYS)
 MAX_ENTRIES = 10000
-_KEY_FORMAT = re.compile(r'^[0-9a-f]{64}$')
 
 
 def directory():
@@ -20,12 +18,7 @@ def directory():
 
 
 def _key(message_id):
-    if not isinstance(message_id, str):
-        return None
-    message_id = message_id.strip().strip('<>').strip()
-    if not message_id or len(message_id) > 998 or any(ord(char) < 32 for char in message_id):
-        return None
-    return hashlib.sha256(message_id.encode('utf-8')).hexdigest()
+    return quarantine_repository.message_key(message_id, 'greylist')
 
 
 def _recipient_list(value):
@@ -43,19 +36,19 @@ def record(metadata, raw_message=None):
         return None
     message_id = metadata.get('message_id') or metadata.get('message-id')
     key = _key(message_id)
-    if key is None:
-        return None
     action = str(metadata.get('action', '')).strip().lower()
     if action not in {'soft reject', 'soft_reject', 'greylist'}:
         if action in {'no action', 'accept', 'add header', 'rewrite subject'}:
-            quarantine_repository.delete(directory(), key, 'greylist')
+            if key is not None:
+                quarantine_repository.delete(directory(), key, 'greylist')
         return False
 
+    key = key or str(uuid.uuid4())
     sender = metadata.get('from') or metadata.get('sender') or ''
     subject = metadata.get('subject') or ''
     score = metadata.get('score')
     entry = {
-        'message_id': message_id.strip().strip('<>').strip(),
+        'message_id': message_id.strip().strip('<>').strip() if isinstance(message_id, str) else '',
         'received': datetime.now(timezone.utc).isoformat(),
         'from': sender[:512] if isinstance(sender, str) else '',
         'subject': subject[:998] if isinstance(subject, str) else '',
@@ -92,15 +85,11 @@ def entries():
 
 def get(record_id):
     """Return a pending greylist record and saved message when available."""
-    if not isinstance(record_id, str) or not _KEY_FORMAT.fullmatch(record_id):
-        return None
     return quarantine_repository.get(directory(), record_id, 'greylist', RETENTION.days)
 
 
 def delete(record_id):
     """Remove a pending greylist record from the shared repository."""
-    if not isinstance(record_id, str) or not _KEY_FORMAT.fullmatch(record_id):
-        return False
     return quarantine_repository.delete(directory(), record_id, 'greylist')
 
 

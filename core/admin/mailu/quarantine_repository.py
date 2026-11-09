@@ -1,6 +1,9 @@
 """Shared file repository for rejected and temporarily greylisted messages."""
 
+import base64
+import fcntl
 import json
+import hashlib
 import logging
 import os
 import re
@@ -8,11 +11,30 @@ import tempfile
 import time
 import uuid
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
+
+from socrate.system import mailbox_shard
 
 
 GREYLIST_RETENTION_DAYS = 7
 _MESSAGE_ID_KEY = re.compile(r'^[0-9a-f]{64}$')
+
+
+
+def message_key(message_id, kind):
+    """Hash a valid sender Message-ID into a safe, kind-specific key."""
+    if not isinstance(message_id, str):
+        return None
+    message_id = message_id.strip().strip('<>').strip()
+    if not message_id or len(message_id) > 998 or any(ord(char) < 32 for char in message_id):
+        return None
+    return hashlib.blake2s((kind + '\0' + message_id).encode('utf-8')).hexdigest()
+
+
+def record_shard(record_id):
+    """Use the first ten digest bits, or hash legacy UUIDs as mailbox keys."""
+    if _MESSAGE_ID_KEY.fullmatch(record_id):
+        return base64.b32encode(bytes.fromhex(record_id[:4])).decode('ascii')[:2].lower()
+    return mailbox_shard(record_id)
 
 
 def _kind(metadata):
@@ -28,19 +50,85 @@ def _record_id(value):
         return value if _MESSAGE_ID_KEY.fullmatch(value) else None
 
 
+
+def _record_directory(root, record_id):
+    return root / record_shard(record_id)
+
+
+def exists(root, record_id):
+    return (_record_directory(root, record_id) / f'{record_id}.json').exists()
+
+
+def _files(root, suffix):
+    return root.glob(f'??/*.{suffix}')
+
+
+def migrate_flat_repository(root):
+    """Move old flat records once, safely resuming an interrupted migration."""
+    root.mkdir(mode=0o700, parents=True, exist_ok=True)
+    marker = root / '.sharded-v1'
+    lock = os.open(root, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if marker.exists():
+            return 0
+        count = 0
+        for metadata_path in root.glob('*.json'):
+            old_id = metadata_path.stem
+            try:
+                metadata = json.loads(metadata_path.read_text(encoding='utf-8'))
+            except (ValueError, UnicodeDecodeError):
+                metadata = None
+            record_id = old_id
+            if _kind(metadata) == 'greylist':
+                message_id = metadata.get('message_id') or metadata.get('message-id')
+                record_id = message_key(message_id, 'greylist') or old_id
+            target = _record_directory(root, record_id)
+            target.mkdir(mode=0o700, parents=True, exist_ok=True)
+            source_message = metadata_path.with_suffix('.eml')
+            target_message = target / f'{record_id}.eml'
+            target_metadata = target / f'{record_id}.json'
+            # Linking leaves the originals intact until both files are present.
+            # A second run recognizes links created before an interruption.
+            resumed = target_metadata.exists() and os.path.samefile(metadata_path, target_metadata)
+            if not source_message.exists() and target_message.exists() and not resumed:
+                raise FileExistsError(f'Conflicting migrated message: {target_message}')
+            _link_for_migration(metadata_path, target_metadata)
+            if source_message.exists():
+                _link_for_migration(source_message, target_message)
+            source_message.unlink(missing_ok=True)
+            metadata_path.unlink()
+            count += 1
+        # Orphan messages are kept for the regular cleanup to handle.
+        for source in root.glob('*.eml'):
+            target = _record_directory(root, source.stem)
+            target.mkdir(mode=0o700, parents=True, exist_ok=True)
+            _link_for_migration(source, target / source.name)
+            source.unlink()
+        marker.touch(mode=0o600, exist_ok=True)
+        return count
+    finally:
+        os.close(lock)
+
+
+def _link_for_migration(source, target):
+    try:
+        os.link(source, target)
+    except FileExistsError:
+        if not os.path.samefile(source, target):
+            raise
+
+
 def store(root, record_id, raw_message, metadata, kind):
     """Atomically save a message and metadata under a validated shared ID."""
     record_id = _record_id(record_id)
     if record_id is None or kind not in {'quarantine', 'greylist'}:
         raise ValueError('invalid quarantine record identity')
-    if kind == 'quarantine' and not _is_uuid(record_id):
-        raise ValueError('invalid quarantine UUID')
-    if kind == 'greylist' and not _MESSAGE_ID_KEY.fullmatch(record_id):
-        raise ValueError('invalid greylist key')
     if kind == 'quarantine' and (not isinstance(raw_message, bytes) or not raw_message):
         raise ValueError('message content is invalid')
     if raw_message is not None and not isinstance(raw_message, bytes):
         raise ValueError('message content is invalid')
+    root = _record_directory(root, record_id)
     root.mkdir(mode=0o700, parents=True, exist_ok=True)
     record = dict(metadata)
     record['kind'] = kind
@@ -76,13 +164,6 @@ def store(root, record_id, raw_message, metadata, kind):
     return record_id
 
 
-def _is_uuid(value):
-    try:
-        return str(uuid.UUID(value)) == value
-    except (ValueError, TypeError, AttributeError):
-        return False
-
-
 def _expired(metadata_path, metadata, retention_days, kind):
     if kind == 'quarantine':
         return metadata_path.stat().st_mtime < time.time() - retention_days * 86400
@@ -100,7 +181,7 @@ def cleanup_expired(root, quarantine_retention_days, greylist_retention_days=GRE
     if not root.exists():
         return 0
     removed = 0
-    for metadata_path in root.glob('*.json'):
+    for metadata_path in _files(root, 'json'):
         try:
             metadata = json.loads(metadata_path.read_text(encoding='utf-8'))
             kind = _kind(metadata)
@@ -116,7 +197,7 @@ def cleanup_expired(root, quarantine_retention_days, greylist_retention_days=GRE
             )
             metadata_path.with_suffix('.eml').unlink(missing_ok=True)
             metadata_path.unlink(missing_ok=True)
-    for message_path in root.glob('*.eml'):
+    for message_path in _files(root, 'eml'):
         if not message_path.with_suffix('.json').exists():
             message_path.unlink(missing_ok=True)
             removed += 1
@@ -126,7 +207,7 @@ def cleanup_expired(root, quarantine_retention_days, greylist_retention_days=GRE
 def entries(root, kind=None):
     """Return stored records, optionally restricted to one kind."""
     results = []
-    for metadata_path in root.glob('*.json'):
+    for metadata_path in _files(root, 'json'):
         try:
             metadata = json.loads(metadata_path.read_text(encoding='utf-8'))
             record_kind = _kind(metadata)
@@ -154,12 +235,9 @@ def get(root, record_id, kind, retention_days):
     record_id = _record_id(record_id)
     if record_id is None:
         return None
-    if kind == 'quarantine' and not _is_uuid(record_id):
-        return None
-    if kind == 'greylist' and not _MESSAGE_ID_KEY.fullmatch(record_id):
-        return None
-    metadata_path = root / f'{record_id}.json'
-    message_path = root / f'{record_id}.eml'
+    record_dir = _record_directory(root, record_id)
+    metadata_path = record_dir / f'{record_id}.json'
+    message_path = record_dir / f'{record_id}.eml'
     try:
         metadata = json.loads(metadata_path.read_text(encoding='utf-8'))
         if _kind(metadata) != kind:
@@ -182,6 +260,7 @@ def delete(root, record_id, kind=None):
     record_id = _record_id(record_id)
     if record_id is None:
         return False
+    root = _record_directory(root, record_id)
     metadata_path = root / f'{record_id}.json'
     message_path = root / f'{record_id}.eml'
     try:

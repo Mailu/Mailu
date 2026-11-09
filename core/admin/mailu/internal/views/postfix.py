@@ -34,18 +34,39 @@ def postfix_dane_map(domain_name):
 def postfix_mailbox_domain(domain_name):
     if _unsupported_address(domain_name) or re.match(r'^\[.*\]$', domain_name):
         return flask.abort(404)
-    domain = models.db.session.get(models.Domain, domain_name) or \
-             models.db.session.get(models.Alternative, domain_name) or \
-             flask.abort(404)
-    return flask.jsonify(domain.name)
+    domain = models.Domain.query.with_entities(models.Domain.name).filter_by(name=domain_name).first()
+    if domain:
+        return flask.jsonify(domain[0])
+    alternative = models.Alternative.query.with_entities(models.Alternative.domain_name).filter_by(name=domain_name).first()
+    return flask.jsonify(alternative[0]) if alternative else flask.abort(404)
+
+
+@internal.route("/postfix/domain-quota", methods=["POST"])
+def postfix_domain_quota():
+    """Best-effort quota policy check called by Postfix for inbound RCPTs."""
+    data = flask.request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return flask.jsonify({'error': 'Expected a JSON object'}), 400
+    recipient = data.get('recipient')
+    size = data.get('size', 0)
+    if not isinstance(recipient, str) or recipient.count('@') != 1:
+        return flask.jsonify({'error': 'Invalid recipient'}), 400
+    if isinstance(size, bool) or not isinstance(size, int) or size < 0:
+        return flask.jsonify({'error': 'Invalid message size'}), 400
+
+    from mailu.domain_quota import check_domain_quota
+    return flask.jsonify(check_domain_quota(recipient, size))
 
 
 @internal.route("/postfix/mailbox/<path:email>")
 def postfix_mailbox_map(email):
     if _unsupported_address(email, require_mailbox=True):
         return flask.abort(404)
-    user = models.db.session.get(models.User, email) or flask.abort(404)
-    return flask.jsonify(user.email)
+    try:
+        user = models.User.query.with_entities(models.User.email).filter_by(_email=email).first()
+    except sqlalchemy.exc.StatementError:
+        user = None
+    return flask.jsonify(user[0]) if user else flask.abort(404)
 
 
 @internal.route("/postfix/alias/<path:alias>")
@@ -64,8 +85,11 @@ def postfix_transport(email):
     if _unsupported_address(email) or email == '*' or re.match(r'(^|.*@)\[.*\]$', email):
         return flask.abort(404)
     _, domain_name = models.Email.resolve_domain(email)
-    relay = models.db.session.get(models.Relay, domain_name) or flask.abort(404)
-    target = relay.smtp.lower()
+    relay = models.Relay.query.with_entities(models.Relay.name, models.Relay.smtp).filter_by(name=domain_name).first()
+    if not relay:
+        flask.abort(404)
+    relay_name, relay_smtp = relay
+    target = relay_smtp.lower()
     port = None
     use_lmtp = False
     use_mx = False
@@ -98,7 +122,7 @@ def postfix_transport(email):
     # default for empty host part is mx:domain
     if not host:
         if not use_lmtp:
-            host = relay.name.lower()
+            host = relay_name.lower()
             use_mx = True
         else:
             # lmtp: needs a host part
@@ -156,7 +180,7 @@ def postfix_sender_map(sender):
         localpart, domain_name = models.Email.resolve_domain(sender)
     except Exception as error:
         return flask.abort(404)
-    if models.db.session.get(models.Domain, domain_name):
+    if models.Domain.query.with_entities(models.Domain.name).filter_by(name=domain_name).first():
         return flask.abort(404)
     return flask.jsonify(srs.forward(sender, domain))
 
@@ -188,8 +212,11 @@ def postfix_sender_rate(sender):
         flask.abort(404)
     if _unsupported_address(sender, require_mailbox=True):
         return flask.abort(404)
-    user = models.User.get(sender) or flask.abort(404)
-    return flask.abort(404) if user.sender_limiter.hit() else flask.jsonify("450 4.2.1 You are sending too many emails too fast.")
+    user = models.User.query.with_entities(models.User.email).filter_by(_email=sender).first()
+    if not user:
+        flask.abort(404)
+    limiter = utils.limiter.get_limiter(flask.current_app.config['MESSAGE_RATELIMIT'], 'sender', user[0])
+    return flask.abort(404) if limiter.hit() else flask.jsonify("450 4.2.1 You are sending too many emails too fast.")
 
 # idna encode domain part of each address in list of addresses
 def idna_encode(addresses):

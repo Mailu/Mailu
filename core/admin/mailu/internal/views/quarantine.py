@@ -42,11 +42,9 @@ def rspamd_quarantine():
     metadata['envelope_recipients'] = envelope_recipients
     mailbox_recipients = set()
     for address in envelope_recipients:
-        localpart, domain = models.User.resolve_domain(address)
-        for destination in models.User.resolve_destination(localpart, domain) or []:
-            mailbox = models.User.get(destination.lower())
-            if mailbox:
-                mailbox_recipients.add(mailbox.email.lower())
+        mailbox_recipients.update(
+            mailbox.email.lower() for mailbox in models.Email.resolve_mailboxes(address)
+        )
     metadata['recipients'] = sorted(mailbox_recipients or envelope_recipients)
     metadata['symbols'] = metadata.get('symbols') if isinstance(metadata.get('symbols'), list) else []
     metadata['received'] = datetime.now(timezone.utc).isoformat()

@@ -281,6 +281,7 @@ This is a complete YAML template with all additional parameters that can be defi
       dkim_key: ''
       max_aliases: -1
       max_quota_bytes: 0
+      max_domain_quota_bytes: 0
       max_users: -1
       signup_enabled: false
 

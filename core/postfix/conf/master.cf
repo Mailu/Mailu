@@ -4,6 +4,8 @@
 # Exposed SMTP service
 smtp      inet  n       -       y       -       -       smtpd
   -o podop=socketmap:unix:/private/podop.socket:
+  -o smtpd_policy_service_default_action=DUNNO
+  -o { smtpd_recipient_restrictions = check_policy_service inet:127.0.0.1:10040 }
 
 # Internal SMTP service
 10025     inet  n       -       y       -       -       smtpd

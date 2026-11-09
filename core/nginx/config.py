@@ -111,7 +111,7 @@ args = system.set_env()
 log.basicConfig(stream=sys.stderr, level=args.get("LOG_LEVEL", "WARNING"))
 bootstrap = "--bootstrap" in sys.argv
 
-args['TLS_PERMISSIVE'] = str(args.get('TLS_PERMISSIVE')).lower() not in ('false', 'no')
+args['TLS_PERMISSIVE'] = system.parse_bool(args.get('TLS_PERMISSIVE'), True)
 
 # Get the first DNS server
 with open("/etc/resolv.conf") as handle:
@@ -122,7 +122,7 @@ with open("/etc/resolv.conf") as handle:
 # TLS configuration
 cert_name = args.get("TLS_CERT_FILENAME", "cert.pem")
 keypair_name = args.get("TLS_KEYPAIR_FILENAME", "key.pem")
-letsencrypt_shortchain = str(args.get("LETSENCRYPT_SHORTCHAIN", True)).lower() not in ("false", "no", "0")
+letsencrypt_shortchain = system.parse_bool(args.get("LETSENCRYPT_SHORTCHAIN"), True)
 ecdsa_chain_name = "front-chain.pem" if letsencrypt_shortchain else "fullchain.pem"
 args["TLS"] = {
     "cert": ("/certs/%s" % cert_name, "/certs/%s" % keypair_name),
@@ -240,8 +240,6 @@ if bootstrap and args.get("TLS_ERROR") and args['TLS_FLAVOR'] in ['letsencrypt',
         pass
 if args.get("TLS_ERROR"):
     args["TLS"] = None
-
-args['TLS_PERMISSIVE'] = str(args.get('TLS_PERMISSIVE')).lower() not in ('false', 'no')
 
 # Build final configuration paths
 conf.jinja("/conf/tls.conf", args, "/etc/nginx/tls.conf")

@@ -1,3 +1,5 @@
+import base64
+import hashlib
 import hmac
 import logging as log
 import os
@@ -6,6 +8,28 @@ import sys
 from pwd import getpwnam
 import socket
 import tenacity
+
+
+def mailbox_shard(address: str) -> str:
+    digest = hashlib.blake2s(
+        address.encode("utf-8"), digest_size=2
+    ).digest()
+    return base64.b32encode(digest).decode("ascii")[:2].lower()
+
+
+def parse_bool(value, default=None):
+    """Parse common boolean spellings, returning default for other values."""
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return default
+    normalized = str(value).strip().lower()
+    if normalized in ('1', 'true', 'yes', 'on'):
+        return True
+    if normalized in ('0', 'false', 'no', 'off'):
+        return False
+    return default
+
 
 @tenacity.retry(stop=tenacity.stop_after_attempt(100),
                 wait=tenacity.wait_random(min=2, max=5))
@@ -20,11 +44,7 @@ def resolve_hostname(hostname):
         raise e
 
 def _coerce_value(value):
-    if isinstance(value, str) and value.lower() in ('true','yes'):
-        return True
-    elif isinstance(value, str) and value.lower() in ('false', 'no'):
-        return False
-    return value
+    return parse_bool(value, value)
 
 def _is_compatible_with_hardened_malloc():
     with open('/proc/version', 'r') as f:
@@ -117,9 +137,9 @@ def clean_env():
     if 'CPU_COUNT' not in os.environ:
         os.environ['CPU_COUNT'] = str(os.cpu_count())
 
-def drop_privs_to(username='mailu'):
+def drop_privs_to(username='mailu', supplementary_groups=None):
     pwnam = getpwnam(username)
-    os.setgroups([])
+    os.setgroups(supplementary_groups or [])
     os.setgid(pwnam.pw_gid)
     os.setuid(pwnam.pw_uid)
     os.environ['HOME'] = pwnam.pw_dir

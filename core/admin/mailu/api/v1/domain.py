@@ -15,7 +15,8 @@ domain_fields = api.model('Domain', {
     'comment': fields.String(description='a comment'),
     'max_users': fields.Integer(description='maximum number of users', min=-1, default=-1),
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
-    'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
+    'max_quota_bytes': fields.Integer(description='maximum quota for each mailbox', min=0),
+    'max_domain_quota_bytes': fields.Integer(description='best-effort aggregate storage limit for the domain', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
     'passkey_require_enrollment': fields.Boolean(description='require every user to enroll a passkey before continuing after sign-in'),
     'passkey_enforce_aaguid': fields.Boolean(description='enforce the domain AAGUID policy'),
@@ -35,7 +36,8 @@ domain_fields_update = api.model('DomainUpdate', {
     'comment': fields.String(description='a comment'),
     'max_users': fields.Integer(description='maximum number of users', min=-1, default=-1),
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
-    'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
+    'max_quota_bytes': fields.Integer(description='maximum quota for each mailbox', min=0),
+    'max_domain_quota_bytes': fields.Integer(description='best-effort aggregate storage limit for the domain', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
     'passkey_require_enrollment': fields.Boolean(description='require every user to enroll a passkey before continuing after sign-in'),
     'passkey_enforce_aaguid': fields.Boolean(description='enforce the domain AAGUID policy'),
@@ -57,7 +59,8 @@ domain_fields_get = api.model('DomainGet', {
     'managers': fields.List(fields.String(attribute='email', description='manager of domain')),
     'max_users': fields.Integer(description='maximum number of users', min=-1, default=-1),
     'max_aliases': fields.Integer(description='maximum number of aliases', min=-1, default=-1),
-    'max_quota_bytes': fields.Integer(description='maximum quota for mailbox', min=0),
+    'max_quota_bytes': fields.Integer(description='maximum quota for each mailbox', min=0),
+    'max_domain_quota_bytes': fields.Integer(description='best-effort aggregate storage limit for the domain', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
     'passkey_require_enrollment': fields.Boolean(description='require every user to enroll a passkey before continuing after sign-in'),
     'passkey_enforce_aaguid': fields.Boolean(description='enforce the domain AAGUID policy'),
@@ -215,6 +218,8 @@ class Domains(Resource):
             domain_new.max_aliases = data['max_aliases']
         if 'max_quota_bytes' in data:
             domain_new.max_quota_bytes = data['max_quota_bytes']
+        if 'max_domain_quota_bytes' in data:
+            domain_new.max_domain_quota_bytes = data['max_domain_quota_bytes']
         if 'signup_enabled' in data:
             domain_new.signup_enabled = data['signup_enabled']
         models.db.session.add(domain_new)
@@ -280,6 +285,8 @@ class Domain(Resource):
             domain_found.max_aliases = data['max_aliases']
         if 'max_quota_bytes' in data:
             domain_found.max_quota_bytes = data['max_quota_bytes']
+        if 'max_domain_quota_bytes' in data:
+            domain_found.max_domain_quota_bytes = data['max_domain_quota_bytes']
         if 'signup_enabled' in data:
             domain_found.signup_enabled = data['signup_enabled']
         if error := _set_passkey_policy(domain_found, data):

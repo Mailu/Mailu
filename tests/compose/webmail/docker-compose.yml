@@ -55,8 +55,13 @@ services:
     volumes:
       - "/mailu/mail:/mail"
       - "/mailu/overrides:/overrides"
+    tmpfs:
+      - /mail/usr:rw,nosuid,nodev,exec,size=128m
     depends_on:
-      - front
+      front:
+        condition: service_started
+      admin:
+        condition: service_healthy
 
   smtp:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-local}

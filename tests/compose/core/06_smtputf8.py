@@ -4,7 +4,6 @@ import base64
 import imaplib
 import smtplib
 import ssl
-import subprocess
 import sys
 import uuid
 from email import policy
@@ -21,29 +20,7 @@ DOMAIN = "mailu.io"
 EAI_LOCALPART = "\u6d4b\u8bd52"
 EAI_USER = f"{EAI_LOCALPART}@{DOMAIN}"
 EAI_PASSWORD = "password"
-COMPOSE_FILE = "tests/compose/core/docker-compose.yml"
 TLS_CONTEXT = ssl._create_unverified_context()
-
-
-def create_eai_user():
-    subprocess.run(
-        [
-            "docker",
-            "compose",
-            "-f",
-            COMPOSE_FILE,
-            "exec",
-            "-T",
-            "admin",
-            "flask",
-            "mailu",
-            "user",
-            "add",
-            EAI_USER,
-            EAI_PASSWORD,
-        ],
-        check=True,
-    )
 
 
 def connect_smtp(port, expect_smtputf8):
@@ -115,8 +92,6 @@ def assert_received(username, password, marker):
 
 
 def main():
-    create_eai_user()
-
     with connect_smtp(25, expect_smtputf8=True):
         pass
     for port in (465, 587):

@@ -141,6 +141,9 @@ services:
     volumes:
       - "{{ root }}/mail:/mail"
       - "{{ root }}/overrides/dovecot:/overrides:ro"
+    # Sieve modules are loaded from this chroot, so this mount must allow executable mappings.
+    tmpfs:
+      - /mail/usr:rw,nosuid,nodev,exec,size=128m
     networks:
       - default
     {% if tika_enabled %}

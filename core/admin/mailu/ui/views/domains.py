@@ -24,8 +24,14 @@ def domain_list():
         models.db.session.query(models.Alias.domain_name, models.db.func.count(models.Alias.email))
         .group_by(models.Alias.domain_name)
     )
+    domain_storage = dict(
+        models.db.session.query(
+            models.User.domain_name,
+            models.db.func.coalesce(models.db.func.sum(models.User.quota_bytes_used), 0),
+        ).group_by(models.User.domain_name)
+    )
     return flask.render_template('domain/list.html',
-        user_counts=user_counts, alias_counts=alias_counts)
+        user_counts=user_counts, alias_counts=alias_counts, domain_storage=domain_storage)
 
 
 @ui.route('/domain/create', methods=['GET', 'POST'])
@@ -50,6 +56,8 @@ def domain_create():
             flask.flash('Domain %s is invalid' % form.name.data, 'error')
     return flask.render_template('domain/create.html', form=form,
         max_quota_bytes=forms.MAX_QUOTA_BYTES,
+        max_domain_quota_bytes=forms.MAX_QUOTA_BYTES,
+        domain_storage_used=0,
         can_edit_domain_settings=True)
 
 
@@ -61,9 +69,15 @@ def domain_edit(domain_name):
     form_class = forms.DomainForm if can_edit_domain_settings else forms.DomainPasskeyPolicyForm
     form = form_class(obj=domain)
     max_quota_bytes = max(forms.MAX_QUOTA_BYTES, domain.max_quota_bytes)
+    max_domain_quota_bytes = max(forms.MAX_QUOTA_BYTES, domain.max_domain_quota_bytes)
+    domain_storage_used = models.db.session.query(
+        models.db.func.coalesce(models.db.func.sum(models.User.quota_bytes_used), 0)
+    ).filter_by(domain_name=domain.name).scalar() or 0
     if can_edit_domain_settings:
         form.max_quota_bytes.validators = [
             wtforms.validators.NumberRange(min=0, max=max_quota_bytes)]
+        form.max_domain_quota_bytes.validators = [
+            wtforms.validators.NumberRange(min=0, max=max_domain_quota_bytes)]
         wtforms_components.read_only(form.name)
         form.name.validators = []
     if form.validate_on_submit():
@@ -73,6 +87,8 @@ def domain_edit(domain_name):
         return flask.redirect(flask.url_for('.domain_list'))
     return flask.render_template('domain/edit.html', form=form,
         domain=domain, max_quota_bytes=max_quota_bytes,
+        max_domain_quota_bytes=max_domain_quota_bytes,
+        domain_storage_used=domain_storage_used,
         can_edit_domain_settings=can_edit_domain_settings)
 
 

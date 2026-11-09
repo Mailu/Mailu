@@ -74,3 +74,15 @@ $(document).ready(function() {
 		}
 	});
 });
+
+$(document).ready(function() {
+	const enabled = $('#webmail_enabled');
+	const options = $('#webmail-options');
+	function updateWebmailOptions() {
+		const show = enabled.prop('checked');
+		options.prop('disabled', !show);
+		options.prop('hidden', !show);
+	}
+	enabled.on('change', updateWebmailOptions);
+	updateWebmailOptions();
+});

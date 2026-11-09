@@ -3,15 +3,31 @@
 interface, Web email clients, antispam, antivirus, etc.
 In this section you can enable the services to you liking.</p>
 
+{% set webmail_enabled = form_data.get('webmail_enabled', 'true') == 'true' %}
+{% set webmail_available = form_data.get('webmail_available', ['roundcube', 'snappymail']) %}
 <div class="form-check form-check-inline">
   <label class="form-check-label">
-    <input class="form-check-input" type="checkbox" name="webmail_enabled" value="true" checked>
+    <input class="form-check-input" type="checkbox" id="webmail_enabled" name="webmail_enabled" value="true"{% if webmail_enabled %} checked{% endif %}>
     Enable webmail
   </label>
 
-  <i>Include Roundcube and SnappyMail. Administrators can control which webmails
-    are available with the WEBMAIL_AVAILABLE setting.</i>
+  <i>Include webmail clients in the Compose stack. Choose which clients are available below.</i>
 </div>
+
+<fieldset id="webmail-options"{% if not webmail_enabled %} disabled hidden{% endif %}>
+  <legend>Webmail clients</legend>
+  <p>Select one or both clients. Both are enabled by default.</p>
+  <div class="btn-group" data-toggle="buttons" role="group" aria-label="Webmail clients">
+    <label class="btn btn-default{% if 'roundcube' in webmail_available %} active{% endif %}">
+      <input type="checkbox" name="webmail_available" value="roundcube" autocomplete="off"{% if 'roundcube' in webmail_available %} checked{% endif %}>
+      Roundcube
+    </label>
+    <label class="btn btn-default{% if 'snappymail' in webmail_available %} active{% endif %}">
+      <input type="checkbox" name="webmail_available" value="snappymail" autocomplete="off"{% if 'snappymail' in webmail_available %} checked{% endif %}>
+      SnappyMail
+    </label>
+  </div>
+</fieldset>
 
 <div class="form-check form-check-inline">
   <label class="form-check-label">

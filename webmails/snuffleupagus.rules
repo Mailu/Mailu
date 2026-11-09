@@ -145,6 +145,8 @@ sp.disable_function.function("move_uploaded_file").param("destination").value_r(
 # Logging lockdown
 sp.disable_function.function("ini_set").param("option").value_r("error_log").drop();
 sp.disable_function.function("ini_set").param("option").value_r("display_errors").filename_r("/var/www/snappymail/snappymail/v/[0-9]+\.[0-9]+\.[0-9]+/app/libraries/snappymail/shutdown.php").allow();
+# CardDAV synchronization streams JSON lines and disables displayed PHP errors.
+sp.disable_function.function("ini_set").param("option").value("display_errors").filename_r("^/var/www/snappymail/snappymail/v/[0-9]+\.[0-9]+\.[0-9]+/app/libraries/snappymail/http/stream\.php$").allow();
 sp.disable_function.function("ini_set").param("option").value_r("display_errors").drop();
 
 # Classic webshells patterns

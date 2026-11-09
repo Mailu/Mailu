@@ -105,7 +105,7 @@ DEFAULT_CONFIG = {
     'PROXY_AUTH_LOGOUT_URL': None,
     'SUBNET': '192.168.203.0/24',
     'SUBNET6': None,
-    'WEBDAV': '',
+    'WEBDAV': 'none',
 }
 
 class ConfigManager:

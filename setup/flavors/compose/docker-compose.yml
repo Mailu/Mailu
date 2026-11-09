@@ -294,6 +294,15 @@ services:
   webdav:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}radicale:${MAILU_VERSION:-{{ version }}}
     restart: always
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      # Startup repairs ownership on existing /data volumes before dropping to mailu.
+      - CHOWN
+      - SETUID
+      - SETGID
     logging:
       driver: journald
       options:

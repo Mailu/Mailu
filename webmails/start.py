@@ -19,6 +19,9 @@ coerced = system.set_env(['ROUNDCUBE','SNUFFLEUPAGUS'])
 context = {}
 context.update(env)
 context['ADMIN'] = coerced.get('ADMIN', False)
+context['DAV_ENABLED'] = env.get('WEBDAV') == 'radicale'
+context['DAV_INTERNAL_URL'] = f"{'http' if env.get('TLS_FLAVOR') in ('notls', 'mail', 'mail-letsencrypt') else 'https'}://{env.get('FRONT_ADDRESS') or 'front'}/webdav/"
+context['DAV_PUBLIC_URL'] = f"{'http' if env.get('TLS_FLAVOR') == 'notls' else 'https'}://{env['HOSTNAMES'].split(',')[0]}/webdav/"
 
 context["MAX_FILESIZE"] = str(int(int(env.get("MESSAGE_SIZE_LIMIT", "50000000")) * 0.66 / 1048576))
 
@@ -58,6 +61,9 @@ conf.jinja("/etc/snuffleupagus.rules.tpl", context, "/etc/snuffleupagus.rules")
 # (using "dict" because it is ordered and "set" is not)
 plugins = dict((p, None) for p in env.get("ROUNDCUBE_PLUGINS", "").replace(" ", "").split(",") if p and os.path.isdir(os.path.join("/var/www/roundcube/plugins", p)))
 if plugins:
+    # Mailu redirects at the end of login_after. Other plugins (including
+    # CardDAV's preset discovery) must finish their login hooks first.
+    plugins.pop("mailu", None)
     plugins["mailu"] = None
 else:
     plugins = dict((k, None) for k in ["archive", "zipdownload", "markasjunk", "managesieve", "enigma", "carddav", "mailu"])
@@ -69,6 +75,7 @@ context["OVERRIDE_DIRECTORY"], context["INCLUDES"] = roundcube_overrides()
 
 # create config files
 conf.jinja("/conf/config.inc.php", context, "/var/www/roundcube/config/config.inc.php")
+conf.jinja("/conf/config.inc.carddav.php", context, "/var/www/roundcube/plugins/carddav/config.inc.php")
 
 # create dirs
 os.system("mkdir -p /data/gpg")
@@ -82,16 +89,19 @@ conf.jinja("/defaults/default.json", context, "/data/_data_/_default_/domains/de
 conf.jinja("/defaults/application.ini", context, "/data/_data_/_default_/configs/application.ini")
 apply_snappymail_overrides("/data/_data_/_default_/configs/application.ini", "/snappymail-overrides/application.ini")
 conf.jinja("/defaults/php.ini", context, "/etc/php84/php.ini")
-snappymail_plugin = "/data/_data_/_default_/plugins/mailu-identities"
-shutil.copytree(
-    "/var/www/snappymail/mailu-plugins/mailu-identities",
-    snappymail_plugin,
-    dirs_exist_ok=True,
-)
+snappymail_plugins = ["mailu-identities", "mailu-carddav"]
+for plugin in snappymail_plugins:
+    shutil.copytree(
+        f"/var/www/snappymail/mailu-plugins/{plugin}",
+        base + f"plugins/{plugin}",
+        dirs_exist_ok=True,
+    )
 
 # setup permissions
 os.system("chown -R mailu:mailu /data")
-os.system(f"chown -R root:root {snappymail_plugin} && chmod -R a-w {snappymail_plugin}")
+for plugin in snappymail_plugins:
+    plugin_path = base + f"plugins/{plugin}"
+    os.system(f"chown -R root:root {plugin_path} && chmod -R a-w {plugin_path}")
 
 def demote(username='mailu'):
     def result():

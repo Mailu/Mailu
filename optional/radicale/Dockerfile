@@ -8,6 +8,7 @@ LABEL version=$VERSION
 
 COPY radicale.conf /
 COPY start.py /
+COPY run_radicale.py /
 
 RUN echo $VERSION >/version
 

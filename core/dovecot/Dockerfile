@@ -14,6 +14,7 @@ RUN set -euxo pipefail \
 COPY conf/ /conf/
 COPY start.py /
 COPY migrate_mail.py /
+COPY provision_mailbox.py /
 COPY rebuild_fts.py /
 COPY fts_settings.py /
 COPY supervisor-healthcheck /usr/local/bin/supervisor-healthcheck

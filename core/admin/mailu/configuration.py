@@ -72,9 +72,7 @@ DEFAULT_CONFIG = {
     'SITENAME': 'Mailu',
     'WEBSITE': 'https://mailu.io',
     'ADMIN': 'none',
-    'WEB_ADMIN': '/admin',
-    'WEB_WEBMAIL': '/webmail',
-    'WEBMAIL': 'none',
+    'WEBMAIL_AVAILABLE': 'roundcube,snappymail',
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
     'LOGO_URL': None,
@@ -82,7 +80,6 @@ DEFAULT_CONFIG = {
     # Advanced settings
     'AUTH_REQUIRE_TOKENS': True,
     'API': False,
-    'WEB_API': '/api',
     'API_TOKEN': None,
     'FULL_TEXT_SEARCH': 'en',
     'FULL_TEXT_SEARCH_ATTACHMENTS': False,
@@ -148,6 +145,7 @@ class ConfigManager:
             key: self.__coerce_value(self.__get_env(key, value))
             for key, value in DEFAULT_CONFIG.items()
         })
+        self.config.update(WEB_ADMIN='/admin', WEB_WEBMAIL='/webmail', WEB_API='/api')
         self.config['ACCOUNT_SETUP_TOKEN_TTL'] = int(
             self.config['ACCOUNT_SETUP_TOKEN_TTL'],
         )

@@ -209,15 +209,24 @@ no specific per-user quota configured.
 Web settings
 ------------
 
-- ``WEBMAIL`` selects the webmail application to run. The supported values are
-  ``none`` (disable webmail), ``roundcube`` and ``snappymail``. This is normally
-  selected in the setup utility and does not need to be changed manually.
+- ``WEBMAIL_AVAILABLE`` is a comma-separated list of enabled webmails.
+  If unset or empty, both webmails are enabled. Set it to ``none`` to disable
+  both webmails. If ``none`` appears in the list, it takes
+  precedence over any webmail names. The webmails are served at ``/roundcube`` and ``/snappymail``;
+  ``/webmail`` redirects signed-in users to their preferred enabled webmail.
+  Users can select their preference in account settings. If their choice is
+  disabled, the first enabled webmail is used. Restart the front and admin
+  services after changing this setting.
 
-- ``WEB_ADMIN`` contains the path to the main admin interface
-
-- ``WEB_WEBMAIL`` contains the path to the Web email client.
-
-- ``WEB_API`` contains the path to the RESTful API.
+  Both webmails run in the same webmail container and use its existing data
+  directory. Replace the old ``WEBMAIL`` setting with ``WEBMAIL_AVAILABLE``
+  when upgrading. Mount ``$ROOT/overrides/roundcube`` at
+  ``/roundcube-overrides`` for Roundcube ``.inc`` and ``.inc.php`` files, and
+  ``$ROOT/overrides/snappymail`` at ``/snappymail-overrides`` for an optional
+  ``application.ini`` containing SnappyMail settings to override. Restart the
+  webmail service after changing overrides. When both webmails are disabled, the default
+  webmail root redirect falls back to ``/admin`` if the admin interface is
+  enabled. The setup wizard can also omit the webmail service entirely.
 
 - ``WEBROOT_REDIRECT`` redirects all non-found queries to the set path.
   An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables
@@ -225,11 +234,11 @@ Web settings
   Alternatively, ``WEBROOT_REDIRECT`` can be set to ``none`` if you
   are using an Nginx override for ``location /``.
 
-All four options need a leading slash (``/``) to work.
+The redirect path needs a leading slash (``/``) to work.
 
   .. note:: ``WEBROOT_REDIRECT`` has to point to a valid path on the webserver.
-    This means it cannot point to any services which are not enabled.
-    For example, don't point it to ``/webmail`` when ``WEBMAIL=none``
+    A redirect to ``/webmail`` falls back to ``/admin`` (or a 404 when admin is
+    disabled) if ``WEBMAIL_AVAILABLE=none``.
 
 Both ``SITENAME`` and ``WEBSITE`` are customization options for the panel menu
 in the admin interface, while ``SITENAME`` is a customization option for
@@ -491,9 +500,9 @@ Once configured, any request to /sso/login with the correct headers will be auth
 Requests to:
 
 - ``/sso/login`` use the browser preference from the last successful sign-in, defaulting to Webmail when enabled.
-- ``/sso/login/admin`` explicitly select ``WEB_ADMIN``.
-- ``/sso/login/webmail`` explicitly select ``WEB_WEBMAIL``.
-- Protected pages under ``WEB_ADMIN`` and ``WEB_WEBMAIL`` return to the original
+- ``/sso/login/admin`` explicitly select ``/admin``.
+- ``/sso/login/webmail`` explicitly select ``/webmail``.
+- Protected pages under ``/admin``, ``/roundcube`` and ``/snappymail`` return to the original
   page after authentication. Return destinations are stored server-side rather
   than placed in internally generated ``?url=`` links.
 
@@ -505,7 +514,7 @@ OAuth2 authentication for native mail clients
 ----------------------------------------------
 
 Mailu provides an OAuth 2.0 issuer for native mail clients. The issuer uses
-the primary ``HOSTNAME`` and the configured ``WEB_ADMIN`` path. OAuth is always
+the primary ``HOSTNAME`` and the ``/admin`` path. OAuth is always
 available and needs no extra environment variables. The draft -07 AutoConfig
 document advertises the Mailu authorization and token endpoints, the public
 ``mailu`` client ID, and the ``imap smtp pop3 sieve offline_access`` scopes. Password

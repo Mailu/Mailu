@@ -298,7 +298,7 @@ def passkey_authentication_options():
     target = payload.get('target', 'admin')
     if target == 'admin' and str(flask.current_app.config['ADMIN']).upper() != 'FALSE':
         destination = flask.current_app.config['WEB_ADMIN']
-    elif target == 'webmail' and str(flask.current_app.config['WEBMAIL']).upper() != 'NONE':
+    elif target == 'webmail' and signin.webmail.available(flask.current_app.config):
         destination = flask.current_app.config['WEB_WEBMAIL']
     else:
         return flask.jsonify(error='Invalid sign-in destination.'), 400

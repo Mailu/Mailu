@@ -1,5 +1,5 @@
 from werkzeug.utils import redirect
-from mailu import models, utils, auth_flow, signin, passkeys as passkey_utils
+from mailu import models, utils, auth_flow, signin, webmail, passkeys as passkey_utils
 from mailu.sso import sso, forms
 from mailu.ui import access
 
@@ -32,7 +32,7 @@ def login(target):
     form = forms.LoginForm()
     form.destination.choices = [(value, label) for value, label in form.destination.choices
                                 if (value == 'admin' and str(app.config['ADMIN']).upper() != 'FALSE')
-                                or (value == 'webmail' and str(app.config['WEBMAIL']).upper() != 'NONE')]
+                                or (value == 'webmail' and webmail.available(app.config))]
     pending_destination = signin.pending()
     if (flask.request.method == 'GET' and pending_destination
             and urlsplit(pending_destination).path ==

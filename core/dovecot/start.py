@@ -12,6 +12,8 @@ import urllib.request
 
 from socrate import system, conf, supervisor
 from fts_settings import normalize_languages
+from migrate_mail import fetch_users
+from socrate.mailbox import harden_parents_once
 
 log_filters = [
     rb'Error\: SSL context initialization failed, disabling SSL\: Couldn\'t initialize SSL server context\: Can\'t load SSL certificate \(ssl_server_cert_file setting\)\: The certificate is empty$',
@@ -26,6 +28,13 @@ context = dict(
     FULL_TEXT_SEARCH_ENABLED=fts_languages != "off",
     FULL_TEXT_SEARCH_ATTACHMENTS=system.parse_bool(env.get("FULL_TEXT_SEARCH_ATTACHMENTS"), False),
 )
+icu_data_files = sorted(glob.glob("/usr/share/icu/*/icudt*.dat")) if context["FULL_TEXT_SEARCH_ENABLED"] else []
+if context["FULL_TEXT_SEARCH_ENABLED"]:
+    if len(icu_data_files) != 1:
+        raise RuntimeError("Expected exactly one ICU data archive")
+    # ICU needs the directory containing the archive, not its parent.
+    context["ICU_DATA_PATH"] = os.path.dirname(icu_data_files[0]) + "/"
+
 def wait_for_tika():
     if not context["FULL_TEXT_SEARCH_ENABLED"] or not context["FULL_TEXT_SEARCH_ATTACHMENTS"]:
         return
@@ -118,14 +127,15 @@ mail_dns_runtime_dir = "/mail/run/dovecot"
 os.makedirs(mail_dns_runtime_dir, mode=0o755, exist_ok=True)
 os.chown(mail_dns_runtime_dir, 0, 0)
 os.chmod(mail_dns_runtime_dir, 0o755)
-mail_dns_socket = os.path.join(mail_dns_runtime_dir, "dns-client")
-try:
-    if stat.S_ISSOCK(os.lstat(mail_dns_socket).st_mode):
-        os.unlink(mail_dns_socket)
-    else:
-        raise RuntimeError(f"Unexpected non-socket at {mail_dns_socket}")
-except FileNotFoundError:
-    pass
+for socket_name in ("dns-client", "indexer"):
+    socket_path = os.path.join(mail_dns_runtime_dir, socket_name)
+    try:
+        if stat.S_ISSOCK(os.lstat(socket_path).st_mode):
+            os.unlink(socket_path)
+        else:
+            raise RuntimeError(f"Unexpected non-socket at {socket_path}")
+    except FileNotFoundError:
+        pass
 
 # Mail processes are chrooted into /mail. Keep the Sieve modules and global
 # scripts they need available inside that chroot without exposing the rest of
@@ -151,7 +161,7 @@ for chroot_name, source_pattern in (
 if context["FULL_TEXT_SEARCH_ENABLED"]:
     # FTS language filters load these files after the mail worker has chrooted
     # into /mail. Keep the ICU data and stopword lists available in tmpfs.
-    fts_runtime_assets = glob.glob("/usr/share/icu/*/icudt*.dat") + glob.glob(
+    fts_runtime_assets = icu_data_files + glob.glob(
         "/usr/share/dovecot/stopwords/*.txt"
     )
     if not any("/icu/" in source for source in fts_runtime_assets):
@@ -173,9 +183,8 @@ for source in glob.glob("/conf/report-*.svbin"):
     os.chown(target, 0, proxy_gid)
     os.chmod(target, 0o640)
 
-# Keep execute sockets below the mailbox chroot. Dovecot resolves service
-# listeners relative to base_dir, while mail processes see these as /usr/run
-# after chrooting.
+# Keep execute sockets below the mailbox chroot. Sieve resolves socket
+# directories relative to Dovecot's /run/dovecot base directory.
 mail_runtime_dir = os.path.join(runtime_root, "run/dovecot")
 os.makedirs(mail_runtime_dir, mode=0o755, exist_ok=True)
 os.chown(mail_runtime_dir, 0, 0)
@@ -184,11 +193,11 @@ token_login_runtime_dir = os.path.join(mail_runtime_dir, "token-login")
 os.makedirs(token_login_runtime_dir, mode=0o750, exist_ok=True)
 os.chown(token_login_runtime_dir, 0, proxy_gid)
 os.chmod(token_login_runtime_dir, 0o750)
-execute_socket_dir = os.path.join(mail_runtime_dir, "sieve-execute")
+execute_socket_dir = os.path.join(mail_dns_runtime_dir, "sieve-execute")
 os.makedirs(execute_socket_dir, mode=0o710, exist_ok=True)
 os.chown(execute_socket_dir, 0, proxy_gid)
 os.chmod(execute_socket_dir, 0o710)
-for name in ("spam", "ham"):
+for name in ("spam", "ham", "provision-mailbox"):
     stale_socket = os.path.join(execute_socket_dir, name)
     try:
         if stat.S_ISSOCK(os.lstat(stale_socket).st_mode):
@@ -198,6 +207,8 @@ for name in ("spam", "ham"):
 
 # Migrate persistent mailbox data before Dovecot starts serving requests.
 subprocess.run(["python3", "/migrate_mail.py"], check=True)
+# Upgrade existing parents once; provisioning and imports protect new ones.
+harden_parents_once(lambda: [user["home"] for user in fetch_users()])
 if os.path.exists("/mail/.fts-rebuild-pending"):
     wait_for_tika()
 

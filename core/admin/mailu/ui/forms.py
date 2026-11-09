@@ -245,6 +245,7 @@ class UserSignupFormCaptcha(UserSignupForm):
     captcha = flask_wtf.RecaptchaField()
 
 class UserSettingsForm(flask_wtf.FlaskForm):
+    webmail_preference = fields.RadioField(_('Preferred webmail'), choices=[], validators=[validators.Optional()])
     displayed_name = fields.StringField(_('Displayed name'), render_kw=AUTOFOCUS)
     gpg_key = fields.TextAreaField(_('OpenPGP public key'), [validators.Optional(), validators.Length(max=65536)])
     submit_gpg_key = fields.SubmitField(_('Publish OpenPGP key'))

@@ -164,12 +164,13 @@ services:
       - redis
 
   webmail:
-    image: "mailu/$WEBMAIL:$VERSION"
+    image: "mailu/webmail:$VERSION"
     restart: always
     env_file: .env
     volumes:
       - "$ROOT/webmail:/data"
-      - "$ROOT/overrides/$WEBMAIL:/overrides:ro"
+      - "$ROOT/overrides/roundcube:/roundcube-overrides:ro"
+      - "$ROOT/overrides/snappymail:/snappymail-overrides:ro"
     depends_on:
       - imap
 

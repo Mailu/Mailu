@@ -7,6 +7,7 @@ import flask_login
 import base64
 import binascii
 import sqlalchemy.exc
+import sqlalchemy
 import urllib
 
 @internal.route("/auth/email")
@@ -84,18 +85,22 @@ def user_authentication():
         original_uri = flask.request.headers.get("X-Mailu-Original-URI", "").split("?", 1)[0]
         if original_uri.endswith("/sso.php"):
             storage_email = models.IdnaEmail.process_bind_param(flask_login, email, "")
-            aliases = models.Alias.query.filter(
+            aliases = models.db.session.query(
+                models.Alias.email, models.Alias.destination,
+            ).outerjoin(
+                models.User, models.Alias.owner_email == models.User.email,
+            ).filter(
                 sqlalchemy.cast(models.Alias.destination, sqlalchemy.String).contains(
                     storage_email, autoescape=True
-                )
+                ),
+                models.Alias.wildcard.is_(False),
+                models.Alias.disabled.is_(False),
+                sqlalchemy.or_(models.Alias.owner_email.is_(None), models.User.enabled.is_(True)),
             ).all()
             addresses = sorted({
-                models.IdnaEmail.process_bind_param(flask_login, alias.email, "")
-                for alias in aliases
-                if not alias.wildcard
-                and not alias.disabled
-                and (not alias.owner or alias.owner.enabled)
-                and storage_email in alias.destination
+                models.IdnaEmail.process_bind_param(flask_login, alias_email, "")
+                for alias_email, destinations in aliases
+                if storage_email in destinations
             })
             serialized_aliases = ",".join(addresses)
             if len(serialized_aliases) <= 2048:

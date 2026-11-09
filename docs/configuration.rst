@@ -5,6 +5,35 @@ This page explains the variables found in ``mailu.env``.
 In most cases ``mailu.env`` is setup correctly by the setup utility and can be left as-is.
 However, some advanced settings or modifications can be done by modifying this file.
 
+Mail storage layout
+-------------------
+
+Dovecot stores each mailbox under ``/mail/<domain>/<shard>/<localpart>``, where
+the shard is the first two lowercase base32 characters of the 2-byte BLAKE2s
+digest of the full email address. Maildir messages and mailbox control state
+live in ``mail/``, persistent indexes and quota state in ``indexes/``, personal
+Sieve scripts and their activation link in ``sieve/``, and IMAP metadata in
+``metadata/``. Dovecot keeps its index cache alongside the persistent indexes.
+
+On upgrade, the IMAP container migrates recognized data from the previous
+``/mail/<email-address>`` layout before starting Dovecot. The migration can be
+restarted safely after interruption, normalizes Maildir message size fields,
+and rebuilds Dovecot indexes. Unrecognized files are left in the legacy
+directory for manual review. The IMAP container records the effective
+full-text-search language configuration, removes stale FTS indexes when FTS is
+disabled, and rebuilds them when the language choices change. Obsolete Xapian
+indexes are discarded as rebuildable data and are never migrated.
+
+To import a filesystem Maildir into an existing Mailu installation, use the
+same legacy staging location, ``/mail/<email-address>``. Create the mailbox
+account first so it has a Dovecot UID/GID, stop the IMAP container, copy the
+contents of the Maildir root into that location, and start the IMAP container
+again. The startup migration detects staged mailboxes even after the initial
+layout migration has completed. It moves recognized state into the account's
+new home, assigns the account's UID/GID, normalizes message sizes, and queues
+index and quota rebuilding. This operation can take a long time; see
+:ref:`import_external_mailbox` for the full procedure and checks.
+
 .. _common_cfg:
 
 Common configuration
@@ -43,6 +72,7 @@ The ``SUBNET6`` (default: unset) defines the IPv6 address range of the docker ne
 It is set by the setup utility when IPv6 is enabled and should be a ULA range (``fd00::/8``).
 When it is set, Mailu services listen on IPv6 addresses as well. Leave it unset to run IPv4 only.
 Enabling IPv6 also requires the Docker network to have IPv6 enabled, see :doc:`faq` for details.
+
 
 The ``POSTMASTER`` is the local part of the postmaster email address. It is
 recommended to setup a generic value and later configure a mail alias for that
@@ -161,8 +191,16 @@ be disabled (e.g. for performance reasons) by setting the variable to ``off``.
 Legacy boolean values such as ``on``, ``true``, ``yes``, and ``1`` enable
 English indexing; ``off``, ``false``, ``no``, and ``0`` disable indexing.
 
+The domain's **Maximum user quota** sets a limit for each mailbox. **Maximum
+domain storage** sets an additional best-effort limit across its mailboxes. The
+Admin interface reports current aggregate usage from Dovecot's quota data, and
+Postfix checks it when accepting each inbound SMTP recipient. The check uses a
+usage snapshot and can be exceeded by concurrent deliveries; it does not cover
+IMAP uploads or moves between mailboxes. Set the domain limit to zero for no
+aggregate limit.
+
 You can set a global ``DEFAULT_QUOTA`` to be used for mailboxes when the domain has
-no specific quota configured.
+no specific per-user quota configured.
 
 .. _`Dovecot languages`: https://doc.dovecot.org/latest/core/plugins/fts.html
 

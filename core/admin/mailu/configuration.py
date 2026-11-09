@@ -1,4 +1,5 @@
 import os
+from socrate.system import parse_bool
 
 from datetime import timedelta
 import ipaddress
@@ -133,11 +134,7 @@ class ConfigManager:
             return os.environ.get(key, value)
 
     def __coerce_value(self, value):
-        if isinstance(value, str) and value.lower() in ('true','yes'):
-            return True
-        elif isinstance(value, str) and value.lower() in ('false', 'no'):
-            return False
-        return value
+        return parse_bool(value, value)
 
     def init_app(self, app):
         # get current app config

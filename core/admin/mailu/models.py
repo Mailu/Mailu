@@ -6,6 +6,7 @@ import json
 import base64
 import hashlib
 import secrets
+import secrets
 
 from datetime import date, datetime, timedelta, timezone
 from email.mime import text, multipart
@@ -39,6 +40,10 @@ logging.getLogger('passlib').setLevel(logging.ERROR)
 
 
 db = flask_sqlalchemy.SQLAlchemy()
+
+def _new_dovecot_uid():
+    # Keep virtual mailbox IDs away from the low system-account range.
+    return 100000 + secrets.randbelow(2_000_000_000 - 100000)
 
 
 class IdnaDomain(db.TypeDecorator):
@@ -190,7 +195,10 @@ class Domain(Base):
         backref=db.backref('manager_of'), lazy='dynamic')
     max_users = db.Column(db.Integer, nullable=False, default=-1)
     max_aliases = db.Column(db.Integer, nullable=False, default=-1)
+    # Maximum quota assigned to each mailbox in the domain (0 = unlimited).
     max_quota_bytes = db.Column(db.BigInteger, nullable=False, default=0)
+    # Best-effort aggregate limit across all mailboxes in the domain (0 = unlimited).
+    max_domain_quota_bytes = db.Column(db.BigInteger, nullable=False, default=0)
     signup_enabled = db.Column(db.Boolean, nullable=False, default=False)
     # Anonymous Email Service integration: enable domain to accept API-generated aliases
     anonmail_enabled = db.Column(db.Boolean, nullable=False, default=False)
@@ -621,12 +629,50 @@ class Email(object):
 
         return None
 
+    @classmethod
+    def resolve_mailboxes(cls, address, seen=None):
+        """Resolve an address through aliases and forwards to local mailboxes."""
+        if not isinstance(address, str) or address.count('@') != 1:
+            return []
+        localpart, domain_name = cls.resolve_domain(address.strip().lower())
+        if not localpart or not db.session.get(Domain, domain_name):
+            return []
+
+        address = f'{localpart}@{domain_name}'.lower()
+        seen = set() if seen is None else seen
+        if address in seen:
+            return []
+        seen.add(address)
+
+        destinations = cls.resolve_destination(localpart, domain_name)
+        if destinations is None:
+            return []
+
+        mailboxes = {}
+        if address in {destination.strip().lower() for destination in destinations
+                       if isinstance(destination, str)}:
+            mailbox = User.get(address)
+            if not mailbox and (delimiters := os.environ.get('RECIPIENT_DELIMITER')):
+                stripped = next((index for index, char in enumerate(localpart)
+                                 if char in delimiters), None)
+                if stripped is not None:
+                    mailbox = User.get(f'{localpart[:stripped]}@{domain_name}')
+            if mailbox:
+                mailboxes[mailbox.email.lower()] = mailbox
+        for destination in destinations:
+            if not isinstance(destination, str) or destination.count('@') != 1:
+                continue
+            for resolved in cls.resolve_mailboxes(destination, seen):
+                mailboxes[resolved.email.lower()] = resolved
+        return list(mailboxes.values())
+
 
 class User(Base, Email):
     """ A user is an email address that has a password to access a mailbox.
     """
 
     __tablename__ = 'user'
+    __table_args__ = (db.Index('ix_user_domain_name', 'domain_name'),)
     _ctx = None
     _credential_cache = {}
 
@@ -635,6 +681,8 @@ class User(Base, Email):
     password = db.Column(db.String(255), nullable=False)
     quota_bytes = db.Column(db.BigInteger, nullable=False, default=10**9)
     quota_bytes_used = db.Column(db.BigInteger, nullable=False, default=0)
+    # Stable Unix identity used by Dovecot for per-mailbox filesystem isolation.
+    dovecot_uid = db.Column(db.Integer, unique=True, nullable=False, default=_new_dovecot_uid)
     global_admin = db.Column(db.Boolean, nullable=False, default=False)
     enabled = db.Column(db.Boolean, nullable=False, default=True)
 

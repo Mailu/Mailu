@@ -62,6 +62,12 @@ digraph mailu {
         >;
     ];
 
+    internet -> front [
+        color="red";
+        fontcolor="red";
+        label = "same published ports when the optional proxy is disabled";
+    ];
+
     # Front from proxy
     proxy -> front [
         color="darkorange";
@@ -93,26 +99,30 @@ digraph mailu {
         >;
     ];
     
-    front -> front [label = "8008/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
-    front -> front [label = "8000/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> front [label = "127.0.0.1:8008/tcp (ACME HTTP-01)"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> front [label = "127.0.0.1:8000/tcp (mail authentication callback)"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> front [label = "127.0.0.1:10204/tcp (health check)"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> admin [label = "8080/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> imap [label = "4190/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> imap [label = "2525/tcp (LMTP)"; color="dodgerblue"; fontcolor="dodgerblue";];
-    front -> imap [label = "2587/tcp (authenticated submission)"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> imap [label = "2587/tcp (submission backend for public 465/587)"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> imap [label = "143/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> imap [label = "993/tcp (IMAPS)"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> imap [label = "110/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> imap [label = "995/tcp (POP3S)"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> smtp [label = "25/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> webmail [label = "80/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> antispam [label = "11334/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> webdav [label = "5232/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     
-    smtp -> admin [label = "8080/tcp"; color="orchid"; fontcolor="orchid";];
+    smtp -> smtp [label = "127.0.0.1:10040/tcp (public :25 RCPT domain-quota policy)"; color="orchid"; fontcolor="orchid";];
+    smtp -> admin [label = "8080/tcp (Postfix maps and domain-quota API)"; color="orchid"; fontcolor="orchid";];
     smtp -> front [label = "2525/tcp"; color="orchid"; fontcolor="orchid";];
-    smtp -> antispam [label = "11332/tcp"; color="orchid"; fontcolor="orchid";];
+    smtp -> antispam [label = "11332/tcp (Rspamd milter)"; color="orchid"; fontcolor="orchid";];
     
     imap -> admin [label = "8080/tcp"; color="cyan"; fontcolor="cyan";];
     imap -> antispam [label = "11334/tcp"; color="cyan"; fontcolor="cyan";];
-    imap -> proxy [label = "25/tcp"; color="cyan"; fontcolor="cyan";];
+    imap -> front [label = "25/tcp (Sieve-generated mail)"; color="cyan"; fontcolor="cyan";];
     imap -> smtp [label = "10025/tcp (submission relay)"; color="cyan"; fontcolor="cyan";];
     imap -> fts_attachments [label = "9998/tcp"; color="cyan"; fontcolor="cyan";];
     

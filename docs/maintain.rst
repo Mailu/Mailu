@@ -75,3 +75,91 @@ as a main MX and the old server is deleted.
 4. Stop Mailu on the old server and run a final ``rsync`` while no process is writing to the files
 5. Start Mailu on the new server, and production should be back to normal
 6. Set your new server as the main MX for your domains, if you did not set an additional MX, make sure you still change the ``A`` and ``AAAA`` record for your MX name.
+
+.. _import_external_mailbox:
+
+Importing an external mailbox
+-----------------------------
+
+For a filesystem Maildir import, stage the source in the previous flat layout
+and let the IMAP container migrate it. The migration reads each account's UID
+and GID from Admin, so create the account before staging its mail. Keep a
+backup of the source until the import is verified.
+
+1. Create the domain and mailbox in Admin. Do not log in to the new mailbox
+   before importing; its new storage location should be empty. While IMAP is
+   running, check the account identity and paths:
+
+   .. code-block:: bash
+
+      docker compose exec imap doveadm user alice@example.org
+
+   Confirm that ``uid`` and ``gid`` are present and equal. The mailbox home
+   should resolve to the new sharded layout.
+
+2. Stop Dovecot so no process is using the mailbox. Find the host-side source
+   directory mounted at ``/mail`` by the ``imap`` service in your Compose file,
+   then copy the **contents** of the external Maildir root into its legacy
+   address directory. For example, if the host-side mount is
+   ``/mailu/mail`` and the source Maildir is
+   ``/backup/alice/Maildir``:
+
+   .. code-block:: bash
+
+      docker compose stop imap
+      mkdir -p /mailu/mail/alice@example.org
+      cp -a /backup/alice/Maildir/. /mailu/mail/alice@example.org/
+
+   The staged directory must contain the Maildir entries such as ``cur/``,
+   ``new/`` and ``tmp/`` directly. Do not add another ``Maildir/`` level, and
+   do not change the source files' ownership; the migration applies the
+   account's UID/GID.
+
+3. Start the IMAP container and follow its logs:
+
+   .. code-block:: bash
+
+      docker compose up -d imap
+      docker compose logs -f imap
+
+   Startup logs identify each migrated mailbox and report that the work may
+   take a long time. The migration moves recognized Maildir control files,
+   subscriptions, UIDVALIDITY state, personal Sieve scripts and IMAP metadata
+   to their new locations. It fixes message size fields, drops rebuildable
+   Dovecot and Xapian indexes, and leaves unrecognized legacy files in the
+   staging directory for review. If startup is interrupted, start ``imap``
+   again; the operation resumes from the files already moved.
+
+   Rebuilding Dovecot indexes, virtual message sizes and quotas runs after
+   Dovecot starts, one mailbox at a time, and resumes from the remaining
+   mailbox queue after an interruption. If full-text search is enabled, its
+   indexes are rebuilt for the configured languages during the initial layout
+   migration and whenever those settings change. Importing an additional
+   mailbox rebuilds only that mailbox's indexes. Ordinary restarts leave
+   existing FTS indexes alone. A full rebuild can add substantial startup
+   time. When attachment indexing is enabled, Tika must be available before
+   the rebuild proceeds.
+
+4. Verify the effective paths and ownership after the rebuild completes:
+
+   .. code-block:: bash
+
+      docker compose exec imap doveadm user alice@example.org
+      docker compose exec imap doveadm mailbox path -u alice@example.org INBOX
+      docker compose exec imap doveadm mailbox path -t index -u alice@example.org INBOX
+      docker compose exec imap stat -c '%u:%g %n' /mail/example.org/hc/alice
+
+   Dovecot reports paths relative to its ``/mail`` chroot, so ``doveadm user``
+   shows ``/<domain>/<shard>/<localpart>``; the corresponding container path is
+   ``/mail/<domain>/<shard>/<localpart>``. Mail is stored in its ``mail/``
+   subdirectory, persistent indexes in ``indexes/``, personal Sieve scripts in
+   ``sieve/``, and IMAP metadata in ``metadata/``. The reported file owner must
+   match the account's UID/GID.
+
+This staging workflow also works after the initial ``mail-layout-v1`` migration:
+the IMAP startup script checks for recognized Maildirs under legacy
+``/mail/<email-address>`` paths on each start. Leave the layout marker in place;
+removing it would unnecessarily rerun the migration and rebuild indexes for
+every account. IMAP-to-IMAP transfers performed with a tool such as ``imapsync``
+can instead deliver directly through the new account and do not need this
+filesystem staging procedure.

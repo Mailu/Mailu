@@ -20,20 +20,29 @@ def vault_error(*messages, status=404):
 @internal.route("/rspamd/vault/v1/dkim/<domain_name>", methods=['GET'])
 def rspamd_dkim_key(domain_name):
     selectors = []
-    domain = models.db.session.get(models.Domain, domain_name)
-    alternative = models.db.session.get(models.Alternative, domain_name)
-    signing_domains = [item for item in (domain, alternative.domain if alternative else None) if item]
+    domain_name_row = models.Domain.query.with_entities(models.Domain.name).filter_by(name=domain_name).first()
+    alternative = models.Alternative.query.with_entities(
+        models.Alternative.domain_name,
+    ).filter_by(name=domain_name).first()
+    signing_domains = {domain_name_row[0]} if domain_name_row else set()
+    if alternative:
+        signing_domains.add(alternative[0])
     seen = set()
-    for signing_domain in signing_domains:
-        for key in signing_domain.dkim_keys:
-            if key.active and key.selector not in seen:
-                seen.add(key.selector)
-                selectors.append({
-                    'domain': idna.encode(domain_name.lower()).decode('ascii'),
-                    'key': key.private_key.decode('utf8'),
-                    'selector': key.selector,
-                    'alg': key.algorithm,
-                })
+    keys = models.DkimKey.query.with_entities(
+        models.DkimKey.selector, models.DkimKey.private_key, models.DkimKey.algorithm,
+    ).filter(
+        models.DkimKey.domain_name.in_(signing_domains),
+        models.DkimKey.active.is_(True),
+    ).all() if signing_domains else []
+    for selector, private_key, algorithm in keys:
+        if selector not in seen:
+            seen.add(selector)
+            selectors.append({
+                'domain': idna.encode(domain_name.lower()).decode('ascii'),
+                'key': private_key.decode('utf8'),
+                'selector': selector,
+                'alg': algorithm,
+            })
     return flask.jsonify({'data': {'selectors': selectors}})
 
 @internal.route("/rspamd/local_domains", methods=['GET'])
@@ -111,11 +120,9 @@ def rspamd_greylist():
     metadata['envelope_recipients'] = envelope_recipients
     mailbox_recipients = set()
     for address in envelope_recipients:
-        localpart, domain = models.User.resolve_domain(address)
-        for destination in models.User.resolve_destination(localpart, domain) or []:
-            mailbox = models.User.get(destination.lower())
-            if mailbox:
-                mailbox_recipients.add(mailbox.email.lower())
+        mailbox_recipients.update(
+            mailbox.email.lower() for mailbox in models.Email.resolve_mailboxes(address)
+        )
     metadata['rcpt'] = sorted(mailbox_recipients or envelope_recipients)
     try:
         result = greylist.record(metadata, raw_message)

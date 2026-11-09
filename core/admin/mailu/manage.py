@@ -218,14 +218,16 @@ def password(localpart, domain_name, password):
 @click.option('-u', '--max-users')
 @click.option('-a', '--max-aliases')
 @click.option('-q', '--max-quota-bytes')
+@click.option('--max-domain-quota-bytes', default=0, type=int)
 @with_appcontext
-def domain(domain_name, max_users=-1, max_aliases=-1, max_quota_bytes=0):
+def domain(domain_name, max_users=-1, max_aliases=-1, max_quota_bytes=0, max_domain_quota_bytes=0):
     """ Create a domain
     """
     domain = models.db.session.get(models.Domain, domain_name)
     if not domain:
         domain = models.Domain(name=domain_name, max_users=max_users,
-                               max_aliases=max_aliases, max_quota_bytes=max_quota_bytes)
+                               max_aliases=max_aliases, max_quota_bytes=max_quota_bytes,
+                               max_domain_quota_bytes=max_domain_quota_bytes)
         db.session.add(domain)
         db.session.commit()
 
@@ -271,19 +273,22 @@ def config_update(verbose=False, delete_objects=False):
         max_users = domain_config.get('max_users', -1)
         max_aliases = domain_config.get('max_aliases', -1)
         max_quota_bytes = domain_config.get('max_quota_bytes', 0)
+        max_domain_quota_bytes = domain_config.get('max_domain_quota_bytes', 0)
         tracked_domains.add(domain_name)
         domain = models.db.session.get(models.Domain, domain_name)
         if not domain:
             domain = models.Domain(name=domain_name,
                                    max_users=max_users,
                                    max_aliases=max_aliases,
-                                   max_quota_bytes=max_quota_bytes)
+                                   max_quota_bytes=max_quota_bytes,
+                                   max_domain_quota_bytes=max_domain_quota_bytes)
             db.session.add(domain)
             print(f'Added {domain_config}')
         else:
             domain.max_users = max_users
             domain.max_aliases = max_aliases
             domain.max_quota_bytes = max_quota_bytes
+            domain.max_domain_quota_bytes = max_domain_quota_bytes
             db.session.add(domain)
             print(f'Updated {domain_config}')
 

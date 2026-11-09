@@ -181,6 +181,8 @@ def test_eai_localpart_round_trips_through_internal_lookups(
         encoded_user = quote(user.email, safe="")
         response = client.get(f"/internal/dovecot/passdb/{encoded_user}")
         assert response.status_code == 200
+        assert response.json["password"] == ""
+        assert response.json["nopassword"] == "Y"
 
         monkeypatch.setattr(
             nginx,

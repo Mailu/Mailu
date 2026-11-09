@@ -49,7 +49,7 @@
     <td>{{ domain.name }}</td>
     <td data-order="{{ user_counts.get(domain.name, 0) }}">{{ user_counts.get(domain.name, 0) }} / {{ '∞' if domain.max_users == -1 else domain.max_users }}</td>
     <td data-order="{{ alias_counts.get(domain.name, 0) }}">{{ alias_counts.get(domain.name, 0) }} / {{ '∞' if domain.max_aliases == -1 else domain.max_aliases }}</td>
-    <td data-sort="{{ domain.max_quota_bytes }}">{{ (domain.max_quota_bytes | filesizeformat) if domain.max_quota_bytes else '∞' }}</td>
+    <td data-order="{{ domain_storage.get(domain.name, 0) }}">{{ domain_storage.get(domain.name, 0) | filesizeformat }} / {{ (domain.max_domain_quota_bytes | filesizeformat) if domain.max_domain_quota_bytes else '∞' }}</td>
     <td>{{ domain.comment or '' }}</td>
     <td data-sort="{{ domain.signup_enabled }}">{% if domain.signup_enabled %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>
     <td data-sort="{{ domain.anonmail_enabled }}">{% if domain.anonmail_enabled %}{% trans %}yes{% endtrans %}{% else %}{% trans %}no{% endtrans %}{% endif %}</td>

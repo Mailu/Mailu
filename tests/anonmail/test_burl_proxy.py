@@ -22,7 +22,9 @@ def test_front_accepts_the_public_urlauth_host():
 
     assert 'imap_urlauth_host = {{ HOSTNAMES.split(",")[0] }}' in config
     assert 'issuers = {{ oauth2_issuers }}' in config
-    assert re.search(r'imap_capability\s*\{\s*METADATA = yes\s*URLAUTH = yes', config)
+    assert re.search(
+        r'imap_capability\s*\{\s*METADATA = yes\s*QUOTA = yes\s*URLAUTH = yes', config,
+    )
 
 
 def test_front_proxies_submission_auth_to_storage_dovecot():

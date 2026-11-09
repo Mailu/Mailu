@@ -21,7 +21,12 @@ def fetch_list():
             "folders": fetch.folders,
             "username": fetch.username,
             "password": fetch.password
-        } for fetch in models.Fetch.query.all()
+        } for fetch in models.Fetch.query.with_entities(
+            models.Fetch.id, models.Fetch.tls, models.Fetch.keep, models.Fetch.scan,
+            models.Fetch.invisible, models.Fetch.user_email, models.Fetch.protocol,
+            models.Fetch.host, models.Fetch.port, models.Fetch.folders,
+            models.Fetch.username, models.Fetch.password,
+        ).all()
     ])
 
 

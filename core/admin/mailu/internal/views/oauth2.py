@@ -17,8 +17,15 @@ def oauth2_introspect():
 
     now = int(time.time())
     parsed = _parse_mail_token(raw_token, 'access')
-    grant = models.OAuth2Grant.query.filter_by(grant_id=parsed[1]).first() if parsed else None
-    user = models.db.session.get(models.User, grant.user_email) if grant else None
+    grant = models.OAuth2Grant.query.with_entities(
+        models.OAuth2Grant.user_email, models.OAuth2Grant.token_generation,
+        models.OAuth2Grant.access_expires_at, models.OAuth2Grant.client_id,
+        models.OAuth2Grant.scope,
+    ).filter_by(grant_id=parsed[1]).first() if parsed else None
+    user = models.User.query.with_entities(
+        models.User.email, models.User.enabled, models.User.enable_imap,
+        models.User.enable_pop,
+    ).filter_by(_email=grant.user_email).first() if grant else None
     protocol = flask.request.headers.get('X-Dovecot-Auth-Protocol')
     protocol_scopes = {
         'imap': 'imap',

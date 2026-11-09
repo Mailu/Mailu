@@ -99,6 +99,7 @@ class DomainForm(flask_wtf.FlaskForm):
     max_users = fields_.IntegerField(_('Maximum user count'), [validators.NumberRange(min=-1)], default=10)
     max_aliases = fields_.IntegerField(_('Maximum alias count'), [validators.NumberRange(min=-1)], default=10)
     max_quota_bytes = fields_.IntegerSliderField(_('Maximum user quota'), [validators.NumberRange(min=0, max=MAX_QUOTA_BYTES)], default=0)
+    max_domain_quota_bytes = fields_.IntegerSliderField(_('Maximum domain storage'), [validators.NumberRange(min=0, max=MAX_QUOTA_BYTES)], default=0)
     signup_enabled = fields.BooleanField(_('Enable sign-up'), default=False)
     anonmail_enabled = fields.BooleanField(_('Enable Global Anonymous Email Service'), default=False)
     passkey_require_enrollment = fields.BooleanField(_('Require all users to enroll a passkey'), default=False)

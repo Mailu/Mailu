@@ -1,7 +1,7 @@
 {%- import "macros.html" as macros %}
 {%- import "bootstrap/utils.html" as utils %}
 <!doctype html>
-<html data-show-password="{{ _('Show password') }}" data-copied="{{ _('Copied') }}" data-copy-failed="{{ _('Copy failed. Select and copy the text.') }}" lang="{{ get_locale() }}" data-static="/static/" data-bs-theme="auto">
+<html data-show-password="{{ _('Show password') }}" data-copied="{{ _('Copied') }}" data-copy-failed="{{ _('Copy failed. Select and copy the text.') }}" lang="{{ get_locale().replace('_', '-') }}" data-static="/static/" data-bs-theme="auto">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ _('Change password') if current_user.is_authenticated else _('Sign in') }} | {{ config['SITENAME'] }}</title>
@@ -27,9 +27,9 @@
       {% if current_user.is_authenticated %} · <a href="{{ url_for('sso.logout') }}">{{ _('Sign out') }}</a>{% endif %}</div>
       <div class="d-flex align-items-center gap-2">
       {{ macros.color_mode_toggle() }}
-      <div class="dropdown"><button class="btn btn-sm btn-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">{{ _('Language') }}: {{ get_locale() }}</button>
+      <div class="dropdown"><button class="btn btn-sm btn-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">{{ _('Language') }}: {{ get_locale_name() }}</button>
         <div class="dropdown-menu dropdown-menu-end" id="mailu-languages">
-          {% for locale in config.translations.values() %}<a class="dropdown-item" href="{{ url_for('sso.set_language', language=locale) }}">{{ locale.get_language_name().title() }}</a>{% endfor %}
+          {% for locale in config.translations.values() %}<a class="dropdown-item" href="{{ url_for('sso.set_language', language=locale) }}">{{ get_locale_name(locale) }}</a>{% endfor %}
         </div>
       </div>
       </div>

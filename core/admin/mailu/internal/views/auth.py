@@ -117,14 +117,15 @@ def basic_authentication():
     """Authenticate device credentials, browser sessions and webmail tokens.
 
     Nginx forwards the source address in X-Forwarded-By, replacing any
-    client-supplied value. Only requests from the configured container subnet
-    may use webmail tokens. An explicit Authorization header never falls back
-    to the browser session.
+    client-supplied value. Public DAV requests may use webmail tokens only from
+    the configured container subnet. The private webmail listener marks its
+    requests separately and is not published by Compose. An explicit
+    Authorization header never falls back to the browser session.
     """
     context = flask.request.headers.get("X-Mailu-Auth-Context")
     source_ip = flask.request.headers.get("X-Forwarded-By", "")
     subnets = [app.config["SUBNET"], app.config["SUBNET6"]]
-    webmail = False
+    webmail = context == "webdav-internal"
     if context == "webdav" and source_ip:
         try:
             webmail = utils.is_ip_in_subnet(source_ip, [subnet for subnet in subnets if subnet])

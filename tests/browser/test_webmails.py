@@ -263,6 +263,11 @@ def test_radicale_browser_uses_mailu_login(page):
     page.goto(base + '/webdav/.web/')
     expect(page).to_have_url(re.compile(r'/webdav/\.web/'))
     expect(page.get_by_text('Contacts', exact=True).first).to_be_visible(timeout=15000)
+    # These Radicale UI assets have /api/ in their path. The front's top-level
+    # /api proxy must not capture them and send them to the admin API.
+    for asset in ('api/api.js', 'api/common.js', 'api/sharing.js'):
+        response = page.request.get(base + '/webdav/.web/js/' + asset)
+        assert response.ok, f'{asset} returned HTTP {response.status}'
     # A same-origin browser can make DAV requests using only its Mailu cookie.
     status = page.evaluate("""async () => (await fetch('/webdav/', {
         method: 'PROPFIND', headers: {'Depth': '0'}

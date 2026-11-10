@@ -82,19 +82,33 @@ def build_app(path):
     @prefix_bp.route("/")
     @root_bp.route("/")
     def wizard():
+        return render_wizard()
+
+    def render_wizard(form_data=None):
         return flask.render_template(
             'wizard.html',
             flavor="compose",
             steps=sorted(os.listdir(os.path.join(path, "templates", "steps", "compose"))),
-            subnet6=random_ipv6_subnet()
+            subnet6=random_ipv6_subnet(),
+            form_data=form_data or {},
         )
 
     @prefix_bp.route("/submit", methods=["POST"])
     @root_bp.route("/submit", methods=["POST"])
     def submit():
-        data = flask.request.form.copy()
+        data = flask.request.form.to_dict()
+        webmail_available = flask.request.form.getlist('webmail_available')
+        data['webmail_available'] = [
+            name for name in ('roundcube', 'snappymail') if name in webmail_available
+        ]
         data['uid'] = str(uuid.uuid4())
         valid = True
+        if any(name not in ('roundcube', 'snappymail') for name in webmail_available):
+            flask.flash('Invalid webmail client selection.', 'error')
+            valid = False
+        if data.get('webmail_enabled') == 'true' and not data['webmail_available']:
+            flask.flash('Select at least one webmail client, or disable webmail.', 'error')
+            valid = False
         try:
             ipaddress.IPv4Address(data['bind4'])
         except:
@@ -131,12 +145,7 @@ def build_app(path):
             db.set(data['uid'], json.dumps(data))
             return flask.redirect(flask.url_for('.setup', uid=data['uid']))
         else:
-            return flask.render_template(
-                'wizard.html',
-                flavor="compose",
-                steps=sorted(os.listdir(os.path.join(path, "templates", "steps", "compose"))),
-                subnet6=random_ipv6_subnet()
-            )
+            return render_wizard(data)
 
     @prefix_bp.route("/setup/<uid>", methods=["GET"])
     @root_bp.route("/setup/<uid>", methods=["GET"])

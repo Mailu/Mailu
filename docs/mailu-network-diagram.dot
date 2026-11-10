@@ -102,7 +102,7 @@ digraph mailu {
     front -> front [label = "127.0.0.1:8008/tcp (ACME HTTP-01)"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> front [label = "127.0.0.1:8000/tcp (mail authentication callback)"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> front [label = "127.0.0.1:10204/tcp (health check)"; color="dodgerblue"; fontcolor="dodgerblue";];
-    front -> admin [label = "8080/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
+    front -> admin [label = "8080/tcp (web and DAV authentication)"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> imap [label = "4190/tcp"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> imap [label = "2525/tcp (LMTP)"; color="dodgerblue"; fontcolor="dodgerblue";];
     front -> imap [label = "2587/tcp (submission backend for public 465/587)"; color="dodgerblue"; fontcolor="dodgerblue";];
@@ -129,8 +129,11 @@ digraph mailu {
     webmail -> front [label = "14190/tcp"; color="darkgoldenrod"; fontcolor="darkgoldenrod";];
     webmail -> front [label = "10025/tcp"; color="darkgoldenrod"; fontcolor="darkgoldenrod";];
     webmail -> front [label = "10143/tcp"; color="darkgoldenrod"; fontcolor="darkgoldenrod";];
-    # carddav
-    webmail -> proxy [label = "443/tcp"; color="darkgoldenrod"; fontcolor="darkgoldenrod";];
+    # CardDAV uses the private front listener, not public HTTPS/PROXY Protocol.
+    webmail -> front [label = "8081/tcp (/webdav/* only; private, not host-published)"; color="darkgoldenrod"; fontcolor="darkgoldenrod";];
+
+    dav_note [shape=note; label="Front listener on 8081/tcp\nWebmail DAV only; other paths return 404\nPublic DAV and WKD remain on HTTPS/443"; color="darkgoldenrod";];
+    webmail -> dav_note [style=dotted; arrowhead=none; color="darkgoldenrod";];
     
     admin -> redis [label = "6379/tcp"; color="green"; fontcolor="green";];
     admin -> front [label = "2525/tcp (LMTP notifications)"; color="green"; fontcolor="green";];

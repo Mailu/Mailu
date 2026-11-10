@@ -20,7 +20,7 @@ context = {}
 context.update(env)
 context['ADMIN'] = coerced.get('ADMIN', False)
 context['DAV_ENABLED'] = env.get('WEBDAV') == 'radicale'
-context['DAV_INTERNAL_URL'] = f"{'http' if env.get('TLS_FLAVOR') in ('notls', 'mail', 'mail-letsencrypt') else 'https'}://{env.get('FRONT_ADDRESS') or 'front'}/webdav/"
+context['DAV_INTERNAL_URL'] = f"http://{env.get('FRONT_ADDRESS') or 'front'}:8081/webdav/"
 context['DAV_PUBLIC_URL'] = f"{'http' if env.get('TLS_FLAVOR') == 'notls' else 'https'}://{env['HOSTNAMES'].split(',')[0]}/webdav/"
 
 context["MAX_FILESIZE"] = str(int(int(env.get("MESSAGE_SIZE_LIMIT", "50000000")) * 0.66 / 1048576))

@@ -72,6 +72,17 @@ def test_webmail_session_token_is_internal_and_revocable(client, dav_user):
     assert client.get('/internal/auth/basic', headers=headers).status_code == 401
 
 
+def test_private_webmail_listener_accepts_session_token(client, dav_user):
+    token = client.get('/internal/auth/user').headers['X-User-Token']
+    response = client.get('/internal/auth/basic', headers={
+        'Authorization': basic(dav_user.email, token),
+        'X-Mailu-Auth-Context': 'webdav-internal',
+        'X-Forwarded-By': '172.20.0.2',
+    })
+    assert response.status_code == 200
+    assert response.headers['X-User'] == dav_user.email
+
+
 def test_disabled_users_and_identity_headers_cannot_authenticate(app, client, dav_user):
     token = client.get('/internal/auth/user').headers['X-User-Token']
     dav_user.enabled = False

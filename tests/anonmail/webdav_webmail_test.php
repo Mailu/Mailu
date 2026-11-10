@@ -69,7 +69,7 @@ namespace {
         public $stored = '';
         public array $settings = [
             'mailu_carddav_url' => 'https://mail.example.org/webdav/',
-            'mailu_carddav_internal_url' => 'https://front/webdav/',
+            'mailu_carddav_internal_url' => 'http://front:8081/webdav/',
         ];
         public function Actions() { return $this; }
         public function Config() { return $this; }
@@ -175,7 +175,7 @@ namespace {
         check($config->Load(), 'Generated SnappyMail configuration could not be read');
         check(str_ends_with($config->Get('custom', 'mailu_carddav_url', ''), '/webdav/'),
               'Upstream config reader discarded the public DAV URL');
-        check(str_contains($config->Get('custom', 'mailu_carddav_internal_url', ''), 'front/webdav/'),
+        check(str_contains($config->Get('custom', 'mailu_carddav_internal_url', ''), 'front:8081/webdav/'),
               'Upstream config reader discarded the internal DAV URL');
         echo "Upstream SnappyMail INI reader accepted the plugin settings\n";
     }

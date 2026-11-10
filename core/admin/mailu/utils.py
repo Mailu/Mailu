@@ -42,7 +42,7 @@ from wonderwords import RandomWord
 from datetime import datetime, timedelta
 from flask.sessions import SessionMixin, SessionInterface
 from itsdangerous.encoding import want_bytes
-from werkzeug.datastructures import CallbackDict
+from werkzeug.datastructures import Accept, CallbackDict, LanguageAccept
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Login configuration
@@ -161,15 +161,54 @@ def is_ip_in_subnet(ip, subnets=[]):
 # Application translation
 babel = flask_babel.Babel()
 
+def _browser_locale():
+    """Resolve each language range before comparing client preferences."""
+    translations = app.config.translations
+    languages = []
+    for language, quality in flask.request.accept_languages:
+        parts = language.lower().replace('_', '-').split('-')
+        if parts[0] == 'zh':
+            if len(parts) == 1 and quality == 0:
+                # Reject both scripts for a blanket Chinese exclusion.
+                languages.append(('zh_Hant', 0))
+            # An explicit script takes precedence over the region.
+            script = parts[1] if len(parts) > 1 and len(parts[1]) == 4 else None
+            region_index = 2 if script else 1
+            region = parts[region_index] if len(parts) > region_index else None
+            traditional = script == 'hant' or (script != 'hans' and region in ('tw', 'hk', 'mo'))
+            language = 'zh_Hant' if traditional else 'zh'
+        elif language != '*':
+            language = LanguageAccept([(language, 1)]).best_match(translations) or language
+        languages.append((language, quality))
+
+    accepted = Accept(languages)
+    # Preserve header order for equal weights; wildcard matches retain server order.
+    candidates = dict.fromkeys(language for language, _ in accepted if language in translations)
+    candidates.update(dict.fromkeys(translations))
+    # Ranges have already been resolved. Avoid a second primary-language fallback
+    # that could select a different Chinese script or revive a q=0 exclusion.
+    return accepted.best_match(candidates) or app.config['BABEL_DEFAULT_LOCALE']
+
+
+def get_locale_name(locale=None):
+    """Return the native language name, distinguishing the Chinese scripts."""
+    language = str(locale or get_locale())
+    if language == 'zh':
+        return '简体中文'
+    if language == 'zh_Hant':
+        return '繁體中文'
+    return app.config.translations[language].get_language_name().title()
+
+
 def get_locale():
     """ selects locale for translation """
     if not app.config['SESSION_COOKIE_NAME'] in flask.request.cookies:
-        return (flask.request.accept_languages.best_match(app.config.translations.keys())
-                or app.config['BABEL_DEFAULT_LOCALE'])
+        return _browser_locale()
     language = flask.session.get('language')
+    if language == 'zh_Hant_TW':
+        language = flask.session['language'] = 'zh_Hant'
     if not language in app.config.translations:
-        language = (flask.request.accept_languages.best_match(app.config.translations.keys())
-                or app.config['BABEL_DEFAULT_LOCALE'])
+        language = _browser_locale()
         flask.session['language'] = language
     return language
 

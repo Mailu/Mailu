@@ -27,7 +27,7 @@
       {% if current_user.is_authenticated %} · <a href="{{ url_for('sso.logout') }}">{{ _('Sign out') }}</a>{% endif %}</div>
       <div class="d-flex align-items-center gap-2">
       {{ macros.color_mode_toggle() }}
-      <div class="dropdown"><button class="btn btn-sm btn-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">{{ _('Language') }}: {{ get_locale() }}</button>
+      <div class="dropdown"><button class="btn btn-link text-body mailu-icon-control" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{% trans %}change language{% endtrans %}" title="{% trans %}change language{% endtrans %}"><i class="fa-solid fa-language" aria-hidden="true"></i></button>
         <div class="dropdown-menu dropdown-menu-end" id="mailu-languages">
           {% for locale in config.translations.values() %}<a class="dropdown-item" href="{{ url_for('sso.set_language', language=locale) }}">{{ locale.get_language_name().title() }}</a>{% endfor %}
         </div>

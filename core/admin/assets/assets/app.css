@@ -12,6 +12,21 @@
   color: #6cb6e8!important;
 }
 
+/* Keep appearance and language controls aligned across the navbar and sign-in page. */
+.mailu-icon-control {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 2.5rem;
+  height: 2.5rem;
+  justify-content: center;
+  padding: 0 !important;
+  width: 2.5rem;
+}
+.mailu-icon-control > i {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
 /* user image */
 .div-circle {
   position: relative;

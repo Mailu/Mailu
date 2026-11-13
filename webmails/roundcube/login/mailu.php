@@ -72,8 +72,19 @@ class mailu extends rcube_plugin
 
   function login($args)
   {
-    $this->sync_identities();
     header('Location: index.php', true, 302);
+
+    // Let the browser continue to the inbox before synchronizing aliases.
+    // Releasing the session lock also lets the redirected request proceed
+    // while this PHP-FPM worker finishes the database updates.
+    if (function_exists('fastcgi_finish_request')) {
+      if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+      }
+      fastcgi_finish_request();
+    }
+
+    $this->sync_identities();
     exit();
   }
 

@@ -36,9 +36,8 @@
         <ul class="navbar-nav ms-auto">
           <li class="nav-item d-flex align-items-center">{{ macros.color_mode_toggle() }}</li>
           <li class="nav-item dropdown">
-            <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-              <i class="fa-solid fa-language fs-4" aria-hidden="true" title="{% trans %}change language{% endtrans %}"></i><span class="visually-hidden">{% trans %}change language{% endtrans %}</span>
-              <span class="badge text-bg-primary navbar-badge">{{ get_locale() }}</span></a>
+            <a class="nav-link mailu-icon-control" data-bs-toggle="dropdown" href="#" aria-expanded="false" aria-label="{% trans %}change language{% endtrans %}" title="{% trans %}change language{% endtrans %}">
+              <i class="fa-solid fa-language" aria-hidden="true"></i></a>
             <div class="dropdown-menu dropdown-menu-end p-0" id="mailu-languages">
             {%- for locale in config.translations.values() %}
               <a class="dropdown-item{% if locale|string() == session['language'] %} active{% endif %}" href="{{ url_for('.set_language', language=locale) }}">{{ locale.get_language_name().title() }}</a>

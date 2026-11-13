@@ -47,6 +47,42 @@ def test_summary_renders_escaped_mailbox_scoped_rows_and_links(app):
     assert 'Other mailbox only' not in html_body
 
 
+def test_summary_replaces_mailbox_and_period_placeholders(app):
+    with app.app_context():
+        user = type('Mailbox', (), {'email': 'alice@example.net'})()
+        settings = spam_settings.get_settings()
+        settings['summary_template'] = (
+            '<p>Hello {{ mailbox }}, here are the messages added to your '
+            'quarantine during the {{ period }} period.</p>{{ quarantine_table }}'
+        )
+        _, plain, html_body = quarantine.render_summary(settings, user, [])
+
+    expected = (
+        'Hello alice@example.net, here are the messages added to your '
+        'quarantine during the one week period.'
+    )
+    assert expected in plain
+    assert expected in html_body
+    assert '{{ mailbox }}' not in plain + html_body
+    assert '{{ period }}' not in plain + html_body
+
+
+def test_summary_replaces_placeholders_split_by_editor_markup(app):
+    with app.app_context():
+        user = type('Mailbox', (), {'email': 'alice@example.net'})()
+        settings = spam_settings.get_settings()
+        settings['summary_template'] = (
+            '<p>Hello {{ mail<strong>box</strong> }}, the period is '
+            '{{ per<strong>iod</strong> }}.</p>{{ quarantine_table }}'
+        )
+        _, plain, html_body = quarantine.render_summary(settings, user, [])
+
+    assert 'Hello alice@example.net, the period is one week.' in plain
+    assert 'Hello alice@example.net, the period is one week.' in html_body
+    assert '{{ mail' not in plain + html_body
+    assert '{{ per' not in plain + html_body
+
+
 def test_summary_table_placeholder_replaces_editor_paragraph(app):
     with app.app_context():
         app.config['HOSTNAMES'] = 'mail.example.net'

@@ -17,8 +17,8 @@
 
 {%- macro color_mode_toggle() %}
   <div class="dropdown">
-    <button class="btn btn-sm btn-link text-body dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-      <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i> {{ _('Appearance') }}
+    <button class="btn btn-link text-body mailu-icon-control" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ _('Appearance') }}" title="{{ _('Appearance') }}">
+      <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>
     </button>
     <div class="dropdown-menu dropdown-menu-end">
       <button class="dropdown-item" type="button" data-bs-theme-value="light" aria-pressed="false">{{ _('Light') }}</button>

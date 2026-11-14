@@ -7,6 +7,7 @@ then
 fi
 
 
+# Sieve execute uses stdout for returned data; keep the helper response empty.
 tee >(rspamc -t 3 -h $RSPAMD_HOST -P mailu learn_spam /dev/stdin >/dev/null||true) \
        >(rspamc -t 3 -h $RSPAMD_HOST -P mailu -f 13 fuzzy_del /dev/stdin >/dev/null||true) \
        >(rspamc -t 3 -h $RSPAMD_HOST -P mailu -f 11 fuzzy_add /dev/stdin >/dev/null||true) > /dev/null

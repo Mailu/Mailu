@@ -1,0 +1,1 @@
+Dovecot mailbox index rebuilds now report progress, prioritize INBOX, and resume after indexing errors without discarding FTS data already rebuilt. IMAPSieve ham/spam helpers no longer write response bytes that corrupt Sieve execute results.

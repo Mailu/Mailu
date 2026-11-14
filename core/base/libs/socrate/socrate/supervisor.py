@@ -62,7 +62,9 @@ def start(programs, secret_env=None):
     config.extend([
         "pidfile={}".format(SUPERVISOR_PID),
         "nodaemon=true",
-        "logfile=/dev/stdout",
+        # Foreground supervisord already logs to stdout via its stream handler.
+        # Pointing its file handler there too duplicates every supervisord log.
+        "logfile=/dev/null",
         "logfile_maxbytes=0",
         "childlogdir=/tmp",
         "loglevel=info",

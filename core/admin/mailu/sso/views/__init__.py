@@ -1,3 +1,3 @@
 __all__ = [
-    'base', 'languages'
+    'base', 'passkeys', 'languages'
 ]

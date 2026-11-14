@@ -1,0 +1,1 @@
+Fix config CLI YAML and JSON round-trips for raw key bytes. Exports now include shared antispam settings and passkeys; secret exports include all DKIM private keys, the OAuth2 signing key, and durable OAuth2 grants. Imports restore them while leaving temporary authorization codes and quarantine progress state out.

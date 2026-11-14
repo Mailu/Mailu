@@ -1,0 +1,5 @@
+#!/bin/sh
+# script-login runs this after userdb lookup and before the mail process starts.
+# The provisioner verifies the account against admin and uses safe directory fds.
+[ -d "$HOME" ] || /app/venv/bin/python /provision_mailbox.py '{{ ADMIN_ADDRESS }}' "$USER" || exit 1
+exec "$@"

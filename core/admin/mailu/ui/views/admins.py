@@ -1,5 +1,5 @@
 from mailu import models
-from mailu.ui import ui, forms, access
+from mailu.ui import ui, forms, access, user_picker
 
 import flask
 import flask_login
@@ -16,20 +16,16 @@ def admin_list():
 @access.global_admin
 def admin_create():
     form = forms.AdminForm()
-    form.admin.choices = [
-        (user.email, user.email)
-        for user in
-        flask_login.current_user.get_managed_emails(include_aliases=False)
-    ]
+    user_picker.configure(form, 'admin', 'admin')
     if form.validate_on_submit():
-        user = models.User.query.get(form.admin.data)
-        if user:
-            user.global_admin = True
+        users = user_picker.selected_users(form, 'admin', 'admin')
+        if users is not None:
+            count = sum(not user.global_admin for user in users)
+            for user in users:
+                user.global_admin = True
             models.db.session.commit()
-            flask.flash('User %s is now admin' % user)
+            flask.flash(user_picker._('Added %(count)s global administrators.', count=count), 'success')
             return flask.redirect(flask.url_for('.admin_list'))
-        else:
-            flask.flash('No such user', 'error')
     return flask.render_template('admin/create.html', form=form)
 
 
@@ -37,14 +33,11 @@ def admin_create():
 @access.global_admin
 @access.confirmation_required("delete admin {admin}")
 def admin_delete(admin):
-    user = models.User.query.get(admin)
+    user = models.db.session.get(models.User, admin)
     if user:
         user.global_admin  = False
         models.db.session.commit()
         flask.flash('User %s is no longer admin' % user)
-        return flask.redirect(flask.url_for('.admin_list'))
     else:
         flask.flash('No such user', 'error')
-    flask.flash('Alias %s deleted' % alias)
-    return flask.redirect(
-        flask.url_for('.alias_list', domain_name=alias.domain.name))
+    return flask.redirect(flask.url_for('.admin_list'))

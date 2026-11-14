@@ -5,6 +5,7 @@ It is able to proxify postfix maps and dovecot dicts to any table
 
 import asyncio
 import logging
+import os
 import sys
 
 from podop import postfix, dovecot, table
@@ -20,7 +21,8 @@ TABLE_TYPES = dict(
 )
 
 
-def run_server(verbosity, server_type, socket, tables):
+def run_server(verbosity, server_type, socket, tables, socket_mode=None, socket_group=None,
+               policy=None):
     """ Run the server, given its type, socket path and table list
 
     The table list must be a list of tuples (name, type, param)
@@ -33,14 +35,34 @@ def run_server(verbosity, server_type, socket, tables):
     # Run the main loop
     logging.basicConfig(stream=sys.stderr, level=max(3 - verbosity, 0) * 10,
                         format='%(name)s (%(levelname)s): %(message)s')
-    loop = asyncio.get_event_loop()
-    server = loop.run_until_complete(loop.create_unix_server(
-        SERVER_TYPES[server_type].factory(table_map), socket
-    ))
+    # get_event_loop() does not create a loop when none is running.
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    sockets = socket if isinstance(socket, (tuple, list)) else (socket,)
+    servers = [
+        loop.run_until_complete(loop.create_unix_server(
+            SERVER_TYPES[server_type].factory(table_map), socket_path
+        ))
+        for socket_path in sockets
+    ]
+    if policy is not None:
+        host, port, url = policy
+        servers.append(loop.run_until_complete(loop.create_server(
+            lambda: postfix.DomainQuotaPolicyProtocol(url), host, port
+        )))
+    if socket_group is not None:
+        for socket_path in sockets:
+            os.chown(socket_path, -1, socket_group)
+    if socket_mode is not None:
+        for socket_path in sockets:
+            os.chmod(socket_path, socket_mode)
     try:
         loop.run_forever()
     except KeyboardInterrupt:
         pass
-    server.close()
-    loop.run_until_complete(server.wait_closed())
+    for server in servers:
+        server.close()
+    loop.run_until_complete(asyncio.gather(
+        *(server.wait_closed() for server in servers)
+    ))
     loop.close()

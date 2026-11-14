@@ -586,7 +586,7 @@ A short summary of the new features:
   - Rate limiting for existing accounts (failed logon attempts).
   - Device-tokens are introduced to ensure genuine users are not locked out
 
-- Domain details page is enhanced with DNS client auto-configuration (RFC6186) entries.
+- Domain details page is enhanced with WebDAV client auto-discovery entries.
 - Centralize the authentication of webmails behind the admin interface.
 
    - The new single sign on page opens up the possibility to introduce 2 factor authentication in the future.

@@ -1,0 +1,30 @@
+{%- extends "base_sso.html" %}
+
+{%- block title %}
+{% trans %}Authorize mail access{% endtrans %}
+{%- endblock %}
+
+{% block content %}
+<p>{% trans sitename=config['SITENAME'], email=current_user.email %}{{ sitename }} is asking you to allow the mail application identified by public client ID <code>mailu</code> to access the mailbox for {{ email }}.{% endtrans %}</p>
+<p class="text-body-secondary">{% trans %}This public client ID does not verify the name or identity of the application requesting access.{% endtrans %}</p>
+<form class="form" method="post">
+  {{ form.hidden_tag() }}
+  <fieldset class="mb-3">
+    <legend class="fs-6">{% trans %}Choose what this app can access{% endtrans %}</legend>
+    <div class="btn-group d-flex flex-row flex-wrap gap-2" role="group" aria-label="{% trans %}Mail access scopes{% endtrans %}">
+      {% for scope in form.selected_scopes %}
+      {{ scope(class_='btn-check', autocomplete='off') }}
+      {{ scope.label(class_='btn btn-outline-primary', title=scope_tooltips[scope.data]) }}
+      {% endfor %}
+    </div>
+    {% if form.selected_scopes.errors %}
+    <div class="text-danger mt-2">{{ form.selected_scopes.errors | join(', ') }}</div>
+    {% endif %}
+  </fieldset>
+  <p class="text-body-secondary">{% trans %}Offline access lets the app refresh its access token without asking you to sign in again. If you turn it off, you will need to authorize the app again after the access token expires.{% endtrans %}</p>
+  <div class="d-flex gap-2">
+    {{ form.approve(class_='btn btn-primary') }}
+    {{ form.deny(class_='btn btn-outline-secondary') }}
+  </div>
+</form>
+{% endblock %}

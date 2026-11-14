@@ -80,6 +80,40 @@ class TestAnonmailPostfixIntegration:
             rv_postfix_disabled = client.get(f'/internal/postfix/alias/{alias_email}')
             assert rv_postfix_disabled.status_code == 404
 
+    def test_postfix_sender_login_spoofing_is_scoped_to_own_domain(self, app, client):
+        """ Regression for #2686.
+
+        ``allow_spoofing`` lets a user authenticate as other senders, but it must
+        only apply within that user's own domain. Otherwise a domain manager can
+        grant themselves ``allow_spoofing`` and send mail spoofing senders on
+        domains they do not manage. The /postfix/sender/login lookup therefore
+        only returns a spoofing user for senders in that user's domain.
+        """
+        with app.app_context():
+            models.db.session.add(models.Domain(name='attacker.com'))
+            models.db.session.add(models.Domain(name='victim.com'))
+
+            spoofer = models.User(localpart='spoofer', domain_name='attacker.com',
+                                  allow_spoofing=True)
+            spoofer.set_password('password')
+            coworker = models.User(localpart='coworker', domain_name='attacker.com')
+            coworker.set_password('password')
+            victim = models.User(localpart='victim', domain_name='victim.com')
+            victim.set_password('password')
+            models.db.session.add_all([spoofer, coworker, victim])
+            models.db.session.commit()
+
+            def logins_for(sender):
+                rv = client.get(f'/internal/postfix/sender/login/{sender}')
+                assert rv.status_code == 200, f'{sender} -> {rv.status_code}'
+                return set(rv.get_json().split(','))
+
+            # Same domain: the spoofer may still send as a coworker.
+            assert 'spoofer@attacker.com' in logins_for('coworker@attacker.com')
+
+            # Cross domain: the spoofer must NOT be a valid login for the victim.
+            assert 'spoofer@attacker.com' not in logins_for('victim@victim.com')
+
     def test_postfix_sees_alias_with_multiple_destinations(self, app, client, create_user_and_token, grant_domain_access):
         with app.app_context():
             d = models.Domain(name='example.com', anonmail_enabled=True)

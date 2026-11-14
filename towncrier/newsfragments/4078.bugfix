@@ -1,0 +1,1 @@
+Accept every localpart Mailu itself allows (``~``, ``!``, ``%``, ``?``, …) as an auto-forward destination; the user settings page previously rejected addresses that can be created as users or aliases and that the API already accepts.

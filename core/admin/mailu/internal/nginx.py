@@ -56,6 +56,9 @@ def check_credentials(user, password, ip, protocol=None, auth_port=None, source_
                 else:
                     app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: badip: token-{token.id}: {token.comment or ""!r}')
                     return False # we can return directly here since the token is valid
+        # an app-token-shaped secret that matched no token is a failure; do not fall
+        # through to the (expensive, rate-limit-exempt) password check
+        return False
     if user.check_password(password):
         if app.config['AUTH_REQUIRE_TOKENS'] and not protocol in ['web', 'sso']:
             app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: password ok, but a token is required')
@@ -105,13 +108,13 @@ def handle_authentication(headers):
             password = urllib.parse.unquote(headers["Auth-Pass"])
             ip = urllib.parse.unquote(headers["Client-Ip"])
         except:
-            app.logger.warn(f'Received undecodable user/password from front: {headers.get("Auth-User", "")!r}')
+            app.logger.warning(f'Received undecodable user/password from front: {headers.get("Auth-User", "")!r}')
         else:
             try:
-                user = models.User.query.get(user_email) if '@' in user_email else None
+                user = models.db.session.get(models.User, user_email) if '@' in user_email else None
             except sqlalchemy.exc.StatementError as exc:
                 exc = str(exc).split('\n', 1)[0]
-                app.logger.warn(f'Invalid user {user_email!r}: {exc}')
+                app.logger.warning(f'Invalid user {user_email!r}: {exc}')
             else:
                 is_valid_user = user is not None
                 ip = urllib.parse.unquote(headers["Client-Ip"])
@@ -153,7 +156,9 @@ def get_server(protocol, authenticated=False):
         else:
             hostname, port = app.config['SMTP_ADDRESS'], 25
     elif protocol == 'submission':
-        hostname, port = app.config['SMTP_ADDRESS'], 10025
+        # Dovecot on the IMAP service owns the mailbox storage and handles
+        # BURL/URLAUTH before relaying the message to Postfix.
+        hostname, port = app.config['IMAP_ADDRESS'], 2587
     elif protocol == 'lmtp':
         hostname, port = app.config['IMAP_ADDRESS'], 2525
     elif protocol == 'sieve':

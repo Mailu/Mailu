@@ -10,14 +10,29 @@ import wtforms_components
 @ui.route('/alias/list/<domain_name>', methods=['GET'])
 @access.domain_admin(models.Domain, 'domain_name')
 def alias_list(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     return flask.render_template('alias/list.html', domain=domain)
+
+
+@ui.route('/destinations/options')
+@access.authenticated
+def destination_options():
+    term = flask.request.args.get('q', '').strip().casefold()
+    emails = sorted({
+        str(email) for email in flask_login.current_user.get_managed_emails()
+        if not (isinstance(email, models.Alias) and email.owner_email is not None)
+    }, key=str.casefold)
+    matches = [email for email in emails if term in email.casefold()]
+    return flask.jsonify(
+        options=[{'value': email, 'text': email} for email in matches[:50]],
+        more=len(matches) > 50,
+    )
 
 
 @ui.route('/alias/create/<domain_name>', methods=['GET', 'POST'])
 @access.domain_admin(models.Domain, 'domain_name')
 def alias_create(domain_name):
-    domain = models.Domain.query.get(domain_name) or flask.abort(404)
+    domain = models.db.session.get(models.Domain, domain_name) or flask.abort(404)
     if not domain.max_aliases == -1 and len(domain.aliases) >= domain.max_aliases:
         flask.flash('Too many aliases for domain %s' % domain, 'error')
         return flask.redirect(
@@ -34,14 +49,13 @@ def alias_create(domain_name):
             flask.flash('Alias %s created' % alias)
             return flask.redirect(
                 flask.url_for('.alias_list', domain_name=domain.name))
-    return flask.render_template('alias/create.html',
-        domain=domain, form=form)
+    return flask.render_template('alias/create.html', domain=domain, form=form)
 
 
 @ui.route('/alias/edit/<path:alias>', methods=['GET', 'POST'])
 @access.domain_admin(models.Alias, 'alias')
 def alias_edit(alias):
-    alias = models.Alias.query.get(alias) or flask.abort(404)
+    alias = models.db.session.get(models.Alias, alias) or flask.abort(404)
     domain_name = alias.domain_name
     form = forms.AliasForm(obj=alias)
     wtforms_components.read_only(form.localpart)
@@ -66,8 +80,9 @@ def alias_edit(alias):
 @access.domain_admin(models.Alias, 'alias')
 @access.confirmation_required("delete {alias}")
 def alias_delete(alias):
-    alias = models.Alias.query.get(alias) or flask.abort(404)
+    alias = models.db.session.get(models.Alias, alias) or flask.abort(404)
     domain_name = alias.domain_name
+    domain = alias.domain
     try:
         models.db.session.delete(alias)
         models.db.session.commit()
@@ -90,9 +105,7 @@ def anonalias_list():
         for d in models.Domain.query.all()
     )
     
-    # Query user's anonymous aliases, standard aliases do not have an owner_email
     aliases = models.Alias.query.filter_by(owner_email=user.email).all()
-    
     return flask.render_template('alias/anonaliases.html', has_access=has_access, aliases=aliases)
 
 
@@ -107,7 +120,6 @@ def anonalias_create():
     for d in models.Domain.query.all():
         if models.has_domain_access(d.name, user=user) or (d.anonmail_enabled and user.domain and d.name == user.domain.name):
             available_domains.append((d.name, d.name))
-    
     form.domain.choices = available_domains
     
     if not available_domains:

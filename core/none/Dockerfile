@@ -7,8 +7,12 @@ ARG VERSION=local
 LABEL version=$VERSION
 
 RUN echo $VERSION >/version
+RUN touch /etc/supervisord.conf && chown mailu:mailu /etc/supervisord.conf \
+  ; mkdir -p /run/mailu-supervisor && chown mailu:mailu /run/mailu-supervisor
 
-HEALTHCHECK CMD true
+COPY start.py /
+
+HEALTHCHECK CMD /usr/local/bin/supervisor-healthcheck
 
 USER mailu
-CMD ["/bin/bash", "-c", "sleep infinity"]
+CMD ["/start.py"]

@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+
+# The index rebuild is deliberately a one-shot supervisor program. It exits
+# after a successful rebuild, so check the long-running services separately
+# and use the pending markers to detect an interrupted/failed rebuild.
+supervisorctl status all | awk '
+    $1 == "mail-index-rebuild" { next }
+    NF {
+        found = 1
+        if ($2 != "RUNNING") failed = 1
+    }
+    END { exit (!found || failed) }
+'
+
+test ! -e /mail/.fts-rebuild-pending
+test ! -e /mail/.index-rebuild-pending

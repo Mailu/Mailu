@@ -3,6 +3,7 @@
 
 import asyncio
 import logging
+import aiohttp
 
 class NetstringProtocol(asyncio.Protocol):
     """ Netstring asyncio protocol implementation.
@@ -114,3 +115,64 @@ class SocketmapProtocol(NetstringProtocol):
         """ Provide a protocol factory for a given map instance.
         """
         return lambda: cls(table_map)
+
+
+class DomainQuotaPolicyProtocol(asyncio.Protocol):
+    """Serve Postfix's check_policy_service protocol for domain quotas."""
+
+    def __init__(self, url):
+        self.url = url
+        self.buffer = bytearray()
+
+    def connection_made(self, transport):
+        self.transport = transport
+        logging.debug("Policy connection from %s", transport.get_extra_info("peername"))
+
+    def data_received(self, data):
+        self.buffer.extend(data)
+        while True:
+            boundaries = [
+                (self.buffer.find(separator), len(separator))
+                for separator in (b"\r\n\r\n", b"\n\n")
+                if self.buffer.find(separator) >= 0
+            ]
+            if not boundaries:
+                break
+            boundary, length = min(boundaries)
+            request = self.buffer[:boundary]
+            remainder = self.buffer[boundary + length:]
+            self.buffer = bytearray(remainder)
+            attributes = {}
+            for line in request.splitlines():
+                key, separator, value = line.partition(b"=")
+                if separator:
+                    attributes[key.decode("ascii", errors="replace")] = value.decode(
+                        "utf-8", errors="replace"
+                    )
+            asyncio.ensure_future(self.respond(attributes))
+
+    async def respond(self, attributes):
+        action = "DUNNO"
+        if attributes.get("protocol_state") == "RCPT" and attributes.get("recipient"):
+            try:
+                size = max(0, int(attributes.get("size") or 0))
+                timeout = aiohttp.ClientTimeout(total=2)
+                async with aiohttp.ClientSession(timeout=timeout) as session:
+                    async with session.post(
+                        self.url,
+                        json={"recipient": attributes["recipient"], "size": size},
+                    ) as response:
+                        response.raise_for_status()
+                        result = await response.json()
+                if not result.get("allowed", True):
+                    action = "552 5.2.2 Domain storage quota exceeded"
+            except (ValueError, aiohttp.ClientError, asyncio.TimeoutError, OSError) as error:
+                # Domain quota checks are best-effort; per-user Dovecot quotas
+                # remain authoritative if the Admin lookup is unavailable.
+                logging.warning(
+                    "Domain quota lookup failed for %s: %s",
+                    attributes.get("recipient", ""), error,
+                )
+            except Exception:
+                logging.exception("Unexpected domain quota policy error")
+        self.transport.write(f"action={action}\n\n".encode("utf-8"))

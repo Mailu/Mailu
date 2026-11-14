@@ -1,0 +1,1 @@
+Migrate the dovecot passdb and userdb from the podop dict proxy to a lua script that queries the admin API directly. This is a prerequisite for the dovecot 2.4 upgrade, which no longer provides the dict passdb/userdb driver. As a side effect user iteration (``doveadm user '*'`` and ``doveadm -A``) now works; the previous dict configuration disabled it explicitly.

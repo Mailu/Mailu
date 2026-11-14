@@ -1,0 +1,1 @@
+Scope the ``allow_spoofing`` permission to the user's own domain, so a domain manager can no longer grant themselves (or a user they create) the ability to send mail spoofing senders on domains they do not manage

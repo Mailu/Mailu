@@ -1,0 +1,1 @@
+Fix API FQDN conflict checks for alternative domains and relays, and avoid a cartesian-product query under current SQLAlchemy releases.

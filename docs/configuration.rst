@@ -5,6 +5,35 @@ This page explains the variables found in ``mailu.env``.
 In most cases ``mailu.env`` is setup correctly by the setup utility and can be left as-is.
 However, some advanced settings or modifications can be done by modifying this file.
 
+Mail storage layout
+-------------------
+
+Dovecot stores each mailbox under ``/mail/<domain>/<shard>/<localpart>``, where
+the shard is the first two lowercase base32 characters of the 2-byte BLAKE2s
+digest of the full email address. Maildir messages and mailbox control state
+live in ``mail/``, persistent indexes and quota state in ``indexes/``, personal
+Sieve scripts and their activation link in ``sieve/``, and IMAP metadata in
+``metadata/``. Dovecot keeps its index cache alongside the persistent indexes.
+
+On upgrade, the IMAP container migrates recognized data from the previous
+``/mail/<email-address>`` layout before starting Dovecot. The migration can be
+restarted safely after interruption, normalizes Maildir message size fields,
+and rebuilds Dovecot indexes. Unrecognized files are left in the legacy
+directory for manual review. The IMAP container records the effective
+full-text-search language configuration, removes stale FTS indexes when FTS is
+disabled, and rebuilds them when the language choices change. Obsolete Xapian
+indexes are discarded as rebuildable data and are never migrated.
+
+To import a filesystem Maildir into an existing Mailu installation, use the
+same legacy staging location, ``/mail/<email-address>``. Create the mailbox
+account first so it has a Dovecot UID/GID, stop the IMAP container, copy the
+contents of the Maildir root into that location, and start the IMAP container
+again. The startup migration detects staged mailboxes even after the initial
+layout migration has completed. It moves recognized state into the account's
+new home, assigns the account's UID/GID, normalizes message sizes, and queues
+index and quota rebuilding. This operation can take a long time; see
+:ref:`import_external_mailbox` for the full procedure and checks.
+
 .. _common_cfg:
 
 Common configuration
@@ -26,12 +55,24 @@ technical addresses.
 
 The ``HOSTNAMES`` are all public hostnames for the mail server. Mailu supports
 a mail server with multiple hostnames. The first declared hostname is the main
-hostname and will be exposed over SMTP, IMAP, etc.
+hostname and will be exposed over SMTP, IMAP, etc. Requests made using a
+hostname that is not configured are redirected to the main hostname. Mailu
+publishes the configured HTTPS origins at
+``/.well-known/webauthn`` so browsers can use passkeys on each configured
+hostname. Mailu also publishes mail client configuration at
+``/.well-known/client-autoconfig.xml`` and retains the legacy Thunderbird
+AutoConfig URLs for older clients.
 
 The ``SUBNET`` defines the address range of the docker network used by Mailu.
 This should not conflict with any networks to which your system is connected.
 (Internal and external!). Normally this does not need to be changed,
 unless there is a conflict with existing networks.
+
+The ``SUBNET6`` (default: unset) defines the IPv6 address range of the docker network used by Mailu.
+It is set by the setup utility when IPv6 is enabled and should be a ULA range (``fd00::/8``).
+When it is set, Mailu services listen on IPv6 addresses as well. Leave it unset to run IPv4 only.
+Enabling IPv6 also requires the Docker network to have IPv6 enabled, see :doc:`faq` for details.
+
 
 The ``POSTMASTER`` is the local part of the postmaster email address. It is
 recommended to setup a generic value and later configure a mail alias for that
@@ -65,6 +106,12 @@ CIDRs that won't be subject to any form of rate limiting. Specifying ``0.0.0.0/0
 there is a good way to disable rate limiting altogether.
 
 The ``TLS_FLAVOR`` sets how Mailu obtains a x509 certificate. More on :ref:`tls_flavor`.
+
+The ``LETSENCRYPT_SHORTCHAIN`` setting (default: ``True``) controls the ECDSA
+chain served by front TLS services when ``TLS_FLAVOR`` is ``letsencrypt`` or
+``mail-letsencrypt``. Set it to ``False`` to serve Certbot's full ECDSA chain,
+which includes the cross-signed ISRG Root X2 certificate for clients that only
+trust ISRG Root X1. SMTP port 25 continues to use its DANE-specific chains.
 
 The ``DEFAULT_SPAM_THRESHOLD`` (default: 80) is the default spam tolerance used when creating a new user.
 
@@ -139,24 +186,47 @@ their DMARC policy records. Reports are sent at 2 AM daily for the previous day'
 email traffic from ``POSTMASTER@DOMAIN``.
 
 The ``FULL_TEXT_SEARCH`` variable (default: 'en') is a comma separated list of
-language codes as defined on `fts_languages`_. This feature can be disabled
-(e.g. for performance reasons) by setting the variable to ``off``.
+ISO 639-1 language codes, as listed under `Dovecot languages`_. This feature can
+be disabled (e.g. for performance reasons) by setting the variable to ``off``.
+Legacy boolean values such as ``on``, ``true``, ``yes``, and ``1`` enable
+English indexing; ``off``, ``false``, ``no``, and ``0`` disable indexing.
+
+The domain's **Maximum user quota** sets a limit for each mailbox. **Maximum
+domain storage** sets an additional best-effort limit across its mailboxes. The
+Admin interface reports current aggregate usage from Dovecot's quota data, and
+Postfix checks it when accepting each inbound SMTP recipient. The check uses a
+usage snapshot and can be exceeded by concurrent deliveries; it does not cover
+IMAP uploads or moves between mailboxes. Set the domain limit to zero for no
+aggregate limit.
 
 You can set a global ``DEFAULT_QUOTA`` to be used for mailboxes when the domain has
-no specific quota configured.
+no specific per-user quota configured.
 
-.. _`fts_languages`: https://doc.dovecot.org/settings/plugin/fts-plugin/#fts-languages
+.. _`Dovecot languages`: https://doc.dovecot.org/latest/core/plugins/fts.html
 
 .. _web_settings:
 
 Web settings
 ------------
 
-- ``WEB_ADMIN`` contains the path to the main admin interface
+- ``WEBMAIL_AVAILABLE`` is a comma-separated list of enabled webmails.
+  If unset or empty, both webmails are enabled. Set it to ``none`` to disable
+  both webmails. If ``none`` appears in the list, it takes
+  precedence over any webmail names. The webmails are served at ``/roundcube`` and ``/snappymail``;
+  ``/webmail`` redirects signed-in users to their preferred enabled webmail.
+  Users can select their preference in account settings. If their choice is
+  disabled, the first enabled webmail is used. Restart the front and admin
+  services after changing this setting.
 
-- ``WEB_WEBMAIL`` contains the path to the Web email client.
-
-- ``WEB_API`` contains the path to the RESTful API.
+  Both webmails run in the same webmail container and use its existing data
+  directory. Replace the old ``WEBMAIL`` setting with ``WEBMAIL_AVAILABLE``
+  when upgrading. Mount ``$ROOT/overrides/roundcube`` at
+  ``/roundcube-overrides`` for Roundcube ``.inc`` and ``.inc.php`` files, and
+  ``$ROOT/overrides/snappymail`` at ``/snappymail-overrides`` for an optional
+  ``application.ini`` containing SnappyMail settings to override. Restart the
+  webmail service after changing overrides. When both webmails are disabled, the default
+  webmail root redirect falls back to ``/admin`` if the admin interface is
+  enabled. The setup wizard can also omit the webmail service entirely.
 
 - ``WEBROOT_REDIRECT`` redirects all non-found queries to the set path.
   An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables
@@ -164,11 +234,11 @@ Web settings
   Alternatively, ``WEBROOT_REDIRECT`` can be set to ``none`` if you
   are using an Nginx override for ``location /``.
 
-All four options need a leading slash (``/``) to work.
+The redirect path needs a leading slash (``/``) to work.
 
   .. note:: ``WEBROOT_REDIRECT`` has to point to a valid path on the webserver.
-    This means it cannot point to any services which are not enabled.
-    For example, don't point it to ``/webmail`` when ``WEBMAIL=none``
+    A redirect to ``/webmail`` falls back to ``/admin`` (or a 404 when admin is
+    disabled) if ``WEBMAIL_AVAILABLE=none``.
 
 Both ``SITENAME`` and ``WEBSITE`` are customization options for the panel menu
 in the admin interface, while ``SITENAME`` is a customization option for
@@ -185,36 +255,20 @@ every Web interface.
 
 .. _admin_account:
 
-Admin account - automatic creation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-For administrative tasks, an admin user account will be needed. You can create it manually,
-after deploying the system, or automatically.
-To create it manually, follow the specific deployment method documentation.
-
-To have the account created automatically, you just need to define a few environment variables:
-
-- ``INITIAL_ADMIN_ACCOUNT``: the admin username: The first part of the e-mail address before the @.
-- ``INITIAL_ADMIN_DOMAIN``: the domain appendix: Most probably identical to the ``DOMAIN`` variable.
-- ``INITIAL_ADMIN_PW``: the admin password.
-- ``INITIAL_ADMIN_MODE``: use one of the options below for configuring how the admin account must be created:
-
-  - ``create``: (default) creates a new admin account and raises an exception when it already exists.
-  - ``ifmissing``: creates a new admin account when the admin account does not exist.
-  - ``update``: creates a new admin account when it does not exist, or update the password of an existing admin account.
-
-Note: It is recommended to set ``INITIAL_ADMIN_MODE`` to either ``update`` or ``ifmissing``. Leaving it with the
-default value will cause an error when the system is restarted.
-
-An example:
+Admin account - initial setup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To create the first administrator, create a user and request a one-time setup link,
+then promote the account to global administrator:
 
 .. code-block:: bash
 
-  INITIAL_ADMIN_ACCOUNT=me
-  INITIAL_ADMIN_DOMAIN=example.net
-  INITIAL_ADMIN_PW=password
-  INITIAL_ADMIN_MODE=ifmissing
+  docker compose exec admin flask mailu user add me@example.net
+  docker compose exec admin flask mailu admin add me@example.net
 
-Depending on your particular deployment you most probably will want to change the default.
+Omitting the password creates a random password and prints a one-time setup link
+in the command output. Open it to set a password or register a passkey. The link expires after the configured account setup token
+lifetime and can only be used once. Keep the link private: anyone who can use it
+can take control of the account.
 
 .. _advanced_settings:
 
@@ -222,7 +276,7 @@ Advanced settings
 -----------------
 
 
-The ``AUTH_REQUIRE_TOKENS`` (default: False) setting controls whether thick clients can authenticate using passwords or whether they are forced to use tokens/application specific passwords.
+The ``AUTH_REQUIRE_TOKENS`` (default: True) setting requires email clients to authenticate using authentication tokens (application-specific passwords). Create one token per app or device and save it in the client's incoming and outgoing password fields. Web sign-in continues to support account passwords and passkeys. Installations that need legacy password authentication for email clients can explicitly set ``AUTH_REQUIRE_TOKENS=False``.
 
 The ``API_TOKEN`` (default: None) setting configures the authentication token.
 The minimum length is 3 characters.
@@ -239,6 +293,36 @@ The ``SESSION_COOKIE_SECURE`` (default: True) setting controls the secure flag o
 the cookies of the administrative interface. It should only be turned off if you
 intend to access it over plain HTTP.
 
+The ``PASSKEY_RP_ID`` setting selects the WebAuthn relying-party ID for passkeys.
+It defaults to the first hostname in ``HOSTNAMES``. Set it to the domain users
+access the web interface through if that differs from the first hostname. Passkeys
+require a secure browser context, normally HTTPS. When multiple hostnames are
+configured, Mailu serves them as related origins for this RP ID from
+``https://<PASSKEY_RP_ID>/.well-known/webauthn``.
+
+The ``PASSKEY_REQUIRED`` setting (default: ``False``) requires every account
+to use a passkey, across all domains. When enabled, password sign-in is disabled
+and the login form only offers passkey sign-in. Accounts without a passkey need
+a one-time account setup link from their domain administrator before they can
+sign in. This is a server-wide passwordless policy.
+
+Domain managers can instead enable **Require all users to enroll a passkey** in
+the domain's passkey policy. This requires users without a passkey to set one up
+after signing in, while allowing them to use their existing password to sign in.
+They cannot continue to other Mailu pages until enrollment is complete. A manager
+can create a one-time setup or recovery link from the user's edit page to help a
+locked-out user. The link can also set or reset a password when the account is
+allowed to use passwords. Global administrators can manage all domain settings; domain managers
+can edit only the passkey policy. For a per-user requirement, use **Require
+passkey** on the user's create or edit form; this option is hidden if
+the domain already requires passkeys or the server-wide setting is enabled.
+
+The ``ACCOUNT_SETUP_TOKEN_TTL`` setting controls how long one-time account setup
+and recovery links remain valid, in seconds. It defaults to ``604800`` (one
+week). A link can be used once to set a password or add a passkey, subject to
+account passkey policies. Generating a replacement invalidates any previous
+link for that account.
+
 ``SESSION_TIMEOUT`` (default: 3600) is the maximum amount of time in seconds between
 requests before a session is invalidated. ``PERMANENT_SESSION_LIFETIME`` (default: 108000)
 is the maximum amount of time in seconds a session can be kept alive for if it hasn't timed-out.
@@ -250,11 +334,12 @@ See the `python docs`_ for more information.
 
 .. _`python docs`: https://docs.python.org/3.6/library/logging.html#logging-levels
 
-The ``LETSENCRYPT_SHORTCHAIN`` (default: False) setting controls whether we send the
-ISRG Root X1 certificate in TLS handshakes. This is required for `android handsets older than 7.1.1`
-but slows down the performance of modern devices.
-
-.. _`android handsets older than 7.1.1`: https://community.letsencrypt.org/t/production-chain-changes/150739
+With ``TLS_FLAVOR=letsencrypt``, front TLS services offer both RSA and ECDSA
+certificates. The RSA chain keeps its path through ISRG Root X1 for compatibility;
+the ECDSA chain includes the Root YE certificate signed by ISRG Root X2 but
+omits X2 itself. This keeps the transmitted chain ECC-only and shorter; clients
+must already trust ISRG Root X2. SMTP port 25 continues to serve the RSA and
+ECDSA DANE chains, including their DNS-published ISRG trust anchors.
 
 The ``TLS_PERMISSIVE`` (default: true) setting controls whether ciphers and protocols offered on port 25
 for STARTTLS are optimized for maximum compatibility. We **strongly recommend** that you do **not** change
@@ -266,21 +351,24 @@ c) silently drop emails; moreover, modern servers will benefit from various down
 (DOWNGRD, RFC7507) making the security argument mostly a moot point.
 
 The ``COMPRESSION`` (default: unset) setting controls whether emails are stored compressed at rest on disk.
-Valid values are ``gz``, ``bz2`` or ``zstd`` and additional settings can be configured via
-``COMPRESSION_LEVEL``, see `zlib_save_level`_ for accepted values. If the underlying filesystem
+Valid values are ``gz``, ``bz2`` or ``zstd``. The compression strength is set with
+``COMPRESSION_LEVEL``, whose meaning depends on the method: for ``gz`` it is the zlib level (0 to 9),
+for ``zstd`` the zstd level, and for ``bz2`` it is the block size in units of 100k (1 to 9). See
+`mail_compress`_ for details. If the underlying filesystem
 supports compression natively you should use it instead of this setting as it will be more efficient
 and will improve compatibility with 3rd party tools.
 
-.. _`zlib_save_level`: https://doc.dovecot.org/settings/plugin/zlib-plugin/#plugin_setting-zlib-zlib_save_level
+.. _`mail_compress`: https://doc.dovecot.org/latest/core/plugins/mail_compress.html
 
 .. _reverse_proxy_headers:
 
 The ``REAL_IP_HEADER`` (default: unset) and ``REAL_IP_FROM`` (default: unset) settings
-controls whether HTTP headers such as ``X-Forwarded-For`` or ``X-Real-IP`` should be trusted.
-The former should be the name of the HTTP header to extract the client IP address from and the
-later a comma separated list of IP addresses designating which proxies to trust.
-If you are using Mailu behind a reverse proxy, you should set both. Setting the former without
-the latter introduces a security vulnerability allowing a potential attacker to spoof their source address.
+control whether HTTP headers such as ``X-Forwarded-For`` or ``X-Real-IP`` should be trusted.
+These settings are for HTTP-header-based proxies. For the recommended TCP reverse-proxy setup,
+use ``PROXY_PROTOCOL`` and ``REAL_IP_FROM`` instead, and leave ``REAL_IP_HEADER`` unset. If your
+proxy forwards client addresses in HTTP headers, set ``REAL_IP_HEADER`` to the header name and
+``REAL_IP_FROM`` to a comma-separated list of trusted proxy addresses. Setting the former without
+the latter introduces a security vulnerability that allows an attacker to spoof their source address.
 
 The ``TZ`` sets the timezone Mailu will use. The timezone naming convention usually uses a ``Region/City`` format. See `TZ database name`_  for a list of valid timezones This defaults to ``Etc/UTC``. Warning: if you are observing different timestamps in your log files you should change your hosts timezone to UTC instead of changing TZ to your local timezone. Using UTC allows easy log correlation with remote MTAs.
 
@@ -357,6 +445,8 @@ For Roundcube, refer to the `roundcube documentation`_ for the URL specification
 .. _`DB URL`: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls
 .. _`roundcube documentation`: https://github.com/roundcube/roundcubemail/blob/master/config/defaults.inc.php#L28
 
+.. _webmail-settings:
+
 Webmail settings
 ----------------
 
@@ -402,6 +492,39 @@ To disable all plugins just set ``ROUNDCUBE_PLUGINS`` to ``mailu``.
 
 To configure a plugin add php files named ``*.inc.php`` to roundcube's :ref:`override section <override-label>`.
 
+With ``WEBDAV=radicale``, the default ``carddav`` plugin automatically discovers
+the user's Mailu address books. SnappyMail's ``mailu-carddav`` plugin configures
+CardDAV synchronization unless the user has saved their own sync settings.
+Keep ``mailu-carddav`` in ``[plugins] enabled_list`` when overriding SnappyMail's
+plugin list if automatic setup is wanted.
+
+Roundcube's CardDAV plugin uses a separate ``$prefs`` configuration, rather than
+Roundcube's ``$config`` array. To add server-wide presets or customize these
+settings, create ``overrides/roundcube/carddav.php`` (without ``.inc`` in its
+name). For example, a shared read-only address book with service credentials::
+
+    <?php
+    $prefs['Company'] = [
+        'accountname' => 'Company contacts',
+        'username' => 'directory-reader',
+        'password' => 'external-service-app-password',
+        'discovery_url' => 'https://contacts.example.org/dav/',
+        'readonly' => true,
+        'fixed' => ['username', 'password', 'discovery_url'],
+    ];
+
+The file is loaded after Mailu's defaults; ``unset($prefs['Mailu']);`` disables
+the automatic Mailu preset. See the `RCMCardDAV administrator settings
+<https://github.com/mstilkerich/rcmcarddav/blob/v5.1.3/doc/ADMIN-SETTINGS.md>`_
+for other preset options. For per-user external credentials, users can add an
+account in **Settings → CardDAV** instead. The ``%p`` preset placeholder refers
+to Mailu's temporary webmail session token, so it cannot be used as a password
+for an external DAV service.
+
+Automatic Mailu CardDAV requests use the front container's HTTP or HTTPS port.
+The front recognizes temporary webmail tokens only for connections originating
+in ``SUBNET`` or ``SUBNET6``. Client discovery advertises the public ``/webdav/`` URL.
+
 .. _header_authentication:
 
 Header authentication using an external proxy
@@ -415,11 +538,77 @@ Once configured, any request to /sso/login with the correct headers will be auth
 
 Requests to:
 
-- "/sso/login" results the user being redirected to the web administration interface after authentication.
-- "/admin" (``WEB_ADMIN=/admin``) results the user being redirected to the web administration interface  after authentication.
-- "/webmail" (``WEB_WEBMAIL=/webmail``) results the user being redirected to the web administration interface  after authentication.
+- ``/sso/login`` use the browser preference from the last successful sign-in, defaulting to Webmail when enabled.
+- ``/sso/login/admin`` explicitly select ``/admin``.
+- ``/sso/login/webmail`` explicitly select ``/webmail``.
+- Protected pages under ``/admin``, ``/roundcube`` and ``/snappymail`` return to the original
+  page after authentication. Return destinations are stored server-side rather
+  than placed in internally generated ``?url=`` links.
+
+The ``mailu_signin_target`` cookie remembers only the selected application for one year. Explicit sign-in routes and protected-page return destinations override this preference. Existing same-origin ``?url=`` bookmarks remain supported.
 
 Use ``PROXY_AUTH_LOGOUT_URL`` (default: unset) to redirect users to a specific URL after they have been logged out.
+
+OAuth2 authentication for native mail clients
+----------------------------------------------
+
+Mailu provides an OAuth 2.0 issuer for native mail clients. The issuer uses
+the primary ``HOSTNAME`` and the ``/admin`` path. OAuth is always
+available and needs no extra environment variables. The draft -07 AutoConfig
+document advertises the Mailu authorization and token endpoints, the public
+``mailu`` client ID, and the ``imap smtp pop3 sieve offline_access`` scopes. Password
+authentication and existing app tokens remain available.
+
+OAuth access and refresh tokens use a dedicated signing key stored in Mailu's
+database-backed config table. It is generated when OAuth tokens are first
+issued and is independent of ``SECRET_KEY``, so rotating ``SECRET_KEY`` does not
+invalidate OAuth tokens. Back up and share the database across admin replicas;
+deleting or replacing this config entry invalidates OAuth tokens.
+
+The authorization-code flow requires PKCE with ``S256``. Users sign in with
+their Mailu account in the browser and approve mailbox access. Mailu issues
+access tokens (24 hours by default) and rotating refresh tokens. Set
+``OAUTH2_ACCESS_TOKEN_TTL`` in ``mailu.env`` to configure access-token lifetime
+in seconds. Reuse of a rotated refresh
+token revokes the entire grant family. For grants with ``offline_access``, an
+access token never outlives the refresh token's absolute expiry or current idle
+deadline. Set ``OAUTH2_REFRESH_TOKEN_TTL`` in
+``mailu.env`` to control the absolute refresh token lifetime in seconds
+(default: 7776000, or 90 days), and ``OAUTH2_REFRESH_TOKEN_IDLE`` to control
+the maximum inactivity period (default: 604800, or one week). In the account settings,
+users can review and revoke authorized mail apps separately from static app
+tokens. The authorized-app list shows the client name, last token refresh, and
+last mail connection address. Dovecot checks access tokens against Mailu's
+private introspection endpoint and accepts ``OAUTHBEARER`` and ``XOAUTH2`` for
+IMAP, SMTP, POP3, and ManageSieve. Thunderbird uses XOAUTH2. Each protocol
+checks its corresponding scope,
+and POP3 remains subject to the user's POP3 setting. Both the draft -07 and
+legacy Thunderbird AutoConfig formats
+prefer OAuth2 while retaining password authentication as a fallback. The
+Thunderbird provider add-on on ``/admin/client`` recognizes every hostname in
+``HOSTNAMES``.
+
+OAuth authorization server metadata is available at
+``/.well-known/oauth-authorization-server``. It advertises the authorization,
+token, and revocation endpoints, supported scopes and grants, query response
+mode, ``none`` client authentication at the token and revocation endpoints,
+and PKCE with ``S256``.
+
+Authorization responses include the ``iss`` parameter from RFC 9207 when the
+issuer uses HTTPS, and metadata advertises this support. Password changes
+expire existing OAuth access and refresh tokens and require each mail app to
+authenticate again. The consent screen shows the public client ID; this ID
+identifies the client registration but does not prove which application is
+using it.
+
+The consent screen lets users select the protocol scopes granted to each app.
+The buttons appear in IMAP, POP3 (when enabled for the user), SMTP, SIEVE,
+and ``offline_access`` order; hover over a button for its description.
+``offline_access`` allows an app to refresh its access token without
+another sign-in. If it is not granted, Mailu does not issue a refresh token and
+the user must authorize the app again after the access token expires. The
+Thunderbird add-on publishes a self-hosted update manifest; its manifest is
+cached for one day and each versioned XPI is cached for one year.
 
 .. _`1972`: https://github.com/Mailu/Mailu/issues/1972
 .. _`2692`: https://github.com/Mailu/Mailu/issues/2692

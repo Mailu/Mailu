@@ -1,0 +1,1 @@
+Removing global admin rights from an address that does not exist no longer fails with an internal server error.

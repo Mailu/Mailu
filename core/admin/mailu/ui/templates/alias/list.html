@@ -9,7 +9,7 @@
 {%- endblock %}
 
 {%- block main_action %}
-<a class="btn btn-primary float-right" href="{{ url_for('.alias_create', domain_name=domain.name) }}">{% trans %}Add alias{% endtrans %}</a>
+<a class="btn btn-primary float-end" href="{{ url_for('.alias_create', domain_name=domain.name) }}">{% trans %}Add alias{% endtrans %}</a>
 {%- endblock %}
 
 {%- block content %}
@@ -28,8 +28,8 @@
   {%- for alias in domain.aliases %}
   <tr {% if alias.owner_email %}class="table-secondary" title="{% trans %}Anonymous Alias{% endtrans %}"{% endif %}>
     <td>
-      <a href="{{ url_for('.alias_edit', alias=alias.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil-alt"></i></a>&nbsp;
-      <a href="{{ url_for('.alias_delete', alias=alias.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+      <a href="{{ url_for('.alias_edit', alias=alias.email) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa-solid fa-pencil"></i></a>&nbsp;
+      <a href="{{ url_for('.alias_delete', alias=alias.email) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa-solid fa-trash"></i></a>
     </td>
     <td>{{ alias }}</td>
     <td>{{ alias.destination|join(', ') or '-' }}</td>

@@ -1,0 +1,2 @@
+Fix "Please don't turn CURLOPT_SSL_VERIFYCLIENT off" on modern roundcube
+Upgrade to roundcube 1.6.18

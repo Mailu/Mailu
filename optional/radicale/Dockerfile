@@ -7,12 +7,14 @@ ARG VERSION=local
 LABEL version=$VERSION
 
 COPY radicale.conf /
+COPY start.py /
+COPY run_radicale.py /
 
 RUN echo $VERSION >/version
 
 #EXPOSE 5232/tcp
-HEALTHCHECK CMD ["/bin/sh", "-c", "ps ax | grep [/]radicale.conf"]
+HEALTHCHECK CMD /usr/local/bin/supervisor-healthcheck
 
 VOLUME ["/data"]
 
-CMD radicale -S -C /radicale.conf
+CMD ["/start.py"]

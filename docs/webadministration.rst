@@ -19,6 +19,8 @@ It offers the following configuration options:
 
 * configure application passwords.
 
+* configure passkeys for signing in to the web interface.
+
 * send broadcast messages to all users.
 
 * configure global administration users.
@@ -47,7 +49,19 @@ Access the web administration interface
 
 The admin GUI is by default accessed via the URL `https://<my domain>/admin`, when it's enabled in the setup utility
 or by manually setting `ADMIN=true` in `mailu.env`.
-To login the admin GUI enter the email address and password of an user.
+Sign in with your email address and password, or use a registered passkey.
+The sign-in page offers a destination selector for Webmail or Account settings.
+A direct visit uses the destination from your last successful sign-in, remembered
+in a separate browser cookie; that destination is pre-selected but can be changed
+on the sign-in page. With no preference, Webmail is the default when enabled.
+Bookmark ``/sso/login/admin`` or ``/sso/login/webmail`` to select a destination explicitly.
+These routes also work with trusted proxy authentication and use the fixed ``/admin`` and ``/webmail`` paths. Protected-page links return you to the requested page after
+sign-in, including after a required password change. All roles continue to open their
+account settings when visiting ``/admin``.
+
+The admin GUI and sign-in page follow your system's light or dark color scheme by default.
+Use **Appearance** to choose **Light**, **Dark**, or **System**. Your choice is saved
+in your browser and shared between the admin GUI and sign-in page.
 
 Only global administrator users have access to all configuration settings and the Rspamd webgui. Other users will be
 presented with settings for only their account, and domains they are managers of.
@@ -74,6 +88,7 @@ Settings
 After logging in the web administration interface, the settings page is loaded.
 On the settings page the settings of the currently logged in user can be changed.
 Changes are saved and effective immediately after clicking the Save Settings button at the bottom of the page.
+OpenPGP keys have a separate publish button in their settings section.
 
 
 Display name
@@ -81,6 +96,36 @@ Display name
 
 On the settings page the displayed name can be changed of the logged in user.
 This display name is only used within the web administration interface.
+
+
+OpenPGP keys and Web Key Directory
+``````````````````````````````````
+
+Users can publish an OpenPGP public key through Web Key Directory (WKD) from
+the ``OpenPGP`` section of their account settings. WKD lets compatible mail
+clients discover a recipient's public key using their email address. It is
+served by the admin application through the existing web server; no additional
+container or WKD-specific DNS record is required. The admin interface must be
+enabled and its domain must be reachable over HTTPS.
+
+Paste an ASCII-armored **public** key into the field and click
+``Publish OpenPGP key``. Mailu validates the key with GnuPG, rejects secret key
+material, and requires a valid key user ID matching the mailbox. Only the
+public key is stored and published. To remove the published key, clear the
+field and click ``Publish OpenPGP key``.
+
+Mailu also publishes a user's key for active, exact aliases currently routed
+to that mailbox, but only when the key contains a valid user ID matching the
+alias address. Configured alternative domains are included too, provided the
+key contains a matching user ID for the address at that alternative domain.
+Wildcard aliases are not included. If multiple users' keys contain the same
+group-alias user ID, WKD returns all of those keys in one response. After
+changing an alias, its destinations, or a domain alternative, republish the
+affected users' keys to refresh the publications.
+
+WKD publication is public. Its hashed lookup names are not a privacy measure:
+common email local-parts can be guessed. Publish only keys and email addresses
+you intend to make discoverable.
 
 
 Antispam
@@ -105,13 +150,41 @@ Under the section `Auto-forward`, the automatic forwarding of received email mes
 
 The option "Keep a copy of the emails" can be ticked, to keep a copy of the received email message in the inbox folder.
 
-In the destination textbox, the email addresses can be entered for automatic forwarding. When entering multiple email addresses the comma (',') must be used as delimiter.
+Search for and select one or more destination addresses in the destination field. You can remove a selected address from the field before saving.
 
 
 Update password
 ---------------
 
 On the `update password` page, the password of the logged in user can be changed. Changes are effective immediately.
+
+If an administrator requires a password change at next login, the user can
+change the password or choose **Set up a passkey instead**. Registering a passkey
+completes the forced password-change step.
+
+
+Passkeys
+--------
+
+Mailu supports signing in to the Admin and Webmail interfaces with passkeys.
+Users can register, name, and remove their passkeys from **Manage passkeys** in
+their account menu. The page shows each credential's creation and last-use
+times, authenticator flags, device type, backup status, attestation format,
+signature counter, and AAGUID. Some details may show as unknown for older
+credentials if they were not recorded at enrollment or a later sign-in.
+
+When a user's account has a passkey, password sign-in and password change are
+disabled for that account. The ``PASSKEY_REQUIRED`` server setting disables
+password sign-in for every account, including accounts without a passkey; users
+without one need a manager-generated setup link. Domain-level enforcement
+does not disable existing passwords. It requires users without a passkey to
+enroll after signing in.
+
+New users are created without an initial password. After creation, give the
+user the one-time setup link shown on their edit page. They can use it to set a
+password or add a passkey. Domain managers can generate a replacement setup or
+recovery link on the same page for users who are locked out or need to reset
+their password. A link works once and expires after the configured lifetime.
 
 
 .. _webadministration_auto-reply:
@@ -121,7 +194,23 @@ Auto-reply
 
 On the `auto-reply` page, automatic replies can be configured. This is also known as out of office (ooo) or out of facility (oof) replies.
 
-To enable automatic replies tick the checkbox 'Enable automatic reply'.
+Enable **Automatic reply**, compose a formatted message, and choose **On selected dates**
+or **Until I turn it off**. Drag across the calendar to select your time away;
+on touch screens, press and hold before dragging. You can also enter the first
+and last day directly. The calendar and date fields stay synchronized. Drag or
+resize the selected period to change it.
+
+Both selected days are included: replies stop at the end of the last day away,
+using the mail server timezone shown below the calendar. A one-day vacation uses
+the same first and last day. **Save automatic reply** applies the message and schedule;
+turning the switch off hides the message and schedule controls and retains the saved settings.
+Use **Preview** to see the server-sanitized message before saving. **Back to editing**
+returns to the composer without changing the draft.
+
+Formatted replies are delivered as HTML with a plain-text alternative. Existing
+plain-text API clients remain supported; updating the plain body clears previous
+formatting. The optional ``reply_body_html`` field is included in configuration
+exports. The nullable-column migration retains existing reply text and dates.
 
 Under Reply subject the email subject for automatic replies can be configured. When a reply subject is entered, this subject will be used for the automatic reply.
 
@@ -179,7 +268,7 @@ The purpose of an authentication token is to create a unique and strong password
 The application will use this authentication token instead of the logged in user's password for sending/receiving email.
 This allows safe access to the logged in user's email account. At any moment, the authentication token can be deleted so that the application has no access to the logged in user's email account anymore.
 
-By clicking on the New token button on the top right of the page, a new authentication token can be created. On this page the generated authentication token will only be displayed once.
+Choose **Create and activate token** to make a new authentication token. The generated token is displayed only once.
 After saving the application token it is not possible anymore to view the unique password.
 
 The comment field can be used to enter a description for the authentication token. For example the name of the application the application token is created for.
@@ -192,13 +281,21 @@ Announcement
 ------------
 
 On the `announcement` page, the global administrator can send an email message to all email accounts on the Mailu server. This message will be received as an email message in the inbox folder of each user on the Mailu server.
-On the announcement page there are the following options:
+The composer shows the configured postmaster sender and the number of recipients.
+Use the formatting toolbar for headings, emphasis, lists, and links. Messages are
+sent as HTML with a plain-text alternative; pasted content is sanitized on the server.
+Images and attachments are not supported.
 
-* Announcement subject. The subject of the announcement email message.
+Choose **Send me a test email** to deliver a copy only to your administrator mailbox,
+with ``[TEST]`` in the subject. Your draft remains available for editing.
+Choose **Preview** to review the sanitized message and recipient count, then
+**Send announcement** to confirm the broadcast. Previews expire after 30 minutes
+and can only be sent once. **Back to editing** lets you revise the message.
 
-* Announcement body. The body of the announcement email message.
-
-Click on send to send the announcement email message to all users.
+Delivery results report successful and failed recipients separately. After a partial
+failure, the retained draft offers a retry only to failed recipients; opening a fresh
+announcement starts a new broadcast. Delivery is synchronous and drafts are not saved
+across visits. Leaving a changed composer prompts you before discarding your changes.
 
 
 Administrators
@@ -245,7 +342,7 @@ On the new relayed domain page the following options can be entered for a new re
   lmtp:target:port  resolve A/AAAA of target and use port  lmtp:target:port
   ================  =====================================  =========================
 
-  `target` can also be an IPv4 or IPv6 address (an IPv6 address must be enclosed in []: ``[2001:DB8::]``).
+  `target` can also be an IPv4 or IPv6 address (an IPv6 address must be enclosed in []: ``[2001:DB8::]``, unbracketed IPv6 addresses are rejected).
 
 * Comment. A text field where a comment can be entered to describe the entry.
 
@@ -292,13 +389,27 @@ This page is also accessible for domain managers. On the details page all DNS se
 Edit
 ````
 
-This page is only accessible for global administrators. On the edit page, the global settings for the domain can be changed.
+Global administrators can edit all domain settings. Domain managers can open the
+same page for domains they manage, but can change only settings in the Passkey
+policy section.
+
+The **Require all users to enroll a passkey** option requires users without a
+passkey to set one up after signing in. Existing passwords remain valid for
+sign-in, but users must complete enrollment before accessing other Mailu pages.
+When this option is enabled, the per-user **Require passkey** option is hidden
+because enrollment is already required for the whole domain.
+
+Domain passkey settings control which credentials may be enrolled and used to sign in. Turn on **Enforce AAGUID restrictions** to apply the allow or block list; enter AAGUID UUIDs one per line. When enforcement is off, the list is ignored. The policy is checked both at enrollment and at sign-in.
+
+The backup eligibility and backup state settings each support **Optional**, **Require**, or **Deny**. Eligibility describes whether an authenticator can back up a credential; state describes whether that credential is currently backed up. Attestation also supports **Optional**, **Require**, or **Deny** and is evaluated at enrollment. Requiring attestation rejects credentials that provide none, but does not by itself verify that an authenticator is trusted by a manufacturer. User verification (such as a PIN or biometrics), device-bound credentials, resident-key preference, and backup flags are also governed by the domain settings.
+
+By default, signature-counter growth is not enforced. Enable **Require signature counter to increase** to reject a sign-in unless its counter is greater than the previously stored counter. Some authenticators do not provide a useful increasing counter, so enabling this can prevent those credentials from signing in. User presence is recorded and displayed; WebAuthn requires it for passkey sign-in.
 
 * Maximum user count. The maximum amount of users that can be created under this domain. Once this limit is reached it is not possible anymore to add users to the domain; and it is also not possible for users to self-register.
 
 * Maximum alias count. The maximum amount of aliases that can be created for an email account.
 
-* Maximum user quota. The maximum amount of quota that can be assigned to a user. When creating or editing a user, this sets the limit on the maximum amount of quota that can be assigned to the user.
+* Maximum user quota. The maximum amount of quota that can be assigned to a user. Enter an integer in MB or GB, up to 1000 of the selected unit (1000 GB is 1 TB). A value of 0 means there is no domain-specific quota limit. When creating or editing a user, this sets the limit on the maximum amount of quota that can be assigned to the user.
 
 * Enable sign-up. When this option is ticked, self-registration is enabled. When the Admin GUI is accessed, in the menu list the option Signup becomes available.
   Obviously this menu item is only visible when signed out. On the Signup page a user can create an email account.
@@ -318,7 +429,8 @@ Users
 
 This page is also accessible for domain managers. On the users page new users can be added via the Add user button (top right of page). For existing users the following options are available via the columns Actions and User settings (from left to right)
 
-* Edit. For all available options see :ref:`the Add user page <webadministration_add_user>`.
+* Edit. Configure the user's account details and next-login requirements. For all
+  available options see :ref:`the Add user page <webadministration_add_user>`.
 
 * Delete. Disables the user. For more information on permanently deleting users, refer to the :ref:`How to delete users page<delete_users>`.
 
@@ -327,6 +439,13 @@ This page is also accessible for domain managers. On the users page new users ca
 * Auto-reply. Access the auto-reply page of the user. See the :ref:`auto-reply page <webadministration_auto-reply>` for more information.
 
 * Fetched accounts. Access the fetched accounts page of the user. See the :ref:`fetched accounts page <webadministration_fetched_accounts>` for more information.
+
+* Passkeys. Open the user's passkey page to review or remove registered keys.
+  Use **Edit** to generate a one-time setup or recovery link for a user who is
+  locked out or needs to set a password or passkey. The link can be generated
+  by global administrators or managers of the user's domain. It works without
+  an existing sign-in and expires after the configured lifetime; generating a
+  replacement invalidates the previous link for that user.
 
 This page also shows an overview of the following settings of an user:
 
@@ -353,7 +472,15 @@ For adding a new user the following options can be configured.
 
 * E-mail. The email address of the new user.
 
-* Password/Confirm password. The password for the new user. The new user can change his password after logging in the Admin GUI.
+* Require passkey. Require the user to set up a passkey before they can sign in.
+  After creating the account, copy the one-time setup link from the user's edit
+  page and give it to them. The user can use the link to set a password or set up
+  a passkey, subject to the server and domain passkey policies.
+
+On an existing user's edit page, **Force password change at next login** remains
+available. Use **Generate one-time setup or recovery link** when the user is
+locked out or needs to choose a new password or passkey. Each generated link
+invalidates the previous link for that account.
 
 * Displayed name. The display name of the user within the Admin GUI.
 
@@ -362,7 +489,7 @@ For adding a new user the following options can be configured.
 * Enabled. Tick this checkbox to enable the user account. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail.
   The email inbox of the user is still retained. This option can be used to temporarily suspend an user account.
 
-* Storage Quota. The maximum quota for the user's email box.
+* Storage Quota. The maximum quota for the user's email box. Enter an integer in MB or GB, up to 1000 of the selected unit (1000 GB is 1 TB), subject to the domain's maximum user quota. A value of 0 means unlimited.
 
 * Allow IMAP access. When ticked, allows email retrieval via the IMAP protocol.
 
@@ -432,7 +559,7 @@ This page is only accessible for global administrators. Via this page a new doma
 
 * Maximum alias count. The maximum amount of aliases that can be made for an email account.
 
-* Maximum user quota. The maximum amount of quota that can be assigned to a user. When creating or editing a user, this sets the limit on the maximum amount of quota that can be assigned to the user.
+* Maximum user quota. The maximum amount of quota that can be assigned to a user. Enter an integer in MB or GB, up to 1000 of the selected unit (1000 GB is 1 TB). A value of 0 means there is no domain-specific quota limit. When creating or editing a user, this sets the limit on the maximum amount of quota that can be assigned to the user.
 
 * Enable sign-up. When this option is ticked, self-registration is enabled. When the Admin GUI is accessed, in the menu list the option Signup becomes available.
   Obviously this menu item is only visible when signed out. On the Signup page a user can create an email account.
@@ -451,7 +578,7 @@ The menu item `Webmail` opens the webmail page. This option is only available if
 Client setup
 ------------
 
-The menu item `Client setup` shows all settings for configuring your email client for connecting to Mailu.
+The menu item `Client setup` shows the settings for connecting an email client to Mailu and encourages use of authentication tokens. Create a separate token for each app or device, then save it in the client's incoming and outgoing password fields. The token is intended to be set once and left in the mail client; it is not your password for signing in to the web interface. Email-client password authentication can be restored by an administrator setting ``AUTH_REQUIRE_TOKENS=False``.
 
 
 Website
@@ -471,3 +598,14 @@ Sign out
 --------
 
 The menu item `Sign out` signs out the currently logged in user.
+
+
+Account selection in access forms
+---------------------------------
+
+When adding managers, global administrators, or Anonymous Email Access, search by
+email address or display name and select multiple accounts before submitting.
+Selected accounts appear as removable chips. Accounts already granted the role
+are marked in the results. Search returns at most 50 matches; continue typing to
+narrow large lists. The server checks every selected account before applying the
+batch, using the same permission scope as the corresponding form.

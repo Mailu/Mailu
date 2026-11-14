@@ -61,6 +61,11 @@ virtual_mailbox_domains = socketmap:unix:/tmp/podop.socket:domain
 virtual_mailbox_maps = socketmap:unix:/tmp/podop.socket:alias
 ```
 
+Mailu's Postfix Podop process also serves the domain quota policy protocol on
+``127.0.0.1:10040``. The public SMTP service uses this endpoint through
+``check_policy_service``; Podop forwards recipient checks to the Admin API and
+fails open if that API is unavailable.
+
 In order to simplify the configuration, you can setup a shortcut.
 
 ```
@@ -69,6 +74,13 @@ virtual_alias_maps = ${podop}:alias
 virtual_mailbox_domains = ${podop}:domain
 virtual_mailbox_maps = ${podop}:alias
 ```
+
+Mailu's Postfix container runs its two SMTP server services chrooted under
+``/queue``. Podop therefore listens on both its regular socket at
+``/tmp/podop.socket`` and a second socket at ``/queue/private/podop.socket``.
+Inside the Postfix chroot, the second socket is available as
+``/private/podop.socket``; Mailu configures the chrooted SMTP services to use
+that path automatically.
 
 Dovecot usage
 =============
@@ -82,6 +94,13 @@ mail_attribute_dict = proxy:/tmp/podop.socket:test
 ```
 
 Multiple maps or identical maps can be configured for various usages.
+
+When Dovecot mail processes are chrooted, the socket must be reachable inside
+the chroot. Mailu places its Dovecot Podop socket at
+``/mail/usr/run/podop/podop.socket`` on the container filesystem
+(``/usr/run/podop/podop.socket`` inside the Dovecot chroot), owned by
+``mail:dovecot-proxy`` with mode ``0660``. Only Dovecot mail processes receive
+the ``dovecot-proxy`` supplementary group.
 
 ```
 mail_attribute_dict = proxy:/tmp/podop.socket:meta

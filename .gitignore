@@ -5,6 +5,9 @@ pip-selfcheck.json
 /core/admin/lib*
 /core/admin/bin
 /core/admin/include
+/core/admin/assets/node_modules/
+/core/admin/assets/package-lock.json
+/core/admin/assets/static/
 /core/base/.venv
 /docs/lib*
 /docs/bin

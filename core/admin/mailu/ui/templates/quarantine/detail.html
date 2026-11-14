@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ message.subject or message.header_subject or _('Quarantined message') }}{% endblock %}
+{% block content %}
+{% call macros.card() %}
+<dl class="row">
+  <dt class="col-sm-3">{% trans %}Received{% endtrans %}</dt><dd class="col-sm-9">{{ message.received }}</dd>
+  <dt class="col-sm-3">{% trans %}From{% endtrans %}</dt><dd class="col-sm-9">{{ message['from'] or message.header_from or '' }}</dd>
+  <dt class="col-sm-3">{% trans %}Recipients{% endtrans %}</dt><dd class="col-sm-9">{{ message.recipients|join(', ') }}</dd>
+  <dt class="col-sm-3">{% trans %}Score{% endtrans %}</dt><dd class="col-sm-9">{{ message.score }}</dd>
+  <dt class="col-sm-3">{% trans %}Size{% endtrans %}</dt><dd class="col-sm-9">{{ message.size|filesizeformat }}</dd>
+</dl>
+{% if symbols %}
+<h2 class="h5">{% trans %}Spam symbols{% endtrans %}</h2>
+<div class="d-flex flex-wrap gap-2 mb-3">
+{% for symbol in symbols %}
+  <span class="badge rounded-pill {% if symbol.score is number and symbol.score > 0 %}text-bg-danger{% elif symbol.score is number and symbol.score < 0 %}text-bg-success{% else %}text-bg-secondary{% endif %}"{% if symbol.options %} title="{{ symbol.options|join(', ') }}"{% endif %}>
+    {{ symbol.name }}{% if symbol.score is not none %} <span class="font-monospace">{{ '%+.2f'|format(symbol.score|float) }}</span>{% endif %}
+  </span>
+{% endfor %}
+</div>
+{% endif %}
+{% if extra_metadata %}
+<h2 class="h5">{% trans %}Additional scan data{% endtrans %}</h2>
+<dl class="row">
+{% for name, value in extra_metadata.items() %}
+  <dt class="col-sm-3 text-break">{{ name }}</dt>
+  <dd class="col-sm-9"><pre class="small text-break text-wrap mb-2">{{ value|tojson(indent=2) if value is mapping or value is sequence and value is not string else value }}</pre></dd>
+{% endfor %}
+</dl>
+{% endif %}
+<h2 class="h5">{% trans %}Message preview{% endtrans %}</h2>
+<pre class="text-break text-wrap">{{ body }}</pre>
+<a class="btn btn-primary me-2" href="{{ url_for('.quarantine_release', message_id=message.id) }}">{% trans %}Release{% endtrans %}</a>
+<a class="btn btn-outline-danger me-2" href="{{ url_for('.quarantine_delete', message_id=message.id) }}">{% trans %}Delete permanently{% endtrans %}</a>
+<a class="btn btn-outline-secondary" href="{{ url_for('.quarantine_list') }}">{% trans %}Back{% endtrans %}</a>
+{% endcall %}
+{% endblock %}

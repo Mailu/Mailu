@@ -9,7 +9,7 @@
 {%- endblock %}
 
 {%- block main_action %}
-<a class="btn btn-primary float-right" href="{{ url_for('.alternative_create', domain_name=domain.name) }}">{% trans %}Add alternative{% endtrans %}</a>
+<a class="btn btn-primary float-end" href="{{ url_for('.alternative_create', domain_name=domain.name) }}">{% trans %}Add alternative{% endtrans %}</a>
 {%- endblock %}
 
 {%- block content %}
@@ -26,7 +26,7 @@
   {%- for alternative in domain.alternatives %}
   <tr>
     <td>
-      <a href="{{ url_for('.alternative_delete', alternative=alternative.name) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+      <a href="{{ url_for('.alternative_delete', alternative=alternative.name) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa-solid fa-trash"></i></a>
     </td>
     <td>{{ alternative }}</td>
     <td data-sort="{{ alternative.created_at or '0000-00-00' }}">{{ alternative.created_at | format_date }}</td>

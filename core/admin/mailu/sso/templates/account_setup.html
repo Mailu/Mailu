@@ -1,0 +1,101 @@
+{%- extends "base_sso.html" %}
+
+{%- block title %}{% trans %}Set up your account{% endtrans %}{%- endblock %}
+
+{% block content %}
+<p class="text-body-secondary">{% trans %}Set up sign-in for{% endtrans %} <strong>{{ user.email }}</strong>.</p>
+
+{% if user.email == demo_account_email %}
+<div class="alert alert-info" role="alert">
+  {% trans %}Password changes and passkey creation are disabled for this user on the demo server. You can create other users to try these features.{% endtrans %}
+</div>
+{% else %}
+{% if allow_password %}
+<section class="mb-4">
+  <h2 class="h5">{% trans %}Set a password{% endtrans %}</h2>
+  <form class="form" method="post" action="{{ url_for('sso.account_setup_password', token=token) }}">
+    {{ password_form.hidden_tag() }}
+    {{ macros.form_field(password_form.pw, autocomplete="new-password") }}
+    {{ macros.form_field(password_form.pw2, autocomplete="new-password") }}
+    {{ macros.form_field(password_form.submit) }}
+  </form>
+</section>
+<hr>
+<section class="mt-4">
+  <h2 class="h5">{% trans %}Or set up a passkey{% endtrans %}</h2>
+</section>
+{% else %}
+<div class="alert alert-info" role="status">
+  {% trans %}A passkey is required for this account. Set one up to continue.{% endtrans %}
+</div>
+{% endif %}
+
+<form id="account-setup-passkey-form" class="form">
+  {{ registration_form.hidden_tag() }}
+  <div class="mb-3">
+    <label class="form-label" for="passkey-name">{% trans %}Passkey name{% endtrans %}</label>
+    <input class="form-control" id="passkey-name" name="name" maxlength="255" value="{% trans %}New passkey{% endtrans %}" required>
+  </div>
+  <button class="btn btn-primary" id="setup-passkey" type="submit">{% trans %}Set up a passkey{% endtrans %}</button>
+</form>
+<div id="account-setup-status" class="alert d-none mt-3" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  const form = document.getElementById('account-setup-passkey-form');
+  const button = document.getElementById('setup-passkey');
+  const status = document.getElementById('account-setup-status');
+  const csrf = form.querySelector('[name="csrf_token"]').value;
+  const optionsUrl = {{ passkey_options_url | tojson }};
+  const registerUrl = {{ passkey_register_url | tojson }};
+  const decode = value => Uint8Array.from(atob(value.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+  const encode = value => btoa(String.fromCharCode(...new Uint8Array(value))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const json = async (response, action) => {
+    let data;
+    try { data = await response.json(); }
+    catch (_) { throw new Error(`${action} failed (HTTP ${response.status}).`); }
+    if (!response.ok) throw new Error(data.error || `${action} failed (HTTP ${response.status}).`);
+    return data;
+  };
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    status.className = 'alert d-none mt-3';
+    button.disabled = true;
+    try {
+      if (!window.PublicKeyCredential || !navigator.credentials?.create) throw new Error({{ _('This browser does not support passkey registration.') | tojson }});
+      const start = await fetch(optionsUrl, {method: 'POST', headers: {'X-CSRFToken': csrf}});
+      const options = await json(start, 'Could not start registration');
+      options.challenge = decode(options.challenge);
+      options.user.id = decode(options.user.id);
+      if (options.excludeCredentials) options.excludeCredentials = options.excludeCredentials.map(item => ({...item, id: decode(item.id)}));
+      const credential = await navigator.credentials.create({publicKey: options});
+      const finish = await fetch(registerUrl, {
+        method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrf},
+        body: JSON.stringify({
+          id: credential.id, rawId: encode(credential.rawId), type: credential.type,
+          name: document.getElementById('passkey-name').value.trim(),
+          response: {
+            attestationObject: encode(credential.response.attestationObject),
+            clientDataJSON: encode(credential.response.clientDataJSON),
+            transports: credential.response.getTransports ? credential.response.getTransports() : []
+          }
+        })
+      });
+      const result = await json(finish, 'Passkey registration failed');
+      if (result.redirect) {
+        window.location.assign(result.redirect);
+        return;
+      }
+      throw new Error({{ _('Passkey registration succeeded but no login redirect was returned.') | tojson }});
+    } catch (error) {
+      status.textContent = error.name === 'NotAllowedError'
+        ? {{ _('Passkey setup was cancelled or timed out. Start again and complete the prompt on your device.') | tojson }}
+        : (error.message || {{ _('Passkey registration failed.') | tojson }});
+      status.className = 'alert alert-danger mt-3';
+    } finally {
+      button.disabled = false;
+    }
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

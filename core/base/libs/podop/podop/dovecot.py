@@ -128,8 +128,14 @@ class DictProtocol(asyncio.Protocol):
                 task.cancel()
             raise e
 
-    def process_begin(self, transaction_id, user=None):
+    def process_begin(self, transaction_id, user=None, expire_secs=None):
         """ Process a dict begin message
+
+        The command is "<id> [<username> [<expire secs>]]", see cmd_begin() in
+        src/dict/dict-commands.c. Dovecot 2.3 only ever sent the first two;
+        2.4 appends the expiry, which this proxy has no use for - values are
+        forwarded to the admin API rather than stored - but which has to be
+        accepted, or the transaction fails before it starts.
         """
         self.transactions[transaction_id] = {}
         self.transactions_user[transaction_id] = user.decode("utf8") if user else self.user

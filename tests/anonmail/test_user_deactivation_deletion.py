@@ -62,7 +62,7 @@ class TestUserDeactivation:
                 assert alias_obj.disabled is False
 
             # Get the user and deactivate them
-            user_obj = models.User.query.get(user_email)
+            user_obj = models.db.session.get(models.User, user_email)
             user_obj.enabled = False
             models.db.session.commit()
 
@@ -100,7 +100,7 @@ class TestUserDeactivation:
             alias2_localpart = alias2.localpart
 
             # Deactivate first user
-            user1_obj = models.User.query.get(user1_email)
+            user1_obj = models.db.session.get(models.User, user1_email)
             user1_obj.enabled = False
             models.db.session.commit()
 
@@ -126,7 +126,7 @@ class TestUserDeactivation:
             assert resolved is not None
 
             # Deactivate user
-            user_obj = models.User.query.get(user_email)
+            user_obj = models.db.session.get(models.User, user_email)
             user_obj.enabled = False
             models.db.session.commit()
 
@@ -140,7 +140,7 @@ class TestUserDeactivation:
 
         with app.app_context():
             # Deactivate user
-            user_obj = models.User.query.get(user_email)
+            user_obj = models.db.session.get(models.User, user_email)
             user_obj.enabled = False
             models.db.session.commit()
 
@@ -151,7 +151,7 @@ class TestUserDeactivation:
                 assert resolved is None
 
             # Re-enable user
-            user_obj = models.User.query.get(user_email)
+            user_obj = models.db.session.get(models.User, user_email)
             user_obj.enabled = True
             models.db.session.commit()
 
@@ -178,7 +178,7 @@ class TestUserDeletion:
                 assert alias_obj is not None
 
             # Delete the user
-            user_obj = models.User.query.get(user_email)
+            user_obj = models.db.session.get(models.User, user_email)
             models.db.session.delete(user_obj)
             models.db.session.commit()
 
@@ -223,7 +223,7 @@ class TestUserDeletion:
             alias2_email = alias2.email
 
             # Delete first user
-            user1_obj = models.User.query.get(user1_email)
+            user1_obj = models.db.session.get(models.User, user1_email)
             models.db.session.delete(user1_obj)
             models.db.session.commit()
 

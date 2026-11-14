@@ -1,0 +1,1 @@
+Fix hardcoded light-theme colors in admin configuration blocks, disabled fields, address selectors, editor states, and secondary text by using the active theme's colors.

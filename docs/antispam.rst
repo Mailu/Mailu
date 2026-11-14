@@ -18,6 +18,29 @@ Rspamd rejects non-compliant email messages and email messages that contain viru
 
 * Email messages with a score of 3 or lower will be accepted.
 
+Quarantine and greylist copies are stored under ``/data/quarantine`` in
+two-character shard directories. New records use a BLAKE2s hash of the
+Message-ID, with separate namespaces for quarantine and greylisting. The first
+ten bits select the directory, encoded in lowercase base32. A generated ID is
+used when the Message-ID is missing or invalid, and for additional quarantined
+messages with the same ID. Such greylisted messages cannot be matched to a
+later retry and remain until deleted or expired. On the first start after upgrading, existing flat records are moved into
+shards before the admin service starts; old greylist IDs are recalculated, so
+links to those IDs change. The migration resumes if interrupted and startup
+fails if it encounters conflicting files. Stop older admin instances before
+the upgrade, and include the entire repository in backups.
+
+Rejected messages are retained in the quarantine for 90 days. Administrators can
+view all quarantined messages, while mailbox users can view messages addressed
+to them. Release submits the original message to Postfix through an internal
+reinjection listener, bypassing the original Rspamd decision while preserving
+normal mailbox, alias, forwarding, and relay routing. A bounded text preview
+is escaped before display; attachments are not rendered in the quarantine view.
+
+Rspamd's rejection thresholds remain configurable in the Rspamd WebUI. Lowering
+the spam rejection threshold causes more high-scoring messages to be quarantined
+instead of being accepted for delivery.
+
 1. When an email message is received or send by Postfix, it is scanned by Rspamd. If the email message receives a spam score between 6 and 15, a header is added to the email message with the spam score. This is an example of an email header for a spam score of 14::
 
     X-Spamd-Bar: ++++++++++++++
@@ -54,7 +77,7 @@ The location in the administration web interface where the spam filter and spam 
 Can I learn ham/spam messages from an already existing mailbox?
 ---------------------------------------------------------------
 
-Mailu supports automatic spam learning for email messages moved to the Junk Folder. Any email messages moved to the Junk Folder will be re-learned as spam, any email moved from the Junk Folder to any other folder (but the trash folder) will be re-learned as ham.
+Mailu supports automatic spam learning for email messages delivered or moved to the Junk Folder. Any email messages delivered to or moved to the Junk Folder will be re-learned as spam. Messages copied or delivered from the Junk Folder to any other folder (but the trash folder) will be re-learned as ham.
 
 If you already have an existing mailbox and want Mailu to learn them all as ham messages, you might run rspamc from within the dovecot container:
 
@@ -182,3 +205,41 @@ Now the file `overrides/rspamd/composites.conf` can be edited, to override the m
 For the changes to take effect, rspamd must be restarted.
 
 .. _`mraptor from oletools`: https://github.com/decalage2/oletools/wiki/mraptor
+
+Shared spam maps
+----------------
+
+Global administrators and domain administrators can manage shared spam lists
+from **Administration → Spam settings**. The page supports ARC signer domains,
+greylist IP and domain allowlists, URL regular expressions, sender domain
+allowlists and denylists, and URL redirector domains. These lists are served
+directly to Rspamd as maps and update without restarting the antispam service.
+
+Mailu keeps the configured upstream greylist allowlist feeds enabled and also
+loads ``/overrides/greylist-whitelist-domains.inc`` when that file exists. The
+upstream Rspamd redirector map is likewise kept alongside locally configured
+redirector domains.
+
+Pending greylist retries appear in the main quarantine table with a distinct
+highlight. Both rejected and greylisted copies use the same file-backed
+repository, with a record kind controlling their lifecycle: rejected messages
+are retained for 90 days and pending greylist retries for seven. Mailu
+temporarily saves a greylisted copy so an administrator can release it
+immediately through Postfix's internal reinjection listener. Rspamd retry scans are
+correlated by Message-ID; an accepted retry removes only the pending greylist
+record. Since a greylisted message was already temporarily rejected, the sender
+may still retry after an administrator releases the saved copy, which can result
+in a duplicate delivery.
+
+Releasing a message first submits it to Rspamd's ham learners, then injects it
+through a private Postfix SMTP listener. This bypasses a second Rspamd decision
+while allowing Postfix to apply the selected envelope recipients' normal alias,
+forwarding, mailbox, and relay routing.
+
+The same Spam settings page can enable quarantine summary emails and set a daily,
+weekly, or monthly cadence. Each enabled mailbox receives only the quarantined
+messages addressed to it. The default English HTML template includes links to
+each message; templates are sanitized before delivery and must contain the
+``quarantine_table`` placeholder. The Admin job checks hourly and sends a
+summary when its selected interval is due. Use **Send me a test** to send the current
+template to the signed-in administrator without saving it.

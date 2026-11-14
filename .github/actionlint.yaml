@@ -1,0 +1,5 @@
+paths:
+  .github/workflows/*.{yml,yaml}:
+    ignore:
+      # actionlint 1.7.12 predates the generally available Ubuntu 26.04 image.
+      - 'label "ubuntu-26\.04" is unknown'

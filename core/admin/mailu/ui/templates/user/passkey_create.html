@@ -1,0 +1,97 @@
+{%- extends "form.html" %}
+
+{%- block title %}{% trans %}Add a passkey{% endtrans %}{%- endblock %}
+{%- block subtitle %}{% if user.email != current_user.email %}{{ user }}{% endif %}{%- endblock %}
+
+{%- block main_action %}
+<a class="btn btn-outline-secondary float-end" href="{{ passkeys_url }}">{% trans %}Back to passkeys{% endtrans %}</a>
+{%- endblock %}
+
+{%- block content %}
+{%- call macros.card() %}
+{% if user.email == demo_account_email %}
+<div class="alert alert-info mb-0" role="alert">
+  {% trans %}Password changes and passkey creation are disabled for this user on the demo server. You can create other users to try these features.{% endtrans %}
+</div>
+{% else %}
+<p>{% trans %}Choose a name to identify this device in your passkey list.{% endtrans %}</p>
+<form id="passkey-enrollment-form">
+  <div class="mb-3">
+    <label class="form-label" for="passkey-name">{% trans %}New passkey name (required){% endtrans %}</label>
+    <div class="input-group">
+      <span class="input-group-text"><i class="fa-solid fa-tag" aria-hidden="true"></i></span>
+      <input class="form-control" id="passkey-name" name="name" type="text" maxlength="255" autocomplete="off" aria-describedby="passkey-name-help" required value="{% trans %}New passkey{% endtrans %}">
+    </div>
+    <div class="form-text" id="passkey-name-help">{% trans %}For example, your phone or laptop.{% endtrans %}</div>
+  </div>
+  <button class="btn btn-primary" id="add-passkey" type="submit"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>{% trans %}Add passkey{% endtrans %}</button>
+</form>
+<div id="passkey-error" class="alert alert-danger mt-3 d-none" role="alert" aria-live="polite"></div>
+<script>
+(() => {
+  const decode = value => Uint8Array.from(atob(value.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+  const encode = value => btoa(String.fromCharCode(...new Uint8Array(value))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const button = document.getElementById('add-passkey');
+  const enrollmentForm = document.getElementById('passkey-enrollment-form');
+  const nameField = document.getElementById('passkey-name');
+  const optionsUrl = {{ passkey_options_url | tojson }};
+  const registerUrl = {{ passkey_register_url | tojson }};
+  const passkeysUrl = {{ passkeys_url | tojson }};
+  const originalLabel = button.textContent;
+  const responseJson = async (response, action) => {
+    let data;
+    try { data = await response.json(); }
+    catch (_) { throw new Error(`${action} failed: server returned HTTP ${response.status}, not JSON. Contact your administrator if this repeats.`); }
+    if (!response.ok) throw new Error(data.error || `${action} failed (HTTP ${response.status}).`);
+    return data;
+  };
+  enrollmentForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    const name = nameField.value.trim();
+    if (!name) {
+      nameField.focus();
+      nameField.reportValidity();
+      return;
+    }
+    const error = document.getElementById('passkey-error');
+    error.textContent = '';
+    error.classList.add('d-none');
+    button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
+    button.textContent = 'Waiting for your authenticator...';
+    try {
+      const start = await fetch(optionsUrl, {method: 'POST'});
+      const options = await responseJson(start, 'Could not start passkey registration');
+      options.challenge = decode(options.challenge);
+      options.user.id = decode(options.user.id);
+      if (options.excludeCredentials) options.excludeCredentials = options.excludeCredentials.map(item => ({...item, id: decode(item.id)}));
+      const credential = await navigator.credentials.create({publicKey: options});
+      const response = await fetch(registerUrl, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          id: credential.id, rawId: encode(credential.rawId), type: credential.type, name,
+          response: {
+            attestationObject: encode(credential.response.attestationObject),
+            clientDataJSON: encode(credential.response.clientDataJSON),
+            transports: credential.response.getTransports ? credential.response.getTransports() : []
+          }
+        })
+      });
+      const result = await responseJson(response, 'Passkey registration failed');
+      window.location.assign(result.redirect || passkeysUrl);
+    } catch (e) {
+      error.textContent = e.name === 'NotAllowedError'
+        ? 'Passkey setup was cancelled or timed out. Start again and complete the prompt on your device.'
+        : (e.message || 'Passkey registration failed.');
+      error.classList.remove('d-none');
+    } finally {
+      button.disabled = false;
+      button.removeAttribute('aria-busy');
+      button.textContent = originalLabel;
+    }
+  });
+})();
+</script>
+{% endif %}
+{%- endcall %}
+{%- endblock %}

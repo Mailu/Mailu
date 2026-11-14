@@ -1,0 +1,65 @@
+{%- extends "base.html" %}
+
+{%- block title %}{% trans %}Passkeys{% endtrans %}{%- endblock %}
+{%- block subtitle %}{% if user.email != current_user.email %}{{ user }}{% endif %}{%- endblock %}
+{%- block main_action %}
+{% if user.email != demo_account_email %}
+<a class="btn btn-primary float-end" href="{{ url_for('.passkey_create', user_email=user.email if user.email != current_user.email else None) }}">{% if required_enrollment %}{% trans %}Set up a passkey{% endtrans %}{% else %}{% trans %}New passkey{% endtrans %}{% endif %}</a>
+{% endif %}
+{%- endblock %}
+
+{%- block content %}
+{% if required_enrollment %}
+<div class="alert alert-info" role="alert">
+  {% trans %}Your administrator requires a passkey before you can continue. Add one now to finish signing in.{% endtrans %}
+</div>
+{% endif %}
+<p class="small text-body-secondary">{% trans %}Details reflect the latest WebAuthn registration or sign-in. Older passkeys may not have all details recorded.{% endtrans %}</p>
+{%- call macros.table(order='[[1,"asc"]]') %}
+<thead>
+  <tr>
+    <th data-orderable="false">{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}Passkey{% endtrans %}</th>
+    <th>{% trans %}Created{% endtrans %}</th>
+    <th>{% trans %}Last used{% endtrans %}</th>
+    <th>{% trans %}User present{% endtrans %}</th>
+    <th>{% trans %}User verified{% endtrans %}</th>
+    <th>{% trans %}Device type{% endtrans %}</th>
+    <th>{% trans %}Backup eligible{% endtrans %}</th>
+    <th>{% trans %}Backed up{% endtrans %}</th>
+    <th>{% trans %}Device-bound{% endtrans %}</th>
+    <th>{% trans %}Attestation{% endtrans %}</th>
+    <th>{% trans %}Signature counter{% endtrans %}</th>
+    <th>{% trans %}Authenticator ID (AAGUID){% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
+  {%- for passkey, credential_id in passkeys %}
+  <tr>
+    <td>
+      <a href="{{ url_for('.passkey_delete', user_email=user.email, credential_id=credential_id) }}" title="{% trans %}Delete{% endtrans %}" aria-label="{% trans %}Delete{% endtrans %}"><i class="fa-solid fa-trash" aria-hidden="true"></i></a>
+    </td>
+    <th scope="row">{{ passkey.name or _('Passkey') }}</th>
+    <td class="text-nowrap">{{ passkey.created_at | format_date }}</td>
+    <td class="text-nowrap">{{ passkey.last_used_at | format_datetime if passkey.last_used_at else _('Never') }}</td>
+    <td>{% if passkey.user_present is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.user_present %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+    <td>{% if passkey.user_verified is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.user_verified %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+    <td>{% if passkey.credential_device_type == 'single_device' %}{% trans %}Single-device{% endtrans %}{% elif passkey.credential_device_type == 'multi_device' %}{% trans %}Multi-device{% endtrans %}{% else %}{% trans %}Unknown{% endtrans %}{% endif %}</td>
+    <td>{% if passkey.backup_eligible is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.backup_eligible %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+    <td>{% if passkey.backed_up is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.backed_up %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+    <td>{% if passkey.device_bound is none %}{% trans %}Unknown{% endtrans %}{% elif passkey.device_bound %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+    <td class="text-nowrap">{{ passkey.attestation_format or _('Unknown') }}</td>
+    <td class="text-end">{{ passkey.sign_count }}</td>
+    <td class="font-monospace small text-break">{{ passkey.aaguid }}</td>
+  </tr>
+  {%- else %}
+  <tr><td colspan="13" class="text-body-secondary">{% trans %}No passkeys registered{% endtrans %}</td></tr>
+  {%- endfor %}
+</tbody>
+{%- endcall %}
+{% if user.email == demo_account_email %}
+<div class="alert alert-info mb-0" role="alert">
+  {% trans %}Password changes and passkey creation are disabled for this user on the demo server. You can create other users to try these features.{% endtrans %}
+</div>
+{% endif %}
+{%- endblock %}

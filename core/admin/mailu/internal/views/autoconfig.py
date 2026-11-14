@@ -1,16 +1,47 @@
 from mailu.internal import internal
+from mailu.oauth2 import auth_url, issuer, token_url
 
+from xml.etree import ElementTree as ET
+from xml.sax.saxutils import escape, quoteattr
+from urllib.parse import urlsplit
 from flask import current_app as app
 import flask
-import xmltodict
+
+
+def oauth2_xml():
+    return f'''<oAuth2>
+<issuer>{escape(issuer())}</issuer>
+<authURL>{escape(auth_url())}</authURL>
+<tokenURL>{escape(token_url())}</tokenURL>
+<scope>{escape(app.config['OAUTH2_SCOPE'])}</scope>
+<clientID>{escape(app.config['OAUTH2_CLIENT_ID'])}</clientID>
+</oAuth2>'''
+
+
+def configured_hostname():
+    return escape(urlsplit(issuer()).hostname or app.config['HOSTNAME'])
+
 
 @internal.route("/autoconfig/mozilla")
 def autoconfig_mozilla():
     # https://wiki.mozilla.org/Thunderbird:Autoconfiguration:ConfigFileFormat
-    hostname = app.config['HOSTNAME']
+    hostname = configured_hostname()
+    webdav_xml = ''
+    if app.config['WEBDAV'] == 'radicale':
+        scheme = 'http' if app.config['TLS_FLAVOR'] == 'notls' else 'https'
+        webdav_xml = f'''<addressBook type="carddav">
+<username>%EMAILADDRESS%</username>
+<authentication>http-basic</authentication>
+<serverURL>{scheme}://{hostname}/webdav/</serverURL>
+</addressBook>
+<calendar type="caldav">
+<username>%EMAILADDRESS%</username>
+<authentication>http-basic</authentication>
+<serverURL>{scheme}://{hostname}/webdav/</serverURL>
+</calendar>'''
     xml = f'''<?xml version="1.0"?>
 <clientConfig version="1.1">
-<emailProvider id="%EMAILDOMAIN%">
+<emailProvider id="{hostname}">
 <domain>%EMAILDOMAIN%</domain>
 
 <displayName>Email</displayName>
@@ -21,6 +52,7 @@ def autoconfig_mozilla():
 <port>993</port>
 <socketType>SSL</socketType>
 <username>%EMAILADDRESS%</username>
+<authentication>OAuth2</authentication>
 <authentication>password-cleartext</authentication>
 </incomingServer>
 
@@ -29,6 +61,7 @@ def autoconfig_mozilla():
 <port>465</port>
 <socketType>SSL</socketType>
 <username>%EMAILADDRESS%</username>
+<authentication>OAuth2</authentication>
 <authentication>password-cleartext</authentication>
 <addThisServer>true</addThisServer>
 <useGlobalPreferredServer>false</useGlobalPreferredServer>
@@ -38,6 +71,59 @@ def autoconfig_mozilla():
 <descr lang="en">Configure your email client</descr>
 </documentation>
 </emailProvider>
+{webdav_xml}
+</clientConfig>\r\n'''
+    return flask.Response(xml, mimetype='text/xml', status=200)
+
+
+@internal.route("/autoconfig/client")
+def autoconfig_client():
+    """Return the draft -07 AutoConfig format at its well-known URL."""
+    hostname = configured_hostname()
+    scheme = 'http' if app.config['TLS_FLAVOR'] == 'notls' else 'https'
+    webdav_xml = ''
+    if app.config['WEBDAV'] == 'radicale':
+        webdav_url = f'{scheme}://{hostname}/webdav/'
+        webdav_xml = f'''<addressbook type="carddav">
+<url>{webdav_url}</url>
+<authentication system="http">Basic</authentication>
+<username>%EMAILADDRESS%</username>
+</addressbook>
+<calendar type="caldav">
+<url>{webdav_url}</url>
+<authentication system="http">Basic</authentication>
+<username>%EMAILADDRESS%</username>
+</calendar>'''
+    xml = f'''<?xml version="1.0" encoding="UTF-8"?>
+<clientConfig version="1.2">
+<emailProvider id="{hostname}">
+<displayName>Email</displayName>
+<displayShortName>Email</displayShortName>
+
+<incomingServer type="imap">
+<hostname>{hostname}</hostname>
+<port>993</port>
+<socketType>SSL</socketType>
+<authentication>OAuth2</authentication>
+<authentication>password-cleartext</authentication>
+<username>%EMAILADDRESS%</username>
+</incomingServer>
+
+<outgoingServer type="smtp">
+<hostname>{hostname}</hostname>
+<port>465</port>
+<socketType>SSL</socketType>
+<authentication>OAuth2</authentication>
+<authentication>password-cleartext</authentication>
+<username>%EMAILADDRESS%</username>
+</outgoingServer>
+
+<documentation url="https://{hostname}/admin/client">
+<descr lang="en">Configure your email client</descr>
+</documentation>
+</emailProvider>
+{webdav_xml}
+{oauth2_xml()}
 </clientConfig>\r\n'''
     return flask.Response(xml, mimetype='text/xml', status=200)
 
@@ -51,46 +137,82 @@ def autoconfig_microsoft_json():
     else:
         return flask.abort(404)
 
-@internal.route("/autoconfig/microsoft", methods=['POST'])
+@internal.route("/autoconfig/microsoft", methods=["POST"])
 def autoconfig_microsoft():
-    # https://docs.microsoft.com/en-us/previous-versions/office/office-2010/cc511507(v=office.14)?redirectedfrom=MSDN#Anchor_3
-    hostname = app.config['HOSTNAME']
+    hostname = escape(app.config["HOSTNAME"])
     try:
-        xmlRequest = (flask.request.data).decode("utf-8")
-        xml = xmltodict.parse(xmlRequest[xmlRequest.find('<'):xmlRequest.rfind('>')+1])
-        schema = xml['Autodiscover']['Request']['AcceptableResponseSchema']
-        if not schema.startswith('http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006'):
+        root = ET.fromstring(flask.request.data)
+
+        # Autodiscover requests normally use this namespace, so strip
+        # namespaces when looking for the two Request children we need.
+        request = next(
+            element
+            for element in root
+            if element.tag.rsplit("}", 1)[-1] == "Request"
+        )
+
+        schema_element = next(
+            element
+            for element in request
+            if element.tag.rsplit("}", 1)[-1] == "AcceptableResponseSchema"
+        )
+        email_element = next(
+            element
+            for element in request
+            if element.tag.rsplit("}", 1)[-1] == "EMailAddress"
+        )
+
+        schema = schema_element.text or ""
+        email = email_element.text or ""
+        if not schema.startswith(
+            "http://schemas.microsoft.com/exchange/autodiscover/"
+            "outlook/responseschema/2006"
+        ):
             return flask.abort(404)
-        email = xml['Autodiscover']['Request']['EMailAddress']
-        xml = f'''<?xml version="1.0" encoding="utf-8" ?>
-    <Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006">
-        <Response xmlns="{schema}">
-            <Account>
-            <AccountType>email</AccountType>
-            <Action>settings</Action>
-            <Protocol>
-                <Type>IMAP</Type>
-                <Server>{hostname}</Server>
-                <Port>993</Port>
-                <LoginName>{email}</LoginName>
-                <DomainRequired>on</DomainRequired>
-                <SPA>off</SPA>
-                <SSL>on</SSL>
-            </Protocol>
-            <Protocol>
-                <Type>SMTP</Type>
-                <Server>{hostname}</Server>
-                <Port>465</Port>
-                <LoginName>{email}</LoginName>
-                <DomainRequired>on</DomainRequired>
-                <SPA>off</SPA>
-                <SSL>on</SSL>
-                </Protocol>
-            </Account>
-        </Response>
-    </Autodiscover>'''
-        return flask.Response(xml, mimetype='text/xml', status=200)
-    except:
+
+        schema = quoteattr(schema)
+        email = escape(email)
+        webdav_protocol = ''
+        if app.config['WEBDAV'] == 'radicale':
+            scheme = 'http' if app.config['TLS_FLAVOR'] == 'notls' else 'https'
+            webdav_protocol = f'''<Protocol>
+            <Type>DAV</Type>
+            <Server>{scheme}://{hostname}/webdav/</Server>
+            <LoginName>{email}</LoginName>
+            <DomainRequired>on</DomainRequired>
+            <SPA>off</SPA>
+            <SSL>{'off' if scheme == 'http' else 'on'}</SSL>
+        </Protocol>'''
+        xml = f"""<?xml version="1.0" encoding="utf-8" ?>
+<Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006">
+    <Response xmlns={schema}>
+        <Account>
+        <AccountType>email</AccountType>
+        <Action>settings</Action>
+        <Protocol>
+            <Type>IMAP</Type>
+            <Server>{hostname}</Server>
+            <Port>993</Port>
+            <LoginName>{email}</LoginName>
+            <DomainRequired>on</DomainRequired>
+            <SPA>off</SPA>
+            <SSL>on</SSL>
+        </Protocol>
+        <Protocol>
+            <Type>SMTP</Type>
+            <Server>{hostname}</Server>
+            <Port>465</Port>
+            <LoginName>{email}</LoginName>
+            <DomainRequired>on</DomainRequired>
+            <SPA>off</SPA>
+            <SSL>on</SSL>
+        </Protocol>
+        {webdav_protocol}
+        </Account>
+    </Response>
+</Autodiscover>"""
+        return flask.Response(xml, mimetype="text/xml", status=200)
+    except (ET.ParseError, KeyError, StopIteration):
         return flask.abort(400)
 
 @internal.route("/autoconfig/apple")
@@ -98,6 +220,38 @@ def autoconfig_apple():
     # https://developer.apple.com/business/documentation/Configuration-Profile-Reference.pdf
     hostname = app.config['HOSTNAME']
     sitename = app.config['SITENAME']
+    webdav_payloads = ''
+    if app.config['WEBDAV'] == 'radicale':
+        scheme = 'http' if app.config['TLS_FLAVOR'] == 'notls' else 'https'
+        use_ssl = '<false/>' if scheme == 'http' else '<true/>'
+        webdav_payloads = f'''<dict>
+<key>CardDAVAccountDescription</key><string>{escape(sitename)}</string>
+<key>CardDAVHostName</key><string>{escape(hostname)}</string>
+<key>CardDAVUsername</key><string></string>
+<key>CardDAVUseSSL</key>{use_ssl}
+<key>CardDAVPrincipalURL</key><string>{scheme}://{escape(hostname)}/webdav/</string>
+<key>PayloadType</key><string>com.apple.carddav.account</string>
+<key>PayloadVersion</key><integer>1</integer>
+<key>PayloadUUID</key><string>c1add9d6-d83a-4bdc-9ed4-5a47e3f3203e</string>
+<key>PayloadIdentifier</key><string>{escape(hostname)}.carddav</string>
+<key>PayloadDisplayName</key><string>{escape(hostname)}</string>
+<key>PayloadDescription</key><string>{escape(sitename)}</string>
+<key>PayloadOrganization</key><string></string>
+</dict>
+<dict>
+<key>CalDAVAccountDescription</key><string>{escape(sitename)}</string>
+<key>CalDAVHostName</key><string>{escape(hostname)}</string>
+<key>CalDAVUsername</key><string></string>
+<key>CalDAVUseSSL</key>{use_ssl}
+<key>CalDAVPrincipalURL</key><string>{scheme}://{escape(hostname)}/webdav/</string>
+<key>PayloadType</key><string>com.apple.caldav.account</string>
+<key>PayloadVersion</key><integer>1</integer>
+<key>PayloadUUID</key><string>6a453a88-a3ae-45f1-a47c-8db8c146164b</string>
+<key>PayloadIdentifier</key><string>{escape(hostname)}.caldav</string>
+<key>PayloadDisplayName</key><string>{escape(hostname)}</string>
+<key>PayloadDescription</key><string>{escape(sitename)}</string>
+<key>PayloadOrganization</key><string></string>
+</dict>'''
     xml = f'''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -161,6 +315,7 @@ def autoconfig_apple():
 <key>disableMailRecentsSyncing</key>
 <false/>
 </dict>
+{webdav_payloads}
 </array>
 <key>PayloadDescription</key>
 <string>{hostname} - E-Mail Account Configuration</string>

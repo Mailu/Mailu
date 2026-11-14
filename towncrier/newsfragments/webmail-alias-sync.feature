@@ -1,0 +1,1 @@
+Roundcube synchronizes eligible Mailu aliases as sender identities after returning the SSO login redirect, so the inbox can load while synchronization finishes. SnappyMail uses the account address as its default sender and adds a link to Mailu account management.

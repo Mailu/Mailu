@@ -1,15 +1,36 @@
+import base64
+import hashlib
 import hmac
 import logging as log
 import os
 import signal
 import sys
-import re
 from pwd import getpwnam
 import socket
 import tenacity
-import subprocess
-import threading
-import time
+
+
+def mailbox_shard(address: str) -> str:
+    """Return the shared two-character storage shard for a stable key."""
+    digest = hashlib.blake2s(
+        address.encode("utf-8"), digest_size=2
+    ).digest()
+    return base64.b32encode(digest).decode("ascii")[:2].lower()
+
+
+def parse_bool(value, default=None):
+    """Parse common boolean spellings, returning default for other values."""
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return default
+    normalized = str(value).strip().lower()
+    if normalized in ('1', 'true', 'yes', 'on'):
+        return True
+    if normalized in ('0', 'false', 'no', 'off'):
+        return False
+    return default
+
 
 @tenacity.retry(stop=tenacity.stop_after_attempt(100),
                 wait=tenacity.wait_random(min=2, max=5))
@@ -24,38 +45,7 @@ def resolve_hostname(hostname):
         raise e
 
 def _coerce_value(value):
-    if isinstance(value, str) and value.lower() in ('true','yes'):
-        return True
-    elif isinstance(value, str) and value.lower() in ('false', 'no'):
-        return False
-    return value
-
-class LogFilter(object):
-    def __init__(self, stream, re_patterns):
-        self.stream  = stream
-        self.pattern = re.compile(b'|'.join([b''.join([b'(?:', pattern, b')']) for pattern in re_patterns]))
-        self.buffer  = b''
-
-    def __getattr__(self, attr_name):
-        return getattr(self.stream, attr_name)
-
-    def write(self, data):
-        if type(data) is str:
-            data = data.encode('utf-8')
-        self.buffer += data
-        while b'\n' in self.buffer:
-            line, cr, rest = self.buffer.partition(b'\n')
-            if not self.pattern.search(line):
-                self.stream.buffer.write(line)
-                self.stream.buffer.write(cr)
-                self.stream.flush()
-            self.buffer = rest
-
-    def flush(self):
-        # write out buffer on flush even if it's not a complete line
-        if self.buffer and not self.pattern.search(self.buffer):
-            self.stream.buffer.write(self.buffer)
-        self.stream.flush()
+    return parse_bool(value, value)
 
 def _is_compatible_with_hardened_malloc():
     with open('/proc/version', 'r') as f:
@@ -80,10 +70,7 @@ def sigterm_handler(_signo, _stack_frame):
     log.critical("Received SIGTERM, terminating.")
     sys.exit(143)
 
-def set_env(required_secrets=[], log_filters=[]):
-    if log_filters:
-        sys.stdout = LogFilter(sys.stdout, log_filters)
-        sys.stderr = LogFilter(sys.stderr, log_filters)
+def set_env(required_secrets=[]):
     log.basicConfig(stream=sys.stderr, level=os.environ.get("LOG_LEVEL", 'WARNING'))
     signal.signal(signal.SIGTERM, sigterm_handler)
 
@@ -108,8 +95,6 @@ def set_env(required_secrets=[], log_filters=[]):
     # derive the keys we need
     for secret in required_secrets:
         os.environ[f'{secret}_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray(secret, 'utf-8'), 'sha256').hexdigest()
-
-    os.system(r'find /run -xdev -type f -name \*.pid -print -delete')
 
     return {
             key: _coerce_value(os.environ.get(key, value))
@@ -137,7 +122,7 @@ def clean_env():
         elif item == '':
             pass
         else:
-            log.error(f'Not sure what to do with {item} in PROXY_PROTOCOL ({args.get("PROXY_PROTOCOL")})')
+            log.error(f'Not sure what to do with {item} in PROXY_PROTOCOL ({os.environ.get("PROXY_PROTOCOL")})')
 
     PORTS_REQUIRING_TLS=['443', '465', '993', '995']
     ALL_PORTS='25,80,443,465,993,995,4190'
@@ -153,39 +138,9 @@ def clean_env():
     if 'CPU_COUNT' not in os.environ:
         os.environ['CPU_COUNT'] = str(os.cpu_count())
 
-def drop_privs_to(username='mailu'):
+def drop_privs_to(username='mailu', supplementary_groups=None):
     pwnam = getpwnam(username)
-    os.setgroups([])
+    os.setgroups(supplementary_groups or [])
     os.setgid(pwnam.pw_gid)
     os.setuid(pwnam.pw_uid)
     os.environ['HOME'] = pwnam.pw_dir
-
-# forwards text lines from src to dst in an infinite loop
-def forward_text_lines(src, dst):
-    while True:
-        current_line = src.readline()
-        if not current_line:
-            return
-        dst.write(current_line)
-
-
-# runs a process and passes its standard/error output to the standard/error output of the current python script
-def run_process_and_forward_output(cmd):
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, errors='replace')
-
-    stdout_thread = threading.Thread(target=forward_text_lines, args=(process.stdout, sys.stdout))
-    stdout_thread.daemon = True
-    stdout_thread.start()
-
-    stderr_thread = threading.Thread(target=forward_text_lines, args=(process.stderr, sys.stderr))
-    stderr_thread.daemon = True
-    stderr_thread.start()
-
-    while True:
-        rc = process.poll()
-        if rc is not None or threading.active_count() < 3:
-            sys.stdout.flush()
-            sys.stderr.flush()
-            os._exit(rc if rc > 0 else 143)
-
-        time.sleep(1)

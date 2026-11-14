@@ -92,13 +92,15 @@ Anything that is static should be managed using environment variables.
 Configuration files should be compiled at runtime by the container `start.py`
 script and all conditional syntax should be handled using Jinja logic.
 
-The `socrate` Python package should include relevant functions for container
-life-cycle management.
+The `socrate` Python package should include relevant functions for
+container life-cycle management.
 
 Anything that is not static, i.e. able to change at runtime, either due to
 configuration in the admin UI or user behavior, should take advantage of the
-admin API. The `podop` package binds mail specific software (Postfix and Dovecot
-at the moment) to the admin API, other containers should use specific API calls.
+admin API. The `podop` package binds mail specific software to the admin API
+(Postfix, and Dovecot's quota and sieve dictionaries); Dovecot's authentication
+queries the admin API directly from a lua script. Other containers should use
+specific API calls.
 
 What traffic should go through the nginx container
 ``````````````````````````````````````````````````

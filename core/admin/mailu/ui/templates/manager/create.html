@@ -10,9 +10,10 @@
 
 {%- block content %}
 {%- call macros.card() %}
-<form class="form" method="post" role="form">
-  {{ form.hidden_tag() }}
-  {{ macros.form_field(form.manager, class_='mailselect') }}
+<form class="form" method="post" role="form" autocomplete="off">
+  {{ form.hidden_tag() }}{{ macros.form_errors(form) }}
+  <p class="text-body-secondary">{{ _('Search for accounts by email or display name. Select several accounts to add them together.') }}</p>
+  {{ macros.form_field(form.manager, class_='mailu-user-picker') }}
   {{ macros.form_field(form.submit) }}
 </form>
 {%- endcall %}

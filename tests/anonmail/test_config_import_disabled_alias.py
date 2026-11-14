@@ -20,6 +20,15 @@ def _update_import(source):
     models.db.session.commit()
 
 
+def test_context_is_propagated_to_nested_schemas():
+    context = {'import': True, 'update': True}
+    schema = MailuSchema(context=context)
+
+    user_schema = schema.fields['user'].schema
+    assert user_schema.context is context
+    assert user_schema.fields['tokens'].schema.context is context
+
+
 def test_update_import_omitting_disabled_keeps_alias_disabled(app):
     with app.app_context():
         models.db.session.add(models.Domain(name='example.com'))

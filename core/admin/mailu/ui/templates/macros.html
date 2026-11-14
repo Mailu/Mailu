@@ -1,3 +1,33 @@
+{%- macro color_mode_init() %}
+  <script>
+    // Apply before styles load to avoid a light flash. AdminLTE handles toggling.
+    (() => {
+      let theme = 'auto';
+      try {
+        const stored = localStorage.getItem('lte-theme');
+        if (['light', 'dark', 'auto'].includes(stored)) theme = stored;
+        localStorage.setItem('lte-theme', theme);
+      } catch (_) {}
+      document.documentElement.dataset.bsTheme = theme === 'auto'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme;
+      document.documentElement.setAttribute('data-lte-theme-resolved', '');
+    })();
+  </script>
+{%- endmacro %}
+
+{%- macro color_mode_toggle() %}
+  <div class="dropdown">
+    <button class="btn btn-link text-body mailu-icon-control" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ _('Appearance') }}" title="{{ _('Appearance') }}">
+      <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>
+    </button>
+    <div class="dropdown-menu dropdown-menu-end">
+      <button class="dropdown-item" type="button" data-bs-theme-value="light" aria-pressed="false">{{ _('Light') }}</button>
+      <button class="dropdown-item" type="button" data-bs-theme-value="dark" aria-pressed="false">{{ _('Dark') }}</button>
+      <button class="dropdown-item" type="button" data-bs-theme-value="auto" aria-pressed="false">{{ _('System') }}</button>
+    </div>
+  </div>
+{%- endmacro %}
+
 {%- macro form_errors(form) %}
   {%- if form.errors %}
     {%- for fieldname, errors in form.errors.items() %}
@@ -13,17 +43,17 @@
 {%- macro form_field_errors(field) %}
   {%- if field.errors %}
     {%- for error in field.errors %}
-      <p class="form-text text-danger">{{ error }}</p>
+      <p class="form-text text-danger" id="{{ field.id }}-error-{{ loop.index }}">{{ error }}</p>
     {%- endfor %}
   {%- endif %}
 {%- endmacro %}
 
 {%- macro form_fields(fields, prepend='', append='', label=True) %}
   {%- set width = (12 / fields|length)|int %}
-  <div class="form-group">
+  <div class="mb-3">
     <div class="row">
       {%- for field in fields %}
-      <div class="col-lg-{{ width }} col-xs-12">
+      <div class="col-lg-{{ width }} col-12">
         {%- if field.__class__.__name__ == 'list' %}
           {%- for subfield in field %}
             {{ form_individual_field(subfield, prepend=prepend, append=append, label=label, **kwargs) }}
@@ -38,12 +68,19 @@
 {%- endmacro %}
 
 {%- macro form_individual_field(field, prepend='', append='', label=True, class_="") %}
-  {%- set fieldclass=" ".join(["form-control"] + ([class_] if class_ else []) + (["is-invalid"] if field.errors else [])) %}
+  {%- if field.errors %}
+    {%- set _ = kwargs.update({'aria-invalid': 'true', 'aria-describedby': field.id ~ '-error-1'}) %}
+  {%- endif %}
+  {%- set fieldclass=" ".join(["form-range" if field.widget.input_type|default("") == "range" else ("form-select" if field.widget.__class__.__name__ == "Select" else "form-control")] + ([class_] if class_ else []) + (["is-invalid"] if field.errors else [])) %}
   {%- if field.type == "BooleanField" %}
-    {{ field(**kwargs) }}<span>&nbsp;&nbsp;</span>{{ field.label if label else '' }}
+    <div class="form-check{% if class_ %} {{ class_ }}{% endif %}">
+      {{ field(class_="form-check-input" + (" is-invalid" if field.errors else ""), **kwargs) }}
+      {{ field.label(class_="form-check-label") if label else '' }}
+      {{ form_field_errors(field) }}
+    </div>
   {%- else %}
     {{ field.label if label else '' }}{{ form_field_errors(field) }}
-    {%- if prepend %}<div class="input-group-prepend">{%- elif append %}<div class="input-group-append">{%- endif %}
+    {%- if prepend or append %}<div class="input-group">{%- endif %}
       {{ prepend|safe }}{{ field(class_=fieldclass, **kwargs) }}{{ append|safe }}
     {%- if prepend or append %}</div>{%- endif %}
   {%- endif %}
@@ -51,20 +88,38 @@
 
 {%- macro form_field(field) %}
   {%- if field.type == 'SubmitField' %}
-  {{- form_fields((field,), label=False, class="btn btn-default", **kwargs) }}
+  {{- form_fields((field,), label=False, class="btn btn-primary", **kwargs) }}
   {%- else %}
   {{- form_fields((field,), **kwargs) }}
   {%- endif %}
 {%- endmacro %}
 
-{%- macro form(form) %}
+{%- macro quota_unit_selector(selected_unit=1000000000) %}
+  <select class="form-select" data-quota-unit aria-label="{{ _('Quota unit') }}">
+    <option value="1000000"{% if selected_unit == 1000000 %} selected{% endif %}>MB</option>
+    <option value="1000000000"{% if selected_unit == 1000000000 %} selected{% endif %}>GB</option>
+  </select>
+{%- endmacro %}
+
+{%- macro quota_amount_input(field_id, value) %}
+  <input type="number" id="{{ field_id }}_value" class="form-control quota-amount" data-quota-value
+      min="0" step="1" value="{{ value }}" aria-label="{{ _('Quota amount; enter 0 for unlimited') }}">
+{%- endmacro %}
+
+{%- macro quota_unlimited_note() %}
+  <small class="form-text text-body-secondary">{{ _('0 means unlimited.') }}</small>
+{%- endmacro %}
+
+{%- macro form(form, cancel=True) %}
 <form class="form" method="post" role="form">
   {{ form.hidden_tag() }}
+  {{ form_errors(form) }}
   {%- for field in form %}
     {%- if not bootstrap_is_hidden_field(field) %}
       {{ form_field(field) }}
     {%- endif %}
   {%- endfor %}
+  {% if cancel %}<a class="btn btn-outline-secondary" href="{{ path[-1][1] if path is defined and path and path[-1][1] else url_for('ui.index') }}">{{ _('Cancel') }}</a>{% endif %}
 </form>
 {%- endmacro %}
 
@@ -87,7 +142,7 @@
 </div>
 {%- endmacro %}
 
-{%- macro table(title=None, theme="primary", datatable=True, order=None) %}
+{%- macro table(title=None, theme="primary", datatable=True, order=None, class_="") %}
 <div class="row">
   <div class="col-lg-12">
     <div class="card card-outline card-{{ theme }}">
@@ -97,7 +152,16 @@
       </div>
       {%- endif %}
       <div class="card-body">
-        <table class="table table-bordered{% if datatable %} dataTable{% endif %}" data-order="{{ order or '[]' | e }}">
+        <table class="table table-bordered{% if datatable %} mailu-table{% endif %} {{ class_ }}"
+          data-order="{{ order or '[]' | e }}"
+          data-search="{{ _('Search') }}"
+          data-length-menu="{{ _('Show _MENU_ entries') }}"
+          data-empty="{{ _('No matching records found') }}"
+          data-no-records="{{ _('No records yet') }}"
+          data-clear="{{ _('Clear search') }}"
+          data-results="{{ _('_START_–_END_ of _TOTAL_ records') }}"
+          data-previous="{{ _('Previous') }}"
+          data-next="{{ _('Next') }}">
           {{- caller() }}
         </table>
       </div>
@@ -106,27 +170,22 @@
 </div>
 {%- endmacro %}
 
-{%- macro fieldset(title=None, field=None, enabled=None, fields=None) %}
-{%- if field or title %}
-<fieldset{% if not enabled %} disabled{% endif %}>
+{%- macro fieldset(title=None, field=None, enabled=None, fields=None, class_="") %}
 {%- if field %}
-<legend>{{ form_individual_field(field) }}</legend>
-{%- else %}
-<legend>{{ title }}</legend>
+{{ form_field(field, class_=class_) }}
+{%- set enabled = field.data %}
 {%- endif %}
-{%- endif %}
+<fieldset{% if field %} data-toggle-field="{{ field.id }}"{% endif %}{% if not enabled %} disabled{% endif %}>
+{% if title %}<legend>{{ title }}</legend>{% endif %}
 {{- caller() }}
-{%- if fields %}
-  {%- set kwargs = {"enabled" if enabled else "disabled": ""} %}
-  {%- for field in fields %}
-    {{ form_field(field, **kwargs) }}
-  {%- endfor %}
-{%- endif %}
+{%- for dependent in fields or [] %}
+  {{ form_field(dependent) }}
+{%- endfor %}
 </fieldset>
 {%- endmacro %}
 
-{%- macro clip(target, title=_("copy to clipboard"), icon="copy", color="primary", action="copy") %}
-<button class="btn btn-{{ color }} btn-xs btn-clip float-right ml-2 mt-1" data-clipboard-action="{{ action }}" data-clipboard-target="#{{ target }}">
-<i class="fas fa-{{ icon }}" title="{{ title }}" aria-expanded="false"></i><span class="sr-only">{{ title }}</span>
+{%- macro clip(target, title=_("copy to clipboard"), icon="copy", color="primary") %}
+<button type="button" class="btn btn-{{ color }} btn-sm btn-clip float-end ms-2 mt-1" data-clipboard-target="#{{ target }}">
+<i class="fa-solid fa-{{ icon }}" title="{{ title }}"></i><span class="visually-hidden">{{ title }}</span>
 </button>
 {%- endmacro %}

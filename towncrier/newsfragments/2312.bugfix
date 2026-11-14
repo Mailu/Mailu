@@ -1,0 +1,1 @@
+Disable temporary response files in the front proxy and webmail FastCGI server, retaining in-memory buffering without repeated disk-buffering warnings.

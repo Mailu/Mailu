@@ -1,0 +1,1 @@
+Shorten the ECDSA chain presented by front TLS services by default, with the ``LETSENCRYPT_SHORTCHAIN`` setting available to restore Certbot's full chain. Continue to offer the RSA chain for compatibility.

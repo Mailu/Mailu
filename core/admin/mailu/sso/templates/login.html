@@ -3,3 +3,204 @@
 {%- block title %}
 {% trans %}Sign in{% endtrans %}
 {%- endblock %}
+
+{%- block extra_login_options %}
+<span class="text-body-secondary small text-center">{{ _('or') }}</span>
+<button class="passkey-login btn btn-outline-primary" type="button"><i class="fa-solid fa-key me-1" aria-hidden="true"></i>{{ _('Use a passkey') }}</button>
+<div id="passkey-status" class="alert text-start mt-3 mb-0 w-100 d-none" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  const buttons = [...document.querySelectorAll('.passkey-login')];
+  const status = document.getElementById('passkey-status');
+  const destinationFields = [...document.querySelectorAll('[name="destination"]')];
+  const selectedDestination = () => destinationFields.find(field => field.checked)?.value || 'webmail';
+  const explicitDestinationField = document.getElementById('destination_explicit');
+  const emailField = document.getElementById('email');
+  let passwordRequired = {{ config['PASSKEY_REQUIRED'] | tojson }};
+  const form = document.querySelector('form.form');
+  const csrfToken = form.querySelector('[name="csrf_token"]').value;
+  const submitButtons = [...form.querySelectorAll('button[type="submit"], input[type="submit"]')];
+  const originalLabels = new Map(buttons.map(button => [button, button.innerHTML]));
+  const supported = Boolean(window.PublicKeyCredential && navigator.credentials && navigator.credentials.get);
+  let attemptId = 0;
+  let activeAttempt = null;
+  let conditionalController = null;
+
+  if (!supported) buttons.forEach(button => { button.hidden = true; });
+
+  const decode = value => {
+    const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+    return Uint8Array.from(atob(base64 + '='.repeat((4 - base64.length % 4) % 4)), c => c.charCodeAt(0));
+  };
+  const encode = value => btoa(String.fromCharCode(...new Uint8Array(value)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const serialize = credential => ({
+    id: credential.id,
+    rawId: encode(credential.rawId),
+    type: credential.type,
+    response: {
+      authenticatorData: encode(credential.response.authenticatorData),
+      clientDataJSON: encode(credential.response.clientDataJSON),
+      signature: encode(credential.response.signature),
+      userHandle: credential.response.userHandle ? encode(credential.response.userHandle) : null
+    }
+  });
+  const responseJson = async (response, action) => {
+    let data;
+    try {
+      data = await response.json();
+    } catch (_) {
+      throw new Error(`${action} failed: the server returned HTTP ${response.status}, not a JSON response. If this continues, contact your administrator.`);
+    }
+    if (!response.ok) throw new Error(data.error || `${action} failed (HTTP ${response.status}).`);
+    return data;
+  };
+  const showStatus = (message, type='danger') => {
+    status.textContent = message;
+    status.classList.remove('d-none', 'alert-danger', 'alert-info');
+    status.classList.add(`alert-${type}`);
+  };
+
+  const clearStatus = () => {
+    status.textContent = '';
+    status.classList.add('d-none');
+    status.classList.remove('alert-danger', 'alert-info');
+  };
+
+  if (!supported && passwordRequired) {
+    showStatus({{ _('This server requires passkey sign-in. Use a supported browser or device; accounts without a passkey need an account setup link from an administrator.') | tojson }}, 'info');
+  }
+
+  const setBusy = (busy, activeButton=null) => {
+    buttons.forEach(button => {
+      button.disabled = busy;
+      button.setAttribute('aria-busy', String(busy));
+      button.innerHTML = busy && button === activeButton
+        ? '{% trans %}Waiting for passkey...{% endtrans %}'
+        : originalLabels.get(button);
+    });
+    submitButtons.forEach(control => { control.disabled = busy; });
+  };
+
+  const cancelAttempt = () => {
+    attemptId++;
+    if (activeAttempt) activeAttempt.controller.abort();
+    activeAttempt = null;
+    if (conditionalController) conditionalController.abort();
+    conditionalController = null;
+    setBusy(false);
+  };
+
+  const verifyCredential = async (credential, signal) => {
+    const verifyResponse = await fetch('{{ url_for("sso.passkey_authenticate") }}', {
+      method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+      body: JSON.stringify(serialize(credential)), signal
+    });
+    const result = await responseJson(verifyResponse, 'Passkey sign-in failed');
+    window.location.assign(result.redirect);
+  };
+
+  const beginPasskeyLogin = async (button) => {
+    if (!supported) {
+      showStatus(passwordRequired
+        ? {{ _('This browser does not support passkey sign-in. Use a supported browser or device.') | tojson }}
+        : {{ _('This browser does not support passkey sign-in. Use your email and password instead.') | tojson }});
+      return;
+    }
+    cancelAttempt();
+    clearStatus();
+    const id = ++attemptId;
+    const controller = new AbortController();
+    activeAttempt = {id, controller, button};
+    setBusy(true, button);
+    try {
+      const startResponse = await fetch('{{ url_for("sso.passkey_authentication_options") }}', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({email: emailField.value.trim(), target: selectedDestination(),
+          explicit: explicitDestinationField.value === '1'}), signal: controller.signal
+      });
+      const options = await responseJson(startResponse, 'Could not start passkey sign-in');
+      options.challenge = decode(options.challenge);
+      if (options.allowCredentials) {
+        options.allowCredentials = options.allowCredentials.map(item => ({...item, id: decode(item.id)}));
+      }
+      const credential = await navigator.credentials.get({publicKey: options, signal: controller.signal});
+      if (!credential) throw new Error(passwordRequired
+        ? {{ _('No passkey was selected. Try again.') | tojson }}
+        : {{ _('No passkey was selected. Try again or sign in with your password.') | tojson }});
+      await verifyCredential(credential, controller.signal);
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      if (e.name === 'NotAllowedError') {
+        showStatus(passwordRequired
+          ? {{ _('No passkey was selected, it was unavailable, or the request timed out. Try again.') | tojson }}
+          : {{ _('No passkey was selected, it was unavailable, or the request timed out. Try again, or sign in with your email and password.') | tojson }});
+      } else if (e.name === 'SecurityError') {
+        showStatus({{ _('Passkey sign-in is blocked for this site. Check that you are using the configured Mailu hostname over HTTPS.') | tojson }});
+      } else if (e.name === 'NotSupportedError') {
+        showStatus(passwordRequired
+          ? {{ _('This browser or device does not support passkey sign-in. Use a supported browser or device.') | tojson }}
+          : {{ _('This browser or device does not support passkey sign-in. Use a supported browser or sign in with your password.') | tojson }});
+      } else {
+        showStatus(e.message || (passwordRequired ? {{ _('Passkey sign-in failed. Try again.') | tojson }} : {{ _('Passkey sign-in failed. Try again or use your password.') | tojson }}));
+      }
+    } finally {
+      if (activeAttempt && activeAttempt.id === id) {
+        activeAttempt = null;
+        setBusy(false);
+      }
+    }
+  };
+
+  const beginConditionalLogin = async () => {
+    if (!supported || !buttons.length || !PublicKeyCredential.isConditionalMediationAvailable) return;
+    const controller = new AbortController();
+    conditionalController = controller;
+    try {
+      if (!await PublicKeyCredential.isConditionalMediationAvailable()) return;
+      const target = selectedDestination();
+      const startResponse = await fetch('{{ url_for("sso.passkey_authentication_options") }}', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({email: '', target, explicit: explicitDestinationField.value === '1'}), signal: controller.signal
+      });
+      const options = await responseJson(startResponse, 'Could not start passkey sign-in');
+      options.challenge = decode(options.challenge);
+      if (options.allowCredentials) {
+        options.allowCredentials = options.allowCredentials.map(item => ({...item, id: decode(item.id)}));
+      }
+      const credential = await navigator.credentials.get({
+        publicKey: options, mediation: 'conditional', signal: controller.signal
+      });
+      if (credential) await verifyCredential(credential, controller.signal);
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      if (e.name === 'NotAllowedError') {
+        showStatus(passwordRequired
+          ? {{ _('No passkey was selected, it was unavailable, or the request timed out. Try again.') | tojson }}
+          : {{ _('No passkey was selected, it was unavailable, or the request timed out. Try again, or sign in with your email and password.') | tojson }});
+      } else if (e.name === 'SecurityError') {
+        showStatus({{ _('Passkey sign-in is blocked for this site. Check that you are using the configured Mailu hostname over HTTPS.') | tojson }});
+      } else if (e.name === 'NotSupportedError') {
+        showStatus(passwordRequired
+          ? {{ _('This browser or device does not support passkey sign-in. Use a supported browser or device.') | tojson }}
+          : {{ _('This browser or device does not support passkey sign-in. Use a supported browser or sign in with your password.') | tojson }});
+      } else {
+        showStatus(e.message || {{ _('Passkey autofill sign-in failed. Select “Use a passkey” to try again.') | tojson }});
+      }
+    } finally {
+      if (conditionalController === controller) conditionalController = null;
+    }
+  };
+
+  buttons.forEach(button => button.addEventListener('click', () => beginPasskeyLogin(button)));
+  form.addEventListener('submit', cancelAttempt);
+  destinationFields.forEach(destinationField => destinationField.addEventListener('change', () => {
+    explicitDestinationField.value = '1';
+    cancelAttempt();
+    clearStatus();
+    beginConditionalLogin();
+  }));
+  beginConditionalLogin();
+})();
+</script>
+{%- endblock %}

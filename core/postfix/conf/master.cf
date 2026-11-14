@@ -2,15 +2,28 @@
 #               (yes)   (yes)   (yes)   (never) (100)
 
 # Exposed SMTP service
-smtp      inet  n       -       n       -       -       smtpd
+smtp      inet  n       -       y       -       -       smtpd
+  -o podop=socketmap:unix:/private/podop.socket:
+  -o smtpd_policy_service_default_action=DUNNO
+  -o { smtpd_recipient_restrictions = check_policy_service inet:127.0.0.1:10040 }
 
 # Internal SMTP service
-10025     inet  n       -       n       -       -       smtpd
+10025     inet  n       -       y       -       -       smtpd
+  -o podop=socketmap:unix:/private/podop.socket:
   -o smtpd_sasl_auth_enable=yes
   -o smtpd_discard_ehlo_keywords=pipelining,silent-discard
   -o smtpd_client_restrictions=$check_ratelimit,reject_unlisted_sender,reject_authenticated_sender_login_mismatch,permit
   -o smtpd_reject_unlisted_recipient={% if REJECT_UNLISTED_RECIPIENT %}{{ REJECT_UNLISTED_RECIPIENT }}{% else %}no{% endif %}
   -o cleanup_service_name=outclean
+
+# Internal quarantine reinjection. Keep Postfix routing, but do not rescan a
+# message after an administrator has learned it as ham and explicitly released it.
+10026     inet  n       -       y       -       -       smtpd
+  -o podop=socketmap:unix:/private/podop.socket:
+  -o smtpd_milters=
+  -o smtpd_sasl_auth_enable=no
+  -o smtpd_client_restrictions=permit_mynetworks,reject
+
 outclean  unix n       -       n       -       0       cleanup
   -o header_checks=pcre:/etc/postfix/outclean_header_filter.cf
   -o nested_header_checks=
@@ -44,12 +57,12 @@ verify    unix  -       -       n       -       1       verify
 flush     unix  n       -       n       1000?   0       flush
 proxymap  unix  -       -       n       -       -       proxymap
 smtp      unix  -       -       n       -       -       smtp
-smtpd     pass  -       -       n       -       -       smtpd
 relay     unix  -       -       n       -       -       smtp
 error     unix  -       -       n       -       -       error
 retry     unix  -       -       n       -       -       error
 discard   unix  -       -       n       -       -       discard
-lmtp      unix  -       -       n       -       -       lmtp
+# Preserve the original SMTP recipient as X-Original-To for Dovecot.
+lmtp      unix  -       -       n       -       -       lmtp flags=O
 anvil     unix  -       -       n       -       1       anvil
 scache    unix  -       -       n       -       1       scache
 postlog   unix-dgram n  -       n       -       1       postlogd

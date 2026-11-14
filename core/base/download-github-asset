@@ -1,0 +1,68 @@
+#!/bin/sh
+set -eu
+
+url="${1:?usage: download-github-asset URL DESTINATION}"
+destination="${2:?usage: download-github-asset URL DESTINATION}"
+github_token="$(cat /run/secrets/github_token 2>/dev/null || true)"
+
+curl_download() {
+  curl --fail --silent --show-error --location --connect-timeout 15 --max-time 120 \
+    --retry 3 --retry-all-errors --retry-delay 5 "$@" -o "$destination"
+}
+
+api_url=
+accept=
+asset_name=
+case "$url" in
+  https://github.com/*/releases/download/*/*)
+    release_path="${url#https://github.com/}"
+    repo="${release_path%%/releases/download/*}"
+    asset_path="${release_path#*/releases/download/}"
+    tag="${asset_path%%/*}"
+    asset_name="${asset_path#*/}"
+    [ -n "$repo" ] && [ -n "$tag" ] && [ -n "$asset_name" ] || exit 1
+    api_url="https://api.github.com/repos/$repo/releases/tags/$tag"
+    ;;
+  https://github.com/*/archive/refs/tags/*)
+    archive_path="${url#https://github.com/}"
+    repo="${archive_path%%/archive/refs/tags/*}"
+    archive="${archive_path#*/archive/refs/tags/}"
+    case "$archive" in
+      *.tar.gz) tag="${archive%.tar.gz}"; api_kind=tarball ;;
+      *.zip) tag="${archive%.zip}"; api_kind=zipball ;;
+      *) exit 1 ;;
+    esac
+    [ -n "$repo" ] && [ -n "$tag" ] || exit 1
+    api_url="https://api.github.com/repos/$repo/$api_kind/$tag"
+    ;;
+  https://raw.githubusercontent.com/*/*/*/*)
+    raw_path="${url#https://raw.githubusercontent.com/}"
+    owner="${raw_path%%/*}"
+    raw_path="${raw_path#*/}"
+    repository="${raw_path%%/*}"
+    raw_path="${raw_path#*/}"
+    ref="${raw_path%%/*}"
+    file_path="${raw_path#*/}"
+    [ -n "$owner" ] && [ -n "$repository" ] && [ -n "$ref" ] && [ -n "$file_path" ] || exit 1
+    api_url="https://api.github.com/repos/$owner/$repository/contents/$file_path?ref=$ref"
+    accept='application/vnd.github.raw'
+    ;;
+esac
+
+if [ -z "$github_token" ] || [ -z "$api_url" ]; then
+  curl_download "$url"
+elif [ -n "$asset_name" ]; then
+  release_data="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 120 \
+    --retry 3 --retry-all-errors --retry-delay 5 \
+    -H "Authorization: Bearer $github_token" -H 'Accept: application/vnd.github+json' \
+    "$api_url")"
+  asset_id="$(printf '%s' "$release_data" | python3 -c 'import json,sys; print(next(a["id"] for a in json.load(sys.stdin)["assets"] if a["name"] == sys.argv[1]))' "$asset_name")"
+  curl_download -H "Authorization: Bearer $github_token" -H 'Accept: application/octet-stream' \
+    "https://api.github.com/repos/$repo/releases/assets/$asset_id"
+else
+  if [ -n "$accept" ]; then
+    curl_download -H "Authorization: Bearer $github_token" -H "Accept: $accept" "$api_url"
+  else
+    curl_download -H "Authorization: Bearer $github_token" "$api_url"
+  fi
+fi

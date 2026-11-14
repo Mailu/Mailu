@@ -1,29 +1,60 @@
 #!/usr/bin/env python3
 
+import ipaddress
 import os
 import os.path
 import time
 import logging as log
 import sys
-from socrate import system
+import subprocess
+from socrate import system, supervisor
 
 os.system("chown mailu:mailu -R /dkim")
 os.system("find /data | grep -v /fetchmail | xargs -n1 chown mailu:mailu")
-system.drop_privs_to('mailu')
+system.set_env(['SECRET', 'QUARANTINE'])
 
-system.set_env(['SECRET'])
+admin_secrets = {
+    name: os.environ[name]
+    for name in (
+        "SECRET_KEY", "SECRET_KEY_FILE", "QUARANTINE_KEY",
+        "DB_PW", "DB_PW_FILE",
+        "SQLALCHEMY_DATABASE_URI", "SQLALCHEMY_DATABASE_URI_FILE",
+        "SQLALCHEMY_DATABASE_URI_ROUNDCUBE", "SQLALCHEMY_DATABASE_URI_ROUNDCUBE_FILE",
+        "RECAPTCHA_PRIVATE_KEY", "RECAPTCHA_PRIVATE_KEY_FILE",
+        "API_TOKEN", "API_TOKEN_FILE",
+    )
+    if name in os.environ
+}
+cleanup_secrets = {
+    name: os.environ[name]
+    for name in (
+        "SECRET_KEY", "SECRET_KEY_FILE", "DB_PW", "DB_PW_FILE",
+        "SQLALCHEMY_DATABASE_URI", "SQLALCHEMY_DATABASE_URI_FILE",
+    )
+    if name in os.environ
+}
 
-os.system("flask mailu advertise")
-os.system("flask db upgrade")
+def run_as_mailu(*command):
+    """Run initialization commands as the user that owns admin state."""
+    return subprocess.run(
+        command,
+        preexec_fn=lambda: system.drop_privs_to("mailu"),
+        check=False,
+    ).returncode
 
-account = os.environ.get("INITIAL_ADMIN_ACCOUNT")
-domain = os.environ.get("INITIAL_ADMIN_DOMAIN")
-password = os.environ.get("INITIAL_ADMIN_PW")
+run_as_mailu("flask", "mailu", "advertise")
+if run_as_mailu("flask", "db", "upgrade") != 0:
+    log.critical("Database migrations failed; refusing to start the admin service")
+    sys.exit(1)
+if run_as_mailu("flask", "mailu", "cleanup-oauth2") != 0:
+    log.warning("Cleaning expired OAuth records failed; startup will continue")
+if run_as_mailu("flask", "mailu", "import-legacy-dkim-keys") != 0:
+    log.critical("Importing legacy DKIM keys failed; refusing to start the admin service")
+    sys.exit(1)
 
-if account is not None and domain is not None and password is not None:
-    mode = os.environ.get("INITIAL_ADMIN_MODE", default="ifmissing")
-    log.info("Creating initial admin account %s@%s with mode %s", account, domain, mode)
-    os.system("flask mailu admin %s %s '%s' --mode %s" % (account, domain, password, mode))
+if run_as_mailu("flask", "mailu", "migrate-quarantine-storage") != 0:
+    log.critical("Quarantine storage migration failed; refusing to start the admin service")
+    sys.exit(1)
 
 def test_unsupported():
     import codecs
@@ -62,22 +93,54 @@ def test_DNS():
 test_DNS()
 test_unsupported()
 
+supervisor.clean_environment()
+
+subnet = os.environ.get("SUBNET")
+forwarded_allow_networks = list(filter(None, [subnet, os.environ.get("SUBNET6")]))
+if subnet:
+    ipv4_network = ipaddress.ip_network(subnet)
+    if ipv4_network.version == 4:
+        forwarded_allow_networks.append(
+            str(ipaddress.ip_network(
+                f"::ffff:{ipv4_network.network_address}/{96 + ipv4_network.prefixlen}"
+            ))
+        )
+forwarded_allow_ips = ",".join(forwarded_allow_networks)
+
 cmdline = [
     "gunicorn",
+    "--worker-class", "gthread",
     "--threads", os.environ.get('CPU_COUNT', '1'),
     # If SUBNET6 is defined, gunicorn must listen on IPv6 as well as IPv4
     "-b", f"{'[::]' if os.environ.get('SUBNET6') else '0.0.0.0'}:8080",
-    "--logger-class mailu.Logger",
-    f"--log-level {os.environ.get('LOG_LEVEL', 'INFO')}",
-    "--worker-tmp-dir /dev/shm",
+    "--logger-class", "mailu.Logger",
+    "--log-level", os.environ.get('LOG_LEVEL', 'INFO'),
+    "--worker-tmp-dir", "/dev/shm",
     "--error-logfile", "-",
-    "--preload"
+    "--preload",
+    "--http-protocols", "h2,h1",
+    "--http2-cleartext", "both",
+    "--forwarded-allow-ips", forwarded_allow_ips
 ]
 
 # logging
 if log.root.level <= log.INFO:
 	cmdline.extend(["--access-logfile", "-"])
 
-cmdline.append("'mailu:create_app()'")
+cmdline.append("mailu:create_app()")
 
-os.system(" ".join(cmdline))
+supervisor.start(
+    [
+        {"name": "admin", "command": cmdline, "user": "mailu", "environment": {"HOME": "/app"}},
+        {
+            "name": "quarantine-cleanup",
+            "command": ["/app/venv/bin/python", "/quarantine_cleanup.py"],
+            "user": "mailu",
+            "environment": {
+                "PYTHONPATH": "/app",
+                "QUARANTINE_RETENTION_DAYS": os.environ.get("QUARANTINE_RETENTION_DAYS", "90"),
+            },
+        },
+    ],
+    secret_env={"admin": admin_secrets, "quarantine-cleanup": cleanup_secrets},
+)

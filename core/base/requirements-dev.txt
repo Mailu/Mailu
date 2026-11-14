@@ -18,7 +18,10 @@ Flask-Migrate
 Flask-RESTX
 Flask-SQLAlchemy
 Flask-WTF
-gunicorn
+gunicorn[http2]
+h2
+hpack
+hyperframe
 idna
 itsdangerous
 limits
@@ -29,6 +32,7 @@ mysql-connector-python
 passlib
 psycopg2-binary
 Pygments
+python-gnupg
 PyYAML
 redis
 SQLAlchemy
@@ -41,7 +45,7 @@ Werkzeug
 wonderwords
 WTForms
 WTForms-Components
-xmltodict
+webauthn
 
 # core/nginx
 watchdog

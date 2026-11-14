@@ -144,15 +144,13 @@ Your mail service will be reachable for IMAP, POP3, SMTP and Webmail at the addr
 How to make IPv6 work?
 ``````````````````````
 
-Docker IPv6 interfacing with ``ip6tables``, which is required for proper IPv6 support, is currently considered experimental.
-
-Although the supposed way to enable IPv6 would be to give each container a publicly routable address, docker's IPv6 support
-uses NAT to pass outside connections to the containers.
-
-Currently we recommend to use `docker-ipv6nat` by `Robert Klarenbeek <https://github.com/robbertkl>` instead of docker's
-experimental support.
+Current Docker releases support IPv6 on user-defined networks and publish IPv6 ports through ``ip6tables``. ``ip6tables`` is
+enabled by default on Linux hosts. See the
+`Docker IPv6 documentation <https://docs.docker.com/engine/daemon/ipv6/>`_ for details.
 
 Before enabling IPv6 you **MUST** disable the userland-proxy in your ``/etc/docker/daemon.json`` to not create an Open Relay!
+With the userland-proxy, containers see the bridge gateway address instead of the real client address, and Mailu trusts its own
+subnet, so anyone could relay mail through your instance.
 
 .. code-block:: json
 
@@ -160,26 +158,14 @@ Before enabling IPv6 you **MUST** disable the userland-proxy in your ``/etc/dock
       "userland-proxy": false
   }
 
-You can enable `docker-ipv6nat` like this:
+Restart Docker afterwards (``sudo systemctl restart docker``).
 
-  docker run -d --name ipv6nat --privileged --network host --restart unless-stopped -v /var/run/docker.sock:/var/run/docker.sock:ro -v /lib/modules:/lib/modules:ro robbertkl/ipv6nat
+Enable IPv6 in the `setup utility`_. This adds ``enable_ipv6: true`` and an IPv6 subnet (``SUBNET6``) to the Mailu network
+in ``docker-compose.yml``, and publishes the front service on ``[BIND6]:port`` as well as on IPv4. Mailu uses its own
+user-defined network, so no IPv6 keys are needed in ``daemon.json`` beyond the userland-proxy setting above.
 
-If you want to try docker's experimental IPv6 support, it can be enabled like this:
-
-.. code-block:: json
-
-  {
-      "userland-proxy": false,
-      "ipv6": true,
-      "experimental": true,
-      "fixed-cidr-v6": "fd00:1234:abcd::/48",
-      "ip6tables": true
-  }
-
-and enabling the IPv6 checkbox in the `setup utility`_.
-
-This setup however is not officially supported, and might result in unforeseen issues.
-With bad misconfiguration you might even cause your instance to become an Open Relay, you have been warned!
+Make sure the host has a global IPv6 address (``ip -6 addr``) and that your firewall allows the mail and web ports over IPv6.
+Also add AAAA records for your mail hostnames, otherwise other servers will only reach you over IPv4.
 
 .. _`setup utility`: https://setup.mailu.io
 
@@ -253,17 +239,51 @@ correct syntax. The following file names will be taken as override configuration
    - All ``$ROOT/overrides/postfix/*.map`` files
    - For both ``postfix.cf`` and ``postfix.master``, you need to put one configuration per line, as they are fed line-by-line
      to postfix.
+   - Mailu's SMTP server services run chrooted under ``/queue``. A custom
+     chrooted Postfix service can access the Postfix Podop socket at
+     ``/private/podop.socket``; unchrooted services should use
+     ``/tmp/podop.socket``.
    - ``logrotate.conf`` as ``$ROOT/overrides/postfix/logrotate.conf`` - Replaces the logrotate.conf file used for rotating ``POSTFIX_LOG_FILE``.
-- `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory.
+- `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory. This file must be written in the
+  Dovecot 2.4 syntax, see :ref:`dovecot24-override-label`.
 - `Nginx`_ :
    - All ``*.conf`` files in the ``nginx`` sub-directory.
-   - ``proxy.conf`` in the ``nginx/dovecot`` sub-directory.
+   - ``proxy.conf`` in the ``nginx/dovecot`` sub-directory. This one configures the dovecot mail
+     proxy running inside front and must be written in the Dovecot 2.4 syntax as well, see
+     :ref:`dovecot24-override-label`.
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
 - `Roundcube`_ - All ``*.inc.php`` files in the ``roundcube`` sub directory.
 
 To override the root location (``/``) in Nginx ``WEBROOT_REDIRECT`` needs to be set to ``none`` in the env file (see :ref:`web settings <web_settings>`).
 
 *Issue reference:* `206`_, `1368`_.
+
+.. _dovecot24-override-label:
+
+My Dovecot override stopped working after upgrading
+```````````````````````````````````````````````````
+
+Mailu moved from Dovecot 2.3 to Dovecot 2.4. The two do not share a configuration syntax:
+``plugin { }`` is gone, most plugin settings moved into named sections, and a number of settings
+were renamed or had their meaning inverted. Mailu's own configuration was rewritten for 2.4, but
+an override file is included unchanged, so one written for 2.3 makes the container fail to start.
+This affects both dovecot overrides - ``$ROOT/overrides/dovecot/dovecot.conf`` for the imap
+container and ``$ROOT/overrides/nginx/dovecot/proxy.conf`` for the mail proxy inside front.
+Dovecot names the offending line when it refuses to start:
+
+.. code-block:: bash
+
+    doveconf: Fatal: Error in configuration file /overrides/dovecot.conf line 3: Unknown setting: fts_enforced
+
+To convert an existing override:
+
+1. Feed it through the `Dovecot config upgrader`_, which turns a 2.3 configuration into its 2.4
+   equivalent.
+2. Check the result against the `Dovecot 2.3 to 2.4 upgrade guide`_. The upgrader is explicitly
+   not perfect - it drops settings it has no rule for and warns about others that do have an
+   equivalent - so do not apply its output unread.
+3. Drop the ``dovecot_config_version`` line if the upgrader added one. Mailu's own configuration
+   already declares it and it may only be set once.
 
 I want to integrate Nextcloud 15 (and newer) with Mailu
 ```````````````````````````````````````````````````````
@@ -332,22 +352,55 @@ After successfull login the domain part will be striped and the rest used as use
 How do I use webdav (radicale)?
 ```````````````````````````````
 
-| For first time set up, the user must access radicale via the url `https://mail.example.com/webdav/.web` and then
-| 1. Log in using the  user's full email address and password.
-| 2. Click 'Create new addressbook or calendar'
-| 3. Follow instructions for creating an addressbook (for contact management) and calendar.
-|
-| Subsequently to use webdav (radicale), you can configure your carddav/caldav client to use the following url:
-| `https://mail.example.com/webdav/user@example.com`
-| As username you must provide the complete email address (user@example.com).
-| As password you must provide the password of the email address.
-| The user must be an existing Mailu user.
+Enable WebDAV in the setup utility and regenerate your Compose configuration.
+With ``WEBDAV=radicale``, Roundcube and SnappyMail automatically connect to the
+user's address book at the next webmail login. Roundcube requires its ``carddav``
+plugin, which is enabled by default. SnappyMail synchronizes one address book;
+Roundcube discovers all of the user's address books. Existing local contacts
+are retained; they are not automatically moved out of Roundcube's local address
+book. SnappyMail uses its normal CardDAV synchronization to merge contacts.
+
+A ``Contacts`` address book is created for new DAV users. Existing users who
+have no address book receive one when Radicale starts. Existing address books
+are preserved. Radicale runs as the unprivileged ``mailu`` user; startup updates
+ownership of existing DAV data so that older volumes remain usable. The
+container drops all Linux capabilities except those needed to update volume
+ownership and switch to the ``mailu`` user, and disallows gaining privileges.
+
+Open **Contacts and calendars** in Mailu, or visit
+``https://mail.example.com/webdav/.web/``, to create calendars and manage
+collections. This interface uses the Mailu browser login. DAV apps use
+``https://mail.example.com/webdav/`` with the full email address as username
+and a device authentication token as password.
+
+When enabled, Mailu includes DAV settings in its Apple configuration profile,
+AutoConfig responses and Autodiscover response, and suggests the CardDAV and
+CalDAV DNS SRV/TXT records in the domain details. Publish those DNS records to
+enable DNS discovery. ``/.well-known/carddav`` and ``/.well-known/caldav`` also
+redirect to the DAV service. Support for DAV fields varies between clients;
+apps that do not support them can use the server URL above.
+
+Can I use an external CardDAV server in webmail?
+````````````````````````````````````````````````
+
+Yes, including when Mailu's own WebDAV service is disabled. In Roundcube, open
+**Settings → CardDAV** and add an account. In SnappyMail, open **Settings →
+Contacts → Remote synchronization (CardDAV)** and enter the external server URL,
+username and password or app password supplied by that service. SnappyMail uses
+one sync account: saving your own settings replaces its automatic Mailu setup,
+and subsequent logins preserve that choice, including disabling synchronization.
+Mailu's webmail session token cannot authenticate to an external service.
+
+Administrators can also supply Roundcube CardDAV presets through
+``overrides/roundcube/carddav.php``; see :ref:`webmail-settings`.
 
 *issue reference:* `1591`_.
 
 
 .. _`Postfix`:   http://www.postfix.org/postconf.5.html
-.. _`Dovecot`:   https://doc.dovecot.org/configuration_manual/config_file/config_file_syntax/
+.. _`Dovecot`:   https://doc.dovecot.org/latest/core/settings/syntax.html
+.. _`Dovecot config upgrader`: https://dovecot.org/upgrader/
+.. _`Dovecot 2.3 to 2.4 upgrade guide`: https://doc.dovecot.org/latest/installation/upgrade/2.3-to-2.4.html
 .. _`NGINX`:     https://nginx.org/en/docs/
 .. _`Rspamd`:    https://www.rspamd.com/doc/configuration/index.html
 .. _`Roundcube`: https://github.com/roundcube/roundcubemail/wiki/Configuration#customize-the-look
@@ -442,6 +495,28 @@ Technical issues
 
 In this section we are trying to cover the most common problems our users are having.
 If your issue is not listed here, please consult issues with the `troubleshooting tag`_.
+
+Why does a passkey show unknown details?
+````````````````````````````````````````````````
+
+Older passkeys may have been enrolled before Mailu recorded all authenticator details. A successful sign-in records the flags returned by that authentication, the latest signature counter, and the last-use time. The attestation format is available only from enrollment, so it can remain unknown for a passkey enrolled before that information was stored. Removing and registering the passkey again records its enrollment details, but requires setting it up again in the authenticator.
+
+I cannot sign in because my administrator requires a passkey
+````````````````````````````````````````````````````````````
+
+If passkeys are required for your domain, sign in with your existing password;
+Mailu will then require you to register a passkey before you can continue. If
+the server-wide ``PASSKEY_REQUIRED`` setting is enabled, password sign-in is
+disabled. Ask a domain manager for a one-time account setup link. The link
+can also be used when you are locked out or cannot complete normal sign-in.
+
+How do I reset a password?
+``````````````````````````
+
+Ask a domain manager to generate a one-time setup or recovery link from your
+user's edit page. The link lets you set a new password or set up a passkey,
+depending on the account's passkey policy. It can be used once and expires
+after the configured lifetime.
 
 .. _delete_users:
 
@@ -609,6 +684,56 @@ Common problems:
 
 .. _`rate-limits`: https://letsencrypt.org/docs/rate-limits/
 
+.. _letsencrypt-http-01-connectivity:
+
+Why can't Mailu reach the Let's Encrypt HTTP challenge?
+............................................................
+
+With ``TLS_FLAVOR=letsencrypt`` or ``mail-letsencrypt``, Mailu checks that an
+HTTP challenge reaches its ``front`` container before requesting a certificate.
+Messages such as "Cannot reach ... on TCP port 80", "Skipping Let's Encrypt
+certificate issuance", or older ``Connection refused`` tracebacks from
+``/letsencrypt.py`` mean this check failed. Mailu retries automatically, but
+cannot obtain a certificate for an affected hostname until connectivity works.
+Secure services may be unavailable while no usable certificate exists.
+
+Check the following:
+
+- Every hostname in ``HOSTNAMES`` must resolve to your server's public address.
+  Publish an AAAA record only if IPv6 connectivity actually works.
+- Allow incoming **TCP port 80** through your firewall and forward it to the
+  ``front`` container. Opening port 443 alone does not allow HTTP-01 validation.
+- A Docker port bound to ``127.0.0.1`` (or ``::1``) only accepts connections
+  from the Docker host. Use a specific network address reachable from outside,
+  forwarding port 80 on your router if necessary. A loopback bind only works
+  with an additional proxy forwarding public requests to it.
+- A reverse proxy must forward ``/.well-known/acme-challenge/`` to Mailu's
+  HTTP listener, without authentication or redirects. If the proxy obtains
+  certificates itself, use ``TLS_FLAVOR=cert`` and supply those certificates
+  to Mailu instead.
+- The public hostname must also be reachable **from inside the front
+  container**. Behind a router, this may require hairpin NAT (also called
+  NAT loopback): connections from your internal network to the public address
+  must be forwarded back to Mailu.
+
+Run this command from the directory containing your Compose configuration,
+replacing ``mail.example.com`` with each hostname in ``HOSTNAMES``:
+
+.. code-block:: bash
+
+   docker compose exec front curl -v --connect-timeout 10 http://mail.example.com/.well-known/acme-challenge/testing
+
+A connection refusal or timeout indicates a connectivity problem. A ``404``
+shows that an HTTP server answered, but does **not** prove that the challenge
+reaches Mailu: this diagnostic path has no active challenge token. Mailu's own
+check uses a temporary token and verifies the response body. Also check
+reachability from a separate internet connection, since a successful internal
+check alone cannot prove public reachability.
+
+Do not add a hostname override pointing to ``127.0.0.1`` merely to bypass the
+check. It does not fix public reachability, and failed certificate requests
+can exhaust the certificate authority's rate limits.
+
 Copying certificates
 ....................
 
@@ -657,8 +782,11 @@ The ``Admin`` container logs failed logon attempt on the single sign on page.
 You will need to setup the proper Regex in the Fail2Ban configuration.
 Below an example how to do so.
 
-If you use a reverse proxy in front of Mailu, it is vital to set the environment variables REAL_IP_HEADER and REAL_IP_FROM.
-Without these environment variables, Mailu will not trust the remote client IP passed on by the reverse proxy and as a result your reverse proxy will be banned.
+If you use a reverse proxy in front of Mailu, configure Mailu to receive the original client IP.
+For the recommended TCP reverse-proxy setup, set ``PROXY_PROTOCOL`` for the proxied ports and
+``REAL_IP_FROM`` to the proxy's address; leave ``REAL_IP_HEADER`` unset. If your proxy forwards
+client addresses in HTTP headers, set both ``REAL_IP_HEADER`` and ``REAL_IP_FROM`` instead.
+Without the appropriate settings, Mailu may see the proxy's address as the client and ban the proxy.
 
 See the :ref:`configuration reference <reverse_proxy_headers>` for more information.
 
@@ -972,13 +1100,24 @@ If you are comfortable using an online spellchecker, the easiest is to configure
    $config['spellcheck_ignore_nums'] = true;
    $config['spellcheck_dictionary'] = true;
 
-If not, you can download the `aspell dictionary`_ you require and place it in ``/usr/share/aspell/`` and then enable it by tweaking the following in the configuration file:
+If not, the webmail image spellchecks through `enchant`_, which reads the
+dictionaries installed for one of its backends. Which backend is in use is
+printed while the image is built; you can also ask the running container:
+
+.. code-block:: bash
+
+   docker compose exec webmail php -r 'print_r(enchant_broker_describe(enchant_broker_init()));'
+
+Install the dictionary where that backend expects it -- ``/usr/share/aspell/``
+for the `aspell dictionaries`_, ``/usr/share/hunspell/`` for hunspell -- and
+then enable it by tweaking the following in the configuration file:
 
 .. code-block:: php
 
    $config['spellcheck_languages'] = array('en'=>'English', ...);
 
-.. _`aspell dictionary`: http://ftp.gnu.org/gnu/aspell/dict/0index.html
+.. _`enchant`: https://rrthomas.github.io/enchant/
+.. _`aspell dictionaries`: http://ftp.gnu.org/gnu/aspell/dict/0index.html
 
 
 I see a lot of "mount: Deactivated successfully." messages in the logs

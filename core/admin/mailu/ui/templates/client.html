@@ -9,6 +9,11 @@
 {%- endblock %}
 
 {%- block content %}
+<div class="alert alert-info" role="alert">
+  <p>{% trans %}Create a separate authentication token for each email app or device. Enter the token in the app's password field for both incoming (IMAP) and outgoing (SMTP) mail, and let the app remember it.{% endtrans %}</p>
+  <a class="btn btn-primary me-2" href="{{ url_for('.token_create') }}">{% trans %}Create an authentication token{% endtrans %}</a>
+  <a class="btn btn-primary" href="{{ url_for('.thunderbird_oauth_addon', v=thunderbird_addon_version) }}">{% trans %}Download Thunderbird OAuth2 add-on (.xpi){% endtrans %}</a>
+</div>
 {%- call macros.table(title=_("Incoming mail"), datatable=False) %}
   <tbody>
     <tr>
@@ -21,15 +26,15 @@
     </tr>
     <tr>
       <th>{% trans %}Server name{% endtrans %}</th>
-      <td><pre class="pre-config border bg-light">{{ config["HOSTNAME"] }}</pre></td>
+      <td><pre class="pre-config border bg-body-tertiary">{{ config["HOSTNAME"] }}</pre></td>
     </tr>
     <tr>
       <th>{% trans %}Username{% endtrans %}</th>
-      <td><pre class="pre-config border bg-light">{{ current_user if current_user.is_authenticated else "******" }}</pre></td>
+      <td><pre class="pre-config border bg-body-tertiary">{{ current_user if current_user.is_authenticated else "******" }}</pre></td>
     </tr>
     <tr>
-      <th>{% trans %}Password{% endtrans %}</th>
-      <td><pre class="pre-config border bg-light">*******</pre></td>
+      <th>{% trans %}Authentication token{% endtrans %}</th>
+      <td><pre class="pre-config border bg-body-tertiary">*******</pre></td>
     </tr>
   </tbody>
 {%- endcall %}
@@ -46,18 +51,41 @@
     </tr>
     <tr>
       <th>{% trans %}Server name{% endtrans %}</th>
-      <td><pre class="pre-config border bg-light">{{ config["HOSTNAME"] }}</pre></td>
+      <td><pre class="pre-config border bg-body-tertiary">{{ config["HOSTNAME"] }}</pre></td>
     </tr>
     <tr>
       <th>{% trans %}Username{% endtrans %}</th>
-      <td><pre class="pre-config border bg-light">{{ current_user if current_user.is_authenticated else "******" }}</pre></td>
+      <td><pre class="pre-config border bg-body-tertiary">{{ current_user if current_user.is_authenticated else "******" }}</pre></td>
     </tr>
     <tr>
-      <th>{% trans %}Password{% endtrans %}</th>
-      <td><pre class="pre-config border bg-light">*******</pre></td>
+      <th>{% trans %}Authentication token{% endtrans %}</th>
+      <td><pre class="pre-config border bg-body-tertiary">*******</pre></td>
     </tr>
   </tbody>
 {%- endcall %}
+{% if config['WEBDAV'] == 'radicale' %}
+{%- call macros.table(title=_("Contacts and calendars"), datatable=False) %}
+  <tbody>
+    <tr>
+      <th>{% trans %}Protocols{% endtrans %}</th>
+      <td>CardDAV / CalDAV</td>
+    </tr>
+    <tr>
+      <th>{% trans %}Server URL{% endtrans %}</th>
+      <td><pre class="pre-config border bg-body-tertiary">{{ 'http' if config['TLS_FLAVOR'] == 'notls' else 'https' }}://{{ config['HOSTNAME'] }}/webdav/</pre></td>
+    </tr>
+    <tr>
+      <th>{% trans %}Username{% endtrans %}</th>
+      <td><pre class="pre-config border bg-body-tertiary">{{ current_user if current_user.is_authenticated else "******" }}</pre></td>
+    </tr>
+    <tr>
+      <th>{% trans %}Password{% endtrans %}</th>
+      <td>{% trans %}Use an authentication token for this device.{% endtrans %}</td>
+    </tr>
+  </tbody>
+{%- endcall %}
+<p><a href="/webdav/.web/">{% trans %}Manage contacts and calendars{% endtrans %}</a></p>
+{% endif %}
 <blockquote>
   {% trans %}If you use an Apple device,{% endtrans %}
   <a href="/apple.mobileconfig">{% trans %}click here to auto-configure it.{% endtrans %}</a>

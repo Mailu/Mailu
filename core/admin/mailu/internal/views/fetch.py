@@ -21,13 +21,18 @@ def fetch_list():
             "folders": fetch.folders,
             "username": fetch.username,
             "password": fetch.password
-        } for fetch in models.Fetch.query.all()
+        } for fetch in models.Fetch.query.with_entities(
+            models.Fetch.id, models.Fetch.tls, models.Fetch.keep, models.Fetch.scan,
+            models.Fetch.invisible, models.Fetch.user_email, models.Fetch.protocol,
+            models.Fetch.host, models.Fetch.port, models.Fetch.folders,
+            models.Fetch.username, models.Fetch.password,
+        ).all()
     ])
 
 
 @internal.route("/fetch/<fetch_id>", methods=["POST"])
 def fetch_done(fetch_id):
-    fetch = models.Fetch.query.get(fetch_id) or flask.abort(404)
+    fetch = models.db.session.get(models.Fetch, fetch_id) or flask.abort(404)
     fetch.last_check = datetime.datetime.now()
     fetch.error_message = str(flask.request.get_json())
     fetch.dont_change_updated_at()

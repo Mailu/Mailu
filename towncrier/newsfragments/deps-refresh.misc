@@ -1,0 +1,1 @@
+Refresh the remaining pinned dependencies: roundcube 1.6.18 to 1.6.19, the clamav image from `1.4_base` to `stable`, the docs image from nginx 1.29 to 1.31.6, and the sphinx and test tooling. The base image now comes from the ghcr mirror again, which has caught up with alpine 3.24.2.

@@ -1,0 +1,1 @@
+Make the resolver healthcheck fail when unbound answers SERVFAIL, instead of reporting healthy while every lookup fails

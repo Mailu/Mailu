@@ -1,0 +1,1 @@
+Return a clean status instead of HTTP 500 when an internal endpoint receives a malformed username: /internal/auth/basic now falls through to 401 on a malformed Basic header, and the /internal/dovecot lookups return 404 on an address that is not a valid stored e-mail.

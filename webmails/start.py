@@ -6,16 +6,22 @@ import sys
 import subprocess
 import shutil
 import hmac
+import tempfile
 
-from socrate import conf, system
+from socrate import conf, system, supervisor
+from overrides import roundcube_overrides, apply_snappymail_overrides
 
 env = os.environ
 
-system.set_env(['ROUNDCUBE','SNUFFLEUPAGUS'])
+coerced = system.set_env(['ROUNDCUBE','SNUFFLEUPAGUS'])
 
 # jinja context
 context = {}
 context.update(env)
+context['ADMIN'] = coerced.get('ADMIN', False)
+context['DAV_ENABLED'] = env.get('WEBDAV') == 'radicale'
+context['DAV_INTERNAL_URL'] = f"http://{env.get('FRONT_ADDRESS') or 'front'}:8081/webdav/"
+context['DAV_PUBLIC_URL'] = f"{'http' if env.get('TLS_FLAVOR') == 'notls' else 'https'}://{env['HOSTNAMES'].split(',')[0]}/webdav/"
 
 context["MAX_FILESIZE"] = str(int(int(env.get("MESSAGE_SIZE_LIMIT", "50000000")) * 0.66 / 1048576))
 
@@ -55,6 +61,9 @@ conf.jinja("/etc/snuffleupagus.rules.tpl", context, "/etc/snuffleupagus.rules")
 # (using "dict" because it is ordered and "set" is not)
 plugins = dict((p, None) for p in env.get("ROUNDCUBE_PLUGINS", "").replace(" ", "").split(",") if p and os.path.isdir(os.path.join("/var/www/roundcube/plugins", p)))
 if plugins:
+    # Mailu redirects at the end of login_after. Other plugins (including
+    # CardDAV's preset discovery) must finish their login hooks first.
+    plugins.pop("mailu", None)
     plugins["mailu"] = None
 else:
     plugins = dict((k, None) for k in ["archive", "zipdownload", "markasjunk", "managesieve", "enigma", "carddav", "mailu"])
@@ -62,10 +71,11 @@ else:
 context["PLUGINS"] = ",".join(f"'{p}'" for p in plugins)
 
 # add overrides
-context["INCLUDES"] = sorted(inc for inc in os.listdir("/overrides") if inc.endswith((".inc", ".inc.php"))) if os.path.isdir("/overrides") else []
+context["OVERRIDE_DIRECTORY"], context["INCLUDES"] = roundcube_overrides()
 
 # create config files
 conf.jinja("/conf/config.inc.php", context, "/var/www/roundcube/config/config.inc.php")
+conf.jinja("/conf/config.inc.carddav.php", context, "/var/www/roundcube/plugins/carddav/config.inc.php")
 
 # create dirs
 os.system("mkdir -p /data/gpg")
@@ -77,49 +87,86 @@ os.makedirs(base + "configs", exist_ok=True)
 
 conf.jinja("/defaults/default.json", context, "/data/_data_/_default_/domains/default.json")
 conf.jinja("/defaults/application.ini", context, "/data/_data_/_default_/configs/application.ini")
-conf.jinja("/defaults/php.ini", context, "/etc/php83/php.ini")
+apply_snappymail_overrides("/data/_data_/_default_/configs/application.ini", "/snappymail-overrides/application.ini")
+conf.jinja("/defaults/php.ini", context, "/etc/php84/php.ini")
+snappymail_plugins = ["mailu-identities", "mailu-carddav"]
+for plugin in snappymail_plugins:
+    shutil.copytree(
+        f"/var/www/snappymail/mailu-plugins/{plugin}",
+        base + f"plugins/{plugin}",
+        dirs_exist_ok=True,
+    )
 
 # setup permissions
 os.system("chown -R mailu:mailu /data")
+for plugin in snappymail_plugins:
+    plugin_path = base + f"plugins/{plugin}"
+    os.system(f"chown -R root:root {plugin_path} && chmod -R a-w {plugin_path}")
 
 def demote(username='mailu'):
     def result():
         system.drop_privs_to(username)
     return result
 
-print("Initializing database")
-try:
-    result = subprocess.check_output(["/var/www/roundcube/bin/initdb.sh", "--dir", "/var/www/roundcube/SQL"],
-                                     stderr=subprocess.STDOUT, preexec_fn=demote())
-    print(result.decode())
-except subprocess.CalledProcessError as exc:
-    err = exc.stdout.decode()
-    if "already exists" in err:
-        print("Already initialized")
-    else:
-        print(err)
-        exit(3)
+def initialize_database(image_version_path="/version", marker_path="/data/.roundcube-version"):
+    with open(image_version_path) as handle:
+        version = handle.read().strip()
+    try:
+        with open(marker_path) as handle:
+            previous_version = handle.read().strip()
+    except FileNotFoundError:
+        previous_version = None
 
-print("Upgrading database")
-try:
-    subprocess.check_call(["/var/www/roundcube/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT, preexec_fn=demote())
-except subprocess.CalledProcessError as exc:
-    exit(4)
-else:
+    print("Initializing database")
+    newly_initialized = False
+    try:
+        result = subprocess.check_output(["/var/www/roundcube/bin/initdb.sh", "--dir", "/var/www/roundcube/SQL"],
+                                         stderr=subprocess.STDOUT, preexec_fn=demote())
+        print(result.decode())
+        newly_initialized = True
+    except subprocess.CalledProcessError as exc:
+        err = exc.stdout.decode()
+        if "already exists" in err:
+            print("Already initialized")
+        else:
+            print(err)
+            raise SystemExit(3)
+
+    if not newly_initialized and previous_version == version:
+        print("Roundcube database is up to date for this image")
+        return
+
+    print("Upgrading database")
+    try:
+        subprocess.check_call(["/var/www/roundcube/bin/update.sh", "--version=?", "-y"], stderr=subprocess.STDOUT, preexec_fn=demote())
+    except subprocess.CalledProcessError:
+        raise SystemExit(4)
     print("Cleaning database")
     try:
         subprocess.check_call(["/var/www/roundcube/bin/cleandb.sh"], stderr=subprocess.STDOUT, preexec_fn=demote())
-    except subprocess.CalledProcessError as exc:
-        exit(5)
+    except subprocess.CalledProcessError:
+        raise SystemExit(5)
+
+    # Never record a failed or interrupted upgrade as complete.
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", dir=os.path.dirname(marker_path), delete=False) as handle:
+            temporary_path = handle.name
+            handle.write(version + "\n")
+        os.replace(temporary_path, marker_path)
+    finally:
+        if temporary_path and os.path.exists(temporary_path):
+            os.unlink(temporary_path)
+
+
+supervisor.clean_environment()
+initialize_database()
 
 # Configure nginx
 conf.jinja("/conf/nginx-webmail.conf", context, "/etc/nginx/http.d/webmail.conf")
-if os.path.exists("/var/run/nginx.pid"):
-    os.system("nginx -s reload")
 
-system.clean_env()
-
-# run nginx
-os.system("php-fpm83")
-os.execv("/usr/sbin/nginx", ["nginx", "-g", "daemon off;"])
+supervisor.start([
+    {"name": "php-fpm", "command": ["php-fpm84", "-F"]},
+    {"name": "nginx", "command": ["/usr/sbin/nginx", "-g", "daemon off;"]},
+])
 

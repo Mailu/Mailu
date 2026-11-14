@@ -2,6 +2,6 @@
 
 {%- block content %}
 {%- call macros.card() %}
-{{ macros.form(form) }}
+{{ macros.form(form, cancel=show_cancel|default(true)) }}
 {%- endcall %}
 {%- endblock %}

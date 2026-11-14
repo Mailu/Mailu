@@ -42,3 +42,4 @@ from . import alias
 from . import relay
 from . import user
 from . import token
+from . import passkey

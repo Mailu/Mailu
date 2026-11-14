@@ -1,0 +1,1 @@
+Dovecot now stages its chroot runtime files on a temporary filesystem instead of the persistent mailbox volume.

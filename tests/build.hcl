@@ -47,7 +47,6 @@ group "default" {
 
     "fetchmail",
     "resolver",
-    "traefik-certdumper",
     "webdav"
   ]
 }
@@ -216,12 +215,6 @@ target "resolver" {
     base = "target:base"
   }
   tags = tag("unbound")
-}
-
-target "traefik-certdumper" {
-  inherits = ["defaults"]
-  context = "optional/traefik-certdumper/"
-  tags = tag("traefik-certdumper")
 }
 
 target "webdav" {

@@ -55,8 +55,13 @@ services:
     volumes:
       - "/mailu/mail:/mail"
       - "/mailu/overrides:/overrides"
+    tmpfs:
+      - /mail/usr:rw,nosuid,nodev,exec,size=128m
     depends_on:
-      - front
+      front:
+        condition: service_started
+      admin:
+        condition: service_healthy
 
   smtp:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-local}
@@ -98,7 +103,7 @@ services:
       default:
         ipv4_address: 192.168.203.254
 
-  # Webmail
+  # Both webmails run in the same service.
   webmail:
     image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-local}
     restart: always

@@ -1,4 +1,5 @@
 import os
+from socrate.system import parse_bool
 
 from datetime import timedelta
 import ipaddress
@@ -35,6 +36,9 @@ DEFAULT_CONFIG = {
     'STATS_ENDPOINT': '202406.{}.stats.mailu.io',
     # Common configuration variables
     'SECRET_KEY': 'changeMe',
+    'QUARANTINE_KEY': '',
+    'QUARANTINE_RETENTION_DAYS': 90,
+    'QUARANTINE_MAX_MESSAGE_BYTES': 52428800,
     'DOMAIN': 'mailu.io',
     'HOSTNAMES': 'mail.mailu.io,alternative.mailu.io,yetanother.mailu.io',
     'POSTMASTER': 'postmaster',
@@ -68,17 +72,14 @@ DEFAULT_CONFIG = {
     'SITENAME': 'Mailu',
     'WEBSITE': 'https://mailu.io',
     'ADMIN': 'none',
-    'WEB_ADMIN': '/admin',
-    'WEB_WEBMAIL': '/webmail',
-    'WEBMAIL': 'none',
+    'WEBMAIL_AVAILABLE': 'roundcube,snappymail',
     'RECAPTCHA_PUBLIC_KEY': '',
     'RECAPTCHA_PRIVATE_KEY': '',
     'LOGO_URL': None,
     'LOGO_BACKGROUND': None,
     # Advanced settings
-    'AUTH_REQUIRE_TOKENS': False,
+    'AUTH_REQUIRE_TOKENS': True,
     'API': False,
-    'WEB_API': '/api',
     'API_TOKEN': None,
     'FULL_TEXT_SEARCH': 'en',
     'FULL_TEXT_SEARCH_ATTACHMENTS': False,
@@ -87,6 +88,12 @@ DEFAULT_CONFIG = {
     'SESSION_TIMEOUT': 3600,
     'PERMANENT_SESSION_LIFETIME': 30*24*3600,
     'SESSION_COOKIE_SECURE': None,
+    'PASSKEY_RP_ID': '',
+    'PASSKEY_REQUIRED': False,
+    'ACCOUNT_SETUP_TOKEN_TTL': 7 * 24 * 3600,
+    'OAUTH2_ACCESS_TOKEN_TTL': 24 * 3600,
+    'OAUTH2_REFRESH_TOKEN_TTL': 90 * 24 * 3600,
+    'OAUTH2_REFRESH_TOKEN_IDLE': 7 * 24 * 3600,
     'CREDENTIAL_ROUNDS': 13,
     'TLS_PERMISSIVE': True,
     'TZ': 'Etc/UTC',
@@ -98,6 +105,7 @@ DEFAULT_CONFIG = {
     'PROXY_AUTH_LOGOUT_URL': None,
     'SUBNET': '192.168.203.0/24',
     'SUBNET6': None,
+    'WEBDAV': 'none',
 }
 
 class ConfigManager:
@@ -123,11 +131,7 @@ class ConfigManager:
             return os.environ.get(key, value)
 
     def __coerce_value(self, value):
-        if isinstance(value, str) and value.lower() in ('true','yes'):
-            return True
-        elif isinstance(value, str) and value.lower() in ('false', 'no'):
-            return False
-        return value
+        return parse_bool(value, value)
 
     def init_app(self, app):
         # get current app config
@@ -141,6 +145,27 @@ class ConfigManager:
             key: self.__coerce_value(self.__get_env(key, value))
             for key, value in DEFAULT_CONFIG.items()
         })
+        self.config.update(WEB_ADMIN='/admin', WEB_WEBMAIL='/webmail', WEB_API='/api')
+        self.config['ACCOUNT_SETUP_TOKEN_TTL'] = int(
+            self.config['ACCOUNT_SETUP_TOKEN_TTL'],
+        )
+        self.config['OAUTH2_REFRESH_TOKEN_TTL'] = int(
+            self.config['OAUTH2_REFRESH_TOKEN_TTL'],
+        )
+        self.config['OAUTH2_ACCESS_TOKEN_TTL'] = int(
+            self.config['OAUTH2_ACCESS_TOKEN_TTL'],
+        )
+        self.config['OAUTH2_REFRESH_TOKEN_IDLE'] = int(
+            self.config['OAUTH2_REFRESH_TOKEN_IDLE'],
+        )
+        if self.config['OAUTH2_REFRESH_TOKEN_TTL'] <= 0:
+            raise ValueError('OAUTH2_REFRESH_TOKEN_TTL must be a positive number of seconds')
+        if self.config['OAUTH2_ACCESS_TOKEN_TTL'] <= 0:
+            raise ValueError('OAUTH2_ACCESS_TOKEN_TTL must be a positive number of seconds')
+        if self.config['OAUTH2_REFRESH_TOKEN_IDLE'] <= 0:
+            raise ValueError('OAUTH2_REFRESH_TOKEN_IDLE must be a positive number of seconds')
+        self.config['QUARANTINE_RETENTION_DAYS'] = int(self.config['QUARANTINE_RETENTION_DAYS'])
+        self.config['QUARANTINE_MAX_MESSAGE_BYTES'] = int(self.config['QUARANTINE_MAX_MESSAGE_BYTES'])
 
         # automatically set the sqlalchemy string
         if self.config['DB_FLAVOR']:
@@ -179,6 +204,13 @@ class ConfigManager:
         hostnames = [host.strip() for host in self.config['HOSTNAMES'].split(',')]
         self.config['HOSTNAMES'] = ','.join(hostnames)
         self.config['HOSTNAME'] = hostnames[0]
+        oauth2_scheme = 'http' if self.config['TLS_FLAVOR'] == 'notls' else 'https'
+        self.config['OAUTH2_ISSUER'] = f"{oauth2_scheme}://{self.config['HOSTNAME']}"
+        oauth2_prefix = f"{self.config['WEB_ADMIN'].rstrip('/')}/oauth2"
+        self.config['OAUTH2_AUTH_URL'] = f"{self.config['OAUTH2_ISSUER']}{oauth2_prefix}/authorize"
+        self.config['OAUTH2_TOKEN_URL'] = f"{self.config['OAUTH2_ISSUER']}{oauth2_prefix}/token"
+        self.config['OAUTH2_CLIENT_ID'] = 'mailu'
+        self.config['OAUTH2_SCOPE'] = 'imap smtp pop3 sieve offline_access'
         self.config['DEFAULT_SPAM_THRESHOLD'] = int(self.config['DEFAULT_SPAM_THRESHOLD'])
         self.config['ANONMAIL_MAX_RETRIES'] = int(self.config['ANONMAIL_MAX_RETRIES'])
         self.config['PROXY_AUTH_WHITELIST'] = set(ipaddress.ip_network(cidr, False) for cidr in (cidr.strip() for cidr in self.config['PROXY_AUTH_WHITELIST'].split(',')) if cidr)

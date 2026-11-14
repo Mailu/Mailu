@@ -3,7 +3,28 @@
   opacity: .8;
 }
 .bg-mailu-logo {
-  background-color: #2980b9!important;
+  background-color: #2471a3!important;
+}
+.sidebar-brand .brand-text {
+  color: white;
+}
+.sidebar-menu .nav-header {
+  color: #6cb6e8!important;
+}
+
+/* Keep appearance and language controls aligned across the navbar and sign-in page. */
+.mailu-icon-control {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 2.5rem;
+  height: 2.5rem;
+  justify-content: center;
+  padding: 0 !important;
+  width: 2.5rem;
+}
+.mailu-icon-control > i {
+  font-size: 1.25rem;
+  line-height: 1;
 }
 
 /* user image */
@@ -15,7 +36,7 @@
   background-color: white;
   border-radius: 50%;
 }
-.div-circle > i {
+.div-circle > svg {
   display: block;
   position: absolute;
   top: 50%;
@@ -32,34 +53,216 @@
   border-radius: 4px;
 }
 
+.antispam-frame {
+  border: 0;
+  display: block;
+  height: calc(100dvh - 13rem);
+  min-height: 20rem;
+  width: 100%;
+}
+
 /* fieldset */
 legend {
   font-size: inherit;
 }
-fieldset:disabled :not(legend) label {
-  opacity: .5;
+fieldset > legend .form-check {
+  margin-left: -.5rem;
 }
-fieldset:disabled .form-control:disabled {
-  color: gray;
+fieldset:disabled label,
+.form-check-input:disabled ~ .form-check-label {
+  color: var(--bs-secondary-color);
+  opacity: 1;
+}
+.form-control:disabled,
+.form-select:disabled {
+  color: var(--bs-secondary-color);
+}
+[data-bs-theme="dark"] .text-danger {
+  color: var(--bs-danger-text-emphasis) !important;
+}
+[data-bs-theme="dark"] .text-success {
+  color: var(--bs-success-text-emphasis) !important;
 }
 
 /* fix animation for icons in menu text */
-.sidebar .nav-link p i {
+.sidebar-wrapper .nav-link p svg {
   transition: margin-left .3s linear,opacity .3s ease,visibility .3s ease;
 }
-
-/* fix select2 text color */
-.select2-container--default .select2-selection--multiple .select2-selection__choice {
-  color: black;
+.sidebar-wrapper .nav-link {
+  align-items: center;
 }
 
-/* range input spacing */
-.input-group-text {
-  margin-right: 1em;
+.user-panel {
+  align-items: center;
+  border-bottom: 1px solid var(--bs-border-color-translucent);
+  padding: 1rem .5rem;
+}
+.user-panel .info {
+  overflow: hidden;
+  padding-left: .75rem;
+  text-overflow: ellipsis;
+}
+.user-panel .info a {
+  color: rgba(255, 255, 255, .8);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* Keep disabled users visibly distinct while respecting the active color mode. */
+.table tr.user-disabled {
+  --bs-table-bg: var(--bs-secondary-bg);
+  --bs-table-color: var(--bs-secondary-color);
+}
+
+/* keep Tom Select aligned with regular Bootstrap controls */
+.ts-wrapper {
+  width: 100%;
+}
+
+.mailu-login-destinations .btn {
+  flex: 1 1 50%;
+  padding: .6rem .75rem;
+  font-weight: 600;
+}
+.input-group > .quota-amount {
+  flex: 0 0 7rem;
+  width: 7rem;
+}
+.input-group > [data-quota-unit] {
+  flex: 0 0 5rem;
+  width: 5rem;
+}
+.mailu-table-sort {
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-align: inherit;
+}
+.mailu-table-sort::after {
+  content: "\00a0\2195";
+  opacity: .35;
+}
+th[aria-sort="ascending"] .mailu-table-sort::after {
+  content: "\00a0\2191";
+  opacity: 1;
+}
+th[aria-sort="descending"] .mailu-table-sort::after {
+  content: "\00a0\2193";
+  opacity: 1;
 }
 
 /* version string */
 .mailu-version {
   font-size: 60%;
   line-height: 0;
+}
+
+/* Shared task layouts */
+.mailu-signin { min-height: 100dvh; display: flex; flex-direction: column; padding: 2rem 1rem; }
+.mailu-signin-main { width: 100%; max-width: 31rem; margin: auto; flex-shrink: 0; }
+.mailu-signin-brand { display: flex; align-items: center; justify-content: center; gap: .8rem; margin-bottom: 2rem; color: var(--bs-body-color); font-size: 1.5rem; }
+.mailu-signin .card { border-radius: 1rem; }
+.form, .mailu-composer { width: 100%; max-width: none; }
+.form .form-control:not(textarea) { min-height: 2.6rem; }
+.form .form-text { margin-bottom: .4rem; }
+.form label { font-weight: 500; margin-bottom: .35rem; }
+
+.mailu-composer .ql-editor { min-height: 20rem; font: inherit; }
+.mailu-composer .ql-container { height: auto; }
+.mailu-composer .ql-toolbar.ql-snow, .mailu-composer .ql-container.ql-snow { border-color: var(--bs-border-color); }
+/* Reuse Bootstrap's palette for widgets that ship with hardcoded colors. */
+.mailu-composer .ql-snow .ql-picker,
+.mailu-composer .ql-snow .ql-picker.ql-expanded .ql-picker-label { color: var(--bs-body-color); }
+.mailu-composer .ql-snow .ql-picker-options,
+.mailu-composer .ql-snow .ql-tooltip,
+.mailu-composer .ql-snow .ql-tooltip input[type=text] {
+  background-color: var(--bs-body-bg);
+  border-color: var(--bs-border-color);
+  color: var(--bs-body-color);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+.mailu-composer .ql-toolbar.ql-snow .ql-picker.ql-expanded :is(.ql-picker-label, .ql-picker-options) { border-color: var(--bs-border-color); }
+.mailu-composer .ql-editor.ql-blank::before { color: var(--bs-secondary-color); }
+.mailu-composer .ql-snow a { color: var(--bs-link-color); }
+/* Outrank Snow's state selectors even though composer.css loads after app.css. */
+.mailu-composer .ql-toolbar.ql-snow :is(button:hover, button:focus, button.ql-active, .ql-picker-label:hover, .ql-picker-label.ql-active, .ql-picker-item:hover, .ql-picker-item.ql-selected) { color: var(--bs-link-color); }
+/* Quill sets icon colors separately for each hover/focus/selected state. */
+.mailu-composer .ql-snow :is(.ql-stroke, .ql-stroke-miter) { stroke: currentColor !important; }
+.mailu-composer .ql-snow .ql-fill { fill: currentColor !important; }
+.ts-wrapper :is(.ts-control, .ts-control input, .ts-dropdown) { color: var(--bs-body-color); }
+.ts-wrapper.multi .ts-control > div { background: var(--bs-secondary-bg); color: var(--bs-body-color); }
+.ts-wrapper.multi .ts-control > div.active { background: var(--bs-primary); color: var(--bs-white); }
+.ts-wrapper.multi.disabled .ts-control > div,
+.ts-wrapper.multi.disabled .ts-control > div.active { background: var(--bs-secondary-bg); color: var(--bs-secondary-color); }
+.ts-dropdown :is(.optgroup-header, .create) { color: var(--bs-secondary-color); }
+[data-bs-theme="dark"] .ts-dropdown [data-selectable] .highlight { background: var(--bs-primary-bg-subtle); color: var(--bs-primary-text-emphasis); }
+.mailu-row-actions summary, details > summary { cursor: pointer; }
+.mailu-row-actions a { white-space: nowrap; text-decoration: none; padding: .3rem .25rem; }
+.mailu-message { overflow-wrap: anywhere; }
+.table td { vertical-align: middle; }
+.table td:first-child { overflow-wrap: anywhere; }
+.sidebar-menu .nav-link[aria-current="page"] { background: var(--bs-primary); color: white; }
+:focus-visible { outline: 3px solid var(--bs-primary); outline-offset: 3px; }
+@media (max-width: 575.98px) {
+  .app-content-header .row { gap: .75rem; }
+  .app-content-header .float-end { float: none !important; }
+  .mailu-table-search { width: 100%; }
+  .mailu-table-search input { flex: 1; min-width: 0; }
+  .mailu-signin { padding: 1rem; }
+}
+
+/* Keep short domain values compact; give the remaining width to names/comments. */
+.mailu-domain-table th:not(:first-child),
+.mailu-domain-table td:not(:first-child) { width: 1%; white-space: nowrap; }
+.mailu-domain-table td:first-child { min-width: 12rem; }
+.mailu-domain-table td { padding: .4rem .6rem; }
+.mailu-domain-comment { max-width: 36rem; overflow-wrap: anywhere; }
+.mailu-count-link { display: inline-block; padding: .3rem .15rem; font-variant-numeric: tabular-nums; text-decoration: none; }
+.mailu-count-link:hover { text-decoration: underline; }
+.mailu-domain-actions { display: flex; align-items: center; gap: .35rem; }
+
+#reply-calendar {
+  font-size: .875rem;
+  --fc-monarch-background: var(--bs-body-bg);
+  --fc-monarch-foreground: var(--bs-body-color);
+  --fc-monarch-faint-foreground: var(--bs-secondary-color);
+  --fc-monarch-muted-foreground: var(--bs-secondary-color);
+  --fc-monarch-border: var(--bs-border-color);
+  --fc-monarch-strong-border: var(--bs-border-color);
+  --fc-monarch-primary: var(--bs-primary);
+  --fc-monarch-primary-foreground: var(--bs-white);
+  --fc-monarch-event: var(--bs-primary);
+  --fc-monarch-event-contrast: var(--bs-white);
+  --fc-monarch-popover: var(--bs-body-bg);
+  --fc-monarch-popover-foreground: var(--bs-body-color);
+  --fc-monarch-secondary: var(--bs-primary-bg-subtle);
+  --fc-monarch-secondary-foreground: var(--bs-primary-text-emphasis);
+  --fc-monarch-secondary-over: var(--bs-secondary-bg);
+  --fc-monarch-secondary-down: var(--bs-tertiary-bg);
+}
+#reply-calendar .fc-toolbar-title { font-size: 1.1rem; }
+#reply-calendar .fc-daygrid-day { cursor: crosshair; }
+[data-autoreply] .ql-editor { min-height: 20rem; }
+[data-autoreply] .card.h-100 { margin-bottom: 0; }
+
+.mailu-user-actions { display: flex; flex-wrap: wrap; gap: .35rem; min-width: 22rem; }
+.mailu-user-actions .btn { white-space: nowrap; }
+
+[data-autoreply] [hidden] { display: none !important; }
+
+/* Give settings one consistent rhythm across cards and disclosure sections. */
+.form.mailu-settings { max-width: none; width: 100%; display: flex; flex-direction: column; gap: 1.5rem; }
+.mailu-settings .card { margin-bottom: 0; }
+.mailu-settings > .mb-3 { margin-bottom: 0 !important; }
+.form-range { cursor: pointer; }
+.form-range:disabled { cursor: default; }
+.input-group > .form-range { flex: 1 1 auto; width: 1%; min-width: 6rem; height: 2.6rem; padding: .75rem; border: var(--bs-border-width) solid var(--bs-border-color); background-color: var(--bs-body-bg); }
+@media (min-width: 992px) {
+  .sidebar-mini.sidebar-collapse .user-panel .info { display: none; }
+  .sidebar-mini.sidebar-collapse .user-panel { justify-content: center; padding-inline: 0; }
+  .sidebar-mini.sidebar-collapse .sidebar-brand .brand-link { justify-content: center; padding-inline: 0; }
+  .sidebar-mini.sidebar-collapse .sidebar-brand .brand-image { margin: 0; }
 }

@@ -1,12 +1,21 @@
 {%- extends "base_sso.html" %}
-
-{%- block content %}
-{%- call macros.card() %}
-<form class="form" method="post" role="form">
+{% block content %}
+<form class="form" method="post">
   {{ form.hidden_tag() }}
+  <fieldset class="mb-4{% if form.destination.choices|length < 2 %} d-none{% endif %}">
+    <legend class="form-label small text-body-secondary mb-2">{{ form.destination.label.text }}</legend>
+    <div class="btn-group w-100 mailu-login-destinations" role="group" aria-label="{{ form.destination.label.text }}">
+      {% for choice in form.destination %}
+      {{ choice(class_="btn-check", autocomplete="off") }}
+      {{ choice.label(class_="btn btn-outline-primary") }}
+      {% endfor %}
+    </div>
+  </fieldset>
   {{ macros.form_field(form.email) }}
-  {{ macros.form_field(form.pw) }}
-  {{ macros.form_fields(fields, label=False, class="btn btn-default") }}
+  {% if not config['PASSKEY_REQUIRED'] %}<div id="password-field">{{ macros.form_field(form.pw) }}</div>{% endif %}
+  <div class="d-grid gap-3 mt-4">
+    {% if not config['PASSKEY_REQUIRED'] %}{{ form.submit(class_="btn btn-primary") }}{% endif %}
+    {% block extra_login_options %}{% endblock %}
+  </div>
 </form>
-{%- endcall %}
-{%- endblock %}
+{% endblock %}

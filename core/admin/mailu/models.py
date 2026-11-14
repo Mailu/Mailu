@@ -3,12 +3,14 @@
 
 import os
 import json
+import base64
+import hashlib
 import secrets
 import sqlite3
 import uuid
 
-from datetime import date, datetime, timezone
-from email.mime import text
+from datetime import date, datetime, timedelta, timezone
+from email.mime import text, multipart
 from itertools import chain
 
 import flask_sqlalchemy
@@ -30,7 +32,7 @@ from sqlalchemy.ext import declarative
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.attributes import flag_modified
-from sqlalchemy import event
+from sqlalchemy.orm import validates
 from werkzeug.utils import cached_property
 
 from mailu import dkim, utils
@@ -41,6 +43,10 @@ logging.getLogger('passlib').setLevel(logging.ERROR)
 
 
 db = flask_sqlalchemy.SQLAlchemy()
+
+def _new_dovecot_uid():
+    # Keep virtual mailbox IDs away from the low system-account range.
+    return 100000 + secrets.randbelow(2_000_000_000 - 100000)
 
 
 def _sql_variable_enabled(value):
@@ -278,12 +284,6 @@ class Config(Base):
     value = db.Column(JSONEncoded)
 
 
-def _save_dkim_keys(session):
-    """ store DKIM keys after commit """
-    for obj in session.identity_map.values():
-        if isinstance(obj, Domain):
-            obj.save_dkim_key()
-
 def _get_managers():
     return managers
 
@@ -299,31 +299,47 @@ class Domain(Base):
         backref=db.backref('manager_of'), lazy='dynamic')
     max_users = db.Column(db.Integer, nullable=False, default=-1)
     max_aliases = db.Column(db.Integer, nullable=False, default=-1)
+    # Maximum quota assigned to each mailbox in the domain (0 = unlimited).
     max_quota_bytes = db.Column(db.BigInteger, nullable=False, default=0)
+    # Best-effort aggregate limit across all mailboxes in the domain (0 = unlimited).
+    max_domain_quota_bytes = db.Column(db.BigInteger, nullable=False, default=0)
     signup_enabled = db.Column(db.Boolean, nullable=False, default=False)
     # Anonymous Email Service integration: enable domain to accept API-generated aliases
     anonmail_enabled = db.Column(db.Boolean, nullable=False, default=False)
 
-    _dkim_key = None
-    _dkim_key_on_disk = None
+    dkim_keys = db.relationship('DkimKey', back_populates='domain', cascade='all, delete-orphan', order_by='DkimKey.selector')
 
-    def _dkim_file(self):
-        """ return filename for active DKIM key """
-        return app.config['DKIM_PATH'].format(
-            domain=self.name,
-            selector=app.config['DKIM_SELECTOR']
-        )
+    # WebAuthn passkey policy
+    passkey_require_enrollment = db.Column(db.Boolean, nullable=False, default=False)
+    passkey_enforce_aaguid = db.Column(db.Boolean, nullable=False, default=False)
+    passkey_aaguid_mode = db.Column(db.String(8), nullable=False, default='allow')
+    passkey_aaguids = db.Column(db.Text, nullable=False, default='')
+    passkey_require_uv = db.Column(db.Boolean, nullable=False, default=True)
+    passkey_backup_eligible_policy = db.Column(db.String(8), nullable=False, default='optional')
+    passkey_backup_state_policy = db.Column(db.String(8), nullable=False, default='optional')
+    passkey_require_sign_count_increase = db.Column(db.Boolean, nullable=False, default=False)
+    passkey_attestation_policy = db.Column(db.String(8), nullable=False, default='optional')
+    passkey_device_bound = db.Column(db.Boolean, nullable=False, default=False)
+    passkey_resident_key = db.Column(db.String(16), nullable=False, default='preferred')
 
-    def save_dkim_key(self):
-        """ save changed DKIM key to disk """
-        if self._dkim_key != self._dkim_key_on_disk:
-            file_path = self._dkim_file()
-            if self._dkim_key:
-                with open(file_path, 'wb') as handle:
-                    handle.write(self._dkim_key)
-            elif os.path.exists(file_path):
-                os.unlink(file_path)
-            self._dkim_key_on_disk = self._dkim_key
+    def _import_legacy_dkim_key(self):
+        """Import the historical filesystem key once, preserving its old selector."""
+        path = app.config['DKIM_PATH'].format(domain=self.name, selector=app.config['DKIM_SELECTOR'])
+        backup_path = f'{path}.bak'
+        if os.path.exists(backup_path):
+            return
+        try:
+            with open(path, 'rb') as key_file:
+                key = key_file.read()
+        except OSError:
+            return
+
+        selector = app.config['DKIM_SELECTOR']
+        if not any(existing.selector == selector for existing in self.dkim_keys):
+            self.dkim_keys.append(DkimKey(private_key=key, algorithm='rsa', active=not any(k.active for k in self.dkim_keys),
+                selector=selector))
+        db.session.commit()
+        os.replace(path, backup_path)
 
     @cached_property
     def dns_mx(self):
@@ -340,9 +356,8 @@ class Domain(Base):
     @property
     def dns_dkim(self):
         """ return DKIM record for domain """
-        if self.dkim_key:
-            selector = app.config['DKIM_SELECTOR']
-            return f'{selector}._domainkey.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN TXT "v=DKIM1; k=rsa; p={self.dkim_publickey}"'
+        if self.dkim_keys:
+            return '\n'.join(key.dns_record(self.name) for key in self.dkim_keys)
 
     @cached_property
     def dns_dmarc(self):
@@ -369,27 +384,30 @@ class Domain(Base):
 
     @cached_property
     def dns_autoconfig(self):
-        """ return list of auto configuration records (RFC6186) """
-        ports = {int(port.strip()) for port in app.config['PORTS'].split(',')}.union({465, 993})
+        """Return legacy autoconfig aliases and WebDAV discovery records."""
         hostname = app.config['HOSTNAME']
-        protocols = [
-            ('imap', 143, 20),
-            ('pop3', 110, 20),
-            ('submission', 587, 20),
-        ]
-        if app.config['TLS_FLAVOR'] != 'notls':
-            protocols.extend([
-                ('autodiscover', 443, 10),
-                ('submissions', 465, 10),
-                ('imaps', 993, 10),
-                ('pop3s', 995, 10),
-            ])
+        webdav_records = []
+        if app.config['WEBDAV'] == 'radicale':
+            if app.config['TLS_FLAVOR'] == 'notls':
+                webdav_protocols = (('carddav', 80), ('caldav', 80))
+            else:
+                webdav_protocols = (('carddavs', 443), ('caldavs', 443))
+            ports = {int(port.strip()) for port in app.config['PORTS'].split(',')}
+            domain = idna.encode(self.name.lower()).decode("ascii")
+            target = idna.encode(hostname.lower()).decode("ascii")
+            for proto, port in webdav_protocols:
+                srv_target = f'10 1 {port} {target}.' if port in ports else '0 0 0 .'
+                webdav_records.append(
+                    f'_{proto}._tcp.{domain}. 600 IN SRV {srv_target}'
+                )
+                webdav_records.append(
+                    f'_{proto}._tcp.{domain}. 600 IN TXT "path=/webdav/"'
+                )
 
-        return [
-            f'_{proto}._tcp.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN SRV {prio} 1 {port} {hostname}.' if port in ports else f'_{proto}._tcp.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN SRV 0 0 0 .'
-            for proto, port, prio
-            in protocols
-        ]+[f'autoconfig.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN CNAME {idna.encode(hostname.lower()).decode('ascii')}.', f'autodiscover.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN CNAME {idna.encode(hostname.lower()).decode('ascii')}.']
+        return webdav_records + [
+            f'autoconfig.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN CNAME {idna.encode(hostname.lower()).decode("ascii")}.',
+            f'autodiscover.{idna.encode(self.name.lower()).decode("ascii")}. 600 IN CNAME {idna.encode(hostname.lower()).decode("ascii")}.'
+        ]
 
     @cached_property
     def dns_tlsa(self):
@@ -401,40 +419,42 @@ class Domain(Base):
                 f'_25._tcp.{idna.encode(hostname.lower()).decode('ascii')}. 86400 IN TLSA 2 1 1 0b9fa5a59eed715c26c1020c711b4f6ec42d58b0015e14337a39dad301c5afc3',
                 # current ISRG Root X2 (ECDSA P-384, O = Internet Security Research Group, CN = ISRG Root X2) @20240311
                 f'_25._tcp.{idna.encode(hostname.lower()).decode('ascii')}. 86400 IN TLSA 2 1 1 762195c225586ee6c0237456e2107dc54f1efc21f61a792ebd515913cce68332',
+                # future ISRG Root YE (ECDSA P-384, O = Internet Security Research Group, CN = ISRG Root YE) @20260925
+                f'_25._tcp.{idna.encode(hostname.lower()).decode('ascii')}. 86400 IN TLSA 2 1 1 b0292ae545978e0fbb98abbd94c861605e5b18bb32ed523f50d5b7b5c71d47bc',
+                # future ISRG Root YR (RSA 4096, O = Internet Security Research Group, CN = ISRG Root XY) @20260925
+                f'_25._tcp.{idna.encode(hostname.lower()).decode('ascii')}. 86400 IN TLSA 2 1 1 7e4e8838a8add6295de7ae3b047d3aba3488ab95db0a0aa56d897a00d8618bcf',
             ]
         return []
 
     @property
     def dkim_key(self):
         """ return private DKIM key """
-        if self._dkim_key is None:
-            file_path = self._dkim_file()
-            if os.path.exists(file_path):
-                with open(file_path, 'rb') as handle:
-                    self._dkim_key = self._dkim_key_on_disk = handle.read()
-            else:
-                self._dkim_key = self._dkim_key_on_disk = b''
-        return self._dkim_key if self._dkim_key else None
+        key = next((key for key in self.dkim_keys if key.active), None)
+        return key.private_key if key else None
 
     @dkim_key.setter
     def dkim_key(self, value):
         """ set private DKIM key """
-        old_key = self.dkim_key
-        self._dkim_key = value if value is not None else b''
-        if self._dkim_key != old_key:
-            if not sqlalchemy.event.contains(db.session, 'after_commit', _save_dkim_keys):
-                sqlalchemy.event.listen(db.session, 'after_commit', _save_dkim_keys)
+        if value is None:
+            return
+        key = next((key for key in self.dkim_keys if key.active), None)
+        if key:
+            key.private_key = value
+        else:
+            self.dkim_keys.append(DkimKey.create(self, value, 'rsa', active=True))
 
     @property
     def dkim_publickey(self):
         """ return public part of DKIM key """
-        dkim_key = self.dkim_key
-        if dkim_key:
-            return dkim.strip_key(dkim_key).decode('utf8')
+        key = next((key for key in self.dkim_keys if key.active), None)
+        if key:
+            return key.public
 
-    def generate_dkim_key(self):
-        """ generate new DKIM key """
-        self.dkim_key = dkim.gen_key()
+    def generate_dkim_key(self, algorithm='rsa', active=True):
+        """Generate a DKIM key, optionally leaving it staged for rotation."""
+        key = DkimKey.create(self, dkim.gen_ed25519_key() if algorithm == 'ed25519' else dkim.gen_key(), algorithm, active)
+        self.dkim_keys.append(key)
+        return key
 
     def has_email(self, localpart):
         """ checks if localpart is configured for domain """
@@ -471,9 +491,8 @@ class Alternative(Base):
     @property
     def dns_dkim(self):
         """ return DKIM record for domain """
-        if self.domain.dkim_key:
-            selector = app.config['DKIM_SELECTOR']
-            return f'{selector}._domainkey.{idna.encode(self.name.lower()).decode('ascii')}. 600 IN TXT "v=DKIM1; k=rsa; p={self.domain.dkim_publickey}"'
+        if self.domain.dkim_keys:
+            return '\n'.join(key.dns_record(self.name) for key in self.domain.dkim_keys)
 
     @cached_property
     def dns_dmarc(self):
@@ -520,6 +539,38 @@ class Alternative(Base):
             )
         except dns.exception.DNSException:
             return False
+
+
+class DkimKey(Base):
+    """A database-backed signing key, retained while staged or retired."""
+
+    __tablename__ = 'dkim_key'
+
+    id = db.Column(db.Integer, primary_key=True)
+    domain_name = db.Column(IdnaDomain, db.ForeignKey('domain.name', ondelete='CASCADE'), nullable=False, index=True)
+    selector = db.Column(db.String(32), nullable=False)
+    algorithm = db.Column(db.String(16), nullable=False, default='rsa')
+    private_key = db.Column(db.LargeBinary, nullable=False)
+    active = db.Column(db.Boolean, nullable=False, default=False)
+    retired = db.Column(db.Boolean, nullable=False, default=False)
+    domain = db.relationship('Domain', back_populates='dkim_keys')
+    __table_args__ = (db.UniqueConstraint('domain_name', 'selector'),)
+
+    @classmethod
+    def create(cls, domain, private_key, algorithm, active=False):
+        return cls(domain_name=domain.name, private_key=private_key, algorithm=algorithm,
+            active=active, selector=dkim.selector(private_key, algorithm))
+
+    @property
+    def public(self):
+        return dkim.public_key(self.private_key, self.algorithm)
+
+    def dns_record(self, domain_name):
+        name = idna.encode(domain_name.lower()).decode('ascii')
+        record = f'{self.selector}._domainkey.{name}. 600 IN TXT'
+        txt = f'v=DKIM1; k={self.algorithm}; p={self.public}'
+        chunks = [f'"{txt[pos:pos + 250]}"' for pos in range(0, len(txt), 250)]
+        return f'{record} {" ".join(chunks)}'
 
 
 class Relay(Base):
@@ -604,6 +655,8 @@ class Email(object):
         # email local parts are case-insensitive: keep them lowercased so the
         # localpart stays in sync with the (lowercased) email primary key (#2695)
         value = value.lower() if value else value
+        if not utils.is_valid_localpart(value):
+            raise ValueError('invalid email local part')
         if target.domain_name:
             target._email = f'{value}@{target.domain_name}'
         return value
@@ -619,26 +672,32 @@ class Email(object):
         sqlalchemy.event.listen(cls.localpart, 'set', cls._update_localpart, propagate=True, retval=True)
         sqlalchemy.event.listen(cls.domain_name, 'set', cls._update_domain_name, propagate=True)
 
-    def sendmail(self, subject, body):
+    def sendmail(self, subject, body, *, html_body=None):
         """ send an email to the address """
         try:
             f_addr = f'{app.config["POSTMASTER"]}@{idna.encode(app.config["DOMAIN"]).decode("ascii")}'
             with smtplib.LMTP(host=app.config['FRONT_ADDRESS'], port=2525) as lmtp:
                 to_address = f'{self.localpart}@{idna.encode(self.domain_name).decode("ascii")}'
-                msg = text.MIMEText(body)
+                if html_body is None:
+                    msg = text.MIMEText(body, 'plain', 'utf-8')
+                else:
+                    msg = multipart.MIMEMultipart('alternative')
+                    msg.attach(text.MIMEText(body, 'plain', 'utf-8'))
+                    msg.attach(text.MIMEText(html_body, 'html', 'utf-8'))
                 msg['Subject'] = subject
                 msg['From'] = f_addr
                 msg['To'] = to_address
                 lmtp.sendmail(f_addr, [to_address], msg.as_string())
             return True
-        except smtplib.SMTPException:
+        except (smtplib.SMTPException, OSError):
+            app.logger.exception("Message delivery failed for %s", self.email)
             return False
 
     @classmethod
     def resolve_domain(cls, email):
         """ resolves domain alternative to real domain """
         localpart, domain_name = email.rsplit('@', 1) if '@' in email else (None, email)
-        if alternative := Alternative.query.get(domain_name):
+        if alternative := db.session.get(Alternative, domain_name):
             domain_name = alternative.domain_name
         return (localpart, domain_name)
 
@@ -666,9 +725,9 @@ class Email(object):
                 localpart_stripped = localpart[:pos]
 
         # is localpart@domain_name or localpart_stripped@domain_name an user?
-        user = User.query.get(f'{localpart}@{domain_name}')
+        user = db.session.get(User, f'{localpart}@{domain_name}')
         if not user and localpart_stripped:
-            user = User.query.get(f'{localpart_stripped}@{domain_name}')
+            user = db.session.get(User, f'{localpart_stripped}@{domain_name}')
 
         if user:
             email = f'{localpart}@{domain_name}'
@@ -700,6 +759,43 @@ class Email(object):
 
         return None
 
+    @classmethod
+    def resolve_mailboxes(cls, address, seen=None):
+        """Resolve an address through aliases and forwards to local mailboxes."""
+        if not isinstance(address, str) or address.count('@') != 1:
+            return []
+        localpart, domain_name = cls.resolve_domain(address.strip().lower())
+        if not localpart or not db.session.get(Domain, domain_name):
+            return []
+
+        address = f'{localpart}@{domain_name}'.lower()
+        seen = set() if seen is None else seen
+        if address in seen:
+            return []
+        seen.add(address)
+
+        destinations = cls.resolve_destination(localpart, domain_name)
+        if destinations is None:
+            return []
+
+        mailboxes = {}
+        if address in {destination.strip().lower() for destination in destinations
+                       if isinstance(destination, str)}:
+            mailbox = User.get(address)
+            if not mailbox and (delimiters := os.environ.get('RECIPIENT_DELIMITER')):
+                stripped = next((index for index, char in enumerate(localpart)
+                                 if char in delimiters), None)
+                if stripped is not None:
+                    mailbox = User.get(f'{localpart[:stripped]}@{domain_name}')
+            if mailbox:
+                mailboxes[mailbox.email.lower()] = mailbox
+        for destination in destinations:
+            if not isinstance(destination, str) or destination.count('@') != 1:
+                continue
+            for resolved in cls.resolve_mailboxes(destination, seen):
+                mailboxes[resolved.email.lower()] = resolved
+        return list(mailboxes.values())
+
 
 class User(Base, Email):
     """ A user is an email address that has a password to access a mailbox.
@@ -707,6 +803,7 @@ class User(Base, Email):
 
     __tablename__ = 'user'
     ADDRESS_TYPE = 'user'
+    __table_args__ = (db.Index('ix_user_domain_name', 'domain_name'),)
     _ctx = None
     _credential_cache = {}
 
@@ -739,6 +836,8 @@ class User(Base, Email):
     )
     quota_bytes = db.Column(db.BigInteger, nullable=False, default=10**9)
     quota_bytes_used = db.Column(db.BigInteger, nullable=False, default=0)
+    # Stable Unix identity used by Dovecot for per-mailbox filesystem isolation.
+    dovecot_uid = db.Column(db.Integer, unique=True, nullable=False, default=_new_dovecot_uid)
     global_admin = db.Column(db.Boolean, nullable=False, default=False)
     enabled = db.Column(db.Boolean, nullable=False, default=True)
 
@@ -754,17 +853,23 @@ class User(Base, Email):
     reply_enabled = db.Column(db.Boolean, nullable=False, default=False)
     reply_subject = db.Column(db.String(255), nullable=True, default=None)
     reply_body = db.Column(db.Text, nullable=True, default=None)
+    reply_body_html = db.Column(db.Text, nullable=True)
     reply_startdate = db.Column(db.Date, nullable=False,
         default=date(1900, 1, 1))
     reply_enddate = db.Column(db.Date, nullable=False,
         default=date(2999, 12, 31))
 
     # Settings
+    webmail_preference = db.Column(db.String(32), nullable=True)
     displayed_name = db.Column(db.String(160), nullable=False, default='')
     spam_enabled = db.Column(db.Boolean, nullable=False, default=True)
     spam_mark_as_read = db.Column(db.Boolean, nullable=False, default=True)
     spam_threshold = db.Column(db.Integer, nullable=False, default=lambda:int(app.config.get("DEFAULT_SPAM_THRESHOLD", 80)))
     change_pw_next_login = db.Column(db.Boolean, nullable=False, default=False)
+    passkey_enroll_next_login = db.Column(db.Boolean, nullable=False, default=False)
+    gpg_key = db.Column(db.Text, nullable=True)
+
+    passkeys = db.relationship('Passkey', back_populates='user', cascade='all, delete-orphan')
 
     # Flask-login attributes
     is_authenticated = True
@@ -789,6 +894,33 @@ class User(Base, Email):
             return ','.join(result)
         else:
             return self.email
+
+    @validates('reply_body')
+    def _plain_reply_changed(self, key, value):
+        # Existing API/CLI clients write plain text; discard stale formatting.
+        if value != self.reply_body:
+            self.reply_body_html = None
+        return value
+
+    @validates('reply_body_html')
+    def _formatted_reply_changed(self, key, value):
+        if not value:
+            return None
+        from mailu.announcements import sanitize
+        html, plain = sanitize(value)
+        self.reply_body = plain
+        return html
+
+    @property
+    def reply_mime(self):
+        if not self.reply_body_html:
+            return None
+        # Stable MIME preserves Sieve vacation duplicate suppression across requests.
+        boundary = 'mailu-vacation-' + hashlib.sha256(((self.reply_body or '') + '\0' + self.reply_body_html).encode()).hexdigest()[:32]
+        message = multipart.MIMEMultipart('alternative', boundary=boundary)
+        message.attach(text.MIMEText(self.reply_body or '', 'plain', 'utf-8'))
+        message.attach(text.MIMEText(self.reply_body_html, 'html', 'utf-8'))
+        return message.as_string()
 
     @property
     def reply_active(self):
@@ -820,6 +952,9 @@ class User(Base, Email):
             scheme for scheme in passlib.registry.list_crypt_handlers()
             if not (scheme == 'scrypt' or scheme.endswith('plaintext'))
         ]
+        # Lazy bcrypt initialization can invalidate the first bcrypt_sha256
+        # operation on Python 3.14.
+        passlib.hash.bcrypt_sha256.get_backend()
         cls._ctx = passlib.context.CryptContext(
             schemes=schemes,
             default='bcrypt_sha256',
@@ -886,6 +1021,11 @@ in clear-text regardless of the presence of the cache.
             else User.get_password_context().hash(password)
         )
         self.password = replacement
+        if sqlalchemy.inspect(self).persistent:
+            from mailu.oauth2 import force_user_reauthentication
+            force_user_reauthentication(self, 'password changed')
+        if keep_sessions is not True and self.email is not None:
+            utils.MailuSessionExtension.prune_sessions(uid=self.email, keep=keep_sessions)
 
     def rotate_auth_generation(self):
         """Invalidate every previously issued browser/webmail session."""
@@ -915,13 +1055,73 @@ in clear-text regardless of the presence of the cache.
     @classmethod
     def get(cls, email):
         """ find user object for email address """
-        return cls.query.get(email)
+        return db.session.get(cls, email)
 
     @classmethod
     def login(cls, email, password):
         """ login user when enabled and password is valid """
-        user = cls.query.get(email)
-        return user if (user and user.enabled and user.check_password(password)) else None
+        user = db.session.get(cls, email)
+        return user if (
+            user and user.enabled
+            and not app.config.get('PASSKEY_REQUIRED', False)
+            and not user.passkeys
+            and user.check_password(password)
+        ) else None
+
+
+class WkdKey(Base):
+    """Pre-filtered OpenPGP key material published for a WKD hash."""
+
+    __tablename__ = 'wkd_key'
+    key_hash = db.Column(db.String(32), primary_key=True, nullable=False)
+    domain_name = db.Column(IdnaDomain, primary_key=True, nullable=False)
+    user_email = db.Column(IdnaEmail, db.ForeignKey(User.email, ondelete='CASCADE'), primary_key=True, nullable=False)
+    fingerprint = db.Column(db.String(64), primary_key=True, nullable=False)
+    key_data = db.Column(db.LargeBinary, nullable=False)
+    user = db.relationship(User)
+
+
+def wkd_hash(localpart):
+    digest = hashlib.sha1(localpart.lower().encode('utf-8')).digest()
+    standard = base64.b32encode(digest).decode('ascii').lower().rstrip('=')
+    return standard.translate(str.maketrans(
+        'abcdefghijklmnopqrstuvwxyz234567', 'ybndrfg8ejkmcpqxot1uwisza345h769'))
+
+
+class Passkey(Base):
+    __tablename__ = 'passkey'
+
+    credential_id = db.Column(db.LargeBinary(1023), primary_key=True)
+    user_email = db.Column(db.String(255), db.ForeignKey('user.email', ondelete='CASCADE'), nullable=False, index=True)
+    public_key = db.Column(db.LargeBinary, nullable=False)
+    sign_count = db.Column(db.BigInteger, nullable=False, default=0)
+    aaguid = db.Column(db.String(36), nullable=False)
+    device_bound = db.Column(db.Boolean, nullable=True, default=None)
+    user_verified = db.Column(db.Boolean, nullable=True)
+    user_present = db.Column(db.Boolean, nullable=True)
+    backup_eligible = db.Column(db.Boolean, nullable=True)
+    attestation_format = db.Column(db.String(32), nullable=True)
+    credential_device_type = db.Column(db.String(16), nullable=True)
+    backed_up = db.Column(db.Boolean, nullable=True)
+    last_used_at = db.Column(db.DateTime(timezone=True), nullable=True)
+    name = db.Column(db.String(255), nullable=False, default='')
+    user = db.relationship('User', back_populates='passkeys')
+
+
+class AccountSetupToken(Base):
+    """A short-lived, single-use grant to set an account password or passkey."""
+
+    __tablename__ = 'passkey_enrollment'
+
+    token_hash = db.Column(db.String(64), primary_key=True)
+    user_email = db.Column(db.String(255), db.ForeignKey('user.email', ondelete='CASCADE'), nullable=False, index=True)
+    expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    user = db.relationship('User')
+
+
+# Keep the old Python name for integrations while the existing database table
+# is still named passkey_enrollment.
+PasskeyEnrollment = AccountSetupToken
 
 
 @sqlalchemy.event.listens_for(
@@ -1146,6 +1346,55 @@ for _address_model in (User, Alias):
     )
 
 
+def wkd_addresses_for_user(user, uid_emails):
+    """Authorize only addresses present in the uploaded key's UIDs."""
+    # Load domain alternatives once, including those used by alias destinations.
+    alternatives = dict(db.session.query(Alternative.name, Alternative.domain_name).all())
+
+    def canonical(address):
+        localpart, domain_name = address.lower().rsplit('@', 1)
+        domain_name = idna.decode(idna.encode(domain_name))
+        return f'{localpart}@{alternatives.get(domain_name, domain_name)}'
+
+    target = canonical(user.email)
+    candidates = {address: canonical(address) for address in uid_emails}
+    addresses = {address for address, destination in candidates.items() if destination == target}
+    alias_addresses = set(candidates.values()) - {target}
+    if not alias_addresses:
+        return addresses
+
+    # A mailbox takes precedence over an alias with the same address.
+    mailboxes = {email for email, in db.session.query(User._email).filter(
+        User._email.in_(alias_addresses)).all()}
+    aliases = Alias.query.filter(
+        Alias._email.in_(alias_addresses - mailboxes),
+        Alias.wildcard.is_(False), Alias.disabled.is_(False),
+        sqlalchemy.or_(Alias.owner_email.is_(None), sqlalchemy.exists().where(
+            sqlalchemy.and_(User.email == Alias.owner_email, User.enabled.is_(True)))),
+    ).all()
+    authorized_aliases = {
+        canonical(alias.email) for alias in aliases
+        if any(canonical(destination) == target for destination in alias.destination)
+    }
+    addresses.update(address for address, destination in candidates.items()
+        if destination in authorized_aliases)
+    return addresses
+
+
+def update_wkd_keys(user, uid_keys):
+    """Replace this user's publications with already-authorized binary exports."""
+    WkdKey.query.filter_by(user_email=user.email).delete(synchronize_session=False)
+    for uid_email, fingerprint, key_data in uid_keys:
+        localpart, domain_name = uid_email.rsplit('@', 1)
+        db.session.add(WkdKey(
+            key_hash=wkd_hash(localpart),
+            domain_name=domain_name,
+            user_email=user.email,
+            fingerprint=fingerprint,
+            key_data=key_data,
+        ))
+
+
 class Token(Base):
     """ A token is an application password for a given user.
     """
@@ -1180,6 +1429,58 @@ class Token(Base):
 
     def __repr__(self):
         return f'<Token #{self.id}: {self.comment or self.ip or self.password}>'
+
+
+class OAuth2AuthorizationCode(Base):
+    """One-time, PKCE-bound authorization code for a native mail client."""
+
+    __tablename__ = 'oauth2_authorization_code'
+
+    code_hash = db.Column(db.String(64), primary_key=True)
+    user_email = db.Column(db.String(255), db.ForeignKey(User.email, ondelete='CASCADE'), nullable=False, index=True)
+    user = db.relationship(User, backref=db.backref('oauth2_authorization_codes', cascade='all, delete-orphan'))
+    client_id = db.Column(db.String(80), nullable=False)
+    redirect_uri = db.Column(db.String(2048), nullable=False)
+    scope = db.Column(db.String(255), nullable=False)
+    code_challenge = db.Column(db.String(128), nullable=False)
+    expires_at = db.Column(db.Integer, nullable=False, index=True)
+
+
+class OAuth2Grant(Base):
+    """Revocable OAuth access and refresh tokens for one authorized client."""
+
+    __tablename__ = 'oauth2_grant'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_email = db.Column(db.String(255), db.ForeignKey(User.email, ondelete='CASCADE'), nullable=False, index=True)
+    user = db.relationship(User, backref=db.backref('oauth2_grants', cascade='all, delete-orphan'))
+    grant_id = db.Column(
+        db.String(22), nullable=False, unique=True,
+        default=lambda: secrets.token_urlsafe(16),
+    )
+    client_id = db.Column(db.String(80), nullable=False)
+    token_generation = db.Column(db.Integer, nullable=False, default=0)
+    scope = db.Column(db.String(255), nullable=False)
+    access_expires_at = db.Column(db.Integer, nullable=False, index=True)
+    refresh_expires_at = db.Column(db.Integer, nullable=True, index=True)
+    client_name = db.Column(db.String(120), nullable=False, default='Mail app')
+    last_refresh_at = db.Column(db.Integer, nullable=True)
+
+    @property
+    def access_expiration(self):
+        return datetime.fromtimestamp(self.access_expires_at, timezone.utc)
+
+    @property
+    def last_refresh(self):
+        return datetime.fromtimestamp(self.last_refresh_at, timezone.utc) if self.last_refresh_at else None
+
+    @property
+    def last_token_rotation(self):
+        if self.last_refresh_at:
+            return datetime.fromtimestamp(self.last_refresh_at, timezone.utc)
+        return self.access_expiration - timedelta(
+            seconds=app.config['OAUTH2_ACCESS_TOKEN_TTL'],
+        )
 
 
 class Fetch(Base):
@@ -1250,7 +1551,7 @@ def has_domain_access(domain_name, user=None):
         return True
     
     if user is not None:
-        domain = Domain.query.get(domain_name)
+        domain = db.session.get(Domain, domain_name)
         if domain and domain.managers.filter_by(email=user.email).first():
             return True
 
@@ -2321,7 +2622,17 @@ class MailuConfig:
         db.session.flush()
 
     def check(self):
-        """ check for duplicate domain names """
+        """Check the imported configuration for invalid domain references."""
+        with db.session.no_autoflush:
+            domain_names = {domain.name for domain in self.domain}
+            for collection in (self.user, self.alias):
+                for item in collection:
+                    if item.domain_name not in domain_names:
+                        raise ValueError(
+                            f'{item.__class__.__name__} {item.email!r} refers to '
+                            f'missing domain {item.domain_name!r}'
+                        )
+
         dup = set()
         for fqdn in chain(
             db.session.query(Domain.name),

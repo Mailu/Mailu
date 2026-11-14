@@ -804,3 +804,22 @@ msgstr "Dostępne miejsca"
 #~ msgid "Forward emails"
 #~ msgstr "Przekieruj wiadomości e-mail"
 
+#: mailu/ui/templates/macros.html:105
+msgid "Search"
+msgstr "Szukaj:"
+
+#: mailu/ui/templates/macros.html:106
+msgid "Show _MENU_ entries"
+msgstr "Pokaż _MENU_ pozycji"
+
+#: mailu/ui/templates/macros.html:107
+msgid "No matching records found"
+msgstr "Nie znaleziono pasujących pozycji"
+
+#: mailu/ui/templates/macros.html:108
+msgid "Previous"
+msgstr "Poprzednia"
+
+#: mailu/ui/templates/macros.html:109
+msgid "Next"
+msgstr "Następna"

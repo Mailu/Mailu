@@ -1,0 +1,1 @@
+Enable Rspamd known-sender and MX checks with Redis storage, set known-sender retention to one year, configure reply history with a 90-day expiry, and add Redis-backed IP, DKIM signer, and SPF reputation scoring with 90-day storage expiry.

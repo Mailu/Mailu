@@ -1,0 +1,1 @@
+OAuth discovery and autoconfiguration now use the requested configured hostname. Expired authorization codes and long-expired OAuth grants are cleaned up during admin startup.

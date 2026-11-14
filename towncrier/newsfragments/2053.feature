@@ -1,0 +1,1 @@
+Rejected messages are retained in a 90-day quarantine. Administrators can review all entries, mailbox users can review their own, and authorized users can release messages through internal LMTP delivery.

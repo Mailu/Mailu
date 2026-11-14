@@ -4,6 +4,8 @@
 from copy import deepcopy
 from collections import Counter
 from datetime import timezone
+import base64
+import binascii
 
 import inspect
 import json
@@ -28,10 +30,37 @@ from pygments.lexers import get_lexer_by_name
 from pygments.lexers.data import YamlLexer
 from pygments.formatters import get_formatter_by_name
 
-from mailu import models, dkim
+from mailu import models, dkim, spam_settings
 
 
 ma = Marshmallow()
+
+
+class ContextNested(fields.Nested):
+    def _bind_to_schema(self, field_name, parent):
+        super()._bind_to_schema(field_name, parent)
+        nested = self.nested
+        if isinstance(nested, type) and issubclass(nested, Schema):
+            self.nested = lambda: nested(context=parent.context)
+
+
+class OAuth2ConfigNested(ContextNested):
+    """Expose portable settings, and the OAuth signing key in secret exports."""
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        allowed = {'rspamd_spam_settings'}
+        if self.parent.context.get('secrets'):
+            allowed.add('oauth2_signing_key')
+        items = [item for item in value if item.name in allowed]
+        if not any(item.name == spam_settings.CONFIG_KEY for item in items):
+            items.append(models.Config(
+                name=spam_settings.CONFIG_KEY,
+                value=spam_settings.get_settings(),
+            ))
+        return super()._serialize(
+            sorted(items, key=lambda item: item.name),
+            attr, obj, **kwargs,
+        )
 
 
 ### import logging and schema colorization ###
@@ -110,11 +139,6 @@ class Logger:
             sqlalchemy.event.listen(model, 'after_update', self._listen_update)
             sqlalchemy.event.listen(model, 'after_delete', self._listen_delete)
 
-        # special listener for dkim_key changes
-        # TODO: _listen_dkim can be removed when dkim keys are stored in database
-        self._dedupe_dkim = set()
-        sqlalchemy.event.listen(models.db.session, 'after_flush', self._listen_dkim)
-
         # register debug logger for sqlalchemy
         if self.debug:
             logging.basicConfig()
@@ -187,29 +211,6 @@ class Logger:
         self._counter.update([('Deleted', target.__table__.name)])
         if self.verbose:
             self._log('Deleted', target)
-
-    # TODO: _listen_dkim can be removed when dkim keys are stored in database
-    def _listen_dkim(self, session, flush_context): # pylint: disable=unused-argument
-        """ callback method to track import """
-        for target in session.identity_map.values():
-            # look at Domains originally loaded from db
-            if not isinstance(target, models.Domain) or not target._sa_instance_state.load_path:
-                continue
-            before = target._dkim_key_on_disk
-            after = target._dkim_key
-            # "de-dupe" messages; this event is fired at every flush
-            if before == after or (target, before, after) in self._dedupe_dkim:
-                continue
-            self._dedupe_dkim.add((target, before, after))
-            self._counter.update([('Modified', target.__table__.name)])
-            if self.verbose:
-                if self.secrets:
-                    before = before.decode('ascii', 'ignore')
-                    after = after.decode('ascii', 'ignore')
-                else:
-                    before = HIDDEN if before else ''
-                    after = HIDDEN if after else ''
-                self._log('Modified', target, f'{str(target)!r} dkim_key: {before!r} -> {after!r}')
 
     def track_serialize(self, obj, item, backref=None):
         """ callback method to track import """
@@ -616,6 +617,63 @@ class DkimKeyField(fields.String):
         else:
             return value
 
+class Base64BytesField(fields.String):
+    """Serialize binary key material as portable base64 text."""
+
+    default_error_messages = {'invalid': 'Not a valid base64 encoded value.'}
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        if value is None:
+            return None
+        return base64.b64encode(value).decode('ascii')
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        if not isinstance(value, str):
+            raise self.make_error('invalid')
+        try:
+            return base64.b64decode(value, validate=True)
+        except (binascii.Error, ValueError) as exc:
+            raise self.make_error('invalid') from exc
+
+
+class ConfigValueField(fields.Field):
+    """Encode OAuth key bytes as base64 and pass structured settings through."""
+
+    default_error_messages = {
+        'invalid': 'Invalid config value.',
+        'secret_required': 'Importing the OAuth2 signing key requires --secrets.',
+    }
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        if obj.name == 'oauth2_signing_key':
+            try:
+                key = bytes.fromhex(value)
+            except (TypeError, ValueError) as exc:
+                raise self.make_error('invalid') from exc
+            return base64.b64encode(key).decode('ascii')
+        if obj.name == 'rspamd_spam_settings' and isinstance(value, dict):
+            return value
+        raise self.make_error('invalid')
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        name = data.get('name')
+        if name == 'oauth2_signing_key':
+            if not self.parent.context.get('secrets'):
+                raise self.make_error('secret_required')
+            if not isinstance(value, str):
+                raise self.make_error('invalid')
+            try:
+                key = base64.b64decode(value, validate=True)
+            except (binascii.Error, ValueError) as exc:
+                raise self.make_error('invalid') from exc
+            if len(key) != 32:
+                raise self.make_error('invalid')
+            return key.hex()
+        if name == 'rspamd_spam_settings' and isinstance(value, dict):
+            return value
+        raise self.make_error('invalid')
+
+
 class PasswordField(fields.Str):
     """ Serialize a hashed password hash by stripping the obsolete {SCHEME}
         Deserialize a plain password or hashed password into a hashed password
@@ -683,12 +741,12 @@ class Storage:
 class BaseOpts(SQLAlchemyAutoSchemaOpts):
     """ Option class with sqla session
     """
-    def __init__(self, meta, ordered=False):
+    def __init__(self, meta):
         if not hasattr(meta, 'sqla_session'):
             meta.sqla_session = models.db.session
         if not hasattr(meta, 'sibling'):
             meta.sibling = False
-        super(BaseOpts, self).__init__(meta, ordered=ordered)
+        super(BaseOpts, self).__init__(meta)
 
 class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
     """ Marshmallow base schema with custom exclude logic
@@ -711,7 +769,8 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
         only = set(kwargs.get('only') or [])
 
         # get context
-        context = kwargs.get('context', {})
+        context = kwargs.pop('context', {})
+        self.context = context
         flags = {key for key, value in context.items() if value is True}
 
         # compile excludes
@@ -774,9 +833,10 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
                     fieldlist[field] = fieldlist.pop(field)
 
         # move post_load hook "_add_instance" to the end (after load_instance mixin)
-        hooks = self._hooks[('post_load', False)]
-        hooks.remove('_add_instance')
-        hooks.append('_add_instance')
+        hooks = self._hooks['post_load']
+        add_instance_hook = next(hook for hook in hooks if hook[0] == '_add_instance')
+        hooks.remove(add_instance_hook)
+        hooks.append(add_instance_hook)
 
     def hide(self, data):
         """ helper method to hide input data for logging """
@@ -867,7 +927,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
                 )
         return data
 
-    @pre_load(pass_many=True)
+    @pre_load(pass_collection=True)
     def _patch_many(self, items, many, **kwargs): # pylint: disable=unused-argument
         """ - flush sqla session before serializing a section when requested
               (make sure all objects that could be referred to later are created)
@@ -885,9 +945,10 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
         # the values a newly-created row would receive; do not borrow the
         # merge/list-union semantics used by --update.
         if self.context.get('reconcile'):
-            originals = items if many else [items]
+            is_many = kwargs.get('many', type(items) is list)
+            originals = items if is_many else [items]
             self.store('original', deepcopy(originals))
-            if many:
+            if is_many:
                 return [
                     self._prepare_replacement_item(item)
                     for item in items
@@ -1064,7 +1125,7 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
 
         return data
 
-    @post_load(pass_many=True)
+    @post_load(pass_collection=True)
     def _prune_items(self, items, many, **kwargs): # pylint: disable=unused-argument
         """ handle list pruning """
 
@@ -1197,6 +1258,20 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
 ### schema definitions ###
 
 @mapped
+class DkimKeySchema(BaseSchema):
+    """Marshmallow schema for a database-backed DKIM signing key."""
+    class Meta:
+        model = models.DkimKey
+        load_instance = True
+        include_fk = True
+        exclude = ['domain', 'id']
+        primary_keys = ['domain_name', 'selector']
+
+    private_key = Base64BytesField(required=True)
+    domain_name = fields.String(required=True)
+
+
+@mapped
 class DomainSchema(BaseSchema):
     """ Marshmallow schema for Domain model """
     class Meta:
@@ -1204,6 +1279,8 @@ class DomainSchema(BaseSchema):
         model = models.Domain
         load_instance = True
         include_relationships = True
+        # Domain-bound database relationships stay excluded except for dkim_keys,
+        # which has a schema that encodes its private bytes for secret exports.
         exclude = ['users', 'managers', 'aliases']
 
         # Anonymous Email Service domain flags
@@ -1211,6 +1288,7 @@ class DomainSchema(BaseSchema):
 
         include_by_context = {
             ('dns',): {'dkim_publickey', 'dns_mx', 'dns_spf', 'dns_dkim', 'dns_dmarc'},
+            ('secrets',): {'dkim_keys'},
         }
         hide_by_context = {
             ('secrets',): {'dkim_key'},
@@ -1225,7 +1303,8 @@ class DomainSchema(BaseSchema):
             'dns_dmarc': [None],
         }
 
-    dkim_key = DkimKeyField(allow_none=True)
+    dkim_keys = ContextNested(DkimKeySchema, many=True)
+    dkim_key = DkimKeyField(allow_none=True, load_only=True)
     dkim_publickey = fields.String(dump_only=True)
     dns_mx = fields.String(dump_only=True)
     dns_spf = fields.String(dump_only=True)
@@ -1240,10 +1319,12 @@ class TokenSchema(BaseSchema):
         """ Schema config """
         model = models.Token
         load_instance = True
+        include_fk = True
 
         sibling = True
 
     password = PasswordField(required=True, metadata={'model': models.User})
+    user_email = fields.String(required=True)
     hash_password = fields.Boolean(load_only=True, load_default=False)
 
 
@@ -1254,6 +1335,7 @@ class FetchSchema(BaseSchema):
         """ Schema config """
         model = models.Fetch
         load_instance = True
+        include_fk = True
 
         sibling = True
         include_by_context = {
@@ -1262,6 +1344,34 @@ class FetchSchema(BaseSchema):
         hide_by_context = {
             ('secrets',): {'password'},
         }
+
+    user_email = fields.String(required=True)
+
+
+@mapped
+class PasskeySchema(BaseSchema):
+    """Marshmallow schema for a user's binary WebAuthn credential."""
+    class Meta:
+        model = models.Passkey
+        load_instance = True
+        include_fk = True
+        exclude = ['user']
+
+    credential_id = Base64BytesField(required=True)
+    public_key = Base64BytesField(required=True)
+
+
+@mapped
+class OAuth2GrantSchema(BaseSchema):
+    """Schema for durable OAuth grants; authorization codes are transient."""
+    class Meta:
+        model = models.OAuth2Grant
+        load_instance = True
+        include_fk = True
+        exclude = ['id', 'user']
+        primary_keys = ['grant_id']
+
+    user_email = fields.String(required=True)
 
 
 @mapped
@@ -1272,6 +1382,8 @@ class UserSchema(BaseSchema):
         model = models.User
         load_instance = True
         include_relationships = True
+        # OAuth relationships contain runtime state and aren't part of config
+        # import/export. Passkeys are included below with binary-safe fields.
         exclude = [
             '_email',
             'address_type',
@@ -1281,7 +1393,9 @@ class UserSchema(BaseSchema):
             'quota_bytes_used',
             'auth_generation',
             'scim_resource',
+            'oauth2_authorization_codes',
         ]
+        include_by_context = {('secrets',): {'oauth2_grants'}}
 
         primary_keys = ['email']
         exclude_by_value = {
@@ -1294,8 +1408,10 @@ class UserSchema(BaseSchema):
         }
 
     email = fields.String(required=True)
-    tokens = fields.Nested(TokenSchema, many=True)
-    fetches = fields.Nested(FetchSchema, many=True)
+    tokens = ContextNested(TokenSchema, many=True)
+    fetches = ContextNested(FetchSchema, many=True)
+    passkeys = ContextNested(PasskeySchema, many=True)
+    oauth2_grants = ContextNested(OAuth2GrantSchema, many=True)
 
     password = PasswordField(required=True, metadata={'model': models.User})
     hash_password = fields.Boolean(load_only=True, load_default=False)
@@ -1362,6 +1478,8 @@ class ConfigSchema(BaseSchema):
         model = models.Config
         load_instance = True
 
+    value = ConfigValueField()
+
 
 @mapped
 class RelaySchema(BaseSchema):
@@ -1380,9 +1498,10 @@ class MailuSchema(Schema, Storage):
         model = models.MailuConfig
         render_module = RenderYAML
 
-        order = ['domain', 'user', 'alias', 'relay'] # 'config'
+        order = ['domain', 'user', 'alias', 'relay', 'config']
 
     def __init__(self, *args, **kwargs):
+        self.context = kwargs.pop('context', {})
         super().__init__(*args, **kwargs)
         # order fieldlists
         for fieldlist in (self.fields, self.load_fields, self.dump_fields):
@@ -1766,8 +1885,8 @@ class MailuSchema(Schema, Storage):
 
         return config
 
-    domain = fields.Nested(DomainSchema, many=True)
-    user = fields.Nested(UserSchema, many=True)
-    alias = fields.Nested(AliasSchema, many=True)
-    relay = fields.Nested(RelaySchema, many=True)
-#    config = fields.Nested(ConfigSchema, many=True)
+    domain = ContextNested(DomainSchema, many=True)
+    user = ContextNested(UserSchema, many=True)
+    alias = ContextNested(AliasSchema, many=True)
+    relay = ContextNested(RelaySchema, many=True)
+    config = OAuth2ConfigNested(ConfigSchema, many=True)

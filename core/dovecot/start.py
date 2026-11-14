@@ -58,9 +58,6 @@ for script_file in glob.glob("/conf/*.script"):
     out_file = os.path.join("/conf/bin/", os.path.basename(script_file).replace('.script',''))
     conf.jinja(script_file, context, out_file)
     os.chmod(out_file, 0o555)
-for sieve_file in glob.glob("/conf/report-*.sieve"):
-    subprocess.run(["sievec", sieve_file], check=True)
-
 supervisor.clean_environment()
 
 # Run Podop, then postfix
@@ -82,11 +79,23 @@ for runtime_name in (
     "lib/dovecot/sieve",
     "run/dovecot",
     "run/podop",
+    "tmp",
 ):
     runtime_path = os.path.join(runtime_root, runtime_name)
     os.makedirs(runtime_path, mode=0o755, exist_ok=True)
     os.chown(runtime_path, 0, 0)
     os.chmod(runtime_path, 0o755)
+
+runtime_temp_dir = os.path.join(runtime_root, "tmp")
+os.chmod(runtime_temp_dir, 0o1777)
+
+# LMTP delivery workers are not chrooted, so they need the same temporary
+# directory at the container root. Chrooted mail workers see the tmpfs copy
+# above as /usr/tmp.
+container_temp_dir = "/usr/tmp"
+os.makedirs(container_temp_dir, mode=0o1777, exist_ok=True)
+os.chown(container_temp_dir, 0, 0)
+os.chmod(container_temp_dir, 0o1777)
 
 runtime_private_dir = os.path.join(runtime_root, "run/podop")
 os.makedirs(runtime_private_dir, mode=0o710, exist_ok=True)
@@ -177,9 +186,14 @@ if context["FULL_TEXT_SEARCH_ENABLED"]:
         os.chown(target, 0, 0)
         os.chmod(target, 0o644)
 
-for source in glob.glob("/conf/report-*.svbin"):
-    target = os.path.join(runtime_root, "share/mailu/sieve", os.path.basename(source))
-    shutil.copy2(source, target)
+for target in glob.glob(os.path.join(runtime_root, "share/mailu/sieve", "*.sieve")):
+    # Compile the global script in its final path. Pigeonhole validates the
+    # binary against that path and otherwise may try to rewrite it from a
+    # mailbox worker, which cannot write to this root-owned directory.
+    subprocess.run(["sievec", target], check=True)
+    binary = f"{os.path.splitext(target)[0]}.svbin"
+    os.chown(binary, 0, proxy_gid)
+    os.chmod(binary, 0o640)
     os.chown(target, 0, proxy_gid)
     os.chmod(target, 0o640)
 

@@ -20,6 +20,7 @@ from socrate.mailbox import harden_parents
 LOG = logging.getLogger("mail-migration")
 MARKER = "/mail/.mail-layout-v1"
 FTS_MARKER = "/mail/.fts-rebuild-pending"
+FTS_PREPARED_MARKER = "/mail/.fts-rebuild-prepared"
 INDEX_MARKER = "/mail/.index-rebuild-pending"
 FTS_CONFIG = "/mail/.fts-config"
 INDEX_FILES = {
@@ -50,20 +51,19 @@ def fetch_users():
 
 
 def normalize_message(path):
-    physical = line_feeds = carriage_returns = crlf_pairs = 0
+    physical = line_feeds = crlf_pairs = 0
     previous_cr = False
     with open(path, "rb") as message:
         while chunk := message.read(1024 * 1024):
             physical += len(chunk)
             line_feeds += chunk.count(b"\n")
-            carriage_returns += chunk.count(b"\r")
             crlf_pairs += chunk.count(b"\r\n")
             if previous_cr and chunk.startswith(b"\n"):
                 crlf_pairs += 1
             previous_cr = chunk.endswith(b"\r")
-    # A lone CR or LF is stored as CRLF by Dovecot; existing CRLF pairs
-    # already occupy the final two bytes.
-    virtual = physical + line_feeds + carriage_returns - (2 * crlf_pairs)
+    # Maildir W= is RFC822.SIZE: count every LF as CRLF, but don't add bytes
+    # for existing CRLF pairs or for standalone CR characters.
+    virtual = physical + line_feeds - crlf_pairs
     name = os.path.basename(path)
     base, sep, flags = name.partition(":2,")
     if not sep:
@@ -86,6 +86,19 @@ def move_entry(source, target):
         raise RuntimeError(f"Both legacy and new paths exist: {source} and {target}")
     os.makedirs(os.path.dirname(target), exist_ok=True)
     os.replace(source, target)
+
+
+def remove_sieve_binaries(directory):
+    """Discard compiled Sieve caches; Pigeonhole regenerates them from scripts."""
+    if not os.path.isdir(directory):
+        return
+    for root, _dirs, files in os.walk(directory):
+        for name in files:
+            if not name.endswith(".svbin"):
+                continue
+            path = os.path.join(root, name)
+            LOG.info("Discarding rebuildable compiled Sieve binary %s", path)
+            os.unlink(path)
 
 
 def has_migratable_legacy_data(legacy):
@@ -199,13 +212,18 @@ def migrate_user(user):
         # Move script storage first so the active pointer can be rewritten
         # relative to its new location.
         if "sieve" in names:
-            move_entry(os.path.join(legacy, "sieve"), os.path.join(home, "sieve"))
+            legacy_sieve = os.path.join(legacy, "sieve")
+            remove_sieve_binaries(legacy_sieve)
+            move_entry(legacy_sieve, os.path.join(home, "sieve"))
         for name in names:
             src = os.path.join(legacy, name)
             if name == "sieve":
                 continue
             if name == ".dovecot.sieve":
                 migrate_active_sieve(src, legacy, home)
+            elif name.endswith(".svbin"):
+                LOG.info("Discarding rebuildable compiled Sieve binary %s", src)
+                os.unlink(src)
             elif name.startswith(".dovecot.sieve.log"):
                 move_entry(src, os.path.join(home, "sieve", name))
             elif name == "dovecot-attributes":
@@ -338,6 +356,13 @@ def enqueue_mailboxes(path, emails):
     write_mailbox_queue(path, pending)
 
 
+def clear_fts_prepared():
+    try:
+        os.unlink(FTS_PREPARED_MARKER)
+    except FileNotFoundError:
+        pass
+
+
 def update_fts_indexes(force_rebuild=False, mailbox_emails=None):
     config = normalize_languages(os.environ.get("FULL_TEXT_SEARCH", "en"))
     try:
@@ -351,11 +376,15 @@ def update_fts_indexes(force_rebuild=False, mailbox_emails=None):
             LOG.info("Full-text search is disabled; removing stored FTS indexes. This may take a long time.")
             for mail_path in glob.glob("/mail/*/*/*/mail"):
                 remove_fts_indexes(mail_path)
+        clear_fts_prepared()
         try:
             os.unlink(FTS_MARKER)
         except FileNotFoundError:
             pass
     elif previous != config:
+        # Prepared mailboxes belong to the old language configuration. A new
+        # generation must clear them so every mailbox drops its stale index.
+        clear_fts_prepared()
         LOG.warning(
             "Full-text search configuration changed (%s -> %s). Rebuilding indexes mailbox by mailbox; "
             "this can take a long time.", previous or "unset", config,
@@ -363,6 +392,10 @@ def update_fts_indexes(force_rebuild=False, mailbox_emails=None):
         with open(FTS_MARKER, "w", encoding="ascii") as marker:
             marker.write("pending\n")
     elif force_rebuild:
+        # A missing queue marker denotes a new rebuild generation. Preserve
+        # prepared state when resuming an already queued rebuild.
+        if not os.path.exists(FTS_MARKER):
+            clear_fts_prepared()
         emails = mailbox_emails or [user["email"] for user in fetch_users()]
         LOG.warning(
             "Rebuilding full-text indexes for %d migrated mailbox(es); this can take a long time.",

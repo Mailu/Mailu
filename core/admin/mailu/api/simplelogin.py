@@ -83,8 +83,11 @@ class RandomAlias(Resource):
         for _ in range(flask.current_app.config.get('ANONMAIL_MAX_RETRIES', 10)):
             candidate = utils.generate_anonymous_alias_localpart(hostname=hostname)
             email_candidate = f"{candidate}@{domain_name}"
+            resolved = models.Alias.resolve(candidate, domain_name)
             if (
-                not models.Alias.resolve(candidate, domain_name) # Specifically check for SQL-like wildcard aliases.
+                # Specifically check for SQL-like wildcard aliases, but ignore a pure catch-all (%@domain):
+                # an exact alias takes precedence over wildcards, so it would otherwise block every candidate.
+                (not resolved or (resolved.wildcard and resolved.localpart == '%'))
                 and not models.Alias.query.filter_by(email=email_candidate).first() # Still need to check for exact match to prevent collision with disabled aliases
                 and not models.User.query.filter_by(email=email_candidate).first()
             ):

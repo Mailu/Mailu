@@ -1,0 +1,1 @@
+Generating anonymous aliases (API and admin UI) no longer fails with "Unable to find a unique alias" on domains that have a catch-all alias (``%@domain``). More specific wildcard aliases still block matching candidates.

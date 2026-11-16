@@ -39,7 +39,7 @@ from mailu import dkim, utils
 logging.getLogger('passlib').setLevel(logging.ERROR)
 
 
-db = flask_sqlalchemy.SQLAlchemy()
+db = flask_sqlalchemy.SQLAlchemy(engine_options={"pool_pre_ping": True})
 
 def _new_dovecot_uid():
     # Keep virtual mailbox IDs away from the low system-account range.

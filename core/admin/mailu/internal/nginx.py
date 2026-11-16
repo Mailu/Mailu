@@ -34,6 +34,14 @@ STATUSES = {
         "pop3": "-ERR [LOGIN-DELAY] Retry later",
         "sieve": "AuthFailed"
     }),
+    "temporary": ("Temporary authentication failure", {
+        "imap": "UNAVAILABLE",
+        "smtp": "454 4.7.0",
+        "submission": "454 4.7.0",
+        "lmtp": "454 4.7.0",
+        "pop3": "-ERR [SYS/TEMP] Temporary authentication failure",
+        "sieve": "AuthFailed"
+    }),
 }
 
 WEBMAIL_PORTS = ['14190', '10143', '10025']
@@ -112,10 +120,6 @@ def handle_authentication(headers):
         else:
             try:
                 user = models.db.session.get(models.User, user_email) if '@' in user_email else None
-            except sqlalchemy.exc.StatementError as exc:
-                exc = str(exc).split('\n', 1)[0]
-                app.logger.warning(f'Invalid user {user_email!r}: {exc}')
-            else:
                 is_valid_user = user is not None
                 ip = urllib.parse.unquote(headers["Client-Ip"])
                 if check_credentials(user, password, ip, protocol, headers["Auth-Port"], headers['Client-Port'], user_email):
@@ -127,6 +131,22 @@ def handle_authentication(headers):
                         "Auth-User-Exists": is_valid_user,
                         "Auth-Port": port
                     }
+            except sqlalchemy.exc.OperationalError as exc:
+                app.logger.warning(f'Temporary authentication failure for {user_email!r}: {exc}')
+                try:
+                    models.db.session.remove()
+                except sqlalchemy.exc.SQLAlchemyError:
+                    app.logger.exception('Failed to reset the database session after an authentication error')
+                status, code = get_status(protocol, "temporary")
+                return {
+                    "Auth-Status": status,
+                    "Auth-Error-Code": code,
+                    "Auth-User": user_email,
+                    "Auth-Wait": 0
+                }
+            except sqlalchemy.exc.StatementError as exc:
+                exc = str(exc).split('\n', 1)[0]
+                app.logger.warning(f'Invalid user {user_email!r}: {exc}')
         status, code = get_status(protocol, "authentication")
         return {
             "Auth-Status": status,

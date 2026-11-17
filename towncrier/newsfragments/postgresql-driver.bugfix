@@ -1,0 +1,1 @@
+Fix the admin container failing to start with a PostgreSQL database (`ModuleNotFoundError: No module named 'psycopg'`): SQLAlchemy 2.1 selects psycopg 3 for `postgresql://` URIs, so the image now ships psycopg 3 instead of psycopg2.

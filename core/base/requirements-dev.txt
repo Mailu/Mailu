@@ -30,7 +30,8 @@ marshmallow
 marshmallow-sqlalchemy
 mysql-connector-python
 passlib
-psycopg2-binary
+psycopg[binary] ; platform_machine != "armv7l"
+psycopg[c] ; platform_machine == "armv7l"
 Pygments
 python-gnupg
 PyYAML

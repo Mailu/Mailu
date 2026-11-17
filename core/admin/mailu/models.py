@@ -109,7 +109,7 @@ class JSONEncoded(db.TypeDecorator):
     """ Represents an immutable structure as a json-encoded string.
     """
 
-    impl = db.String(255)
+    impl = db.Text
     cache_ok = True
     python_type = str
 

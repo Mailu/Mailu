@@ -25,12 +25,10 @@ hyperframe
 idna
 itsdangerous
 limits
-mariadb
+mariadb[binary]
 marshmallow
 marshmallow-sqlalchemy
-mysql-connector-python
 passlib
-psycopg2-binary
 Pygments
 python-gnupg
 PyYAML

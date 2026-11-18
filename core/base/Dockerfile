@@ -13,7 +13,7 @@ ARG MAILU_GID=1000
 RUN set -euxo pipefail \
   ; addgroup -Sg ${MAILU_GID} mailu \
   ; adduser -Sg ${MAILU_UID} -G mailu -h /app -g "mailu app" -s /bin/bash mailu \
-  ; apk add --no-cache bash ca-certificates curl python3 supervisor tzdata \
+  ; apk add --no-cache bash ca-certificates curl python3 supervisor tzdata py3-psycopg-pyc py3-psycopg-c-pyc py3-mysqlclient-pyc \
   ; ! [[ "$(apk --print-arch)" == x86_64 ]] \
     || apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing hardened-malloc
 
@@ -63,7 +63,7 @@ RUN --mount=type=secret,id=github_token,required=false set -euxo pipefail \
   ;  machine="$(apk --print-arch)" \
   ; deps="build-base gcc libffi-dev python3-dev mariadb-dev" \
   ; [[ "${machine}" != x86_64 ]] && \
-      deps="${deps} rust cargo cmake git libretls-dev mariadb-connector-c-dev postgresql-dev" \
+      deps="${deps} rust cargo cmake git libretls-dev mariadb-connector-c-dev" \
   ; apk add --virtual .build-deps ${deps} \
   ; set +x \
   ; github_token="$(cat /run/secrets/github_token 2>/dev/null || true)" \

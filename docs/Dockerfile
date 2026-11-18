@@ -40,7 +40,7 @@ RUN --mount=type=secret,id=github_token,required=false set -euxo pipefail \
 
 
 # Build nginx deployment image including generated html
-FROM nginx:1.31.6-alpine
+FROM nginx:1.31.9-alpine
 
 # TODO: Remove or reconsider this upgrade once cached Python and libexpat stay
 # aligned; the cached Python build can fail importing pyexpat in Supervisor.

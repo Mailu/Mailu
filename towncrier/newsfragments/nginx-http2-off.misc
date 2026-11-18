@@ -1,0 +1,1 @@
+Temporarily disable HTTP/2 in the front and webmail nginx to mitigate CVE-2026-123633 and CVE-2026-123007 until Alpine ships a patched nginx package.

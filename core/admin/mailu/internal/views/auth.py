@@ -41,6 +41,11 @@ def nginx_authentication():
         if key == 'Auth-User':
             continue
         response.headers[key] = str(value)
+    temporary_status, _ = nginx.get_status(
+        flask.request.headers['Auth-Protocol'], 'temporary'
+    )
+    if headers.get("Auth-Status") == temporary_status:
+        return response
     is_valid_user = False
     if response.headers.get("Auth-User-Exists") == "True":
         if not is_from_webmail and not is_app_token and utils.limiter.should_rate_limit_user(username, client_ip):

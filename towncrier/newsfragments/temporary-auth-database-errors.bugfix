@@ -1,0 +1,1 @@
+Return temporary authentication errors when the database is unavailable instead of reporting invalid credentials.

@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile-upstream:1.4.3
 
-FROM base
+ARG MAILU_BASE=base
+FROM ${MAILU_BASE}
 
 ARG VERSION
 LABEL version=$VERSION
@@ -12,7 +13,7 @@ COPY roundcube/roundcube.diff /tmp/roundcube.diff
 # php83-pecl-imagick php83-pecl-uuid are missing
 RUN set -euxo pipefail \
   ; apk add --no-cache \
-    nginx gpg gpg-agent patch gd libsodium \
+    'nginx>=1.28.3-r8' gpg gpg-agent patch gd libsodium \
     aspell-uk aspell-ru aspell-fr aspell-de aspell-en \
   ; apk add --no-cache \
     'php83>=8.3.36-r0' php83-fpm php83-mbstring php83-zip php83-xml php83-simplexml php83-pecl-apcu \

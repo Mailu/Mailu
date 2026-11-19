@@ -91,6 +91,13 @@ def user_edit(user_email):
     form.quota_bytes.validators = [
         wtforms.validators.NumberRange(min=0, max=max_quota_bytes)]
     if form.validate_on_submit():
+        if form.pw.data:
+            if msg := utils.isBadOrPwned(form):
+                flask.flash(msg, "error")
+                return flask.render_template('user/edit.html', form=form, user=user,
+                    domain=user.domain, max_quota_bytes=max_quota_bytes)
+        previous_generation = user.auth_generation
+        preserve_current = flask_login.current_user.email == user.email
         keep_passkey_enrollment_flag = (
             user.passkey_enroll_next_login
             if user.domain.passkey_require_enrollment
@@ -99,7 +106,18 @@ def user_edit(user_email):
         form.populate_obj(user)
         if keep_passkey_enrollment_flag is not None:
             user.passkey_enroll_next_login = keep_passkey_enrollment_flag
+        if form.pw.data:
+            user.set_password(form.pw.data, keep_sessions=True)
+        expected_generation = user.auth_generation
+        uid = user.email
         models.db.session.commit()
+        if expected_generation != previous_generation:
+            utils.finish_session_authority_change(
+                user,
+                preserve_current=preserve_current,
+                expected_generation=expected_generation,
+                uid=uid,
+            )
         flask.flash('User %s updated' % user)
         return flask.redirect(
             flask.url_for('.user_list', domain_name=user.domain.name))
@@ -214,9 +232,17 @@ def _process_password_change(form, user_email):
             if msg := utils.isBadOrPwned(form):
                 flask.flash(msg, "error")
                 return flask.render_template('user/password.html', form=form, user=user)
-            flask.session.regenerate()
-            user.set_password(form.pw.data, keep_sessions=set(flask.session))
+            preserve_current = flask_login.current_user.email == user.email
+            user.set_password(form.pw.data, keep_sessions=True)
+            expected_generation = user.auth_generation
+            uid = user.email
             models.db.session.commit()
+            utils.finish_session_authority_change(
+                user,
+                preserve_current=preserve_current,
+                expected_generation=expected_generation,
+                uid=uid,
+            )
             flask.flash('Password updated for %s' % user)
             if user_email:
                 return flask.redirect(flask.url_for('.user_list',
@@ -392,7 +418,7 @@ def user_signup(domain_name=None):
             user = models.User(domain=domain)
             form.populate_obj(user)
             user.change_pw_next_login = True
-            user.set_password(form.pw.data)
+            user.set_password(form.pw.data, keep_sessions=True)
             user.quota_bytes = quota_bytes
             models.db.session.add(user)
             models.db.session.commit()

@@ -271,6 +271,14 @@ def user_import(localpart, domain_name, password_hash):
 def config_update(verbose=False, delete_objects=False):
     """ Sync configuration with data from YAML (deprecated)
     """
+    try:
+        _config_update(verbose=verbose, delete_objects=delete_objects)
+    except models.ScimManagedAliasError as exc:
+        db.session.rollback()
+        raise click.ClickException(str(exc)) from exc
+
+
+def _config_update(verbose=False, delete_objects=False):
     new_config = yaml.safe_load(sys.stdin)
     # print new_config
     domains = new_config.get('domains', [])
@@ -371,7 +379,7 @@ def config_update(verbose=False, delete_objects=False):
             alias.wildcard = wildcard
         db.session.add(alias)
 
-    db.session.commit()
+    db.session.flush()
 
     managers = new_config.get('managers', [])
     # tracked_managers=set()
@@ -386,7 +394,7 @@ def config_update(verbose=False, delete_objects=False):
             domain.managers.append(manageruser)
         db.session.add(domain)
 
-    db.session.commit()
+    db.session.flush()
 
     if delete_objects:
         for user in db.session.query(models.User).all():
@@ -439,6 +447,28 @@ def config_import(verbose=0, secrets=False, debug=False, quiet=False, color=Fals
     }
 
     schema = MailuSchema(only=MailuSchema.Meta.order, context=context)
+    absent = object()
+    dkim_state = [
+        (
+            domain,
+            domain.__dict__.get('_dkim_key', absent),
+            domain.__dict__.get('_dkim_key_on_disk', absent),
+        )
+        for domain in models.Domain.query.all()
+    ]
+
+    def rollback():
+        """Roll back SQL and unmapped Domain key cache state."""
+        db.session.rollback()
+        for domain, key, on_disk in dkim_state:
+            for name, value in (
+                ('_dkim_key', key),
+                ('_dkim_key_on_disk', on_disk),
+            ):
+                if value is absent:
+                    domain.__dict__.pop(name, None)
+                else:
+                    domain.__dict__[name] = value
 
     try:
         # import source
@@ -450,6 +480,7 @@ def config_import(verbose=0, secrets=False, debug=False, quiet=False, color=Fals
         # check for duplicate domain names
         config.check()
     except Exception as exc:
+        rollback()
         if msg := log.format_exception(exc):
             raise click.ClickException(msg) from exc
         raise
@@ -457,7 +488,7 @@ def config_import(verbose=0, secrets=False, debug=False, quiet=False, color=Fals
     # do not commit when running dry
     if dry_run:
         log.changes('Dry run. Not committing changes.')
-        db.session.rollback()
+        rollback()
     else:
         log.changes('Committing changes.')
         db.session.commit()
@@ -527,8 +558,12 @@ def user_delete(email, really=False):
 def alias_delete(email):
     """delete alias"""
     if alias := models.db.session.get(models.Alias, email):
-        db.session.delete(alias)
-        db.session.commit()
+        try:
+            db.session.delete(alias)
+            db.session.commit()
+        except models.ScimManagedAliasError as exc:
+            db.session.rollback()
+            raise click.ClickException(str(exc)) from exc
 
 
 @mailu.command()
@@ -553,6 +588,60 @@ def alias(localpart, domain_name, destination, wildcard=False):
     )
     db.session.add(alias)
     db.session.commit()
+
+
+@mailu.command('scim-group-adopt')
+@click.argument('email')
+@click.option(
+    '--external-id',
+    default=None,
+    help='Optional provider externalId to bind to the adopted SCIM Group.',
+)
+@with_appcontext
+def scim_group_adopt(email, external_id=None):
+    """Adopt one eligible existing alias as a provider-managed SCIM Group."""
+    alias = db.session.get(models.Alias, email)
+    if alias is None or alias.email != email:
+        raise click.ClickException(f'alias {email!r} not found')
+
+    try:
+        group = models.create_scim_group_mapping(
+            alias,
+            external_id=external_id,
+        )
+        original_destinations = list(group.alias.destination)
+        member_ids = []
+        external_destinations = []
+        for value in original_destinations:
+            destination = models.canonicalize_scim_destination(value)
+            local_address = db.session.get(models.MailAddress, destination)
+            if local_address is None:
+                external_destinations.append(destination)
+                continue
+
+            if local_address.address_type == models.User.ADDRESS_TYPE:
+                subject = db.session.get(models.User, local_address.email)
+            else:
+                subject = db.session.get(models.Alias, local_address.email)
+            member = subject.scim_resource if subject is not None else None
+            if member is None or member.deleted_at is not None:
+                raise models.ScimGroupAdoptionError(
+                    f'local destination {destination!r} is not an active '
+                    'SCIM resource'
+                )
+            member_ids.append(member.id)
+
+        models.replace_scim_group_graph(
+            group,
+            member_ids=member_ids,
+            external_destinations=external_destinations,
+        )
+        db.session.commit()
+    except (models.ScimIdentityError, ValueError) as exc:
+        db.session.rollback()
+        raise click.ClickException(str(exc)) from exc
+
+    click.echo(f'adopted {email!r} as SCIM Group {group.id}')
 
 
 @mailu.command()

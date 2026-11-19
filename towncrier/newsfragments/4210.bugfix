@@ -1,0 +1,1 @@
+Disable http2 to mitigate CVE-2026-123633 & others

@@ -15,7 +15,7 @@ RUN set -euxo pipefail \
     nginx gpg gpg-agent patch gd libsodium \
     aspell-uk aspell-ru aspell-fr aspell-de aspell-en \
   ; apk add --no-cache \
-    'php83>=8.3.36-r0' php83-fpm php83-mbstring php83-zip php83-xml php83-simplexml php83-pecl-apcu \
+    'php83>=8.3.37-r0' 'php83-fpm>=8.3.37-r0' php83-mbstring php83-zip php83-xml php83-simplexml php83-pecl-apcu \
     php83-dom php83-curl php83-exif php83-gd php83-iconv php83-intl php83-openssl php83-ctype \
     php83-pdo_sqlite php83-pdo_mysql php83-pdo_pgsql php83-pdo php83-sodium php83-tidy \
     php83-pspell php83-opcache php83-session php83-sockets php83-fileinfo php83-xmlreader php83-xmlwriter \

@@ -1,0 +1,1 @@
+Fix the /api/v1/alias/me endpoints returning HTTP 500: they now authenticate the caller with their own credentials (the 'Authentication: email:token' header) instead of the global API token, which never identified a user.

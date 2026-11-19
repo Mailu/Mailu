@@ -176,3 +176,20 @@ class TestAnonymousAliasAPI:
             data = rv.get_json()
             assert 'email' in data
             assert data['email'].endswith('@example.com')
+
+    def test_response_includes_simplelogin_alias_field(self, app, client, create_user_and_token, grant_domain_access):
+        """Bitwarden's SimpleLogin forwarder reads the new address from `alias`, like SimpleLogin returns it"""
+        with app.app_context():
+            d = models.Domain(name='example.com', anonmail_enabled=True)
+            models.db.session.add(d)
+            models.db.session.commit()
+
+            user, token = create_user_and_token()
+            grant_domain_access('example.com', user=user)
+
+            headers = {'Authentication': f'{user.email}:{"a" * 32}'}
+            rv = client.post('/api/alias/random/new?hostname=bitwarden.com', json={'note': 'Bitwarden test'}, headers=headers)
+            assert rv.status_code == 201
+            data = rv.get_json()
+            assert data['alias'] == data['email']
+            assert models.Alias.query.filter_by(email=data['alias']).first() is not None

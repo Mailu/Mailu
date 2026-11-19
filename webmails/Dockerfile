@@ -28,7 +28,12 @@ RUN set -euxo pipefail \
   ; rm -f /tmp/roundcube.asc /tmp/snappymail.asc \
   ; mkdir -p /run/nginx /conf
 
+<<<<<<< HEAD
 ENV ROUNDCUBE_URL=https://github.com/roundcube/roundcubemail/releases/download/1.6.20/roundcubemail-1.6.20-complete.tar.gz
+=======
+# roundcube
+ENV ROUNDCUBE_URL=https://github.com/roundcube/roundcubemail/releases/download/1.6.21/roundcubemail-1.6.21-complete.tar.gz
+>>>>>>> 5470462 (roundcube 1.6.21)
 ENV CARDDAV_URL=https://github.com/mstilkerich/rcmcarddav/releases/download/v5.1.3/carddav-v5.1.3.tar.gz
 
 RUN set -euxo pipefail \

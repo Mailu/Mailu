@@ -100,6 +100,13 @@ mail delivery.
 Destination addresses must belong to the token owner. Arbitrary forwarding
 addresses are not permitted.
 
+If the domain has a catch-all alias (``%@example.com``), it is ignored when
+checking a generated alias for collisions, so aliases can still be generated.
+More specific wildcard aliases (e.g. ``shop.%@example.com``) still prevent a
+matching alias from being generated. While a catch-all exists, disabling or
+deleting a generated alias does not stop mail delivery: messages to it are
+delivered through the catch-all instead.
+
 Troubleshooting
 ---------------
 

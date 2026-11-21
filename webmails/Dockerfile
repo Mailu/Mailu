@@ -15,7 +15,7 @@ COPY roundcube/roundcube.diff /tmp/roundcube.diff
 RUN set -euxo pipefail \
   ; apk add --no-cache \
     nginx gpg gpg-agent patch \
-    php84 php84-fpm php84-mbstring php84-zip php84-xml php84-simplexml php84-pecl-apcu \
+    'php84>=8.4.28-r0' 'php84-fpm>=8.4.28-r0' php84-mbstring php84-zip php84-xml php84-simplexml php84-pecl-apcu \
     php84-dom php84-curl php84-exif gd php84-gd php84-iconv php84-intl php84-openssl php84-ctype \
     php84-pdo_sqlite php84-pdo_mysql php84-pdo_pgsql php84-pdo php84-sodium libsodium php84-tidy \
     php84-enchant enchant2 php84-opcache php84-session php84-sockets php84-fileinfo php84-xmlreader php84-xmlwriter \

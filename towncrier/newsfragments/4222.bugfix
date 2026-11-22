@@ -1,0 +1,1 @@
+Do not recommend or preload hardened-malloc on images where the library is not installed (arm64).

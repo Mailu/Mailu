@@ -48,6 +48,10 @@ def _coerce_value(value):
     return parse_bool(value, value)
 
 def _is_compatible_with_hardened_malloc():
+    # hardened-malloc is only installed on x86_64 images (see core/base/Dockerfile)
+    if not os.path.isfile('/usr/lib/libhardened_malloc.so'):
+        return False
+
     with open('/proc/version', 'r') as f:
         major, minor = f.readline().split()[2].split('.')[:2]
         if int(major) < 6 or int(major) == 6 and int(minor) < 1:

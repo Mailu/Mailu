@@ -1,0 +1,4 @@
+Backport two Dovecot fixes into the Alpine 3.24 package used by the IMAP and
+front images. IMAP now keeps the TLS socket open through the post-login handoff,
+enables Dovecot's Thunderbird client workarounds, and sends empty partial FETCH
+results in a form accepted by affected iOS Mail clients.

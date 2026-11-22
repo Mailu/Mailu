@@ -101,11 +101,47 @@ RUN --mount=type=secret,id=github_token,required=false set -euxo pipefail \
   ; cp src/.libs/snuffleupagus.so /app \
   ; rm -rf /root/.cargo /tmp/*.pem /root/.cache
 
+# Build Alpine's Dovecot APKs with the Mailu backports. This target is used by
+# front and imap only; the base image carries the signed APKs, not build tools.
+FROM build AS dovecot-package-build
+
+ARG APORTS_COMMIT=75e10f2ea64d8adbc06fcec9aea3be394f383a46
+ENV PACKAGER="Mailu Dovecot Backport <dovecot-backport@mailu.io>"
+
+RUN apk add --no-cache alpine-sdk git
+RUN apk update
+RUN abuild-keygen -a -n
+RUN cp /root/.abuild/*.rsa.pub /etc/apk/keys/
+
+COPY dovecot-aports/APKBUILD.patch /patches/APKBUILD.patch
+COPY dovecot-aports/patches/ /patches/
+
+RUN set -eux \
+  ; git init /aports \
+  ; git -C /aports remote add origin https://gitlab.alpinelinux.org/alpine/aports.git \
+  ; git -C /aports fetch --depth 1 origin ${APORTS_COMMIT} \
+  ; git -C /aports checkout --detach FETCH_HEAD \
+  ; patch -d /aports/main/dovecot -p1 < /patches/APKBUILD.patch \
+  ; cp /patches/0001-login-common-keep-post-login-fd-open.patch /aports/main/dovecot/ \
+  ; cp /patches/0002-imap-empty-partial-as-quoted.patch /aports/main/dovecot/ \
+  ; cd /aports/main/dovecot \
+  ; REPODEST=/root/packages abuild -F -r \
+  ; mkdir -p /out/front /out/imap /out/keys \
+  ; arch="$(apk --print-arch)" \
+  ; for package in dovecot dovecot-lua dovecot-lmtpd dovecot-pigeonhole-plugin dovecot-pop3d dovecot-submissiond dovecot-fts-flatcurve; do \
+      cp "/root/packages/main/${arch}/${package}-2.4.5-r1.apk" /out/imap/; \
+    done \
+  ; for package in dovecot dovecot-lua dovecot-lmtpd dovecot-pigeonhole-plugin dovecot-pop3d dovecot-submissiond; do \
+      cp "/out/imap/${package}-2.4.5-r1.apk" /out/front/; \
+    done \
+  ; cp /root/.abuild/*.rsa.pub /out/keys/
+
 # base mailu image
 FROM system
 
 COPY --from=build /app/venv/ /app/venv/
 COPY --chown=root:root --from=build /app/snuffleupagus.so /usr/lib/php84/modules/
+COPY --from=dovecot-package-build /out/ /usr/share/mailu/dovecot-apks/
 
 ENV \
   VIRTUAL_ENV=/app/venv \

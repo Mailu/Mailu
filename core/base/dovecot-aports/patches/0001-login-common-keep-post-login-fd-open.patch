@@ -1,0 +1,92 @@
+From 98665ed44141f5c64078eeaf937c4224403eb9ce Mon Sep 17 00:00:00 2001
+From: Aki Tuomi <aki.tuomi@open-xchange.com>
+Date: Mon, 19 Oct 2026 04:54:51 +0000
+Subject: [PATCH] login-common: Keep the fd passed to post-login open until
+ login reply
+
+For TLS clients the login process sends one end of a socketpair to the
+post-login process and used to close its own copy right after
+fd_send(), before the receiver had accepted the connection. On macOS
+15.7 the received endpoint then reads EOF, so IMAP over STARTTLS or
+IMAPS disconnects right after login. Plaintext clients are unaffected,
+because client->fd stays open.
+
+Keep the fd open until the login reply arrives, the client is destroyed
+with the request pending, or the client is freed.
+
+Based-on-patch-by: Ignacio Pozo <ipozow@gmail.com>
+---
+ src/login-common/client-common.c | 3 +++
+ src/login-common/client-common.h | 3 +++
+ src/login-common/sasl-proxy.c    | 7 +++++--
+ 3 files changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/src/login-common/client-common.c b/src/login-common/client-common.c
+index 1e0d7d1eda..e4879b786e 100644
+--- a/src/login-common/client-common.c
++++ b/src/login-common/client-common.c
+@@ -285,6 +285,7 @@ int client_alloc(int fd, const struct master_service_connection *conn,
+ 	p_array_init(&client->module_contexts, client->pool, 5);
+ 
+ 	client->fd = fd;
++	client->pending_plaintext_fd = -1;
+ 	client->local_ip = conn->local_ip;
+ 	client->local_port = conn->local_port;
+ 	client->ip = conn->remote_ip;
+@@ -532,6 +533,7 @@ void client_destroy(struct client *client, const char *reason)
+ 		client->authenticating = FALSE;
+ 		login_client_request_abort(login_client_list,
+ 					   client->master_tag);
++		i_close_fd(&client->pending_plaintext_fd);
+ 		client->refcount--;
+ 	} else if (client->auth_request != NULL ||
+ 		   client->anvil_query != NULL) {
+@@ -642,6 +644,7 @@ bool client_unref(struct client **_client)
+ 	o_stream_unref(&client->output);
+ 	o_stream_unref(&client->multiplex_orig_output);
+ 	i_close_fd(&client->fd);
++	i_close_fd(&client->pending_plaintext_fd);
+ 	event_unref(&client->event);
+ 	event_unref(&client->event_auth);
+ 	client_settings_free(client);
+diff --git a/src/login-common/client-common.h b/src/login-common/client-common.h
+index 0fbc1f951d..bb8337872a 100644
+--- a/src/login-common/client-common.h
++++ b/src/login-common/client-common.h
+@@ -205,6 +205,9 @@ struct client {
+ 	ARRAY_TYPE(const_string) forward_fields;
+ 
+ 	int fd;
++	/* TLS socketpair endpoint passed to the post-login process. macOS
++	   needs it kept open until the receiver has it. */
++	int pending_plaintext_fd;
+ 	struct istream *input;
+ 	struct ostream *output;
+ 	/* The rawlog streams don't hold any references */
+diff --git a/src/login-common/sasl-proxy.c b/src/login-common/sasl-proxy.c
+index 6ca2703a65..9a063f929c 100644
+--- a/src/login-common/sasl-proxy.c
++++ b/src/login-common/sasl-proxy.c
+@@ -158,6 +158,7 @@ login_callback(const struct login_reply *reply, void *context)
+ 	enum sasl_proxy_reply sasl_reply = SASL_PROXY_REPLY_MASTER_FAILED;
+ 	const char *data = NULL;
+ 
++	i_close_fd(&client->pending_plaintext_fd);
+ 	client->master_tag = 0;
+ 	client->authenticating = FALSE;
+ 	if (reply != NULL) {
+@@ -230,10 +231,12 @@ static int master_send_request(struct anvil_request *anvil_request)
+ 	params.socket_path = client->postlogin_socket_path;
+ 	params.request = req;
+ 	params.data = buf->data;
++	if (close_fd) {
++		i_assert(client->pending_plaintext_fd == -1);
++		client->pending_plaintext_fd = fd;
++	}
+ 	login_client_request(login_client_list, &params, login_callback,
+ 			     client, &client->master_tag);
+-	if (close_fd)
+-		i_close_fd(&fd);
+ 	return 0;
+ }
+ 

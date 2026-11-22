@@ -18,9 +18,11 @@ The two source patches are:
 `APKBUILD.patch` bumps `pkgrel`, declares Perl as a build dependency, and adds
 both patches and their SHA-512 sums to Alpine's recipe. It applies to aports commit
 `75e10f2ea64d8adbc06fcec9aea3be394f383a46`, which contains Dovecot 2.4.5-r0.
-The package build target is intentionally pinned to that recipe revision; when
-Alpine updates the 3.24 package, rebase the APKBUILD delta and verify both
-patches against the new Dovecot source before updating the pin.
+The package build target is intentionally pinned to that recipe revision and
+fetches it from Alpine's GitHub mirror so GitHub Actions can build it without
+depending on direct GitLab access. When Alpine updates the 3.24 package, rebase
+the APKBUILD delta and verify both patches against the new Dovecot source before
+updating the pin.
 
 The IMAP server enables `tb-extra-mailbox-sep`, `tb-lsub-flags`, and
 `empty-partial-as-quoted` by default. The latter option is provided by the

@@ -118,7 +118,7 @@ COPY dovecot-aports/patches/ /patches/
 
 RUN set -eux \
   ; git init /aports \
-  ; git -C /aports remote add origin https://gitlab.alpinelinux.org/alpine/aports.git \
+  ; git -C /aports remote add origin https://github.com/alpinelinux/aports.git \
   ; git -C /aports fetch --depth 1 origin ${APORTS_COMMIT} \
   ; git -C /aports checkout --detach FETCH_HEAD \
   ; patch -d /aports/main/dovecot -p1 < /patches/APKBUILD.patch \

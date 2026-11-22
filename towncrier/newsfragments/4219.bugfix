@@ -1,0 +1,1 @@
+Exclude List-* and Autocrypt headers from full-text search indexing. Overlong tokens (e.g. tracking URLs in List-Unsubscribe) made fts-flatcurve drop whole batches of messages from the index ("Term too long").

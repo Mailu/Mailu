@@ -1,0 +1,123 @@
+From fac4eb5c29d70cbfcd1ccf5147edf0316f12d223 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Christian=20Gro=C3=9Fegger?= <chr.grossegger@gmail.com>
+Date: Tue, 8 Sep 2026 11:06:52 +0200
+Subject: [PATCH] imap: Add empty-partial-as-quoted to imap_client_workarounds
+
+A FETCH of a body section range that lies past the end of that section is
+answered with an empty string, as RFC 9051 6.4.5 requires. Dovecot writes
+it as a zero-length literal, "{0}\r\n": get_prefix() emits the header for
+data that is streamed out afterwards, and a literal is the only string
+form that can carry arbitrary octets, so one format string serves every
+size.
+
+The framing parser in swift-nio-imap mishandles exactly the zero-length
+case. It emits the header line as a completed frame and enters
+.insideLiteral(remaining: 0); the next pass leaves that state again
+without consuming a byte, so frameLength is still 0, and parseFrame()
+returns .incomplete. parseFrames() stops at the first .incomplete, so the
+")\r\n" already sitting in the client's own buffer -- and every tagged
+reply behind it -- is never parsed. Only fresh network bytes re-drive the
+parser, and after a fully answered FETCH none arrive.
+
+iOS Mail (ID name com.apple.email.maild) is built on a fork of that
+library. The effect is a stall of about 90 seconds after a completed,
+pipelined FETCH, ended only by the client's own watchdog. It reproduces
+with any message whose fetched section is much smaller than RFC822.SIZE,
+because the client sizes its 384 KiB slice plan from the latter and every
+slice past the end of the section then gets an empty string.
+
+"" and {0} are the same value -- the ABNF has string = quoted / literal --
+so this changes the encoding of the reply, not the reply. Dovecot already
+prefers "" for an empty string everywhere else: imap_append_nstring()
+cannot produce a literal for one, and imap_append_string_for_humans() has
+an explicit "" case. get_prefix() was the exception.
+
+The workaround is not restricted to partial fetches. The defect is in the
+framing of any zero-length literal, so a plain FETCH of an empty section
+is affected just as much.
+---
+ src/imap/imap-fetch-body.c | 26 +++++++++++++++++++++++---
+ src/imap/imap-settings.c   |  1 +
+ src/imap/imap-settings.h   |  3 ++-
+ 3 files changed, 26 insertions(+), 4 deletions(-)
+
+diff --git a/src/imap/imap-fetch-body.c b/src/imap/imap-fetch-body.c
+index 555abe22106..d93fd35f824 100644
+--- a/src/imap/imap-fetch-body.c
++++ b/src/imap/imap-fetch-body.c
+@@ -75,10 +75,11 @@ static const char *get_body_name(const struct imap_fetch_body_data *body)
+ 	return str_c(str);
+ }
+ 
+-static string_t *get_prefix(struct imap_fetch_state *state,
++static string_t *get_prefix(struct imap_fetch_context *ctx,
+ 			    const struct imap_fetch_body_data *body,
+ 			    uoff_t size, bool has_nuls)
+ {
++	struct imap_fetch_state *state = &ctx->state;
+ 	string_t *str;
+ 
+ 	str = t_str_new(128);
+@@ -93,7 +94,26 @@ static string_t *get_prefix(struct imap_fetch_state *state,
+ 		str_append(str, " NIL");
+ 	else if (has_nuls && body->binary)
+ 		str_printfa(str, " ~{%"PRIuUOFF_T"}\r\n", size);
+-	else
++	else if (size == 0 &&
++		 (ctx->client->set->parsed_workarounds &
++		  WORKAROUND_EMPTY_PARTIAL_AS_QUOTED) != 0) {
++		/* An empty string, as RFC 9051 6.4.5 requires for a range
++		   past the end of a section. "" and {0} are the same value
++		   (string = quoted / literal), but only the literal splits
++		   the response across two lines.
++
++		   swift-nio-imap's FramingParser mishandles the zero-length
++		   case: it emits the header as a complete frame, enters
++		   .insideLiteral(remaining: 0), leaves it without consuming
++		   a byte, then returns .incomplete because frameLength is
++		   still 0. Only new network bytes re-drive it, and after a
++		   finished FETCH none arrive -- iOS Mail hangs ~90 s.
++
++		   Every zero-length literal is affected, not just partial
++		   fetches. imap_append_nstring() already prefers "" for an
++		   empty string; this was the one place that did not. */
++		str_append(str, " \"\"");
++	} else
+ 		str_printfa(str, " {%"PRIuUOFF_T"}\r\n", size);
+ 	return str;
+ }
+@@ -201,7 +221,7 @@ static int fetch_body_msgpart(struct imap_fetch_context *ctx, struct mail *mail,
+ 	ctx->state.cur_human_name = get_body_human_name(ctx->ctx_pool, body);
+ 
+ 	fetch_state_update_stats(ctx, body->msgpart);
+-	str = get_prefix(&ctx->state, body, ctx->state.cur_size,
++	str = get_prefix(ctx, body, ctx->state.cur_size,
+ 			 result.binary_decoded_input_has_nuls);
+ 	o_stream_nsend(ctx->client->output, str_data(str), str_len(str));
+ 
+diff --git a/src/imap/imap-settings.c b/src/imap/imap-settings.c
+index 7800d210c93..8260c81586c 100644
+--- a/src/imap/imap-settings.c
++++ b/src/imap/imap-settings.c
+@@ -204,6 +204,7 @@ static const struct imap_client_workaround_list imap_client_workaround_list[] =
+ 	{ "delay-newmail", WORKAROUND_DELAY_NEWMAIL },
+ 	{ "tb-extra-mailbox-sep", WORKAROUND_TB_EXTRA_MAILBOX_SEP },
+ 	{ "tb-lsub-flags", WORKAROUND_TB_LSUB_FLAGS },
++	{ "empty-partial-as-quoted", WORKAROUND_EMPTY_PARTIAL_AS_QUOTED },
+ 	{ NULL, 0 }
+ };
+ 
+diff --git a/src/imap/imap-settings.h b/src/imap/imap-settings.h
+index edc1ea0ce80..c2fffe24c9e 100644
+--- a/src/imap/imap-settings.h
++++ b/src/imap/imap-settings.h
+@@ -9,7 +9,8 @@ struct mail_user_settings;
+ enum imap_client_workarounds {
+ 	WORKAROUND_DELAY_NEWMAIL		= 0x01,
+ 	WORKAROUND_TB_EXTRA_MAILBOX_SEP		= 0x08,
+-	WORKAROUND_TB_LSUB_FLAGS		= 0x10
++	WORKAROUND_TB_LSUB_FLAGS		= 0x10,
++	WORKAROUND_EMPTY_PARTIAL_AS_QUOTED	= 0x20
+ };
+ 
+ enum imap_client_fetch_failure {

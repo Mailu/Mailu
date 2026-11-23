@@ -17,7 +17,8 @@ ARG VERSION
 LABEL version=$VERSION
 
 RUN set -euxo pipefail \
-  ; apk add --no-cache certbot nginx nginx-mod-http-brotli nginx-mod-http-zstd nginx-mod-mail openssl dovecot-lua dovecot-pigeonhole-plugin dovecot-lmtpd dovecot-pop3d dovecot-submissiond
+  ; cp /usr/share/mailu/dovecot-apks/keys/*.pub /etc/apk/keys/ \
+  ; apk add --no-cache /usr/share/mailu/dovecot-apks/front/*.apk certbot nginx nginx-mod-http-brotli nginx-mod-http-zstd nginx-mod-mail openssl
 
 COPY conf/ /conf/
 COPY --from=static /static/ /static/

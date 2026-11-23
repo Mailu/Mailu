@@ -7,7 +7,8 @@ ARG VERSION
 LABEL version=$VERSION
 
 RUN set -euxo pipefail \
-  ; apk add --no-cache dovecot dovecot-lua dovecot-lmtpd dovecot-pigeonhole-plugin dovecot-pop3d dovecot-submissiond rspamd-client dovecot-fts-flatcurve lua-json4 \
+  ; cp /usr/share/mailu/dovecot-apks/keys/*.pub /etc/apk/keys/ \
+  ; apk add --no-cache /usr/share/mailu/dovecot-apks/imap/*.apk rspamd-client lua-json4 \
   ; addgroup -S dovecot-proxy \
   ; mkdir /var/lib/dovecot
 

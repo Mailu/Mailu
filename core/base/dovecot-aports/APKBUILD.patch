@@ -1,0 +1,37 @@
+--- a/APKBUILD
++++ b/APKBUILD
+@@ -13,7 +13,7 @@
+ 	*.*.*.*) _pkgverminor=${pkgver%.*.*};;
+ 	*.*.*) _pkgverminor=${pkgver%.*};;
+ esac
+-pkgrel=0
++pkgrel=1
+ _pigeonholever=2.4.5
+ pkgdesc="IMAP and POP3 server"
+ url="https://www.dovecot.org/"
+@@ -39,6 +39,7 @@
+ 	mariadb-connector-c-dev
+ 	openldap-dev
+ 	openssl-dev>3
++	perl
+ 	pcre2-dev
+ 	sqlite-dev
+ 	xapian-core-dev
+@@ -68,6 +69,8 @@
+ source="https://www.dovecot.org/releases/$_pkgverminor/dovecot-$_pkgver.tar.gz
+ 	$pkgname-pigeonhole-$_pigeonholever.tar.gz::https://pigeonhole.dovecot.org/releases/$_pkgverminor/dovecot-pigeonhole-$_pigeonholever.tar.gz
+ 	skip-iconv-check.patch
++	0001-login-common-keep-post-login-fd-open.patch
++	0002-imap-empty-partial-as-quoted.patch
+ 	dovecot.logrotate
+ 	dovecot.initd
+ 	"
+@@ -399,6 +402,8 @@
+ d23607289ab5b4ac6fa0a87ffb6d461357980cf1f6a7a5037f9c5fb13b89b1778557e73465d1042ac2ee4cdd5893c9f44b3c80a0d87c2fc708d2928702a6b69b  dovecot-2.4.5.tar.gz
+ fa353a8994c532be5d71eb9371e0a673888f76c6af941deca9131b0535e8b1a2b24a199935895f4cf3717d107d62bf1090d88ee424263b4a590309f53d8b5ebd  dovecot-pigeonhole-2.4.5.tar.gz
+ 63d49a8d4df3e674ab9815766139e436f8b593d69f94003ab0030c36c0e5245bae79a983e6cbf9c7425b255135e27f389640ba50f5bbc6217f0b1fb3667e3db5  skip-iconv-check.patch
++66305ea5738a694b8f62108ee649bcf76d5f52072e91890424a710ecc8957663520db2c405dcf81e7484630213ffacd332cca49edd5f4a43e3d0186e1b35f29e  0001-login-common-keep-post-login-fd-open.patch
++72565d37e816cc05a67d79029e9732e5068a3688b1d20f0a49cfcb049acb2381c6316c4e1b18b99bdabe86d5eab7dae44d4c24206931416b5a6f21edc7f65598  0002-imap-empty-partial-as-quoted.patch
+ 9f19698ab45969f1f94dc4bddf6de59317daee93c9421c81f2dbf8a7efe6acf89689f1d30f60f536737bb9526c315215d2bce694db27e7b8d7896036a59c31f0  dovecot.logrotate
+ d91951b81150d7a3ef6a674c0dc7b012f538164dac4b9d27a6801d31da6813b764995a438f69b6a680463e1b60a3b4f2959654f68e565fe116ea60312d5e5e70  dovecot.initd
+ "

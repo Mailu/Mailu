@@ -1,0 +1,1 @@
+Stop the Postfix master gracefully when the SMTP container shuts down.

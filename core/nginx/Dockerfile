@@ -11,7 +11,7 @@ RUN set -euxo pipefail \
 
 
 # nginx image
-FROM ${MAILU_BASE}
+FROM base
 
 ARG VERSION
 LABEL version=$VERSION

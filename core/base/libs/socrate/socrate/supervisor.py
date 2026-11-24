@@ -53,6 +53,7 @@ def start(programs, secret_env=None):
     """
     secret_env = secret_env or {}
     parent_env = dict(os.environ)
+    parent_env.pop("MAILU_STOP_COMMAND", None)
     program_directory = os.getcwd()
     control_username = "mailu-supervisorctl"
     control_password = secrets.token_urlsafe(32)

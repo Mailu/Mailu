@@ -7,6 +7,7 @@ import queue
 import re
 import select
 import selectors
+import shlex
 import signal
 import subprocess
 import sys
@@ -166,6 +167,7 @@ def main():
         raise SystemExit("log filter requires a command")
 
     patterns = _patterns()
+    stop_command = shlex.split(os.environ.pop("MAILU_STOP_COMMAND", ""))
     requested_signal = {"value": None}
     requested_child_signal = {"value": None}
 
@@ -217,6 +219,11 @@ def main():
                 requested_child_signal["value"] = None
 
             if requested_signal["value"] is not None:
+                if stop_command:
+                    try:
+                        subprocess.run(stop_command, timeout=6, check=True)
+                    except (subprocess.SubprocessError, OSError) as error:
+                        print(f"[mailu log filter] stop failed: {error}", file=sys.stderr)
                 _stop_process_group(process)
                 group_stopped = True
                 break

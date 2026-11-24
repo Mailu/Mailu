@@ -89,7 +89,13 @@ prepare_postfix_chroot()
 
 programs = [
     {"name": "podop", "command": ["python3", "-m", "podop.run_server", "postfix"], "priority": 10},
-    {"name": "postfix", "command": ["postfix", "start-fg"], "log_filters": log_filters, "priority": 20},
+    {
+        "name": "postfix",
+        "command": ["postfix", "start-fg"],
+        "environment": {"MAILU_STOP_COMMAND": "postfix stop"},
+        "log_filters": log_filters,
+        "priority": 20,
+    },
 ]
 if os.environ.get('POSTFIX_LOG_FILE'):
     programs.append({"name": "cron", "command": ["/usr/sbin/crond", "-f", "-l", "2", "-L", "/proc/1/fd/1"]})

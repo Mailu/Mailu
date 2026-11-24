@@ -43,15 +43,15 @@ assets="${admin}/assets"
 cd "${tmp}"
 
 # base
-cp "${base}"/requirements-* .
-cp -r "${base}"/libs .
+cp "${base}"/requirements-* "${base}"/{supervisor-healthcheck,download-github-asset} .
+cp -r "${base}"/{libs,dovecot-aports} .
 sed -E '/^#/d;s:^FROM system$:FROM system AS base:' "${base}/Dockerfile" >Dockerfile
 
 # assets
 cp "${assets}/package.json" .
 cp -r "${assets}/assets" ./assets
 sed '/new compress/,/}),/d' <"${assets}/webpack.config.js" >webpack.config.js
-sed -E '/^#/d;s:^(FROM [^ ]+$):\1 AS assets:' "${assets}/Dockerfile" >>Dockerfile
+sed -E '/^#/d;s:^(FROM .+)$:\1 AS assets:' "${assets}/Dockerfile" >>Dockerfile
 
 # admin
 sed -E '/^#/d;/^(COPY|EXPOSE|HEALTHCHECK|VOLUME|CMD) /d; s:^(.* )[^ ]*pybabel[^\\]*(.*):\1true \2:' "${admin}/Dockerfile" >>Dockerfile

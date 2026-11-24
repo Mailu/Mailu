@@ -1,0 +1,1 @@
+Upgrade to nginx >= 1.28.3-r8 (to fix CVE-2026-113425, CVE-2026-123633, CVE-2026-123007, ...) and re-enable HTTP2. ARMv7 is still vulnerable as the alpine packages are not available yet.

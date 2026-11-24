@@ -17,7 +17,7 @@ ARG VERSION
 LABEL version=$VERSION
 
 RUN set -euxo pipefail \
-  ; apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.22/main/ 'nginx>=1.28.3-r9' nginx-mod-http-brotli 'nginx-mod-mail>=1.28.3-r8' \
+  ; apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.22/main/ nginx nginx-mod-http-brotli nginx-mod-mail \
   ; apk add --no-cache openssl certbot dovecot-lua dovecot-pigeonhole-plugin 'dovecot-lmtpd<2.4' dovecot-pop3d dovecot-submissiond
 
 COPY conf/ /conf/

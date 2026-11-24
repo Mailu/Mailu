@@ -12,7 +12,7 @@ COPY roundcube/roundcube.diff /tmp/roundcube.diff
 
 # php83-pecl-imagick php83-pecl-uuid are missing
 RUN set -euxo pipefail \
-  ; apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.22/main/ 'nginx>=1.28.3-r9' \
+  ; apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.22/main/ nginx \
   ; apk add --no-cache \
     gpg gpg-agent patch gd libsodium \
     aspell-uk aspell-ru aspell-fr aspell-de aspell-en \

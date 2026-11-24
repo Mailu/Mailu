@@ -92,7 +92,7 @@ programs = [
     {
         "name": "postfix",
         "command": ["postfix", "start-fg"],
-        "stop_command": ["postfix", "stop"],
+        "environment": {"MAILU_STOP_COMMAND": "postfix stop"},
         "log_filters": log_filters,
         "priority": 20,
     },

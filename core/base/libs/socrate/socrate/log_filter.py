@@ -19,8 +19,6 @@ READ_SIZE = 65536
 MAX_LINE_SIZE = 65536
 MAX_QUEUED_LINES = 64
 STOP_TIMEOUT = 3
-STOP_COMMAND_TIMEOUT = 6
-SHUTDOWN_DRAIN_TIMEOUT = 0.25
 
 
 def _patterns():
@@ -116,63 +114,6 @@ def _stop_process_group(process, timeout=STOP_TIMEOUT):
         process.wait()
 
 
-class _CommandShutdown:
-    """Advance shutdown without interrupting reads from the daemon's pipes."""
-
-    def __init__(self, command, process, report_error):
-        self.process = process
-        self.report_error = report_error
-        self.command = None
-        self.failed = False
-        self.group_deadline = None
-        self.group_killed = False
-        self.groups = [process]
-        self.command_deadline = time.monotonic() + STOP_COMMAND_TIMEOUT
-        try:
-            self.command = subprocess.Popen(command, start_new_session=True)
-            self.groups.append(self.command)
-        except OSError as error:
-            self._fallback(str(error))
-
-    def _fallback(self, error=None):
-        if error is not None:
-            self.failed = True
-            self.report_error("stop command failed: {}".format(error))
-        for child in self.groups:
-            _signal_process_group(child, signal.SIGTERM)
-        self.group_deadline = time.monotonic() + STOP_TIMEOUT
-
-    def advance(self):
-        """Poll and reap both children, escalating the relevant group at its deadline."""
-        now = time.monotonic()
-        process_exited = self.process.poll() is not None
-        command_status = self.command.poll() if self.command is not None else None
-        if self.group_deadline is None:
-            if command_status not in (None, 0):
-                self._fallback("exit status {}".format(command_status))
-            elif command_status == 0 and process_exited:
-                self._fallback()
-            elif now >= self.command_deadline:
-                if command_status is None:
-                    _signal_process_group(self.command, signal.SIGKILL)
-                self._fallback("timed out waiting for the command or foreground process")
-
-        if self.group_deadline is None:
-            return False
-        live_groups = [child for child in self.groups if _process_group_exists(child)]
-        if live_groups and now >= self.group_deadline and not self.group_killed:
-            self.group_killed = True
-            self.failed = True
-            self.report_error("shutdown required SIGKILL for remaining process groups")
-            for child in live_groups:
-                _signal_process_group(child, signal.SIGKILL)
-        return (
-            (not live_groups or now >= self.group_deadline)
-            and process_exited
-            and (self.command is None or command_status is not None)
-        )
-
-
 def _emit_line(pipe, line, outputs, patterns, output_queue, dropped, disabled):
     output_fd = outputs[pipe]
     if len(line) > MAX_LINE_SIZE:
@@ -243,7 +184,6 @@ def main():
     process = None
     selector = None
     writer = None
-    shutdown = None
     try:
         process = subprocess.Popen(
             command,
@@ -272,31 +212,23 @@ def main():
             os.set_blocking(pipe.fileno(), False)
             selector.register(pipe, selectors.EVENT_READ)
 
-        def report_stop_error(error):
-            message = "[mailu log filter] {}\n".format(error).encode()
-            _emit(output_queue, sys.stderr.fileno(), message, (), dropped, disabled)
-
         group_stopped = False
-        drain_deadline = None
-        while selector.get_map() or process.poll() is None or shutdown is not None:
+        while selector.get_map() or process.poll() is None:
             if requested_child_signal["value"] is not None:
                 _signal_process_group(process, requested_child_signal["value"])
                 requested_child_signal["value"] = None
 
             if requested_signal["value"] is not None:
-                if shutdown is None:
-                    if not stop_command:
-                        _stop_process_group(process)
-                        break
-                    shutdown = _CommandShutdown(stop_command, process, report_stop_error)
+                if stop_command:
+                    try:
+                        subprocess.run(stop_command, timeout=6, check=True)
+                    except (subprocess.SubprocessError, OSError) as error:
+                        print(f"[mailu log filter] stop failed: {error}", file=sys.stderr)
+                _stop_process_group(process)
+                group_stopped = True
+                break
 
-            timeout = 0.05 if shutdown is not None else 0.25
-            if drain_deadline is not None:
-                remaining = drain_deadline - time.monotonic()
-                if not selector.get_map() or remaining <= 0:
-                    break
-                timeout = min(timeout, remaining)
-            events = selector.select(timeout=timeout)
+            events = selector.select(timeout=0.25) if selector.get_map() else ()
             for key, _ in events:
                 pipe = key.fileobj
                 try:
@@ -316,17 +248,14 @@ def main():
                     output_queue, dropped, disabled,
                 )
 
-            if shutdown is not None:
-                if drain_deadline is None and shutdown.advance():
-                    drain_deadline = time.monotonic() + SHUTDOWN_DRAIN_TIMEOUT
-            elif process.poll() is not None and not group_stopped:
+            if process.poll() is not None and not group_stopped:
                 # A service command must remain in the foreground. Clean up
                 # any descendants if its leader exits while they hold pipes.
                 _stop_process_group(process, timeout=1)
                 group_stopped = True
 
         if requested_signal["value"] is not None:
-            return 1 if shutdown is not None and shutdown.failed else 128 + requested_signal["value"]
+            return 128 + requested_signal["value"]
         if process.poll() is None:
             _stop_process_group(process)
         return process.wait()
@@ -335,8 +264,6 @@ def main():
             _stop_process_group(process)
         raise
     finally:
-        if shutdown is not None and shutdown.command is not None and shutdown.command.poll() is None:
-            _stop_process_group(shutdown.command)
         if selector is not None:
             selector.close()
         if process is not None:

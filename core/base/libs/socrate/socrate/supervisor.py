@@ -47,8 +47,7 @@ def start(programs, secret_env=None):
     """Exec supervisord, keeping sensitive variables scoped to named programs.
 
     ``programs`` contains ``name``, ``command`` and optional ``environment``
-    values. An optional ``stop_command`` gracefully stops a filtered program
-    whose daemon runs in a separate process group. ``secret_env`` maps program names to the sensitive environment
+    values. ``secret_env`` maps program names to the sensitive environment
     entries that program needs. Supervisord itself and all other programs run
     without any sensitive variables inherited from the container environment.
     """
@@ -85,16 +84,13 @@ def start(programs, secret_env=None):
         name = program["name"]
         environment = dict(program.get("environment", {}))
         environment.update(secret_env.get(name, {}))
-        environment.pop("MAILU_STOP_COMMAND", None)
         if "LD_PRELOAD" in parent_env:
             environment.setdefault("LD_PRELOAD", parent_env["LD_PRELOAD"])
         command = program["command"]
-        if program.get("stop_command"):
-            environment["MAILU_STOP_COMMAND"] = shlex.join(program["stop_command"])
-        if program.get("log_filters") or program.get("stop_command"):
+        if program.get("log_filters"):
             environment["MAILU_LOG_FILTERS"] = ",".join(
                 base64.b64encode(pattern).decode("ascii")
-                for pattern in program.get("log_filters", ())
+                for pattern in program["log_filters"]
             )
             command = [sys.executable, "-m", "socrate.log_filter", "--"] + command
         config.extend([

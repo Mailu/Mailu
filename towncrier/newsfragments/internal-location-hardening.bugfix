@@ -1,0 +1,1 @@
+GHSA-qvh9-7593-8r84: Keep internal Nginx routes restricted to internal subrequests, regardless of other configured locations.

@@ -34,6 +34,44 @@ new home, assigns the account's UID/GID, normalizes message sizes, and queues
 index and quota rebuilding. This operation can take a long time; see
 :ref:`import_external_mailbox` for the full procedure and checks.
 
+.. _mailbox_uid_range:
+
+Each mailbox gets its own Unix UID/GID, so Dovecot processes of one mailbox
+can't read another's files. This separation is where the security gain lies;
+that the IDs are random adds little, so a smaller range is no weaker as long as
+every mailbox keeps its own ID. New mailboxes get a random, unused ID from the
+range ``MAILBOX_UID_MIN`` to ``MAILBOX_UID_MAX`` (default: ``100000`` to
+``2000000000``). The IDs ``65534`` (``nobody``) and ``65535`` are never used,
+even when they are inside the range. ``MAILBOX_UID_MIN`` must be at least
+``10000``, to keep away from system and service accounts.
+
+Change the range when the containers run in a user namespace: rootless Docker
+or Podman, or Docker with ``userns-remap``. There, only the IDs of the host's
+subordinate ID block (``/etc/subuid`` and ``/etc/subgid``, usually 65536 IDs)
+exist inside the containers, and the default range doesn't fit. Suggested
+values (a block of *N* IDs appears as ``0`` to *N* − 1 inside the containers):
+
+=====================================  ===================  ===================  =================
+Setup                                  ``MAILBOX_UID_MIN``  ``MAILBOX_UID_MAX``  Max mailboxes
+=====================================  ===================  ===================  =================
+Rootless Docker or Podman (65536 IDs)  ``10000``            ``65535``            55534
+Docker ``userns-remap`` (65536 IDs)    ``10000``            ``65535``            55534
+Subordinate block of *N* IDs           ``10000``            *N* − 1              *N* − 10002
+Default (no user namespace)            ``100000``           ``2000000000``       about 1.9 billion
+=====================================  ===================  ===================  =================
+
+With Podman's ``--userns=auto``, the size of the namespace is estimated from the
+IDs the image needs, which doesn't cover mailbox IDs created later; request a
+full block, for example ``--userns=auto:size=65536``.
+
+Set both values in ``mailu.env`` before the first start, or before upgrading
+from a version without per-mailbox IDs: existing mailboxes are numbered from
+``MAILBOX_UID_MIN`` during that upgrade.
+
+The admin container refuses to start when a mailbox already has an ID outside
+the configured range, and names the mailboxes concerned. Mailu doesn't move
+existing mailboxes to a new range; keep the range they were created with.
+
 .. _common_cfg:
 
 Common configuration

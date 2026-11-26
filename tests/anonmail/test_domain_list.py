@@ -33,6 +33,7 @@ class TestDomainListCounts:
 
             with client.session_transaction() as sess:
                 sess['_user_id'] = admin.email
+                sess['_auth_generation'] = admin.auth_generation
                 sess['_fresh'] = True
 
             statements = []

@@ -15,7 +15,7 @@ import urllib.error
 
 from fts_settings import normalize_languages
 from socrate.system import mailbox_shard
-from socrate.mailbox import harden_parents
+from socrate.mailbox import MAX_UID, MIN_UID, harden_parents, valid_uid
 
 LOG = logging.getLogger("mail-migration")
 MARKER = "/mail/.mail-layout-v1"
@@ -201,6 +201,12 @@ def migrate_user(user):
     local, domain = email.rsplit("@", 1)
     uid = int(user["uid"])
     gid = uid
+    if not valid_uid(uid, MIN_UID, MAX_UID):
+        # Fail with a clear message before chown does (EINVAL in a user namespace).
+        raise ValueError(
+            f"Mailbox {email} has UID {uid}, outside MAILBOX_UID_MIN..MAILBOX_UID_MAX "
+            f"({MIN_UID}-{MAX_UID}) or reserved"
+        )
     legacy = os.path.join("/mail", email)
     home = os.path.join("/mail", domain, mailbox_shard(email), local)
     mail = os.path.join(home, "mail")

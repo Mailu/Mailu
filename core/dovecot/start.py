@@ -13,7 +13,7 @@ import urllib.request
 from socrate import system, conf, supervisor
 from fts_settings import normalize_languages
 from migrate_mail import fetch_users
-from socrate.mailbox import harden_parents_once
+from socrate.mailbox import harden_parents_once, uid_range
 
 log_filters = [
     rb'Error\: SSL context initialization failed, disabling SSL\: Couldn\'t initialize SSL server context\: Can\'t load SSL certificate \(ssl_server_cert_file setting\)\: The certificate is empty$',
@@ -22,8 +22,11 @@ env = system.set_env()
 
 # Actual startup script
 fts_languages = normalize_languages(env.get("FULL_TEXT_SEARCH", "en"))
+mailbox_uid_min, mailbox_uid_max = uid_range(env)
 context = dict(
     os.environ,
+    MAILBOX_UID_MIN=mailbox_uid_min,
+    MAILBOX_UID_MAX=mailbox_uid_max,
     FULL_TEXT_SEARCH=fts_languages,
     FULL_TEXT_SEARCH_ENABLED=fts_languages != "off",
     FULL_TEXT_SEARCH_ATTACHMENTS=system.parse_bool(env.get("FULL_TEXT_SEARCH_ATTACHMENTS"), False),

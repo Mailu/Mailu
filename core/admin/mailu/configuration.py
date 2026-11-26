@@ -1,5 +1,6 @@
 import os
 from socrate.system import parse_bool
+from socrate.mailbox import DEFAULT_MIN_UID, DEFAULT_MAX_UID, uid_range
 
 from datetime import timedelta
 import ipaddress
@@ -98,7 +99,9 @@ DEFAULT_CONFIG = {
     'TLS_PERMISSIVE': True,
     'TZ': 'Etc/UTC',
     'DEFAULT_SPAM_THRESHOLD': 80,
-    'PORTS': '25,80,443,465,993,995,4190',
+    'MAILBOX_UID_MIN': DEFAULT_MIN_UID,
+    'MAILBOX_UID_MAX': DEFAULT_MAX_UID,
+    'PORTS':'25,80,443,465,993,995,4190',
     'PROXY_AUTH_WHITELIST': '',
     'PROXY_AUTH_HEADER': 'X-Auth-Email',
     'PROXY_AUTH_CREATE': False,
@@ -166,6 +169,8 @@ class ConfigManager:
             raise ValueError('OAUTH2_REFRESH_TOKEN_IDLE must be a positive number of seconds')
         self.config['QUARANTINE_RETENTION_DAYS'] = int(self.config['QUARANTINE_RETENTION_DAYS'])
         self.config['QUARANTINE_MAX_MESSAGE_BYTES'] = int(self.config['QUARANTINE_MAX_MESSAGE_BYTES'])
+        self.config['MAILBOX_UID_MIN'], self.config['MAILBOX_UID_MAX'] = uid_range(self.config)
+        self.config['MAILBOX_UID_RANGE'] = (self.config['MAILBOX_UID_MIN'], self.config['MAILBOX_UID_MAX'])
 
         # automatically set the sqlalchemy string
         if self.config['DB_FLAVOR']:

@@ -46,6 +46,9 @@ run_as_mailu("flask", "mailu", "advertise")
 if run_as_mailu("flask", "db", "upgrade") != 0:
     log.critical("Database migrations failed; refusing to start the admin service")
     sys.exit(1)
+if run_as_mailu("flask", "mailu", "check-mailbox-uids") != 0:
+    log.critical("Mailbox UIDs don't match MAILBOX_UID_MIN/MAILBOX_UID_MAX; refusing to start the admin service")
+    sys.exit(1)
 if run_as_mailu("flask", "mailu", "cleanup-oauth2") != 0:
     log.warning("Cleaning expired OAuth records failed; startup will continue")
 if run_as_mailu("flask", "mailu", "import-legacy-dkim-keys") != 0:

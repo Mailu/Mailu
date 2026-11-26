@@ -32,6 +32,8 @@ from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.orm import validates
 from werkzeug.utils import cached_property
 
+from socrate.mailbox import valid_uid
+
 from mailu import dkim, utils
 
 
@@ -41,9 +43,37 @@ logging.getLogger('passlib').setLevel(logging.ERROR)
 
 db = flask_sqlalchemy.SQLAlchemy(engine_options={"pool_pre_ping": True})
 
-def _new_dovecot_uid():
-    # Keep virtual mailbox IDs away from the low system-account range.
-    return 100000 + secrets.randbelow(2_000_000_000 - 100000)
+def _new_dovecot_uid(context):
+    """Pick a random, unused mailbox UID from MAILBOX_UID_MIN..MAILBOX_UID_MAX.
+
+    SQLAlchemy calls this as the column default and passes the execution
+    context, so the check runs in the same transaction. A smaller range (as
+    needed for rootless Docker/Podman or userns-remap) makes collisions likely
+    enough to check: a taken or reserved UID is drawn again. Two mailboxes
+    created in the same flush could still collide; the unique index then
+    rejects the second one.
+    """
+    low, high = app.config['MAILBOX_UID_RANGE']
+    column = sqlalchemy.column('dovecot_uid')
+    query = sqlalchemy.select(column).select_from(sqlalchemy.table('user')).limit(1)
+    for _ in range(100):
+        uid = low + secrets.randbelow(high - low + 1)
+        if not valid_uid(uid, low, high):
+            continue
+        if context.connection.execute(query.where(column == uid)).first() is None:
+            return uid
+    # Random draws keep failing only when the range is nearly full: take the
+    # lowest free UID instead.
+    taken = {row[0] for row in context.connection.execute(
+        sqlalchemy.select(column).select_from(sqlalchemy.table('user'))
+        .where(column.between(low, high))
+    )}
+    for uid in range(low, high + 1):
+        if valid_uid(uid, low, high) and uid not in taken:
+            return uid
+    raise RuntimeError(
+        f'No free mailbox UID found in {low}-{high}; widen MAILBOX_UID_MIN/MAILBOX_UID_MAX'
+    )
 
 
 class IdnaDomain(db.TypeDecorator):

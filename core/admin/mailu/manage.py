@@ -66,6 +66,28 @@ def migrate_quarantine_storage():
     click.echo(f'Migrated {count} quarantine and greylist records')
 
 
+@mailu.command('check-mailbox-uids')
+@with_appcontext
+def check_mailbox_uids():
+    """Fail if a mailbox UID is outside MAILBOX_UID_MIN..MAILBOX_UID_MAX."""
+    from socrate.mailbox import valid_uid
+    low, high = app.config['MAILBOX_UID_RANGE']
+    bad = [
+        (email, uid) for email, uid in models.db.session.query(
+            models.User.email, models.User.dovecot_uid
+        )
+        if not valid_uid(uid, low, high)
+    ]
+    if bad:
+        for email, uid in bad[:10]:
+            click.echo(f'{email}: UID {uid}', err=True)
+        raise click.ClickException(
+            f'{len(bad)} mailbox(es) have a UID outside MAILBOX_UID_MIN..MAILBOX_UID_MAX '
+            f'({low}-{high}) or a reserved one. Set the range they were created with.'
+        )
+    click.echo(f'All mailbox UIDs are within {low}-{high}')
+
+
 @mailu.command('cleanup-oauth2')
 @with_appcontext
 def cleanup_oauth2():

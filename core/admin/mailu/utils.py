@@ -73,8 +73,12 @@ def is_demo_account(user):
 
 
 def is_valid_localpart(localpart):
-    """Validate an RFC 5321/6531 dot-atom local-part."""
+    """Validate a local-part that can be used safely in mailbox paths."""
     if not isinstance(localpart, str) or not localpart:
+        return False
+    # The local-part is a component of Dovecot's mailbox home path. Allowing a
+    # slash here can make distinct email addresses resolve to the same path.
+    if '/' in localpart:
         return False
     try:
         if any(len(candidate.encode('utf-8')) > 64

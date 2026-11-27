@@ -7,7 +7,7 @@ import pytest
 from mailu.ui import forms
 
 
-ATEXT_SPECIALS = "!#$%&'*+-/=?^_`{|}~"
+ATEXT_SPECIALS = "!#$%&'*+-=?^_`{|}~"
 
 
 def validate_destination(app, destination):
@@ -27,6 +27,9 @@ class TestForwardDestinationLocalpart:
     def test_tilde_localpart_is_accepted(self, app):
         """#4078: `~@domain.com` is a valid address and must be forwardable to."""
         assert validate_destination(app, '~@example.com')
+
+    def test_slash_localpart_is_rejected_for_maildir_safety(self):
+        assert not re.match(forms.LOCALPART_REGEX, 'a/b')
 
     @pytest.mark.parametrize('char', list(ATEXT_SPECIALS))
     def test_every_localpart_character_mailu_allows_is_accepted(self, app, char):

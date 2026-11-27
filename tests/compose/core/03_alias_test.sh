@@ -4,7 +4,7 @@ cat << EOF | docker compose -f tests/compose/core/docker-compose.yml exec -T adm
 aliases:
   - localpart: alltheusers
     domain: mailu.io
-    destination: "admin@mailu.io,user@mailu.io,user/with/slash@mailu.io"
+    destination: "admin@mailu.io,user@mailu.io,user_with_slash@mailu.io"
 EOF
 
 python3 tests/alias_test.py

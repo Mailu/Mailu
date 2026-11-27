@@ -48,3 +48,31 @@ def test_postfix_recipient_map_rejects_short_srs_hash(app, client):
     )
 
     assert short_hash_response.status_code == 404
+
+
+def test_password_change_revokes_sessions_created_from_anonymous_sessions(app):
+    app.config['WTF_CSRF_ENABLED'] = False
+    domain = models.Domain(name='session-security.example')
+    user = models.User(localpart='admin', domain=domain, global_admin=True)
+    user.set_password('old-password')
+    models.db.session.add_all([domain, user])
+    models.db.session.commit()
+
+    inherited_session_client = app.test_client()
+    password_change_client = app.test_client()
+    for client in (inherited_session_client, password_change_client):
+        assert client.get('/sso/login').status_code == 200
+        login_response = client.post('/sso/login', data={
+            'email': user.email,
+            'pw': 'old-password',
+        })
+        assert login_response.status_code == 302
+
+    change_response = password_change_client.post('/sso/pw_change', data={
+        'oldpw': 'old-password',
+        'pw': 'new-password-123',
+        'pw2': 'new-password-123',
+    })
+
+    assert change_response.status_code == 302
+    assert inherited_session_client.get('/sso/pw_change').status_code == 302

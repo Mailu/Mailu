@@ -335,9 +335,15 @@ class MailuSession(CallbackDict, SessionMixin):
     def save(self):
         """ Save session to store. """
         set_cookie = False
-        # set uid from dict data
-        if self._uid is None:
-            self._uid = self.app.session_config.gen_uid(self.get('_user_id', ''))
+        # Session keys are scoped to the authenticated identity. A browser can
+        # carry a saved anonymous session through login, so refresh the UID
+        # prefix whenever Flask-Login changes _user_id.
+        uid = self.app.session_config.gen_uid(self.get('_user_id', ''))
+        if self._uid != uid:
+            if self._uid is not None:
+                self.delete(clear_token=False)
+                self._sid = None
+            self._uid = uid
 
         # create new session id for new or regenerated sessions and force setting the cookie
         if self._sid is None:
@@ -527,9 +533,10 @@ class MailuSessionExtension:
         app = app or flask.current_app
 
         prefix = None if uid is None else app.session_config.gen_uid(uid)
+        keys = app.session_store.list(prefix)
 
         count = 0
-        for key in app.session_store.list(prefix):
+        for key in dict.fromkeys(keys):
             if key not in keep and not key.startswith(b'token-'):
                 app.session_store.delete(key)
                 count += 1

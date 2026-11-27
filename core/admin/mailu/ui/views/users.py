@@ -71,15 +71,26 @@ def user_edit(user_email):
         form.quota_bytes.validators = [
             wtforms.validators.NumberRange(max=max_quota_bytes)]
     if form.validate_on_submit():
+<<<<<<< HEAD
         if form.pw.data:
             if msg := utils.isBadOrPwned(form):
                 flask.flash(msg, "error")
                 return flask.render_template('user/edit.html', form=form, user=user,
                     domain=user.domain, max_quota_bytes=max_quota_bytes)
+=======
+        keep_passkey_enrollment_flag = (
+            user.passkey_enroll_next_login
+            if user.domain.passkey_require_enrollment
+            else None
+        )
+        was_enabled = user.enabled
+>>>>>>> 7eef20e (Revoke sessions when disabling an account)
         form.populate_obj(user)
         if form.pw.data:
             user.set_password(form.pw.data, keep_sessions=set(flask.session))
         models.db.session.commit()
+        if was_enabled and not user.enabled:
+            utils.MailuSessionExtension.prune_sessions(uid=user.email)
         flask.flash('User %s updated' % user)
         return flask.redirect(
             flask.url_for('.user_list', domain_name=user.domain.name))

@@ -217,6 +217,7 @@ class User(Resource):
         user_found = models.User.query.get(email)
         if not user_found:
             return {'code': 404, 'message': f'User {email} cannot be found'}, 404
+        was_enabled = user_found.enabled
         if ('forward_enabled' in data and data['forward_enabled'] is True) or ('forward_enabled' not in data and user_found.forward_enabled):
             if ('forward_destination' in data and len(data['forward_destination']) == 0):
                 return { 'code': 400, 'message': f'forward_destination is mandatory when forward_enabled is true'}, 400
@@ -269,6 +270,8 @@ class User(Resource):
             user_found.spam_threshold = data['spam_threshold']
         db.session.add(user_found)
         db.session.commit()
+        if was_enabled and not user_found.enabled:
+            utils.MailuSessionExtension.prune_sessions(uid=user_found.email)
 
         return {'code': 200,'message': f'User {email} has been updated'}, 200
 

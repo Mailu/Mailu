@@ -8,6 +8,48 @@ import re
 import sqlalchemy.exc
 import srslib
 
+<<<<<<< HEAD
+=======
+SRS_HASH_LENGTH = 4
+
+
+def _has_full_srs_hash(address):
+    """Reject shortened SRS hashes before srslib validates them.
+
+    srslib checks a hash using the length supplied in the address. Requiring
+    Mailu's configured output length prevents an attacker from trying shorter
+    prefixes of a valid recipient hash.
+    """
+    if address.count('@') != 1:
+        return False
+    localpart = address.rsplit('@', 1)[0]
+    if (localpart[:4].upper() not in ('SRS0', 'SRS1')
+            or len(localpart) < 6
+            or localpart[4] not in '-=+'):
+        return False
+    hash_value, separator, _ = localpart[5:].partition('=')
+    return bool(separator and len(hash_value) == SRS_HASH_LENGTH)
+
+
+def _unsupported_address(address, require_mailbox=False):
+    """ Return True for a lookup key Mailu cannot resolve: an address with
+    more than one ``@`` or a quoted local part. Binding such a key in
+    ``resolve_destination`` lets ``IdnaEmail.process_bind_param`` raise (the
+    local part still contains an ``@``), which SQLAlchemy surfaces as a
+    ``StatementError`` and 500s the endpoint. Postfix then treats the lookup as
+    a temporary failure and retries — tripping the sender rate limit (#3252).
+    The resolve-path endpoints must answer 404 instead. """
+    if ((require_mailbox and address.count('@') != 1)
+            or address.count('@') > 1 or address.startswith('"')):
+        return True
+    domain = address.rsplit('@', 1)[-1]
+    try:
+        idna.encode(domain.lower())
+    except idna.IDNAError:
+        return True
+    return False
+
+>>>>>>> 3db109d (Require full-length SRS recipient hashes)
 @internal.route("/postfix/dane/<domain_name>")
 def postfix_dane_map(domain_name):
     return flask.jsonify('dane-only') if utils.has_dane_record(domain_name) else flask.abort(404)
@@ -110,8 +152,8 @@ def postfix_recipient_map(recipient):
 
     This is meant for bounces to go back to the original sender.
     """
-    srs = srslib.SRS(flask.current_app.srs_key)
-    if srslib.SRS.is_srs_address(recipient):
+    srs = srslib.SRS(flask.current_app.srs_key, hash_length=SRS_HASH_LENGTH)
+    if _has_full_srs_hash(recipient) and srslib.SRS.is_srs_address(recipient):
         try:
             return flask.jsonify(srs.reverse(recipient))
         except srslib.Error as error:
@@ -125,9 +167,13 @@ def postfix_sender_map(sender):
 
     This is for bounces to come back the reverse path properly.
     """
+<<<<<<< HEAD
     if sender.count('@') > 1 or sender.startswith('"'):
         return flask.abort(404)
     srs = srslib.SRS(flask.current_app.srs_key)
+=======
+    srs = srslib.SRS(flask.current_app.srs_key, hash_length=SRS_HASH_LENGTH)
+>>>>>>> 3db109d (Require full-length SRS recipient hashes)
     domain = flask.current_app.config["DOMAIN"]
     try:
         localpart, domain_name = models.Email.resolve_domain(sender)

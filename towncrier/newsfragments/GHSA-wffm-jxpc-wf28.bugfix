@@ -1,0 +1,1 @@
+Normalize usernames before applying authentication rate limits.

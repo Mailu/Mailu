@@ -348,6 +348,7 @@ Add user
 For adding a new user the following options can be configured.
 
 * E-mail. The email address of the new user.
+  The local part cannot contain ``/`` because it is used as a filesystem path component.
 
 * Password/Confirm password. The password for the new user. The new user can change his password after logging in the Admin GUI.
 

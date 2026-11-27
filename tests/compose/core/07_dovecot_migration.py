@@ -119,6 +119,36 @@ class DovecotMigrationTests(TestCase):
             self.assertEqual(pending.read_text(), "pending\n")
             self.assertEqual(config_file.read_text(), "fr\n")
 
+    def test_dovecot_uid_limits_follow_mailbox_uid_range(self):
+        config = (ROOT / "core/dovecot/conf/dovecot.conf").read_text()
+        for key in ("first_valid_uid", "first_valid_gid"):
+            self.assertIn(f"{key} = {{{{ MAILBOX_UID_MIN }}}}", config)
+        for key in ("last_valid_uid", "last_valid_gid"):
+            self.assertIn(f"{key} = {{{{ MAILBOX_UID_MAX }}}}", config)
+
+    def test_provisioner_gets_the_range_despite_dovecot_clearing_the_environment(self):
+        conf = (ROOT / "core/dovecot/conf").glob("*")
+        callers = [p for p in conf if p.is_file() and "provision_mailbox.py" in p.read_text()]
+        self.assertEqual(
+            {p.name for p in callers}, {"dovecot.conf", "mailbox-postlogin.script"}
+        )
+        for path in callers:
+            for line in path.read_text().splitlines():
+                if "provision_mailbox.py" in line and not line.lstrip().startswith("#"):
+                    text = line if "MAILBOX_UID_MIN" in line else path.read_text()
+                    self.assertIn("MAILBOX_UID_MIN={{ MAILBOX_UID_MIN }}", text, path.name)
+                    self.assertIn("MAILBOX_UID_MAX={{ MAILBOX_UID_MAX }}", text, path.name)
+
+    def test_uid_outside_range_fails_before_touching_the_mailbox(self):
+        # The check comes first, so no path under /mail is looked at or created.
+        with patch.object(migration, "MIN_UID", 10000), \
+                patch.object(migration, "MAX_UID", 60000), \
+                patch.object(migration, "move_entry", side_effect=AssertionError("moved")), \
+                patch.object(migration.os, "makedirs", side_effect=AssertionError("created")):
+            for uid in (100000, 65534, 9999):
+                with self.assertRaisesRegex(ValueError, "outside MAILBOX_UID_MIN"):
+                    migration.migrate_user({"email": "alice@example.test", "uid": uid})
+
     def test_index_rebuild_queue_persists_remaining_mailboxes(self):
         with tempfile.TemporaryDirectory() as directory:
             queue = Path(directory) / ".fts-rebuild-pending"

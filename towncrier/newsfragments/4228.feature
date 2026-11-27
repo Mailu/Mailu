@@ -1,0 +1,1 @@
+Make the per-mailbox UID/GID range configurable with MAILBOX_UID_MIN and MAILBOX_UID_MAX (default 100000-2000000000), so Mailu can run with rootless Docker or Podman and with userns-remap, where only a 65536-ID subuid block exists inside the containers. The admin container checks existing mailbox IDs against the range at start-up.

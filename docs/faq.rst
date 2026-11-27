@@ -212,6 +212,35 @@ so we cannot promise any support on this when you are heading into trouble. See 
 
 .. _`Mailu/Rancher`: https://github.com/Mailu/Rancher
 
+Does Mailu run with rootless Docker, Podman or userns-remap?
+````````````````````````````````````````````````````````````
+
+In these setups the containers run in a user namespace: only the IDs of the
+host's subordinate ID block (``/etc/subuid`` and ``/etc/subgid``, usually 65536
+IDs) exist inside the containers. Mailu gives every mailbox its own UID/GID,
+by default from a range far above that block, and the IMAP container fails to
+start with ``Invalid argument`` when it sets the owner of a mailbox.
+
+Set a range that fits the block in ``mailu.env``, before the first start or
+before upgrading from a version without per-mailbox IDs:
+
+.. code-block:: bash
+
+  MAILBOX_UID_MIN=10000
+  MAILBOX_UID_MAX=65535
+
+This allows up to 55534 mailboxes. See :ref:`the mailbox ID range <mailbox_uid_range>`
+for other block sizes and the details.
+
+Also make sure Mailu sees the real client addresses (see the next question).
+Rootless Docker's default port forwarding hides them; put a proxy in front
+that passes them on, for example with the PROXY protocol (``PROXY_PROTOCOL``
+and ``REAL_IP_FROM``).
+
+*Discussion reference:* `4228`_.
+
+.. _`4228`: https://github.com/Mailu/Mailu/discussions/4228
+
 
 Can I run Mailu without host iptables?
 ``````````````````````````````````````

@@ -3,8 +3,49 @@ import os
 import pwd
 import stat
 
-MIN_UID = 100000
-MAX_UID = 2000000000
+DEFAULT_MIN_UID = 100000
+DEFAULT_MAX_UID = 2000000000
+# Below this, IDs belong to system and service accounts (the mailu user is 1000).
+LOWEST_MIN_UID = 10000
+# Mailbox IDs are stored in a signed 32-bit integer column.
+HIGHEST_MAX_UID = 2**31 - 1
+# Never given to a mailbox: nobody, and the 16-bit "no ID" value. A range may
+# include them (e.g. 10000-65535 for a 65536-ID subuid block); they are skipped.
+RESERVED_UIDS = frozenset((65534, 65535))
+
+
+def uid_range(environ=None):
+    """Return the (min, max) per-mailbox UID/GID range.
+
+    Read from MAILBOX_UID_MIN and MAILBOX_UID_MAX. A smaller range is needed
+    when containers run in a user namespace (rootless Docker or Podman,
+    userns-remap), where only the IDs of the host's subuid/subgid block
+    (usually 0-65535) exist.
+    """
+    environ = os.environ if environ is None else environ
+    values = []
+    for key, default in (('MAILBOX_UID_MIN', DEFAULT_MIN_UID), ('MAILBOX_UID_MAX', DEFAULT_MAX_UID)):
+        raw = str(environ.get(key, '') or '').strip()
+        try:
+            values.append(int(raw) if raw else default)
+        except ValueError:
+            raise ValueError(f'{key} must be an integer, got {raw!r}') from None
+    low, high = values
+    if low < LOWEST_MIN_UID:
+        raise ValueError(f'MAILBOX_UID_MIN must be at least {LOWEST_MIN_UID}, got {low}')
+    if high > HIGHEST_MAX_UID:
+        raise ValueError(f'MAILBOX_UID_MAX must be at most {HIGHEST_MAX_UID}, got {high}')
+    if low >= high:
+        raise ValueError(f'MAILBOX_UID_MIN ({low}) must be lower than MAILBOX_UID_MAX ({high})')
+    return low, high
+
+
+def valid_uid(uid, low, high):
+    """Whether uid may be used for a mailbox in the range low..high."""
+    return low <= uid <= high and uid not in RESERVED_UIDS
+
+
+MIN_UID, MAX_UID = uid_range()
 
 
 def _home_parts(home):
@@ -67,7 +108,7 @@ def harden_parents_once(fetch_homes, root='/mail'):
 def provision(fields, root='/mail'):
     home = fields['home']
     uid, gid = int(fields['uid']), int(fields['gid'])
-    if uid != gid or not MIN_UID <= uid <= MAX_UID:
+    if uid != gid or not valid_uid(uid, MIN_UID, MAX_UID):
         raise ValueError('Invalid mailbox identity')
     parts = _home_parts(home)
     flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW

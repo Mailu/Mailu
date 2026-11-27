@@ -124,7 +124,7 @@ def load_user(user_id):
     Without this, sessions opened with a password before 2FA was required for
     the mailbox would keep working until they expire.
     """
-    user = models.User.get(user_id)
+    user = models.User.get_active(user_id)
     if user is not None and not session_is_trusted(flask.session) and mfa_required_for(user):
         return None
     return user

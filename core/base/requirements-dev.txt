@@ -30,6 +30,7 @@ marshmallow
 marshmallow-sqlalchemy
 passlib
 Pygments
+PyJWT
 python-gnupg
 PyYAML
 redis

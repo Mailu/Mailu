@@ -66,6 +66,7 @@ python-dateutil==2.9.0.post0
 python-magic==0.4.27
 python-gnupg==0.5.7
 pytz==2026.5
+PyJWT==2.10.1
 PyYAML==6.0.3
 Radicale==3.8.3
 redis==8.1.0

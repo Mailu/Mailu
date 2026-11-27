@@ -63,7 +63,14 @@ class LimitWraperFactory(object):
 
     def should_rate_limit_user(self, username, ip, device_cookie=None, device_cookie_name=None):
         limiter = self.get_limiter(app.config["AUTH_RATELIMIT_USER"], 'auth-user')
-        is_rate_limited = self.is_subject_to_rate_limits(ip) and not limiter.test(device_cookie if device_cookie_name == username else username)
+        # Mailbox lookup is case-insensitive, so all spellings of an address
+        # must share the same account-level guessing budget.
+        username = username.lower()
+        has_matching_device_cookie = (
+            device_cookie_name is not None
+            and device_cookie_name.lower() == username
+        )
+        is_rate_limited = self.is_subject_to_rate_limits(ip) and not limiter.test(device_cookie if has_matching_device_cookie else username)
         if is_rate_limited:
             app.logger.warn(f'Authentication attempt from {ip} for {username} has been rate-limited.')
         return is_rate_limited
@@ -71,11 +78,21 @@ class LimitWraperFactory(object):
     def rate_limit_user(self, username, ip, device_cookie=None, device_cookie_name=None, password=''):
         limiter = self.get_limiter(app.config["AUTH_RATELIMIT_USER"], 'auth-user')
         if self.is_subject_to_rate_limits(ip):
+            username = username.lower()
+            has_matching_device_cookie = (
+                device_cookie_name is not None
+                and device_cookie_name.lower() == username
+            )
             truncated_password = hmac.new(bytearray(username, 'utf-8'), bytearray(password, 'utf-8'), 'sha256').hexdigest()[-6:]
             if password and (self.storage.get(f'dedup2-{username}-{truncated_password}') > 0):
                 return
+<<<<<<< HEAD
             self.storage.incr(f'dedup2-{username}-{truncated_password}', limits.parse(app.config['AUTH_RATELIMIT_USER']).GRANULARITY.seconds, True)
             limiter.hit(device_cookie if device_cookie_name == username else username)
+=======
+            self.storage.incr(f'dedup2-{username}-{truncated_password}', limits.parse(app.config['AUTH_RATELIMIT_USER']).GRANULARITY.seconds)
+            limiter.hit(device_cookie if has_matching_device_cookie else username)
+>>>>>>> 83c736a (Fix case-variant SSO rate-limit bypass)
             self.rate_limit_ip(ip, username)
 
     """ Device cookies as described on:

@@ -76,3 +76,39 @@ def test_password_change_revokes_sessions_created_from_anonymous_sessions(app):
 
     assert change_response.status_code == 302
     assert inherited_session_client.get('/sso/pw_change').status_code == 302
+
+
+def test_disabling_global_admin_revokes_existing_sessions(app):
+    app.config['WTF_CSRF_ENABLED'] = False
+    domain = models.Domain(name='disabled-session-security.example')
+    user = models.User(localpart='admin', domain=domain, global_admin=True)
+    user.set_password('test-password')
+    models.db.session.add_all([domain, user])
+    models.db.session.commit()
+
+    browser = app.test_client()
+    api_client = app.test_client()
+    assert browser.get('/sso/login').status_code == 200
+    login_response = browser.post('/sso/login', data={
+        'email': user.email,
+        'pw': 'test-password',
+    })
+    assert login_response.status_code == 302
+
+    user.enabled = False
+    models.db.session.commit()
+    assert browser.get('/admin/admin/list').status_code == 302
+
+    user.enabled = True
+    models.db.session.commit()
+    headers = {'Authorization': f'Bearer {app.config["API_TOKEN"]}'}
+    disable_response = api_client.patch(
+        f'/api/v1/user/{user.email}', headers=headers, json={'enabled': False},
+    )
+    assert disable_response.status_code == 200
+    enable_response = api_client.patch(
+        f'/api/v1/user/{user.email}', headers=headers, json={'enabled': True},
+    )
+    assert enable_response.status_code == 200
+
+    assert browser.get('/admin/admin/list').status_code == 302

@@ -67,6 +67,7 @@ def create_app_from_config(config):
             available_webmails=webmail.available(app.config),
             config        = app.config,
             get_locale    = utils.get_locale,
+            get_locale_name = utils.get_locale_name,
         )
 
     # Jinja filters

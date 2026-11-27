@@ -25,9 +25,13 @@ try:
 except:
     sys.exit(25)
 
+<<<<<<< HEAD
 time.sleep(30)
 
 for user in ['user@mailu.io', 'admin@mailu.io', 'user/with/slash@mailu.io']:
+=======
+for user in ['user@mailu.io', 'admin@mailu.io', 'user_with_slash@mailu.io']:
+>>>>>>> 091c5aa (Reject slash local-parts that alias Maildirs)
     try:
         imap_server = imaplib.IMAP4_SSL('localhost')
         imap_server.login(user, 'password')

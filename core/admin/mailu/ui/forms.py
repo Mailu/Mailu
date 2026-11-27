@@ -7,7 +7,28 @@ import flask_wtf
 import re
 import ipaddress
 
+<<<<<<< HEAD
 LOCALPART_REGEX = r'^[a-zA-Z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&\'*+/=?^_`{|}~-]+)*$'
+=======
+# Mailu-safe localpart characters, kept in a single place so that fields
+# creating an address and fields referencing one agree.
+LOCALPART_CHARS = r'a-zA-Z0-9!#$%&\'*+=?^_`{|}~-'
+LOCALPART_REGEX = rf'^[{LOCALPART_CHARS}]+(?:\.[{LOCALPART_CHARS}]+)*$'
+EMAIL_ADDRESS_REGEX = rf'[{LOCALPART_CHARS}]+(?:\.[{LOCALPART_CHARS}]+)*@(?:[a-z0-9-]+\.)*[a-z]+'
+
+def checkStrippable(form, field):
+    if field.data != field.data.strip(string.whitespace):
+        raise ValidationError(_('Passwords should not start or end with whitespaces'))
+
+
+def validLocalpart(form, field):
+    if not utils.is_valid_localpart(field.data):
+        raise ValidationError(_('Invalid email address.'))
+
+AUTOFOCUS = {'autofocus': True}
+NO_AUTOCOMPLETE = {'autocomplete': 'off', 'autocorrect': 'off', 'autocapitalize': 'off', 'spellcheck': 'false'}
+MAX_QUOTA_BYTES = 1000 * 10**9
+>>>>>>> 091c5aa (Reject slash local-parts that alias Maildirs)
 
 class DestinationField(fields.SelectMultipleField):
     """ Allow for multiple emails selection from current user choices and

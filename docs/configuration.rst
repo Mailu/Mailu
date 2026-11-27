@@ -5,6 +5,40 @@ This page explains the variables found in ``mailu.env``.
 In most cases ``mailu.env`` is setup correctly by the setup utility and can be left as-is.
 However, some advanced settings or modifications can be done by modifying this file.
 
+<<<<<<< HEAD
+=======
+Mail storage layout
+-------------------
+
+Dovecot stores each mailbox under ``/mail/<domain>/<shard>/<localpart>``, where
+the shard is the first two lowercase base32 characters of the 2-byte BLAKE2s
+digest of the full email address. Mail local-parts cannot contain ``/`` because
+they are used as a filesystem path component. Maildir messages and mailbox
+control state live in ``mail/``, persistent indexes and quota state in
+``indexes/``, personal Sieve scripts and their activation link in ``sieve/``,
+and IMAP metadata in ``metadata/``. Dovecot keeps its index cache alongside the
+persistent indexes.
+
+On upgrade, the IMAP container migrates recognized data from the previous
+``/mail/<email-address>`` layout before starting Dovecot. The migration can be
+restarted safely after interruption, normalizes Maildir message size fields,
+and rebuilds Dovecot indexes. Unrecognized files are left in the legacy
+directory for manual review. The IMAP container records the effective
+full-text-search language configuration, removes stale FTS indexes when FTS is
+disabled, and rebuilds them when the language choices change. Obsolete Xapian
+indexes are discarded as rebuildable data and are never migrated.
+
+To import a filesystem Maildir into an existing Mailu installation, use the
+same legacy staging location, ``/mail/<email-address>``. Create the mailbox
+account first so it has a Dovecot UID/GID, stop the IMAP container, copy the
+contents of the Maildir root into that location, and start the IMAP container
+again. The startup migration detects staged mailboxes even after the initial
+layout migration has completed. It moves recognized state into the account's
+new home, assigns the account's UID/GID, normalizes message sizes, and queues
+index and quota rebuilding. This operation can take a long time; see
+:ref:`import_external_mailbox` for the full procedure and checks.
+
+>>>>>>> 091c5aa (Reject slash local-parts that alias Maildirs)
 .. _common_cfg:
 
 Common configuration

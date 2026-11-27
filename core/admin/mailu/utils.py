@@ -51,6 +51,57 @@ resolver = dns.resolver.Resolver()
 resolver.use_edns(0, dns.flags.DO, 1232)
 resolver.flags = dns.flags.AD | dns.flags.RD
 
+<<<<<<< HEAD
+=======
+DEMO_ACCOUNT_EMAIL = 'admin@test.mailu.io'
+DEMO_ACCOUNT_NOTICE = (
+    'Password changes and passkey creation are disabled for this user on the '
+    'demo server. You can create other users to try these features.'
+)
+
+
+def is_demo_account(user):
+    return user.email == DEMO_ACCOUNT_EMAIL
+
+
+def is_valid_localpart(localpart):
+    """Validate a local-part that can be used safely in mailbox paths."""
+    if not isinstance(localpart, str) or not localpart:
+        return False
+    # The local-part is a component of Dovecot's mailbox home path. Allowing a
+    # slash here can make distinct email addresses resolve to the same path.
+    if '/' in localpart:
+        return False
+    try:
+        if any(len(candidate.encode('utf-8')) > 64
+               for candidate in (localpart, localpart.lower())):
+            return False
+    except UnicodeEncodeError:
+        return False
+    try:
+        validate_email(
+            f'{localpart}@example.com',
+            allow_smtputf8=True,
+            check_deliverability=False,
+            strict=True,
+        )
+    except EmailNotValidError:
+        return False
+    return True
+
+
+def is_valid_email(email):
+    """Validate a mailbox while preserving Mailu's existing domain policy."""
+    if not isinstance(email, str) or email.count('@') != 1:
+        return False
+    localpart, domain = email.rsplit('@', 1)
+    try:
+        idna.encode(domain.lower())
+    except idna.IDNAError:
+        return False
+    return is_valid_localpart(localpart) and bool(validators.domain(domain))
+
+>>>>>>> 091c5aa (Reject slash local-parts that alias Maildirs)
 def has_dane_record(domain, timeout=10):
     try:
         result = resolver.resolve(f'_25._tcp.{domain}', dns.rdatatype.TLSA,dns.rdataclass.IN, lifetime=timeout)

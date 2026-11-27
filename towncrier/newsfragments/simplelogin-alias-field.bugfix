@@ -1,0 +1,1 @@
+The SimpleLogin-compatible ``POST /api/alias/random/new`` endpoint now also returns the new address in the ``alias`` field, as SimpleLogin does, so that Bitwarden can generate forwarded email aliases.

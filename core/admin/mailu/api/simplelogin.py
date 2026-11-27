@@ -37,6 +37,7 @@ alias_ns = api.namespace('alias', description='Alias operations')
 @alias_ns.route('/random/new')
 class RandomAlias(Resource):
     @api.response(201, 'Success', api.model('RandomAliasResponse', {
+        'alias': fields.String(description='created alias email address (read by Bitwarden, as returned by SimpleLogin)'),
         'email': fields.String(description='created alias email address'),
         'enabled': fields.Boolean(description='whether alias is enabled'),
         'note': fields.String(description='alias note/comment'),
@@ -113,6 +114,8 @@ class RandomAlias(Resource):
 
         # Return SimpleLogin-compatible response
         return {
+            # Bitwarden's SimpleLogin forwarder reads `alias`; SimpleLogin returns both.
+            'alias': alias_model.email,
             'email': alias_model.email,
             'enabled': not alias_model.disabled,
             'note': alias_model.comment or '',

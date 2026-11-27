@@ -1,0 +1,1 @@
+Re-key authenticated sessions after login so password changes revoke sessions that began anonymously.

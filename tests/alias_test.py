@@ -27,7 +27,7 @@ except:
 
 time.sleep(30)
 
-for user in ['user@mailu.io', 'admin@mailu.io', 'user/with/slash@mailu.io']:
+for user in ['user@mailu.io', 'admin@mailu.io', 'user_with_slash@mailu.io']:
     try:
         imap_server = imaplib.IMAP4_SSL('localhost')
         imap_server.login(user, 'password')

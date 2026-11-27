@@ -409,8 +409,11 @@ class Email(object):
 
     @staticmethod
     def _update_localpart(target, value, *_):
+        if value and '/' in value:
+            raise ValueError('invalid email local part')
         if target.domain_name:
             target._email = f'{value}@{target.domain_name}'
+        return value
 
     @staticmethod
     def _update_domain_name(target, value, *_):
@@ -420,7 +423,7 @@ class Email(object):
     @classmethod
     def __declare_last__(cls):
         # gets called after mappings are completed
-        sqlalchemy.event.listen(cls.localpart, 'set', cls._update_localpart, propagate=True)
+        sqlalchemy.event.listen(cls.localpart, 'set', cls._update_localpart, propagate=True, retval=True)
         sqlalchemy.event.listen(cls.domain_name, 'set', cls._update_domain_name, propagate=True)
 
     def sendmail(self, subject, body):
@@ -533,8 +536,11 @@ class User(Base, Email):
 
     # Flask-login attributes
     is_authenticated = True
-    is_active = True
     is_anonymous = False
+
+    @property
+    def is_active(self):
+        return self.enabled
 
     def get_id(self):
         """ return users email address """
@@ -665,6 +671,12 @@ set() containing the sessions to keep
     def get(cls, email):
         """ find user object for email address """
         return cls.query.get(email)
+
+    @classmethod
+    def get_active(cls, email):
+        """Load a user only while the account is enabled for web sessions."""
+        user = cls.get(email)
+        return user if user and user.enabled else None
 
     @classmethod
     def login(cls, email, password):

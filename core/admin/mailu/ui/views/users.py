@@ -76,10 +76,13 @@ def user_edit(user_email):
                 flask.flash(msg, "error")
                 return flask.render_template('user/edit.html', form=form, user=user,
                     domain=user.domain, max_quota_bytes=max_quota_bytes)
+        was_enabled = user.enabled
         form.populate_obj(user)
         if form.pw.data:
             user.set_password(form.pw.data, keep_sessions=set(flask.session))
         models.db.session.commit()
+        if was_enabled and not user.enabled:
+            utils.MailuSessionExtension.prune_sessions(uid=user.email)
         flask.flash('User %s updated' % user)
         return flask.redirect(
             flask.url_for('.user_list', domain_name=user.domain.name))

@@ -1,0 +1,1 @@
+Reject email local parts containing slashes, which conflict with Maildir paths.

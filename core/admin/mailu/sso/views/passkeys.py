@@ -17,11 +17,12 @@ from webauthn.helpers import bytes_to_base64url, base64url_to_bytes
 from webauthn.helpers.structs import PublicKeyCredentialDescriptor, UserVerificationRequirement
 from flask_wtf import FlaskForm
 
-from mailu import models, utils, signin, passkeys as webauthn_config, auth_flow, setup_tokens
+from mailu import models, utils, signin, keycloak, passkeys as webauthn_config, auth_flow, setup_tokens
 from mailu.sso import sso, forms
 
 
 PASSKEY_LOGIN_CREDENTIAL_SLOTS = 10
+SSO_REQUIRED = 'This account requires two-factor sign-in through single sign-on. Enter your e-mail address and select Continue.'
 
 
 def _login_credential_ids(email, credentials):
@@ -295,6 +296,8 @@ def passkey_authentication_options():
     email = (payload.get('email') or '').strip()
     if email and not utils.is_valid_email(email):
         return flask.jsonify(error='Enter a valid email address, or leave it blank to choose a passkey.'), 400
+    if not keycloak.mfa_exemptions_exist() or (email and keycloak.mfa_required_for(email=email)):
+        return flask.jsonify(error=SSO_REQUIRED), 403
     target = payload.get('target', 'admin')
     if target == 'admin' and str(flask.current_app.config['ADMIN']).upper() != 'FALSE':
         destination = flask.current_app.config['WEB_ADMIN']
@@ -343,6 +346,8 @@ def passkey_authentication_options():
 
 @sso.route('/passkey/verify', methods=['POST'])
 def passkey_authenticate():
+    if not keycloak.mfa_exemptions_exist():
+        return flask.jsonify(error=SSO_REQUIRED), 403
     if error := _csrf_error():
         return error
     challenge = flask.session.pop('passkey_login_challenge', None)
@@ -360,6 +365,12 @@ def passkey_authenticate():
     if email:
         query = query.filter_by(user_email=email)
     credential = query.first()
+    if credential and credential.user.enabled and credential.user.requires_mfa:
+        flask.current_app.logger.warning(
+            'Passkey authentication rejected user=%s reason=mailbox_requires_2fa ip=%s',
+            credential.user_email, flask.request.headers.get('X-Real-IP', flask.request.remote_addr),
+        )
+        return flask.jsonify(error=SSO_REQUIRED), 403
     if not credential or not credential.user.enabled:
         flask.current_app.logger.warning(
             'Passkey authentication failed user=%r credential=%s result=unknown_or_disabled ip=%s',

@@ -5,6 +5,21 @@
 {%- endblock %}
 
 {%- block extra_login_options %}
+{%- if config['KEYCLOAK_ISSUER'] %}
+<span class="text-body-secondary small text-center">{{ _('or') }}</span>
+<a id="keycloak-login" class="btn btn-outline-primary" href="{{ url_for('sso.keycloak_login') }}"><i class="fa-solid fa-right-to-bracket me-1" aria-hidden="true"></i>{{ _('Sign in with %(provider)s', provider=config['KEYCLOAK_DISPLAY_NAME']) }}</a>
+<script>
+(() => {
+  const link = document.getElementById('keycloak-login');
+  link.addEventListener('click', () => {
+    const selected = document.querySelector('[name="destination"]:checked');
+    if (selected && document.getElementById('destination_explicit').value === '1') {
+      link.search = '?target=' + encodeURIComponent(selected.value);
+    }
+  });
+})();
+</script>
+{%- endif %}
 <span class="text-body-secondary small text-center">{{ _('or') }}</span>
 <button class="passkey-login btn btn-outline-primary" type="button"><i class="fa-solid fa-key me-1" aria-hidden="true"></i>{{ _('Use a passkey') }}</button>
 <div id="passkey-status" class="alert text-start mt-3 mb-0 w-100 d-none" role="status" aria-live="polite"></div>
@@ -204,3 +219,5 @@
 })();
 </script>
 {%- endblock %}
+
+{%- block extra_login_options_email %}{{ self.extra_login_options() }}{% endblock %}

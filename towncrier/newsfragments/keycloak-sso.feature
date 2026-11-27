@@ -1,0 +1,1 @@
+Add Keycloak single sign-on with two-factor authentication that can be required per domain and per mailbox; mailboxes that require it refuse password sign-in for webmail, the admin interface, IMAP, POP3, SMTP, Sieve and DAV, and mail apps use OAuth2 or authentication tokens instead.

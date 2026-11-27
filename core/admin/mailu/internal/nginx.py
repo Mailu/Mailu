@@ -1,4 +1,4 @@
-from mailu import models, utils
+from mailu import models, utils, keycloak
 from flask import current_app as app
 from socrate import system
 
@@ -66,6 +66,10 @@ def check_credentials(user, password, ip, protocol=None, auth_port=None, source_
                     return False # we can return directly here since the token is valid
         # an app-token-shaped secret that matched no token is a failure; do not fall
         # through to the (expensive, rate-limit-exempt) password check
+        return False
+    if keycloak.mfa_required_for(user):
+        # Checked before the hash so a disabled password costs no bcrypt round.
+        app.logger.info(f'Login attempt for: {user}/{protocol}/{auth_port} from: {ip}/{source_port}: failed: password refused, mailbox requires 2FA; use OAuth or an app token')
         return False
     if user.check_password(password):
         if app.config['AUTH_REQUIRE_TOKENS'] and not protocol in ['web', 'sso']:

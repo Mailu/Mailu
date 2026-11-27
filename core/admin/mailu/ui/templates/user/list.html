@@ -20,6 +20,7 @@
     <th data-orderable="false">{% trans %}User settings{% endtrans %}</th>
     <th>{% trans %}Email{% endtrans %}</th>
     <th>{% trans %}Passkeys{% endtrans %}</th>
+    {% if config['KEYCLOAK_ISSUER'] %}<th>{% trans %}2FA{% endtrans %}</th>{% endif %}
     <th>{% trans %}Features{% endtrans %}</th>
     <th>{% trans %}Quota{% endtrans %}</th>
     <th>{% trans %}Comment{% endtrans %}</th>
@@ -50,6 +51,13 @@
         <span class="badge {{ 'text-bg-primary' if passkey_count else 'text-bg-secondary' }}">{{ passkey_count }}</span>
       </a>
     </td>
+    {% if config['KEYCLOAK_ISSUER'] %}
+    {% set mfa = user.requires_mfa %}
+    <td data-sort="{{ 1 if mfa else 0 }}">
+      <span class="badge {{ 'text-bg-success' if mfa else 'text-bg-secondary' }}">{{ _('Required') if mfa else _('Not required') }}</span>
+      <span class="small text-body-secondary">{% if user.mfa_required is not none %}{% trans %}mailbox{% endtrans %}{% elif user.domain.mfa_required is not none %}{% trans %}domain{% endtrans %}{% else %}{% trans %}default{% endtrans %}{% endif %}</span>
+    </td>
+    {% endif %}
     <td data-sort="{{ user.allow_spoofing*4 + user.enable_imap*2 + user.enable_pop }}">
       {% if user.enable_imap %}<span class="badge bg-primary">imap</span>{% endif %}
       {% if user.enable_pop %}<span class="badge bg-secondary">pop3</span>{% endif %}

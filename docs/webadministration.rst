@@ -50,6 +50,9 @@ Access the web administration interface
 The admin GUI is by default accessed via the URL `https://<my domain>/admin`, when it's enabled in the setup utility
 or by manually setting `ADMIN=true` in `mailu.env`.
 Sign in with your email address and password, or use a registered passkey.
+When :ref:`Keycloak single sign-on <keycloak_authentication>` is configured, the
+sign-in page asks for the email address first; see
+:ref:`webadministration_keycloak_2fa`.
 The sign-in page offers a destination selector for Webmail or Account settings.
 A direct visit uses the destination from your last successful sign-in, remembered
 in a separate browser cookie; that destination is pre-selected but can be changed
@@ -185,6 +188,61 @@ user the one-time setup link shown on their edit page. They can use it to set a
 password or add a passkey. Domain managers can generate a replacement setup or
 recovery link on the same page for users who are locked out or need to reset
 their password. A link works once and expires after the configured lifetime.
+
+.. _webadministration_keycloak_2fa:
+
+Two-factor authentication with Keycloak
+---------------------------------------
+
+When :ref:`Keycloak single sign-on <keycloak_authentication>` is configured,
+administrators decide which mailboxes must sign in through Keycloak with a
+second factor (for example an authenticator app or a security key). The
+setting can be made on a domain and overridden on a mailbox; see
+:ref:`domain settings <webadministration_domain_2fa>` and
+:ref:`mailbox settings <webadministration_user_2fa>`.
+The **2FA** column on a domain's user list shows, for each mailbox, whether
+two-factor authentication is required and whether that comes from the
+mailbox, the domain, or the server default.
+
+**Signing in to Webmail and Account settings**
+
+1. Enter your email address and choose **Continue**.
+2. If your mailbox requires two-factor authentication, your browser goes to
+   Keycloak with the address filled in. Sign in there and confirm your second
+   factor. Keycloak sends you back to Mailu, which checks that a second factor
+   was used before opening Webmail or Account settings.
+3. Otherwise, Mailu asks for your password on the next page, or you can use a
+   passkey. **Use a different e-mail address** returns to the first step.
+
+The page also offers a **Sign in with Keycloak** button. Signing in through
+Keycloak always requires a second factor, even for mailboxes that do not
+require one.
+
+If every mailbox requires two-factor authentication, the sign-in page skips
+the email step and opens Keycloak directly.
+
+**Mail apps (IMAP, POP3, SMTP and Sieve) and contacts and calendars**
+
+Mail apps cannot ask for a second factor, so a mailbox that requires
+two-factor authentication no longer accepts its password from mail apps or
+from CalDAV/CardDAV clients. Use one of these instead:
+
+* Mail apps that support OAuth2, such as Thunderbird, open a browser window
+  when you add the account. Sign in with Keycloak there and approve access on
+  the Mailu consent page. The app is then listed under **Authorized mail apps**.
+* Other apps use an :ref:`authentication token <AUTH tokens>`.
+  Create one per app or device after signing in, and enter it as the app's
+  password for both incoming and outgoing mail.
+
+**Passwords, passkeys and signing out**
+
+For a mailbox that requires two-factor authentication, password and passkey
+sign-in are refused, and **Update password** points to your Keycloak account
+instead: the Mailu password is no longer used. Signing out of Mailu also signs
+you out of Keycloak, so the next sign-in asks for the second factor again.
+When an administrator starts requiring two-factor authentication for a
+mailbox, browser sessions that were opened with a password end, and the user
+signs in again through Keycloak.
 
 
 .. _webadministration_auto-reply:
@@ -399,6 +457,16 @@ sign-in, but users must complete enrollment before accessing other Mailu pages.
 When this option is enabled, the per-user **Require passkey** option is hidden
 because enrollment is already required for the whole domain.
 
+.. _webadministration_domain_2fa:
+
+When Keycloak single sign-on is configured, the **Two-factor authentication**
+section sets **Two-factor authentication (Keycloak)** for every mailbox in the
+domain: **Server default** (follow ``KEYCLOAK_MFA_DEFAULT``), **Required**, or
+**Not required**. Only global administrators can change it. A mailbox can
+override it; see :ref:`mailbox settings <webadministration_user_2fa>`. Addresses in the domain
+that have no mailbox follow the domain setting at sign-in, so the sign-in page
+does not reveal which mailboxes exist.
+
 Domain passkey settings control which credentials may be enrolled and used to sign in. Turn on **Enforce AAGUID restrictions** to apply the allow or block list; enter AAGUID UUIDs one per line. When enforcement is off, the list is ignored. The policy is checked both at enrollment and at sign-in.
 
 The backup eligibility and backup state settings each support **Optional**, **Require**, or **Deny**. Eligibility describes whether an authenticator can back up a credential; state describes whether that credential is currently backed up. Attestation also supports **Optional**, **Require**, or **Deny** and is evaluated at enrollment. Requiring attestation rejects credentials that provide none, but does not by itself verify that an authenticator is trusted by a manufacturer. User verification (such as a PIN or biometrics), device-bound credentials, resident-key preference, and backup flags are also governed by the domain settings.
@@ -496,6 +564,16 @@ invalidates the previous link for that account.
 * Allow POP3 access. When ticked, allows email retrieval via the POP3 protocol.
 
 * Allow the user to spoof the sender. When ticked, allows the user to send email as anyone.
+
+.. _webadministration_user_2fa:
+
+* Two-factor authentication (Keycloak). Shown when Keycloak single sign-on is
+  configured. **Domain setting** follows the domain; **Required** makes this
+  mailbox sign in only through Keycloak with a second factor and refuses its
+  password for mail apps; **Not required** exempts the mailbox. The edit page
+  shows the result that currently applies. Domain managers can choose
+  **Required** or **Domain setting**; only global administrators can choose
+  **Not required**.
 
 
 Aliases

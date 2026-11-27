@@ -545,6 +545,102 @@ The ``mailu_signin_target`` cookie remembers only the selected application for o
 
 Use ``PROXY_AUTH_LOGOUT_URL`` (default: unset) to redirect users to a specific URL after they have been logged out.
 
+.. _keycloak_authentication:
+
+Keycloak single sign-on with two-factor authentication
+------------------------------------------------------
+
+Mailu can delegate sign-in to a Keycloak realm over OpenID Connect and require
+that Keycloak used a second factor (OTP, WebAuthn or similar). Mailu uses the
+authorization code flow with PKCE, verifies the ID token signature against the
+realm's keys and checks the issuer, audience, expiry and nonce.
+
+Two-factor authentication is decided per mailbox. Each mailbox and each
+domain has a *Two-factor authentication (Keycloak)* setting that is
+*Required*, *Not required*, or inherited. The mailbox setting wins, then the
+domain setting, then ``KEYCLOAK_MFA_DEFAULT``. The user list shows the result
+for each mailbox and where it comes from. Only global administrators can
+change the domain setting or exempt a mailbox; domain managers can require
+2FA for a mailbox or set it back to the domain setting. The REST API exposes
+the same setting as ``mfa_required`` (``true``, ``false`` or ``null``).
+
+For a mailbox that requires it, the second factor applies to every way in:
+
+- **Webmail and the admin interface**: the sign-in page asks for the e-mail
+  address first. Addresses that require 2FA continue at Keycloak, with the
+  address passed as a login hint; the others continue with a password or
+  passkey. Password and passkey sign-in are refused for these mailboxes, and
+  web sessions that Keycloak did not create (for example, sessions opened
+  before 2FA was required) are signed out. When no domain or mailbox is
+  exempt and ``KEYCLOAK_MFA_DEFAULT`` is on, ``/sso/login`` goes straight to
+  Keycloak.
+- **IMAP, POP3, SMTP submission and Sieve**: mailbox passwords are rejected.
+  Mail clients that support OAuth2 (such as Thunderbird) use
+  :ref:`Mailu's OAuth2 server <oauth2_native_clients>`, whose consent page
+  requires a Keycloak sign-in. Other clients use an authentication token
+  (application password) that the user creates under *Authentication tokens*
+  after signing in with Keycloak.
+- **CalDAV/CardDAV**: use an authentication token for the same reason.
+
+Configure the following settings:
+
+- ``KEYCLOAK_ISSUER`` (default: unset, disabled): the realm URL, for example
+  ``https://sso.example.com/realms/mail``. The admin container must be able to
+  reach it. Set ``REQUESTS_CA_BUNDLE`` if Keycloak uses a private CA.
+- ``KEYCLOAK_CLIENT_ID`` (default: ``mailu``) and ``KEYCLOAK_CLIENT_SECRET``
+  (or ``KEYCLOAK_CLIENT_SECRET_FILE``): the OpenID Connect client.
+- ``KEYCLOAK_MFA_DEFAULT`` (default: True): whether mailboxes require 2FA
+  when neither the mailbox nor its domain decides. Addresses that are not
+  hosted follow this default, and addresses without a mailbox follow their
+  domain, so the sign-in page does not reveal which mailboxes exist. It does
+  reveal whether an address's domain or mailbox requires 2FA.
+- ``KEYCLOAK_REQUIRED_ACR`` (default: ``mfa``): comma-separated ``acr`` values
+  that prove two-factor authentication. Mailu requests them with
+  ``acr_values`` and rejects ID tokens with any other ``acr``.
+- ``KEYCLOAK_REQUIRED_AMR`` (default: unset): comma-separated ``amr`` values,
+  for example ``otp,hwk``. When set, the ID token must contain at least one.
+  Leaving both this and ``KEYCLOAK_REQUIRED_ACR`` empty trusts Keycloak's flow
+  without checking it, and Mailu logs a warning at startup.
+- ``KEYCLOAK_EMAIL_CLAIM`` (default: ``email``): the claim that names the
+  mailbox. ``KEYCLOAK_REQUIRE_VERIFIED_EMAIL`` (default: True) requires
+  ``email_verified`` to be true for the ``email`` claim.
+- ``KEYCLOAK_CREATE_USERS`` (default: False): create a mailbox on first
+  sign-in when its domain is hosted by Mailu. Otherwise the mailbox must
+  already exist.
+- ``KEYCLOAK_SCOPES`` (default: ``openid email profile``) and
+  ``KEYCLOAK_DISPLAY_NAME`` (default: ``Keycloak``, the sign-in button label).
+
+In Keycloak:
+
+1. Create an *OpenID Connect* client with *Client authentication* on and the
+   *Standard flow* enabled. Add ``https://<each Mailu hostname>/sso/keycloak/callback``
+   to *Valid redirect URIs* and ``https://<each Mailu hostname>/sso/login`` to
+   *Valid post logout redirect URIs*. Set *PKCE method* to ``S256``.
+2. Under the client's *Advanced* tab, set *ACR to LoA Mapping* to
+   ``mfa`` → ``2`` (or match ``KEYCLOAK_REQUIRED_ACR``).
+3. Copy the browser flow and add a conditional sub-flow with *Condition - Level
+   of Authentication* set to level 2, containing *OTP Form* or *WebAuthn
+   Authenticator*. Bind the copy as the client's browser flow (client
+   *Advanced* → *Authentication flow overrides*) or the realm's browser flow.
+4. Make sure users have a verified e-mail address that matches their Mailu
+   mailbox.
+
+Signing out of Mailu also ends the Keycloak session, so the next sign-in asks
+for the second factor again. Disabling a user in Keycloak stops new sign-ins
+but does not revoke authentication tokens or OAuth grants already issued by
+Mailu; disable the mailbox in Mailu too.
+
+Sign-in through Keycloak always requires the second factor, including for
+exempt mailboxes that choose the Keycloak button.
+
+If Keycloak is unreachable, mailboxes that require 2FA cannot sign in to the
+web interfaces. Existing authentication tokens and OAuth access tokens keep
+working. A global administrator whose own mailbox is exempt can still sign in
+with a password and change policies; otherwise, set ``KEYCLOAK_MFA_DEFAULT=False``
+temporarily (domain and mailbox settings that say *Required* still apply).
+
+.. _oauth2_native_clients:
+
 OAuth2 authentication for native mail clients
 ----------------------------------------------
 

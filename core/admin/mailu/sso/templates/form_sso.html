@@ -11,11 +11,24 @@
       {% endfor %}
     </div>
   </fieldset>
+  {% set step = login_step | default(None) %}
+  {% if step == 'password' %}
+  {{ macros.form_field(form.email, readonly=True) }}
+  <p class="small mt-n2 mb-3"><a href="{{ url_for('sso.login') }}">{{ _('Use a different e-mail address') }}</a></p>
+  {% else %}
   {{ macros.form_field(form.email) }}
-  {% if not config['PASSKEY_REQUIRED'] %}<div id="password-field">{{ macros.form_field(form.pw) }}</div>{% endif %}
+  {% endif %}
+  {% if step == 'email' %}
+  <div class="d-grid gap-3 mt-4">
+    {{ form.submitContinue(class_="btn btn-primary") }}
+    {% block extra_login_options_email %}{% endblock %}
+  </div>
+  {% else %}
+  {% if not config['PASSKEY_REQUIRED'] %}<div id="password-field">{{ macros.form_field(form.pw, autofocus=(step == 'password')) }}</div>{% endif %}
   <div class="d-grid gap-3 mt-4">
     {% if not config['PASSKEY_REQUIRED'] %}{{ form.submit(class_="btn btn-primary") }}{% endif %}
     {% block extra_login_options %}{% endblock %}
   </div>
+  {% endif %}
 </form>
 {% endblock %}

@@ -2080,3 +2080,143 @@ msgstr ""
 #: mailu/ui/views/users.py:302
 msgid "The message is too long."
 msgstr ""
+
+#: mailu/keycloak.py
+msgid ""
+"Your sign-in did not use two-factor authentication. Set up a second "
+"factor in your account and try again."
+msgstr ""
+
+#: mailu/keycloak.py
+msgid "Your single sign-on account has no e-mail address."
+msgstr ""
+
+#: mailu/keycloak.py
+msgid "Your e-mail address is not verified in your single sign-on account."
+msgstr ""
+
+#: mailu/keycloak.py
+msgid "This mailbox is disabled."
+msgstr ""
+
+#: mailu/keycloak.py
+msgid "There is no mailbox for your account on this server."
+msgstr ""
+
+#: mailu/sso/forms.py
+msgid "Continue"
+msgstr ""
+
+#: mailu/sso/templates/form_sso.html
+msgid "Use a different e-mail address"
+msgstr ""
+
+#: mailu/sso/templates/keycloak_error.html
+msgid "Try again"
+msgstr ""
+
+#: mailu/sso/templates/login.html
+#, python-format
+msgid "Sign in with %(provider)s"
+msgstr ""
+
+#: mailu/sso/views/base.py
+#, python-format
+msgid ""
+"Your password is managed by single sign-on. Change it in your "
+"%(provider)s account."
+msgstr ""
+
+#: mailu/sso/views/keycloak.py
+msgid "Single sign-on failed. Try again, or contact your administrator."
+msgstr ""
+
+#: mailu/sso/views/keycloak.py
+msgid "Single sign-on is temporarily unavailable. Try again later."
+msgstr ""
+
+#: mailu/sso/views/keycloak.py
+msgid "Your sign-in attempt expired. Try again."
+msgstr ""
+
+#: mailu/sso/views/keycloak.py
+msgid "Sign-in was cancelled or refused by the identity provider."
+msgstr ""
+
+#: mailu/ui/forms.py mailu/ui/templates/user/list.html
+msgid "Not required"
+msgstr ""
+
+#: mailu/ui/forms.py
+msgid "Two-factor authentication (Keycloak)"
+msgstr ""
+
+#: mailu/ui/forms.py
+msgid "Server default"
+msgstr ""
+
+#: mailu/ui/forms.py
+msgid "Domain setting"
+msgstr ""
+
+#: mailu/ui/templates/domain/create.html
+msgid "Two-factor authentication"
+msgstr ""
+
+#: mailu/ui/templates/domain/create.html
+msgid ""
+"When required, mailboxes in this domain sign in to webmail and the admin "
+"interface only through Keycloak with a second factor, and mail apps must "
+"use OAuth or an authentication token instead of the mailbox password. A "
+"mailbox can override this setting."
+msgstr ""
+
+#: mailu/ui/templates/domain/create.html
+#, python-format
+msgid "The server default is: %(default)s."
+msgstr ""
+
+#: mailu/ui/templates/domain/create.html mailu/ui/templates/user/create.html
+msgid "required"
+msgstr ""
+
+#: mailu/ui/templates/domain/create.html mailu/ui/templates/user/create.html
+msgid "not required"
+msgstr ""
+
+#: mailu/ui/templates/user/create.html
+msgid ""
+"When required, this mailbox signs in only through Keycloak with a second "
+"factor, and mail apps must use OAuth or an authentication token."
+msgstr ""
+
+#: mailu/ui/templates/user/create.html
+#, python-format
+msgid "Currently: %(state)s."
+msgstr ""
+
+#: mailu/ui/templates/user/create.html
+msgid "Only global administrators can exempt a mailbox."
+msgstr ""
+
+#: mailu/ui/templates/user/list.html
+msgid "2FA"
+msgstr ""
+
+#: mailu/ui/templates/user/list.html
+msgid "mailbox"
+msgstr ""
+
+#: mailu/ui/templates/user/list.html
+msgid "domain"
+msgstr ""
+
+#: mailu/ui/templates/user/list.html
+msgid "default"
+msgstr ""
+
+#: mailu/ui/views/users.py
+msgid ""
+"Only global administrators can exempt a mailbox from two-factor "
+"authentication."
+msgstr ""

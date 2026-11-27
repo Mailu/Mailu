@@ -41,6 +41,24 @@ class DestinationField(fields.SelectMultipleField):
             if not utils.is_valid_email(item):
                 raise validators.ValidationError(_('Invalid email address.'))
 
+class MfaPolicyField(fields.SelectField):
+    """Tri-state 2FA policy stored as None (inherit), True or False."""
+    VALUES = {'inherit': None, 'required': True, 'optional': False}
+
+    def __init__(self, label, inherit_label, **kwargs):
+        super().__init__(label, choices=[
+            ('inherit', inherit_label),
+            ('required', _('Required')),
+            ('optional', _('Not required')),
+        ], coerce=self._coerce, default=None, **kwargs)
+
+    @classmethod
+    def _coerce(cls, value):
+        if value is None or isinstance(value, bool):
+            return value
+        return cls.VALUES.get(value, value)
+
+
 class MultipleEmailAddressesVerify(object):
     def __init__(self,message=_('Invalid email address.')):
         self.message = message
@@ -102,6 +120,7 @@ class DomainForm(flask_wtf.FlaskForm):
     max_domain_quota_bytes = fields_.IntegerSliderField(_('Maximum domain storage'), [validators.NumberRange(min=0, max=MAX_QUOTA_BYTES)], default=0)
     signup_enabled = fields.BooleanField(_('Enable sign-up'), default=False)
     anonmail_enabled = fields.BooleanField(_('Enable Global Anonymous Email Service'), default=False)
+    mfa_required = MfaPolicyField(_('Two-factor authentication (Keycloak)'), _('Server default'))
     passkey_require_enrollment = fields.BooleanField(_('Require all users to enroll a passkey'), default=False)
     passkey_enforce_aaguid = fields.BooleanField(_('Enforce AAGUID restrictions'), default=False)
     passkey_aaguid_mode = fields.RadioField(_('AAGUID list behavior'), choices=[
@@ -231,6 +250,7 @@ class UserForm(flask_wtf.FlaskForm):
     enabled = fields.BooleanField(_('Enabled'), default=True)
     change_pw_next_login = fields.BooleanField(_('Force password change at next login'), default=True)
     passkey_enroll_next_login = fields.BooleanField(_('Require passkey'), default=False)
+    mfa_required = MfaPolicyField(_('Two-factor authentication (Keycloak)'), _('Domain setting'))
     submit = fields.SubmitField(_('Save'))
 
 

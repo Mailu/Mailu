@@ -1,3 +1,4 @@
+from flask_restx import fields
 from .. import models, utils
 from . import v1
 from flask import request
@@ -90,3 +91,8 @@ def user_token_authorization(func):
         flask.current_app.logger.info(f'Valid credentials for user {user_email} provided by {client_ip}.')
         return func(*args, **kwds)
     return decorated_function
+
+
+class NullableBoolean(fields.Boolean):
+    """A boolean that also accepts null, used for inheritable settings."""
+    __schema_type__ = ['boolean', 'null']

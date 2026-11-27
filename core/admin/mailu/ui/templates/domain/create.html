@@ -27,6 +27,13 @@
   {{ macros.form_field(form.signup_enabled) }}
   {{ macros.form_field(form.anonmail_enabled) }}
   {%- endcall %}
+  {% if config['KEYCLOAK_ISSUER'] %}
+  {%- call macros.card(title=_('Two-factor authentication')) %}
+  {{ macros.form_field(form.mfa_required) }}
+  <p class="small text-body-secondary">{% trans %}When required, mailboxes in this domain sign in to webmail and the admin interface only through Keycloak with a second factor, and mail apps must use OAuth or an authentication token instead of the mailbox password. A mailbox can override this setting.{% endtrans %}</p>
+  <p class="small text-body-secondary">{% trans default=(_('required') if config['KEYCLOAK_MFA_DEFAULT'] else _('not required')) %}The server default is: {{ default }}.{% endtrans %}</p>
+  {%- endcall %}
+  {% endif %}
   {% endif %}
   {%- call macros.card(title=_('Passkey policy')) %}
   <p class="text-body-secondary">{% trans %}These settings apply to passkeys for users in this domain.{% endtrans %}</p>

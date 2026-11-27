@@ -27,7 +27,8 @@ def create_app_from_config(config):
     utils.limiter.init_app(app)
     utils.babel.init_app(app, locale_selector=utils.get_locale)
     utils.login.init_app(app)
-    utils.login.user_loader(models.User.get)
+    from mailu import keycloak
+    utils.login.user_loader(keycloak.load_user)
     utils.proxy.init_app(app)
     utils.migrate.init_app(app, models.db)
 

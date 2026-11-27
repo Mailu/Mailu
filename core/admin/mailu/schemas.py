@@ -1201,6 +1201,7 @@ class DomainSchema(BaseSchema):
         }
         exclude_by_value = {
             'alternatives': [[]],
+            'mfa_required': [None],
             'dkim_key': [None],
             'dkim_publickey': [None],
             'dns_mx': [None],
@@ -1304,6 +1305,7 @@ class UserSchema(BaseSchema):
             'manager_of':          [[]],
             'reply_enddate':       ['2999-12-31'],
             'reply_startdate':     ['1900-01-01'],
+            'mfa_required':        [None],
         }
 
     email = fields.String(required=True)

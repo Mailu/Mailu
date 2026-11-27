@@ -19,6 +19,7 @@ domain_fields = api.model('Domain', {
     'max_domain_quota_bytes': fields.Integer(description='best-effort aggregate storage limit for the domain', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
     'passkey_require_enrollment': fields.Boolean(description='require every user to enroll a passkey before continuing after sign-in'),
+    'mfa_required': common.NullableBoolean(description='Require Keycloak two-factor sign-in for mailboxes in this domain; null uses the server default (KEYCLOAK_MFA_DEFAULT)'),
     'passkey_enforce_aaguid': fields.Boolean(description='enforce the domain AAGUID policy'),
     'passkey_aaguid_mode': fields.String(description='Whether listed passkey AAGUIDs are allowed or blocked', enum=['allow', 'block']),
     'passkey_aaguids': fields.String(description='Comma or newline separated passkey AAGUID UUIDs'),
@@ -40,6 +41,7 @@ domain_fields_update = api.model('DomainUpdate', {
     'max_domain_quota_bytes': fields.Integer(description='best-effort aggregate storage limit for the domain', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
     'passkey_require_enrollment': fields.Boolean(description='require every user to enroll a passkey before continuing after sign-in'),
+    'mfa_required': common.NullableBoolean(description='Require Keycloak two-factor sign-in for mailboxes in this domain; null uses the server default (KEYCLOAK_MFA_DEFAULT)'),
     'passkey_enforce_aaguid': fields.Boolean(description='enforce the domain AAGUID policy'),
     'passkey_aaguid_mode': fields.String(description='Whether listed passkey AAGUIDs are allowed or blocked', enum=['allow', 'block']),
     'passkey_aaguids': fields.String(description='Comma or newline separated passkey AAGUID UUIDs'),
@@ -63,6 +65,7 @@ domain_fields_get = api.model('DomainGet', {
     'max_domain_quota_bytes': fields.Integer(description='best-effort aggregate storage limit for the domain', min=0),
     'signup_enabled': fields.Boolean(description='allow signup'),
     'passkey_require_enrollment': fields.Boolean(description='require every user to enroll a passkey before continuing after sign-in'),
+    'mfa_required': common.NullableBoolean(description='Require Keycloak two-factor sign-in for mailboxes in this domain; null uses the server default (KEYCLOAK_MFA_DEFAULT)'),
     'passkey_enforce_aaguid': fields.Boolean(description='enforce the domain AAGUID policy'),
     'passkey_aaguid_mode': fields.String(description='Whether listed passkey AAGUIDs are allowed or blocked', enum=['allow', 'block']),
     'passkey_aaguids': fields.String(description='Comma or newline separated passkey AAGUID UUIDs'),
@@ -129,6 +132,10 @@ def _set_passkey_policy(domain, data):
         if data['passkey_resident_key'] not in ('discouraged', 'preferred', 'required'):
             return 'passkey_resident_key must be discouraged, preferred, or required'
         updates['passkey_resident_key'] = data['passkey_resident_key']
+    if 'mfa_required' in data:
+        if data['mfa_required'] is not None and not isinstance(data['mfa_required'], bool):
+            return 'mfa_required must be true, false or null'
+        updates['mfa_required'] = data['mfa_required']
     for name, value in updates.items():
         setattr(domain, name, value)
     return None

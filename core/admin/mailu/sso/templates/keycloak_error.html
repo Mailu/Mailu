@@ -1,0 +1,12 @@
+{%- extends "base_sso.html" %}
+
+{%- block title %}
+{% trans %}Sign in{% endtrans %}
+{%- endblock %}
+
+{%- block content %}
+<div class="alert alert-danger" role="alert">{{ message }}</div>
+<div class="d-grid">
+  <a class="btn btn-primary" href="{{ url_for('sso.keycloak_login') }}">{% trans %}Try again{% endtrans %}</a>
+</div>
+{%- endblock %}

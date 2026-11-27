@@ -5,6 +5,7 @@ import hashlib
 from markupsafe import escape
 from mailu.ui import ui, access, forms
 from flask import current_app as app
+from flask_babel import lazy_gettext as _
 
 import flask
 import flask_login
@@ -46,7 +47,7 @@ def user_create(domain_name):
     form.quota_bytes.validators = [
         wtforms.validators.NumberRange(min=0, max=max_quota_bytes)]
     form.quota_bytes.default = min(int(app.config['DEFAULT_QUOTA']), max_quota_bytes)
-    if form.validate_on_submit():
+    if form.validate_on_submit() and not _mfa_exemption_refused(form, None):
         if domain.has_email(form.localpart.data):
             flask.flash('Email is already used', 'error')
         else:
@@ -90,7 +91,7 @@ def user_edit(user_email):
     form.localpart.validators = []
     form.quota_bytes.validators = [
         wtforms.validators.NumberRange(min=0, max=max_quota_bytes)]
-    if form.validate_on_submit():
+    if form.validate_on_submit() and not _mfa_exemption_refused(form, user.mfa_required):
         keep_passkey_enrollment_flag = (
             user.passkey_enroll_next_login
             if user.domain.passkey_require_enrollment
@@ -104,6 +105,16 @@ def user_edit(user_email):
         return flask.redirect(
             flask.url_for('.user_list', domain_name=user.domain.name))
     return _render_user_edit(form, user, max_quota_bytes)
+
+
+def _mfa_exemption_refused(form, previous):
+    """Domain managers may require 2FA for a mailbox but not exempt one."""
+    if (form.mfa_required.data is False and previous is not False
+            and not flask_login.current_user.global_admin):
+        form.mfa_required.errors = list(form.mfa_required.errors) + [
+            _('Only global administrators can exempt a mailbox from two-factor authentication.')]
+        return True
+    return False
 
 
 def _render_user_edit(form, user, max_quota_bytes):

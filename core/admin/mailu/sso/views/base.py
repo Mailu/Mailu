@@ -1,5 +1,6 @@
 from werkzeug.utils import redirect
-from mailu import models, utils, auth_flow, signin, webmail, passkeys as passkey_utils
+from wtforms import validators
+from mailu import models, utils, auth_flow, signin, webmail, keycloak, passkeys as passkey_utils
 from mailu.sso import sso, forms
 from mailu.ui import access
 
@@ -26,6 +27,10 @@ def login(target):
         return _proxy()
     if flask_login.current_user.is_authenticated:
         return flask.redirect(signin.resolve(target))
+    if keycloak.enabled() and not keycloak.mfa_exemptions_exist():
+        # Every mailbox needs 2FA, so asking for the address first adds
+        # nothing. Destinations were remembered above for the finish step.
+        return flask.redirect(flask.url_for('sso.keycloak_login'))
 
     client_ip = flask.request.headers.get('X-Real-IP', flask.request.remote_addr)
     client_port = flask.request.headers.get('X-Real-Port', None)
@@ -58,6 +63,23 @@ def login(target):
         form.destination.data = selected
     fields = []
     flask.session['passkey_login_redirect'] = signin.pending()
+
+    # With Keycloak, ask for the address first: mailboxes that require 2FA go
+    # to Keycloak, the others continue with a password or passkey.
+    login_step = None
+    if keycloak.enabled():
+        login_step = 'password' if flask.request.method == 'POST' and not form.submitContinue.data else 'email'
+        if login_step == 'email' and flask.request.method == 'POST':
+            form.pw.validators = [validators.Optional()]
+            if form.validate_on_submit():
+                email = form.email.data.strip().lower()
+                if keycloak.mfa_required_for(email=email):
+                    return _keycloak_redirect(email, selected if explicit_selection else None)
+                login_step = 'password'
+            return flask.render_template('login.html', form=form, fields=fields, login_step=login_step)
+        if login_step == 'password' and form.validate_on_submit() and keycloak.mfa_required_for(email=form.email.data):
+            # A stale or crafted password form for a mailbox that requires 2FA.
+            return _keycloak_redirect(form.email.data.strip().lower(), selected if explicit_selection else None)
 
     if form.validate_on_submit():
         # Preserve old password form submissions while sharing destination policy.
@@ -109,7 +131,15 @@ def login(target):
             else:
                 flask.current_app.logger.info(f'Login attempt for: {username}/sso/{flask.request.headers.get("X-Forwarded-Proto")} from: {client_ip}/{client_port}: failed: badauth: {utils.truncated_pw_hash(form.pw.data)}')
                 flask.flash(_('Wrong e-mail or password'), 'error')
-    return flask.render_template('login.html', form=form, fields=fields)
+    return flask.render_template('login.html', form=form, fields=fields, login_step=login_step)
+
+
+def _keycloak_redirect(email, selected):
+    """Continue a sign-in at Keycloak, keeping the chosen destination."""
+    if selected:
+        signin.clear()
+        signin.remember(signin.target_path(selected))
+    return flask.redirect(flask.url_for('sso.keycloak_login', login_hint=email))
 
 @sso.route('/pw_change', methods=['GET', 'POST'])
 @access.authenticated
@@ -119,6 +149,10 @@ def pw_change():
             'pw_change.html', form=forms.PWChangeForm(), required_change=False,
             demo_account_email=utils.DEMO_ACCOUNT_EMAIL,
         )
+    if flask_login.current_user.requires_mfa:
+        flask.flash(_('Your password is managed by single sign-on. Change it in your %(provider)s account.',
+                      provider=app.config['KEYCLOAK_DISPLAY_NAME']), 'info')
+        return flask.redirect(app.config['WEB_ADMIN'])
     if flask_login.current_user.passkeys or app.config.get('PASSKEY_REQUIRED', False):
         flask.flash(_('Password sign-in is disabled because passkeys are required.'), 'info')
         return flask.redirect(flask.url_for('ui.passkey_list'))
@@ -160,9 +194,15 @@ def pw_change():
 @sso.route('/logout', methods=['GET'])
 @access.authenticated
 def logout():
+    from_keycloak = flask.session.get(keycloak.SESSION_AUTH_METHOD) == 'keycloak'
+    id_token = flask.session.get(keycloak.SESSION_ID_TOKEN)
     flask_login.logout_user()
     flask.session.destroy()
-    response = flask.redirect(app.config['PROXY_AUTH_LOGOUT_URL'] or flask.url_for('.login'))
+    destination = app.config['PROXY_AUTH_LOGOUT_URL']
+    if not destination and from_keycloak and keycloak.enabled():
+        # End the Keycloak session too, or the next sign-in would skip 2FA.
+        destination = keycloak.end_session_url(id_token)
+    response = flask.redirect(destination or flask.url_for('.login'))
     return _clear_webmail_cookies(response)
 
 """
@@ -198,6 +238,7 @@ def _proxy():
     if user:
         flask.session.regenerate()
         flask_login.login_user(user)
+        flask.session[keycloak.SESSION_AUTH_METHOD] = 'proxy'
         flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
         if actions := auth_flow.user_required_actions(user):
             auth_flow.require_actions(flask.session, actions, url)
@@ -224,6 +265,7 @@ def _proxy():
     models.db.session.commit()
     flask.session.regenerate()
     flask_login.login_user(user)
+    flask.session[keycloak.SESSION_AUTH_METHOD] = 'proxy'
     user.send_welcome()
     flask.current_app.logger.info(f'Login succeeded by proxy created user: {user} from {client_ip} through {flask.request.remote_addr}.')
     if actions := auth_flow.user_required_actions(user):

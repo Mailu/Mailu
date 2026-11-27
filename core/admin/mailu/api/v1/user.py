@@ -30,6 +30,7 @@ user_fields_get = api.model('UserGet', {
     'enabled': fields.Boolean(description='Enable the user. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail'),
     'change_pw_next_login': fields.Boolean(description='Force the user to change their password at next login'),
     'passkey_enroll_next_login': fields.Boolean(description='Require the user to set up a passkey before continuing after their next login'),
+    'mfa_required': common.NullableBoolean(description='Require Keycloak two-factor sign-in for this mailbox; null uses the domain setting'),
     'enable_imap': fields.Boolean(description='Allow email retrieval via IMAP'),
     'enable_pop': fields.Boolean(description='Allow email retrieval via POP3'),
     'allow_spoofing': fields.Boolean(description='Allow the user to spoof the sender (send email as anyone)'),
@@ -56,6 +57,7 @@ user_fields_post = api.model('UserCreate', {
     'enabled': fields.Boolean(description='Enable the user. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail'),
     'change_pw_next_login': fields.Boolean(description='Force the user to change their password at next login'),
     'passkey_enroll_next_login': fields.Boolean(description='Require the user to set up a passkey before continuing after their next login'),
+    'mfa_required': common.NullableBoolean(description='Require Keycloak two-factor sign-in for this mailbox; null uses the domain setting'),
     'enable_imap': fields.Boolean(description='Allow email retrieval via IMAP'),
     'enable_pop': fields.Boolean(description='Allow email retrieval via POP3'),
     'allow_spoofing': fields.Boolean(description='Allow the user to spoof the sender (send email as anyone)'),
@@ -81,6 +83,7 @@ user_fields_put = api.model('UserUpdate', {
     'enabled': fields.Boolean(description='Enable the user. When an user is disabled, the user is unable to login to the Admin GUI or webmail or access his email via IMAP/POP3 or send mail'),
     'change_pw_next_login': fields.Boolean(description='Force the user to change their password at next login'),
     'passkey_enroll_next_login': fields.Boolean(description='Require the user to set up a passkey before continuing after their next login'),
+    'mfa_required': common.NullableBoolean(description='Require Keycloak two-factor sign-in for this mailbox; null uses the domain setting'),
     'enable_imap': fields.Boolean(description='Allow email retrieval via IMAP'),
     'enable_pop': fields.Boolean(description='Allow email retrieval via POP3'),
     'allow_spoofing': fields.Boolean(description='Allow the user to spoof the sender (send email as anyone)'),
@@ -159,6 +162,8 @@ class Users(Resource):
             user_new.change_pw_next_login = data['change_pw_next_login']
         if 'passkey_enroll_next_login' in data:
             user_new.passkey_enroll_next_login = data['passkey_enroll_next_login']
+        if 'mfa_required' in data:
+            user_new.mfa_required = data['mfa_required']
         if 'enable_imap' in data:
             user_new.enable_imap = data['enable_imap']
         if 'enable_pop' in data:
@@ -257,6 +262,8 @@ class User(Resource):
             user_found.change_pw_next_login = data['change_pw_next_login']
         if 'passkey_enroll_next_login' in data:
             user_found.passkey_enroll_next_login = data['passkey_enroll_next_login']
+        if 'mfa_required' in data:
+            user_found.mfa_required = data['mfa_required']
         if 'enable_imap' in data:
             user_found.enable_imap = data['enable_imap']
         if 'enable_pop' in data:

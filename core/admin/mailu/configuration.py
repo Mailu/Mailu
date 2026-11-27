@@ -2,7 +2,9 @@ import os
 from socrate.system import parse_bool
 
 from datetime import timedelta
+from urllib.parse import urlsplit
 import ipaddress
+import logging
 
 DEFAULT_CONFIG = {
     # Specific to the admin UI
@@ -103,6 +105,18 @@ DEFAULT_CONFIG = {
     'PROXY_AUTH_HEADER': 'X-Auth-Email',
     'PROXY_AUTH_CREATE': False,
     'PROXY_AUTH_LOGOUT_URL': None,
+    # Keycloak (OpenID Connect) sign-in; disabled while KEYCLOAK_ISSUER is empty
+    'KEYCLOAK_ISSUER': '',
+    'KEYCLOAK_CLIENT_ID': 'mailu',
+    'KEYCLOAK_CLIENT_SECRET': None,
+    'KEYCLOAK_SCOPES': 'openid email profile',
+    'KEYCLOAK_MFA_DEFAULT': True,
+    'KEYCLOAK_REQUIRED_ACR': 'mfa',
+    'KEYCLOAK_REQUIRED_AMR': '',
+    'KEYCLOAK_EMAIL_CLAIM': 'email',
+    'KEYCLOAK_REQUIRE_VERIFIED_EMAIL': True,
+    'KEYCLOAK_CREATE_USERS': False,
+    'KEYCLOAK_DISPLAY_NAME': 'Keycloak',
     'SUBNET': '192.168.203.0/24',
     'SUBNET6': None,
     'WEBDAV': 'none',
@@ -200,6 +214,18 @@ class ConfigManager:
         self.config['OAUTH2_SCOPE'] = 'imap smtp pop3 sieve offline_access'
         self.config['DEFAULT_SPAM_THRESHOLD'] = int(self.config['DEFAULT_SPAM_THRESHOLD'])
         self.config['ANONMAIL_MAX_RETRIES'] = int(self.config['ANONMAIL_MAX_RETRIES'])
+        self.config['KEYCLOAK_ISSUER'] = str(self.config['KEYCLOAK_ISSUER'] or '').strip().rstrip('/')
+        if self.config['KEYCLOAK_ISSUER']:
+            issuer = urlsplit(self.config['KEYCLOAK_ISSUER'])
+            if issuer.scheme not in ('https', 'http') or not issuer.netloc or issuer.query or issuer.fragment:
+                raise ValueError('KEYCLOAK_ISSUER must be the realm URL, e.g. https://sso.example.com/realms/mail')
+            if issuer.scheme == 'http' and self.config['TLS_FLAVOR'] != 'notls':
+                raise ValueError('KEYCLOAK_ISSUER must use https')
+            if not self.config['KEYCLOAK_REQUIRED_ACR'] and not self.config['KEYCLOAK_REQUIRED_AMR']:
+                logging.getLogger(__name__).warning(
+                    'KEYCLOAK_REQUIRED_ACR and KEYCLOAK_REQUIRED_AMR are both empty: Mailu will '
+                    'not verify that Keycloak used a second factor'
+                )
         self.config['PROXY_AUTH_WHITELIST'] = set(ipaddress.ip_network(cidr, False) for cidr in (cidr.strip() for cidr in self.config['PROXY_AUTH_WHITELIST'].split(',')) if cidr)
         try:
             self.config['MAILU_VERSION'] = open('/version', 'r').read()

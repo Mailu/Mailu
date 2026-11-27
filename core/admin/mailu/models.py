@@ -207,6 +207,8 @@ class Domain(Base):
 
     # WebAuthn passkey policy
     passkey_require_enrollment = db.Column(db.Boolean, nullable=False, default=False)
+    # Keycloak 2FA: None inherits KEYCLOAK_MFA_DEFAULT, True requires, False exempts.
+    mfa_required = db.Column(db.Boolean, nullable=True, default=None)
     passkey_enforce_aaguid = db.Column(db.Boolean, nullable=False, default=False)
     passkey_aaguid_mode = db.Column(db.String(8), nullable=False, default='allow')
     passkey_aaguids = db.Column(db.Text, nullable=False, default='')
@@ -712,6 +714,8 @@ class User(Base, Email):
     spam_threshold = db.Column(db.Integer, nullable=False, default=lambda:int(app.config.get("DEFAULT_SPAM_THRESHOLD", 80)))
     change_pw_next_login = db.Column(db.Boolean, nullable=False, default=False)
     passkey_enroll_next_login = db.Column(db.Boolean, nullable=False, default=False)
+    # Keycloak 2FA: None inherits the domain setting, True requires, False exempts.
+    mfa_required = db.Column(db.Boolean, nullable=True, default=None)
     gpg_key = db.Column(db.Text, nullable=True)
 
     passkeys = db.relationship('Passkey', back_populates='user', cascade='all, delete-orphan')
@@ -884,6 +888,12 @@ set() containing the sessions to keep
         """ find user object for email address """
         return db.session.get(cls, email)
 
+    @property
+    def requires_mfa(self):
+        """Whether this mailbox may only sign in through Keycloak with 2FA."""
+        from mailu import keycloak
+        return keycloak.mfa_required_for(self)
+
     @classmethod
     def login(cls, email, password):
         """ login user when enabled and password is valid """
@@ -892,6 +902,7 @@ set() containing the sessions to keep
             user and user.enabled
             and not app.config.get('PASSKEY_REQUIRED', False)
             and not user.passkeys
+            and not user.requires_mfa
             and user.check_password(password)
         ) else None
 

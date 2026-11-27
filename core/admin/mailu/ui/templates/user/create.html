@@ -28,6 +28,14 @@
     {{ macros.form_field(form.change_pw_next_login) }}
     {{ macros.form_field(form.passkey_enroll_next_login) }}
   {% endif %}
+  {% if config['KEYCLOAK_ISSUER'] %}
+  {{ macros.form_field(form.mfa_required) }}
+  <p class="small text-body-secondary">
+    {% trans %}When required, this mailbox signs in only through Keycloak with a second factor, and mail apps must use OAuth or an authentication token.{% endtrans %}
+    {% if user is defined %}{% trans state=(_('required') if user.requires_mfa else _('not required')) %}Currently: {{ state }}.{% endtrans %}{% endif %}
+    {% if not current_user.global_admin %}{% trans %}Only global administrators can exempt a mailbox.{% endtrans %}{% endif %}
+  </p>
+  {% endif %}
   {%- endcall %}
 
   {% if user is defined and can_generate_enrollment_link %}

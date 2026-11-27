@@ -8,6 +8,19 @@ import re
 import sqlalchemy.exc
 import srslib
 
+SRS_HASH_LENGTH = 4
+
+
+def _has_full_srs_hash(address):
+    """Check that an SRS address carries the full configured hash."""
+    localpart = address.rsplit('@', 1)[0]
+    if (localpart[:4].upper() not in ('SRS0', 'SRS1')
+            or len(localpart) < 6
+            or localpart[4] not in '-=+'):
+        return False
+    hash_value, separator, _ = localpart[5:].partition('=')
+    return bool(separator and len(hash_value) == SRS_HASH_LENGTH)
+
 @internal.route("/postfix/dane/<domain_name>")
 def postfix_dane_map(domain_name):
     return flask.jsonify('dane-only') if utils.has_dane_record(domain_name) else flask.abort(404)
@@ -110,8 +123,8 @@ def postfix_recipient_map(recipient):
 
     This is meant for bounces to go back to the original sender.
     """
-    srs = srslib.SRS(flask.current_app.srs_key)
-    if srslib.SRS.is_srs_address(recipient):
+    srs = srslib.SRS(flask.current_app.srs_key, hash_length=SRS_HASH_LENGTH)
+    if _has_full_srs_hash(recipient) and srslib.SRS.is_srs_address(recipient):
         try:
             return flask.jsonify(srs.reverse(recipient))
         except srslib.Error as error:
@@ -127,7 +140,7 @@ def postfix_sender_map(sender):
     """
     if sender.count('@') > 1 or sender.startswith('"'):
         return flask.abort(404)
-    srs = srslib.SRS(flask.current_app.srs_key)
+    srs = srslib.SRS(flask.current_app.srs_key, hash_length=SRS_HASH_LENGTH)
     domain = flask.current_app.config["DOMAIN"]
     try:
         localpart, domain_name = models.Email.resolve_domain(sender)

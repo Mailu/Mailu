@@ -409,8 +409,11 @@ class Email(object):
 
     @staticmethod
     def _update_localpart(target, value, *_):
+        if value and '/' in value:
+            raise ValueError('invalid email local part')
         if target.domain_name:
             target._email = f'{value}@{target.domain_name}'
+        return value
 
     @staticmethod
     def _update_domain_name(target, value, *_):
@@ -420,7 +423,7 @@ class Email(object):
     @classmethod
     def __declare_last__(cls):
         # gets called after mappings are completed
-        sqlalchemy.event.listen(cls.localpart, 'set', cls._update_localpart, propagate=True)
+        sqlalchemy.event.listen(cls.localpart, 'set', cls._update_localpart, propagate=True, retval=True)
         sqlalchemy.event.listen(cls.domain_name, 'set', cls._update_domain_name, propagate=True)
 
     def sendmail(self, subject, body):

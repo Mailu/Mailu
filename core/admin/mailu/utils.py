@@ -73,8 +73,12 @@ def is_demo_account(user):
 
 
 def is_valid_localpart(localpart):
-    """Validate an RFC 5321/6531 dot-atom local-part."""
+    """Validate a local-part that can be used safely in mailbox paths."""
     if not isinstance(localpart, str) or not localpart:
+        return False
+    # The local-part is a component of Dovecot's mailbox home path. Allowing a
+    # slash here can make distinct email addresses resolve to the same path.
+    if '/' in localpart:
         return False
     try:
         if any(len(candidate.encode('utf-8')) > 64
@@ -331,9 +335,15 @@ class MailuSession(CallbackDict, SessionMixin):
     def save(self):
         """ Save session to store. """
         set_cookie = False
-        # set uid from dict data
-        if self._uid is None:
-            self._uid = self.app.session_config.gen_uid(self.get('_user_id', ''))
+        # Session keys are scoped to the authenticated identity. A browser can
+        # carry a saved anonymous session through login, so refresh the UID
+        # prefix whenever Flask-Login changes _user_id.
+        uid = self.app.session_config.gen_uid(self.get('_user_id', ''))
+        if self._uid != uid:
+            if self._uid is not None:
+                self.delete(clear_token=False)
+                self._sid = None
+            self._uid = uid
 
         # create new session id for new or regenerated sessions and force setting the cookie
         if self._sid is None:
@@ -523,9 +533,10 @@ class MailuSessionExtension:
         app = app or flask.current_app
 
         prefix = None if uid is None else app.session_config.gen_uid(uid)
+        keys = app.session_store.list(prefix)
 
         count = 0
-        for key in app.session_store.list(prefix):
+        for key in dict.fromkeys(keys):
             if key not in keep and not key.startswith(b'token-'):
                 app.session_store.delete(key)
                 count += 1

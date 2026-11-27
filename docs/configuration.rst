@@ -10,10 +10,12 @@ Mail storage layout
 
 Dovecot stores each mailbox under ``/mail/<domain>/<shard>/<localpart>``, where
 the shard is the first two lowercase base32 characters of the 2-byte BLAKE2s
-digest of the full email address. Maildir messages and mailbox control state
-live in ``mail/``, persistent indexes and quota state in ``indexes/``, personal
-Sieve scripts and their activation link in ``sieve/``, and IMAP metadata in
-``metadata/``. Dovecot keeps its index cache alongside the persistent indexes.
+digest of the full email address. Mail local-parts cannot contain ``/`` because
+they are used as a filesystem path component. Maildir messages and mailbox
+control state live in ``mail/``, persistent indexes and quota state in
+``indexes/``, personal Sieve scripts and their activation link in ``sieve/``,
+and IMAP metadata in ``metadata/``. Dovecot keeps its index cache alongside the
+persistent indexes.
 
 On upgrade, the IMAP container migrates recognized data from the previous
 ``/mail/<email-address>`` layout before starting Dovecot. The migration can be

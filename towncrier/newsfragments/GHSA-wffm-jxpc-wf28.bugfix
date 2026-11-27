@@ -1,0 +1,1 @@
+Normalize SSO account rate-limit keys so email case variants share one password-guessing budget.

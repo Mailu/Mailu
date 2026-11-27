@@ -722,8 +722,11 @@ class User(Base, Email):
 
     # Flask-login attributes
     is_authenticated = True
-    is_active = True
     is_anonymous = False
+
+    @property
+    def is_active(self):
+        return self.enabled
 
     def get_id(self):
         """ return users email address """
@@ -893,6 +896,12 @@ set() containing the sessions to keep
         """Whether this mailbox may only sign in through Keycloak with 2FA."""
         from mailu import keycloak
         return keycloak.mfa_required_for(self)
+
+    @classmethod
+    def get_active(cls, email):
+        """Load a user only while the account is enabled for web sessions."""
+        user = cls.get(email)
+        return user if user and user.enabled else None
 
     @classmethod
     def login(cls, email, password):

@@ -97,10 +97,13 @@ def user_edit(user_email):
             if user.domain.passkey_require_enrollment
             else None
         )
+        was_enabled = user.enabled
         form.populate_obj(user)
         if keep_passkey_enrollment_flag is not None:
             user.passkey_enroll_next_login = keep_passkey_enrollment_flag
         models.db.session.commit()
+        if was_enabled and not user.enabled:
+            utils.MailuSessionExtension.prune_sessions(uid=user.email)
         flask.flash('User %s updated' % user)
         return flask.redirect(
             flask.url_for('.user_list', domain_name=user.domain.name))

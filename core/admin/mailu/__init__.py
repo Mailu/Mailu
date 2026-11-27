@@ -4,7 +4,7 @@
 import flask
 import flask_bootstrap
 
-from mailu import utils, debug, models, manage, configuration
+from mailu import utils, debug, models, manage, configuration, keycloak
 from mailu.gunicorn_logging import Logger, NoPingFilter
 import logging
 from urllib.parse import urlsplit, urlunsplit
@@ -27,7 +27,6 @@ def create_app_from_config(config):
     utils.limiter.init_app(app)
     utils.babel.init_app(app, locale_selector=utils.get_locale)
     utils.login.init_app(app)
-    from mailu import keycloak
     utils.login.user_loader(keycloak.load_user)
     utils.proxy.init_app(app)
     utils.migrate.init_app(app, models.db)

@@ -21,20 +21,24 @@ def _visible_recipients(metadata, user):
 
 
 def _release_recipients(metadata, user):
+    original_recipients = metadata.get('recipients', [])
+    if isinstance(original_recipients, str):
+        original_recipients = [original_recipients]
+    if not isinstance(original_recipients, list):
+        original_recipients = []
     if user.global_admin:
         # Preserve the original SMTP route so Postfix can apply aliases,
         # forwarding and relayed-domain transports again.
-        recipients = metadata.get('envelope_recipients') or metadata.get('recipients', [])
+        recipients = metadata.get('envelope_recipients') or original_recipients
         if isinstance(recipients, str):
             recipients = [recipients]
         if not isinstance(recipients, list):
             recipients = []
-        recipients = [address.strip() for address in recipients
-                      if isinstance(address, str) and utils.is_valid_email(address.strip())]
     else:
-        recipients = [address for address in _visible_recipients(metadata, user)
-                      if utils.is_valid_email(address)]
-    if not any(address.lower() == user.email.lower() for address in metadata.get('recipients', [])
+        recipients = original_recipients
+    recipients = [address.strip() for address in recipients
+                  if isinstance(address, str) and utils.is_valid_email(address.strip())]
+    if not any(address.lower() == user.email.lower() for address in original_recipients
                if isinstance(address, str)):
         recipients.append(user.email)
     return list(dict.fromkeys(recipients))

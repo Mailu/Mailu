@@ -8,9 +8,9 @@ import re
 import string
 import ipaddress
 
-# Characters a localpart may contain (RFC 5322 dot-atom), kept in a single place
-# so that the fields creating an address and the ones referencing one agree.
-LOCALPART_CHARS = r'a-zA-Z0-9!#$%&\'*+/=?^_`{|}~-'
+# Mailu-safe localpart characters, kept in a single place so that fields
+# creating an address and fields referencing one agree.
+LOCALPART_CHARS = r'a-zA-Z0-9!#$%&\'*+=?^_`{|}~-'
 LOCALPART_REGEX = rf'^[{LOCALPART_CHARS}]+(?:\.[{LOCALPART_CHARS}]+)*$'
 EMAIL_ADDRESS_REGEX = rf'[{LOCALPART_CHARS}]+(?:\.[{LOCALPART_CHARS}]+)*@(?:[a-z0-9-]+\.)*[a-z]+'
 

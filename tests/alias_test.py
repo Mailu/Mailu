@@ -33,7 +33,7 @@ try:
 except:
     sys.exit(25)
 
-for user in ['user@mailu.io', 'admin@mailu.io', 'user/with/slash@mailu.io']:
+for user in ['user@mailu.io', 'admin@mailu.io', 'user_with_slash@mailu.io']:
     try:
         imap_server = connect_imap(user, 'password')
     except Exception as exc:

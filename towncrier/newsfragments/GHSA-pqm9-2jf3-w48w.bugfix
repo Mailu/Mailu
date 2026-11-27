@@ -1,0 +1,1 @@
+Reject slash characters in mailbox local-parts so public sign-up cannot create accounts that share another user's Maildir path.

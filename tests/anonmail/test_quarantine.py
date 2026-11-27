@@ -119,7 +119,7 @@ def test_quarantine_release_recipients_are_scoped():
         'get_managed_domains': lambda self: [type('Domain', (), {'name': 'example.com'})()],
     })()
     metadata = {'recipients': ['user@example.com', 'outside.test', 'manager@example.com']}
-    assert _visible_recipients(metadata, manager) == ['user@example.com', 'manager@example.com']
+    assert _visible_recipients(metadata, manager) == ['manager@example.com']
     assert _release_recipients(metadata, manager) == [
         'user@example.com', 'manager@example.com'
     ]

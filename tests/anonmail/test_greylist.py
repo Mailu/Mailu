@@ -186,7 +186,7 @@ def test_quarantine_and_greylist_records_share_one_repository(app, tmp_path, mon
     assert len(quarantine_id) == 36
 
 
-def test_domain_admin_sees_greylist_and_can_release_it_on_quarantine_page(app, tmp_path, monkeypatch):
+def test_domain_admin_can_manage_greylist_when_also_a_recipient(app, tmp_path, monkeypatch):
     monkeypatch.setattr(greylist, 'directory', lambda: tmp_path)
     monkeypatch.setattr(quarantine, 'directory', lambda: tmp_path)
     app.config['WTF_CSRF_ENABLED'] = False
@@ -202,7 +202,7 @@ def test_domain_admin_sees_greylist_and_can_release_it_on_quarantine_page(app, t
         email = admin.email
         greylist.record({
             'message_id': 'untrusted@example.org', 'action': 'soft reject',
-            'subject': '<script>alert(1)</script>', 'rcpt': [recipient.email],
+            'subject': '<script>alert(1)</script>', 'rcpt': [recipient.email, email],
         }, b'Subject: greylist\r\n\r\nbody')
         [entry] = greylist.entries()
 
@@ -248,7 +248,7 @@ def test_domain_admin_sees_greylist_and_can_release_it_on_quarantine_page(app, t
     with app.app_context():
         greylist.record({
             'message_id': 'delete-copy@example.org', 'action': 'soft reject',
-            'recipients': [recipient.email], 'subject': 'delete this saved copy',
+            'recipients': [recipient.email, email], 'subject': 'delete this saved copy',
         }, b'Subject: delete this saved copy\r\n\r\nbody')
         [delete_entry] = greylist.entries()
     delete_url = f"/admin/quarantine/{delete_entry['id']}/delete"

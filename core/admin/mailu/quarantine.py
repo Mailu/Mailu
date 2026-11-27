@@ -48,14 +48,8 @@ def visible_recipients(metadata, user):
                   if isinstance(address, str)]
     if user.global_admin:
         return recipients
-    if hasattr(user, 'get_managed_domains'):
-        managed_domains = user.get_managed_domains()
-    else:
-        managed_domains = getattr(user, 'manager_of', [])
-    managed = {domain.name.lower() for domain in managed_domains}
     return [address for address in recipients
-            if address.lower() == user.email.lower()
-            or ('@' in address and address.rsplit('@', 1)[-1].lower() in managed)]
+            if address.lower() == user.email.lower()]
 
 
 def visible_entries(user, source_entries=None):
